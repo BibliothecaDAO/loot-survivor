@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "./Button";
+import { Button } from "@/app/components/buttons/Button";
 
 interface ButtonProps {
   amount: number;

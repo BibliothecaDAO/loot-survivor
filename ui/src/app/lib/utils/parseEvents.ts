@@ -1,5 +1,5 @@
 import { InvokeTransactionReceiptResponse } from "starknet";
-import { GameData } from "../../components/GameData";
+import { GameData } from "../data/GameData";
 import { getKeyFromValue, convertToBoolean, chunkArray } from ".";
 import {
   DiscoveredHealthEvent,

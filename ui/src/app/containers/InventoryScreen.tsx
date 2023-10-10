@@ -15,7 +15,7 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import LootIcon from "../components/icons/LootIcon";
 import { InfoIcon, BagIcon } from "../components/icons/Icons";
 import { Item, Metadata } from "../types";
-import { GameData } from "../components/GameData";
+import { GameData } from "../lib/data/GameData";
 import useUIStore from "../hooks/useUIStore";
 
 /**

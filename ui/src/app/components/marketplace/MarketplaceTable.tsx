@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
-import MarketplaceRow from "../../components/marketplace/MarketplaceRow";
+import MarketplaceRow from "@/app/components/marketplace/MarketplaceRow";
 import { Item, UpgradeStats, ItemPurchase } from "@/app/types";
 import { getItemData, getKeyFromValue } from "@/app/lib/utils";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import LootIconLoader from "../../components/icons/Loader";
-import { Button } from "../buttons/Button";
-import { GameData } from "../../components/GameData";
+import LootIconLoader from "@/app/components/icons/Loader";
+import { Button } from "@/app/components/buttons/Button";
+import { GameData } from "@/app/lib/data/GameData";
 
 export interface MarketplaceTableProps {
   purchaseItems: ItemPurchase[];

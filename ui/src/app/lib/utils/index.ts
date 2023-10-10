@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 
 import { Adventurer, Item } from "../../types";
-import { GameData } from "../../components/GameData";
+import { GameData } from "../data/GameData";
 import {
   itemCharismaDiscount,
   itemBasePrice,

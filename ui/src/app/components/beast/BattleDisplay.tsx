@@ -2,20 +2,20 @@ import TwitterShareButton from "../buttons/TwitterShareButtons";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
-import { processBeastName, getBeastData } from "../../lib/utils";
-import { Battle } from "../../types";
-import Head from "./public/icons/loot/head.svg";
-import Hand from "../../../../public/icons/loot/hand.svg";
-import Chest from "../../../../public/icons/loot/chest.svg";
-import Waist from "../../../../public/icons/loot/waist.svg";
-import Foot from "../../../../public/icons/loot/foot.svg";
+import { processBeastName, getBeastData } from "@/app/lib/utils";
+import { Battle } from "@/app/types";
+import Head from "public/icons/loot/head.svg";
+import Hand from "public/icons/loot/hand.svg";
+import Chest from "public/icons/loot/chest.svg";
+import Waist from "public/icons/loot/waist.svg";
+import Foot from "public/icons/loot/foot.svg";
 import { getAppUrl } from "@/app/lib/constants";
 import {
   GiWalkingBootIcon,
   GiFootTripIcon,
   GiBattleGearIcon,
   SkullCrossedBonesIcon,
-} from "../icons/Icons";
+} from "@/app/components/icons/Icons";
 
 interface BattleDisplayProps {
   battleData: Battle;

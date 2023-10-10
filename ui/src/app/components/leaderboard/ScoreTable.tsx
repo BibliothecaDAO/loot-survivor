@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Button } from "../../components/buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { Adventurer } from "@/app/types";
-import ScoreRow from "./ScoreRow";
+import ScoreRow from "@/app/components/leaderboard/ScoreRow";
 import useUIStore from "@/app/hooks/useUIStore";
 import { getScoresInList } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";

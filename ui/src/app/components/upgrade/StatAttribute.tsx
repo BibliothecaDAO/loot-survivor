@@ -1,7 +1,7 @@
 import { ReactElement, useEffect, useState, useRef } from "react";
-import QuantityButtons from "../buttons/QuantityButtons";
+import QuantityButtons from "@/app/components/buttons/QuantityButtons";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import { GameData } from "../GameData";
+import { GameData } from "@/app/lib/data/GameData";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import { UpgradeStats, ZeroUpgrade } from "@/app/types";

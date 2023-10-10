@@ -18,10 +18,10 @@ import {
   CartIcon,
   SettingsIcon,
   GithubIcon,
-} from "../icons/Icons";
-import TransactionCart from "./TransactionCart";
-import TransactionHistory from "./TransactionHistory";
-import { NullAdventurer } from "../../types";
+} from "@/app/components/icons/Icons";
+import TransactionCart from "@/app/components/navigation/TransactionCart";
+import TransactionHistory from "@/app/components/navigation/TransactionHistory";
+import { NullAdventurer } from "@/app/types";
 
 export interface HeaderProps {
   multicall: (...args: any[]) => any;

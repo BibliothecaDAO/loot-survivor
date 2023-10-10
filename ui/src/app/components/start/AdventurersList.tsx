@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Button } from "../buttons/Button";
-import Info from "../adventurer/Info";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
+import { Button } from "@/app/components/buttons/Button";
+import Info from "@/app/components/adventurer/Info";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { Adventurer } from "@/app/types";
-import { SkullIcon } from "../icons/Icons";
+import { SkullIcon } from "@/app/components/icons/Icons";
 import useUIStore from "@/app/hooks/useUIStore";
-import { useQueriesStore } from "../../hooks/useQueryStore";
-import LootIconLoader from "../../components/icons/Loader";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import LootIconLoader from "@/app/components/icons/Loader";
 
 export interface AdventurerListProps {
   isActive: boolean;

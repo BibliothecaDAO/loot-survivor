@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Button } from "../buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 import { useConnectors } from "@starknet-react/core";
-import useUIStore from "../../hooks/useUIStore";
+import useUIStore from "@/app/hooks/useUIStore";
 import Image from "next/image";
-import { WalletTutorial } from "../tutorial/WalletTutorial";
+import { WalletTutorial } from "@/app/components/tutorial/WalletTutorial";
 
 interface WalletSelectProps {}
 

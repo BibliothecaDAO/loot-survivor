@@ -1,13 +1,13 @@
 import { useState, FormEvent, useEffect } from "react";
-import Image from "next/image";
-import { Button } from "../buttons/Button";
-import { MdClose } from "react-icons/md";
-import { WalletTutorial } from "../tutorial/WalletTutorial";
-import { TxActivity } from "../navigation/TxActivity";
-import useUIStore from "@/app/hooks/useUIStore";
-import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { TypeAnimation } from "react-type-animation";
+import { MdClose } from "react-icons/md";
+import Image from "next/image";
+import { Button } from "@/app/components/buttons/Button";
+import { WalletTutorial } from "@/app/components/tutorial/WalletTutorial";
+import { TxActivity } from "@/app/components/navigation/TxActivity";
+import useUIStore from "@/app/hooks/useUIStore";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { battle } from "@/app/lib/constants";
 import { FormData } from "@/app/types";
 

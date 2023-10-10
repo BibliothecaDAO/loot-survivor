@@ -1,7 +1,11 @@
-import Menu from "../menu/ButtonMenu";
-import { SoundOnIcon, SoundOffIcon, LedgerIcon } from "../icons/Icons";
-import { DiscordIcon } from "../icons/Icons";
-import useUIStore from "../../hooks/useUIStore";
+import Menu from "@/app/components/menu/ButtonMenu";
+import {
+  SoundOnIcon,
+  SoundOffIcon,
+  LedgerIcon,
+} from "@/app/components/icons/Icons";
+import { DiscordIcon } from "@/app/components/icons/Icons";
+import useUIStore from "@/app/hooks/useUIStore";
 import { displayAddress } from "@/app/lib/utils";
 import { useConnectors } from "@starknet-react/core";
 import { useAccount } from "@starknet-react/core";

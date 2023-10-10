@@ -7,8 +7,8 @@ import {
   GiSandsOfTimeIcon,
   TwoCoinIcon,
   HealthPotionIcon,
-} from "../icons/Icons";
-import { Discovery } from "../../types";
+} from "@/app/components/icons/Icons";
+import { Discovery } from "@/app/types";
 
 interface DiscoveryProps {
   discoveryData: Discovery;

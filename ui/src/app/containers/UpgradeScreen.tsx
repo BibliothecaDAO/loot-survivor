@@ -6,7 +6,7 @@ import {
   getItemPrice,
   getPotionPrice,
 } from "../lib/utils";
-import { GameData } from "../components/GameData";
+import { GameData } from "../lib/data/GameData";
 import ButtonMenu from "../components/menu/ButtonMenu";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
@@ -23,7 +23,7 @@ import {
   ScrollIcon,
   HeartIcon,
 } from "../components/icons/Icons";
-import PurchaseHealth from "../components/actions/PurchaseHealth";
+import PurchaseHealth from "../components/upgrade/PurchaseHealth";
 import MarketplaceScreen from "./MarketplaceScreen";
 import { UpgradeNav } from "../components/upgrade/UpgradeNav";
 import { StatAttribute } from "../components/upgrade/StatAttribute";

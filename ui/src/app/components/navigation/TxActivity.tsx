@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useWaitForTransaction } from "@starknet-react/core";
-import { displayAddress, padAddress } from "../../lib/utils";
-import useLoadingStore from "../../hooks/useLoadingStore";
-import LootIconLoader from "../icons/Loader";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import { displayAddress, padAddress } from "@/app/lib/utils";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
+import LootIconLoader from "@/app/components/icons/Loader";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { InvokeTransactionReceiptResponse } from "starknet";
 
 export const TxActivity = () => {

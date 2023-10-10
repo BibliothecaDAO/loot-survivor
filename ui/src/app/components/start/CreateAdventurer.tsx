@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { FormData } from "@/app/types";
-import { AdventurerName } from "./AdventurerName";
-import { WeaponSelect } from "./WeaponSelect";
-import { Spawn } from "./Spawn";
+import { AdventurerName } from "@/app/components/start/AdventurerName";
+import { WeaponSelect } from "@/app/components/start/WeaponSelect";
+import { Spawn } from "@/app/components/start/Spawn";
 
 export interface CreateAdventurerProps {
   isActive: boolean;

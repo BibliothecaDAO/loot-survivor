@@ -1,6 +1,6 @@
-import { NotificationBattleDisplay } from "../beast/BattleDisplay";
-import { DiscoveryDisplay } from "../actions/DiscoveryDisplay";
-import { GameData } from "../GameData";
+import { NotificationBattleDisplay } from "@/app/components/beast/BattleDisplay";
+import { DiscoveryDisplay } from "@/app/components/actions/DiscoveryDisplay";
+import { GameData } from "@/app/lib/data/GameData";
 import {
   processBeastName,
   getRandomElement,
@@ -8,7 +8,7 @@ import {
   isObject,
   getItemData,
   getValueFromKey,
-} from "../../lib/utils";
+} from "@/app/lib/utils";
 import {
   Adventurer,
   Battle,
@@ -18,8 +18,11 @@ import {
   UpgradeSummary,
   ItemPurchase,
 } from "@/app/types";
-import LootIcon from "../../components/icons/LootIcon";
-import { HealthPotionIcon, GiSandsOfTimeIcon } from "../icons/Icons";
+import LootIcon from "@/app/components/icons/LootIcon";
+import {
+  HealthPotionIcon,
+  GiSandsOfTimeIcon,
+} from "@/app/components/icons/Icons";
 
 const handleUpgrade = (notificationData: any, notifications: any[]) => {
   const gameData = new GameData();

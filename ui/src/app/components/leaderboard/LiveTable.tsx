@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Button } from "../../components/buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { Adventurer } from "@/app/types";
-import LiveRow from "./LiveRow";
+import LiveRow from "@/app/components/leaderboard/LiveRow";
 import useUIStore from "@/app/hooks/useUIStore";
 
 export interface LiveLeaderboardTableProps {

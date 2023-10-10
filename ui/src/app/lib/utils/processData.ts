@@ -1,4 +1,4 @@
-import { GameData } from "@/app/components/GameData";
+import { GameData } from "@/app/lib/data/GameData";
 import {
   DiscoveredHealthEvent,
   DiscoveredGoldEvent,

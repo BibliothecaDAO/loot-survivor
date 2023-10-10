@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import SpriteAnimation from "../animations/SpriteAnimation";
+import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
 import { notificationAnimations } from "@/app/lib/constants";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { CSSTransition } from "react-transition-group";
-import { Button } from "../buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 
 export interface NotificationComponentProps {
   notifications: any[];
