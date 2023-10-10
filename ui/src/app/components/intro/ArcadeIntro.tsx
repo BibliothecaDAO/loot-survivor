@@ -91,7 +91,7 @@ export const ArcadeIntro = () => {
             adventurers!
           </p>
           <p className="text-sm xl:text-xl 2xl:text-2xl">
-            Connect using a wallet provider.
+            1: Connect using a wallet provider.
           </p>
           <div className="flex flex-col gap-2 w-1/4">
             {walletConnectors.map((connector, index) => (
@@ -106,7 +106,7 @@ export const ArcadeIntro = () => {
               </Button>
             ))}
           </div>
-          <p className="text-sm xl:text-xl 2xl:text-2xl">Mint Some Lords</p>
+          <p className="text-sm xl:text-xl 2xl:text-2xl">2: Mint Some Lords</p>
           <Button
             onClick={() =>
               checkAnyETh
@@ -116,7 +116,8 @@ export const ArcadeIntro = () => {
             disabled={
               isWrongNetwork ||
               isMintingLords ||
-              lords >= parseInt(LORDS_PREFUND_AMOUNT)
+              lords >= parseInt(LORDS_PREFUND_AMOUNT) ||
+              !account
             }
             className="flex flex-row w-1/4"
           >
@@ -130,8 +131,8 @@ export const ArcadeIntro = () => {
             )}
           </Button>
           <p className="text-sm xl:text-xl 2xl:text-2xl">
-            Create Arcade Account (Fund ETH + LORDS, deploy, set permissions and
-            approvals)
+            3: Create Arcade Account (Fund ETH + LORDS, deploy, set permissions
+            and approvals)
           </p>
           <Button
             onClick={() =>
@@ -139,7 +140,11 @@ export const ArcadeIntro = () => {
                 ? window.open("https://faucet.goerli.starknet.io/", "_blank")
                 : create()
             }
-            disabled={isWrongNetwork || lords < parseInt(LORDS_PREFUND_AMOUNT)}
+            disabled={
+              isWrongNetwork ||
+              lords < parseInt(LORDS_PREFUND_AMOUNT) ||
+              !account
+            }
             className="w-1/4"
           >
             {checkNotEnoughPrefundEth ? "GET GOERLI ETH" : "CREATE"}
