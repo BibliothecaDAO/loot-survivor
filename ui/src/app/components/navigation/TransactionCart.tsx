@@ -24,6 +24,8 @@ import { GameData } from "../GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { chunkArray } from "../../lib/utils";
+import { UpgradeStats } from "../../types";
+import { useContracts } from "@/app/hooks/useContracts";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
@@ -31,10 +33,15 @@ export interface TransactionCartProps {
 }
 
 const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeFromCalls = useTransactionCartStore(
     (state) => state.removeFromCalls
+  );
+  const removeEntrypointFromCalls = useTransactionCartStore(
+    (state) => state.removeEntrypointFromCalls
   );
   const resetCalls = useTransactionCartStore((state) => state.resetCalls);
   const [notification, setNotification] = useState<any[]>([]);
@@ -170,6 +177,46 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
     setSlayAdventurers([]);
   };
 
+  const handleAddUpgradeTx = (
+    currentUpgrades?: UpgradeStats,
+    potions?: number,
+    items?: any[]
+  ) => {
+    removeEntrypointFromCalls("upgrade");
+    const upgradeTx = {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "upgrade",
+      calldata: [
+        adventurer?.id?.toString() ?? "",
+        potions! >= 0 ? potions?.toString() : potionAmount.toString(),
+        currentUpgrades
+          ? currentUpgrades["Strength"].toString()
+          : upgrades["Strength"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Dexterity"].toString()
+          : upgrades["Dexterity"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Vitality"].toString()
+          : upgrades["Vitality"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Intelligence"].toString()
+          : upgrades["Intelligence"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Wisdom"].toString()
+          : upgrades["Wisdom"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Charisma"].toString()
+          : upgrades["Charisma"].toString(),
+        "0",
+        items ? items.length.toString() : purchaseItems.length.toString(),
+        ...(items
+          ? items.flatMap(Object.values)
+          : purchaseItems.flatMap(Object.values)),
+      ],
+    };
+    addToCalls(upgradeTx);
+  };
+
   const filteredStats = Object.entries(upgrades).filter(
     (stat: any) => stat[1] !== 0
   );
@@ -298,6 +345,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                                 onClick={() => {
                                   clickPlay();
                                   setPotionAmount(0);
+                                  handleAddUpgradeTx(undefined, 0, undefined);
                                 }}
                                 className="text-red-500 hover:text-red-700"
                               >
@@ -326,6 +374,11 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                                       (i) => i.item !== item.item
                                     );
                                     setPurchaseItems(newItems);
+                                    handleAddUpgradeTx(
+                                      undefined,
+                                      undefined,
+                                      newItems
+                                    );
                                   }}
                                   className="text-red-500 hover:text-red-700"
                                 >
