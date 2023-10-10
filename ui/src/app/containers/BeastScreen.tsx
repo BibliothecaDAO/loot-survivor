@@ -6,7 +6,7 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import React, { useState } from "react";
 import { processBeastName } from "../lib/utils";
-import { Battle, NullDiscovery, NullBeast } from "../types";
+import { Battle, NullBeast } from "../types";
 import { Button } from "../components/buttons/Button";
 import useUIStore from "../hooks/useUIStore";
 
@@ -28,9 +28,6 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
-  const lastBeast = useQueriesStore(
-    (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
-  );
   const beastData = useQueriesStore(
     (state) => state.data.beastQuery?.beasts[0] || NullBeast
   );
@@ -38,14 +35,14 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
     (state) => state.data.battlesByBeastQuery?.battles || []
   );
 
-  const [buttonText, setButtonText] = useState("Flee!");
+  const [buttonText, setButtonText] = useState("Flee");
 
   const handleMouseEnter = () => {
-    setButtonText("you coward!");
+    setButtonText("You Coward!");
   };
 
   const handleMouseLeave = () => {
-    setButtonText("Flee!");
+    setButtonText("Flee");
   };
 
   const attackButtonsData: ButtonData[] = [
@@ -66,8 +63,6 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
     {
       id: 2,
       label: "TILL DEATH",
-      mouseEnter: handleMouseEnter,
-      mouseLeave: handleMouseLeave,
       action: async () => {
         resetNotification();
         await attack(true, beastData);
@@ -85,6 +80,8 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
     {
       id: 1,
       label: adventurer?.dexterity === 0 ? "DEX TOO LOW" : "SINGLE",
+      mouseEnter: handleMouseEnter,
+      mouseLeave: handleMouseLeave,
       action: async () => {
         resetNotification();
         await flee(false, beastData);
@@ -94,7 +91,8 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
         adventurer?.beastHealth == 0 ||
         loading ||
         adventurer?.level == 1 ||
-        adventurer.dexterity === 0,
+        adventurer.dexterity === 0 ||
+        estimatingFee,
       loading: loading,
     },
     {
@@ -111,7 +109,8 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
         adventurer?.beastHealth == 0 ||
         loading ||
         adventurer?.level == 1 ||
-        adventurer.dexterity === 0,
+        adventurer.dexterity === 0 ||
+        estimatingFee,
       loading: loading,
     },
   ];
@@ -150,12 +149,10 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
   }
 
   return (
-    <div className="sm:w-2/3 sm:h-2/3 flex flex-col sm:flex-row">
+    <div className="sm:w-2/3 flex flex-col sm:flex-row h-full">
       <div className="sm:w-1/2 order-1 sm:order-2">
         {hasBeast ? (
-          <>
-            <BeastDisplay beastData={beastData} />
-          </>
+          <BeastDisplay beastData={beastData} />
         ) : (
           <div className="flex flex-col items-center border-2 border-terminal-green">
             <p className="m-auto text-lg uppercase text-terminal-green">
@@ -196,7 +193,9 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
                 />
               </div>
               <div className="flex flex-col items-center">
-                <p className="uppercase sm:text-xl 2xl:text-2xl">Flee</p>
+                <p className="uppercase sm:text-xl 2xl:text-2xl">
+                  {buttonText}
+                </p>
                 <KeyboardControl
                   buttonsData={fleeButtonsData}
                   size={"xl"}
@@ -207,7 +206,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
           </>
         )}
 
-        <div className="hidden sm:block xl:h-[500px] 2xl:h-full">
+        <div className="hidden sm:block">
           {(hasBeast || formatBattles.length > 0) && <BattleLog />}
         </div>
 

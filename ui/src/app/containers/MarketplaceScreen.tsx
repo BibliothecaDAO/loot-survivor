@@ -1,18 +1,8 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { getLatestMarketItems } from "../hooks/graphql/queries";
-import MarketplaceRow from "../components/marketplace/MarketplaceRow";
+import { useState, useEffect, useRef, useCallback } from "react";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import LootIconLoader from "../components/icons/Loader";
-import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import { Item, ItemPurchase, NullItem, UpgradeStats } from "../types";
-import { getItemData, getItemPrice, getKeyFromValue } from "../lib/utils";
-import PurchaseHealth from "../components/actions/PurchaseHealth";
-import { useMediaQuery } from "react-responsive";
-import { Button } from "../components/buttons/Button";
-import { useContracts } from "../hooks/useContracts";
-import { GameData } from "../components/GameData";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import { ItemPurchase, UpgradeStats } from "../types";
 import MarketplaceTable from "../components/marketplace/MarketplaceTable";
 
 export interface MarketplaceScreenProps {

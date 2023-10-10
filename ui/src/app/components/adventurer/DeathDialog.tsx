@@ -24,7 +24,7 @@ export const DeathDialog = () => {
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const [imageLoading, setImageLoading] = useState(false);
 
-  const { data, refetch, setData } = useQueriesStore();
+  const { refetch, setData } = useQueriesStore();
 
   useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
 
@@ -61,6 +61,7 @@ export const DeathDialog = () => {
             src={"/scenes/intro/skulls.png"}
             pixelSize={rank <= 100 ? 10 : 20}
             setImageLoading={setImageLoading}
+            fill={true}
           />
 
           <div className="absolute inset-0 bg-black opacity-50"></div>

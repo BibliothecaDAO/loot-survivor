@@ -3,14 +3,12 @@ import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
 import { formatNumber } from "@/app/lib/utils";
 
 interface ScoreLeaderboardRowProps {
-  index: number;
   adventurer: any;
   rank: number;
   handleRowSelected: (id: number) => void;
 }
 
 const ScoreRow = ({
-  index,
   adventurer,
   rank,
   handleRowSelected,

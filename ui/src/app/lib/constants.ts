@@ -10,19 +10,21 @@ export const chapter4 =
   "They find golden coins in their pocket, glimmering in the dim light - an enigma wrapped in the shroud of the unexpected.";
 export const battle = "A beast lurks in the shadow, prepare for battle!";
 
+export const NETWORK: "goerli" | "mainnet" = "goerli";
+
 export function getRPCUrl() {
-  switch (process.env.NEXT_PUBLIC_NETWORK) {
+  switch (NETWORK) {
     case "goerli":
-      return process.env.NEXT_PUBLIC_RPC_GOERLI_ENDPOINT;
+      return "https://starknet-goerli.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
     case "mainnet":
-      return process.env.NEXT_PUBLIC_RPC_MAINNET_ENDPOINT;
+      return "https://starknet-mainnet.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
     default:
       return "http://localhost:8000/graphql";
   }
 }
 
 export function getGraphQLUrl() {
-  switch (process.env.NEXT_PUBLIC_NETWORK) {
+  switch (NETWORK) {
     case "goerli":
       return "https://survivor-indexer.realms.world/goerli-graphql";
     case "mainnet":
@@ -33,7 +35,7 @@ export function getGraphQLUrl() {
 }
 
 export function getContracts() {
-  switch (process.env.NEXT_PUBLIC_NETWORK) {
+  switch (NETWORK) {
     case "goerli":
       return {
         eth: process.env.NEXT_PUBLIC_GOERLI_ETH_CONTRACT_ADDRESS,
@@ -54,20 +56,20 @@ export function getContracts() {
 }
 
 export function getArcadeClassHash() {
-  switch (process.env.NEXT_PUBLIC_NETWORK) {
+  switch (NETWORK) {
     case "goerli":
-      return process.env.NEXT_PUBLIC_GOERLI_ARCADE_ACCOUNT_CLASS_HASH;
+      return "0x0715b5e10bf63c36e69c402a81e1eb96b9107ef56eb5e821b00893e39bdcf545";
     case "mainnet":
-      return process.env.NEXT_PUBLIC_MAINNET_ARCADE_ACCOUNT_CLASS_HASH;
+      return "0x0";
   }
 }
 
 export function getAppUrl() {
-  switch (process.env.NEXT_PUBLIC_NETWORK) {
+  switch (NETWORK) {
     case "goerli":
-      return process.env.NEXT_PUBLIC_GOERLI_APP_URL;
+      return "https://starknet-goerli.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
     case "mainnet":
-      return process.env.NEXT_PUBLIC_MAINNET_APP_URL;
+      return "https://starknet-mainnet.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
   }
 }
 
@@ -87,7 +89,7 @@ export const notificationAnimations = [
 
 // ---- CONTRACT PARAMS
 // Penalty time is 12 blocks, where each block is ~ 15 seconds
-export const penaltyTime = 12 * 15;
+export const penaltyTime = 420;
 export const itemCharismaDiscount = 1;
 export const itemBasePrice = 4;
 export const itemMinimumPrice = 1;

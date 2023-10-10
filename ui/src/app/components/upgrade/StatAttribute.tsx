@@ -1,7 +1,6 @@
-import { ReactElement, use, useEffect, useState, useRef } from "react";
+import { ReactElement, useEffect, useState, useRef } from "react";
 import QuantityButtons from "../buttons/QuantityButtons";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import { getKeyFromValue, removeElement } from "@/app/lib/utils";
 import { GameData } from "../GameData";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -11,7 +10,6 @@ interface StatAttributeProps {
   name: string;
   icon: ReactElement;
   description: string;
-  buttonText: string;
   upgradeHandler: (
     upgrades?: UpgradeStats,
     potions?: number,
@@ -23,7 +21,6 @@ export const StatAttribute = ({
   name,
   icon,
   description,
-  buttonText,
   upgradeHandler,
 }: StatAttributeProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -57,7 +54,7 @@ export const StatAttribute = ({
           if (
             Object.values(upgrades).filter((value) => value !== 0).length === 0
           ) {
-            removeEntrypointFromCalls("upgrade_adventurer");
+            removeEntrypointFromCalls("upgrade");
           }
         }
         setButtonClicked(false);

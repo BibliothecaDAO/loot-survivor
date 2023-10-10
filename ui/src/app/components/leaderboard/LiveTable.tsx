@@ -29,7 +29,7 @@ const LiveLeaderboardTable = ({
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const totalPages = Math.ceil(adventurers.length / itemsPerPage);
+  const totalPages = Math.ceil(aliveAdventurers.length / itemsPerPage);
 
   let previousXp = -1;
   let currentRank = 0;
@@ -84,9 +84,7 @@ const LiveLeaderboardTable = ({
               (adventurer: Adventurer, index: number) => (
                 <LiveRow
                   key={index}
-                  index={index}
                   adventurer={adventurer}
-                  rank={rankXp(adventurer, index)}
                   handleRowSelected={handleRowSelected}
                 />
               )

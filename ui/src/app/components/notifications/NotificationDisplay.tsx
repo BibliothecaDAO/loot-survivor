@@ -1,6 +1,6 @@
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import { NullAdventurer } from "@/app/types";
 import NotificationComponent from "./NotificationComponent";

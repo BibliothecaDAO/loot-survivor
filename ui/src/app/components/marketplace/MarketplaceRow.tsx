@@ -1,32 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "../buttons/Button";
-import { useContracts } from "../../hooks/useContracts";
 import { getItemData, getItemPrice, getKeyFromValue } from "../../lib/utils";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import LootIcon from "../icons/LootIcon";
 import {
   useTransactionManager,
   useWaitForTransaction,
 } from "@starknet-react/core";
-import {
-  Metadata,
-  Item,
-  Adventurer,
-  Call,
-  ItemPurchase,
-  UpgradeStats,
-} from "../../types";
+import { Metadata, Item, ItemPurchase, UpgradeStats } from "../../types";
 import { CoinIcon } from "../icons/Icons";
 import EfficacyDisplay from "../icons/EfficacyIcon";
 import { GameData } from "../GameData";
-import { useMediaQuery } from "react-responsive";
 
 interface MarketplaceRowProps {
   item: Item;
   index: number;
   selectedIndex: number;
-  adventurers: Adventurer[];
   activeMenu: number | null;
   setActiveMenu: (value: number | null) => void;
   calculatedNewGold: number;
@@ -45,7 +34,6 @@ const MarketplaceRow = ({
   item,
   index,
   selectedIndex,
-  adventurers,
   activeMenu,
   setActiveMenu,
   calculatedNewGold,
@@ -56,25 +44,15 @@ const MarketplaceRow = ({
   totalCharisma,
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
-  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const calls = useTransactionCartStore((state) => state.calls);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { hashes, transactions } = useTransactionManager();
   const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
-  // const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
 
   const transactingMarketIds = (transactions[0]?.metadata as Metadata)?.items;
 
   const gameData = new GameData();
 
   const singlePurchaseExists = (item: string) => {
-    // return calls.some(
-    //   (call: Call) =>
-    //     call.entrypoint == "buy_items_and_upgrade_stats" &&
-    //     Array.isArray(call.calldata) &&
-    //     call.calldata[2] == getKeyFromValue(gameData.ITEMS, item)?.toString()
-    // );
     return purchaseItems.some(
       (purchasingItem: ItemPurchase) => purchasingItem.item == item
     );

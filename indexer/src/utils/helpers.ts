@@ -24,9 +24,8 @@ export function insertAdventurer({
   ring,
   beastHealth,
   statUpgrades,
+  actionsPerBlock,
   name,
-  homeRealm,
-  classType,
   entropy,
   createdTime,
   lastUpdatedTime,
@@ -62,9 +61,8 @@ export function insertAdventurer({
         ring: checkExistsInt(BigInt(ring)),
         beastHealth: encodeIntAsBytes(BigInt(beastHealth)),
         statUpgrades: checkExistsInt(BigInt(statUpgrades)),
+        actionsPerBlock: encodeIntAsBytes(BigInt(actionsPerBlock)),
         name: checkExistsInt(BigInt(name)),
-        homeRealm: checkExistsInt(BigInt(homeRealm)),
-        classType: checkExistsInt(BigInt(classType)),
         entropy: encodeIntAsBytes(BigInt(entropy)),
         createdTime: createdTime,
         lastUpdatedTime: lastUpdatedTime,
@@ -162,15 +160,16 @@ export function updateAdventurer({
   timestamp: string;
 }) {
   const { adventurer } = adventurerState;
+  const entity = {
+    id: checkExistsInt(BigInt(adventurerState.adventurerId)),
+    owner: checkExistsInt(BigInt(adventurerState.owner)),
+  };
   return {
-    entity: {
-      id: checkExistsInt(BigInt(adventurerState.adventurerId)),
-    },
+    entity,
     update: {
       $set: {
-        id: checkExistsInt(BigInt(adventurerState.adventurerId)),
-        owner: checkExistsInt(BigInt(adventurerState.owner)),
-        lastAction: encodeIntAsBytes(BigInt(adventurer.lastAction)),
+        ...entity,
+        lastAction: encodeIntAsBytes(BigInt(adventurer.lastActionBlock)),
         health: encodeIntAsBytes(BigInt(adventurer.health)),
         xp: encodeIntAsBytes(BigInt(adventurer.xp)),
         strength: encodeIntAsBytes(BigInt(adventurer.stats.strength)),
@@ -191,6 +190,7 @@ export function updateAdventurer({
         ring: checkExistsInt(BigInt(adventurer.ring.id)),
         beastHealth: encodeIntAsBytes(BigInt(adventurer.beastHealth)),
         statUpgrades: encodeIntAsBytes(BigInt(adventurer.statsPointsAvailable)),
+        actionsPerBlock: encodeIntAsBytes(BigInt(adventurer.actionsPerBlock)),
         lastUpdatedTime: timestamp,
         timestamp,
       },
@@ -546,7 +546,6 @@ export function insertHighScore({
 export function updateTotalPayout({
   adventurerId,
   owner,
-  rank,
   timestamp,
   newPayout,
 }: any) {

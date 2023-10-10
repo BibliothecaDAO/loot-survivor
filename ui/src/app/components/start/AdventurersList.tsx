@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "../buttons/Button";
 import Info from "../adventurer/Info";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { ButtonData } from "../KeyboardControls";
 import { Adventurer } from "@/app/types";
 import { SkullIcon } from "../icons/Icons";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -77,7 +76,7 @@ export const AdventurersList = ({
   }, [isActive, handleKeyDown]);
 
   return (
-    <div className="flex flex-col items-center h-screen">
+    <div className="flex flex-col items-center h-full">
       {sortedAdventurers.length > 0 ? (
         <div className="flex flex-col gap-2 sm:flex-row w-full h-full items-center sm:items-start">
           <div className="flex flex-col w-full sm:w-1/3 overflow-y-auto mx-2 border border-terminal-green sm:border-none h-[350px] xl:h-[500px] 2xl:h-[625px] p-1">
@@ -121,7 +120,7 @@ export const AdventurersList = ({
             )}
           </div>
           {filteredAdventurers.length > 0 && (
-            <div className="hidden sm:block sm:w-6/12 md:w-6/12 lg:w-2/3 w-full">
+            <div className="hidden sm:block sm:w-6/12 md:w-6/12 lg:w-2/3 w-full h-full">
               {isLoading.global ? (
                 <LootIconLoader className="m-auto" size="w-10" />
               ) : (

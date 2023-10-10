@@ -44,9 +44,9 @@ export default function transform({ header, events }: Block) {
   return events.flatMap(({ event, receipt }) => {
     switch (event.keys[0]) {
       case NEW_HIGH_SCORE: {
+        console.log("NEW_HIGH_SCORE", "->", "SCORES UPDATE");
         const { value } = parseNewHighScore(event.data, 0);
         const as = value.adventurer_state;
-        console.log("NEW_HIGH_SCORE", "->", "SCORES UPDATE");
         return [
           insertHighScore({
             adventurerId: as.adventurerId,
@@ -61,18 +61,17 @@ export default function transform({ header, events }: Block) {
         ];
       }
       case REWARD_DISTRIBUTION: {
+        console.log("REWARD_DISTRIBUTION", "->", "SCORES UPDATE");
         const { value } = parseRewardDistribution(event.data, 0);
         const fp = value.firstPlace;
         const sp = value.secondPlace;
         const tp = value.thirdPlace;
-        console.log("REWARD_DISTRIBUTION", "->", "SCORES UPDATE");
         const updates: any[] = [];
         if (BigInt(fp.amount) > 0) {
           updates.push(
             updateTotalPayout({
               adventurerId: fp.adventurerId,
               owner: fp.address,
-              rank: fp.rank,
               timestamp: new Date().toISOString(),
               newPayout: fp.amount,
             })
@@ -83,7 +82,6 @@ export default function transform({ header, events }: Block) {
             updateTotalPayout({
               adventurerId: sp.adventurerId,
               owner: sp.address,
-              rank: sp.rank,
               timestamp: new Date().toISOString(),
               newPayout: sp.amount,
             })
@@ -94,7 +92,6 @@ export default function transform({ header, events }: Block) {
             updateTotalPayout({
               adventurerId: tp.adventurerId,
               owner: tp.address,
-              rank: tp.rank,
               timestamp: new Date().toISOString(),
               newPayout: tp.amount,
             })

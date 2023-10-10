@@ -65,24 +65,30 @@ async function checkArcadeBalance(
   if (ethBalance < FEE_CHECK_BALANCE) {
     const storage: BurnerStorage = Storage.get("burners");
     if (account && (account?.address ?? "0x0") in storage) {
-      setEstimatingFee(true);
-      const newAccount = new Account(
-        account,
-        account?.address,
-        storage[account?.address]["privateKey"],
-        "1"
-      );
-      const { suggestedMaxFee: estimatedFee } = await newAccount.estimateFee(
-        calls
-      );
-      // Add 10% to fee for safety
-      const formattedFee = estimatedFee * (BigInt(11) / BigInt(10));
-      setEstimatingFee(false);
-      if (ethBalance < formattedFee) {
-        showTopUpDialog(true);
-        setTopUpAccount(account?.address);
-        return true;
-      } else {
+      try {
+        setEstimatingFee(true);
+        const newAccount = new Account(
+          account,
+          account?.address,
+          storage[account?.address]["privateKey"],
+          "1"
+        );
+        const { suggestedMaxFee: estimatedFee } = await newAccount.estimateFee(
+          calls
+        );
+        // Add 10% to fee for safety
+        const formattedFee = estimatedFee * (BigInt(11) / BigInt(10));
+        setEstimatingFee(false);
+        if (ethBalance < formattedFee) {
+          showTopUpDialog(true);
+          setTopUpAccount(account?.address);
+          return true;
+        } else {
+          return false;
+        }
+      } catch (e) {
+        console.log(e);
+        setEstimatingFee(false);
         return false;
       }
     }
@@ -313,23 +319,30 @@ export function syscalls({
       addToCalls(approveLordsTx);
       spawnCalls.push(mintLords, approveLordsTx);
     }
+    const mintLords: Call = {
+      contractAddress: lordsContract?.address ?? "",
+      entrypoint: "mint",
+      calldata: [account?.address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+    };
+    const approveLordsSpendingTx = {
+      contractAddress: lordsContract?.address ?? "",
+      entrypoint: "approve",
+      calldata: [gameContract?.address ?? "", (250 * 10 ** 18).toString(), "0"],
+    };
     const mintAdventurerTx = {
       contractAddress: gameContract?.address ?? "",
-      entrypoint: "start",
+      entrypoint: "new_game",
       calldata: [
         "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         stringToFelt(formData.name).toString(),
-        getRandomNumber(8000),
-        "1",
-        "1",
       ],
     };
 
     addToCalls(mintAdventurerTx);
     spawnCalls.push(mintAdventurerTx);
     const balanceEmpty = await checkArcadeBalance(
-      [...calls, ...spawnCalls],
+      [...calls, mintLords, approveLordsSpendingTx, mintAdventurerTx],
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
@@ -345,7 +358,12 @@ export function syscalls({
         undefined
       );
       try {
-        const tx = await handleSubmitCalls(account, [...calls, ...spawnCalls]);
+        const tx = await handleSubmitCalls(account, [
+          ...calls,
+          mintLords,
+          approveLordsSpendingTx,
+          mintAdventurerTx,
+        ]);
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
@@ -430,7 +448,7 @@ export function syscalls({
     const exploreTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "explore",
-      calldata: [adventurer?.id?.toString() ?? "", "0", till_beast ? "1" : "0"],
+      calldata: [adventurer?.id?.toString() ?? "", till_beast ? "1" : "0"],
     };
     addToCalls(exploreTx);
 
@@ -679,7 +697,7 @@ export function syscalls({
     const attackTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "attack",
-      calldata: [adventurer?.id?.toString() ?? "", "0", tillDeath ? "1" : "0"],
+      calldata: [adventurer?.id?.toString() ?? "", tillDeath ? "1" : "0"],
     };
     addToCalls(attackTx);
 
@@ -911,7 +929,7 @@ export function syscalls({
     const fleeTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "flee",
-      calldata: [adventurer?.id?.toString() ?? "", "0", tillDeath ? "1" : "0"],
+      calldata: [adventurer?.id?.toString() ?? "", tillDeath ? "1" : "0"],
     };
     addToCalls(fleeTx);
 

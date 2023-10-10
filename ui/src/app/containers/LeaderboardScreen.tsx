@@ -73,7 +73,7 @@ export default function LeaderboardScreen() {
   }, [adventurersByXPdata]);
 
   return (
-    <div className="flex flex-col items-center justify-between xl:h-[500px] xl:overflow-y-auto 2xl:h-full 2xl:overflow-hidden mt-5 sm:mt-0">
+    <div className="flex flex-col items-center h-full xl:overflow-y-auto 2xl:overflow-hidden mt-5 sm:mt-0">
       <Button
         onClick={async () => {
           const adventurersByXPdata = await refetch(

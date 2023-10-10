@@ -1,7 +1,6 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "./useQueryStore";
-import { isEqual } from "lodash";
 
 type Variables = Record<
   string,

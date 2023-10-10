@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useBalance, useAccount, useConnectors } from "@starknet-react/core";
 import { useContracts } from "@/app/hooks/useContracts";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
@@ -25,9 +25,10 @@ import { NullAdventurer } from "@/app/types";
 
 export interface HeaderProps {
   multicall: (...args: any[]) => any;
+  mintLords: (...args: any[]) => any;
 }
 
-export default function Header({ multicall }: HeaderProps) {
+export default function Header({ multicall, mintLords }: HeaderProps) {
   const { account, address } = useAccount();
   const { disconnect } = useConnectors();
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -60,6 +61,8 @@ export default function Header({ multicall }: HeaderProps) {
   const displayCartButtonRef = useRef<HTMLButtonElement>(null);
   const displayHistoryButtonRef = useRef<HTMLButtonElement>(null);
 
+  const [showLordsMint, setShowLordsMint] = useState(false);
+
   return (
     <div className="flex flex-row justify-between px-1  ">
       <div className="flex flex-row items-center gap-2 sm:gap-5">
@@ -78,15 +81,30 @@ export default function Header({ multicall }: HeaderProps) {
         <Button
           size={"xs"}
           variant={"outline"}
-          className="self-center xl:px-5"
+          className="hidden sm:block self-center xl:px-5"
           disabled={true}
         >
           Play For Real
         </Button>
-        <Button size={"xs"} variant={"outline"} className="self-center xl:px-5">
+        <Button
+          size={"xs"}
+          variant={"outline"}
+          className="self-center xl:px-5 hover:bg-terminal-green"
+          onClick={mintLords}
+          onMouseEnter={() => setShowLordsMint(true)}
+          onMouseLeave={() => setShowLordsMint(false)}
+        >
           <span className="flex flex-row items-center justify-between w-full">
-            <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
-            <p>{formatNumber(parseInt(lordsBalance.data?.formatted ?? "0"))}</p>
+            {!showLordsMint ? (
+              <>
+                <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
+                <p>
+                  {formatNumber(parseInt(lordsBalance.data?.formatted ?? "0"))}
+                </p>
+              </>
+            ) : (
+              <p className="text-black">Mint Lords</p>
+            )}
           </span>
         </Button>
         <Button

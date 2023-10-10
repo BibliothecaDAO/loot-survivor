@@ -2,7 +2,6 @@ import { Button } from "../buttons/Button";
 import { ProfileIcon, TrophyIcon } from "../icons/Icons";
 import useUIStore from "../../hooks/useUIStore";
 import { capitalizeFirstLetter } from "../../lib/utils";
-import Image from "next/image";
 
 export default function MobileHeader() {
   const screen = useUIStore((state) => state.screen);

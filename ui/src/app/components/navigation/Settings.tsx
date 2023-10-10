@@ -23,6 +23,12 @@ export default function Settings() {
   const buttonsData: ButtonData[] = [
     {
       id: 1,
+      label: "Play For Real",
+      action: () => setDisconnected(false),
+      disabled: true,
+    },
+    {
+      id: 2,
       label: "Ledger",
       icon: <LedgerIcon />,
       action: () => setDisplayHistory(!displayHistory),

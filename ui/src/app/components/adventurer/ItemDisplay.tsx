@@ -145,7 +145,7 @@ export const ItemDisplay = ({
     <>
       {!showInventoryItems ? (
         <div
-          className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-10 sm:h-10 md:h-full  ${
+          className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-[8rem] sm:h-10 md:h-full  ${
             item.item
               ? "bg-terminal-green text-terminal-black 2xl:overflow-x-auto 2xl:overflow-y-hidden"
               : ""
@@ -153,12 +153,12 @@ export const ItemDisplay = ({
           ref={scrollableRef}
         >
           <div className="sm:hidden flex flex-col items-center justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
-            <LootIcon size={"w-3"} type={itemSlot ? itemSlot : slot} />
-            <Efficacyicon size={"w-4"} type={type} />
+            <LootIcon size={"w-5"} type={itemSlot ? itemSlot : slot} />
+            <Efficacyicon size={"w-5"} type={type} />
           </div>
           <div className="hidden sm:flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
-            <LootIcon size={"w-4"} type={itemSlot ? itemSlot : slot} />
-            <Efficacyicon size={"w-4"} type={type} />
+            <LootIcon size={"w-5"} type={itemSlot ? itemSlot : slot} />
+            <Efficacyicon size={"w-5"} type={type} />
           </div>
 
           {item.item ? (
@@ -192,12 +192,12 @@ export const ItemDisplay = ({
                         <Button
                           variant={"contrast"}
                           size={"xxs"}
-                          className="p-1"
+                          className="p-1 xl:p-0 2xl:h-5 2xl:w-6"
                           onClick={() => {
                             setShowInventoryItems(true);
                           }}
                         >
-                          <SwapIcon className="w-3 h-3 lg:w-4 lg:h-4" />
+                          <SwapIcon className="w-2 h-2 lg:w-3 lg:h-3" />
                         </Button>
                       )}
                       {inventory && (
@@ -237,7 +237,7 @@ export const ItemDisplay = ({
                         <Button
                           variant={"contrast"}
                           size={"xxs"}
-                          className="p-1"
+                          className="p-1 xl:p-0 2xl:h-5 2xl:w-6"
                           onClick={() => handleDrop(item.item ?? "")}
                           disabled={checkDropping(item.item ?? "")}
                         >

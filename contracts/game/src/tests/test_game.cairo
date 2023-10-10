@@ -31,8 +31,7 @@ mod tests {
     use survivor::{
         stats::Stats, adventurer_meta::{AdventurerMetadata},
         constants::adventurer_constants::{
-            STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH, ClassStatBoosts,
-            MAX_BLOCK_COUNT
+            STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH, MAX_BLOCK_COUNT
         },
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, item_primitive::ItemPrimitive,
         bag::{Bag, IBag}, adventurer_utils::AdventurerUtils
@@ -57,8 +56,8 @@ mod tests {
 
     const ADVENTURER_ID: felt252 = 1;
 
-    const MAX_LORDS: u256 = 500000000000000000000;
-    const APPROVE: u256 = 50000000000000000000;
+    const MAX_LORDS: u256 = 1000000000000000000000;
+    const APPROVE: u256 = 100000000000000000000;
     const NAME: felt252 = 111;
     const SYMBOL: felt252 = 222;
 
@@ -1842,6 +1841,7 @@ mod tests {
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
         game.explore(ADVENTURER_ID, false);
         game.explore(ADVENTURER_ID, false);
+        game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
     }

@@ -9,17 +9,13 @@ import { getKeyFromValue, groupBySlot } from "../lib/utils";
 import { InventoryRow } from "../components/inventory/InventoryRow";
 import Info from "../components/adventurer/Info";
 import { ItemDisplay } from "../components/adventurer/ItemDisplay";
-import { Button } from "../components/buttons/Button";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import useLoadingStore from "../hooks/useLoadingStore";
 import LootIcon from "../components/icons/LootIcon";
 import { InfoIcon, BagIcon } from "../components/icons/Icons";
-import { Call, Item, Metadata } from "../types";
+import { Item, Metadata } from "../types";
 import { GameData } from "../components/GameData";
-import useCustomQuery from "../hooks/useCustomQuery";
-import { getAdventurerById } from "../hooks/graphql/queries";
 import useUIStore from "../hooks/useUIStore";
 
 /**
@@ -67,7 +63,6 @@ export default function InventoryScreen() {
         entrypoint: "equip",
         calldata: [
           adventurer?.id?.toString() ?? "",
-          "0",
           newEquipItems.length.toString(),
           ...newEquipItems,
         ],
@@ -87,10 +82,9 @@ export default function InventoryScreen() {
     if (gameContract) {
       const dropItemsTx = {
         contractAddress: gameContract?.address,
-        entrypoint: "drop_items",
+        entrypoint: "drop",
         calldata: [
           adventurer?.id?.toString() ?? "",
-          "0",
           newDropItems.length.toString(),
           ...newDropItems,
         ],
@@ -102,15 +96,6 @@ export default function InventoryScreen() {
   };
 
   const gameData = new GameData();
-
-  const singleEquipExists = (item: string) => {
-    return calls.some(
-      (call: Call) =>
-        call.entrypoint == "equip" &&
-        Array.isArray(call.calldata) &&
-        call.calldata[2] == getKeyFromValue(gameData.ITEMS, item)?.toString()
-    );
-  };
 
   const checkTransacting = (item: string) => {
     if (txData?.status == "RECEIVED") {
@@ -176,7 +161,7 @@ export default function InventoryScreen() {
   const selectedItems = groupedItems[selected || "Weapon"] || [];
 
   return (
-    <div className="flex flex-row sm:gap-5">
+    <div className="flex flex-row sm:gap-5 h-full">
       <div className="hidden sm:block sm:w-1/2 lg:w-1/3">
         <Info adventurer={adventurer} />
       </div>
@@ -190,7 +175,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 0}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.weapon}
-          icon={<LootIcon type="bag" />}
+          icon={<LootIcon type="bag" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -203,7 +188,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 1}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.weapon}
-          icon={<LootIcon type="weapon" size="w-4" />}
+          icon={<LootIcon type="weapon" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -216,7 +201,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 2}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.chest}
-          icon={<LootIcon type="chest" size="w-4" />}
+          icon={<LootIcon type="chest" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -229,7 +214,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 3}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.head}
-          icon={<LootIcon type="head" size="w-4" />}
+          icon={<LootIcon type="head" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -242,7 +227,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 4}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.waist}
-          icon={<LootIcon type="waist" size="w-4" />}
+          icon={<LootIcon type="waist" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -255,7 +240,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 5}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.foot}
-          icon={<LootIcon type="foot" size="w-4" />}
+          icon={<LootIcon type="foot" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -268,7 +253,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 6}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.hand}
-          icon={<LootIcon type="hand" size="w-4" />}
+          icon={<LootIcon type="hand" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -281,7 +266,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 7}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.neck}
-          icon={<LootIcon type="neck" size="w-4" />}
+          icon={<LootIcon type="neck" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -294,7 +279,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 8}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.ring}
-          icon={<LootIcon type="ring" size="w-4" />}
+          icon={<LootIcon type="ring" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -340,17 +325,6 @@ export default function InventoryScreen() {
                         }
                         handleDrop={handleDropItems}
                       />
-                      {/* <Button
-                      onClick={() => handleAddEquipItem(item.item ?? "")}
-                      disabled={
-                        singleEquipExists(item.item ?? "") ||
-                        item.equipped ||
-                        checkTransacting(item.item ?? "")
-                      }
-                      loading={loading}
-                    >
-                      {item.equipped ? "Eqipped" : "Equip"}
-                    </Button> */}
                     </div>
                   );
                 })

@@ -4,7 +4,6 @@ export type Dict<T> = { [key: number]: T };
 export type DictString<T> = { [key: string]: T };
 
 export class GameData {
-  CONTRACTS: DictString<string>;
   BEASTS: Dict<string>;
   BEAST_TIERS: Dict<number>;
   BEAST_TYPES: Dict<string>;
@@ -34,21 +33,6 @@ export class GameData {
   QUERY_KEYS: DictString<string>;
 
   constructor() {
-    this.CONTRACTS = {
-      goerliAdventurer:
-        "0x035d755a23ec72df90819f584d9a1849bbc21fa77f96d25e03f1736883895248",
-      goerliBeast:
-        "0x000f4dbfe5d15792aa91025e42ee1d74c22bdeb1eef0b9bc19a37216377290c1",
-      goerliLoot:
-        "0x065669e15c8f1a7f17b7062e4eb1b709b922b931b93c59577f1848a85c30ab1f",
-      devnetAdventurer:
-        "0x005160ffc8910638190fbe80296932ce90be9091f622b30b299ed81c7be7d359",
-      devnetBeast:
-        "0x061533cb6f21d230aeef9ac2aecf0c70679d1d50d9d61f11bd6a6113cf3d7d85",
-      devnetLoot:
-        "0x040583a9197a52f289a5f6f03981ace0b3dfcc7496137fa292ec67796be22766",
-    };
-
     this.BEASTS = {
       1: "Warlock",
       2: "Typhon",

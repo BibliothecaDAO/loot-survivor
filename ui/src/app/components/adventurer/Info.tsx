@@ -1,19 +1,10 @@
-import { useMemo } from "react";
 import { Adventurer, NullAdventurer, NullItem } from "../../types";
-import { getItemsByAdventurer } from "../../hooks/graphql/queries";
-import { HeartIcon, CoinIcon, BagIcon, QuestionMarkIcon } from "../icons/Icons";
+import { HeartIcon, CoinIcon, QuestionMarkIcon } from "../icons/Icons";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
-import {
-  calculateLevel,
-  getRealmNameById,
-  getKeyFromValue,
-  countOccurrences,
-} from "../../lib/utils";
+import { getKeyFromValue } from "../../lib/utils";
 import { useQueriesStore } from "../../hooks/useQueryStore";
-import useCustomQuery from "../../hooks/useCustomQuery";
 import useUIStore from "../../hooks/useUIStore";
-import useLoadingStore from "../../hooks/useLoadingStore";
 import { Item } from "@/app/types";
 import { HealthCountDown } from "../CountDown";
 import { GameData } from "../GameData";
@@ -32,9 +23,7 @@ export default function Info({
   upgradeCost,
 }: InfoProps) {
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
-  const profile = useUIStore((state) => state.profile);
-  const { data, isLoading, data: storeData } = useQueriesStore();
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
+  const { data } = useQueriesStore();
   const dropItems = useUIStore((state) => state.dropItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
   const potionAmount = useUIStore((state) => state.potionAmount);
@@ -64,10 +53,9 @@ export default function Info({
     if (gameContract) {
       const dropItemsTx = {
         contractAddress: gameContract?.address,
-        entrypoint: "drop_items",
+        entrypoint: "drop",
         calldata: [
           adventurer?.id?.toString() ?? "",
-          "0",
           newDropItems.length.toString(),
           ...newDropItems,
         ],
@@ -120,9 +108,9 @@ export default function Info({
   return (
     <>
       {adventurer?.id ? (
-        <div className="border border-terminal-green xl:h-[500px] 2xl:h-full">
-          <div className="flex flex-row flex-wrap gap-2 p-2 xl:h-full">
-            <div className="flex flex-col w-full uppercase xl:h-full">
+        <div className="border border-terminal-green h-full">
+          <div className="flex flex-row flex-wrap gap-2 p-2 h-full">
+            <div className="flex flex-col w-full uppercase h-full">
               <div className="relative flex justify-between w-full text-xl sm:text-2xl lg:text-3xl border-b border-terminal-green">
                 {formatAdventurer.name}
                 <span className="relative flex items-center text-terminal-yellow">
@@ -150,33 +138,24 @@ export default function Info({
                   </p>
                 )}
               </div>
-              <div className="flex justify-between w-full text-sm sm:text-base">
-                {formatAdventurer.classType}{" "}
-                <span>
-                  {
-                    getRealmNameById(formatAdventurer.homeRealm ?? 0)
-                      ?.properties.name
-                  }
-                </span>
-              </div>
               <hr className="border-terminal-green" />
               <div className="flex justify-between w-full sm:text-sm lg:text-xl pb-1">
                 <LevelBar xp={formatAdventurer.xp ?? 0} />
               </div>
 
-              <div className="flex flex-col w-full justify-between overflow-hidden">
+              <div className="flex flex-col w-full gap-1 overflow-hidden h-[450px] sm:h-full">
                 <div className="flex flex-row w-full font-semibold text-xs sm:text-sm lg:text-base">
                   {attributes.map((attribute) => (
                     <div
                       key={attribute.key}
-                      className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black  sm:mb-2"
+                      className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black"
                     >
                       {attribute.key}
                       <span className="pl-1">{attribute.value}</span>
                     </div>
                   ))}
                 </div>
-                <div className="w-full flex flex-col sm:gap-1 2xl:gap-0 text-xs h-full xl:h-[500px] overflow-y-auto 2xl:overflow-hidden">
+                <div className="w-full flex flex-col sm:gap-1 2xl:gap-0 text-xs h-[400px] sm:h-[425px] overflow-y-auto 2xl:overflow-hidden">
                   {bodyParts.map((part) => (
                     <ItemDisplay
                       item={

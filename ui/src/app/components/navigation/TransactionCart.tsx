@@ -24,6 +24,8 @@ import { GameData } from "../GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { chunkArray } from "../../lib/utils";
+import { UpgradeStats } from "../../types";
+import { useContracts } from "@/app/hooks/useContracts";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
@@ -31,10 +33,15 @@ export interface TransactionCartProps {
 }
 
 const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeFromCalls = useTransactionCartStore(
     (state) => state.removeFromCalls
+  );
+  const removeEntrypointFromCalls = useTransactionCartStore(
+    (state) => state.removeEntrypointFromCalls
   );
   const resetCalls = useTransactionCartStore((state) => state.resetCalls);
   const [notification, setNotification] = useState<any[]>([]);
@@ -134,10 +141,10 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
         case "equip":
           handleEquipItem();
           break;
-        case "drop_items":
+        case "drop":
           handleDropItems();
           break;
-        case "upgrade_adventurer":
+        case "upgrade":
           handleUpgradeAdventurer();
           break;
         case "slay_idle_adventurers":
@@ -168,6 +175,46 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
     setPurchaseItems([]);
     setUpgrades({ ...ZeroUpgrade });
     setSlayAdventurers([]);
+  };
+
+  const handleAddUpgradeTx = (
+    currentUpgrades?: UpgradeStats,
+    potions?: number,
+    items?: any[]
+  ) => {
+    removeEntrypointFromCalls("upgrade");
+    const upgradeTx = {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "upgrade",
+      calldata: [
+        adventurer?.id?.toString() ?? "",
+        potions! >= 0 ? potions?.toString() : potionAmount.toString(),
+        currentUpgrades
+          ? currentUpgrades["Strength"].toString()
+          : upgrades["Strength"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Dexterity"].toString()
+          : upgrades["Dexterity"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Vitality"].toString()
+          : upgrades["Vitality"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Intelligence"].toString()
+          : upgrades["Intelligence"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Wisdom"].toString()
+          : upgrades["Wisdom"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Charisma"].toString()
+          : upgrades["Charisma"].toString(),
+        "0",
+        items ? items.length.toString() : purchaseItems.length.toString(),
+        ...(items
+          ? items.flatMap(Object.values)
+          : purchaseItems.flatMap(Object.values)),
+      ],
+    };
+    addToCalls(upgradeTx);
   };
 
   const filteredStats = Object.entries(upgrades).filter(
@@ -235,7 +282,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                             </div>
                           ))}
                         </div>
-                      ) : call.entrypoint === "drop_items" ? (
+                      ) : call.entrypoint === "drop" ? (
                         <div className="flex flex-col">
                           {dropItems.map((item: string, index: number) => (
                             <div className="flex flex-row" key={index}>
@@ -263,7 +310,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                             </div>
                           ))}
                         </div>
-                      ) : call.entrypoint === "upgrade_adventurer" ? (
+                      ) : call.entrypoint === "upgrade" ? (
                         <div className="flex flex-col">
                           {filteredStats.map(
                             ([string, number], index: number) => (
@@ -298,6 +345,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                                 onClick={() => {
                                   clickPlay();
                                   setPotionAmount(0);
+                                  handleAddUpgradeTx(undefined, 0, undefined);
                                 }}
                                 className="text-red-500 hover:text-red-700"
                               >
@@ -326,6 +374,11 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                                       (i) => i.item !== item.item
                                     );
                                     setPurchaseItems(newItems);
+                                    handleAddUpgradeTx(
+                                      undefined,
+                                      undefined,
+                                      newItems
+                                    );
                                   }}
                                   className="text-red-500 hover:text-red-700"
                                 >
@@ -370,10 +423,10 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                           if (call.entrypoint === "equip") {
                             setEquipItems([]);
                           }
-                          if (call.entrypoint === "drop_items") {
+                          if (call.entrypoint === "drop") {
                             setDropItems([]);
                           }
-                          if (call.entrypoint === "upgrade_adventurer") {
+                          if (call.entrypoint === "upgrade") {
                             setUpgrades({ ...ZeroUpgrade });
                             setPurchaseItems([]);
                           }

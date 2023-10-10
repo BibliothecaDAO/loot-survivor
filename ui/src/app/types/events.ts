@@ -1,15 +1,9 @@
 type u128 = number;
-type u256 = {
-  low: u128;
-  high: u128;
-};
 type u16 = number;
 type u8 = number;
 
 type AdventurerMetadata = {
   name: u128;
-  homeRealm: u16;
-  class: u8;
   entropy: u128;
 };
 
@@ -45,6 +39,7 @@ type Adventurer = {
   ring: LootStatistics;
   beastHealth: u16;
   statPointsAvailable: u8;
+  actionsPerBlock: u8;
   mutated: boolean;
 };
 
@@ -109,7 +104,7 @@ type ContractAddress = any; // This needs to be defined or imported from its sou
 
 export type AdventurerState = {
   owner: ContractAddress;
-  adventurerId: u256;
+  adventurerId: u128;
   adventurer: Adventurer;
 };
 
