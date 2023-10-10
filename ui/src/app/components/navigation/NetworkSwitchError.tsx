@@ -1,6 +1,4 @@
-"use client";
-import { useAccount, useNetwork } from "@starknet-react/core";
-import { Button } from "../buttons/Button";
+import { useAccount } from "@starknet-react/core";
 
 export interface NetworkSwitchErrorProps {
   isWrongNetwork: boolean;

@@ -12,7 +12,7 @@ interface TopUpDialogProps {
 }
 
 export const TopUpDialog = ({ token }: TopUpDialogProps) => {
-  const { account: walletAccount, address, connector } = useAccount();
+  const { account: walletAccount, address } = useAccount();
   const { connect, available } = useConnectors();
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const topUpAccount = useUIStore((state) => state.topUpAccount);

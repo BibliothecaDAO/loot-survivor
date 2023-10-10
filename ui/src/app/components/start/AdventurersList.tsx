@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "../buttons/Button";
 import Info from "../adventurer/Info";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { ButtonData } from "../KeyboardControls";
 import { Adventurer } from "@/app/types";
 import { SkullIcon } from "../icons/Icons";
 import useUIStore from "@/app/hooks/useUIStore";

@@ -51,7 +51,6 @@ export const InventoryRow = ({
           adventurer?.id?.toString() ?? "",
           equipItems.length,
           ...equipItems,
-          // getKeyFromValue(gameData.ITEMS, item) ?? "",
         ],
         metadata: `Equipping ${item}!`,
       };

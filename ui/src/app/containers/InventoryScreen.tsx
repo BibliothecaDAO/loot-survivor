@@ -14,7 +14,7 @@ import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import LootIcon from "../components/icons/LootIcon";
 import { InfoIcon, BagIcon } from "../components/icons/Icons";
-import { Call, Item, Metadata } from "../types";
+import { Item, Metadata } from "../types";
 import { GameData } from "../components/GameData";
 import useUIStore from "../hooks/useUIStore";
 

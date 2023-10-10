@@ -7,8 +7,7 @@ import EncountersScreen from "./EncountersScreen";
 import { NullAdventurer } from "../types";
 
 export default function Profile() {
-  const { data, setData, setIsLoading, setNotLoading, refetch } =
-    useQueriesStore();
+  const { data } = useQueriesStore();
   const profile = useUIStore((state) => state.profile);
   const [encounters, setEncounters] = useState(false);
 

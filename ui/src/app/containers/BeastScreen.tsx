@@ -63,8 +63,6 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
     {
       id: 2,
       label: "TILL DEATH",
-      mouseEnter: handleMouseEnter,
-      mouseLeave: handleMouseLeave,
       action: async () => {
         resetNotification();
         await attack(true, beastData);
@@ -82,6 +80,8 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
     {
       id: 1,
       label: adventurer?.dexterity === 0 ? "DEX TOO LOW" : "SINGLE",
+      mouseEnter: handleMouseEnter,
+      mouseLeave: handleMouseLeave,
       action: async () => {
         resetNotification();
         await flee(false, beastData);

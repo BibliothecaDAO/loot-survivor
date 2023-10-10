@@ -2,7 +2,6 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 
-import Realms from "../realms.json";
 import { Adventurer, Item } from "../../types";
 import { GameData } from "../../components/GameData";
 import {
@@ -152,12 +151,6 @@ export function convertTime(time: number) {
 
   const TimeUTC = dateTime.getTime() + timezoneOffsetMilliseconds;
   return TimeUTC;
-}
-
-export function getRealmNameById(id: number) {
-  return Realms.features.find(
-    (realm: any) => realm.properties.realm_idx === id
-  );
 }
 
 export function getRankFromList(id: number, data: Adventurer[]) {

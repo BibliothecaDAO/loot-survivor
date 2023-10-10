@@ -1,21 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "../buttons/Button";
-import { useContracts } from "../../hooks/useContracts";
 import { getItemData, getItemPrice, getKeyFromValue } from "../../lib/utils";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import LootIcon from "../icons/LootIcon";
 import {
   useTransactionManager,
   useWaitForTransaction,
 } from "@starknet-react/core";
-import {
-  Metadata,
-  Item,
-  Adventurer,
-  ItemPurchase,
-  UpgradeStats,
-} from "../../types";
+import { Metadata, Item, ItemPurchase, UpgradeStats } from "../../types";
 import { CoinIcon } from "../icons/Icons";
 import EfficacyDisplay from "../icons/EfficacyIcon";
 import { GameData } from "../GameData";

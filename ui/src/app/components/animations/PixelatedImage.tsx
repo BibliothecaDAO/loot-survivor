@@ -5,6 +5,7 @@ interface PixelatedImageProps {
   pixelSize: number;
   setImageLoading?: (imageLoaded: boolean) => void;
   fill?: boolean;
+  pulsate?: boolean;
 }
 
 const PixelatedImage: React.FC<PixelatedImageProps> = ({
@@ -12,6 +13,7 @@ const PixelatedImage: React.FC<PixelatedImageProps> = ({
   pixelSize,
   setImageLoading,
   fill,
+  pulsate,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -84,7 +86,7 @@ const PixelatedImage: React.FC<PixelatedImageProps> = ({
         }
 
         setTimeout(() => {
-          setImageLoading && setImageLoading(true);
+          setImageLoading && setImageLoading(false);
         }, maxTimeout);
       };
     };
@@ -93,7 +95,7 @@ const PixelatedImage: React.FC<PixelatedImageProps> = ({
 
   return (
     <canvas
-      className="absolute animate-pulse"
+      className={`absolute ${pulsate ? "animate-pulse" : ""}`}
       ref={canvasRef}
       width={dimensions.width}
       height={dimensions.height}

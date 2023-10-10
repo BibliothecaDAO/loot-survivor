@@ -7,7 +7,6 @@ import {
   GiSandsOfTimeIcon,
   TwoCoinIcon,
   HealthPotionIcon,
-  GiStarsStackIcon,
 } from "../icons/Icons";
 import { Discovery } from "@/app/types";
 

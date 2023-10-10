@@ -2,7 +2,7 @@ import { Adventurer, NullAdventurer, NullItem } from "../../types";
 import { HeartIcon, CoinIcon, QuestionMarkIcon } from "../icons/Icons";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
-import { getRealmNameById, getKeyFromValue } from "../../lib/utils";
+import { getKeyFromValue } from "../../lib/utils";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useUIStore from "../../hooks/useUIStore";
 import { Item } from "@/app/types";

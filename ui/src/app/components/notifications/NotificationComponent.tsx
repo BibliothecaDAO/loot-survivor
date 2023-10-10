@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import SpriteAnimation from "../animations/SpriteAnimation";
 import { notificationAnimations } from "@/app/lib/constants";
 import useLoadingStore from "@/app/hooks/useLoadingStore";

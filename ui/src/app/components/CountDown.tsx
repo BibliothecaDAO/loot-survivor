@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import { useCountUp } from "react-countup";
 import { useState } from "react";
 import { penaltyTime } from "../lib/constants";
-import { convertTime } from "../lib/utils";
 
 export const HealthCountDown = ({ health }: any) => {
   const countUpRef = useRef(null);

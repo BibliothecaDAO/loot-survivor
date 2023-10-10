@@ -185,6 +185,7 @@ export const ArcadeDialog = () => {
           <PixelatedImage
             src={"/scenes/intro/arcade-account.png"}
             pixelSize={5}
+            pulsate={true}
           />
           <h3 className="text-lg sm:text-3xl loading-ellipsis absolute top-2/3 sm:top-1/2 flex items-center justify-center w-full">
             {isSettingPermissions
