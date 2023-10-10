@@ -1139,10 +1139,6 @@ mod Game {
         }
     }
 
-    fn _to_ether(amount: u256) -> u256 {
-        amount * 10 ^ 18
-    }
-
     fn _process_payment_and_distribute_rewards(
         ref self: ContractState, client_address: ContractAddress
     ) {
@@ -1165,7 +1161,7 @@ mod Game {
             // without this, there would be an incentive to start and die immediately after contract is deployed
             // to capture the rewards from the launch hype
             IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, dao_address, _to_ether(COST_TO_PLAY.into()));
+                .transferFrom(caller, dao_address, COST_TO_PLAY.into());
 
             __event_RewardDistribution(
                 ref self,
@@ -1222,26 +1218,26 @@ mod Game {
         // DAO
         if (week.DAO != 0) {
             IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, dao_address, _to_ether(week.DAO));
+                .transferFrom(caller, dao_address, week.DAO);
         }
 
         // interface
         if (week.INTERFACE != 0) {
             IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, client_address, _to_ether(week.INTERFACE));
+                .transferFrom(caller, client_address, week.INTERFACE);
         }
 
         // first place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, first_place_address, _to_ether(week.FIRST_PLACE));
+            .transferFrom(caller, first_place_address, week.FIRST_PLACE);
 
         // second place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, second_place_address, _to_ether(week.SECOND_PLACE));
+            .transferFrom(caller, second_place_address, week.SECOND_PLACE);
 
         // third place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, third_place_address, _to_ether(week.THIRD_PLACE));
+            .transferFrom(caller, third_place_address, week.THIRD_PLACE);
 
         __event_RewardDistribution(
             ref self,
