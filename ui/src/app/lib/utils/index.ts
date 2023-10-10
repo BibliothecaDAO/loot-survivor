@@ -2,16 +2,16 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 
-import { Adventurer, Item } from "../../types";
-import { GameData } from "../data/GameData";
+import { Adventurer, Item } from "@/app/types";
+import { GameData } from "@/app/lib/data/GameData";
 import {
   itemCharismaDiscount,
   itemBasePrice,
   itemMinimumPrice,
   potionBasePrice,
-} from "../constants";
+} from "@/app/lib/constants";
 import { z } from "zod";
-import { deathMessages } from "../constants";
+import { deathMessages } from "@/app/lib/constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { useContracts } from "../hooks/useContracts";
+import { useContracts } from "@/app/hooks/useContracts";
 import {
   getItemData,
   getValueFromKey,
   getItemPrice,
   getPotionPrice,
-} from "../lib/utils";
-import { GameData } from "../lib/data/GameData";
-import ButtonMenu from "../components/menu/ButtonMenu";
-import useLoadingStore from "../hooks/useLoadingStore";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import Info from "../components/adventurer/Info";
-import { Button } from "../components/buttons/Button";
+} from "@/app/lib/utils";
+import { GameData } from "@/app/lib/data/GameData";
+import ButtonMenu from "@/app/components/menu/ButtonMenu";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import Info from "@/app/components/adventurer/Info";
+import { Button } from "@/app/components/buttons/Button";
 import {
   ArrowTargetIcon,
   CatIcon,
@@ -22,15 +22,15 @@ import {
   LightbulbIcon,
   ScrollIcon,
   HeartIcon,
-} from "../components/icons/Icons";
-import PurchaseHealth from "../components/upgrade/PurchaseHealth";
-import MarketplaceScreen from "./MarketplaceScreen";
-import { UpgradeNav } from "../components/upgrade/UpgradeNav";
-import { StatAttribute } from "../components/upgrade/StatAttribute";
-import useUIStore from "../hooks/useUIStore";
-import { UpgradeStats, ZeroUpgrade, UpgradeSummary } from "../types";
-import Summary from "../components/upgrade/Summary";
-import { HealthCountDown } from "../components/CountDown";
+} from "@/app/components/icons/Icons";
+import PurchaseHealth from "@/app/components/upgrade/PurchaseHealth";
+import MarketplaceScreen from "@/app/containers/MarketplaceScreen";
+import { UpgradeNav } from "@/app/components/upgrade/UpgradeNav";
+import { StatAttribute } from "@/app/components/upgrade/StatAttribute";
+import useUIStore from "@/app/hooks/useUIStore";
+import { UpgradeStats, ZeroUpgrade, UpgradeSummary } from "@/app/types";
+import Summary from "@/app/components/upgrade/Summary";
+import { HealthCountDown } from "@/app/components/CountDown";
 
 interface UpgradeScreenProps {
   upgrade: (...args: any[]) => any;

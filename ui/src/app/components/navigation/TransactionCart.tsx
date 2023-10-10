@@ -9,7 +9,7 @@ import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Button } from "@/app/components/buttons/Button";
 import { MdClose } from "react-icons/md";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import { useQueriesStore, QueryKey } from "@/app/hooks/useQueryStore";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import {
   processItemName,
   getItemPrice,
@@ -46,7 +46,6 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
   const resetCalls = useTransactionCartStore((state) => state.resetCalls);
   const [notification, setNotification] = useState<any[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
-  const [loadingQuery, setLoadingQuery] = useState<QueryKey | null>(null);
   const { data } = useQueriesStore();
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
@@ -61,7 +60,6 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const upgrades = useUIStore((state) => state.upgrades);
   const setUpgrades = useUIStore((state) => state.setUpgrades);
-  const setUpgradeScreen = useUIStore((state) => state.setUpgradeScreen);
   const slayAdventurers = useUIStore((state) => state.slayAdventurers);
   const setSlayAdventurers = useUIStore((state) => state.setSlayAdventurers);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -448,7 +446,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
             <Button
               onClick={async () => {
                 resetNotification();
-                await multicall(loadingMessage, loadingQuery, notification);
+                await multicall(loadingMessage, notification);
                 handleResetCalls();
               }}
             >

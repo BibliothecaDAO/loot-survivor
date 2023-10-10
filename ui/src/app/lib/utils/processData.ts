@@ -25,9 +25,9 @@ import {
   UpgradesAvailableEvent,
   IdleDeathPenaltyEvent,
   AdventurerUpgradedEvent,
-} from "../../types/events";
+} from "@/app/types/events";
 import { Adventurer } from "@/app/types";
-import { feltToString } from ".";
+import { feltToString } from "@/app/lib/utils";
 
 type EventData =
   | DiscoveredHealthEvent

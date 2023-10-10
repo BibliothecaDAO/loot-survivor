@@ -1,5 +1,5 @@
 import { RawArgs } from "starknet";
-import { ScreenPage } from "../hooks/useUIStore";
+import { ScreenPage } from "@/app/hooks/useUIStore";
 import { ReactElement } from "react";
 
 export interface Adventurer {

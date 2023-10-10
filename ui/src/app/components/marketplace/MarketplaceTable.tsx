@@ -26,7 +26,6 @@ const MarketplaceTable = ({
   totalCharisma,
   calculatedNewGold,
 }: MarketplaceTableProps) => {
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showEquipQ, setShowEquipQ] = useState<number | null>(null);
@@ -37,9 +36,6 @@ const MarketplaceTable = ({
 
   const marketLatestItems = useQueriesStore(
     (state) => state.data.latestMarketItemsQuery?.items || []
-  );
-  const adventurers = useQueriesStore(
-    (state) => state.data.adventurersInListQuery?.adventurers || []
   );
   const adventurerItems = useQueriesStore(
     (state) => state.data.itemsByAdventurerQuery?.items || []
@@ -127,7 +123,6 @@ const MarketplaceTable = ({
                 <MarketplaceRow
                   item={item}
                   index={index}
-                  selectedIndex={selectedIndex}
                   activeMenu={showEquipQ}
                   setActiveMenu={setShowEquipQ}
                   calculatedNewGold={calculatedNewGold}

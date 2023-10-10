@@ -18,8 +18,7 @@ export const ArcadeIntro = () => {
   const { account, address } = useAccount();
   const { connect, available } = useConnectors();
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const { getMasterAccount, create, isDeploying, isSettingPermissions } =
-    useBurner();
+  const { create, isDeploying, isSettingPermissions } = useBurner();
   const walletConnectors = getWalletConnectors(available);
   const { lordsContract, ethContract } = useContracts();
   const calls = useTransactionCartStore((state) => state.calls);

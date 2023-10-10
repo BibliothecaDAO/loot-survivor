@@ -1,15 +1,15 @@
 import { useState } from "react";
-import useUIStore from "@/app/hooks/useUIStore";
-import { AdventurerTutorial } from "./AdventurerTutorial";
-import { ActionsTutorial } from "./ActionsTutorial";
-import { BeastTutorial } from "./BeastTutorial";
-import { UpgradeTutorial } from "./UpgradeTutorial";
-import { FinalTutorial } from "./FinalTutorial";
-import { Button } from "../buttons/Button";
+// import useUIStore from "@/app/hooks/useUIStore";
+import { AdventurerTutorial } from "@/app/components/tutorial/AdventurerTutorial";
+import { ActionsTutorial } from "@/app/components/tutorial/ActionsTutorial";
+import { BeastTutorial } from "@/app/components/tutorial/BeastTutorial";
+import { UpgradeTutorial } from "@/app/components/tutorial/UpgradeTutorial";
+import { FinalTutorial } from "@/app/components/tutorial/FinalTutorial";
+import { Button } from "@/app/components/buttons/Button";
 
 export const TutorialDialog = () => {
-  const screen = useUIStore((state) => state.screen);
-  const showTutorialDialog = useUIStore((state) => state.showTutorialDialog);
+  // const screen = useUIStore((state) => state.screen);
+  // const showTutorialDialog = useUIStore((state) => state.showTutorialDialog);
 
   const [tutorialStepIndex, setTutorialStepIndex] = useState(0);
   const tutorialSteps = ["start", "play", "beast", "upgrade", "final"];

@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "@/app/components/buttons/Button";
 import { useBurner } from "@/app/lib/burner";
@@ -9,9 +8,9 @@ import { useCallback } from "react";
 import { useContracts } from "@/app/hooks/useContracts";
 import { balanceSchema } from "@/app/lib/utils";
 import { MIN_BALANCE } from "@/app/lib/constants";
-import PixelatedImage from "./animations/PixelatedImage";
-import { getArcadeConnectors } from "../lib/connectors";
-import SpriteAnimation from "./animations/SpriteAnimation";
+import PixelatedImage from "@/app/components/animations/PixelatedImage";
+import { getArcadeConnectors } from "@/app/lib/connectors";
+import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
 
 const MAX_RETRIES = 10;
 const RETRY_DELAY = 2000; // 2 seconds

@@ -1,6 +1,6 @@
 import { InvokeTransactionReceiptResponse } from "starknet";
-import { GameData } from "../data/GameData";
-import { getKeyFromValue, convertToBoolean, chunkArray } from ".";
+import { GameData } from "@/app/lib/data/GameData";
+import { getKeyFromValue, convertToBoolean, chunkArray } from "@/app/lib/utils";
 import {
   DiscoveredHealthEvent,
   DiscoveredGoldEvent,
@@ -27,8 +27,8 @@ import {
   UpgradesAvailableEvent,
   IdleDeathPenaltyEvent,
   AdventurerUpgradedEvent,
-} from "../../types/events";
-import { processData } from "./processData";
+} from "@/app/types/events";
+import { processData } from "@/app/lib/utils/processData";
 
 function parseAdventurerState(data: string[]) {
   return {

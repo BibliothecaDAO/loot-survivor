@@ -17,7 +17,6 @@ const ScoreLeaderboardTable = ({
   handleFetchProfileData,
 }: ScoreLeaderboardTableProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [loading, setLoading] = useState(false);
   const { data } = useQueriesStore();
   const adventurers = data.adventurersByXPQuery?.adventurers
     ? data.adventurersByXPQuery?.adventurers
@@ -31,8 +30,6 @@ const ScoreLeaderboardTable = ({
   );
 
   const scoreIds = scores?.map((score) => score.id ?? 0);
-
-  console.log(scoreIds);
 
   const scoresData = useCustomQuery("topScoresQuery", getScoresInList, {
     ids: scoreIds,
@@ -57,7 +54,11 @@ const ScoreLeaderboardTable = ({
   let currentRank = 0;
   let rankOffset = 0;
 
-  const rankXp = (adventurer: Adventurer, index: number) => {
+  const rankXp = (
+    adventurer: Adventurer,
+    index: number,
+    rankOffset: number
+  ) => {
     if (adventurer.xp !== previousXp) {
       currentRank = index + 1 + (currentPage - 1) * itemsPerPage;
       rankOffset = 0;
@@ -69,7 +70,6 @@ const ScoreLeaderboardTable = ({
   };
 
   const handleRowSelected = async (adventurerId: number) => {
-    setLoading(true);
     try {
       setProfile(adventurerId);
       setScreen("profile");
@@ -77,7 +77,6 @@ const ScoreLeaderboardTable = ({
     } catch (error) {
       console.error(error);
     } finally {
-      setLoading(false);
     }
   };
 
@@ -106,7 +105,7 @@ const ScoreLeaderboardTable = ({
                 <ScoreRow
                   key={index}
                   adventurer={adventurer}
-                  rank={rankXp(adventurer, index)}
+                  rank={rankXp(adventurer, index, rankOffset)}
                   handleRowSelected={handleRowSelected}
                 />
               ))}

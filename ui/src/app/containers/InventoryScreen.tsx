@@ -1,22 +1,22 @@
 import { useState, useEffect, useCallback } from "react";
-import { useContracts } from "../hooks/useContracts";
+import { useContracts } from "@/app/hooks/useContracts";
 import {
   useAccount,
   useWaitForTransaction,
   useTransactionManager,
 } from "@starknet-react/core";
-import { getKeyFromValue, groupBySlot } from "../lib/utils";
-import { InventoryRow } from "../components/inventory/InventoryRow";
-import Info from "../components/adventurer/Info";
-import { ItemDisplay } from "../components/adventurer/ItemDisplay";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import LootIcon from "../components/icons/LootIcon";
-import { InfoIcon, BagIcon } from "../components/icons/Icons";
-import { Item, Metadata } from "../types";
-import { GameData } from "../lib/data/GameData";
-import useUIStore from "../hooks/useUIStore";
+import { getKeyFromValue, groupBySlot } from "@/app/lib/utils";
+import { InventoryRow } from "@/app/components/inventory/InventoryRow";
+import Info from "@/app/components/adventurer/Info";
+import { ItemDisplay } from "@/app/components/adventurer/ItemDisplay";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import LootIcon from "@/app/components/icons/LootIcon";
+import { InfoIcon, BagIcon } from "@/app/components/icons/Icons";
+import { Item, Metadata } from "@/app/types";
+import { GameData } from "@/app/lib/data/GameData";
+import useUIStore from "@/app/hooks/useUIStore";
 
 /**
  * @container
@@ -25,7 +25,6 @@ import useUIStore from "../hooks/useUIStore";
 export default function InventoryScreen() {
   const { account } = useAccount();
   const formatAddress = account ? account.address : "0x0";
-  const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls

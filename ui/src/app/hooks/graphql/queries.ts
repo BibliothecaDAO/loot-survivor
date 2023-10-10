@@ -295,15 +295,6 @@ const getAdventurerByXP = gql`
   }
 `;
 
-const getDeadAdventurerByXP = gql`
-  ${ADVENTURERS_FRAGMENT}
-  query get_adventurer_by_xp {
-    adventurers(orderBy: { xp: { desc: true } }, limit: 10000000) {
-      ...AdventurerFields
-    }
-  }
-`;
-
 const getAdventurersByXPPaginated = gql`
   ${ADVENTURERS_FRAGMENT}
   query get_adventurer_by_xp_paginated($skip: Int) {

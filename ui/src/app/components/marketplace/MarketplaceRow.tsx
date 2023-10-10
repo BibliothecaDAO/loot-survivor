@@ -15,7 +15,6 @@ import { GameData } from "@/app/lib/data/GameData";
 interface MarketplaceRowProps {
   item: Item;
   index: number;
-  selectedIndex: number;
   activeMenu: number | null;
   setActiveMenu: (value: number | null) => void;
   calculatedNewGold: number;
@@ -33,7 +32,6 @@ interface MarketplaceRowProps {
 const MarketplaceRow = ({
   item,
   index,
-  selectedIndex,
   activeMenu,
   setActiveMenu,
   calculatedNewGold,
@@ -121,8 +119,7 @@ const MarketplaceRow = ({
   return (
     <tr
       className={
-        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black w-full" +
-        (selectedIndex === index + 1 ? " bg-terminal-black" : "")
+        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black w-full"
       }
     >
       <td className="text-center">{item.item}</td>

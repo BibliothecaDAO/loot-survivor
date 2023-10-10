@@ -26,16 +26,16 @@ export const getWalletConnectors = (available: Connector[]) =>
       typeof connector.id !== "string" || !connector.id.includes("0x")
   );
 
-function argentWebWalletUrl() {
-  switch (process.env.NEXT_PUBLIC_NETWORK) {
-    case "goerli":
-      return "https://web.hydrogen.argent47.net";
-    case "mainnet":
-      return "https://web.argent.xyz/";
-    default:
-      return "https://web.hydrogen.argent47.net";
-  }
-}
+// function argentWebWalletUrl() {
+//   switch (process.env.NEXT_PUBLIC_NETWORK) {
+//     case "goerli":
+//       return "https://web.hydrogen.argent47.net";
+//     case "mainnet":
+//       return "https://web.argent.xyz/";
+//     default:
+//       return "https://web.hydrogen.argent47.net";
+//   }
+// }
 
 // export const argentWebWalletConnector = new WebWalletConnector({
 //   url: argentWebWalletUrl(),

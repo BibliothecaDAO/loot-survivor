@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+// import { useCallback, useState } from "react";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import { soundSelector, useUiSounds } from "@/app/hooks/useUiSound";
+// import { soundSelector, useUiSounds } from "@/app/hooks/useUiSound";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { NullAdventurer } from "@/app/types";
 import NotificationComponent from "@/app/components/notifications/NotificationComponent";
@@ -29,13 +29,13 @@ export const NotificationDisplay = () => {
       )
     : [];
 
-  const [setSound, setSoundState] = useState(soundSelector.click);
+  // const [setSound, setSoundState] = useState(soundSelector.click);
 
-  const { play } = useUiSounds(setSound);
+  // const { play } = useUiSounds(setSound);
 
-  const playSound = useCallback(() => {
-    play();
-  }, [play]);
+  // const playSound = useCallback(() => {
+  //   play();
+  // }, [play]);
 
   return <NotificationComponent notifications={notifications} />;
 };

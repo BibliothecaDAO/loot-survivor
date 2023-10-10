@@ -1,10 +1,10 @@
-import Info from "../components/adventurer/Info";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import { Button } from "../components/buttons/Button";
-import useUIStore from "../hooks/useUIStore";
+import Info from "@/app/components/adventurer/Info";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { Button } from "@/app/components/buttons/Button";
+import useUIStore from "@/app/hooks/useUIStore";
 import { useState } from "react";
-import EncountersScreen from "./EncountersScreen";
-import { NullAdventurer } from "../types";
+import EncountersScreen from "@/app/containers/EncountersScreen";
+import { NullAdventurer } from "@/app/types";
 
 export default function Profile() {
   const { data } = useQueriesStore();
