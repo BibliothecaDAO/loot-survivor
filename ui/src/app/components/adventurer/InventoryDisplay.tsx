@@ -1,19 +1,19 @@
 import LootIcon from "../icons/LootIcon";
 import Efficacyicon from "../icons/EfficacyIcon";
-import { Item } from "@/app/types";
+import { Item } from "../../types";
 import {
   getItemData,
   processItemName,
   calculateLevel,
   getKeyFromValue,
-} from "@/app/lib/utils";
+} from "../../lib/utils";
 import { MdClose } from "react-icons/md";
 import { Button } from "../buttons/Button";
-import useUIStore from "@/app/hooks/useUIStore";
+import useUIStore from "../../hooks/useUIStore";
 import { GameData } from "../GameData";
-import { useContracts } from "@/app/hooks/useContracts";
-import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { useContracts } from "../../hooks/useContracts";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 
 interface InventoryDisplayProps {
   itemsOwnedInSlot: Item[];

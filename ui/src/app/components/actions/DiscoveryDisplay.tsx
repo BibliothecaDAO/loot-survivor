@@ -1,4 +1,4 @@
-import { processBeastName } from "../../lib/utils";
+import { processBeastName } from "@/app/lib/utils";
 import {
   CoinIcon,
   GiBruteIcon,
@@ -8,7 +8,7 @@ import {
   TwoCoinIcon,
   HealthPotionIcon,
 } from "../icons/Icons";
-import { Discovery } from "@/app/types";
+import { Discovery } from "../../types";
 
 interface DiscoveryProps {
   discoveryData: Discovery;

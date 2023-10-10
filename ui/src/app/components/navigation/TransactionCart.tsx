@@ -21,11 +21,11 @@ import { useUiSounds } from "../../hooks/useUiSound";
 import { soundSelector } from "../../hooks/useUiSound";
 import { Item, NullItem, Call, ItemPurchase, ZeroUpgrade } from "../../types";
 import { GameData } from "../GameData";
-import useOnClickOutside from "@/app/hooks/useOnClickOutside";
-import useLoadingStore from "@/app/hooks/useLoadingStore";
+import useOnClickOutside from "../../hooks/useOnClickOutside";
+import useLoadingStore from "../../hooks/useLoadingStore";
 import { chunkArray } from "../../lib/utils";
 import { UpgradeStats } from "../../types";
-import { useContracts } from "@/app/hooks/useContracts";
+import { useContracts } from "../../hooks/useContracts";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;

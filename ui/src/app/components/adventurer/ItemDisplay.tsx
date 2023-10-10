@@ -8,9 +8,9 @@ import { GameData } from "../GameData";
 import { getKeyFromValue, getValueFromKey } from "../../lib/utils";
 import { SwapIcon, DownArrowIcon } from "../icons/Icons";
 import { Button } from "../buttons/Button";
-import useUIStore from "@/app/hooks/useUIStore";
+import useUIStore from "../../hooks/useUIStore";
 import { InventoryDisplay } from "./InventoryDisplay";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { useQueriesStore } from "../../hooks/useQueryStore";
 
 interface ItemDisplayProps {
   item: Item;

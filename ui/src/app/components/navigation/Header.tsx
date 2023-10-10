@@ -6,10 +6,10 @@ import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import { useUiSounds } from "@/app/hooks/useUiSound";
 import { soundSelector } from "@/app/hooks/useUiSound";
-import Logo from "../../../../public/icons/logo.svg";
-import Lords from "../../../../public/icons/lords.svg";
-import { PenaltyCountDown } from "../../components/CountDown";
-import { Button } from "../../components/buttons/Button";
+import Logo from "public/icons/logo.svg";
+import Lords from "public/icons/lords.svg";
+import { PenaltyCountDown } from "@/app/components/CountDown";
+import { Button } from "@/app/components/buttons/Button";
 import { formatNumber, displayAddress } from "@/app/lib/utils";
 import {
   ArcadeIcon,
@@ -21,7 +21,7 @@ import {
 } from "../icons/Icons";
 import TransactionCart from "./TransactionCart";
 import TransactionHistory from "./TransactionHistory";
-import { NullAdventurer } from "@/app/types";
+import { NullAdventurer } from "../../types";
 
 export interface HeaderProps {
   multicall: (...args: any[]) => any;

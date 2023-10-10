@@ -1,15 +1,15 @@
-import { Adventurer, NullAdventurer, NullItem } from "../../types";
+import { Adventurer, NullAdventurer, NullItem } from "@/app/types";
 import { HeartIcon, CoinIcon, QuestionMarkIcon } from "../icons/Icons";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
 import { getKeyFromValue } from "../../lib/utils";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useUIStore from "../../hooks/useUIStore";
-import { Item } from "@/app/types";
+import { Item } from "../../types";
 import { HealthCountDown } from "../CountDown";
 import { GameData } from "../GameData";
-import { useContracts } from "@/app/hooks/useContracts";
-import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { useContracts } from "../../hooks/useContracts";
+import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
