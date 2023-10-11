@@ -267,7 +267,6 @@ export const processNotifications = (
         message: (
           <NotificationBattleDisplay
             battleData={battleScenarios[i] as Battle[]}
-            type={type}
           />
         ),
       });
