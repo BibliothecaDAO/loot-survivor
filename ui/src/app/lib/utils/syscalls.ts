@@ -250,13 +250,19 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
+        // Here we need to process the StartGame event first and use the output for AmbushedByBeast event
+        const startGameEvents = await parseEvents(
+          receipt as InvokeTransactionReceiptResponse,
+          undefined,
+          "StartGame"
+        );
+        console.log(startGameEvents[0]);
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
           {
             name: formData["name"],
-            homeRealm: formData["homeRealmId"],
-            classType: formData["class"],
-            entropy: 0,
+            startBlock: startGameEvents[0].data.startBlock,
+            revealBlock: startGameEvents[0].data.revealBlock,
             createdTime: new Date(),
           }
         );

@@ -1,5 +1,13 @@
 import { create } from "zustand";
-import { Battle, Beast, Item, Adventurer, Discovery, Score } from "../types";
+import {
+  Battle,
+  Beast,
+  Item,
+  Adventurer,
+  Discovery,
+  Score,
+  Entropy,
+} from "../types";
 import { GameData } from "../components/GameData";
 
 export type QueryKey =
@@ -24,7 +32,8 @@ export type QueryKey =
   | "itemsByProfileQuery"
   | "topScoresQuery"
   | "latestMarketItemsQuery"
-  | "adventurerToSlayQuery";
+  | "adventurerToSlayQuery"
+  | "latestEntropyQuery";
 
 interface BattlesResult {
   [key: string]: Battle[];
@@ -56,6 +65,11 @@ interface ScoresResult {
   scores: Score[];
 }
 
+interface EntropyResult {
+  [key: string]: Entropy[];
+  entropy: Entropy[];
+}
+
 interface InitialData {
   // [key: string]: BattlesResult | DiscoveriesResult | BeastsResult | AdventurersResult | ItemsResult | ScoresResult | null;
   lastBattleQuery: BattlesResult | null;
@@ -80,6 +94,7 @@ interface InitialData {
   topScoresQuery: ScoresResult | null;
   latestMarketItemsQuery: ItemsResult | null;
   adventurerToSlayQuery: AdventurersResult | null;
+  latestEntropyQuery: EntropyResult | null;
 }
 
 type QueriesState = {
@@ -122,6 +137,7 @@ const initialData: InitialData = {
   topScoresQuery: null,
   latestMarketItemsQuery: null,
   adventurerToSlayQuery: null,
+  latestEntropyQuery: null,
 };
 
 const initialLoading: Record<QueryKey, boolean> & { global: boolean } = {
@@ -147,6 +163,7 @@ const initialLoading: Record<QueryKey, boolean> & { global: boolean } = {
   topScoresQuery: false,
   latestMarketItemsQuery: false,
   adventurerToSlayQuery: false,
+  latestEntropyQuery: false,
   global: false,
 };
 
@@ -173,6 +190,7 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   topScoresQuery: async () => {},
   latestMarketItemsQuery: async () => {},
   adventurerToSlayQuery: async () => {},
+  latestEntropyQuery: async () => {},
 };
 
 export const useQueriesStore = create<QueriesState>((set, get) => ({
@@ -299,6 +317,7 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
         topScoresQuery: null,
         latestMarketItemsQuery: null,
         adventurerToSlayQuery: null,
+        latestEntropyQuery: null,
       };
       for (let key of allKeys) {
         const refetch = refetchFunctions[key as QueryKey];

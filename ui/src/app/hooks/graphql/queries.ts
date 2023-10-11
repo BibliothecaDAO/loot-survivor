@@ -24,6 +24,8 @@ const ADVENTURER_FIELDS = `
   ring
   beastHealth
   statUpgrades
+  startBlock
+  revealBlock
   actionsPerBlock
   gold
   createdTime
@@ -155,6 +157,25 @@ const SCORE_FIELDS = `
 const SCORES_FRAGMENT = `
   fragment ScoreFields on Score {
     ${SCORE_FIELDS}
+  }
+`;
+
+const ENTROPY_FIELDS = `
+  prevHash
+  prevBlockNumber
+  prevBlockTimestamp
+  prevNextRotationBlock
+  newHash
+  newBlockNumber
+  newBlockTimestamp
+  newNextRotationBlock
+  blocksPerHour
+  currentTimestamp
+`;
+
+const ENTROPY_FRAGMENT = `
+  fragment EntropyFields on Entropy {
+    ${ENTROPY_FIELDS}
   }
 `;
 
@@ -476,6 +497,15 @@ const getScoresInList = gql`
   }
 `;
 
+const getLastestEntropy = gql`
+  ${ENTROPY_FRAGMENT}
+  query get_latest_entropy {
+    entropy(orderBy: { currentTimestamp: { desc: true } }, limit: 1) {
+      ...EntropyFields
+    }
+  }
+`;
+
 export {
   getAdventurer,
   getDiscoveries,
@@ -504,4 +534,5 @@ export {
   getAdventurersByXPPaginated,
   getTopScores,
   getScoresInList,
+  getLastestEntropy,
 };

@@ -99,6 +99,7 @@ export default function transform({ header, events }: Block) {
       case START_GAME: {
         console.log("START_GAME", "->", "ADVENTURER UPDATES");
         const { value } = parseStartGame(event.data, 0);
+        console.log(value);
         const as = value.adventurerState;
         const am = value.adventurerMeta;
         return [

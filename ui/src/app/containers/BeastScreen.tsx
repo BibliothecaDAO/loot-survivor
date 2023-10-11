@@ -1,14 +1,17 @@
+import React, { useState, useEffect } from "react";
 import KeyboardControl, { ButtonData } from "../components/KeyboardControls";
 import { BattleDisplay } from "../components/beast/BattleDisplay";
 import { BeastDisplay } from "../components/beast/BeastDisplay";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import React, { useState } from "react";
 import { processBeastName } from "../lib/utils";
 import { Battle, NullBeast } from "../types";
 import { Button } from "../components/buttons/Button";
 import useUIStore from "../hooks/useUIStore";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { getLastestEntropy } from "../hooks/graphql/queries";
+import InterludeScreen from "./InterludeScreen";
 
 interface BeastScreenProps {
   attack: (...args: any[]) => any;
@@ -20,14 +23,15 @@ interface BeastScreenProps {
  * @description Provides the beast screen for adventurer battles.
  */
 export default function BeastScreen({ attack, flee }: BeastScreenProps) {
+  const [nextEntropyTime, setNextEntropyTime] = useState(0);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const [showBattleLog, setShowBattleLog] = useState(false);
-
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
+  const setData = useQueriesStore((state) => state.setData);
   const beastData = useQueriesStore(
     (state) => state.data.beastQuery?.beasts[0] || NullBeast
   );
@@ -144,12 +148,38 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
     </div>
   );
 
+  const latestEntropyData = useCustomQuery(
+    "latestEntropyQuery",
+    getLastestEntropy,
+    undefined
+  );
+
+  useEffect(() => {
+    if (latestEntropyData) {
+      setData("latestEntropyQuery", latestEntropyData);
+      const nextEntropyRotationBlock = adventurer?.revealBlock!;
+      const adventurerStartBlock = adventurer?.startBlock!;
+      const blockDifference = nextEntropyRotationBlock - adventurerStartBlock;
+      const blocksPerHour = latestEntropyData.entropy[0].blocksPerHour;
+      const blocksPerMillisecond = blocksPerHour / (60 * 60 * 1000);
+      const secondsUntilNextEntropy = blockDifference / blocksPerMillisecond;
+      const adventurerCreatedTime = new Date(
+        adventurer?.createdTime!
+      ).getTime();
+      const nextEntropyTime = adventurerCreatedTime + secondsUntilNextEntropy;
+      setNextEntropyTime(nextEntropyTime);
+    }
+  }, [latestEntropyData]);
+
+  const currentTime = new Date().getTime();
+
   if (showBattleLog) {
     return <BattleLog />;
   }
 
   return (
     <div className="sm:w-2/3 flex flex-col sm:flex-row h-full">
+      <InterludeScreen nextEntropyTime={nextEntropyTime} />
       <div className="sm:w-1/2 order-1 sm:order-2">
         {hasBeast ? (
           <BeastDisplay beastData={beastData} />

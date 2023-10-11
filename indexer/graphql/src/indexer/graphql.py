@@ -641,6 +641,8 @@ class AdventurersFilter:
     ring: Optional[FeltValueFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     statUpgrades: Optional[FeltValueFilter] = None
+    startBlock: Optional[FeltValueFilter] = None
+    revealBlock: Optional[FeltValueFilter] = None
     actionsPerBlock: Optional[FeltValueFilter] = None
     gold: Optional[FeltValueFilter] = None
     createdTime: Optional[OrderByInput] = None
@@ -784,6 +786,8 @@ class AdventurersOrderByInput:
     ring: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     statUpgrades: Optional[OrderByInput] = None
+    startBlock: Optional[OrderByInput] = None
+    revealBlock: Optional[OrderByInput] = None
     actionsPerBlock: Optional[OrderByInput] = None
     gold: Optional[OrderByInput] = None
     createdTime: Optional[OrderByInput] = None
@@ -927,6 +931,8 @@ class Adventurer:
     ring: Optional[ItemValue]
     beastHealth: Optional[FeltValue]
     statUpgrades: Optional[FeltValue]
+    startBlock: Optional[FeltValue]
+    revealBlock: Optional[FeltValue]
     actionsPerBlock: Optional[FeltValue]
     gold: Optional[FeltValue]
     createdTime: Optional[str]
@@ -959,6 +965,8 @@ class Adventurer:
             ring=data["ring"],
             beastHealth=data["beastHealth"],
             statUpgrades=data["statUpgrades"],
+            startBlock=data["startBlock"],
+            revealBlock=data["revealBlock"],
             actionsPerBlock=data["actionsPerBlock"],
             gold=data["gold"],
             createdTime=data["createdTime"],
@@ -1589,7 +1597,7 @@ def get_entropy(
     limit: Optional[int] = 10,
     skip: Optional[int] = 0,
     orderBy: Optional[EntropyOrderByInput] = {},
-) -> List[Item]:
+) -> List[Entropy]:
     db = info.context["db"]
 
     filter = {"_cursor.to": None}
@@ -1614,7 +1622,7 @@ def get_entropy(
             sort_var = key
             sort_dir = -1
             break
-    query = db["items"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
+    query = db["entropy"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
 
     return [Entropy.from_mongo(t) for t in query]
 
@@ -1692,15 +1700,15 @@ async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
         },
     )
 
-    ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-    ssl_context.load_cert_chain(
-        "/etc/letsencrypt/live/survivor-indexer.realms.world/fullchain.pem",
-        "/etc/letsencrypt/live/survivor-indexer.realms.world/privkey.pem",
-    )
+    # ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    # ssl_context.load_cert_chain(
+    #     "/etc/letsencrypt/live/survivor-indexer.realms.world/fullchain.pem",
+    #     "/etc/letsencrypt/live/survivor-indexer.realms.world/privkey.pem",
+    # )
 
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", int(port), ssl_context=ssl_context)
+    site = web.TCPSite(runner, "0.0.0.0", int(port))
     await site.start()
 
     print(f"GraphQL server started on port {port}")
