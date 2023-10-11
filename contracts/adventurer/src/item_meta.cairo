@@ -478,7 +478,7 @@ mod tests {
     #[available_gas(4000000)]
     fn test_set_metadata_id() {
         // start test with a new adventurer wielding a wand
-        let mut adventurer = ImplAdventurer::new(12, 6, 1, 0);
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // assert adventurer starter weapon has meta data id 1
         assert(adventurer.weapon.metadata == 1, 'advntr wpn meta data shld be 1');
