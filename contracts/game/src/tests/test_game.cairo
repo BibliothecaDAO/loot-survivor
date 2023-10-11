@@ -571,7 +571,7 @@ mod tests {
         // perform upgrade
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+            strength: 0, dexterity: 1, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         };
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
 
@@ -667,7 +667,7 @@ mod tests {
         let mut game = new_adventurer_lvl2(1000);
 
         // get items from market
-        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let market_items = @game.get_items_on_market_by_tier(ADVENTURER_ID, 5);
 
         // get first item on the market
         let item_id = *market_items.at(0);
@@ -886,10 +886,10 @@ mod tests {
     #[available_gas(92000000)]
     fn test_equip() {
         // start game on level 2 so we have access to the market
-        let mut game = new_adventurer_lvl2(1001);
+        let mut game = new_adventurer_lvl2(1002);
 
         // get items from market
-        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let market_items = @game.get_items_on_market_by_tier(ADVENTURER_ID, 5);
 
         // get first item on the market
         let item_id = *market_items.at(0);
@@ -917,40 +917,27 @@ mod tests {
             // if the item is a weapon and we haven't purchased a weapon yet
             // and the item is a tier 4 or 5 item
             // repeat this for everything
-            if (item_slot == Slot::Weapon(())
-                && purchased_weapon == 0
-                && (item_tier == Tier::T5(()))
-                && item_id != 12) {
+            if (item_slot == Slot::Weapon(()) && purchased_weapon == 0 && item_id != 12) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_weapon = item_id;
-            } else if (item_slot == Slot::Chest(())
-                && purchased_chest == 0
-                && item_tier == Tier::T5(())) {
+            } else if (item_slot == Slot::Chest(()) && purchased_chest == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_chest = item_id;
-            } else if (item_slot == Slot::Head(())
-                && purchased_head == 0
-                && item_tier == Tier::T5(())) {
+            } else if (item_slot == Slot::Head(()) && purchased_head == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_head = item_id;
-            } else if (item_slot == Slot::Waist(())
-                && purchased_waist == 0
-                && item_tier == Tier::T5(())) {
+            } else if (item_slot == Slot::Waist(()) && purchased_waist == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_waist = item_id;
-            } else if (item_slot == Slot::Foot(())
-                && purchased_foot == 0
-                && item_tier == Tier::T5(())) {
+            } else if (item_slot == Slot::Foot(()) && purchased_foot == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_foot = item_id;
-            } else if (item_slot == Slot::Hand(())
-                && purchased_hand == 0
-                && item_tier == Tier::T5(())) {
+            } else if (item_slot == Slot::Hand(()) && purchased_hand == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_hand = item_id;
@@ -1750,7 +1737,7 @@ mod tests {
     #[available_gas(75000000)]
     fn test_upgrade_adventurer() {
         // deploy and start new game
-        let mut game = new_adventurer_lvl2(1004);
+        let mut game = new_adventurer_lvl2(1006);
 
         // get original adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1817,7 +1804,7 @@ mod tests {
     #[available_gas(570778841)]
     #[should_panic(expected: ('rate limit exceeded', 'ENTRYPOINT_FAILED'))]
     fn test_exceed_rate_limit() {
-        let starting_block = 1000;
+        let starting_block = 1003;
         let mut game = new_adventurer_lvl2(starting_block);
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
@@ -1835,7 +1822,7 @@ mod tests {
     #[test]
     #[available_gas(944417814)]
     fn test_exceed_rate_limit_block_rotation() {
-        let starting_block = 1000;
+        let starting_block = 1003;
         let mut game = new_adventurer_lvl2(starting_block);
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
