@@ -65,9 +65,9 @@ export function getArcadeClassHash() {
 export function getAppUrl() {
   switch (NETWORK) {
     case "goerli":
-      return "https://starknet-goerli.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
+      return "https://goerli-survivor.realms.world/";
     case "mainnet":
-      return "https://starknet-mainnet.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
+      return "https://survivor.realms.world/";
   }
 }
 
