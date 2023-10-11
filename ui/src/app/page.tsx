@@ -57,6 +57,7 @@ import ScreenMenu from "./components/menu/ScreenMenu";
 import { getArcadeConnectors } from "./lib/connectors";
 import Header from "./components/navigation/Header";
 import { Maintenance } from "./components/archived/Maintenance";
+import { checkArcadeBalance } from "./lib/utils";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -115,6 +116,7 @@ export default function Home() {
   const { gameContract, lordsContract, ethContract } = useContracts();
   const { addTransaction } = useTransactionManager();
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const resetCalls = useTransactionCartStore((state) => state.resetCalls);
   const handleSubmitCalls = useTransactionCartStore(
     (state) => state.handleSubmitCalls
   );
@@ -169,6 +171,7 @@ export default function Home() {
     setTopUpAccount,
     setEstimatingFee,
     account,
+    resetCalls,
   });
 
   const playState = useMemo(
@@ -349,29 +352,41 @@ export default function Home() {
 
   // TEMPORARY FOR TESTING
   const mintLords = async () => {
-    try {
-      setIsMintingLords(true);
-      // Mint 250 LORDS
-      const mintLords: Call = {
-        contractAddress: lordsContract?.address ?? "",
-        entrypoint: "mint",
-        calldata: [address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
-      };
-      addToCalls(mintLords);
-      const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
-      const result = await account?.waitForTransaction(tx?.transaction_hash, {
-        retryInterval: 2000,
-      });
+    // Mint 250 LORDS
+    const mintLords: Call = {
+      contractAddress: lordsContract?.address ?? "",
+      entrypoint: "mint",
+      calldata: [address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+    };
+    const balanceEmpty = await checkArcadeBalance(
+      [...calls, mintLords],
+      ethBalance.data?.value ?? BigInt(0),
+      showTopUpDialog,
+      setTopUpAccount,
+      setEstimatingFee,
+      account
+    );
+    if (!balanceEmpty) {
+      try {
+        setIsMintingLords(true);
+        addToCalls(mintLords);
+        const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
+        const result = await account?.waitForTransaction(tx?.transaction_hash, {
+          retryInterval: 2000,
+        });
 
-      if (!result) {
-        throw new Error("Lords Mint did not complete successfully.");
+        if (!result) {
+          throw new Error("Lords Mint did not complete successfully.");
+        }
+
+        setIsMintingLords(false);
+        lordsBalance.refetch();
+      } catch (e) {
+        setIsMintingLords(false);
+        console.log(e);
       }
-
-      setIsMintingLords(false);
-      lordsBalance.refetch();
-    } catch (e) {
-      setIsMintingLords(false);
-      console.log(e);
+    } else {
+      resetCalls();
     }
   };
 

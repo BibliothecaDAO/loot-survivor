@@ -1,8 +1,8 @@
 import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
-
-import { Adventurer, Item } from "../../types";
+import { Adventurer, Item, BurnerStorage } from "../../types";
+import Storage from "../storage";
 import { GameData } from "../../components/GameData";
 import {
   itemCharismaDiscount,
@@ -11,7 +11,8 @@ import {
   potionBasePrice,
 } from "../constants";
 import { z } from "zod";
-import { deathMessages } from "../constants";
+import { deathMessages, FEE_CHECK_BALANCE } from "../constants";
+import { Call, AccountInterface, Account } from "starknet";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -357,4 +358,49 @@ export function getDeathMessageByRank(rank: number): string {
   const { message } = deathMessages.find((item) => rank <= item.rank) || {};
 
   return message || "Better luck next time - You can improve!";
+}
+
+export async function checkArcadeBalance(
+  calls: Call[],
+  ethBalance: bigint,
+  showTopUpDialog: (...args: any[]) => any,
+  setTopUpAccount: (...args: any[]) => any,
+  setEstimatingFee: (...args: any[]) => any,
+  account?: AccountInterface
+) {
+  console.log(calls);
+  console.log(ethBalance);
+  if (ethBalance < FEE_CHECK_BALANCE) {
+    const storage: BurnerStorage = Storage.get("burners");
+    if (account && (account?.address ?? "0x0") in storage) {
+      try {
+        setEstimatingFee(true);
+        const newAccount = new Account(
+          account,
+          account?.address,
+          storage[account?.address]["privateKey"],
+          "1"
+        );
+        const { suggestedMaxFee: estimatedFee } = await newAccount.estimateFee(
+          calls
+        );
+        // Add 10% to fee for safety
+        const formattedFee = estimatedFee * (BigInt(11) / BigInt(10));
+        setEstimatingFee(false);
+        if (ethBalance < formattedFee) {
+          showTopUpDialog(true);
+          setTopUpAccount(account?.address);
+          return true;
+        } else {
+          return false;
+        }
+      } catch (e) {
+        console.log(e);
+        setEstimatingFee(false);
+        return false;
+      }
+    }
+  } else {
+    return false;
+  }
 }

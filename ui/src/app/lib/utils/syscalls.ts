@@ -1,9 +1,7 @@
 import {
   InvokeTransactionReceiptResponse,
   Call,
-  Account,
   AccountInterface,
-  provider,
 } from "starknet";
 import { GameData } from "@/app/components/GameData";
 import {
@@ -11,14 +9,12 @@ import {
   FormData,
   NullAdventurer,
   UpgradeStats,
-  BurnerStorage,
 } from "@/app/types";
 import { QueryKey } from "@/app/hooks/useQueryStore";
-import { getKeyFromValue, stringToFelt, getRandomNumber } from ".";
+import { getKeyFromValue, stringToFelt } from ".";
 import { parseEvents } from "./parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
-import Storage from "../storage";
-import { FEE_CHECK_BALANCE } from "../constants";
+import { checkArcadeBalance } from ".";
 
 export interface SyscallsProps {
   gameContract: any;
@@ -47,49 +43,7 @@ export interface SyscallsProps {
   setTopUpAccount: (...args: any[]) => any;
   setEstimatingFee: (...args: any[]) => any;
   account?: AccountInterface;
-}
-
-async function checkArcadeBalance(
-  calls: Call[],
-  ethBalance: bigint,
-  showTopUpDialog: (...args: any[]) => any,
-  setTopUpAccount: (...args: any[]) => any,
-  setEstimatingFee: (...args: any[]) => any,
-  account?: AccountInterface
-) {
-  if (ethBalance < FEE_CHECK_BALANCE) {
-    const storage: BurnerStorage = Storage.get("burners");
-    if (account && (account?.address ?? "0x0") in storage) {
-      try {
-        setEstimatingFee(true);
-        const newAccount = new Account(
-          account,
-          account?.address,
-          storage[account?.address]["privateKey"],
-          "1"
-        );
-        const { suggestedMaxFee: estimatedFee } = await newAccount.estimateFee(
-          calls
-        );
-        // Add 10% to fee for safety
-        const formattedFee = estimatedFee * (BigInt(11) / BigInt(10));
-        setEstimatingFee(false);
-        if (ethBalance < formattedFee) {
-          showTopUpDialog(true);
-          setTopUpAccount(account?.address);
-          return true;
-        } else {
-          return false;
-        }
-      } catch (e) {
-        console.log(e);
-        setEstimatingFee(false);
-        return false;
-      }
-    }
-  } else {
-    return false;
-  }
+  resetCalls: (...args: any[]) => any;
 }
 
 function handleEquip(
@@ -170,6 +124,7 @@ export function syscalls({
   showTopUpDialog,
   setTopUpAccount,
   setEstimatingFee,
+  resetCalls,
 }: SyscallsProps) {
   const gameData = new GameData();
 
@@ -359,6 +314,8 @@ export function syscalls({
         console.log(e);
         stopLoading(e, true);
       }
+    } else {
+      resetCalls();
     }
   };
 
@@ -607,6 +564,8 @@ export function syscalls({
         console.log(e);
         stopLoading(e, true);
       }
+    } else {
+      resetCalls();
     }
   };
 
@@ -840,6 +799,8 @@ export function syscalls({
         console.log(e);
         stopLoading(e, true);
       }
+    } else {
+      resetCalls();
     }
   };
 
@@ -1012,6 +973,8 @@ export function syscalls({
         console.log(e);
         stopLoading(e, true);
       }
+    } else {
+      resetCalls();
     }
   };
 
@@ -1173,6 +1136,8 @@ export function syscalls({
         console.log(e);
         stopLoading(e, true);
       }
+    } else {
+      resetCalls();
     }
   };
 
@@ -1433,6 +1398,8 @@ export function syscalls({
         console.log(e);
         stopLoading(e, true);
       }
+    } else {
+      resetCalls();
     }
   };
 

@@ -119,37 +119,39 @@ export const Spawn = ({
               </div>
             </>
           ) : (
-            <form
-              onSubmit={async (e) => {
-                if (formData) {
-                  await handleSubmit(e);
-                }
-              }}
-            >
-              <div className="flex flex-col gap-2">
-                <Button
-                  type="submit"
-                  size={"xl"}
-                  disabled={
-                    !formFilled ||
-                    !account ||
-                    isWrongNetwork ||
-                    loading ||
-                    estimatingFee ||
-                    !checkEnoughLords
+            <>
+              <form
+                onSubmit={async (e) => {
+                  if (formData) {
+                    await handleSubmit(e);
                   }
-                >
-                  {checkEnoughLords
-                    ? formFilled
-                      ? "Start Game!!"
-                      : "Fill details"
-                    : "Not enough Lords"}
-                </Button>
-                {!checkEnoughLords && (
-                  <Button onClick={mintLords}>Mint Lords</Button>
-                )}
-              </div>
-            </form>
+                }}
+              >
+                <div className="flex flex-col gap-2">
+                  <Button
+                    type="submit"
+                    size={"xl"}
+                    disabled={
+                      !formFilled ||
+                      !account ||
+                      isWrongNetwork ||
+                      loading ||
+                      estimatingFee ||
+                      !checkEnoughLords
+                    }
+                  >
+                    {checkEnoughLords
+                      ? formFilled
+                        ? "Start Game!!"
+                        : "Fill details"
+                      : "Not enough Lords"}
+                  </Button>
+                </div>
+              </form>
+              {!checkEnoughLords && (
+                <Button onClick={mintLords}>Mint Lords</Button>
+              )}
+            </>
           )}
         </div>
         <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center gap-4 z-10 pb-8">
