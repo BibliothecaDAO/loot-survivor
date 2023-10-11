@@ -13,6 +13,7 @@ import {
 import { z } from "zod";
 import { deathMessages, FEE_CHECK_BALANCE } from "../constants";
 import { Call, AccountInterface, Account } from "starknet";
+import { getBlock } from "@/app/api/api";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -402,3 +403,24 @@ export async function checkArcadeBalance(
     return false;
   }
 }
+
+export const fetchAverageBlockTime = async (
+  currentBlock: number,
+  numberOfBlocks: number
+) => {
+  try {
+    let totalTimeInterval = 0;
+
+    for (let i = currentBlock - numberOfBlocks; i < currentBlock; i++) {
+      const currentBlockData = await getBlock(i);
+      const nextBlockData = await getBlock(i + 1);
+
+      const timeInterval = nextBlockData.timestamp - currentBlockData.timestamp;
+      totalTimeInterval += timeInterval;
+    }
+    const averageTime = totalTimeInterval / numberOfBlocks;
+    return averageTime;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};

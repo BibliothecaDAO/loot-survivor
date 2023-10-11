@@ -1,6 +1,6 @@
 export const UpgradeTutorial = () => {
   return (
-    <div className="uppercase">
+    <div className="flex flex-col uppercase justify-center items-center h-full">
       <h3 className="mt-0">Level Up</h3>
       <h3 className="text-sm sm:text-lg">Health Potions</h3>
       <p className="text-sm sm:text-lg">

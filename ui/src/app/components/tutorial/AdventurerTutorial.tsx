@@ -1,6 +1,6 @@
 export const AdventurerTutorial = () => {
   return (
-    <div className="flex flex-col uppercase">
+    <div className="flex flex-col uppercase justify-center h-full">
       <h3 className="mt-0">Welcome to Loot Survivor!</h3>
 
       {/* <h3 className="text-xl sm:text-2xl">Create an Adventurer</h3> */}

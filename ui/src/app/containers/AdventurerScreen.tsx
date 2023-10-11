@@ -33,7 +33,6 @@ export default function AdventurerScreen({
   const adventurers = useQueriesStore(
     (state) => state.data.adventurersByOwnerQuery?.adventurers || []
   );
-  console.log(adventurers);
   const resetData = useQueriesStore((state) => state.resetData);
   const startOption = useUIStore((state) => state.startOption);
   const setStartOption = useUIStore((state) => state.setStartOption);

@@ -1,6 +1,6 @@
 export const ActionsTutorial = () => {
   return (
-    <div className="flex flex-col uppercase">
+    <div className="flex flex-col uppercase justify-center items-center h-full">
       <h3 className="mt-0">Explore</h3>
       <p className="text-sm sm:text-lg mb-2">
         During your exploration, you will encounter a number of things. These

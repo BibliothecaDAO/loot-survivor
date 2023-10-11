@@ -256,13 +256,12 @@ export function syscalls({
           undefined,
           "StartGame"
         );
-        console.log(startGameEvents[0]);
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
           {
             name: formData["name"],
-            startBlock: startGameEvents[0].data.startBlock,
-            revealBlock: startGameEvents[0].data.revealBlock,
+            startBlock: startGameEvents[0].data[0].startBlock,
+            revealBlock: startGameEvents[0].data[0].revealBlock,
             createdTime: new Date(),
           }
         );

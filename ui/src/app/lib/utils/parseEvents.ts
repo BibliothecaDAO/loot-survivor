@@ -236,7 +236,6 @@ export async function parseEvents(
 
     switch (eventName) {
       case "StartGame":
-        console.log(raw.data);
         const startGameData: StartGameEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
           adventurerMeta: {

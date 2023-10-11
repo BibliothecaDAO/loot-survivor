@@ -64,7 +64,11 @@ export default function Lobby() {
       <table className="w-full xl:text-lg 2xl:text-xl border border-terminal-green">
         <thead className="border border-terminal-green">
           <tr>
-            <th className="p-1">Adventurer</th>
+            <th className="p-1">Name</th>
+            <th className="p-1">Account</th>
+            <th className="p-1">Death Toll</th>
+            <th className="p-1">Best Run</th>
+            <th className="p-1">Blocks Left</th>
           </tr>
         </thead>
         <tbody>
@@ -74,6 +78,7 @@ export default function Lobby() {
                 key={index}
                 adventurer={adventurer}
                 handleRowSelected={handleRowSelected}
+                currentBlock={blockData?.block_number!}
               />
             )
           )}

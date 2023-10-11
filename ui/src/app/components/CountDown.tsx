@@ -7,9 +7,9 @@ const formatTime = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds - hours * 3600) / 60);
   const seconds = totalSeconds % 60;
-  return `${hours.toString().padStart(2, "0")}:${minutes
+  return `${minutes.toString().padStart(2, "0")}:${seconds
     .toString()
-    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    .padStart(2, "0")}`;
 };
 
 export const HealthCountDown = ({ health }: any) => {
@@ -100,10 +100,14 @@ export const PenaltyCountDown = ({
 };
 
 export interface EntropyCountDownProps {
-  targetTime: number;
+  targetTime: number | null;
+  countDownExpired: () => void;
 }
 
-export const EntropyCountDown = ({ targetTime }: EntropyCountDownProps) => {
+export const EntropyCountDown = ({
+  targetTime,
+  countDownExpired,
+}: EntropyCountDownProps) => {
   const [seconds, setSeconds] = useState(0);
   useEffect(() => {
     if (targetTime) {
@@ -111,6 +115,12 @@ export const EntropyCountDown = ({ targetTime }: EntropyCountDownProps) => {
         const currentTime = new Date().getTime();
         const timeRemaining = targetTime - currentTime;
         setSeconds(Math.floor(timeRemaining / 1000));
+
+        if (timeRemaining <= 0) {
+          countDownExpired(); // Call the countDownExpired function when countdown expires
+        } else {
+          setSeconds(Math.floor(timeRemaining / 1000));
+        }
       };
 
       updateCountdown();
@@ -122,12 +132,27 @@ export const EntropyCountDown = ({ targetTime }: EntropyCountDownProps) => {
     }
   }, [targetTime]);
   return (
-    <div className="text-xs sm:text-6xl self-center h-full w-full">
-      {seconds > 0 && (
-        <span className="flex flex-row gap-1 items-center justify-center h-full">
-          <p className="animate-pulse">{formatTime(seconds)}</p>
-        </span>
-      )}
+    <div className="h-1/4 flex items-center justify-center">
+      <span className="flex flex-col gap-1 items-center justify-center">
+        {targetTime ? (
+          <>
+            <p className="sm:text-2xl">Session Starts in</p>
+            <p
+              className={`sm:text-6xl ${
+                seconds < 10
+                  ? "animate-pulse text-red-600"
+                  : "text-terminal-yellow"
+              }`}
+            >
+              {seconds === 0 ? "GO" : formatTime(seconds)}
+            </p>
+          </>
+        ) : (
+          <p className="sm:text-6xl animate-pulse text-terminal-yellow">
+            Loading
+          </p>
+        )}
+      </span>
     </div>
   );
 };
