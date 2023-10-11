@@ -790,6 +790,9 @@ mod Game {
         fn get_actions_per_block(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).actions_per_block
         }
+        fn get_reveal_block(self: @ContractState, adventurer_id: felt252) -> u64 {
+            _get_reveal_block(self, adventurer_id)
+        }
         fn get_equipped_items(
             self: @ContractState, adventurer_id: felt252
         ) -> Array<ItemPrimitive> {
@@ -1327,15 +1330,10 @@ mod Game {
             name, start_block: current_block, starting_stats: empty_stats
         };
 
-        // emit a StartGame event 
-        __event_StartGame(ref self, adventurer, adventurer_id, adventurer_meta);
-
         // adventurer immediately gets ambushed by a starter beast
         let beast_battle_details = _starter_beast_ambush(
             ref adventurer, adventurer_id, weapon, starter_beast_rnd
         );
-
-        __event_AmbushedByBeast(ref self, adventurer, adventurer_id, beast_battle_details);
 
         // pack and save new adventurer and metadata
         _pack_adventurer(ref self, adventurer_id, adventurer);
@@ -1346,6 +1344,10 @@ mod Game {
 
         // set caller as owner
         self._owner.write(adventurer_id, get_caller_address());
+
+        // emit events 
+        __event_StartGame(ref self, adventurer, adventurer_id, adventurer_meta);
+        __event_AmbushedByBeast(ref self, adventurer, adventurer_id, beast_battle_details);
     }
 
     fn _starter_beast_ambush(
@@ -3123,7 +3125,9 @@ mod Game {
         let adventurer_state = AdventurerState {
             owner: get_caller_address(), adventurer_id, adventurer
         };
+
         let reveal_block = _get_reveal_block(@self, adventurer_id);
+
         self.emit(StartGame { adventurer_state, adventurer_meta, reveal_block });
     }
 
