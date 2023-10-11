@@ -60,9 +60,11 @@ impl AdventurerUtils of IAdventurerUtils {
     // @notice Determines a random attack location based on the provided entropy
     // @param entropy The entropy used to generate a random attack location
     // @return A Slot type which represents the randomly determined attack location
-    fn get_random_attack_location(entropy: u128) -> Slot {
+    fn get_random_attack_location(entropy: felt252) -> Slot {
+        let slots: u256 = 5;
+
         // project entropy into 0-4 range
-        let rnd_slot = entropy % 5;
+        let (_, rnd_slot) = integer::U256DivRem::div_rem(entropy.into(), slots.try_into().unwrap());
 
         // return disinct slot for each outcome
         if (rnd_slot == 0) {
@@ -73,27 +75,11 @@ impl AdventurerUtils of IAdventurerUtils {
             Slot::Waist(())
         } else if (rnd_slot == 3) {
             Slot::Foot(())
-        } else {
+        } else if (rnd_slot == 4) {
             Slot::Hand(())
+        } else {
+            panic_with_felt252('slot out of range')
         }
-    }
-
-    // @notice Generates entropy for an adventurer based on a block number and adventurer ID
-    // @param block_number The block number used in generating the entropy
-    // @param adventurer_id The ID of the adventurer used in generating the entropy
-    // @return A u128 type entropy unique to the block number and adventurer ID
-    fn generate_adventurer_entropy(
-        adventurer_id: felt252, block_number: u64, block_timestamp: u64
-    ) -> u128 {
-        let mut hash_span = ArrayTrait::<felt252>::new();
-        hash_span.append(adventurer_id);
-        hash_span.append(block_number.into());
-        hash_span.append(block_timestamp.into());
-        let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
-        let (d, r) = integer::U256DivRem::div_rem(
-            poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
-        );
-        r.try_into().unwrap()
     }
 
     // @notice Generates special entropy for an item based on provided entropy and item ID
@@ -187,11 +173,11 @@ impl AdventurerUtils of IAdventurerUtils {
     // @param game_entropy: game entropy
     // @return (u128, u128): tuple of randomness
     fn get_randomness(
-        adventurer_xp: u16, adventurer_entropy: u128, game_entropy: felt252
+        adventurer_xp: u16, adventurer_entropy: felt252, game_entropy: felt252
     ) -> (u128, u128) {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(adventurer_xp.into());
-        hash_span.append(adventurer_entropy.into());
+        hash_span.append(adventurer_entropy);
         hash_span.append(game_entropy);
         let poseidon = poseidon_hash_span(hash_span.span());
         AdventurerUtils::split_hash(poseidon)
@@ -204,12 +190,15 @@ impl AdventurerUtils of IAdventurerUtils {
     // @param game_entropy: game entropy
     // @return (u128, u128): tuple of randomness
     fn get_randomness_with_health(
-        adventurer_xp: u16, adventurer_health: u16, adventurer_entropy: u128, game_entropy: felt252
+        adventurer_xp: u16,
+        adventurer_health: u16,
+        adventurer_entropy: felt252,
+        game_entropy: felt252
     ) -> (u128, u128) {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(adventurer_xp.into());
         hash_span.append(adventurer_health.into());
-        hash_span.append(adventurer_entropy.into());
+        hash_span.append(adventurer_entropy);
         hash_span.append(game_entropy);
         let poseidon = poseidon_hash_span(hash_span.span());
         AdventurerUtils::split_hash(poseidon)
@@ -225,7 +214,7 @@ impl AdventurerUtils of IAdventurerUtils {
         (r.try_into().unwrap(), d.try_into().unwrap())
     }
 
-    fn generate_starting_stats(entropy: u128, starting_stat_count: u8) -> Stats {
+    fn generate_starting_stats(entropy: u256, starting_stat_count: u8) -> Stats {
         let mut starting_stats = Stats {
             strength: 0,
             dexterity: 0,
@@ -236,7 +225,7 @@ impl AdventurerUtils of IAdventurerUtils {
             luck: 0,
         };
 
-        let random_outcomes = AdventurerUtils::u128_to_u8_array(entropy);
+        let random_outcomes = AdventurerUtils::u256_to_u8_array(entropy);
 
         // TODO: Use conditional compilation to only run this check in debug mode as not to waste gas in production
         assert(starting_stat_count.into() < random_outcomes.len(), 'stat count out of bounds');
@@ -270,7 +259,7 @@ impl AdventurerUtils of IAdventurerUtils {
         starting_stats
     }
 
-    fn u128_to_u8_array(value: u128) -> Array<u8> {
+    fn u256_to_u8_array(value: u256) -> Array<u8> {
         let mut result = ArrayTrait::<u8>::new();
         result.append((value & MASK_8).try_into().unwrap());
         result.append(((value / TWO_POW_8) & MASK_8).try_into().unwrap());
@@ -291,28 +280,29 @@ impl AdventurerUtils of IAdventurerUtils {
         result
     }
 }
-const MASK_8: u128 = 0xFF;
-const TWO_POW_8: u128 = 0x100;
-const TWO_POW_16: u128 = 0x10000;
-const TWO_POW_24: u128 = 0x1000000;
-const TWO_POW_32: u128 = 0x100000000;
-const TWO_POW_40: u128 = 0x10000000000;
-const TWO_POW_48: u128 = 0x1000000000000;
-const TWO_POW_56: u128 = 0x100000000000000;
-const TWO_POW_64: u128 = 0x10000000000000000;
-const TWO_POW_72: u128 = 0x1000000000000000000;
-const TWO_POW_80: u128 = 0x100000000000000000000;
-const TWO_POW_88: u128 = 0x10000000000000000000000;
-const TWO_POW_96: u128 = 0x1000000000000000000000000;
-const TWO_POW_104: u128 = 0x100000000000000000000000000;
-const TWO_POW_112: u128 = 0x10000000000000000000000000000;
-const TWO_POW_120: u128 = 0x1000000000000000000000000000000;
+const MASK_8: u256 = 0xFF;
+const TWO_POW_8: u256 = 0x100;
+const TWO_POW_16: u256 = 0x10000;
+const TWO_POW_24: u256 = 0x1000000;
+const TWO_POW_32: u256 = 0x100000000;
+const TWO_POW_40: u256 = 0x10000000000;
+const TWO_POW_48: u256 = 0x1000000000000;
+const TWO_POW_56: u256 = 0x100000000000000;
+const TWO_POW_64: u256 = 0x10000000000000000;
+const TWO_POW_72: u256 = 0x1000000000000000000;
+const TWO_POW_80: u256 = 0x100000000000000000000;
+const TWO_POW_88: u256 = 0x10000000000000000000000;
+const TWO_POW_96: u256 = 0x1000000000000000000000000;
+const TWO_POW_104: u256 = 0x100000000000000000000000000;
+const TWO_POW_112: u256 = 0x10000000000000000000000000000;
+const TWO_POW_120: u256 = 0x1000000000000000000000000000000;
 
 // ---------------------------
 // ---------- Tests ----------
 // ---------------------------
 #[cfg(test)]
 mod tests {
+    use debug::PrintTrait;
     use poseidon::poseidon_hash_span;
     use survivor::{
         constants::{
@@ -326,21 +316,23 @@ mod tests {
         adventurer_utils::AdventurerUtils
     };
     use combat::constants::CombatEnums::{Type, Tier, Slot};
+    use lootitems::{constants::{ItemId}};
+
     #[test]
-    #[available_gas(166544)]
+    #[available_gas(286398)]
     fn test_generate_starting_stats_gas() {
         AdventurerUtils::generate_starting_stats(0, 1);
     }
 
     #[test]
-    #[available_gas(166544)]
+    #[available_gas(244018)]
     #[should_panic(expected: ('stat count out of bounds',))]
     fn test_generate_starting_stats_fail_out_of_bounds() {
         AdventurerUtils::generate_starting_stats(0, 20);
     }
 
     #[test]
-    #[available_gas(1924040)]
+    #[available_gas(2020662)]
     fn test_generate_starting_stats() {
         let starting_stat_count = 9;
 
@@ -382,8 +374,7 @@ mod tests {
         hash_span.append(241);
         hash_span.append(14212);
         let poseidon = poseidon_hash_span(hash_span.span());
-        let (rnd1, rnd2) = AdventurerUtils::split_hash(poseidon);
-        let stats = AdventurerUtils::generate_starting_stats(rnd1, starting_stat_count);
+        let stats = AdventurerUtils::generate_starting_stats(poseidon.into(), starting_stat_count);
         let stat_count = stats.strength
             + stats.dexterity
             + stats.vitality
@@ -391,29 +382,16 @@ mod tests {
             + stats.wisdom
             + stats.charisma;
         assert(stat_count == starting_stat_count, 'wrong stat total');
-        assert(stats.strength == 1, 'strength should be 1');
-        assert(stats.dexterity == 1, 'dexterity should be 1');
-        assert(stats.vitality == 2, 'vitality should be 2');
-        assert(stats.intelligence == 1, 'intelligence should be 1');
-        assert(stats.wisdom == 4, 'wisdom should be 4');
-        assert(stats.charisma == 0, 'charisma should be 0');
-
-        let stats = AdventurerUtils::generate_starting_stats(rnd2, starting_stat_count);
-        let stat_count = stats.strength
-            + stats.dexterity
-            + stats.vitality
-            + stats.intelligence
-            + stats.wisdom
-            + stats.charisma;
-        assert(stat_count == starting_stat_count, 'wrong stat total');
-        assert(stats.strength == 0, 'strength should be 0');
-        assert(stats.dexterity == 1, 'dexterity should be 1');
-        assert(stats.vitality == 3, 'vitality should be 3');
-        assert(stats.intelligence == 4, 'intelligence should be 4');
+        assert(stats.strength == 2, 'strength should be 2');
+        assert(stats.dexterity == 3, 'dexterity should be 3');
+        assert(stats.vitality == 1, 'vitality should be 1');
+        assert(stats.intelligence == 0, 'intelligence should be 0');
         assert(stats.wisdom == 1, 'wisdom should be 1');
-        assert(stats.charisma == 0, 'charisma should be 0');
+        assert(stats.charisma == 2, 'charisma should be 2');
 
-        let stats = AdventurerUtils::generate_starting_stats(rnd2, starting_stat_count + 5);
+        let stats = AdventurerUtils::generate_starting_stats(
+            poseidon.into(), starting_stat_count + 5
+        );
         let stat_count = stats.strength
             + stats.dexterity
             + stats.vitality
@@ -421,12 +399,12 @@ mod tests {
             + stats.wisdom
             + stats.charisma;
         assert(stat_count == starting_stat_count + 5, 'wrong stat total');
-        assert(stats.strength == 0, 'strength should be 0');
+        assert(stats.strength == 2, 'strength should be 2');
         assert(stats.dexterity == 3, 'dexterity should be 3');
-        assert(stats.vitality == 4, 'vitality should be 4');
-        assert(stats.intelligence == 5, 'intelligence should be 5');
-        assert(stats.wisdom == 1, 'wisdom should be 1');
-        assert(stats.charisma == 1, 'charisma should be 1');
+        assert(stats.vitality == 2, 'vitality should be 2');
+        assert(stats.intelligence == 2, 'intelligence should be 2');
+        assert(stats.wisdom == 2, 'wisdom should be 2');
+        assert(stats.charisma == 3, 'charisma should be 3');
     }
 
     #[test]
@@ -434,7 +412,7 @@ mod tests {
     fn test_u128_to_u8_array() {
         // zero case
         let value = 0;
-        let values = AdventurerUtils::u128_to_u8_array(value);
+        let values = AdventurerUtils::u256_to_u8_array(value);
         let mut i = 0;
         loop {
             if i == values.len() {
@@ -448,7 +426,7 @@ mod tests {
 
         // max u128 case
         let value = 0xffffffffffffffffffffffffffffffff;
-        let values = AdventurerUtils::u128_to_u8_array(value);
+        let values = AdventurerUtils::u256_to_u8_array(value);
         let mut i = 0;
         loop {
             if i == values.len() {
@@ -464,7 +442,7 @@ mod tests {
         let value =
             0b00000110110100110000110010010111000001000110111100110010001111010010000001111110000110100111101100010101000000001111111101100101;
 
-        let values = AdventurerUtils::u128_to_u8_array(value);
+        let values = AdventurerUtils::u256_to_u8_array(value);
         assert(*values.at(15) == 6, 'rand15 should be 6');
         assert(*values.at(14) == 211, 'rand14 should be 211');
         assert(*values.at(13) == 12, 'rand13 should be 12');
@@ -486,7 +464,7 @@ mod tests {
     #[test]
     #[available_gas(259644)]
     fn test_is_health_full() {
-        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // adventurers should start with full health
         assert(
@@ -520,7 +498,7 @@ mod tests {
     #[test]
     #[available_gas(205004)]
     fn test_get_max_health() {
-        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // assert starting state
         assert(
@@ -543,25 +521,6 @@ mod tests {
             AdventurerUtils::get_max_health(adventurer.stats.vitality) == MAX_ADVENTURER_HEALTH,
             'wrong max health'
         );
-    }
-
-
-    #[test]
-    #[available_gas(6482260)]
-    fn test_generate_adventurer_entropy() {
-        let mut i: u8 = 1;
-        loop {
-            if (i >= 100) {
-                break;
-            }
-            let adventurer_id = i.into();
-            let block_number = 839152;
-            let block_timestamp = 53289712;
-            let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(
-                adventurer_id, block_number, block_timestamp
-            );
-            i += 1;
-        };
     }
 
     #[test]
@@ -601,7 +560,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(60000)]
+    #[available_gas(163120)]
     fn test_get_random_attack_location() {
         // base cases
         let mut entropy = 0;
