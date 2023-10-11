@@ -43,6 +43,7 @@ trait IGame<TContractState> {
     fn get_stat_upgrades_available(self: @TContractState, adventurer_id: felt252) -> u8;
     fn get_last_action_block(self: @TContractState, adventurer_id: felt252) -> u16;
     fn get_actions_per_block(self: @TContractState, adventurer_id: felt252) -> u8;
+    fn get_reveal_block(self: @TContractState, adventurer_id: felt252) -> u64;
 
     // adventurer stats (includes boost)
     fn get_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
@@ -118,7 +119,7 @@ trait IGame<TContractState> {
 
     // game settings
     fn next_game_entropy_rotation(self: @TContractState) -> felt252;
-    fn game_rate_limit(self: @TContractState) -> u64;    
+    fn game_rate_limit(self: @TContractState) -> u64;
     fn starting_gold(self: @TContractState) -> u16;
     fn starting_health(self: @TContractState) -> u16;
     fn base_potion_price(self: @TContractState) -> u16;
