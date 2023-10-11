@@ -567,3 +567,38 @@ export function updateTotalPayout({
     },
   };
 }
+
+export function insertEntropy({
+  prevHash,
+  prevBlockNumber,
+  prevBlockTimestamp,
+  prevNextRotationBlock,
+  newHash,
+  newBlockNumber,
+  newBlockTimestamp,
+  newNextRotationBlock,
+  blocksPerHour,
+  currentTimestamp,
+}: any) {
+  const entity = {
+    prevHash: checkExistsInt(BigInt(prevHash)),
+    prevBlockNumber: prevBlockNumber,
+    prevBlockTimestamp: prevBlockTimestamp,
+    prevNextRotationBlock: prevNextRotationBlock,
+    newHash: checkExistsInt(BigInt(newHash)),
+    newBlockNumber: newBlockNumber,
+    newBlockTimestamp: newBlockTimestamp,
+    newNextRotationBlock: newNextRotationBlock,
+    blocksPerHour: blocksPerHour,
+    currentTimestamp: currentTimestamp,
+  };
+
+  return {
+    entity,
+    update: {
+      $set: {
+        ...entity,
+      },
+    },
+  };
+}
