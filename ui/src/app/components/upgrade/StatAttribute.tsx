@@ -44,8 +44,6 @@ export const StatAttribute = ({
   const newUpgradeTotal =
     amount + ((adventurer?.statUpgrades ?? 0) - upgradesTotal);
 
-  console.log(nonBoostedStat, BigInt(amount), BigInt(15));
-
   const maxNonBoosted =
     (nonBoostedStat ?? BigInt(0)) + BigInt(amount) >= BigInt(15);
 
