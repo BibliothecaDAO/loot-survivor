@@ -247,7 +247,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
         const events = await parseEvents(
@@ -355,7 +355,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
         const events = await parseEvents(
@@ -606,7 +606,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
 
@@ -835,7 +835,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
         // Add optimistic data
@@ -1011,7 +1011,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
 
@@ -1180,7 +1180,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
         setTxHash(tx?.transaction_hash);
