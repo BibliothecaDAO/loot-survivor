@@ -74,6 +74,15 @@ export function getAppUrl() {
   }
 }
 
+export function getTokenViewerUrl() {
+  switch (NETWORK) {
+    case "goerli":
+      return "https://goerli-realms.world/token-viewer/";
+    case "mainnet":
+      return "https://realms.world/token-viewer/";
+  }
+}
+
 export const notificationAnimations = [
   { name: "idle", startFrame: 0, frameCount: 4 },
   { name: "run", startFrame: 9, frameCount: 5 },
