@@ -15,6 +15,7 @@ interface StatAttributeProps {
     potions?: number,
     items?: any[]
   ) => void;
+  nonBoostedStat: any;
 }
 
 export const StatAttribute = ({
@@ -22,6 +23,7 @@ export const StatAttribute = ({
   icon,
   description,
   upgradeHandler,
+  nonBoostedStat,
 }: StatAttributeProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const prevAmountRef = useRef<{ [key: string]: number }>({ ...ZeroUpgrade });
@@ -41,6 +43,8 @@ export const StatAttribute = ({
 
   const newUpgradeTotal =
     amount + ((adventurer?.statUpgrades ?? 0) - upgradesTotal);
+
+  const maxNonBoosted = nonBoostedStat + BigInt(amount) >= BigInt(15);
 
   useEffect(() => {
     if (buttonClicked) {
@@ -67,21 +71,27 @@ export const StatAttribute = ({
   return (
     <div className="flex flex-col gap-1 sm:gap-3 items-center">
       <span className="hidden sm:block w-10 h-10">{icon}</span>
-      <p className="sm:text-[28px] xl:text-2xl text-center h-2/3">
-        {description}
-      </p>
-      <span className="flex flex-row items-center">
-        <QuantityButtons
-          amount={amount}
-          min={0}
-          max={newUpgradeTotal}
-          setAmount={(value) => {
-            upgrades[name] = value;
-            setUpgrades(upgrades);
-            setButtonClicked(true);
-          }}
-        />
-      </span>
+      {maxNonBoosted ? (
+        <p className="sm:text-4xl text-center">Base Stat Maxed Out</p>
+      ) : (
+        <>
+          <p className="sm:text-[28px] xl:text-2xl text-center h-2/3">
+            {description}
+          </p>
+          <span className="flex flex-row items-center">
+            <QuantityButtons
+              amount={amount}
+              min={0}
+              max={newUpgradeTotal}
+              setAmount={(value) => {
+                upgrades[name] = value;
+                setUpgrades(upgrades);
+                setButtonClicked(true);
+              }}
+            />
+          </span>
+        </>
+      )}
     </div>
   );
 };
