@@ -12,22 +12,45 @@ import { Adventurer } from "../types";
 import ScoreTable from "../components/leaderboard/ScoreTable";
 import LiveTable from "../components/leaderboard/LiveTable";
 import { RefreshIcon } from "../components/icons/Icons";
+import { useBlock, useAccount } from "@starknet-react/core";
+import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
+import { useContracts } from "../hooks/useContracts";
+import useLoadingStore from "../hooks/useLoadingStore";
+
+interface LeaderboardScreenProps {
+  slayAllIdles: (...args: any[]) => any;
+}
 
 /**
  * @container
  * @description Provides the leaderboard screen for the adventurer.
  */
-export default function LeaderboardScreen() {
+export default function LeaderboardScreen({
+  slayAllIdles,
+}: LeaderboardScreenProps) {
+  const { account } = useAccount();
+  const { gameContract } = useContracts();
   const itemsPerPage = 10;
   const [showScores, setShowScores] = useState(false);
 
-  const { refetch, setData, setIsLoading, setNotLoading } = useQueriesStore();
+  const { data, refetch, setData, setIsLoading, setNotLoading } =
+    useQueriesStore();
 
   const adventurersByXPdata = useCustomQuery(
     "adventurersByXPQuery",
     getAdventurerByXP,
     undefined
   );
+
+  const { data: blockData } = useBlock({
+    refetchInterval: false,
+  });
+
+  const adventurers = data.adventurersByXPQuery?.adventurers
+    ? data.adventurersByXPQuery?.adventurers
+    : [];
+
+  const formatCurrentBlock = (blockData?.block_number ?? 0) % 512;
 
   const profile = useUIStore((state) => state.profile);
 
@@ -72,20 +95,48 @@ export default function LeaderboardScreen() {
     }
   }, [adventurersByXPdata]);
 
+  const slayAdventurers = adventurers.map((adventurer) => {
+    const formatLastActionBlock = (adventurer?.lastAction ?? 0) % 512;
+    const idleTime =
+      formatCurrentBlock >= formatLastActionBlock
+        ? formatCurrentBlock - formatLastActionBlock
+        : 512 - formatLastActionBlock + formatCurrentBlock;
+    if (
+      (idleTime < idleDeathPenaltyBlocks || adventurer?.health === 0) &&
+      adventurer.id
+    ) {
+      return adventurer.id;
+    }
+  });
+
+  const handleSlayAdventurers = async () => {
+    await slayAllIdles(slayAdventurers);
+  };
+
+  console.log(slayAdventurers);
+
   return (
     <div className="flex flex-col items-center h-full xl:overflow-y-auto 2xl:overflow-hidden mt-5 sm:mt-0">
-      <Button
-        onClick={async () => {
-          const adventurersByXPdata = await refetch(
-            "adventurersByXPQuery",
-            undefined
-          );
-          const sortedAdventurersByXP = handleSortXp(adventurersByXPdata);
-          setData("adventurersByXPQuery", sortedAdventurersByXP);
-        }}
-      >
-        <RefreshIcon className="w-8" />
-      </Button>
+      <div className="flex flex-row gap-5">
+        <Button
+          onClick={() => handleSlayAdventurers()}
+          disabled={slayAdventurers.length === 0}
+        >
+          Slay Idle Adventurers
+        </Button>
+        <Button
+          onClick={async () => {
+            const adventurersByXPdata = await refetch(
+              "adventurersByXPQuery",
+              undefined
+            );
+            const sortedAdventurersByXP = handleSortXp(adventurersByXPdata);
+            setData("adventurersByXPQuery", sortedAdventurersByXP);
+          }}
+        >
+          <RefreshIcon className="w-8" />
+        </Button>
+      </div>
       <div className="flex flex-row w-full">
         <div
           className={`${showScores ? "hidden " : ""}sm:block w-full sm:w-1/2`}

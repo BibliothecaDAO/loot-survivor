@@ -1141,6 +1141,61 @@ export function syscalls({
     }
   };
 
+  const slayAllIdles = async (slayAdventurers: number[]) => {
+    const slayIdleAdventurersTx = {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "slay_idle_adventurers",
+      calldata: [slayAdventurers.length.toString(), ...slayAdventurers],
+      metadata: `Slaying all Adventurers`,
+    };
+    addToCalls(slayIdleAdventurersTx);
+
+    const balanceEmpty = await checkArcadeBalance(
+      [...calls, slayIdleAdventurersTx],
+      ethBalance,
+      showTopUpDialog,
+      setTopUpAccount,
+      setEstimatingFee,
+      account
+    );
+
+    if (!balanceEmpty) {
+      startLoading("Slay All Idles", "Slaying All Idles", undefined, undefined);
+      try {
+        const tx = await handleSubmitCalls(account, calls);
+        setTxHash(tx?.transaction_hash);
+        addTransaction({
+          hash: tx?.transaction_hash,
+          metadata: {
+            method: `Upgrade`,
+          },
+        });
+        const receipt = await account?.waitForTransaction(
+          tx?.transaction_hash,
+          {
+            retryInterval: 100,
+          }
+        );
+
+        const events = await parseEvents(
+          receipt as InvokeTransactionReceiptResponse,
+          queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
+        );
+
+        // If there are any equip or drops, do them first
+        handleEquip(events, setData, setAdventurer, queryData);
+        handleDrop(events, setData, setAdventurer);
+
+        stopLoading(`You have slain all idle adventurers!`);
+      } catch (e) {
+        console.log(e);
+        stopLoading(`You have slain all idle adventurers!`);
+      }
+    } else {
+      resetCalls();
+    }
+  };
+
   const multicall = async (
     loadingMessage: string[],
     loadingQuery: QueryKey | null,
@@ -1403,5 +1458,5 @@ export function syscalls({
     }
   };
 
-  return { spawn, explore, attack, flee, upgrade, multicall };
+  return { spawn, explore, attack, flee, upgrade, slayAllIdles, multicall };
 }

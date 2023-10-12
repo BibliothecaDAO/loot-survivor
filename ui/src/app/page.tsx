@@ -144,35 +144,36 @@ export default function Home() {
   const { data, refetch, resetData, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
 
-  const { spawn, explore, attack, flee, upgrade, multicall } = syscalls({
-    gameContract,
-    lordsContract,
-    addTransaction,
-    queryData: data,
-    resetData,
-    setData,
-    adventurer,
-    addToCalls,
-    calls,
-    handleSubmitCalls,
-    startLoading,
-    stopLoading,
-    setTxHash,
-    setEquipItems,
-    setDropItems,
-    setDeathMessage,
-    showDeathDialog,
-    setScreen,
-    setAdventurer,
-    setMintAdventurer,
-    setStartOption,
-    ethBalance: ethBalance.data?.value ?? BigInt(0),
-    showTopUpDialog,
-    setTopUpAccount,
-    setEstimatingFee,
-    account,
-    resetCalls,
-  });
+  const { spawn, explore, attack, flee, upgrade, slayAllIdles, multicall } =
+    syscalls({
+      gameContract,
+      lordsContract,
+      addTransaction,
+      queryData: data,
+      resetData,
+      setData,
+      adventurer,
+      addToCalls,
+      calls,
+      handleSubmitCalls,
+      startLoading,
+      stopLoading,
+      setTxHash,
+      setEquipItems,
+      setDropItems,
+      setDeathMessage,
+      showDeathDialog,
+      setScreen,
+      setAdventurer,
+      setMintAdventurer,
+      setStartOption,
+      ethBalance: ethBalance.data?.value ?? BigInt(0),
+      showTopUpDialog,
+      setTopUpAccount,
+      setEstimatingFee,
+      account,
+      resetCalls,
+    });
 
   const playState = useMemo(
     () => ({
@@ -465,7 +466,9 @@ export default function Home() {
                     />
                   )}
                   {screen === "inventory" && <InventoryScreen />}
-                  {screen === "leaderboard" && <LeaderboardScreen />}
+                  {screen === "leaderboard" && (
+                    <LeaderboardScreen slayAllIdles={slayAllIdles} />
+                  )}
                   {screen === "upgrade" && <UpgradeScreen upgrade={upgrade} />}
                   {screen === "profile" && <Profile />}
                   {screen === "encounters" && <EncountersScreen />}
