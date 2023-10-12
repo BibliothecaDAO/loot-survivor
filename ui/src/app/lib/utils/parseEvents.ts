@@ -27,6 +27,7 @@ import {
   UpgradesAvailableEvent,
   IdleDeathPenaltyEvent,
   AdventurerUpgradedEvent,
+  ERC721TransferEvent,
 } from "../../types/events";
 import { processData } from "./processData";
 
@@ -210,7 +211,8 @@ function parseEquippedItems(data: string[]) {
 
 export async function parseEvents(
   receipt: InvokeTransactionReceiptResponse,
-  currentAdventurer?: any
+  currentAdventurer?: any,
+  beastsContract?: string
 ) {
   if (!receipt.events) {
     throw new Error(`No events found`);
@@ -220,7 +222,16 @@ export async function parseEvents(
   let events: Array<any> = [];
 
   for (let raw of receipt.events) {
-    const eventName = getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]);
+    let eventName: string | null = "";
+    // If event is a Transfer, make sure it is just the beast contract that
+    if (getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]) == "Transfer") {
+      if (raw.from_address == beastsContract) {
+        eventName = "Transfer";
+      }
+      eventName = null;
+    } else {
+      eventName = getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]);
+    }
 
     switch (eventName) {
       case "StartGame":
@@ -696,6 +707,17 @@ export async function parseEvents(
           currentAdventurer
         );
         events.push({ name: eventName, data: idleDeathPenaltyEvent });
+        break;
+      case "Transfer":
+        const beastTransferData: ERC721TransferEvent = {
+          from: parseInt(raw.data[0]),
+          to: parseInt(raw.data[1]),
+          tokenId: {
+            low: parseInt(raw.data[2]),
+            high: parseInt(raw.data[3]),
+          },
+        };
+        events.push({ name: eventName, data: beastTransferData });
         break;
     }
   }

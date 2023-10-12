@@ -15,10 +15,12 @@ import { getKeyFromValue, stringToFelt } from ".";
 import { parseEvents } from "./parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
 import { checkArcadeBalance } from ".";
+import { CallData } from "starknet";
 
 export interface SyscallsProps {
   gameContract: any;
   lordsContract: any;
+  beastsContract: any;
   addTransaction: any;
   queryData: any;
   resetData: (...args: any[]) => any;
@@ -44,6 +46,8 @@ export interface SyscallsProps {
   setEstimatingFee: (...args: any[]) => any;
   account?: AccountInterface;
   resetCalls: (...args: any[]) => any;
+  setSpecialBeastDefeated: (...args: any[]) => any;
+  setSpecialBeast: (...args: any[]) => any;
 }
 
 function handleEquip(
@@ -100,6 +104,7 @@ function handleDrop(
 export function syscalls({
   gameContract,
   lordsContract,
+  beastsContract,
   addTransaction,
   account,
   queryData,
@@ -125,6 +130,8 @@ export function syscalls({
   setTopUpAccount,
   setEstimatingFee,
   resetCalls,
+  setSpecialBeastDefeated,
+  setSpecialBeast,
 }: SyscallsProps) {
   const gameData = new GameData();
 
@@ -688,6 +695,33 @@ export function syscalls({
                   itemLeveled.special3,
                   "special3",
                   ownedItemIndex
+                );
+              }
+            }
+          }
+
+          const transferEvents = events.filter(
+            (event) => event.name === "Transfer"
+          );
+          for (let transferEvent of transferEvents) {
+            // Check whether beast has a prefix and suffix, if so check token
+            if (
+              slayedBeastEvent.data[1].special2 &&
+              slayedBeastEvent.data[1].special3
+            ) {
+              const tokenMinted = await beastsContract.call(
+                "isMinted",
+                CallData.compile({
+                  beast: slayedBeastEvent.data[1].beast,
+                  prefix: slayedBeastEvent.data[1].special2,
+                  suffix: slayedBeastEvent.data[1].special3,
+                })
+              ); // check if token has been minted
+              if (!tokenMinted) {
+                setSpecialBeastDefeated(true);
+                setSpecialBeast(
+                  slayedBeastEvent.data[1],
+                  transferEvent.data.tokenId.low
                 );
               }
             }

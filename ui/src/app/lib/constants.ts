@@ -42,6 +42,8 @@ export function getContracts() {
         game: "0x03f2ac2c55abbf633123ddb72adc3472feefc4e962c4cedc16dda11a2ac8d1d4",
         lords:
           "0x05e367ac160e5f90c5775089b582dfc987dd148a5a2f977c49def2a6644f724b",
+        beasts:
+          "0x05f9699b308b8544fddab9da50d7374743d0b3ca5b53de9c92e26d6bd99705ed",
       };
     case "mainnet":
       return {
@@ -49,6 +51,7 @@ export function getContracts() {
         game: "0x0",
         lords:
           "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+        beasts: "0x0",
       };
   }
 }

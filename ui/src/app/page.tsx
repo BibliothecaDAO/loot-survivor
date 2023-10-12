@@ -58,6 +58,7 @@ import { getArcadeConnectors } from "./lib/connectors";
 import Header from "./components/navigation/Header";
 import { Maintenance } from "./components/archived/Maintenance";
 import { checkArcadeBalance } from "./lib/utils";
+import { SpecialBeast } from "./components/notifications/SpecialBeast";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -113,7 +114,16 @@ export default function Home() {
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
   const setEstimatingFee = useUIStore((state) => state.setEstimatingFee);
-  const { gameContract, lordsContract, ethContract } = useContracts();
+  const setSpecialBeast = useUIStore((state) => state.setSpecialBeast);
+  const specialBeastDefeated = useUIStore(
+    (state) => state.specialBeastDefeated
+  );
+  // const specialBeastDefeated = true;
+  const setSpecialBeastDefeated = useUIStore(
+    (state) => state.setSpecialBeastDefeated
+  );
+  const { gameContract, lordsContract, ethContract, beastsContract } =
+    useContracts();
   const { addTransaction } = useTransactionManager();
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const resetCalls = useTransactionCartStore((state) => state.resetCalls);
@@ -147,6 +157,7 @@ export default function Home() {
   const { spawn, explore, attack, flee, upgrade, multicall } = syscalls({
     gameContract,
     lordsContract,
+    beastsContract,
     addTransaction,
     queryData: data,
     resetData,
@@ -172,6 +183,8 @@ export default function Home() {
     setEstimatingFee,
     account,
     resetCalls,
+    setSpecialBeastDefeated,
+    setSpecialBeast,
   });
 
   const playState = useMemo(
@@ -399,6 +412,7 @@ export default function Home() {
         <>
           <div className="flex flex-col w-full">
             <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
+            {specialBeastDefeated && <SpecialBeast />}
             {!spawnLoader && (
               <div className="sm:hidden">
                 <TxActivity />
