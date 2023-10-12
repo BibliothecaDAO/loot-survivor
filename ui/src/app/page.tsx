@@ -115,10 +115,10 @@ export default function Home() {
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
   const setEstimatingFee = useUIStore((state) => state.setEstimatingFee);
   const setSpecialBeast = useUIStore((state) => state.setSpecialBeast);
-  const specialBeastDefeated = useUIStore(
-    (state) => state.specialBeastDefeated
-  );
-  // const specialBeastDefeated = true;
+  // const specialBeastDefeated = useUIStore(
+  //   (state) => state.specialBeastDefeated
+  // );
+  const specialBeastDefeated = true;
   const setSpecialBeastDefeated = useUIStore(
     (state) => state.setSpecialBeastDefeated
   );

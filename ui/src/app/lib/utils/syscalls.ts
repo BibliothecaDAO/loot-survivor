@@ -719,10 +719,10 @@ export function syscalls({
               ); // check if token has been minted
               if (!tokenMinted) {
                 setSpecialBeastDefeated(true);
-                setSpecialBeast(
-                  slayedBeastEvent.data[1],
-                  transferEvent.data.tokenId.low
-                );
+                setSpecialBeast({
+                  data: slayedBeastEvent.data[1],
+                  tokenId: transferEvent.data.tokenId.low,
+                });
               }
             }
           }

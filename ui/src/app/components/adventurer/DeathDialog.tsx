@@ -120,6 +120,7 @@ export const DeathDialog = () => {
                 } XP.\n\nGravestone bears the inscription:\n\n"${
                   messageRef.current?.innerText
                 }"🪦\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+                className="animate-pulse"
               />
               <Button
                 onClick={() => {
