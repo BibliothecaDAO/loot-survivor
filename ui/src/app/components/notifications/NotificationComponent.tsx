@@ -20,18 +20,22 @@ const NotificationComponent = ({
   const [flash, setFlash] = useState(false);
 
   useEffect(() => {
-    if (currentIndex < notifications.length - 1) {
-      const timer = setTimeout(() => {
-        setCurrentIndex((prev) => prev + 1);
-      }, 2000);
-      return () => {
-        clearTimeout(timer);
-      };
-    } else if (currentIndex === notifications.length - 1) {
-      const timer = setTimeout(() => {
-        resetNotification();
-      }, 2000);
-      return () => clearTimeout(timer);
+    if (notifications.length === 0) {
+      resetNotification();
+    } else {
+      if (currentIndex < notifications.length - 1) {
+        const timer = setTimeout(() => {
+          setCurrentIndex((prev) => prev + 1);
+        }, 2000);
+        return () => {
+          clearTimeout(timer);
+        };
+      } else if (currentIndex === notifications.length - 1) {
+        const timer = setTimeout(() => {
+          resetNotification();
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
     }
   }, [showNotification, currentIndex]);
 

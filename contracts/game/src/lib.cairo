@@ -280,6 +280,14 @@ mod Game {
                 _rotate_game_entropy(ref self);
             }
 
+            // if the adventurer is on level 1, this is their first action of the game
+            if adventurer.get_level() == 1 {
+                // so we reveal their starting stats and store them in Adventurer Meta
+                let adventurer_meta = _handle_stat_reveal(@self, ref adventurer, adventurer_id);
+                // update adventurer meta data (this is the last time this storage slot is updated)
+                _pack_adventurer_meta(ref self, adventurer_id, adventurer_meta);
+            }
+
             // get number of blocks between actions
             let (idle, num_blocks) = _is_idle(immutable_adventurer, game_entropy);
 
@@ -790,6 +798,9 @@ mod Game {
         fn get_actions_per_block(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).actions_per_block
         }
+        fn get_reveal_block(self: @ContractState, adventurer_id: felt252) -> u64 {
+            _get_reveal_block(self, adventurer_id)
+        }
         fn get_equipped_items(
             self: @ContractState, adventurer_id: felt252
         ) -> Array<ItemPrimitive> {
@@ -1060,12 +1071,6 @@ mod Game {
             ref self, ref adventurer, adventurer_id, xp_earned_items, attack_rnd_2
         );
 
-        // if adventurer is on level 1, they are defeating their first beast
-        if (adventurer.get_level() == 1) {
-            // which means we can reveal their starting stats
-            _handle_stat_reveal(ref self, ref adventurer, adventurer_id);
-        }
-
         // emit slayed beast event
         __event_SlayedBeast(
             ref self,
@@ -1106,13 +1111,14 @@ mod Game {
     /// @param self A reference to the ContractState object.
     /// @param adventurer A reference to the Adventurer object whose stats are to be revealed and set.
     /// @param adventurer_id The unique identifier of the adventurer.
+    /// @return The adventurer's metadata.
     fn _handle_stat_reveal(
-        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: felt252
-    ) {
+        self: @ContractState, ref adventurer: Adventurer, adventurer_id: felt252
+    ) -> AdventurerMetadata {
         // generate starting stats using the adventurer entropy which is based on the block hash of the block after
         // the player committed to playing the game
         let starting_stats = AdventurerUtils::generate_starting_stats(
-            _get_adventurer_entropy(@self, adventurer_id).into(), NUM_STARTING_STATS
+            _get_adventurer_entropy(self, adventurer_id).into(), NUM_STARTING_STATS
         );
 
         // adventurer shouldn't have any stats so save gas and overwrite
@@ -1123,9 +1129,9 @@ mod Game {
             - STARTING_HEALTH;
 
         // update adventurer meta with starting stats, this is last time we need to update adventurer meta data
-        let mut adventurer_meta = _unpack_adventurer_meta(@self, adventurer_id);
+        let mut adventurer_meta = _unpack_adventurer_meta(self, adventurer_id);
         adventurer_meta.starting_stats = starting_stats;
-        _pack_adventurer_meta(ref self, adventurer_id, adventurer_meta);
+        adventurer_meta
     }
 
     fn _mint_beast(self: @ContractState, beast: Beast) {
@@ -1327,15 +1333,10 @@ mod Game {
             name, start_block: current_block, starting_stats: empty_stats
         };
 
-        // emit a StartGame event 
-        __event_StartGame(ref self, adventurer, adventurer_id, adventurer_meta);
-
         // adventurer immediately gets ambushed by a starter beast
         let beast_battle_details = _starter_beast_ambush(
             ref adventurer, adventurer_id, weapon, starter_beast_rnd
         );
-
-        __event_AmbushedByBeast(ref self, adventurer, adventurer_id, beast_battle_details);
 
         // pack and save new adventurer and metadata
         _pack_adventurer(ref self, adventurer_id, adventurer);
@@ -1346,6 +1347,10 @@ mod Game {
 
         // set caller as owner
         self._owner.write(adventurer_id, get_caller_address());
+
+        // emit events 
+        __event_StartGame(ref self, adventurer, adventurer_id, adventurer_meta);
+        __event_AmbushedByBeast(ref self, adventurer, adventurer_id, beast_battle_details);
     }
 
     fn _starter_beast_ambush(
@@ -2210,17 +2215,20 @@ mod Game {
         let mut adventurer: Adventurer = self._adventurer.read(adventurer_id);
 
         // start with no stat boosts
-        let mut stat_boosts = StatUtils::new();
+        let mut item_stat_boosts = StatUtils::new();
 
         // if adventurer has item specials
         if adventurer.has_item_specials() {
             // get specials from storage
             let (name_storage1, name_storage2) = _get_special_storages(self, adventurer_id);
             // get resulting stat boosts
-            stat_boosts = adventurer.get_stat_boosts(name_storage1, name_storage2);
+            item_stat_boosts = adventurer.get_stat_boosts(name_storage1, name_storage2);
             // apply stat boosts
-            adventurer.apply_stat_boosts(stat_boosts);
+            adventurer.apply_stat_boosts(item_stat_boosts);
         }
+
+        let starting_stats = _unpack_adventurer_meta(self, adventurer_id).starting_stats;
+        adventurer.apply_stat_boosts(starting_stats);
 
         // get bag from storage
         let bag = _unpacked_bag(self, adventurer_id);
@@ -2228,8 +2236,8 @@ mod Game {
         // luck isn't stored, it is calculated dynamically
         adventurer.set_luck(bag);
 
-        // return adventurer with stat boosts
-        (adventurer, stat_boosts, bag)
+        // return adventurer, item stat boots, and bag
+        (adventurer, item_stat_boosts, bag)
     }
 
     #[inline(always)]
@@ -2468,17 +2476,6 @@ mod Game {
             ImplLoot::is_starting_weapon(starting_weapon) == true, messages::INVALID_STARTING_WEAPON
         );
     }
-    fn _assert_starting_stats(starting_stats: Stats) {
-        let total_stats = starting_stats.strength
-            + starting_stats.dexterity
-            + starting_stats.vitality
-            + starting_stats.intelligence
-            + starting_stats.wisdom
-            + starting_stats.charisma;
-        assert(total_stats == NUM_STARTING_STATS, messages::WRONG_NUM_STARTING_STATS);
-        _assert_zero_luck(starting_stats);
-    }
-
     fn _assert_zero_luck(stats: Stats) {
         assert(stats.luck == 0, messages::NON_ZERO_STARTING_LUCK);
     }
@@ -3123,7 +3120,9 @@ mod Game {
         let adventurer_state = AdventurerState {
             owner: get_caller_address(), adventurer_id, adventurer
         };
+
         let reveal_block = _get_reveal_block(@self, adventurer_id);
+
         self.emit(StartGame { adventurer_state, adventurer_meta, reveal_block });
     }
 

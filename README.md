@@ -16,7 +16,7 @@
 
 > Go and die with glory
 
-Play [Loot Survivor](https://loot-survivor.vercel.app/)
+Play [Loot Survivor](https://goerli-survivor.realms.world/)
 
 Table of contents
 
