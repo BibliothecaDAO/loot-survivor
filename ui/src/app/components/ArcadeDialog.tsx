@@ -17,6 +17,7 @@ const MAX_RETRIES = 10;
 const RETRY_DELAY = 2000; // 2 seconds
 
 export const ArcadeDialog = () => {
+  const [fetchedBalances, setFetchedBalances] = useState(false);
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
@@ -47,42 +48,30 @@ export const ArcadeDialog = () => {
   }, [available]);
 
   const fetchBalanceWithRetry = async (
-    accountName: string,
-    retryCount: number = 0
+    accountName: string
   ): Promise<bigint[]> => {
-    try {
-      const ethResult = await ethContract!.call(
-        "balanceOf",
-        CallData.compile({ account: accountName })
-      );
-      const lordsBalanceResult = await lordsContract!.call(
-        "balance_of",
-        CallData.compile({
-          account: accountName,
-        })
-      );
-      const lordsAllowanceResult = await lordsContract!.call(
-        "allowance",
-        CallData.compile({
-          owner: accountName,
-          spender: gameContract?.address ?? "",
-        })
-      );
-      return [
-        uint256.uint256ToBN(balanceSchema.parse(ethResult).balance),
-        lordsBalanceResult as bigint,
-        lordsAllowanceResult as bigint,
-      ];
-    } catch (error) {
-      if (retryCount < MAX_RETRIES) {
-        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY)); // delay before retry
-        return fetchBalanceWithRetry(accountName, retryCount + 1);
-      } else {
-        throw new Error(
-          `Failed to fetch balance after ${MAX_RETRIES} retries.`
-        );
-      }
-    }
+    const ethResult = await ethContract!.call(
+      "balanceOf",
+      CallData.compile({ account: accountName })
+    );
+    const lordsBalanceResult = await lordsContract!.call(
+      "balance_of",
+      CallData.compile({
+        account: accountName,
+      })
+    );
+    const lordsAllowanceResult = await lordsContract!.call(
+      "allowance",
+      CallData.compile({
+        owner: accountName,
+        spender: gameContract?.address ?? "",
+      })
+    );
+    return [
+      uint256.uint256ToBN(balanceSchema.parse(ethResult).balance),
+      lordsBalanceResult as bigint,
+      lordsAllowanceResult as bigint,
+    ];
   };
 
   const getBalances = async () => {
@@ -92,6 +81,7 @@ export const ArcadeDialog = () => {
     > = {};
     const balancePromises = arcadeConnectors().map((account) => {
       return fetchBalanceWithRetry(account.name).then((balances) => {
+        console.log(localBalances);
         localBalances[account.name] = {
           eth: BigInt(0),
           lords: BigInt(0),
@@ -105,6 +95,7 @@ export const ArcadeDialog = () => {
     });
     await Promise.all(balancePromises);
     setArcadeBalances(localBalances);
+    setFetchedBalances(true);
   };
 
   const getAccountBalances = async (account: string) => {
@@ -120,8 +111,8 @@ export const ArcadeDialog = () => {
   };
 
   useEffect(() => {
-    getBalances();
-  }, [arcadeConnectors]);
+    // getBalances();
+  }, [arcadeConnectors, fetchedBalances]);
 
   if (!connectors) return <div></div>;
 
