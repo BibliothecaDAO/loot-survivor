@@ -44,7 +44,10 @@ export const StatAttribute = ({
   const newUpgradeTotal =
     amount + ((adventurer?.statUpgrades ?? 0) - upgradesTotal);
 
-  const maxNonBoosted = nonBoostedStat + BigInt(amount) >= BigInt(15);
+  console.log(nonBoostedStat, BigInt(amount), BigInt(15));
+
+  const maxNonBoosted =
+    (nonBoostedStat ?? BigInt(0)) + BigInt(amount) >= BigInt(15);
 
   useEffect(() => {
     if (buttonClicked) {
