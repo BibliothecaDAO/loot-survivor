@@ -32,8 +32,6 @@ const ScoreLeaderboardTable = ({
 
   const scoreIds = scores?.map((score) => score.id ?? 0);
 
-  console.log(scoreIds);
-
   const scoresData = useCustomQuery("topScoresQuery", getScoresInList, {
     ids: scoreIds,
   });

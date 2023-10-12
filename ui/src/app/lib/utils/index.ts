@@ -368,8 +368,6 @@ export async function checkArcadeBalance(
   setEstimatingFee: (...args: any[]) => any,
   account?: AccountInterface
 ) {
-  console.log(calls);
-  console.log(ethBalance);
   if (ethBalance < FEE_CHECK_BALANCE) {
     const storage: BurnerStorage = Storage.get("burners");
     if (account && (account?.address ?? "0x0") in storage) {

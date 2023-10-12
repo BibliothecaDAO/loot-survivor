@@ -109,7 +109,6 @@ export const ArcadeDialog = () => {
 
   const getAccountBalances = async (account: string) => {
     const balances = await fetchBalanceWithRetry(account);
-    console.log(balances);
     setArcadeBalances({
       ...arcadebalances,
       [account]: {
