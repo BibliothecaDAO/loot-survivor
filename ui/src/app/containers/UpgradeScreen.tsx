@@ -31,6 +31,7 @@ import useUIStore from "../hooks/useUIStore";
 import { UpgradeStats, ZeroUpgrade, UpgradeSummary } from "../types";
 import Summary from "../components/upgrade/Summary";
 import { HealthCountDown } from "../components/CountDown";
+import { CallData } from "starknet";
 
 interface UpgradeScreenProps {
   upgrade: (...args: any[]) => any;
@@ -54,6 +55,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
     (state) => state.computed.hasStatUpgrades
   );
   const [selected, setSelected] = useState("");
+  const [nonBoostedStats, setNonBoostedStats] = useState<any | null>(null);
   const upgradeScreen = useUIStore((state) => state.upgradeScreen);
   const setUpgradeScreen = useUIStore((state) => state.setUpgradeScreen);
   const potionAmount = useUIStore((state) => state.potionAmount);
@@ -82,6 +84,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       description: "Strength increases attack damage by 10%",
       buttonText: "Upgrade Strength",
       abbrev: "STR",
+      nonBoostedStat: nonBoostedStats?.strength,
     },
     {
       name: "Dexterity",
@@ -89,6 +92,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       description: "Dexterity increases chance of fleeing Beasts",
       buttonText: "Upgrade Dexterity",
       abbrev: "DEX",
+      nonBoostedStat: nonBoostedStats?.dexterity,
     },
     {
       name: "Vitality",
@@ -97,6 +101,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       description: "Vitality increases max health and gives +10hp ",
       buttonText: "Upgrade Vitality",
       abbrev: "VIT",
+      nonBoostedStat: nonBoostedStats?.vitality,
     },
     {
       name: "Intelligence",
@@ -104,6 +109,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       description: "Intelligence increases chance of avoiding Obstacles",
       buttonText: "Upgrade Intelligence",
       abbrev: "INT",
+      nonBoostedStat: nonBoostedStats?.intelligence,
     },
     {
       name: "Wisdom",
@@ -111,6 +117,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       description: "Wisdom increases chance of avoiding a Beast ambush",
       buttonText: "Upgrade Wisdom",
       abbrev: "WIS",
+      nonBoostedStat: nonBoostedStats?.wisdom,
     },
     {
       name: "Charisma",
@@ -118,6 +125,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       description: "Charisma provides discounts on the marketplace and potions",
       buttonText: "Upgrade Charisma",
       abbrev: "CHA",
+      nonBoostedStat: nonBoostedStats?.charisma,
     },
   ];
 
@@ -298,6 +306,18 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
     (adventurer?.health ?? 0) + healthPlus,
     maxHealth
   );
+
+  const getNoBoostedStats = async () => {
+    const stats = await gameContract?.call(
+      "get_base_stats",
+      CallData.compile({ token_id: adventurer?.id! })
+    ); // check whether player can use the current token
+    setNonBoostedStats(stats);
+  };
+
+  useEffect(() => {
+    getNoBoostedStats();
+  }, []);
 
   return (
     <>
