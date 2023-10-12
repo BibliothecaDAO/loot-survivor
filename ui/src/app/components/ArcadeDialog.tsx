@@ -110,9 +110,9 @@ export const ArcadeDialog = () => {
     });
   };
 
-  useEffect(() => {
-    // getBalances();
-  }, [arcadeConnectors, fetchedBalances]);
+  // useEffect(() => {
+  //   // getBalances();
+  // }, [arcadeConnectors, fetchedBalances]);
 
   if (!connectors) return <div></div>;
 
