@@ -106,7 +106,7 @@ mod tests {
     }
 
     fn add_adventurer_to_game(ref game: IGameDispatcher) {
-        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero', DEFAULT_NO_GOLDEN_TOKEN);
+        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero', DEFAULT_NO_GOLDEN_TOKEN.into());
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
@@ -124,7 +124,7 @@ mod tests {
         let name = 'abcdefghijklmno';
 
         // start new game
-        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN);
+        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN.into());
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);

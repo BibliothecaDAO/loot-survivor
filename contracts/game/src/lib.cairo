@@ -23,7 +23,8 @@ mod Game {
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
         clone::Clone, poseidon::poseidon_hash_span, option::OptionTrait, box::BoxTrait,
         starknet::{
-            get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const, get_block_timestamp
+            get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const,
+            get_block_timestamp
         },
     };
 
@@ -3461,7 +3462,7 @@ mod Game {
         };
 
         assert(_can_play(@self, token_id), 'Cant play');
-        assert(golden_token.owner_of(token_id) == account, 'Not owner');
+        assert(golden_token.owner_of(token_id) == player, 'Not owner');
 
         self
             ._golden_token_last_use

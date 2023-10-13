@@ -13,7 +13,7 @@ use survivor::{
 trait IGame<TContractState> {
     // ------ Game Actions ------
     fn new_game(
-        ref self: TContractState, client_reward_address: ContractAddress, weapon: u8, name: u128
+        ref self: TContractState, client_reward_address: ContractAddress, weapon: u8, name: u128, golden_token_id: u256
     );
     fn explore(ref self: TContractState, adventurer_id: felt252, till_beast: bool);
     fn attack(ref self: TContractState, adventurer_id: felt252, to_the_death: bool);
