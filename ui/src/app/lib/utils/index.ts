@@ -424,3 +424,12 @@ export const fetchAverageBlockTime = async (
     console.error("Error:", error);
   }
 };
+
+export const fetchBlockTime = async (currentBlock: number) => {
+  try {
+    const currentBlockData = await getBlock(currentBlock);
+    return currentBlockData.timestamp;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};

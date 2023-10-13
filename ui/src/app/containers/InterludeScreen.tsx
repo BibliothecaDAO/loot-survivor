@@ -4,6 +4,7 @@ import { EntropyCountDown } from "../components/CountDown";
 import Hints from "../components/interlude/Hints";
 import { fetchAverageBlockTime } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import { fetchBlockTime } from "../lib/utils";
 
 export default function InterludeScreen() {
   const { adventurer } = useAdventurerStore();
@@ -17,19 +18,23 @@ export default function InterludeScreen() {
   });
 
   const fetchData = async () => {
-    const result = await fetchAverageBlockTime(blockData?.block_number!, 10);
+    const result = await fetchAverageBlockTime(blockData?.block_number!, 20);
     setAverageBlockTime(result!);
     setFetchedAverageBlockTime(true);
   };
 
-  const getNextEntropyTime = () => {
+  const getNextEntropyTime = async () => {
     const nextBlockHashBlock = adventurer?.revealBlock!;
     const adventurerStartBlock = adventurer?.startBlock!;
     const blockDifference = nextBlockHashBlock - adventurerStartBlock;
     const secondsUntilNextEntropy = blockDifference * averageBlockTime;
-    const adventurerCreatedTime = new Date(adventurer?.createdTime!).getTime();
+    // const adventurerCreatedTime = new Date(adventurer?.createdTime!).getTime();
+    // const previousBlocktimePlus1 =
+    //   (await fetchBlockTime(adventurer?.startBlock! - 1)) * 1000;
+    // const previousBlocktime = previousBlocktimePlus1 + averageBlockTime * 1000;
+    // const nextEntropyTime = previousBlocktime + secondsUntilNextEntropy * 1000;
     const nextEntropyTime =
-      adventurerCreatedTime + secondsUntilNextEntropy * 1000;
+      secondsUntilNextEntropy + secondsUntilNextEntropy * 1000;
     setNextEntropyTime(nextEntropyTime);
   };
 
