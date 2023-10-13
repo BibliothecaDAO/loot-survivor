@@ -1557,22 +1557,22 @@ class IndexerGraphQLView(GraphQLView):
 
 async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
     mongo_goerli = MongoClient(mongo_goerli)
-    mongo_mainnet = MongoClient(mongo_mainnet)
+    # mongo_mainnet = MongoClient(mongo_mainnet)
     db_name_goerli = "mongo-goerli".replace("-", "_")
-    db_name_mainnet = "mongo-mainnet".replace("-", "_")
+    # db_name_mainnet = "mongo-mainnet".replace("-", "_")
     db_goerli = mongo_goerli[db_name_goerli]
-    db_mainnet = mongo_mainnet[db_name_mainnet]
+    # db_mainnet = mongo_mainnet[db_name_mainnet]
 
     schema = strawberry.Schema(query=Query)
     view_goerli = IndexerGraphQLView(db_goerli, schema=schema)
-    view_mainnet = IndexerGraphQLView(db_mainnet, schema=schema)
+    # view_mainnet = IndexerGraphQLView(db_mainnet, schema=schema)
 
     app = web.Application()
     # app.router.add_route("*", "/graphql", view_goerli)
 
     cors = aiohttp_cors.setup(app)
     resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
-    resource_mainnet = cors.add(app.router.add_resource("/graphql"))
+    # resource_mainnet = cors.add(app.router.add_resource("/graphql"))
 
     cors.add(
         resource_goerli.add_route("POST", view_goerli),
@@ -1591,22 +1591,22 @@ async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
         },
     )
 
-    cors.add(
-        resource_mainnet.add_route("POST", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
-    cors.add(
-        resource_mainnet.add_route("GET", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
+    # cors.add(
+    #     resource_mainnet.add_route("POST", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
+    # cors.add(
+    #     resource_mainnet.add_route("GET", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
 
     ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     ssl_context.load_cert_chain(
