@@ -21,7 +21,7 @@ services:
 
 
   adventurers_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.1
     depends_on:
       - etcd
       - mongo
@@ -38,7 +38,7 @@ services:
       AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
   battles_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.1
     depends_on:
       - etcd
       - mongo
@@ -55,7 +55,7 @@ services:
       AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
   beasts_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.1
     depends_on:
       - etcd
       - mongo
@@ -72,7 +72,7 @@ services:
       AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
   discoveries_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.1
     depends_on:
       - etcd
       - mongo
@@ -89,7 +89,7 @@ services:
       AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
   items_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.1
     depends_on:
       - etcd
       - mongo
@@ -106,7 +106,7 @@ services:
       AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
   scores_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.1
     depends_on:
       - etcd
       - mongo
