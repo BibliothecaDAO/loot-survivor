@@ -247,7 +247,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
         // Here we need to process the StartGame event first and use the output for AmbushedByBeast event
@@ -360,7 +360,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
         const events = await parseEvents(
@@ -611,7 +611,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
 
@@ -840,7 +840,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
         // Add optimistic data
@@ -1016,7 +1016,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
 
@@ -1185,7 +1185,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
         setTxHash(tx?.transaction_hash);
