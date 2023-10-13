@@ -50,12 +50,18 @@ mod tests {
         contract_address_const::<1>()
     }
 
+    fn GOLDEN_TOKEN() -> ContractAddress {
+        contract_address_const::<2>()
+    }
+
     const ADVENTURER_ID: felt252 = 1;
 
     const MAX_LORDS: u256 = 1000000000000000000000;
     const APPROVE: u256 = 100000000000000000000;
     const NAME: felt252 = 111;
     const SYMBOL: felt252 = 222;
+
+    const DEFAULT_NO_GOLDEN_TOKEN: felt252 = 0;
 
     fn OWNER() -> ContractAddress {
         contract_address_const::<10>()
@@ -83,6 +89,7 @@ mod tests {
         calldata.append(lords.into());
         calldata.append(DAO().into());
         calldata.append(COLLECTIBLE_BEASTS().into());
+        calldata.append(GOLDEN_TOKEN().into());
 
         let (address0, _) = deploy_syscall(
             Game::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
@@ -99,7 +106,7 @@ mod tests {
     }
 
     fn add_adventurer_to_game(ref game: IGameDispatcher) {
-        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero');
+        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero', DEFAULT_NO_GOLDEN_TOKEN);
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
@@ -117,7 +124,7 @@ mod tests {
         let name = 'abcdefghijklmno';
 
         // start new game
-        game.new_game(INTERFACE_ID(), starting_weapon, name);
+        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN);
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);

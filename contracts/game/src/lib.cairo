@@ -17,17 +17,35 @@ mod Game {
     const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 100;
     const LOOT_NAME_STORAGE_INDEX_1: u8 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u8 = 1;
+    const DAY: felt252 = 86400;
 
     use core::{
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
         clone::Clone, poseidon::poseidon_hash_span, option::OptionTrait, box::BoxTrait,
         starknet::{
-            get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const
+            get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const, get_block_timestamp
         },
     };
 
     use openzeppelin::token::erc20::interface::{
         IERC20Camel, IERC20CamelDispatcher, IERC20CamelDispatcherTrait, IERC20CamelLibraryDispatcher
+    };
+
+    use openzeppelin::introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait};
+
+    use openzeppelin::token::erc721::interface::{
+        IERC721, IERC721Dispatcher, IERC721DispatcherTrait, IERC721LibraryDispatcher
+    };
+
+    use goldenToken::ERC721::{
+        GoldenToken, GoldenTokenDispatcher, GoldenTokenDispatcherTrait, GoldenTokenLibraryDispatcher
+    };
+
+    use arcade_account::{
+        account::interface::{
+            IMasterControl, IMasterControlDispatcher, IMasterControlDispatcherTrait
+        },
+        Account, ARCADE_ACCOUNT_ID
     };
 
     use super::game::{
@@ -87,6 +105,8 @@ mod Game {
         _lords: ContractAddress,
         _owner: LegacyMap::<felt252, ContractAddress>,
         _item_specials: LegacyMap::<(felt252, u8), ItemSpecialsStorage>,
+        _golden_token_last_use: LegacyMap::<felt252, felt252>,
+        _golden_token: ContractAddress,
     }
 
     #[event]
@@ -124,7 +144,8 @@ mod Game {
         ref self: ContractState,
         lords: ContractAddress,
         dao: ContractAddress,
-        collectible_beasts: ContractAddress
+        collectible_beasts: ContractAddress,
+        golden_token_address: ContractAddress,
     ) {
         // set the contract addresses
         self._lords.write(lords);
@@ -133,6 +154,8 @@ mod Game {
 
         // set the genesis block
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
+
+        self._golden_token.write(golden_token_address);
 
         // initialize game entropy
         let current_block_info = starknet::get_block_info().unbox();
@@ -161,13 +184,21 @@ mod Game {
         /// @param weapon A u8 representing the weapon to start the game with. Valid options are: {wand: 12, book: 17, short sword: 46, club: 76}
         /// @param name A u128 value representing the player's name.
         fn new_game(
-            ref self: ContractState, client_reward_address: ContractAddress, weapon: u8, name: u128,
+            ref self: ContractState,
+            client_reward_address: ContractAddress,
+            weapon: u8,
+            name: u128,
+            golden_token_id: u256
         ) {
             // assert provided weapon
             _assert_valid_starter_weapon(weapon);
 
             // process payment for game and distribute rewards
-            _process_payment_and_distribute_rewards(ref self, client_reward_address);
+            if (golden_token_id != 0) {
+                _play_with_token(ref self, golden_token_id);
+            } else {
+                _process_payment_and_distribute_rewards(ref self, client_reward_address);
+            }
 
             // start the game
             _start_game(ref self, weapon, name);
@@ -1182,13 +1213,20 @@ mod Game {
         }
     }
 
+    fn _golden_token_dispatcher(ref self: ContractState) -> IERC721Dispatcher {
+        IERC721Dispatcher { contract_address: self._golden_token.read() }
+    }
+
+    fn _lords_dispatcher(ref self: ContractState) -> IERC20CamelDispatcher {
+        IERC20CamelDispatcher { contract_address: self._lords.read() }
+    }
+
     fn _process_payment_and_distribute_rewards(
         ref self: ContractState, client_address: ContractAddress
     ) {
         let caller = get_caller_address();
         let block_number = starknet::get_block_info().unbox().block_number;
 
-        let lords = self._lords.read();
         let genesis_block = self._genesis_block.read();
         let dao_address = self._dao.read();
 
@@ -1203,8 +1241,7 @@ mod Game {
             // the purpose of this is to let a decent set of top scores get set before payouts begin
             // without this, there would be an incentive to start and die immediately after contract is deployed
             // to capture the rewards from the launch hype
-            IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, dao_address, COST_TO_PLAY.into());
+            _lords_dispatcher(ref self).transferFrom(caller, dao_address, COST_TO_PLAY.into());
 
             __event_RewardDistribution(
                 ref self,
@@ -1260,28 +1297,24 @@ mod Game {
 
         // DAO
         if (week.DAO != 0) {
-            IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, dao_address, week.DAO);
+            _lords_dispatcher(ref self).transferFrom(caller, dao_address, week.DAO);
         }
 
         // interface
         if (week.INTERFACE != 0) {
-            IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, client_address, week.INTERFACE);
+            _lords_dispatcher(ref self).transferFrom(caller, client_address, week.INTERFACE);
         }
 
         // first place
-        IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, first_place_address, week.FIRST_PLACE);
+        _lords_dispatcher(ref self).transferFrom(caller, first_place_address, week.FIRST_PLACE);
 
         // second place
-        IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, second_place_address, week.SECOND_PLACE);
+        _lords_dispatcher(ref self).transferFrom(caller, second_place_address, week.SECOND_PLACE);
 
         // third place
-        IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, third_place_address, week.THIRD_PLACE);
+        _lords_dispatcher(ref self).transferFrom(caller, third_place_address, week.THIRD_PLACE);
 
+        // emit reward distribution event
         __event_RewardDistribution(
             ref self,
             RewardDistribution {
@@ -3411,5 +3444,31 @@ mod Game {
         );
         fn isMinted(self: @T, beast: u8, prefix: u8, suffix: u8) -> bool;
         fn getMinter(self: @T) -> ContractAddress;
+    }
+
+    fn _can_play(self: @ContractState, token_id: u256) -> bool {
+        _last_usage(self, token_id) + DAY.into() < get_block_timestamp().into()
+    }
+
+    fn _play_with_token(ref self: ContractState, token_id: u256) {
+        let golden_token = _golden_token_dispatcher(ref self);
+
+        let account = ISRC5Dispatcher { contract_address: get_caller_address() };
+        let player = if account.supports_interface(ARCADE_ACCOUNT_ID) {
+            IMasterControlDispatcher { contract_address: get_caller_address() }.get_master_account()
+        } else {
+            get_caller_address()
+        };
+
+        assert(_can_play(@self, token_id), 'Cant play');
+        assert(golden_token.owner_of(token_id) == account, 'Not owner');
+
+        self
+            ._golden_token_last_use
+            .write(token_id.try_into().unwrap(), get_block_timestamp().into());
+    }
+
+    fn _last_usage(self: @ContractState, token_id: u256) -> u256 {
+        self._golden_token_last_use.read(token_id.try_into().unwrap()).into()
     }
 }
