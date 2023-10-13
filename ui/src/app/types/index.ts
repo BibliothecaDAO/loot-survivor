@@ -182,6 +182,7 @@ export interface ButtonData {
   action: () => void;
   disabled?: boolean;
   variant?: "default" | "outline";
+  color?: string;
 }
 
 export interface ItemPurchase {
