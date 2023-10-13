@@ -122,23 +122,6 @@ services:
       SINK_ID: scores
       AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
   
-  entropy_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
-    depends_on:
-      - etcd
-      - mongo
-    restart: always
-    command:
-      - run
-      - --allow-env=/data/env-goerli
-      - /data/src/entropy.ts
-    volumes:
-      - ./:/data/
-    environment:
-      PERSIST_TO_ETCD: http://etcd:2379
-      SINK_ID: entropy
-      AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
-
 volumes:
   etcd_data:
   mongo_data:

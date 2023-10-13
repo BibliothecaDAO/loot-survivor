@@ -160,25 +160,6 @@ const SCORES_FRAGMENT = `
   }
 `;
 
-const ENTROPY_FIELDS = `
-  prevHash
-  prevBlockNumber
-  prevBlockTimestamp
-  prevNextRotationBlock
-  newHash
-  newBlockNumber
-  newBlockTimestamp
-  newNextRotationBlock
-  blocksPerHour
-  currentTimestamp
-`;
-
-const ENTROPY_FRAGMENT = `
-  fragment EntropyFields on Entropy {
-    ${ENTROPY_FIELDS}
-  }
-`;
-
 const getAdventurer = gql`
   ${ADVENTURERS_FRAGMENT}
   query getAdventurer($owner: HexValue) {
@@ -497,15 +478,6 @@ const getScoresInList = gql`
   }
 `;
 
-const getLastestEntropy = gql`
-  ${ENTROPY_FRAGMENT}
-  query get_latest_entropy {
-    entropy(orderBy: { currentTimestamp: { desc: true } }, limit: 1) {
-      ...EntropyFields
-    }
-  }
-`;
-
 export {
   getAdventurer,
   getDiscoveries,
@@ -534,5 +506,4 @@ export {
   getAdventurersByXPPaginated,
   getTopScores,
   getScoresInList,
-  getLastestEntropy,
 };

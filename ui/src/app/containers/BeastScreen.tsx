@@ -9,8 +9,6 @@ import { processBeastName } from "../lib/utils";
 import { Battle, NullBeast } from "../types";
 import { Button } from "../components/buttons/Button";
 import useUIStore from "../hooks/useUIStore";
-import useCustomQuery from "../hooks/useCustomQuery";
-import { getLastestEntropy } from "../hooks/graphql/queries";
 import InterludeScreen from "./InterludeScreen";
 import { getBlock } from "../api/api";
 import { useBlock } from "@starknet-react/core";

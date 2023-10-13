@@ -7,6 +7,8 @@ export interface Adventurer {
   id?: number; // Adventurer ID
   lastAction?: number; // Block number from last action
   owner?: string; // Hex address of the owner
+  classType?: string; // Class of the adventurer
+  homeRealm?: number; // Home Realm of the adventurer
   name?: string; // Name of the adventurer
   order?: string; // Order of the adventurer
   health?: number; // Health of the adventurer
@@ -29,8 +31,6 @@ export interface Adventurer {
   ring?: string; // Ring of the adventure
   beastHealth?: number; // Beast health adventurer is engaging
   statUpgrades?: number; // Stat upgrades adventurer has
-  startBlock?: number; // The block number the adventurer was minted
-  revealBlock?: number; // The next block number that the game entropy rotates from spawn
   gold?: number; // Gold adventurer has
   createdTime?: Date; // Block time the adventurer was created
   lastUpdatedTime?: Date; // Block time the adventurer was last updated
@@ -145,19 +145,6 @@ export interface Score {
   txHash?: string; // Hex of the transaction hash
   blockTime?: Date; // Time of the score
   timestamp?: Date; // Indexer timestamp of event process
-}
-
-export interface Entropy {
-  prevHash?: string;
-  prevBlockNumber?: number;
-  prevBlockTimestamp?: Date;
-  prevNextRotationBlock?: number;
-  newHash?: string;
-  newBlockNumber?: number;
-  newBlockTimestamp?: Date;
-  newNextRotationBlock?: number;
-  blocksPerHour?: number;
-  currentTimestamp?: Date;
 }
 
 export interface Metadata {
@@ -306,6 +293,8 @@ export const NullAdventurer: Adventurer = {
   id: undefined,
   lastAction: undefined,
   owner: undefined,
+  classType: undefined,
+  homeRealm: undefined,
   name: undefined,
   order: undefined,
   health: undefined,
@@ -328,8 +317,6 @@ export const NullAdventurer: Adventurer = {
   ring: undefined,
   beastHealth: undefined,
   statUpgrades: undefined,
-  startBlock: undefined,
-  revealBlock: undefined,
   gold: undefined,
   createdTime: undefined,
   lastUpdatedTime: undefined,
@@ -420,19 +407,6 @@ export const NullScore: Score = {
   txHash: undefined,
   blockTime: undefined,
   timestamp: undefined,
-};
-
-export const NullEntropy: Entropy = {
-  prevHash: undefined,
-  prevBlockNumber: undefined,
-  prevBlockTimestamp: undefined,
-  prevNextRotationBlock: undefined,
-  newHash: undefined,
-  newBlockNumber: undefined,
-  newBlockTimestamp: undefined,
-  newNextRotationBlock: undefined,
-  blocksPerHour: undefined,
-  currentTimestamp: undefined,
 };
 
 export const ZeroUpgrade: UpgradeStats = {
