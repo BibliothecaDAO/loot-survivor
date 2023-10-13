@@ -14,6 +14,11 @@ mod tests {
     use openzeppelin::token::erc20::interface::{
         IERC20Camel, IERC20CamelDispatcher, IERC20CamelDispatcherTrait, IERC20CamelLibraryDispatcher
     };
+
+    use goldenToken::ERC721::{
+        GoldenToken, GoldenTokenDispatcher, GoldenTokenDispatcherTrait, GoldenTokenLibraryDispatcher
+    };
+
     use openzeppelin::token::erc20::erc20::ERC20;
     use market::market::{ImplMarket, LootWithPrice, ItemPurchase};
     use lootitems::{loot::{Loot, ImplLoot, ILoot}, constants::{ItemId}};
@@ -65,42 +70,65 @@ mod tests {
         contract_address_const::<10>()
     }
 
-    fn deploy_lords() -> ContractAddress {
+    fn deploy_erc20(symbol: felt252) -> ContractAddress {
         let mut calldata = array![];
         calldata.append_serde(NAME);
-        calldata.append_serde(SYMBOL);
+        calldata.append_serde(symbol);
         calldata.append_serde(MAX_LORDS);
         calldata.append_serde(OWNER());
 
-        let lords0 = utils::deploy(CamelERC20Mock::TEST_CLASS_HASH, calldata);
+        utils::deploy(CamelERC20Mock::TEST_CLASS_HASH, calldata)
+    }
 
-        lords0
+    fn deploy_golden_token(eth: ContractAddress) -> (ContractAddress, GoldenTokenDispatcher) {
+        let mut calldata = ArrayTrait::new();
+        calldata.append(NAME);
+        calldata.append(SYMBOL);
+        calldata.append(OWNER().into());
+        calldata.append(DAO().into());
+        calldata.append(eth.into());
+
+        let (golden_token, _) = deploy_syscall(
+            goldenToken::ERC721::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
+        )
+            .unwrap();
+
+        (golden_token, GoldenTokenDispatcher { contract_address: golden_token })
     }
 
     fn setup(starting_block: u64) -> IGameDispatcher {
         testing::set_block_number(starting_block);
         testing::set_block_timestamp(1696201757);
 
-        let lords = deploy_lords();
+        let lords = deploy_erc20('LORDS');
+        let eth = deploy_erc20('ETH');
+
+        let (golden_token_address, golden_token_dispatcher) = deploy_golden_token(eth);
 
         let mut calldata = ArrayTrait::new();
         calldata.append(lords.into());
         calldata.append(DAO().into());
         calldata.append(COLLECTIBLE_BEASTS().into());
-        calldata.append(GOLDEN_TOKEN_ADDRESS().into());
+        calldata.append(golden_token_address.into());
 
-        let (address0, _) = deploy_syscall(
+        let (game_address, _) = deploy_syscall(
             Game::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
         )
             .unwrap();
 
         testing::set_contract_address(OWNER());
 
-        let lordsContract = IERC20CamelDispatcher { contract_address: lords };
+        let lords_contract = IERC20CamelDispatcher { contract_address: lords };
+        lords_contract.approve(game_address, APPROVE.into());
 
-        lordsContract.approve(address0, APPROVE.into());
+        let eth_contract = IERC20CamelDispatcher { contract_address: eth };
+        eth_contract.approve(golden_token_address, APPROVE.into());
 
-        IGameDispatcher { contract_address: address0 }
+        golden_token_dispatcher.open();
+        golden_token_dispatcher.mint();
+        golden_token_dispatcher.mint();
+
+        IGameDispatcher { contract_address: game_address }
     }
 
     fn add_adventurer_to_game(ref game: IGameDispatcher) {
@@ -1868,5 +1896,18 @@ mod tests {
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
+    }
+
+    #[test]
+    #[available_gas(944417814)]
+    fn test_golden_token_mint() {
+        let mut game = setup(1000);
+
+        let starting_weapon = ItemId::Wand;
+        let name = 'abcdefghijklmno';
+        let golden_token_id: u256 = 1;
+
+        // start new game
+        game.new_game(INTERFACE_ID(), starting_weapon, name, golden_token_id);
     }
 }

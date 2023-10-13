@@ -19,7 +19,8 @@ mod Game {
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
         clone::Clone, poseidon::poseidon_hash_span, option::OptionTrait, box::BoxTrait,
         starknet::{
-            get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const
+            get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const,
+            get_block_timestamp
         },
     };
 
@@ -27,6 +28,10 @@ mod Game {
         IERC20Camel, IERC20CamelDispatcher, IERC20CamelDispatcherTrait, IERC20CamelLibraryDispatcher
     };
     use openzeppelin::introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait};
+
+    use openzeppelin::token::erc721::interface::{
+        IERC721, IERC721Dispatcher, IERC721DispatcherTrait, IERC721LibraryDispatcher
+    };
 
     use goldenToken::ERC721::{
         GoldenToken, GoldenTokenDispatcher, GoldenTokenDispatcherTrait, GoldenTokenLibraryDispatcher
@@ -97,6 +102,7 @@ mod Game {
         _leaderboard: Leaderboard,
         _lords: ContractAddress,
         _owner: LegacyMap::<felt252, ContractAddress>,
+        _golden_token_last_use: LegacyMap::<felt252, felt252>,
     }
 
     #[event]
@@ -185,10 +191,9 @@ mod Game {
             _assert_valid_starter_weapon(weapon);
 
             // if player has a golden token
-            let golden_token = _golden_token_dispatcher(ref self);
-            if (golden_token_id != 0 && golden_token.can_play(golden_token_id)) {
-                // pay with the golden token
-                golden_token.play(golden_token_id);
+            // there is no 0 token
+            if (golden_token_id != 0) {
+                _play_with_token(ref self, golden_token_id);
             } else {
                 _process_payment_and_distribute_rewards(ref self, client_reward_address);
             }
@@ -1166,8 +1171,8 @@ mod Game {
         }
     }
 
-    fn _golden_token_dispatcher(ref self: ContractState) -> GoldenTokenDispatcher {
-        GoldenTokenDispatcher { contract_address: self._golden_token.read() }
+    fn _golden_token_dispatcher(ref self: ContractState) -> IERC721Dispatcher {
+        IERC721Dispatcher { contract_address: self._golden_token.read() }
     }
 
     fn _lords_dispatcher(ref self: ContractState) -> IERC20CamelDispatcher {
@@ -1193,8 +1198,7 @@ mod Game {
             // the purpose of this is to let a decent set of top scores get set before payouts begin
             // without this, there would be an incentive to start and die immediately after contract is deployed
             // to capture the rewards from the launch hype
-            _lords_dispatcher(ref self)
-                .transferFrom(caller, dao_address, _to_ether(COST_TO_PLAY.into()));
+            _lords_dispatcher(ref self).transferFrom(caller, dao_address, COST_TO_PLAY.into());
 
             __event_RewardDistribution(
                 ref self,
@@ -3342,5 +3346,33 @@ mod Game {
         );
         fn isMinted(self: @T, beast: u8, prefix: u8, suffix: u8) -> bool;
         fn getMinter(self: @T) -> ContractAddress;
+    }
+
+    const DAY: felt252 = 86400;
+
+    fn _can_play(self: @ContractState, token_id: u256) -> bool {
+        _last_usage(self, token_id) + DAY.into() < get_block_timestamp().into()
+    }
+
+    fn _play_with_token(ref self: ContractState, token_id: u256) {
+        let golden_token = _golden_token_dispatcher(ref self);
+
+        let account = ISRC5Dispatcher { contract_address: get_caller_address() };
+        // let player = if account.supports_interface(ARCADE_ACCOUNT_ID) {
+        //     IMasterControlDispatcher { contract_address: get_caller_address() }.get_master_account()
+        // } else {
+        //     get_caller_address()
+        // };
+
+        assert(_can_play(@self, token_id), 'Cant play');
+        assert(golden_token.owner_of(token_id) == account, 'Not owner');
+
+        self
+            ._golden_token_last_use
+            .write(token_id.try_into().unwrap(), get_block_timestamp().into());
+    }
+
+    fn _last_usage(self: @ContractState, token_id: u256) -> u256 {
+        self._golden_token_last_use.read(token_id.try_into().unwrap()).into()
     }
 }
