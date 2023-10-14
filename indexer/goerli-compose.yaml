@@ -8,6 +8,7 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+      - ./scripts/mongo-init:/docker-entrypoint-initdb.d
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
@@ -21,7 +22,7 @@ services:
 
 
   adventurers_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.1
     depends_on:
       - etcd
       - mongo
@@ -38,7 +39,7 @@ services:
       AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
   battles_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.1
     depends_on:
       - etcd
       - mongo
@@ -55,7 +56,7 @@ services:
       AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
   beasts_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.1
     depends_on:
       - etcd
       - mongo
@@ -72,7 +73,7 @@ services:
       AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
   discoveries_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.1
     depends_on:
       - etcd
       - mongo
@@ -89,7 +90,7 @@ services:
       AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
   items_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.1
     depends_on:
       - etcd
       - mongo
@@ -106,7 +107,7 @@ services:
       AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
   scores_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.1
     depends_on:
       - etcd
       - mongo
