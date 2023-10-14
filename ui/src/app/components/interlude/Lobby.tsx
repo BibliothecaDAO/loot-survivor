@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import { Adventurer, NullAdventurer, NullEntropy } from "@/app/types";
+import { Adventurer, NullAdventurer } from "@/app/types";
 import { useBlock } from "@starknet-react/core";
 import useUIStore from "@/app/hooks/useUIStore";
 import LobbyRow from "./LobbyRow";

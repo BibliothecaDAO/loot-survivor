@@ -119,3 +119,9 @@ export const deathMessages = [
   { rank: 100, message: "Brave Combatant! - A commendable effort!" },
   { rank: 250, message: "Daring Challenger! - A brave stand!" },
 ];
+
+export const efficacyData = [
+  { weapon: "Blade", metal: "Weak", hide: "Fair", cloth: "Strong" },
+  { weapon: "Bludgeon", metal: "Fair", hide: "Strong", cloth: "Weak" },
+  { weapon: "Magic", metal: "Strong", hide: "Weak", cloth: "Fair" },
+];

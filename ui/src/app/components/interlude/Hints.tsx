@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
-import { ActionsTutorial } from "../tutorial/ActionsTutorial";
-import { AdventurerTutorial } from "../tutorial/AdventurerTutorial";
-import { BeastTutorial } from "../tutorial/BeastTutorial";
+import { ItemsTutorial } from "../tutorial/ItemsTutorial";
 import { UpgradeTutorial } from "../tutorial/UpgradeTutorial";
-import RowLoader from "../animations/RowLoadre";
+import { EfficacyHint } from "../tutorial/EfficaciesTutorial";
+import { UnlocksTutorial } from "../tutorial/UnlocksTutorial";
+import { ExploreTutorial } from "../tutorial/ExploreTutorial";
+import { StrategyTutorial } from "../tutorial/StrategyTutorial";
+import RowLoader from "../animations/RowLoader";
 
 export default function Hints() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const tutorials = [
-    <ActionsTutorial key={0} />,
-    <AdventurerTutorial key={1} />,
-    <BeastTutorial key={2} />,
+    <EfficacyHint key={0} />,
+    <ItemsTutorial key={1} />,
+    <UnlocksTutorial key={2} />,
     <UpgradeTutorial key={3} />,
+    <ExploreTutorial key={4} />,
+    <StrategyTutorial key={5} />,
   ];
   useEffect(() => {
     if (currentIndex < tutorials.length - 1) {
@@ -30,9 +34,9 @@ export default function Hints() {
   }, [currentIndex]);
 
   return (
-    <div className="flex flex-col w-1/2 items-center justify-center h-full">
+    <div className="flex flex-col sm:w-1/2 items-center justify-center h-full">
       <p className="text-4xl h-1/6 flex justify-center items-center">Hints</p>
-      <div className="flex flex-col border border-terminal-green bg-black p-12 h-5/6 w-3/4">
+      <div className="flex flex-col border border-terminal-green bg-black p-2 sm:p-6 2xl:p-12 h-5/6 w-full sm:w-3/4">
         <div className="w-full h-1/6">
           <RowLoader />
         </div>
