@@ -36,7 +36,7 @@ export default function Hints() {
   return (
     <div className="flex flex-col sm:w-1/2 items-center justify-center h-full">
       <p className="text-4xl h-1/6 flex justify-center items-center">Hints</p>
-      <div className="flex flex-col border border-terminal-green bg-black p-2 sm:p-6 2xl:p-12 h-5/6 w-full sm:w-3/4">
+      <div className="flex flex-col border border-terminal-green bg-black p-2 sm:p-6 2xl:px-12 2xl:py-6 h-5/6 w-full sm:w-3/4">
         <div className="w-full h-1/6">
           <RowLoader />
         </div>

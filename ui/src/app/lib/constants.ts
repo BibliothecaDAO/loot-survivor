@@ -15,7 +15,7 @@ export const NETWORK: "goerli" | "mainnet" = "goerli";
 export function getRPCUrl() {
   switch (NETWORK) {
     case "goerli":
-      return "https://starknet-goerli.infura.io/v3/bba03efe093c494c9ce604963eaf0252";
+      return "https://starknet-goerli.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
     case "mainnet":
       return "https://starknet-mainnet.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
     default:
