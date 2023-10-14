@@ -673,9 +673,18 @@ mod Game {
         ///
         /// @notice Rotates the game entropy
         /// @dev This is intentional callable by anyone
-        /// @players Ideally this is called at the minimum block interval to provide optimal game entropy. If the community does not do this, bots will likely use this to their advantage.
         fn rotate_game_entropy(ref self: ContractState) {
             _rotate_game_entropy(ref self);
+        }
+
+        /// @title Updates cost to play
+        ///
+        /// @notice Adjusts the price up or down
+        /// @dev This is intentional callable by anyone
+        /// @players Adjust the cost to play if the moving price of $LORDS is too high or too low
+        fn update_cost_to_play(ref self: ContractState) {
+            _assert_leader_board(@self);
+            _update_cost_to_play(ref self);
         }
 
         //
@@ -3542,12 +3551,15 @@ mod Game {
         (current_game_count - snapshot_game_count).try_into().unwrap()
     }
 
-    fn _update_game_price(ref self: ContractState) {
-        // TODO: assert above floor price - price can't drop below X
+    fn _update_cost_to_play(ref self: ContractState) {
+        let cost_to_play = self._cost_to_play.read();
 
         // check if time diff is greater than a week
-        let time_diff = get_block_timestamp().into() - self._time_since_price_update.read();
-        assert(time_diff.into() > (DAY.into() * 7), 'Time diff too small');
+        let time_diff: u128 = get_block_timestamp().into()
+            - self._time_since_price_update.read().try_into().unwrap();
+        let one_week: u128 = (DAY.into() * 7).try_into().unwrap();
+
+        assert(time_diff > one_week, 'Time diff too small');
 
         let game_count: u128 = _game_count_in_period(@self);
 
@@ -3556,13 +3568,28 @@ mod Game {
 
         if game_count > upper_threshold {
             // increase price by 10%
-            self._cost_to_play.write(self._cost_to_play.read() * 11 / 10);
+            self._cost_to_play.write(cost_to_play * 11 / 10);
         } else if game_count < lower_threshold {
             // decrease price by ~10%
-            self._cost_to_play.write(self._cost_to_play.read() * 9 / 10);
+            self._cost_to_play.write(cost_to_play * 9 / 10);
         }
 
         // set snapshot to price change game
         _snapshot(ref self);
+    }
+
+    fn _assert_leader_board(self: @ContractState) {
+        let caller = get_caller_address();
+
+        let leaderboard = self._leaderboard.read();
+
+        let first_place = self._owner.read(leaderboard.first.adventurer_id.into());
+        let second_place = self._owner.read(leaderboard.second.adventurer_id.into());
+        let third_place = self._owner.read(leaderboard.third.adventurer_id.into());
+
+        assert(
+            first_place == caller || second_place == caller || third_place == caller,
+            'Not on leaderboard'
+        );
     }
 }
