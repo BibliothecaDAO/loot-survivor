@@ -1164,10 +1164,15 @@ export function syscalls({
       account
     );
 
+    console.log(balanceEmpty);
+
     if (!balanceEmpty) {
       startLoading("Slay All Idles", "Slaying All Idles", undefined, undefined);
       try {
-        const tx = await handleSubmitCalls(account, calls);
+        const tx = await handleSubmitCalls(account, [
+          ...calls,
+          slayIdleAdventurersTx,
+        ]);
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,

@@ -107,8 +107,10 @@ export default function LeaderboardScreen({
       formatCurrentBlock >= formatLastActionBlock
         ? formatCurrentBlock - formatLastActionBlock
         : 512 - formatLastActionBlock + formatCurrentBlock;
+    console.log(idleTime, idleDeathPenaltyBlocks);
     if (
-      (idleTime < idleDeathPenaltyBlocks || adventurer?.health === 0) &&
+      idleTime > idleDeathPenaltyBlocks &&
+      adventurer?.health !== 0 &&
       adventurer.id
     ) {
       return slayAdventurers.push(adventurer.id);
@@ -128,8 +130,8 @@ export default function LeaderboardScreen({
       ) : (
         <>
           <div className="flex flex-row gap-5 items-center">
-            <div className="flex flex-row border border-terminal-green w-6 h-5 items-center justify-between sm:w-24 sm:h-12 px-2">
-              <ProfileIcon className="fill-current w-8" />
+            <div className="flex flex-row border border-terminal-green items-center justify-between w-16 h-8 sm:w-24 sm:h-12 px-2">
+              <ProfileIcon className="fill-current w-4 h-4 sm:w-8 sm:h-8" />
               <p className="sm:text-2xl">{aliveAdventurers.length}</p>
             </div>
             <Button
@@ -148,10 +150,10 @@ export default function LeaderboardScreen({
                 setData("adventurersByXPQuery", sortedAdventurersByXP);
               }}
             >
-              <RefreshIcon className="w-8" />
+              <RefreshIcon className="w-4 sm:w-8" />
             </Button>
-            <div className="flex flex-row border border-terminal-green w-6 h-5 items-center justify-between sm:w-24 sm:h-12 px-2">
-              <SkullIcon className="fill-current w-8 h-8" />
+            <div className="flex flex-row border border-terminal-green w-6 h-5 items-center justify-between w-16 h-8 sm:w-24 sm:h-12 px-2">
+              <SkullIcon className="fill-current w-4 h-4 sm:w-8 sm:h-8" />
               <p className="sm:text-2xl">{scores.length}</p>
             </div>
           </div>
