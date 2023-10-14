@@ -146,4 +146,5 @@ trait IGame<TContractState> {
     fn get_lords_address(self: @TContractState) -> ContractAddress;
     fn get_game_entropy(self: @TContractState) -> GameEntropy;
     fn get_leaderboard(self: @TContractState) -> Leaderboard;
+    fn get_cost_to_play(self: @TContractState) -> u128;
 }

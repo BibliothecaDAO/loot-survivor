@@ -1056,6 +1056,10 @@ mod Game {
         fn strength_bonus_damage(self: @ContractState) -> u8 {
             STRENGTH_DAMAGE_BONUS
         }
+
+        fn get_cost_to_play(self: @ContractState) -> u128 {
+            _get_cost_to_play(self)
+        }
     }
 
     // ------------------------------------------ //
@@ -1232,6 +1236,10 @@ mod Game {
 
     fn _calculate_payout(bp: u256, price: u128) -> u256 {
         (bp * price.into()) / 1000
+    }
+
+    fn _get_cost_to_play(self: @ContractState) -> u128 {
+        self._cost_to_play.read()
     }
 
     fn _process_payment_and_distribute_rewards(
@@ -3515,7 +3523,6 @@ mod Game {
         self._golden_token_last_use.read(token_id.try_into().unwrap()).into()
     }
 
-
     fn _snapshot(ref self: ContractState) {
         // set snapshot to price change game
         self._games_played_snapshot.write(self._game_counter.read());
@@ -3524,7 +3531,7 @@ mod Game {
         self._time_since_price_update.write(get_block_timestamp().into());
     }
 
-    fn _game_count_in_period(self: @ContractState) -> felt252 {
+    fn _game_count_in_period(self: @ContractState) -> u128 {
         // get current game count
         let current_game_count = self._game_counter.read();
 
@@ -3532,7 +3539,7 @@ mod Game {
         let snapshot_game_count = self._games_played_snapshot.read();
 
         // return difference
-        current_game_count - snapshot_game_count
+        (current_game_count - snapshot_game_count).try_into().unwrap()
     }
 
     fn _update_game_price(ref self: ContractState) {
@@ -3542,10 +3549,10 @@ mod Game {
         let time_diff = get_block_timestamp().into() - self._time_since_price_update.read();
         assert(time_diff.into() > (DAY.into() * 7), 'Time diff too small');
 
-        let game_count = _game_count_in_period(@self).into();
+        let game_count: u128 = _game_count_in_period(@self);
 
-        let upper_threshold = 1000;
-        let lower_threshold = 100;
+        let upper_threshold: u128 = 1000;
+        let lower_threshold: u128 = 100;
 
         if game_count > upper_threshold {
             // increase price by 10%
