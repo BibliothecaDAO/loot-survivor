@@ -36,7 +36,7 @@ export function indexAddress(address: string) {
 }
 
 export function padAddress(address: string) {
-  if (address !== "") {
+  if (address && address !== "") {
     const length = address.length;
     const neededLength = 66 - length;
     let zeros = "";
