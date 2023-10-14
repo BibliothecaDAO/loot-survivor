@@ -12,11 +12,10 @@ import { Adventurer } from "../types";
 import ScoreTable from "../components/leaderboard/ScoreTable";
 import LiveTable from "../components/leaderboard/LiveTable";
 import { RefreshIcon } from "../components/icons/Icons";
-import { useBlock, useAccount } from "@starknet-react/core";
+import { useBlock } from "@starknet-react/core";
 import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
-import { useContracts } from "../hooks/useContracts";
-import useLoadingStore from "../hooks/useLoadingStore";
 import LootIconLoader from "../components/icons/Loader";
+import { ProfileIcon, SkullIcon } from "../components/icons/Icons";
 
 interface LeaderboardScreenProps {
   slayAllIdles: (...args: any[]) => any;
@@ -29,8 +28,6 @@ interface LeaderboardScreenProps {
 export default function LeaderboardScreen({
   slayAllIdles,
 }: LeaderboardScreenProps) {
-  const { account } = useAccount();
-  const { gameContract } = useContracts();
   const itemsPerPage = 10;
   const [showScores, setShowScores] = useState(false);
 
@@ -50,6 +47,12 @@ export default function LeaderboardScreen({
   const adventurers = data.adventurersByXPQuery?.adventurers
     ? data.adventurersByXPQuery?.adventurers
     : [];
+
+  const aliveAdventurers = adventurers.filter(
+    (adventurer) => (adventurer.health ?? 0) > 0
+  );
+
+  const scores = adventurers.filter((adventurer) => adventurer.health === 0);
 
   const formatCurrentBlock = (blockData?.block_number ?? 0) % 512;
 
@@ -96,7 +99,9 @@ export default function LeaderboardScreen({
     }
   }, [adventurersByXPdata]);
 
-  const slayAdventurers = adventurers.map((adventurer) => {
+  const slayAdventurers: number[] = [];
+
+  adventurers.map((adventurer) => {
     const formatLastActionBlock = (adventurer?.lastAction ?? 0) % 512;
     const idleTime =
       formatCurrentBlock >= formatLastActionBlock
@@ -106,15 +111,13 @@ export default function LeaderboardScreen({
       (idleTime < idleDeathPenaltyBlocks || adventurer?.health === 0) &&
       adventurer.id
     ) {
-      return adventurer.id;
+      return slayAdventurers.push(adventurer.id);
     }
   });
 
   const handleSlayAdventurers = async () => {
     await slayAllIdles(slayAdventurers);
   };
-
-  console.log(slayAdventurers);
 
   return (
     <div className="flex flex-col items-center h-full xl:overflow-y-auto 2xl:overflow-hidden mt-5 sm:mt-0">
@@ -124,7 +127,11 @@ export default function LeaderboardScreen({
         </div>
       ) : (
         <>
-          <div className="flex flex-row gap-5">
+          <div className="flex flex-row gap-5 items-center">
+            <div className="flex flex-row border border-terminal-green w-6 h-5 items-center justify-between sm:w-24 sm:h-12 px-2">
+              <ProfileIcon className="fill-current w-8" />
+              <p className="sm:text-2xl">{aliveAdventurers.length}</p>
+            </div>
             <Button
               onClick={() => handleSlayAdventurers()}
               disabled={slayAdventurers.length === 0}
@@ -143,6 +150,10 @@ export default function LeaderboardScreen({
             >
               <RefreshIcon className="w-8" />
             </Button>
+            <div className="flex flex-row border border-terminal-green w-6 h-5 items-center justify-between sm:w-24 sm:h-12 px-2">
+              <SkullIcon className="fill-current w-8 h-8" />
+              <p className="sm:text-2xl">{scores.length}</p>
+            </div>
           </div>
           <div className="flex flex-row w-full">
             <div
@@ -153,6 +164,7 @@ export default function LeaderboardScreen({
               <LiveTable
                 itemsPerPage={itemsPerPage}
                 handleFetchProfileData={handlefetchProfileData}
+                adventurers={aliveAdventurers}
               />
             </div>
             <div
@@ -163,6 +175,7 @@ export default function LeaderboardScreen({
               <ScoreTable
                 itemsPerPage={itemsPerPage}
                 handleFetchProfileData={handlefetchProfileData}
+                adventurers={scores}
               />
             </div>
           </div>
