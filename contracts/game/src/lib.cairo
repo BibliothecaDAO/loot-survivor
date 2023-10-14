@@ -108,6 +108,9 @@ mod Game {
         _item_specials: LegacyMap::<(felt252, u8), ItemSpecialsStorage>,
         _golden_token_last_use: LegacyMap::<felt252, felt252>,
         _golden_token: ContractAddress,
+        _cost_to_play: u128,
+        _games_played_snapshot: felt252,
+        _time_since_price_update: felt252,
     }
 
     #[event]
@@ -147,6 +150,7 @@ mod Game {
         dao: ContractAddress,
         collectible_beasts: ContractAddress,
         golden_token_address: ContractAddress,
+        cost_to_play: u128
     ) {
         // set the contract addresses
         self._lords.write(lords);
@@ -156,7 +160,11 @@ mod Game {
         // set the genesis block
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
 
+        // set the golden token address
         self._golden_token.write(golden_token_address);
+
+        // set the cost to play
+        self._cost_to_play.write(cost_to_play);
 
         // initialize game entropy
         let current_block_info = starknet::get_block_info().unbox();
@@ -1222,6 +1230,10 @@ mod Game {
         IERC20CamelDispatcher { contract_address: self._lords.read() }
     }
 
+    fn _calculate_payout(bp: u256, price: u128) -> u128 {
+        (bp * price.into()) / 1000
+    }
+
     fn _process_payment_and_distribute_rewards(
         ref self: ContractState, client_address: ContractAddress
     ) {
@@ -1263,24 +1275,26 @@ mod Game {
             return;
         }
 
+        let current_cost_to_play = self._cost_to_play.read();
+
         // First phase all rewards go to players
         let mut week = Week {
-            DAO: REWARD_DISTRIBUTIONS_PHASE1::DAO,
-            INTERFACE: REWARD_DISTRIBUTIONS_PHASE1::INTERFACE,
-            FIRST_PLACE: REWARD_DISTRIBUTIONS_PHASE1::FIRST_PLACE,
-            SECOND_PLACE: REWARD_DISTRIBUTIONS_PHASE1::SECOND_PLACE,
-            THIRD_PLACE: REWARD_DISTRIBUTIONS_PHASE1::THIRD_PLACE
+            DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO,current_cost_to_play),
+            INTERFACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1::INTERFACE,current_cost_to_play),
+            FIRST_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1::FIRST_PLACE,current_cost_to_play),
+            SECOND_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1::SECOND_PLACE,current_cost_to_play),
+            THIRD_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1::THIRD_PLACE,current_cost_to_play)
         };
 
         // after 2 weeks, the DAO gets a share of rewards
         if (BLOCKS_IN_A_WEEK * 2 + genesis_block) > block_number {
             week =
                 Week {
-                    DAO: REWARD_DISTRIBUTIONS_PHASE2::DAO,
-                    INTERFACE: REWARD_DISTRIBUTIONS_PHASE2::INTERFACE,
-                    FIRST_PLACE: REWARD_DISTRIBUTIONS_PHASE2::FIRST_PLACE,
-                    SECOND_PLACE: REWARD_DISTRIBUTIONS_PHASE2::SECOND_PLACE,
-                    THIRD_PLACE: REWARD_DISTRIBUTIONS_PHASE2::THIRD_PLACE
+                    DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE2::DAO,current_cost_to_play),
+                    INTERFACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE2::INTERFACE,current_cost_to_play),
+                    FIRST_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE2::FIRST_PLACE,current_cost_to_play),
+                    SECOND_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE2::SECOND_PLACE,current_cost_to_play),
+                    THIRD_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE2::THIRD_PLACE,current_cost_to_play)
                 };
         }
 
@@ -1288,11 +1302,11 @@ mod Game {
         if (BLOCKS_IN_A_WEEK * 8 + genesis_block) > block_number {
             week =
                 Week {
-                    DAO: REWARD_DISTRIBUTIONS_PHASE3::DAO,
-                    INTERFACE: REWARD_DISTRIBUTIONS_PHASE3::INTERFACE,
-                    FIRST_PLACE: REWARD_DISTRIBUTIONS_PHASE3::FIRST_PLACE,
-                    SECOND_PLACE: REWARD_DISTRIBUTIONS_PHASE3::SECOND_PLACE,
-                    THIRD_PLACE: REWARD_DISTRIBUTIONS_PHASE3::THIRD_PLACE
+                    DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3::DAO,current_cost_to_play),
+                    INTERFACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3::INTERFACE,current_cost_to_play),
+                    FIRST_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3::FIRST_PLACE,current_cost_to_play),
+                    SECOND_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3::SECOND_PLACE,current_cost_to_play),
+                    THIRD_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3::THIRD_PLACE,current_cost_to_play)
                 }
         }
 
@@ -3471,5 +3485,50 @@ mod Game {
 
     fn _last_usage(self: @ContractState, token_id: u256) -> u256 {
         self._golden_token_last_use.read(token_id.try_into().unwrap()).into()
+    }
+
+
+    fn _snapshot(ref self: ContractState) {
+        // set snapshot to price change game
+        self._games_played_snapshot.write(self._game_counter.read());
+
+        // set time since price update to now
+        self._time_since_price_update.write(get_block_timestamp().into());
+    }
+
+    fn _game_count_in_period(self: @ContractState) -> felt252 {
+        // get current game count
+        let current_game_count = self._game_counter.read();
+
+        // get snapshot game count
+        let snapshot_game_count = self._games_played_snapshot.read();
+
+        // return difference
+        current_game_count - snapshot_game_count
+    }
+
+    fn _update_game_price(ref self: ContractState) {
+
+        // TODO: assert above floor price - price can't drop below X
+
+        // check if time diff is greater than a week
+        let time_diff = get_block_timestamp().into() - self._time_since_price_update.read();
+        assert(time_diff > (DAY.into() * 7), 'Time diff too small');
+
+        let game_count = _game_count_in_period(@self);
+
+        let upper_threshold = 1000;
+        let lower_threshold = 100;
+
+        if game_count > upper_threshold {
+            // increase price by 10%
+            // self._cost_to_play.write(self._cost_to_play.read() * 11 / 10);
+        } else if game_count < lower_threshold {
+            // decrease price by ~10%
+            // self._cost_to_play.write(self._cost_to_play.read() * 9 / 10);
+        }
+
+        // set snapshot to price change game
+        _snapshot(ref self);
     }
 }

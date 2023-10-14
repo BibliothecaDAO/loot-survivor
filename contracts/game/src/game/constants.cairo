@@ -71,4 +71,28 @@ mod REWARD_DISTRIBUTIONS_PHASE3 {
     const THIRD_PLACE: u256 = 3000000000000000000;
 }
 
+mod REWARD_DISTRIBUTIONS_PHASE1_BP {
+    const DAO: u256 = 0;
+    const INTERFACE: u256 = 0;
+    const FIRST_PLACE: u256 = 480;
+    const SECOND_PLACE: u256 = 320;
+    const THIRD_PLACE: u256 = 20;
+}
+
+mod REWARD_DISTRIBUTIONS_PHASE2_BP {
+    const DAO: u256 = 200;
+    const INTERFACE: u256 = 0;
+    const FIRST_PLACE: u256 = 400;
+    const SECOND_PLACE: u256 = 240;
+    const THIRD_PLACE: u256 = 160;
+}
+
+mod REWARD_DISTRIBUTIONS_PHASE3_BP {
+    const DAO: u256 = 200;
+    const INTERFACE: u256 = 160;
+    const FIRST_PLACE: u256 = 360;
+    const SECOND_PLACE: u256 = 160;
+    const THIRD_PLACE: u256 = 120;
+}
+
 const STARTER_BEAST_ATTACK_DAMAGE: u16 = 10;
