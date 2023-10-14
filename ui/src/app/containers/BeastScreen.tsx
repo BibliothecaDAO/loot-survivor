@@ -155,6 +155,8 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
     return <BattleLog />;
   }
 
+  console.log(blockData?.block_number! < adventurer?.revealBlock!);
+
   return (
     <div className="sm:w-2/3 flex flex-col sm:flex-row h-full">
       {blockData?.block_number! < adventurer?.revealBlock! && (

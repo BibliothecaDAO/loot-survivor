@@ -11,7 +11,7 @@ export const StrategyTutorial = () => {
         build! Each stat has an importance to survival, there is no rule book.
       </p>
       <p className="sm:text-lg">
-        Think but be quick, there isn&spos;t much time before the idle death
+        Think but be quick, there isn&apos;t much time before the idle death
         penalty will get you!
       </p>
     </div>

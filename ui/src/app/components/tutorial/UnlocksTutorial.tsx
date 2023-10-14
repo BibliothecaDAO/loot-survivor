@@ -18,8 +18,8 @@ export const UnlocksTutorial = () => {
       </p>
 
       <p className="sm:text-lg">
-        At lvl 20 you will start discovering named beasts. Slaying these will
-        provide great reward!
+        Beasts above level 20 will be named. Slaying these will provide great
+        reward!
       </p>
     </div>
   );
