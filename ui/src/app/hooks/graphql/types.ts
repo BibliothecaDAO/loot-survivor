@@ -42,6 +42,8 @@ export type AdventurerQuery = {
     beast: Maybe<Scalars["String"]>;
     beastHealth: Maybe<Scalars["Int"]>;
     statUpgrades: Maybe<Scalars["Int"]>;
+    startBlock: Maybe<Scalars["Int"]>;
+    revealBlock: Maybe<Scalars["Int"]>;
     actionsPerBlock: Maybe<Scalars["Int"]>;
     gold: Maybe<Scalars["Int"]>;
     createdTime: Maybe<Scalars["Timestamp"]>;

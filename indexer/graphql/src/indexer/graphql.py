@@ -641,6 +641,8 @@ class AdventurersFilter:
     ring: Optional[FeltValueFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     statUpgrades: Optional[FeltValueFilter] = None
+    startBlock: Optional[FeltValueFilter] = None
+    revealBlock: Optional[FeltValueFilter] = None
     actionsPerBlock: Optional[FeltValueFilter] = None
     gold: Optional[FeltValueFilter] = None
     createdTime: Optional[OrderByInput] = None
@@ -745,6 +747,20 @@ class ItemsFilter:
 
 
 @strawberry.input
+class EntropyFilter:
+    prevHash: Optional[HexValueFilter] = None
+    prevBlockNumber: Optional[FeltValueFilter] = None
+    prevBlockTimestamp: Optional[DateTimeFilter] = None
+    prevNextRotationBlock: Optional[FeltValueFilter] = None
+    newHash: Optional[HexValueFilter] = None
+    newBlockNumber: Optional[FeltValueFilter] = None
+    newBlockTimestamp: Optional[DateTimeFilter] = None
+    newNextRotationBlock: Optional[FeltValueFilter] = None
+    blocksPerHour: Optional[FeltValueFilter] = None
+    currentTimestamp: Optional[DateTimeFilter] = None
+
+
+@strawberry.input
 class AdventurersOrderByInput:
     id: Optional[OrderByInput] = None
     lastAction: Optional[OrderByInput] = None
@@ -770,6 +786,8 @@ class AdventurersOrderByInput:
     ring: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     statUpgrades: Optional[OrderByInput] = None
+    startBlock: Optional[OrderByInput] = None
+    revealBlock: Optional[OrderByInput] = None
     actionsPerBlock: Optional[OrderByInput] = None
     gold: Optional[OrderByInput] = None
     createdTime: Optional[OrderByInput] = None
@@ -874,6 +892,20 @@ class ItemsOrderByInput:
     timestamp: Optional[OrderByInput] = None
 
 
+@strawberry.input
+class EntropyOrderByInput:
+    prevHash: Optional[OrderByInput] = None
+    prevBlockNumber: Optional[OrderByInput] = None
+    prevBlockTimestamp: Optional[OrderByInput] = None
+    prevNextRotationBlock: Optional[OrderByInput] = None
+    newHash: Optional[OrderByInput] = None
+    newBlockNumber: Optional[OrderByInput] = None
+    newBlockTimestamp: Optional[OrderByInput] = None
+    newNextRotationBlock: Optional[OrderByInput] = None
+    blocksPerHour: Optional[OrderByInput] = None
+    currentTimestamp: Optional[OrderByInput] = None
+
+
 @strawberry.type
 class Adventurer:
     id: Optional[FeltValue]
@@ -899,6 +931,8 @@ class Adventurer:
     ring: Optional[ItemValue]
     beastHealth: Optional[FeltValue]
     statUpgrades: Optional[FeltValue]
+    startBlock: Optional[FeltValue]
+    revealBlock: Optional[FeltValue]
     actionsPerBlock: Optional[FeltValue]
     gold: Optional[FeltValue]
     createdTime: Optional[str]
@@ -931,6 +965,8 @@ class Adventurer:
             ring=data["ring"],
             beastHealth=data["beastHealth"],
             statUpgrades=data["statUpgrades"],
+            startBlock=data["startBlock"],
+            revealBlock=data["revealBlock"],
             actionsPerBlock=data["actionsPerBlock"],
             gold=data["gold"],
             createdTime=data["createdTime"],
@@ -1135,6 +1171,35 @@ class Item:
             xp=data["xp"],
             isAvailable=data["isAvailable"],
             timestamp=data["timestamp"],
+        )
+
+
+@strawberry.type
+class Entropy:
+    prevHash: Optional[HexValue]
+    prevBlockNumber: Optional[int]
+    prevBlockTimestamp: Optional[str]
+    prevNextRotationBlock: Optional[int]
+    newHash: Optional[HexValue]
+    newBlockNumber: Optional[int]
+    newBlockTimestamp: Optional[str]
+    newNextRotationBlock: Optional[int]
+    blocksPerHour: Optional[int]
+    currentTimestamp: Optional[str]
+
+    @classmethod
+    def from_mongo(cls, data):
+        return cls(
+            prevHash=data["prevHash"],
+            prevBlockNumber=data["prevBlockNumber"],
+            prevBlockTimestamp=data["prevBlockTimestamp"],
+            prevNextRotationBlock=data["prevNextRotationBlock"],
+            newHash=data["newHash"],
+            newBlockNumber=data["newBlockNumber"],
+            newBlockTimestamp=data["newBlockTimestamp"],
+            newNextRotationBlock=data["newNextRotationBlock"],
+            blocksPerHour=data["blocksPerHour"],
+            currentTimestamp=data["currentTimestamp"],
         )
 
 
@@ -1496,17 +1561,7 @@ def get_items(
     if where:
         processed_filters = process_filters(where)
         for key, value in processed_filters.items():
-            if (
-                isinstance(value, StringFilter)
-                | isinstance(value, ItemFilter)
-                | isinstance(value, SlotFilter)
-                | isinstance(value, TypeFilter)
-                | isinstance(value, MaterialFilter)
-                | isinstance(value, Special1Filter)
-                | isinstance(value, Special2Filter)
-                | isinstance(value, Special3Filter)
-                | isinstance(value, StatusFilter)
-            ):
+            if isinstance(value, StringFilter):
                 filter[key] = get_str_filters(value)
             elif isinstance(value, HexValueFilter):
                 filter[key] = get_hex_filters(value)
@@ -1536,6 +1591,42 @@ def get_items(
     return [Item.from_mongo(t) for t in query]
 
 
+def get_entropy(
+    info,
+    where: Optional[EntropyFilter] = {},
+    limit: Optional[int] = 10,
+    skip: Optional[int] = 0,
+    orderBy: Optional[EntropyOrderByInput] = {},
+) -> List[Entropy]:
+    db = info.context["db"]
+
+    filter = {"_cursor.to": None}
+
+    if where:
+        processed_filters = process_filters(where)
+        for key, value in processed_filters.items():
+            if isinstance(value, HexValueFilter):
+                filter[key] = get_hex_filters(value)
+
+    sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
+
+    sort_var = "updated_at"
+    sort_dir = -1
+
+    for key, value in sort_options.items():
+        if value.asc:
+            sort_var = key
+            sort_dir = 1
+            break
+        if value.desc:
+            sort_var = key
+            sort_dir = -1
+            break
+    query = db["entropy"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
+
+    return [Entropy.from_mongo(t) for t in query]
+
+
 @strawberry.type
 class Query:
     adventurers: List[Adventurer] = strawberry.field(resolver=get_adventurers)
@@ -1544,6 +1635,7 @@ class Query:
     beasts: List[Beast] = strawberry.field(resolver=get_beasts)
     battles: List[Battle] = strawberry.field(resolver=get_battles)
     items: List[Item] = strawberry.field(resolver=get_items)
+    entropy: List[Entropy] = strawberry.field(resolver=get_entropy)
 
 
 class IndexerGraphQLView(GraphQLView):
@@ -1557,22 +1649,22 @@ class IndexerGraphQLView(GraphQLView):
 
 async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
     mongo_goerli = MongoClient(mongo_goerli)
-    mongo_mainnet = MongoClient(mongo_mainnet)
+    # mongo_mainnet = MongoClient(mongo_mainnet)
     db_name_goerli = "mongo-goerli".replace("-", "_")
-    db_name_mainnet = "mongo-mainnet".replace("-", "_")
+    # db_name_mainnet = "mongo-mainnet".replace("-", "_")
     db_goerli = mongo_goerli[db_name_goerli]
-    db_mainnet = mongo_mainnet[db_name_mainnet]
+    # db_mainnet = mongo_mainnet[db_name_mainnet]
 
     schema = strawberry.Schema(query=Query)
     view_goerli = IndexerGraphQLView(db_goerli, schema=schema)
-    view_mainnet = IndexerGraphQLView(db_mainnet, schema=schema)
+    # view_mainnet = IndexerGraphQLView(db_mainnet, schema=schema)
 
     app = web.Application()
     # app.router.add_route("*", "/graphql", view_goerli)
 
     cors = aiohttp_cors.setup(app)
     resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
-    resource_mainnet = cors.add(app.router.add_resource("/graphql"))
+    # resource_mainnet = cors.add(app.router.add_resource("/graphql"))
 
     cors.add(
         resource_goerli.add_route("POST", view_goerli),
@@ -1591,22 +1683,22 @@ async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
         },
     )
 
-    cors.add(
-        resource_mainnet.add_route("POST", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
-    cors.add(
-        resource_mainnet.add_route("GET", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
+    # cors.add(
+    #     resource_mainnet.add_route("POST", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
+    # cors.add(
+    #     resource_mainnet.add_route("GET", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
 
     ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     ssl_context.load_cert_chain(

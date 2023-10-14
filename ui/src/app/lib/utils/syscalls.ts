@@ -247,16 +247,21 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
+        );
+        // Here we need to process the StartGame event first and use the output for AmbushedByBeast event
+        const startGameEvents = await parseEvents(
+          receipt as InvokeTransactionReceiptResponse,
+          undefined,
+          "StartGame"
         );
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
           {
             name: formData["name"],
-            homeRealm: formData["homeRealmId"],
-            classType: formData["class"],
-            entropy: 0,
+            startBlock: startGameEvents[0].data[0].startBlock,
+            revealBlock: startGameEvents[0].data[0].revealBlock,
             createdTime: new Date(),
           }
         );
@@ -355,7 +360,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
         const events = await parseEvents(
@@ -606,7 +611,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
 
@@ -835,7 +840,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
         // Add optimistic data
@@ -1011,7 +1016,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
 
@@ -1235,7 +1240,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: 2000,
           }
         );
         setTxHash(tx?.transaction_hash);

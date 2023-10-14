@@ -602,7 +602,7 @@ mod tests {
 
     #[test]
     #[available_gas(2383150)]
-    fn test_pack_bag() {
+    fn test_save_bag() {
         let mut bag = Bag {
             item_1: ItemPrimitive { id: 127, xp: 511, metadata: 31 },
             item_2: ItemPrimitive { id: 127, xp: 511, metadata: 31 },

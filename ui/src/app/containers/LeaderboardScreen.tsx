@@ -16,6 +16,7 @@ import { useBlock, useAccount } from "@starknet-react/core";
 import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
 import { useContracts } from "../hooks/useContracts";
 import useLoadingStore from "../hooks/useLoadingStore";
+import LootIconLoader from "../components/icons/Loader";
 
 interface LeaderboardScreenProps {
   slayAllIdles: (...args: any[]) => any;
@@ -117,52 +118,64 @@ export default function LeaderboardScreen({
 
   return (
     <div className="flex flex-col items-center h-full xl:overflow-y-auto 2xl:overflow-hidden mt-5 sm:mt-0">
-      <div className="flex flex-row gap-5">
-        <Button
-          onClick={() => handleSlayAdventurers()}
-          disabled={slayAdventurers.length === 0}
-        >
-          Slay Idle Adventurers
-        </Button>
-        <Button
-          onClick={async () => {
-            const adventurersByXPdata = await refetch(
-              "adventurersByXPQuery",
-              undefined
-            );
-            const sortedAdventurersByXP = handleSortXp(adventurersByXPdata);
-            setData("adventurersByXPQuery", sortedAdventurersByXP);
-          }}
-        >
-          <RefreshIcon className="w-8" />
-        </Button>
-      </div>
-      <div className="flex flex-row w-full">
-        <div
-          className={`${showScores ? "hidden " : ""}sm:block w-full sm:w-1/2`}
-        >
-          <LiveTable
-            itemsPerPage={itemsPerPage}
-            handleFetchProfileData={handlefetchProfileData}
-          />
+      {!adventurersByXPdata ? (
+        <div className="flex justify-center items-center h-full">
+          <LootIconLoader className="m-auto" size="w-10" />
         </div>
-        <div
-          className={`${showScores ? "" : "hidden "}sm:block w-full sm:w-1/2`}
-        >
-          <ScoreTable
-            itemsPerPage={itemsPerPage}
-            handleFetchProfileData={handlefetchProfileData}
-          />
-        </div>
-      </div>
-      <Button
-        onClick={() =>
-          showScores ? setShowScores(false) : setShowScores(true)
-        }
-        className="sm:hidden"
-      >
-        {showScores ? "Show Live Leaderboard" : "Show Scores"}
-      </Button>
+      ) : (
+        <>
+          <div className="flex flex-row gap-5">
+            <Button
+              onClick={() => handleSlayAdventurers()}
+              disabled={slayAdventurers.length === 0}
+            >
+              Slay Idle Adventurers
+            </Button>
+            <Button
+              onClick={async () => {
+                const adventurersByXPdata = await refetch(
+                  "adventurersByXPQuery",
+                  undefined
+                );
+                const sortedAdventurersByXP = handleSortXp(adventurersByXPdata);
+                setData("adventurersByXPQuery", sortedAdventurersByXP);
+              }}
+            >
+              <RefreshIcon className="w-8" />
+            </Button>
+          </div>
+          <div className="flex flex-row w-full">
+            <div
+              className={`${
+                showScores ? "hidden " : ""
+              }sm:block w-full sm:w-1/2`}
+            >
+              <LiveTable
+                itemsPerPage={itemsPerPage}
+                handleFetchProfileData={handlefetchProfileData}
+              />
+            </div>
+            <div
+              className={`${
+                showScores ? "" : "hidden "
+              }sm:block w-full sm:w-1/2`}
+            >
+              <ScoreTable
+                itemsPerPage={itemsPerPage}
+                handleFetchProfileData={handlefetchProfileData}
+              />
+            </div>
+          </div>
+          <Button
+            onClick={() =>
+              showScores ? setShowScores(false) : setShowScores(true)
+            }
+            className="sm:hidden"
+          >
+            {showScores ? "Show Live Leaderboard" : "Show Scores"}
+          </Button>
+        </>
+      )}
     </div>
   );
 }
