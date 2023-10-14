@@ -413,6 +413,10 @@ mod Game {
                 @self, ref adventurer, ref bag, adventurer_id, items.clone(), false
             );
 
+            __event_EquippedItems(
+                ref self, adventurer, adventurer_id, bag, items, unequipped_items,
+            );
+
             // if the adventurer is equipping an item during battle, the beast will counter attack
             if (adventurer.in_battle()) {
                 // get beast and beast seed
@@ -428,10 +432,7 @@ mod Game {
                     ref self, ref adventurer, adventurer_id, beast, beast_seed, rnd1, rnd2,
                 );
 
-                // emit events
-                __event_EquippedItems(
-                    ref self, adventurer, adventurer_id, bag, items, unequipped_items,
-                );
+                // emit attacked by beast event
                 __event_AttackedByBeast(ref self, adventurer, adventurer_id, beast_battle_details);
 
                 // if adventurer died from counter attack, process death
@@ -469,6 +470,9 @@ mod Game {
             // drop items
             _drop(ref self, ref adventurer, ref bag, adventurer_id, items.clone());
 
+            // emit dropped items event
+            __event_DroppedItems(ref self, adventurer, adventurer_id, bag, items);
+
             // if the adventurer was mutated, save it
             if (adventurer.mutated) {
                 _save_adventurer(ref self, ref adventurer, adventurer_id);
@@ -478,9 +482,6 @@ mod Game {
             if bag.mutated {
                 _save_bag(ref self, adventurer_id, bag);
             }
-
-            // emit dropped items event
-            __event_DroppedItems(ref self, adventurer, adventurer_id, bag, items);
         }
 
         /// @title Upgrade Function
