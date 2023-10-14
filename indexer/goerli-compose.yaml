@@ -122,7 +122,7 @@ services:
       PERSIST_TO_ETCD: http://etcd:2379
       SINK_ID: scores
       AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
-
+  
 volumes:
   etcd_data:
   mongo_data:

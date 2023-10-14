@@ -81,7 +81,6 @@ export const ArcadeDialog = () => {
     > = {};
     const balancePromises = arcadeConnectors().map((account) => {
       return fetchBalanceWithRetry(account.name).then((balances) => {
-        console.log(localBalances);
         localBalances[account.name] = {
           eth: BigInt(0),
           lords: BigInt(0),
@@ -110,9 +109,9 @@ export const ArcadeDialog = () => {
     });
   };
 
-  // useEffect(() => {
-  //   // getBalances();
-  // }, [arcadeConnectors, fetchedBalances]);
+  useEffect(() => {
+    getBalances();
+  }, [arcadeConnectors, fetchedBalances]);
 
   if (!connectors) return <div></div>;
 
@@ -309,7 +308,7 @@ export const ArcadeAccountCard = ({
         </span>
         <span className="text-lg w-full">
           {formattedEth === "NaN" ? (
-            <span className="loading-ellipsis">Loading</span>
+            <span className="loading-ellipsis text-center">Loading</span>
           ) : (
             <span className="flex flex-row justify-between text-sm sm:text-base">
               <span>{`${formattedEth}ETH`}</span>

@@ -46,8 +46,6 @@ export const config: Config<Starknet, Mongo | Console> = {
 };
 
 export default function transform({ header, events }: Block) {
-  const { timestamp } = header!;
-
   return events.flatMap(({ event }) => {
     switch (event.keys[0]) {
       case DISCOVERED_BEAST: {

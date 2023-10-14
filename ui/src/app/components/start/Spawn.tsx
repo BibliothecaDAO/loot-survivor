@@ -2,7 +2,7 @@ import { useState, FormEvent, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "../buttons/Button";
 import { MdClose } from "react-icons/md";
-import { WalletTutorial } from "../tutorial/WalletTutorial";
+import { WalletTutorial } from "../intro/WalletTutorial";
 import { TxActivity } from "../navigation/TxActivity";
 import useUIStore from "@/app/hooks/useUIStore";
 import useLoadingStore from "@/app/hooks/useLoadingStore";

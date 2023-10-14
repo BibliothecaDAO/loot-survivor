@@ -12,6 +12,7 @@ import { Adventurer } from "../types";
 import ScoreTable from "../components/leaderboard/ScoreTable";
 import LiveTable from "../components/leaderboard/LiveTable";
 import { RefreshIcon } from "../components/icons/Icons";
+import LootIconLoader from "../components/icons/Loader";
 
 /**
  * @container
@@ -72,15 +73,11 @@ export default function LeaderboardScreen() {
     }
   }, [adventurersByXPdata]);
 
-  console.log(adventurersByXPdata);
-
   return (
     <div className="flex flex-col items-center h-full xl:overflow-y-auto 2xl:overflow-hidden mt-5 sm:mt-0">
       {!adventurersByXPdata ? (
         <div className="flex justify-center items-center h-full">
-          <p className="text-4xl">
-            Leaderboard is down right now, we are working on fixing ASAP!
-          </p>
+          <LootIconLoader className="m-auto" size="w-10" />
         </div>
       ) : (
         <>
