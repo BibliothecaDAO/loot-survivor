@@ -7,7 +7,8 @@ export const ExploreTutorial = () => {
       </p>
       <ul className="text-sm sm:text-lg">
         <li>
-          Beasts: There are 75 beasts, each with a fixed tier and elemental type. The level and health of the beasts will vary based on the adventurer's level.
+          Beasts: There are 75 beasts, each with a fixed tier and elemental type. 
+          The level and health of the beasts will vary based on the adventurer's level.
         </li>
         <li>
           Obstacles - 75 different obstacles that will give damage unless they
