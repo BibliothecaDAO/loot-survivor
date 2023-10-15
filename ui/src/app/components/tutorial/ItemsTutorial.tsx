@@ -3,10 +3,10 @@ import LootIcon from "../icons/LootIcon";
 export const ItemsTutorial = () => {
   return (
     <div className="flex flex-col gap-5 uppercase items-center text-center h-full">
-      <h3 className="mt-0">Loot Items</h3>
+      <h3 className="mt-0">Items</h3>
 
       <p className="sm:text-lg">
-        There are 101 of the original Loot Items to choose when upgrading!
+        Loot Survivor uses the 101 Loot items
       </p>
 
       <div className="flex flex-row gap-2">
@@ -21,12 +21,7 @@ export const ItemsTutorial = () => {
       </div>
 
       <p className="sm:text-xl sm:text-lg">
-        They are ranked from Tier 1 (strongest) - 5 (weakest).
-      </p>
-
-      <p className="sm:text-lg">
-        Be wise when choosing the strength of your gear, the higher tier items
-        are costly! Charisma will reduce the amount you pay during upgrading!
+        Items are ranked from Tier 1 (strongest) to Tier 5 (weakest)
       </p>
     </div>
   );

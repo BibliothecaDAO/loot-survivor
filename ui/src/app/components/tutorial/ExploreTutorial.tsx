@@ -1,21 +1,18 @@
 export const ExploreTutorial = () => {
   return (
     <div className="flex flex-col gap-5 uppercase items-center text-center h-full">
-      <h3 className="mt-0">Explore</h3>
-      <p className="text-sm sm:text-lg mb-2">
-        During your exploration, you will discovery many things. They include:
-      </p>
+      <h3 className="mt-0">Exploration</h3>
+
       <ul className="text-sm sm:text-lg">
         <li>
-          Beasts - 75 different beasts with various levels and health will lock
-          you in a battle. Fight or Flee to survive!
+          Beasts: There are 75 beasts, each with a fixed tier and elemental type. The level and health of the beasts will vary based on the Adventurer&apos;s level. Defeating a beast provides gold and xp.
         </li>
         <li>
-          Obstacles - 75 different obstacles that will give damage unless they
-          are avoided!
+          Obstacles: There are 75 obstacles, each with a fixed tier and elemental type. The level of the obstacles will vary based on the adventurer&apos;s level. You either dodge the obstacle or take damage.
         </li>
-        <li>Gold - A random amount of gold will be added to your balance</li>
-        <li>Health Potions - Instant injection of a random amount</li>
+        <li>
+          In addition to Beasts and Obstacles, you can find Gold and Health during your explorations.
+        </li>
       </ul>
     </div>
   );

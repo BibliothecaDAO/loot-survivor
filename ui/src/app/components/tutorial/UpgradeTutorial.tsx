@@ -1,29 +1,27 @@
 export const UpgradeTutorial = () => {
   return (
     <div className="flex flex-col uppercase items-center text-center h-full">
-      <h3 className="mt-0">Upgrades</h3>
+      <h3 className="mt-0">Adventurer Upgrades</h3>
       <p className="sm:text-lg">
-        Whenever your adventurer levels up they will be able to upgrade and
-        boost their power!
+        At the start of each level, you get the option to ugprade stats and purchase items
       </p>
       <div className="flex flex-col gap-2">
         <div className="flex flex-col">
-          <p className="text-lg sm:text-2xl">Upgrade Stats</p>
+          <p className="text-lg sm:text-2xl">Stats</p>
           <p className="sm:text-lg">
-            Adventurer can choose to upgrade 6 different stats.
+            Adventurer&apos;s receive one stat upgrade each time they level up or get an item to greatness 20.
           </p>
         </div>
         <div className="flex flex-col">
-          <p className="text-lg sm:text-2xl">Health Potions</p>
+          <p className="text-lg sm:text-2xl">Health</p>
           <p className="text-sm sm:text-lg">
-            Health potions give 10hp. Potion cost will rise as your journey
-            continues.
+            Use potions to replenish your health. The cost of potions increases each level, invest in Charisma to keep the cost down.
           </p>
         </div>
         <div className="flex flex-col">
-          <p className="text-lg sm:text-2xl">Loot Fountain</p>
+          <p className="text-lg sm:text-2xl">Items</p>
           <p className="sm:text-lg">
-            20 Loot Items will be available for each level.
+            Adventurer&apos;s have access to a random selection of items each level. Similar to potions, Charisma provides a discount on items.
           </p>
         </div>
       </div>
