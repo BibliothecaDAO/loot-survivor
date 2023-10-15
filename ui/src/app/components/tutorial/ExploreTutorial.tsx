@@ -7,9 +7,7 @@ export const ExploreTutorial = () => {
       </p>
       <ul className="text-sm sm:text-lg">
         <li>
-          Beasts: 75 different beasts with various levels and health will lock Fight or Flee to survive!
-          you in a battle. Fight or Flee to survive! Fight or Flee to survive! Fight or Flee to survive!
-          Fight or Flee to survive!
+          Beasts - There are 75 distinct types of beasts, each with a fixed tier and eelemental type
         </li>
         <li>
           Obstacles - 75 different obstacles that will give damage unless they
