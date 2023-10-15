@@ -6,7 +6,7 @@ export const ItemsTutorial = () => {
       <h3 className="mt-0">Loot Items</h3>
 
       <p className="sm:text-lg">
-        Loot Survivor uses the 101 items from the OG Loot contract, consisting of: 18 weapons, 75 armor pieces, 5 rings, and 3 necklaces.
+        Loot Survivor uses the 101 Loot items
       </p>
 
       <div className="flex flex-row gap-2">
@@ -21,14 +21,10 @@ export const ItemsTutorial = () => {
       </div>
 
       <p className="sm:text-xl sm:text-lg">
-        The items are ranked from Tier 1 (strongest) to Tier 5 (weakest).
-      </p>
-
-      <p className="sm:text-lg">
-        The price of the items in the market is based on the tier, with tier 1 items costing the most and tier 5 costing the least. Your Adventurer&apos;s Charisma provides a discount on items and potions.
+        Items are ranked from Tier 1 (strongest) to Tier 5 (weakest)
       </p>
       <p className="sm:text-lg">
-        Jewlery items provide special boosts and increase your adventurer&apos;s luck which increases the chance of critical hits.
+        Jewlery items provide item boosts and increases Luck which used for critical hits
       </p>
     </div>
   );
