@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { ItemsTutorial } from "../tutorial/ItemsTutorial";
 import { UpgradeTutorial } from "../tutorial/UpgradeTutorial";
-import { EfficacyHint } from "../tutorial/EfficaciesTutorial";
-import { UnlocksTutorial } from "../tutorial/UnlocksTutorial";
+import { EfficacyHint } from "../tutorial/ElementalTutorial";
+import { UnlocksTutorial } from "../tutorial/ItemSpecialsTutorial";
 import { ExploreTutorial } from "../tutorial/ExploreTutorial";
 import { StrategyTutorial } from "../tutorial/StrategyTutorial";
 import RowLoader from "../animations/RowLoader";

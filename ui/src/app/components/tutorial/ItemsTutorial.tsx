@@ -6,7 +6,7 @@ export const ItemsTutorial = () => {
       <h3 className="mt-0">Loot Items</h3>
 
       <p className="sm:text-lg">
-        There are 101 of the original Loot Items to choose when upgrading!
+        Loot Survivor uses the 101 items from the OG Loot contract, consisting of: 18 weapons, 75 armor pieces, 5 rings, and 3 necklaces.
       </p>
 
       <div className="flex flex-row gap-2">
@@ -21,12 +21,14 @@ export const ItemsTutorial = () => {
       </div>
 
       <p className="sm:text-xl sm:text-lg">
-        They are ranked from Tier 1 (strongest) - 5 (weakest).
+        The items are ranked from Tier 1 (strongest) to Tier 5 (weakest).
       </p>
 
       <p className="sm:text-lg">
-        Be wise when choosing the strength of your gear, the higher tier items
-        are costly! Charisma will reduce the amount you pay during upgrading!
+        The price of the items in the market is based on the tier, with tier 1 items costing the most and tier 5 costing the least. Your Adventurer&apos;s Charisma provides a discount on items and potions.
+      </p>
+      <p className="sm:text-lg">
+        Jewlery items provide special boosts and increase your adventurer&apos;s luck which increases the chance of critical hits.
       </p>
     </div>
   );
