@@ -6,7 +6,8 @@ export const EfficacyHint = () => {
       <h3 className="mt-0 uppercase">Efficacies</h3>
       <div className="flex flex-col gap-5">
         <p className="sm:text-2xl">
-          Understanding weapon and armor elemental is vital to survival!
+          Understanding the efficacy chart is vital for surviving through
+          combat!
         </p>
         <table className="uppercase whitespace-nowrap border border-terminal-green text-sm">
           <thead>
