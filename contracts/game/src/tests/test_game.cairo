@@ -21,7 +21,7 @@ mod tests {
         Game,
         game::{
             interfaces::{IGameDispatcherTrait, IGameDispatcher},
-            constants::{messages::{STAT_UPGRADES_AVAILABLE}, STARTER_BEAST_ATTACK_DAMAGE}
+            constants::{COST_TO_PLAY,BLOCKS_IN_A_WEEK, messages::{STAT_UPGRADES_AVAILABLE}, STARTER_BEAST_ATTACK_DAMAGE}
         }
     };
     use openzeppelin::utils::serde::SerializedAppend;
@@ -79,7 +79,7 @@ mod tests {
         lords0
     }
 
-    fn setup(starting_block: u64) -> IGameDispatcher {
+    fn setup(starting_block: u64) -> (IGameDispatcher, IERC20CamelDispatcher) {
         testing::set_block_number(starting_block);
         testing::set_block_timestamp(1696201757);
 
@@ -90,6 +90,7 @@ mod tests {
         calldata.append(DAO().into());
         calldata.append(COLLECTIBLE_BEASTS().into());
         calldata.append(GOLDEN_TOKEN().into());
+        calldata.append(COST_TO_PLAY.try_into().unwrap());
 
         let (address0, _) = deploy_syscall(
             Game::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
@@ -98,11 +99,11 @@ mod tests {
 
         testing::set_contract_address(OWNER());
 
-        let lordsContract = IERC20CamelDispatcher { contract_address: lords };
+        let lords_contract = IERC20CamelDispatcher { contract_address: lords };
 
-        lordsContract.approve(address0, APPROVE.into());
+        lords_contract.approve(address0, APPROVE.into());
 
-        IGameDispatcher { contract_address: address0 }
+        (IGameDispatcher { contract_address: address0 }, lords_contract)
     }
 
     fn add_adventurer_to_game(ref game: IGameDispatcher) {
@@ -118,7 +119,9 @@ mod tests {
     }
 
     fn new_adventurer(starting_block: u64) -> IGameDispatcher {
-        let mut game = setup(starting_block);
+        let (unmut_game, lords) = setup(starting_block);
+
+        let mut game = unmut_game;
 
         let starting_weapon = ItemId::Wand;
         let name = 'abcdefghijklmno';
@@ -452,6 +455,33 @@ mod tests {
         assert(adventurer.get_level() == 11, 'adventurer should be lvl 11');
 
         game
+    }
+
+    fn new_adventurer_with_lords(starting_block: u64) -> (IGameDispatcher, IERC20CamelDispatcher) {
+        let (unmut_game, lords) = setup(starting_block);
+
+        let mut game = unmut_game;
+
+        let starting_weapon = ItemId::Wand;
+        let name = 'abcdefghijklmno';
+
+        // start new game
+        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN.into());
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let adventurer_meta_data = game.get_adventurer_meta(ADVENTURER_ID);
+
+        // verify starting weapon
+        assert(adventurer.weapon.id == starting_weapon, 'wrong starting weapon');
+        assert(adventurer_meta_data.name == name, 'wrong player name');
+        assert(adventurer.xp == 0, 'should start with 0 xp');
+        assert(
+            adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
+            'wrong starter beast health '
+        );
+
+        (game, lords)
     }
 
     // TODO: need to figure out how to make this more durable
@@ -1848,5 +1878,18 @@ mod tests {
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
+    }
+
+    #[test]
+    #[available_gas(90000000)]
+    fn test_bp_distribution() {
+        let (game, lords) = new_adventurer_with_lords(1000);
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // stage 1
+        assert(lords.balanceOf(DAO()) == COST_TO_PLAY, 'wrong stage 1 balance');
+
+        testing::set_block_number(1001 + BLOCKS_IN_A_WEEK * 2);
+        
     }
 }
