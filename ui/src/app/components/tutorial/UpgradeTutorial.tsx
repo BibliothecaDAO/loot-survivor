@@ -1,29 +1,27 @@
 export const UpgradeTutorial = () => {
   return (
     <div className="flex flex-col uppercase items-center text-center h-full">
-      <h3 className="mt-0">Upgrades</h3>
+      <h3 className="mt-0">Adventurer Upgrades</h3>
       <p className="sm:text-lg">
-        Whenever your adventurer levels up they will be able to upgrade and
-        boost their power!
+        Each time an Adventurer reaches a new level, they get the option to ugprade stats and purchase items
       </p>
       <div className="flex flex-col gap-2">
         <div className="flex flex-col">
-          <p className="text-lg sm:text-2xl">Upgrade Stats</p>
+          <p className="text-lg sm:text-2xl">Stats Upgrades</p>
           <p className="sm:text-lg">
-            Adventurer can choose to upgrade 6 different stats.
+            Adventurer's receive one stat upgrade for each level.
           </p>
         </div>
         <div className="flex flex-col">
           <p className="text-lg sm:text-2xl">Health Potions</p>
           <p className="text-sm sm:text-lg">
-            Health potions give 10hp. Potion cost will rise as your journey
-            continues.
+            Health potions provide +10hp. The base cost of potions is equal to the adventurer's level. Charisma provides a +2 gold discount on potions.
           </p>
         </div>
         <div className="flex flex-col">
-          <p className="text-lg sm:text-2xl">Loot Fountain</p>
+          <p className="text-lg sm:text-2xl">Item Upgrades</p>
           <p className="sm:text-lg">
-            20 Loot Items will be available for each level.
+            Adventurer's will have the option to purchase item upgrades each level up. The items in the market are random for each level up, with the number of items in the market equal to 21 times the number of stat points available. In the case where you receive multiple stat upgrades, such as during a double level up, or from getting items to greatness 20, the size of the market will be larger.
           </p>
         </div>
       </div>
