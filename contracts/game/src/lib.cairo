@@ -109,8 +109,9 @@ mod Game {
         _golden_token_last_use: LegacyMap::<felt252, felt252>,
         _golden_token: ContractAddress,
         _cost_to_play: u128,
-        _games_played_snapshot: felt252,
+        _games_played_snapshot: LegacyMap::<felt252, felt252>,
         _time_since_price_update: felt252,
+        _snap_shot_period: felt252,
     }
 
     #[event]
@@ -684,8 +685,11 @@ mod Game {
         /// @dev This is intentional callable by anyone
         /// @players Adjust the cost to play if the moving price of $LORDS is too high or too low
         fn update_cost_to_play(ref self: ContractState) {
-            _assert_leader_board(@self);
             _update_cost_to_play(ref self);
+        }
+
+        fn initiate_price_change(ref self: ContractState) {
+            _initiate_price_change(ref self);
         }
 
         //
@@ -3541,71 +3545,90 @@ mod Game {
         self._golden_token_last_use.read(token_id.try_into().unwrap()).into()
     }
 
-    fn _snapshot(ref self: ContractState) {
+    fn _assert_week_past(self: @ContractState) {
+        let time_diff: u128 = get_block_timestamp().into()
+            - self._time_since_price_update.read().try_into().unwrap();
+
+        // check if time diff is greater than a week    
+        let one_week: u128 = (DAY.into() * 7).try_into().unwrap();
+
+        // assert enough time passed
+        assert(time_diff > one_week, messages::TIME_NOT_REACHED);
+    }
+
+    fn _initiate_price_change(ref self: ContractState) {
+        // TODO: Put restriction on this, otherwise it will get spammed and a update can never happen
+
+        let current_period = self._snap_shot_period.read();
+
         // set snapshot to price change game
-        self._games_played_snapshot.write(self._game_counter.read());
+        self._games_played_snapshot.write(current_period, self._game_counter.read());
 
         // set time since price update to now
         self._time_since_price_update.write(get_block_timestamp().into());
+
+        // update snapshot period
+        self._snap_shot_period.write(current_period + 1);
     }
 
-    fn _game_count_in_period(self: @ContractState) -> u128 {
-        // get current game count
-        let current_game_count = self._game_counter.read();
+    fn _game_count_in_period(self: @ContractState, period: u128) -> u128 {
+        (self._game_counter.read() - self._games_played_snapshot.read(period.into()))
+            .try_into()
+            .unwrap()
+    }
 
-        // get snapshot game count
-        let snapshot_game_count = self._games_played_snapshot.read();
+    // TODO: Currently this will only work if 3 periods exist
+    fn _moving_average(self: @ContractState, period: u128) -> u128 {
+        assert(period > 3, 'Period must be greater than 3');
 
-        // return difference
-        (current_game_count - snapshot_game_count).try_into().unwrap()
+        let mut total_games: u128 = 0;
+        let mut window_size: u128 = 3;
+
+        let mut i = 0;
+
+        loop {
+            if (i > window_size) {
+                break;
+            }
+
+            let game_count = _game_count_in_period(self, period - i);
+            total_games += game_count;
+
+            i += 1;
+        };
+
+        total_games / window_size
     }
 
     fn _update_cost_to_play(ref self: ContractState) {
         let cost_to_play = self._cost_to_play.read();
 
-        // check if time diff is greater than a week
-        let time_diff: u128 = get_block_timestamp().into()
-            - self._time_since_price_update.read().try_into().unwrap();
-        let one_week: u128 = (DAY.into() * 7).try_into().unwrap();
+        // check if time diff is greater than a week since init
+        _assert_week_past(@self);
 
-        // assert enough time passed
-        assert(time_diff > one_week, messages::TIME_NOT_REACHED);
+        // get current period
+        let current_period = self._snap_shot_period.read().try_into().unwrap();
 
-        let game_count: u128 = _game_count_in_period(@self);
+        // get game count in period
+        let game_count: u128 = _game_count_in_period(@self, current_period);
 
-        let upper_threshold: u128 = 1000;
-        let lower_threshold: u128 = 50;
+        // including current period
+        let moving_average: u128 = _moving_average(@self, current_period);
 
-        if game_count > upper_threshold {
+        if game_count > moving_average {
             // increase price by 10%
             self._cost_to_play.write(cost_to_play * 11 / 10);
-        } else if game_count < lower_threshold {
+        } else if game_count < moving_average {
             // decrease price by ~10%
             self._cost_to_play.write(cost_to_play * 9 / 10);
         }
 
-        // set snapshot to price change game
-        _snapshot(ref self);
-
         // emit price change event
-        self.emit(PriceChangeEvent {
-            new_price: self._cost_to_play.read().into(),
-            changer: get_caller_address()
-        });
-    }
-
-    fn _assert_leader_board(self: @ContractState) {
-        let caller = get_caller_address();
-
-        let leaderboard = self._leaderboard.read();
-
-        let first_place = self._owner.read(leaderboard.first.adventurer_id.into());
-        let second_place = self._owner.read(leaderboard.second.adventurer_id.into());
-        let third_place = self._owner.read(leaderboard.third.adventurer_id.into());
-
-        assert(
-            first_place == caller || second_place == caller || third_place == caller,
-            messages::NOT_ON_LEADERBOARD
-        );
+        self
+            .emit(
+                PriceChangeEvent {
+                    new_price: self._cost_to_play.read().into(), changer: get_caller_address()
+                }
+            );
     }
 }

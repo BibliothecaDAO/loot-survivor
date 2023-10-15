@@ -30,6 +30,7 @@ trait IGame<TContractState> {
     fn slay_idle_adventurers(ref self: TContractState, adventurer_ids: Array<felt252>);
     fn rotate_game_entropy(ref self: TContractState);
     fn update_cost_to_play(ref self: TContractState);
+    fn initiate_price_change(ref self: TContractState);
 
     // ------ View Functions ------
 

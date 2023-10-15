@@ -1880,16 +1880,26 @@ mod tests {
         game.attack(ADVENTURER_ID, false);
     }
 
+    fn _calculate_payout(bp: u256, price: u128) -> u256 {
+        (bp * price.into()) / 1000
+    }
+
     #[test]
     #[available_gas(90000000)]
     fn test_bp_distribution() {
         let (game, lords) = new_adventurer_with_lords(1000);
         let adventurer = game.get_adventurer(ADVENTURER_ID);
 
-        // stage 1
+        // stage 0
         assert(lords.balanceOf(DAO()) == COST_TO_PLAY, 'wrong stage 1 balance');
 
+        // stage 1
         testing::set_block_number(1001 + BLOCKS_IN_A_WEEK * 2);
+
+        // spawn new
+        
+        // DAO doesn't get anything more until stage 2
+        assert(lords.balanceOf(DAO()) == COST_TO_PLAY, 'wrong stage 1 balance');
         
     }
 }
