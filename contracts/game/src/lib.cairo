@@ -141,6 +141,7 @@ mod Game {
         IdleDeathPenalty: IdleDeathPenalty,
         RewardDistribution: RewardDistribution,
         GameEntropyRotatedEvent: GameEntropyRotatedEvent,
+        PriceChangeEvent: PriceChangeEvent,
     }
 
     #[constructor]
@@ -3587,7 +3588,7 @@ mod Game {
         _snapshot(ref self);
 
         // emit price change event
-        selt.emit(PriceChangeEvent {
+        self.emit(PriceChangeEvent {
             new_price: self._cost_to_play.read().into(),
             changer: get_caller_address()
         });
