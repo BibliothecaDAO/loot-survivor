@@ -7,7 +7,7 @@ export const ExploreTutorial = () => {
       </p>
       <ul className="text-sm sm:text-lg">
         <li>
-          Beasts - 75 different beasts with various levels and health will lock
+          Beasts: 75 different beasts with various levels and health will lock
           you in a battle. Fight or Flee to survive! Fight or Flee to survive!
           Fight or Flee to survive!
         </li>
