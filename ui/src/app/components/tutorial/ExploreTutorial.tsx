@@ -7,7 +7,8 @@ export const ExploreTutorial = () => {
       </p>
       <ul className="text-sm sm:text-lg">
         <li>
-          Beasts: There are 75 distinct types of beasts, each with a fixed elemental type and tier. The level and health of the beasts will vary and scale based on the adventurer's level. When encountering a beast, it will attempt to ambush and attack before you have a chance to react. Your chance change of avoiding this ambush is based on your Adventurer's Wisdom. Defeating provides gold and xp for your adventurer and items, with stronger beasts yielding more substantial gold and xp
+          Beasts - 75 different beasts with various levels and health will lock
+          you in a battle. Fight or Flee to survive! Your chance of fleeing depends on your Adventurer's Dexterity
         </li>
         <li>
           Obstacles - 75 different obstacles that will give damage unless they
