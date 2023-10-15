@@ -8,7 +8,7 @@ export const ExploreTutorial = () => {
       <ul className="text-sm sm:text-lg">
         <li>
           Beasts - 75 different beasts with various levels and health will lock
-          you in a battle. Fight or Flee to survive!! test
+          you in a battle. Fight or Flee to survive!! test test test
         </li>
         <li>
           Obstacles - 75 different obstacles that will give damage unless they
