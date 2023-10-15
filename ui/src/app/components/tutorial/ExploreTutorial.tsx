@@ -7,7 +7,7 @@ export const ExploreTutorial = () => {
       </p>
       <ul className="text-sm sm:text-lg">
         <li>
-          A Beast: There are 75 distinct types of beasts, each with a fixed tier and elemental type. The level and health of the beasts will vary and increase with the adventurer's level. Defeating a beast provides gold and xp for your adventurer and items, stronger beasts provide larger rewards.
+          Beasts: There are 75 beasts, each with a fixed tier and elemental type. The level and health of the beasts will vary based on the adventurer's level.
         </li>
         <li>
           Obstacles - 75 different obstacles that will give damage unless they
