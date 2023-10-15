@@ -23,6 +23,12 @@ export const ItemsTutorial = () => {
       <p className="sm:text-xl sm:text-lg">
         Items are ranked from Tier 1 (strongest) to Tier 5 (weakest)
       </p>
+      <p className="sm:text-xl sm:text-lg">
+        There are three types of weapons: Blades, Bludgeons, and Magical
+      </p>
+      <p className="sm:text-xl sm:text-lg">
+        There are three types of armor: Hide, Metal, and Magic
+      </p>
     </div>
   );
 };

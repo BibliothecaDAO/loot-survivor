@@ -4,19 +4,19 @@ export const UnlocksTutorial = () => {
       <h3 className="mt-0">Item Specials</h3>
 
       <p className="sm:text-lg">
-        Loot items receive special abilities upon reaching greatness level 15, 19, and 20.
+        Loot items receive special abilities when they reach greatness 15, 19, and 20.
       </p>
 
       <p className="sm:text-lg">
-        G15: Special suffix such as &quot;Of Power&quot;. There are sixteen unique suffixes, with each providing a unique set of stat boosts.
+        At G15, they receive a Special suffix such as &quot;Of Power&quot;. There are sixteen suffixes, each providing a unique set of stat boosts.
       </p>
 
       <p className="sm:text-lg">
-        G19: Two part prefix such as &quot;Agony Bane&quot; that can provide significant damage bonus when used properly.
+        At G19, they receive a two part name prefix such as &quot;Agony Bane&quot; which if it matches a beast, provides a powerful damage boost.
       </p>
 
       <p className="sm:text-lg">
-        G20: Adventurer receives a permenant stat upgrade equvialent to leveling up.
+        At G20, they receive a +1 modifier which grants the player a stat upgrade for their Adventurer.
       </p>
     </div>
   );

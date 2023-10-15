@@ -8,9 +8,6 @@ export const StrategyTutorial = () => {
       <p className="sm:text-lg">
         Elemental significantly impacts damage. Consider purchasing differnt types of weapons and armor to maximize damage and minimize damage taken.
       </p>
-      <p className="sm:text-lg">
-        Without dexterity, you cannot flee beasts. Without intelligence, you will take damage from every obstacle. Without wisdom, beasts will always ambush and attack before you are prepared.
-      </p>
     </div>
   );
 };
