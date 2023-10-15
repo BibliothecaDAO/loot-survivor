@@ -25,6 +25,10 @@ mod messages {
     const NO_ITEMS: felt252 = 'Must provide item ids';
     const NON_ZERO_STARTING_LUCK: felt252 = 'Luck must be zero';
     const RATE_LIMIT_EXCEEDED: felt252 = 'rate limit exceeded';
+    const NOT_ON_LEADERBOARD: felt252 = 'Not on leaderboard';
+    const TIME_NOT_REACHED: felt252 = 'Time not reached';
+    const CANNOT_PLAY_WITH_TICKET: felt252 = 'Cannot play with ticket';
+    const NOT_OWNER_OF_TICKET: felt252 = 'Not owner of ticket';
 }
 
 // TODO: Update for mainnet
@@ -45,30 +49,6 @@ struct Week {
     FIRST_PLACE: u256,
     SECOND_PLACE: u256,
     THIRD_PLACE: u256,
-}
-
-mod REWARD_DISTRIBUTIONS_PHASE1 {
-    const DAO: u256 = 0;
-    const INTERFACE: u256 = 0;
-    const FIRST_PLACE: u256 = 12000000000000000000;
-    const SECOND_PLACE: u256 = 8000000000000000000;
-    const THIRD_PLACE: u256 = 5000000000000000000;
-}
-
-mod REWARD_DISTRIBUTIONS_PHASE2 {
-    const DAO: u256 = 5000000000000000000;
-    const INTERFACE: u256 = 0;
-    const FIRST_PLACE: u256 = 10000000000000000000;
-    const SECOND_PLACE: u256 = 6000000000000000000;
-    const THIRD_PLACE: u256 = 4000000000000000000;
-}
-
-mod REWARD_DISTRIBUTIONS_PHASE3 {
-    const DAO: u256 = 5000000000000000000;
-    const INTERFACE: u256 = 4000000000000000000;
-    const FIRST_PLACE: u256 = 9000000000000000000;
-    const SECOND_PLACE: u256 = 4000000000000000000;
-    const THIRD_PLACE: u256 = 3000000000000000000;
 }
 
 mod REWARD_DISTRIBUTIONS_PHASE1_BP {

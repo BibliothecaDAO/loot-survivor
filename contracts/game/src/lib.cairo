@@ -3157,6 +3157,12 @@ mod Game {
         blocks_per_hour: u64,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct PriceChangeEvent {
+        new_price: felt252,
+        changer: ContractAddress
+    }
+
     #[derive(Drop, Serde)]
     struct PlayerReward {
         adventurer_id: felt252,
@@ -3513,15 +3519,17 @@ mod Game {
     fn _play_with_token(ref self: ContractState, token_id: u256) {
         let golden_token = _golden_token_dispatcher(ref self);
 
-        let account = ISRC5Dispatcher { contract_address: get_caller_address() };
+        let caller = get_caller_address();
+
+        let account = ISRC5Dispatcher { contract_address: caller };
         let player = if account.supports_interface(ARCADE_ACCOUNT_ID) {
-            IMasterControlDispatcher { contract_address: get_caller_address() }.get_master_account()
+            IMasterControlDispatcher { contract_address: caller }.get_master_account()
         } else {
-            get_caller_address()
+            caller
         };
 
-        assert(_can_play(@self, token_id), 'Cant play');
-        assert(golden_token.owner_of(token_id) == player, 'Not owner');
+        assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TICKET);
+        assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TICKET);
 
         self
             ._golden_token_last_use
@@ -3559,12 +3567,13 @@ mod Game {
             - self._time_since_price_update.read().try_into().unwrap();
         let one_week: u128 = (DAY.into() * 7).try_into().unwrap();
 
-        assert(time_diff > one_week, 'Time diff too small');
+        // assert enough time passed
+        assert(time_diff > one_week, messages::TIME_NOT_REACHED);
 
         let game_count: u128 = _game_count_in_period(@self);
 
         let upper_threshold: u128 = 1000;
-        let lower_threshold: u128 = 100;
+        let lower_threshold: u128 = 50;
 
         if game_count > upper_threshold {
             // increase price by 10%
@@ -3576,6 +3585,12 @@ mod Game {
 
         // set snapshot to price change game
         _snapshot(ref self);
+
+        // emit price change event
+        selt.emit(PriceChangeEvent {
+            new_price: self._cost_to_play.read().into(),
+            changer: get_caller_address()
+        });
     }
 
     fn _assert_leader_board(self: @ContractState) {
@@ -3589,7 +3604,7 @@ mod Game {
 
         assert(
             first_place == caller || second_place == caller || third_place == caller,
-            'Not on leaderboard'
+            messages::NOT_ON_LEADERBOARD
         );
     }
 }
