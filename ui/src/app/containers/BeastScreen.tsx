@@ -29,7 +29,6 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
   const [showBattleLog, setShowBattleLog] = useState(false);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
-  const setData = useQueriesStore((state) => state.setData);
   const beastData = useQueriesStore(
     (state) => state.data.beastQuery?.beasts[0] || NullBeast
   );

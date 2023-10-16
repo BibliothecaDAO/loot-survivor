@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button } from "@/app/components/buttons/Button";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { Adventurer } from "@/app/types";
 import LiveRow from "@/app/components/leaderboard/LiveRow";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -17,7 +16,6 @@ const LiveLeaderboardTable = ({
   adventurers,
 }: LiveLeaderboardTableProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const { data } = useQueriesStore();
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
   const displayAdventurers = adventurers?.slice(

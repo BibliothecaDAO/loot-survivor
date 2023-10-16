@@ -2,7 +2,7 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 import { z } from "zod";
-\import { Call, AccountInterface, Account } from "starknet";
+import { Call, AccountInterface, Account } from "starknet";
 import { Adventurer, Item, BurnerStorage } from "@/app/types";
 import Storage from "@/app/lib/storage";
 import { GameData } from "@/app/lib/data/GameData";

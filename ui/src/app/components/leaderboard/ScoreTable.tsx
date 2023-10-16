@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button } from "@/app/components/buttons/Button";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { Adventurer } from "@/app/types";
 import ScoreRow from "@/app/components/leaderboard/ScoreRow";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -19,7 +18,6 @@ const ScoreLeaderboardTable = ({
   adventurers,
 }: ScoreLeaderboardTableProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const { data } = useQueriesStore();
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
   const displayScores = adventurers?.slice(

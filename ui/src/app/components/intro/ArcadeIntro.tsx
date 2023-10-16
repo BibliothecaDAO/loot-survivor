@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAccount, useConnectors, useBalance } from "@starknet-react/core";
+import { useAccount, useConnectors } from "@starknet-react/core";
 import {
   ETH_PREFUND_AMOUNT,
   LORDS_PREFUND_AMOUNT,
@@ -13,7 +13,6 @@ import Lords from "public/icons/lords.svg";
 import { useContracts } from "@/app/hooks/useContracts";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Call } from "@/app/types";
-import { fetchBalances } from "@/app/lib/balances";
 
 interface ArcadeIntroProps {
   ethBalance: bigint;
@@ -31,7 +30,7 @@ export const ArcadeIntro = ({
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const { create, isDeploying, isSettingPermissions } = useBurner();
   const walletConnectors = getWalletConnectors(available);
-  const { lordsContract, ethContract, gameContract } = useContracts();
+  const { lordsContract } = useContracts();
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const handleSubmitCalls = useTransactionCartStore(

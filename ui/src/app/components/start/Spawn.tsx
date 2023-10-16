@@ -8,6 +8,8 @@ import useUIStore from "@/app/hooks/useUIStore";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { battle } from "@/app/lib/constants";
 import { FormData } from "@/app/types";
+import { Button } from "@/app/components/buttons/Button";
+import Image from "next/image";
 
 export interface SpawnProps {
   formData: FormData;

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useBlock } from "@starknet-react/core";
 import {
   getAdventurerByXP,
   getAdventurerById,
@@ -40,10 +39,6 @@ export default function LeaderboardScreen({
     undefined
   );
 
-  const { data: blockData } = useBlock({
-    refetchInterval: false,
-  });
-
   const adventurers = data.adventurersByXPQuery?.adventurers
     ? data.adventurersByXPQuery?.adventurers
     : [];
@@ -53,8 +48,6 @@ export default function LeaderboardScreen({
   );
 
   const scores = adventurers.filter((adventurer) => adventurer.health === 0);
-
-  const formatCurrentBlock = (blockData?.block_number ?? 0) % 512;
 
   const profile = useUIStore((state) => state.profile);
 

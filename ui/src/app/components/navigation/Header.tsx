@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
-import { useBalance, useAccount, useConnectors } from "@starknet-react/core";
-import { useContracts } from "@/app/hooks/useContracts";
+import { useAccount, useConnectors } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -191,7 +190,7 @@ export default function Header({
             }}
             className="xl:px-5"
           >
-            {account ? displayAddress(account.address) : "Connect"}
+            {account ? displayAddress(address ?? "") : "Connect"}
           </Button>
 
           <Button
