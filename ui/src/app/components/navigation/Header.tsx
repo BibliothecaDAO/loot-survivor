@@ -26,9 +26,14 @@ import { NullAdventurer } from "@/app/types";
 export interface HeaderProps {
   multicall: (...args: any[]) => any;
   mintLords: (...args: any[]) => any;
+  lordsBalance: bigint;
 }
 
-export default function Header({ multicall, mintLords }: HeaderProps) {
+export default function Header({
+  multicall,
+  mintLords,
+  lordsBalance,
+}: HeaderProps) {
   const { account, address } = useAccount();
   const { disconnect } = useConnectors();
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -36,13 +41,6 @@ export default function Header({ multicall, mintLords }: HeaderProps) {
   const data = useQueriesStore((state) => state.data);
   const resetData = useQueriesStore((state) => state.resetData);
   const isLoading = useQueriesStore((state) => state.isLoading);
-
-  const { lordsContract } = useContracts();
-
-  const lordsBalance = useBalance({
-    token: lordsContract?.address,
-    address,
-  });
 
   const setDisconnected = useUIStore((state) => state.setDisconnected);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
@@ -99,7 +97,7 @@ export default function Header({ multicall, mintLords }: HeaderProps) {
               <>
                 <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
                 <p>
-                  {formatNumber(parseInt(lordsBalance.data?.formatted ?? "0"))}
+                  {formatNumber(parseInt(lordsBalance.toString()) / 10 ** 18)}
                 </p>
               </>
             ) : (

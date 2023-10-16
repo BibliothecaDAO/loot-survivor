@@ -36,7 +36,6 @@ export interface SyscallsProps {
   showDeathDialog: (...args: any[]) => any;
   setScreen: (...args: any[]) => any;
   setAdventurer: (...args: any[]) => any;
-  setMintAdventurer: (...args: any[]) => any;
   setStartOption: (...args: any[]) => any;
   ethBalance: bigint;
   showTopUpDialog: (...args: any[]) => any;
@@ -118,7 +117,6 @@ export function syscalls({
   showDeathDialog,
   setScreen,
   setAdventurer,
-  setMintAdventurer,
   setStartOption,
   ethBalance,
   showTopUpDialog,
@@ -314,7 +312,6 @@ export function syscalls({
         stopLoading(`You have spawned ${formData.name}!`);
         setAdventurer(adventurerState);
         setScreen("play");
-        setMintAdventurer(true);
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -564,7 +561,6 @@ export function syscalls({
         setEquipItems([]);
         setDropItems([]);
         stopLoading(reversedDiscoveries);
-        setMintAdventurer(false);
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -799,7 +795,6 @@ export function syscalls({
         stopLoading(reversedBattles);
         setEquipItems([]);
         setDropItems([]);
-        setMintAdventurer(false);
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -973,7 +968,6 @@ export function syscalls({
         stopLoading(reversedBattles);
         setEquipItems([]);
         setDropItems([]);
-        setMintAdventurer(false);
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -1135,7 +1129,6 @@ export function syscalls({
             Potions: potionAmount,
           });
           setScreen("play");
-          setMintAdventurer(false);
         }
       } catch (e) {
         console.log(e);
@@ -1150,9 +1143,10 @@ export function syscalls({
     const slayIdleAdventurersTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "slay_idle_adventurers",
-      calldata: [slayAdventurers.length.toString(), ...slayAdventurers],
+      calldata: [slayAdventurers.length, ...slayAdventurers],
       metadata: `Slaying all Adventurers`,
     };
+    console.log(slayIdleAdventurersTx);
     addToCalls(slayIdleAdventurersTx);
 
     const balanceEmpty = await checkArcadeBalance(
@@ -1163,8 +1157,6 @@ export function syscalls({
       setEstimatingFee,
       account
     );
-
-    console.log(balanceEmpty);
 
     if (!balanceEmpty) {
       startLoading("Slay All Idles", "Slaying All Idles", undefined, undefined);
@@ -1458,7 +1450,6 @@ export function syscalls({
         }
 
         stopLoading(notification);
-        setMintAdventurer(false);
       } catch (e) {
         console.log(e);
         stopLoading(e, true);

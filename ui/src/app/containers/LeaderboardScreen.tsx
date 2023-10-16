@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   getAdventurerByXP,
   getAdventurerById,
@@ -13,7 +13,7 @@ import ScoreTable from "../components/leaderboard/ScoreTable";
 import LiveTable from "../components/leaderboard/LiveTable";
 import { RefreshIcon } from "../components/icons/Icons";
 import { useBlock } from "@starknet-react/core";
-import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
+// import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
 import LootIconLoader from "../components/icons/Loader";
 import { ProfileIcon, SkullIcon } from "../components/icons/Icons";
 
@@ -99,27 +99,28 @@ export default function LeaderboardScreen({
     }
   }, [adventurersByXPdata]);
 
-  const slayAdventurers: number[] = [];
+  // const getIdleAdventurers = useCallback(() => {
+  //   const slayAdventurers: number[] = [];
+  //   adventurers.map((adventurer) => {
+  //     const formatLastActionBlock = (adventurer?.lastAction ?? 0) % 512;
+  //     const idleTime =
+  //       formatCurrentBlock >= formatLastActionBlock
+  //         ? formatCurrentBlock - formatLastActionBlock
+  //         : 512 - formatLastActionBlock + formatCurrentBlock;
+  //     if (
+  //       idleTime > idleDeathPenaltyBlocks &&
+  //       adventurer?.health !== 0 &&
+  //       adventurer.id
+  //     ) {
+  //       return slayAdventurers.push(adventurer.id);
+  //     }
+  //   });
+  //   return slayAdventurers;
+  // }, [adventurers, formatCurrentBlock]);
 
-  adventurers.map((adventurer) => {
-    const formatLastActionBlock = (adventurer?.lastAction ?? 0) % 512;
-    const idleTime =
-      formatCurrentBlock >= formatLastActionBlock
-        ? formatCurrentBlock - formatLastActionBlock
-        : 512 - formatLastActionBlock + formatCurrentBlock;
-    console.log(idleTime, idleDeathPenaltyBlocks);
-    if (
-      idleTime > idleDeathPenaltyBlocks &&
-      adventurer?.health !== 0 &&
-      adventurer.id
-    ) {
-      return slayAdventurers.push(adventurer.id);
-    }
-  });
-
-  const handleSlayAdventurers = async () => {
-    await slayAllIdles(slayAdventurers);
-  };
+  // const handleSlayAdventurers = async () => {
+  //   await slayAllIdles(getIdleAdventurers());
+  // };
 
   return (
     <div className="flex flex-col items-center h-full xl:overflow-y-auto 2xl:overflow-hidden mt-5 sm:mt-0">
@@ -134,12 +135,12 @@ export default function LeaderboardScreen({
               <ProfileIcon className="fill-current w-4 h-4 sm:w-8 sm:h-8" />
               <p className="sm:text-2xl">{aliveAdventurers.length}</p>
             </div>
-            <Button
+            {/* <Button
               onClick={() => handleSlayAdventurers()}
-              disabled={slayAdventurers.length === 0}
+              disabled={getIdleAdventurers().length === 0}
             >
               Slay Idle Adventurers
-            </Button>
+            </Button> */}
             <Button
               onClick={async () => {
                 const adventurersByXPdata = await refetch(
@@ -152,7 +153,7 @@ export default function LeaderboardScreen({
             >
               <RefreshIcon className="w-4 sm:w-8" />
             </Button>
-            <div className="flex flex-row border border-terminal-green w-6 h-5 items-center justify-between w-16 h-8 sm:w-24 sm:h-12 px-2">
+            <div className="flex flex-row border border-terminal-green items-center justify-between w-16 h-8 sm:w-24 sm:h-12 px-2">
               <SkullIcon className="fill-current w-4 h-4 sm:w-8 sm:h-8" />
               <p className="sm:text-2xl">{scores.length}</p>
             </div>

@@ -52,12 +52,11 @@ import { syscalls } from "./lib/utils/syscalls";
 import { useContracts } from "./hooks/useContracts";
 import { useBalance } from "@starknet-react/core";
 import { ArcadeIntro } from "./components/intro/ArcadeIntro";
-import Logo from "../../public/icons/logo.svg";
 import ScreenMenu from "./components/menu/ScreenMenu";
 import { getArcadeConnectors } from "./lib/connectors";
 import Header from "./components/navigation/Header";
-import { Maintenance } from "./components/archived/Maintenance";
 import { checkArcadeBalance } from "./lib/utils";
+import { fetchBalances } from "./lib/balances";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -79,10 +78,7 @@ const mobileMenuItems: Menu[] = [
 ];
 
 export default function Home() {
-  // TEMPORARY
-  const [isMintingLords, setIsMintingLords] = useState(false);
-
-  const { disconnect, available } = useConnectors();
+  const { available } = useConnectors();
   const { chain } = useNetwork();
   const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
@@ -96,7 +92,6 @@ export default function Home() {
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const deathDialog = useUIStore((state) => state.deathDialog);
-  const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
@@ -106,7 +101,6 @@ export default function Home() {
   const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
-  const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeIntro = useUIStore((state) => state.arcadeIntro);
   const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
   const topUpDialog = useUIStore((state) => state.topUpDialog);
@@ -131,15 +125,24 @@ export default function Home() {
   const setStartOption = useUIStore((state) => state.setStartOption);
 
   const arcadeConnectors = getArcadeConnectors(available);
-  const lordsBalance = useBalance({
-    token: lordsContract?.address,
-    address,
-  });
 
-  const ethBalance = useBalance({
-    token: ethContract?.address,
-    address,
-  });
+  const [ethBalance, setEthBalance] = useState<bigint>(BigInt(0));
+  const [lordsBalance, setLordsBalance] = useState<bigint>(BigInt(0));
+
+  const getBalances = async () => {
+    const balances = await fetchBalances(
+      account?.address ?? "",
+      ethContract,
+      lordsContract,
+      gameContract
+    );
+    setEthBalance(balances[0]);
+    setLordsBalance(balances[1]);
+  };
+
+  useEffect(() => {
+    getBalances();
+  }, []);
 
   const { data, refetch, resetData, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
@@ -165,9 +168,8 @@ export default function Home() {
       showDeathDialog,
       setScreen,
       setAdventurer,
-      setMintAdventurer,
       setStartOption,
-      ethBalance: ethBalance.data?.value ?? BigInt(0),
+      ethBalance: ethBalance,
       showTopUpDialog,
       setTopUpAccount,
       setEstimatingFee,
@@ -361,7 +363,7 @@ export default function Home() {
     };
     const balanceEmpty = await checkArcadeBalance(
       [...calls, mintLords],
-      ethBalance.data?.value ?? BigInt(0),
+      ethBalance,
       showTopUpDialog,
       setTopUpAccount,
       setEstimatingFee,
@@ -369,7 +371,6 @@ export default function Home() {
     );
     if (!balanceEmpty) {
       try {
-        setIsMintingLords(true);
         addToCalls(mintLords);
         const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
         const result = await account?.waitForTransaction(tx?.transaction_hash, {
@@ -380,10 +381,8 @@ export default function Home() {
           throw new Error("Lords Mint did not complete successfully.");
         }
 
-        setIsMintingLords(false);
-        lordsBalance.refetch();
+        getBalances();
       } catch (e) {
-        setIsMintingLords(false);
         console.log(e);
       }
     } else {
@@ -408,6 +407,7 @@ export default function Home() {
             <Header
               multicall={multicall}
               mintLords={async () => await mintLords()}
+              lordsBalance={lordsBalance}
             />
           </div>
           <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
@@ -420,7 +420,13 @@ export default function Home() {
           <NotificationDisplay />
 
           {deathDialog && <DeathDialog />}
-          {arcadeIntro && <ArcadeIntro />}
+          {arcadeIntro && (
+            <ArcadeIntro
+              ethBalance={ethBalance}
+              lordsBalance={lordsBalance}
+              getBalances={getBalances}
+            />
+          )}
           {status == "connected" && arcadeDialog && <ArcadeDialog />}
           {status == "connected" && topUpDialog && <TopUpDialog token="ETH" />}
 
@@ -454,7 +460,7 @@ export default function Home() {
                     <AdventurerScreen
                       spawn={spawn}
                       handleSwitchAdventurer={handleSwitchAdventurer}
-                      lordsBalance={lordsBalance.data?.value}
+                      lordsBalance={lordsBalance}
                       mintLords={async () => await mintLords()}
                     />
                   )}
