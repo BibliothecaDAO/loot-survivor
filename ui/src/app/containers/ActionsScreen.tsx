@@ -28,7 +28,6 @@ export default function ActionsScreen({
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
-  const [selected, setSelected] = useState<string>("");
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
@@ -83,9 +82,7 @@ export default function ActionsScreen({
         <>
           {adventurer?.id ? (
             <div className="flex flex-col items-center lg:w-1/3 bg-terminal-black order-1 sm:order-2">
-              {selected == "explore" && (
-                <Discovery discoveries={latestDiscoveries} />
-              )}
+              <Discovery discoveries={latestDiscoveries} />
             </div>
           ) : (
             <p className="text-xl text-center order-1 sm:order-2">
@@ -94,7 +91,7 @@ export default function ActionsScreen({
           )}
           <div className="flex flex-col items-center lg:w-1/3 m-auto my-4 w-full px-4 sm:order-1">
             {loading && <MazeLoader />}
-            <div className="h-1/6 w-full">
+            <div className="h-1/6 w-3/4">
               <ActionMenu
                 buttonsData={buttonsData}
                 size="fill"

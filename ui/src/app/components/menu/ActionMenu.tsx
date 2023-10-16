@@ -23,7 +23,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
   return (
     <div className={`relative ${className ?? ""} flex  w-full h-full`}>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border border-terminal-green p-2 bg-terminal-black">
-        <p>{title}</p>
+        <p className="uppercase">{title}</p>
       </div>
       {buttonsData.map((buttonData, index) => (
         <Button
