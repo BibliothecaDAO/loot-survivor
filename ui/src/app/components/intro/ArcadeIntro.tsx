@@ -18,30 +18,33 @@ import Lords from "../../../../public/icons/lords.svg";
 import { useContracts } from "@/app/hooks/useContracts";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Call } from "@/app/types";
+import { fetchBalances } from "@/app/lib/balances";
 
-export const ArcadeIntro = () => {
+interface ArcadeIntroProps {
+  ethBalance: bigint;
+  lordsBalance: bigint;
+  getBalances: () => void;
+}
+
+export const ArcadeIntro = ({
+  ethBalance,
+  lordsBalance,
+  getBalances,
+}: ArcadeIntroProps) => {
   const { account, address } = useAccount();
   const { connect, available } = useConnectors();
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const { getMasterAccount, create, isDeploying, isSettingPermissions } =
     useBurner();
   const walletConnectors = getWalletConnectors(available);
-  const { lordsContract, ethContract } = useContracts();
+  const { lordsContract, ethContract, gameContract } = useContracts();
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const handleSubmitCalls = useTransactionCartStore(
     (state) => state.handleSubmitCalls
   );
-  const { data: ethBalance } = useBalance({
-    token: ethContract?.address,
-    address,
-  });
-  const { data: lordsBalance, refetch: refetchLordsBalance } = useBalance({
-    token: lordsContract?.address,
-    address,
-  });
-  const lords = Number(lordsBalance?.value);
-  const eth = Number(ethBalance?.value);
+  const lords = Number(lordsBalance);
+  const eth = Number(ethBalance);
   const [isMintingLords, setIsMintingLords] = useState(false);
 
   const mintLords = async () => {
@@ -64,7 +67,7 @@ export const ArcadeIntro = () => {
       }
 
       setIsMintingLords(false);
-      refetchLordsBalance();
+      getBalances();
     } catch (e) {
       setIsMintingLords(false);
       console.log(e);

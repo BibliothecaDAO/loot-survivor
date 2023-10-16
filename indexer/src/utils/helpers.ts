@@ -26,7 +26,8 @@ export function insertAdventurer({
   statUpgrades,
   actionsPerBlock,
   name,
-  entropy,
+  startBlock,
+  revealBlock,
   createdTime,
   lastUpdatedTime,
   timestamp,
@@ -63,7 +64,8 @@ export function insertAdventurer({
         statUpgrades: checkExistsInt(BigInt(statUpgrades)),
         actionsPerBlock: encodeIntAsBytes(BigInt(actionsPerBlock)),
         name: checkExistsInt(BigInt(name)),
-        entropy: encodeIntAsBytes(BigInt(entropy)),
+        startBlock: encodeIntAsBytes(BigInt(startBlock)),
+        revealBlock: encodeIntAsBytes(BigInt(revealBlock)),
         createdTime: createdTime,
         lastUpdatedTime: lastUpdatedTime,
         timestamp,
@@ -563,6 +565,41 @@ export function updateTotalPayout({
       },
       $inc: {
         totalPayout: parseInt(newPayout),
+      },
+    },
+  };
+}
+
+export function insertEntropy({
+  prevHash,
+  prevBlockNumber,
+  prevBlockTimestamp,
+  prevNextRotationBlock,
+  newHash,
+  newBlockNumber,
+  newBlockTimestamp,
+  newNextRotationBlock,
+  blocksPerHour,
+  currentTimestamp,
+}: any) {
+  const entity = {
+    prevHash: checkExistsInt(BigInt(prevHash)),
+    prevBlockNumber: prevBlockNumber,
+    prevBlockTimestamp: prevBlockTimestamp,
+    prevNextRotationBlock: prevNextRotationBlock,
+    newHash: checkExistsInt(BigInt(newHash)),
+    newBlockNumber: newBlockNumber,
+    newBlockTimestamp: newBlockTimestamp,
+    newNextRotationBlock: newNextRotationBlock,
+    blocksPerHour: blocksPerHour,
+    currentTimestamp: currentTimestamp,
+  };
+
+  return {
+    entity,
+    update: {
+      $set: {
+        ...entity,
       },
     },
   };

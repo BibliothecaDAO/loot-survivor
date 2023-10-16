@@ -8,6 +8,7 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+      - ./scripts/mongo-init:/docker-entrypoint-initdb.d
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
@@ -121,7 +122,7 @@ services:
       PERSIST_TO_ETCD: http://etcd:2379
       SINK_ID: scores
       AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
-
+  
 volumes:
   etcd_data:
   mongo_data:

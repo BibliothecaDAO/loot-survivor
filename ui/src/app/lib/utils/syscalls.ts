@@ -36,7 +36,6 @@ export interface SyscallsProps {
   showDeathDialog: (...args: any[]) => any;
   setScreen: (...args: any[]) => any;
   setAdventurer: (...args: any[]) => any;
-  setMintAdventurer: (...args: any[]) => any;
   setStartOption: (...args: any[]) => any;
   ethBalance: bigint;
   showTopUpDialog: (...args: any[]) => any;
@@ -118,7 +117,6 @@ export function syscalls({
   showDeathDialog,
   setScreen,
   setAdventurer,
-  setMintAdventurer,
   setStartOption,
   ethBalance,
   showTopUpDialog,
@@ -250,13 +248,18 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
+        // Here we need to process the StartGame event first and use the output for AmbushedByBeast event
+        const startGameEvents = await parseEvents(
+          receipt as InvokeTransactionReceiptResponse,
+          undefined,
+          "StartGame"
+        );
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
           {
             name: formData["name"],
-            homeRealm: formData["homeRealmId"],
-            classType: formData["class"],
-            entropy: 0,
+            startBlock: startGameEvents[0].data[0].startBlock,
+            revealBlock: startGameEvents[0].data[0].revealBlock,
             createdTime: new Date(),
           }
         );
@@ -309,7 +312,6 @@ export function syscalls({
         stopLoading(`You have spawned ${formData.name}!`);
         setAdventurer(adventurerState);
         setScreen("play");
-        setMintAdventurer(true);
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -559,7 +561,6 @@ export function syscalls({
         setEquipItems([]);
         setDropItems([]);
         stopLoading(reversedDiscoveries);
-        setMintAdventurer(false);
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -794,7 +795,6 @@ export function syscalls({
         stopLoading(reversedBattles);
         setEquipItems([]);
         setDropItems([]);
-        setMintAdventurer(false);
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -968,7 +968,6 @@ export function syscalls({
         stopLoading(reversedBattles);
         setEquipItems([]);
         setDropItems([]);
-        setMintAdventurer(false);
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -1130,11 +1129,69 @@ export function syscalls({
             Potions: potionAmount,
           });
           setScreen("play");
-          setMintAdventurer(false);
         }
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
+      }
+    } else {
+      resetCalls();
+    }
+  };
+
+  const slayAllIdles = async (slayAdventurers: number[]) => {
+    const slayIdleAdventurersTx = {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "slay_idle_adventurers",
+      calldata: [slayAdventurers.length, ...slayAdventurers],
+      metadata: `Slaying all Adventurers`,
+    };
+    console.log(slayIdleAdventurersTx);
+    addToCalls(slayIdleAdventurersTx);
+
+    const balanceEmpty = await checkArcadeBalance(
+      [...calls, slayIdleAdventurersTx],
+      ethBalance,
+      showTopUpDialog,
+      setTopUpAccount,
+      setEstimatingFee,
+      account
+    );
+
+    if (!balanceEmpty) {
+      startLoading("Slay All Idles", "Slaying All Idles", undefined, undefined);
+      try {
+        const tx = await handleSubmitCalls(account, [
+          ...calls,
+          slayIdleAdventurersTx,
+        ]);
+        setTxHash(tx?.transaction_hash);
+        addTransaction({
+          hash: tx?.transaction_hash,
+          metadata: {
+            method: `Upgrade`,
+          },
+        });
+        const receipt = await account?.waitForTransaction(
+          tx?.transaction_hash,
+          {
+            retryInterval: 100,
+          }
+        );
+
+        const events = await parseEvents(
+          receipt as InvokeTransactionReceiptResponse,
+          queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
+        );
+
+        // If there are any equip or drops, do them first
+        handleEquip(events, setData, setAdventurer, queryData);
+        handleDrop(events, setData, setAdventurer);
+
+        stopLoading(`You have slain all idle adventurers!`);
+      } catch (e) {
+        console.log(e);
+        stopLoading(`You have slain all idle adventurers!`);
       }
     } else {
       resetCalls();
@@ -1393,7 +1450,6 @@ export function syscalls({
         }
 
         stopLoading(notification);
-        setMintAdventurer(false);
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -1403,5 +1459,5 @@ export function syscalls({
     }
   };
 
-  return { spawn, explore, attack, flee, upgrade, multicall };
+  return { spawn, explore, attack, flee, upgrade, slayAllIdles, multicall };
 }
