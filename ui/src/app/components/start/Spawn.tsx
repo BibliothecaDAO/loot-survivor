@@ -2,10 +2,8 @@ import { useState, FormEvent, useEffect } from "react";
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { TypeAnimation } from "react-type-animation";
 import { MdClose } from "react-icons/md";
-import Image from "next/image";
-import { Button } from "@/app/components/buttons/Button";
-import { WalletTutorial } from "@/app/components/tutorial/WalletTutorial";
-import { TxActivity } from "@/app/components/navigation/TxActivity";
+import { WalletTutorial } from "../intro/WalletTutorial";
+import { TxActivity } from "../navigation/TxActivity";
 import useUIStore from "@/app/hooks/useUIStore";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { battle } from "@/app/lib/constants";
@@ -119,37 +117,39 @@ export const Spawn = ({
               </div>
             </>
           ) : (
-            <form
-              onSubmit={async (e) => {
-                if (formData) {
-                  await handleSubmit(e);
-                }
-              }}
-            >
-              <div className="flex flex-col gap-2">
-                <Button
-                  type="submit"
-                  size={"xl"}
-                  disabled={
-                    !formFilled ||
-                    !account ||
-                    isWrongNetwork ||
-                    loading ||
-                    estimatingFee ||
-                    !checkEnoughLords
+            <>
+              <form
+                onSubmit={async (e) => {
+                  if (formData) {
+                    await handleSubmit(e);
                   }
-                >
-                  {checkEnoughLords
-                    ? formFilled
-                      ? "Start Game!!"
-                      : "Fill details"
-                    : "Not enough Lords"}
-                </Button>
-                {!checkEnoughLords && (
-                  <Button onClick={mintLords}>Mint Lords</Button>
-                )}
-              </div>
-            </form>
+                }}
+              >
+                <div className="flex flex-col gap-2">
+                  <Button
+                    type="submit"
+                    size={"xl"}
+                    disabled={
+                      !formFilled ||
+                      !account ||
+                      isWrongNetwork ||
+                      loading ||
+                      estimatingFee ||
+                      !checkEnoughLords
+                    }
+                  >
+                    {checkEnoughLords
+                      ? formFilled
+                        ? "Start Game!!"
+                        : "Fill details"
+                      : "Not enough Lords"}
+                  </Button>
+                </div>
+              </form>
+              {!checkEnoughLords && (
+                <Button onClick={mintLords}>Mint Lords</Button>
+              )}
+            </>
           )}
         </div>
         <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center gap-4 z-10 pb-8">

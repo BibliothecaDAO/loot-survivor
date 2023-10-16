@@ -49,10 +49,12 @@ import NetworkSwitchError from "@/app/components/navigation/NetworkSwitchError";
 import { syscalls } from "@/app/lib/utils/syscalls";
 import { useContracts } from "@/app/hooks/useContracts";
 import { useBalance } from "@starknet-react/core";
-import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
-import ScreenMenu from "@/app/components/menu/ScreenMenu";
-import { getArcadeConnectors } from "@/app/lib/connectors";
-import Header from "@/app/components/navigation/Header";
+import { ArcadeIntro } from "./components/intro/ArcadeIntro";
+import ScreenMenu from "./components/menu/ScreenMenu";
+import { getArcadeConnectors } from "./lib/connectors";
+import Header from "./components/navigation/Header";
+import { checkArcadeBalance } from "./lib/utils";
+import { fetchBalances } from "./lib/balances";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -88,7 +90,6 @@ export default function Home() {
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const deathDialog = useUIStore((state) => state.deathDialog);
-  const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
@@ -107,6 +108,7 @@ export default function Home() {
   const { gameContract, lordsContract, ethContract } = useContracts();
   const { addTransaction } = useTransactionManager();
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const resetCalls = useTransactionCartStore((state) => state.resetCalls);
   const handleSubmitCalls = useTransactionCartStore(
     (state) => state.handleSubmitCalls
   );
@@ -121,47 +123,57 @@ export default function Home() {
   const setStartOption = useUIStore((state) => state.setStartOption);
 
   const arcadeConnectors = getArcadeConnectors(available);
-  const lordsBalance = useBalance({
-    token: lordsContract?.address,
-    address,
-  });
 
-  const ethBalance = useBalance({
-    token: ethContract?.address,
-    address,
-  });
+  const [ethBalance, setEthBalance] = useState<bigint>(BigInt(0));
+  const [lordsBalance, setLordsBalance] = useState<bigint>(BigInt(0));
+
+  const getBalances = async () => {
+    const balances = await fetchBalances(
+      address ?? "0x0",
+      ethContract,
+      lordsContract,
+      gameContract
+    );
+    setEthBalance(balances[0]);
+    setLordsBalance(balances[1]);
+  };
+
+  useEffect(() => {
+    getBalances();
+  }, [address]);
 
   const { data, refetch, resetData, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
 
-  const { spawn, explore, attack, flee, upgrade, multicall } = syscalls({
-    gameContract,
-    lordsContract,
-    addTransaction,
-    queryData: data,
-    resetData,
-    setData,
-    adventurer,
-    addToCalls,
-    calls,
-    handleSubmitCalls,
-    startLoading,
-    stopLoading,
-    setTxHash,
-    setEquipItems,
-    setDropItems,
-    setDeathMessage,
-    showDeathDialog,
-    setScreen,
-    setAdventurer,
-    setMintAdventurer,
-    setStartOption,
-    ethBalance: ethBalance.data?.value ?? BigInt(0),
-    showTopUpDialog,
-    setTopUpAccount,
-    setEstimatingFee,
-    account,
-  });
+  const { spawn, explore, attack, flee, upgrade, slayAllIdles, multicall } =
+    syscalls({
+      gameContract,
+      lordsContract,
+      addTransaction,
+      queryData: data,
+      resetData,
+      setData,
+      adventurer,
+      addToCalls,
+      calls,
+      handleSubmitCalls,
+      startLoading,
+      stopLoading,
+      setTxHash,
+      setEquipItems,
+      setDropItems,
+      setDeathMessage,
+      showDeathDialog,
+      setScreen,
+      setAdventurer,
+      setStartOption,
+      ethBalance: ethBalance,
+      showTopUpDialog,
+      setTopUpAccount,
+      setEstimatingFee,
+      account,
+      resetCalls,
+    });
 
   const playState = useMemo(
     () => ({
@@ -341,25 +353,38 @@ export default function Home() {
 
   // TEMPORARY FOR TESTING
   const mintLords = async () => {
-    try {
-      // Mint 250 LORDS
-      const mintLords: Call = {
-        contractAddress: lordsContract?.address ?? "",
-        entrypoint: "mint",
-        calldata: [address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
-      };
-      addToCalls(mintLords);
-      const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
-      const result = await account?.waitForTransaction(tx?.transaction_hash, {
-        retryInterval: 2000,
-      });
+    // Mint 250 LORDS
+    const mintLords: Call = {
+      contractAddress: lordsContract?.address ?? "",
+      entrypoint: "mint",
+      calldata: [address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+    };
+    const balanceEmpty = await checkArcadeBalance(
+      [...calls, mintLords],
+      ethBalance,
+      showTopUpDialog,
+      setTopUpAccount,
+      setEstimatingFee,
+      account
+    );
+    if (!balanceEmpty) {
+      try {
+        addToCalls(mintLords);
+        const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
+        const result = await account?.waitForTransaction(tx?.transaction_hash, {
+          retryInterval: 2000,
+        });
 
-      if (!result) {
-        throw new Error("Lords Mint did not complete successfully.");
+        if (!result) {
+          throw new Error("Lords Mint did not complete successfully.");
+        }
+
+        getBalances();
+      } catch (e) {
+        console.log(e);
       }
-      lordsBalance.refetch();
-    } catch (e) {
-      console.log(e);
+    } else {
+      resetCalls();
     }
   };
 
@@ -379,6 +404,7 @@ export default function Home() {
             <Header
               multicall={multicall}
               mintLords={async () => await mintLords()}
+              lordsBalance={lordsBalance}
             />
           </div>
           <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
@@ -391,7 +417,13 @@ export default function Home() {
           <NotificationDisplay />
 
           {deathDialog && <DeathDialog />}
-          {arcadeIntro && <ArcadeIntro />}
+          {arcadeIntro && (
+            <ArcadeIntro
+              ethBalance={ethBalance}
+              lordsBalance={lordsBalance}
+              getBalances={getBalances}
+            />
+          )}
           {status == "connected" && arcadeDialog && <ArcadeDialog />}
           {status == "connected" && topUpDialog && <TopUpDialog token="ETH" />}
 
@@ -425,7 +457,7 @@ export default function Home() {
                     <AdventurerScreen
                       spawn={spawn}
                       handleSwitchAdventurer={handleSwitchAdventurer}
-                      lordsBalance={lordsBalance.data?.value}
+                      lordsBalance={lordsBalance}
                       mintLords={async () => await mintLords()}
                     />
                   )}
@@ -437,7 +469,9 @@ export default function Home() {
                     />
                   )}
                   {screen === "inventory" && <InventoryScreen />}
-                  {screen === "leaderboard" && <LeaderboardScreen />}
+                  {screen === "leaderboard" && (
+                    <LeaderboardScreen slayAllIdles={slayAllIdles} />
+                  )}
                   {screen === "upgrade" && <UpgradeScreen upgrade={upgrade} />}
                   {screen === "profile" && <Profile />}
                   {screen === "encounters" && <EncountersScreen />}

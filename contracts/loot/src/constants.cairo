@@ -1,5 +1,3 @@
-const NUM_ITEMS: u8 = 101;
-
 mod ItemId {    
     const Pendant: u8 = 1;
     const Necklace: u8 = 2;
@@ -347,8 +345,11 @@ mod ItemSuffix {
     const of_the_Twins: u8 = 16;
 }
 
-
 // suffix and prefix
 const NamePrefixLength: u8 = 69; // requires 7 bits
 const NameSuffixLength: u8 = 18; // requires 5 bits
 const ItemSuffixLength: u8 = 16; // requires 4 bits
+
+const NUM_ITEMS: u8 = 101;
+const SUFFIX_UNLOCK_GREANTESS: u8 = 15;
+const PREFIXES_UNLOCK_GREANTESS: u8 = 19;

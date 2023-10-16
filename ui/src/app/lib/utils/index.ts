@@ -1,9 +1,9 @@
 import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
-
-import { Adventurer, Item } from "@/app/types";
-import { GameData } from "@/app/lib/data/GameData";
+import { Adventurer, Item, BurnerStorage } from "../../types";
+import Storage from "../storage";
+import { GameData } from "../../components/GameData";
 import {
   itemCharismaDiscount,
   itemBasePrice,
@@ -11,7 +11,9 @@ import {
   potionBasePrice,
 } from "@/app/lib/constants";
 import { z } from "zod";
-import { deathMessages } from "@/app/lib/constants";
+import { deathMessages, FEE_CHECK_BALANCE } from "../constants";
+import { Call, AccountInterface, Account } from "starknet";
+import { getBlock } from "@/app/api/api";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -34,7 +36,7 @@ export function indexAddress(address: string) {
 }
 
 export function padAddress(address: string) {
-  if (address !== "") {
+  if (address && address !== "") {
     const length = address.length;
     const neededLength = 66 - length;
     let zeros = "";
@@ -358,3 +360,76 @@ export function getDeathMessageByRank(rank: number): string {
 
   return message || "Better luck next time - You can improve!";
 }
+
+export async function checkArcadeBalance(
+  calls: Call[],
+  ethBalance: bigint,
+  showTopUpDialog: (...args: any[]) => any,
+  setTopUpAccount: (...args: any[]) => any,
+  setEstimatingFee: (...args: any[]) => any,
+  account?: AccountInterface
+) {
+  if (ethBalance < FEE_CHECK_BALANCE) {
+    const storage: BurnerStorage = Storage.get("burners");
+    if (account && (account?.address ?? "0x0") in storage) {
+      try {
+        setEstimatingFee(true);
+        const newAccount = new Account(
+          account,
+          account?.address,
+          storage[account?.address]["privateKey"],
+          "1"
+        );
+        const { suggestedMaxFee: estimatedFee } = await newAccount.estimateFee(
+          calls
+        );
+        // Add 10% to fee for safety
+        const formattedFee = estimatedFee * (BigInt(11) / BigInt(10));
+        setEstimatingFee(false);
+        if (ethBalance < formattedFee) {
+          showTopUpDialog(true);
+          setTopUpAccount(account?.address);
+          return true;
+        } else {
+          return false;
+        }
+      } catch (e) {
+        console.log(e);
+        setEstimatingFee(false);
+        return false;
+      }
+    }
+  } else {
+    return false;
+  }
+}
+
+export const fetchAverageBlockTime = async (
+  currentBlock: number,
+  numberOfBlocks: number
+) => {
+  try {
+    let totalTimeInterval = 0;
+
+    for (let i = currentBlock - numberOfBlocks; i < currentBlock; i++) {
+      const currentBlockData = await getBlock(i);
+      const nextBlockData = await getBlock(i + 1);
+
+      const timeInterval = nextBlockData.timestamp - currentBlockData.timestamp;
+      totalTimeInterval += timeInterval;
+    }
+    const averageTime = totalTimeInterval / numberOfBlocks;
+    return averageTime;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
+export const fetchBlockTime = async (currentBlock: number) => {
+  try {
+    const currentBlockData = await getBlock(currentBlock);
+    return currentBlockData.timestamp;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};

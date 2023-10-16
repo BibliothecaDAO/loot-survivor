@@ -24,6 +24,8 @@ const ADVENTURER_FIELDS = `
   ring
   beastHealth
   statUpgrades
+  startBlock
+  revealBlock
   actionsPerBlock
   gold
   createdTime

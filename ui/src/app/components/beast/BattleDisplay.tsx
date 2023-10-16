@@ -170,12 +170,10 @@ export const BattleDisplay = ({
 
 interface NotificationBattleDisplayProps {
   battleData: Battle[] | Battle;
-  type: string;
 }
 
 export const NotificationBattleDisplay = ({
   battleData,
-  type,
 }: NotificationBattleDisplayProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
 

@@ -39,14 +39,12 @@ export const config: Config<Starknet, Mongo | Console> = {
 };
 
 export default function transform({ header, events }: Block) {
-  const { timestamp } = header!;
-
   return events.flatMap(({ event, receipt }) => {
     switch (event.keys[0]) {
       case NEW_HIGH_SCORE: {
         console.log("NEW_HIGH_SCORE", "->", "SCORES UPDATE");
         const { value } = parseNewHighScore(event.data, 0);
-        const as = value.adventurer_state;
+        const as = value.adventurerState;
         return [
           insertHighScore({
             adventurerId: as.adventurerId,

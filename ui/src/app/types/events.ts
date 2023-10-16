@@ -1,10 +1,12 @@
 type u128 = number;
+type u64 = number;
 type u16 = number;
 type u8 = number;
 
 type AdventurerMetadata = {
+  startBlock: u64;
+  startingStats: Stats;
   name: u128;
-  entropy: u128;
 };
 
 type Stats = {
@@ -130,6 +132,7 @@ type AdventurerStateWithBag = {
 export type StartGameEvent = {
   adventurerState: AdventurerState;
   adventurerMeta: AdventurerMetadata;
+  revealBlock: u64;
 };
 
 export type DiscoveredHealthEvent = {

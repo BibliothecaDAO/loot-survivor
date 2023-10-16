@@ -31,6 +31,8 @@ export interface Adventurer {
   ring?: string; // Ring of the adventure
   beastHealth?: number; // Beast health adventurer is engaging
   statUpgrades?: number; // Stat upgrades adventurer has
+  startBlock?: number; // The block number the adventurer was minted
+  revealBlock?: number; // The next block number that the game entropy rotates from spawn
   gold?: number; // Gold adventurer has
   createdTime?: Date; // Block time the adventurer was created
   lastUpdatedTime?: Date; // Block time the adventurer was last updated

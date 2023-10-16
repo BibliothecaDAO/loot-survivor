@@ -77,7 +77,6 @@ export const InventoryCard = ({
 
   const handleEquipItems = (item: string) => {
     const formattedNewEquipItems = handleCheckSameSlot(slot, equipItems);
-    console.log(equipItems);
     const newEquipItems = [
       ...formattedNewEquipItems,
       getKeyFromValue(gameData.ITEMS, item) ?? "",

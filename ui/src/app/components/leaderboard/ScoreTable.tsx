@@ -10,26 +10,24 @@ import useCustomQuery from "@/app/hooks/useCustomQuery";
 export interface ScoreLeaderboardTableProps {
   itemsPerPage: number;
   handleFetchProfileData: (adventurerId: number) => void;
+  adventurers: Adventurer[];
 }
 
 const ScoreLeaderboardTable = ({
   itemsPerPage,
   handleFetchProfileData,
+  adventurers,
 }: ScoreLeaderboardTableProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const { data } = useQueriesStore();
-  const adventurers = data.adventurersByXPQuery?.adventurers
-    ? data.adventurersByXPQuery?.adventurers
-    : [];
-  const scores = adventurers.filter((adventurer) => adventurer.health === 0);
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
-  const displayScores = scores?.slice(
+  const displayScores = adventurers?.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const scoreIds = scores?.map((score) => score.id ?? 0);
+  const scoreIds = adventurers?.map((score) => score.id ?? 0);
 
   const scoresData = useCustomQuery("topScoresQuery", getScoresInList, {
     ids: scoreIds,
@@ -48,7 +46,7 @@ const ScoreLeaderboardTable = ({
 
   const scoresWithLords = mergedScores;
 
-  const totalPages = Math.ceil(scores.length / itemsPerPage);
+  const totalPages = Math.ceil(adventurers.length / itemsPerPage);
 
   let previousXp = -1;
   let currentRank = 0;
@@ -89,7 +87,7 @@ const ScoreLeaderboardTable = ({
   return (
     <div className="flex flex-col items-center p-2 gap-2">
       <h4 className="text-2xl text-center sm:text-2xl m-0">Leaderboard</h4>
-      {scores.length > 0 ? (
+      {adventurers.length > 0 ? (
         <div className="flex flex-col w-full gap-5">
           <table className="w-full sm:text-lg xl:text-xl border border-terminal-green">
             <thead className="border border-terminal-green">
@@ -111,7 +109,7 @@ const ScoreLeaderboardTable = ({
               ))}
             </tbody>
           </table>
-          {scores?.length > 10 && (
+          {adventurers?.length > 10 && (
             <div className="flex justify-center sm:mt-8">
               <Button
                 variant={"outline"}

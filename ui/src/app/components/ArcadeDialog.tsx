@@ -3,24 +3,22 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "@/app/components/buttons/Button";
 import { useBurner } from "@/app/lib/burner";
 import { Connector, useAccount, useConnectors } from "@starknet-react/core";
-import { AccountInterface, CallData, uint256 } from "starknet";
+import { AccountInterface } from "starknet";
 import { useCallback } from "react";
-import { useContracts } from "@/app/hooks/useContracts";
-import { balanceSchema } from "@/app/lib/utils";
-import { MIN_BALANCE } from "@/app/lib/constants";
-import PixelatedImage from "@/app/components/animations/PixelatedImage";
-import { getArcadeConnectors } from "@/app/lib/connectors";
-import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
-
-const MAX_RETRIES = 10;
-const RETRY_DELAY = 2000; // 2 seconds
+import { useContracts } from "../hooks/useContracts";
+import { MIN_BALANCE } from "../lib/constants";
+import PixelatedImage from "./animations/PixelatedImage";
+import { getArcadeConnectors } from "../lib/connectors";
+import SpriteAnimation from "./animations/SpriteAnimation";
+import { fetchBalances } from "../lib/balances";
 
 export const ArcadeDialog = () => {
+  const [fetchedBalances, setFetchedBalances] = useState(false);
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const { connect, connectors, available } = useConnectors();
+  const { connect, disconnect, connectors, available } = useConnectors();
   const {
     getMasterAccount,
     create,
@@ -45,52 +43,18 @@ export const ArcadeDialog = () => {
     return getArcadeConnectors(available);
   }, [available]);
 
-  const fetchBalanceWithRetry = async (
-    accountName: string,
-    retryCount: number = 0
-  ): Promise<bigint[]> => {
-    try {
-      const ethResult = await ethContract!.call(
-        "balanceOf",
-        CallData.compile({ account: accountName })
-      );
-      const lordsBalanceResult = await lordsContract!.call(
-        "balance_of",
-        CallData.compile({
-          account: accountName,
-        })
-      );
-      const lordsAllowanceResult = await lordsContract!.call(
-        "allowance",
-        CallData.compile({
-          owner: accountName,
-          spender: gameContract?.address ?? "",
-        })
-      );
-      return [
-        uint256.uint256ToBN(balanceSchema.parse(ethResult).balance),
-        lordsBalanceResult as bigint,
-        lordsAllowanceResult as bigint,
-      ];
-    } catch (error) {
-      if (retryCount < MAX_RETRIES) {
-        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY)); // delay before retry
-        return fetchBalanceWithRetry(accountName, retryCount + 1);
-      } else {
-        throw new Error(
-          `Failed to fetch balance after ${MAX_RETRIES} retries.`
-        );
-      }
-    }
-  };
-
   const getBalances = async () => {
     const localBalances: Record<
       string,
       { eth: bigint; lords: bigint; lordsGameAllowance: bigint }
     > = {};
     const balancePromises = arcadeConnectors().map((account) => {
-      return fetchBalanceWithRetry(account.name).then((balances) => {
+      return fetchBalances(
+        account.name,
+        ethContract,
+        lordsContract,
+        gameContract
+      ).then((balances) => {
         localBalances[account.name] = {
           eth: BigInt(0),
           lords: BigInt(0),
@@ -104,11 +68,11 @@ export const ArcadeDialog = () => {
     });
     await Promise.all(balancePromises);
     setArcadeBalances(localBalances);
+    setFetchedBalances(true);
   };
 
   const getAccountBalances = async (account: string) => {
-    const balances = await fetchBalanceWithRetry(account);
-    console.log(balances);
+    const balances = await fetchBalances(account);
     setArcadeBalances({
       ...arcadebalances,
       [account]: {
@@ -121,7 +85,7 @@ export const ArcadeDialog = () => {
 
   useEffect(() => {
     getBalances();
-  }, [arcadeConnectors]);
+  }, [arcadeConnectors, fetchedBalances]);
 
   if (!connectors) return <div></div>;
 
@@ -158,6 +122,7 @@ export const ArcadeDialog = () => {
                 key={index}
                 account={account}
                 onClick={connect}
+                disconnect={disconnect}
                 address={address!}
                 walletAccount={walletAccount!}
                 masterAccountAddress={masterAccount}
@@ -240,6 +205,7 @@ export const ArcadeDialog = () => {
 interface ArcadeAccountCardProps {
   account: Connector;
   onClick: (conn: Connector<any>) => void;
+  disconnect: () => void;
   address: string;
   walletAccount: AccountInterface;
   masterAccountAddress: string;
@@ -268,6 +234,7 @@ interface ArcadeAccountCardProps {
 export const ArcadeAccountCard = ({
   account,
   onClick,
+  disconnect,
   address,
   walletAccount,
   masterAccountAddress,
@@ -315,7 +282,7 @@ export const ArcadeAccountCard = ({
         </span>
         <span className="text-lg w-full">
           {formattedEth === "NaN" ? (
-            <span className="loading-ellipsis">Loading</span>
+            <span className="loading-ellipsis text-center">Loading</span>
           ) : (
             <span className="flex flex-row justify-between text-sm sm:text-base">
               <span>{`${formattedEth}ETH`}</span>
@@ -330,7 +297,10 @@ export const ArcadeAccountCard = ({
             <div className="flex flex-row">
               <Button
                 variant={connected ? "default" : "ghost"}
-                onClick={() => onClick(account)}
+                onClick={() => {
+                  disconnect();
+                  onClick(account);
+                }}
               >
                 {connected ? "connected" : "connect"}
               </Button>
