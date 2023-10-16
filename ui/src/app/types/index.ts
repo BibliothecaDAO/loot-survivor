@@ -180,11 +180,14 @@ export interface ButtonData {
   id: number;
   label: string;
   icon?: ReactElement;
+  loading?: boolean;
   value?: string;
+  mouseEnter?: () => void;
+  mouseLeave?: () => void;
   action: () => void;
   disabled?: boolean;
   variant?: "default" | "outline";
-  color?: string;
+  className?: string;
 }
 
 export interface ItemPurchase {

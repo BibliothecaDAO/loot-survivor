@@ -8,6 +8,7 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import BeastScreen from "./BeastScreen";
 import MazeLoader from "../components/icons/MazeLoader";
 import useUIStore from "../hooks/useUIStore";
+import ActionMenu from "../components/menu/ActionMenu";
 
 interface ActionsScreenProps {
   explore: (...args: any[]) => any;
@@ -40,7 +41,7 @@ export default function ActionsScreen({
   const buttonsData = [
     {
       id: 1,
-      label: loading ? "Exploring..." : hasBeast ? "Beast found!!" : "Explore",
+      label: loading ? "Exploring..." : hasBeast ? "Beast found!!" : "Once",
       value: "explore",
       action: async () => {
         resetNotification();
@@ -48,6 +49,8 @@ export default function ActionsScreen({
       },
       disabled: hasBeast || loading || !adventurer?.id || estimatingFee,
       loading: loading,
+      className:
+        "bg-terminal-green-25 hover:bg-terminal-green hover:text-black",
     },
     {
       id: 2,
@@ -63,6 +66,8 @@ export default function ActionsScreen({
       },
       disabled: hasBeast || loading || !adventurer?.id || estimatingFee,
       loading: loading,
+      className:
+        "bg-terminal-green-50 hover:bg-terminal-green hover:text-black",
     },
   ];
 
@@ -77,7 +82,7 @@ export default function ActionsScreen({
       ) : (
         <>
           {adventurer?.id ? (
-            <div className="flex flex-col items-center sm:w-1/3 bg-terminal-black order-1 sm:order-2">
+            <div className="flex flex-col items-center lg:w-1/3 bg-terminal-black order-1 sm:order-2">
               {selected == "explore" && (
                 <Discovery discoveries={latestDiscoveries} />
               )}
@@ -87,15 +92,15 @@ export default function ActionsScreen({
               Please Select an Adventurer
             </p>
           )}
-          <div className="flex flex-col items-center sm:w-1/3 m-auto my-4 w-full px-4 sm:order-1">
+          <div className="flex flex-col items-center lg:w-1/3 m-auto my-4 w-full px-4 sm:order-1">
             {loading && <MazeLoader />}
-            <p className="uppercase text-2xl">Into the Mist</p>
-            <ButtonMenu
-              buttonsData={buttonsData}
-              onSelected={(value) => setSelected(value)}
-              onEnterAction={true}
-              size="sm"
-            />
+            <div className="h-1/6 w-full">
+              <ActionMenu
+                buttonsData={buttonsData}
+                size="fill"
+                title="Explore"
+              />
+            </div>
           </div>
         </>
       )}
