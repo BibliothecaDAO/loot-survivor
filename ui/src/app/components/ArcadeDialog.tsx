@@ -22,7 +22,7 @@ export const ArcadeDialog = () => {
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const { connect, connectors, available } = useConnectors();
+  const { connect, disconnect, connectors, available } = useConnectors();
   const {
     getMasterAccount,
     create,
@@ -81,7 +81,6 @@ export const ArcadeDialog = () => {
     > = {};
     const balancePromises = arcadeConnectors().map((account) => {
       return fetchBalanceWithRetry(account.name).then((balances) => {
-        console.log(localBalances);
         localBalances[account.name] = {
           eth: BigInt(0),
           lords: BigInt(0),
@@ -110,9 +109,9 @@ export const ArcadeDialog = () => {
     });
   };
 
-  // useEffect(() => {
-  //   // getBalances();
-  // }, [arcadeConnectors, fetchedBalances]);
+  useEffect(() => {
+    getBalances();
+  }, [arcadeConnectors, fetchedBalances]);
 
   if (!connectors) return <div></div>;
 
@@ -149,6 +148,7 @@ export const ArcadeDialog = () => {
                 key={index}
                 account={account}
                 onClick={connect}
+                disconnect={disconnect}
                 address={address!}
                 walletAccount={walletAccount!}
                 masterAccountAddress={masterAccount}
@@ -231,6 +231,7 @@ export const ArcadeDialog = () => {
 interface ArcadeAccountCardProps {
   account: Connector;
   onClick: (conn: Connector<any>) => void;
+  disconnect: () => void;
   address: string;
   walletAccount: AccountInterface;
   masterAccountAddress: string;
@@ -259,6 +260,7 @@ interface ArcadeAccountCardProps {
 export const ArcadeAccountCard = ({
   account,
   onClick,
+  disconnect,
   address,
   walletAccount,
   masterAccountAddress,
@@ -306,7 +308,7 @@ export const ArcadeAccountCard = ({
         </span>
         <span className="text-lg w-full">
           {formattedEth === "NaN" ? (
-            <span className="loading-ellipsis">Loading</span>
+            <span className="loading-ellipsis text-center">Loading</span>
           ) : (
             <span className="flex flex-row justify-between text-sm sm:text-base">
               <span>{`${formattedEth}ETH`}</span>
@@ -321,7 +323,10 @@ export const ArcadeAccountCard = ({
             <div className="flex flex-row">
               <Button
                 variant={connected ? "default" : "ghost"}
-                onClick={() => onClick(account)}
+                onClick={() => {
+                  disconnect();
+                  onClick(account);
+                }}
               >
                 {connected ? "connected" : "connect"}
               </Button>

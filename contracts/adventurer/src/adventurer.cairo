@@ -30,7 +30,7 @@ use super::{
 };
 use lootitems::{
     loot::{Loot, ILoot, ImplLoot},
-    constants::{ItemSuffix, ItemId, NamePrefixLength, NameSuffixLength}
+    constants::{ItemSuffix, ItemId, NamePrefixLength, NameSuffixLength, SUFFIX_UNLOCK_GREANTESS}
 };
 use combat::{
     combat::{ImplCombat, CombatSpec, SpecialPowers, CombatResult},
@@ -838,7 +838,8 @@ impl ImplAdventurer of IAdventurer {
         if (previous_level < 15 && new_level >= 19) {
             // if previous level was below G15 and new level is G19+, sufix and prefixes were unlocked
             return (true, true);
-        } else if (previous_level < 15 && new_level >= 15) {
+        } else if (previous_level < SUFFIX_UNLOCK_GREANTESS
+            && new_level >= SUFFIX_UNLOCK_GREANTESS) {
             // if previous level was below G15 and new level is G15+, suffix was unlocked
             return (true, false);
         } else if (previous_level < 19 && new_level >= 19) {
@@ -1048,52 +1049,52 @@ impl ImplAdventurer of IAdventurer {
     // @notice Removes a specified suffix boost from an adventurer's stats.
     // @param self The instance of the Stats struct which contains the adventurer's stats.
     // @param suffix The suffix to be removed from the adventurer's stats.
-    fn remove_suffix_boost(ref self: Adventurer, suffix: u8) {
+    fn remove_suffix_boost(ref self: Stats, suffix: u8) {
         if (suffix == ItemSuffix::of_Power) {
-            self.stats.decrease_strength(3);
+            self.decrease_strength(3);
         } else if (suffix == ItemSuffix::of_Giant) {
-            self.stats.decrease_vitality(3);
+            self.decrease_vitality(3);
         } else if (suffix == ItemSuffix::of_Titans) {
-            self.stats.decrease_strength(2);
-            self.stats.decrease_vitality(1);
+            self.decrease_strength(2);
+            self.decrease_vitality(1);
         } else if (suffix == ItemSuffix::of_Skill) {
-            self.stats.decrease_dexterity(3);
+            self.decrease_dexterity(3);
         } else if (suffix == ItemSuffix::of_Perfection) {
-            self.stats.decrease_strength(1);
-            self.stats.decrease_dexterity(1);
-            self.stats.decrease_vitality(1);
+            self.decrease_strength(1);
+            self.decrease_dexterity(1);
+            self.decrease_vitality(1);
         } else if (suffix == ItemSuffix::of_Brilliance) {
-            self.stats.decrease_vitality(3);
+            self.decrease_vitality(3);
         } else if (suffix == ItemSuffix::of_Enlightenment) {
-            self.stats.decrease_vitality(3);
+            self.decrease_vitality(3);
         } else if (suffix == ItemSuffix::of_Protection) {
-            self.stats.decrease_vitality(2);
-            self.stats.decrease_dexterity(1);
+            self.decrease_vitality(2);
+            self.decrease_dexterity(1);
         } else if (suffix == ItemSuffix::of_Anger) {
-            self.stats.decrease_strength(2);
-            self.stats.decrease_dexterity(1);
+            self.decrease_strength(2);
+            self.decrease_dexterity(1);
         } else if (suffix == ItemSuffix::of_Rage) {
-            self.stats.decrease_strength(1);
-            self.stats.decrease_vitality(1);
-            self.stats.decrease_vitality(1);
+            self.decrease_strength(1);
+            self.decrease_vitality(1);
+            self.decrease_vitality(1);
         } else if (suffix == ItemSuffix::of_Fury) {
-            self.stats.decrease_vitality(1);
-            self.stats.decrease_vitality(1);
-            self.stats.decrease_vitality(1);
+            self.decrease_vitality(1);
+            self.decrease_vitality(1);
+            self.decrease_vitality(1);
         } else if (suffix == ItemSuffix::of_Vitriol) {
-            self.stats.decrease_vitality(2);
-            self.stats.decrease_vitality(1);
+            self.decrease_vitality(2);
+            self.decrease_vitality(1);
         } else if (suffix == ItemSuffix::of_the_Fox) {
-            self.stats.decrease_dexterity(2);
-            self.stats.decrease_vitality(1);
+            self.decrease_dexterity(2);
+            self.decrease_vitality(1);
         } else if (suffix == ItemSuffix::of_Detection) {
-            self.stats.decrease_vitality(2);
-            self.stats.decrease_dexterity(1);
+            self.decrease_vitality(2);
+            self.decrease_dexterity(1);
         } else if (suffix == ItemSuffix::of_Reflection) {
-            self.stats.decrease_vitality(1);
-            self.stats.decrease_vitality(2);
+            self.decrease_vitality(1);
+            self.decrease_vitality(2);
         } else if (suffix == ItemSuffix::of_the_Twins) {
-            self.stats.decrease_vitality(3);
+            self.decrease_vitality(3);
         }
     }
 
@@ -1101,21 +1102,21 @@ impl ImplAdventurer of IAdventurer {
     // @param self The Adventurer to check for item specials.
     // @return Returns true if adventurer has item specials, false otherwise.
     fn has_item_specials(self: Adventurer) -> bool {
-        if (self.weapon.get_greatness() >= 15) {
+        if (self.weapon.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.chest.get_greatness() >= 15) {
+        } else if (self.chest.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.head.get_greatness() >= 15) {
+        } else if (self.head.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.waist.get_greatness() >= 15) {
+        } else if (self.waist.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.foot.get_greatness() >= 15) {
+        } else if (self.foot.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.hand.get_greatness() >= 15) {
+        } else if (self.hand.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.neck.get_greatness() >= 15) {
+        } else if (self.neck.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.ring.get_greatness() >= 15) {
+        } else if (self.ring.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
         } else {
             false
@@ -1162,28 +1163,28 @@ impl ImplAdventurer of IAdventurer {
             strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
         };
 
-        if (self.weapon.get_greatness() >= 15) {
+        if (self.weapon.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.weapon)
                         .special1
                 );
         }
-        if (self.chest.get_greatness() >= 15) {
+        if (self.chest.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.chest)
                         .special1
                 );
         }
-        if (self.head.get_greatness() >= 15) {
+        if (self.head.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.head)
                         .special1
                 );
         }
-        if (self.waist.get_greatness() >= 15) {
+        if (self.waist.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.waist)
@@ -1191,7 +1192,7 @@ impl ImplAdventurer of IAdventurer {
                 );
         }
 
-        if (self.foot.get_greatness() >= 15) {
+        if (self.foot.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.foot)
@@ -1199,7 +1200,7 @@ impl ImplAdventurer of IAdventurer {
                 );
         }
 
-        if (self.hand.get_greatness() >= 15) {
+        if (self.hand.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.hand)
@@ -1207,7 +1208,7 @@ impl ImplAdventurer of IAdventurer {
                 );
         }
 
-        if (self.neck.get_greatness() >= 15) {
+        if (self.neck.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.neck)
@@ -1215,7 +1216,7 @@ impl ImplAdventurer of IAdventurer {
                 );
         }
 
-        if (self.ring.get_greatness() >= 15) {
+        if (self.ring.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.ring)
@@ -4069,11 +4070,11 @@ mod tests {
 
         // test base case
         adventurer.stats.strength = 4;
-        adventurer.remove_suffix_boost(1);
+        adventurer.stats.remove_suffix_boost(1);
         assert(adventurer.stats.strength == 1, 'strength should be 1');
 
         // underflow check
-        adventurer.remove_suffix_boost(1);
+        adventurer.stats.remove_suffix_boost(1);
         assert(adventurer.stats.strength == 0, 'strength should still be 0');
     }
 
