@@ -29,7 +29,7 @@ const ButtonMenu: React.FC<ButtonMenuProps> = ({
         <Button
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
-          className={`flex flex-row gap-5 w-full ${buttonsData.color ?? ""}`}
+          className={`flex flex-row gap-5 w-full ${buttonData.color ?? ""}`}
           variant="outline"
           size={size}
           onClick={() => {
