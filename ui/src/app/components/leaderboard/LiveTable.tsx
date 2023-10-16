@@ -8,28 +8,24 @@ import useUIStore from "@/app/hooks/useUIStore";
 export interface LiveLeaderboardTableProps {
   itemsPerPage: number;
   handleFetchProfileData: (adventurerId: number) => void;
+  adventurers: Adventurer[];
 }
 
 const LiveLeaderboardTable = ({
   itemsPerPage,
   handleFetchProfileData,
+  adventurers,
 }: LiveLeaderboardTableProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [loading, setLoading] = useState(false);
   const { data } = useQueriesStore();
-  const adventurers = data.adventurersByXPQuery?.adventurers
-    ? data.adventurersByXPQuery?.adventurers
-    : [];
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
-  const aliveAdventurers = adventurers.filter(
-    (adventurer) => (adventurer.health ?? 0) > 0
-  );
-  const displayAdventurers = aliveAdventurers?.slice(
+  const displayAdventurers = adventurers?.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const totalPages = Math.ceil(aliveAdventurers.length / itemsPerPage);
+  const totalPages = Math.ceil(adventurers.length / itemsPerPage);
 
   let previousXp = -1;
   let currentRank = 0;
@@ -91,7 +87,7 @@ const LiveLeaderboardTable = ({
             )}
           </tbody>
         </table>
-        {aliveAdventurers?.length > 10 && (
+        {adventurers?.length > 10 && (
           <div className="flex justify-center sm:mt-8 xl:mt-2">
             <Button
               variant={"outline"}

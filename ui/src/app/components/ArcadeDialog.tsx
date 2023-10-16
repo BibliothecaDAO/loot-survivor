@@ -4,17 +4,14 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "./buttons/Button";
 import { useBurner } from "../lib/burner";
 import { Connector, useAccount, useConnectors } from "@starknet-react/core";
-import { AccountInterface, CallData, uint256 } from "starknet";
+import { AccountInterface } from "starknet";
 import { useCallback } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { balanceSchema } from "../lib/utils";
 import { MIN_BALANCE } from "../lib/constants";
 import PixelatedImage from "./animations/PixelatedImage";
 import { getArcadeConnectors } from "../lib/connectors";
 import SpriteAnimation from "./animations/SpriteAnimation";
-
-const MAX_RETRIES = 10;
-const RETRY_DELAY = 2000; // 2 seconds
+import { fetchBalances } from "../lib/balances";
 
 export const ArcadeDialog = () => {
   const [fetchedBalances, setFetchedBalances] = useState(false);
@@ -47,40 +44,13 @@ export const ArcadeDialog = () => {
     return getArcadeConnectors(available);
   }, [available]);
 
-  const fetchBalanceWithRetry = async (
-    accountName: string
-  ): Promise<bigint[]> => {
-    const ethResult = await ethContract!.call(
-      "balanceOf",
-      CallData.compile({ account: accountName })
-    );
-    const lordsBalanceResult = await lordsContract!.call(
-      "balance_of",
-      CallData.compile({
-        account: accountName,
-      })
-    );
-    const lordsAllowanceResult = await lordsContract!.call(
-      "allowance",
-      CallData.compile({
-        owner: accountName,
-        spender: gameContract?.address ?? "",
-      })
-    );
-    return [
-      uint256.uint256ToBN(balanceSchema.parse(ethResult).balance),
-      lordsBalanceResult as bigint,
-      lordsAllowanceResult as bigint,
-    ];
-  };
-
   const getBalances = async () => {
     const localBalances: Record<
       string,
       { eth: bigint; lords: bigint; lordsGameAllowance: bigint }
     > = {};
     const balancePromises = arcadeConnectors().map((account) => {
-      return fetchBalanceWithRetry(account.name).then((balances) => {
+      return fetchBalances(account.name).then((balances) => {
         localBalances[account.name] = {
           eth: BigInt(0),
           lords: BigInt(0),
@@ -98,7 +68,7 @@ export const ArcadeDialog = () => {
   };
 
   const getAccountBalances = async (account: string) => {
-    const balances = await fetchBalanceWithRetry(account);
+    const balances = await fetchBalances(account);
     setArcadeBalances({
       ...arcadebalances,
       [account]: {
