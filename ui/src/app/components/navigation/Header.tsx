@@ -22,17 +22,21 @@ import {
 import TransactionCart from "./TransactionCart";
 import TransactionHistory from "./TransactionHistory";
 import { NullAdventurer } from "@/app/types";
+import { Connector } from "@starknet-react/core";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 
 export interface HeaderProps {
   multicall: (...args: any[]) => any;
   mintLords: (...args: any[]) => any;
   lordsBalance: bigint;
+  arcadeConnectors: Connector<any>[];
 }
 
 export default function Header({
   multicall,
   mintLords,
   lordsBalance,
+  arcadeConnectors,
 }: HeaderProps) {
   const { account, address } = useAccount();
   const { disconnect } = useConnectors();
@@ -54,12 +58,19 @@ export default function Header({
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const setScreen = useUIStore((state) => state.setScreen);
 
+  const calls = useTransactionCartStore((state) => state.calls);
+  const txInCart = calls.length > 0;
+
   const { play: clickPlay } = useUiSounds(soundSelector.click);
 
   const displayCartButtonRef = useRef<HTMLButtonElement>(null);
   const displayHistoryButtonRef = useRef<HTMLButtonElement>(null);
 
   const [showLordsMint, setShowLordsMint] = useState(false);
+
+  const checkArcade = arcadeConnectors.some(
+    (connector) => connector.id == address
+  );
 
   return (
     <div className="flex flex-row justify-between px-1  ">
@@ -107,10 +118,10 @@ export default function Header({
         </Button>
         <Button
           size={"xs"}
-          variant={"outline"}
+          variant={checkArcade ? "outline" : "default"}
           onClick={() => showArcadeDialog(!arcadeDialog)}
           disabled={isWrongNetwork}
-          className="xl:px-5"
+          className={`xl:px-5 ${checkArcade ? "" : "animate-pulse"}`}
         >
           <ArcadeIcon className="sm:w-5 sm:h-5  h-3 w-3 justify-center fill-current mr-2" />
           <span className="hidden sm:block">arcade account</span>
@@ -132,14 +143,14 @@ export default function Header({
         </Button>
         {account && (
           <Button
-            variant={"outline"}
+            variant={txInCart ? "default" : "outline"}
             size={"xs"}
             ref={displayCartButtonRef}
             onClick={() => {
               setDisplayCart(!displayCart);
               clickPlay();
             }}
-            className="xl:px-5"
+            className={`xl:px-5 ${txInCart ? "animate-pulse" : ""}`}
           >
             <CartIcon className="sm:w-5 sm:h-5 h-3 w-3 fill-current" />
           </Button>
@@ -179,20 +190,26 @@ export default function Header({
               </Button>
             </>
           )}
-
-          <Button
-            variant={"outline"}
-            size={"sm"}
-            onClick={() => {
-              disconnect();
-              resetData();
-              setAdventurer(NullAdventurer);
-              setDisconnected(true);
-            }}
-            className="xl:px-5"
-          >
-            {account ? displayAddress(account.address) : "Connect"}
-          </Button>
+          <div className="relative">
+            <Button
+              variant={"outline"}
+              size={"sm"}
+              onClick={() => {
+                disconnect();
+                resetData();
+                setAdventurer(NullAdventurer);
+                setDisconnected(true);
+              }}
+              className="xl:px-5"
+            >
+              {account ? displayAddress(account.address) : "Connect"}
+            </Button>
+            {checkArcade && (
+              <div className="absolute top-0 right-0">
+                <ArcadeIcon className="fill-current w-4" />
+              </div>
+            )}
+          </div>
 
           <Button
             variant={"outline"}

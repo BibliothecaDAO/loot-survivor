@@ -20,9 +20,17 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
+  console.log(buttonsData[0].disabled);
+
   return (
     <div className={`relative ${className ?? ""} flex  w-full h-full`}>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border border-terminal-green p-2 bg-terminal-black">
+      <div
+        className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${
+          buttonsData[0].disabled
+            ? "text-slate-400"
+            : "border border-terminal-green"
+        } p-2 bg-terminal-black`}
+      >
         <p className="uppercase">{title}</p>
       </div>
       {buttonsData.map((buttonData, index) => (

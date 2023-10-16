@@ -21,10 +21,7 @@ export const getArcadeConnectors = (available: Connector[]) => {
 };
 
 export const getWalletConnectors = (available: Connector[]) =>
-  available.filter(
-    (connector) =>
-      typeof connector.id !== "string" || !connector.id.includes("0x")
-  );
+  available.filter((connector) => typeof connector.id !== "string");
 
 function argentWebWalletUrl() {
   switch (process.env.NEXT_PUBLIC_NETWORK) {

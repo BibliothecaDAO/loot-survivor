@@ -408,6 +408,7 @@ export default function Home() {
               multicall={multicall}
               mintLords={async () => await mintLords()}
               lordsBalance={lordsBalance}
+              arcadeConnectors={arcadeConnectors}
             />
           </div>
           <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">

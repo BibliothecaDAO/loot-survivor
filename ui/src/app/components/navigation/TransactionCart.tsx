@@ -68,6 +68,8 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
   useOnClickOutside(wrapperRef, () => setDisplayCart(false), buttonRef);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
 
+  const callExists = calls.length > 0;
+
   const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
     : [];
@@ -446,6 +448,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
           </div>
           <div className="flex flex-row gap-2 absolute bottom-4">
             <Button
+              disabled={!callExists}
               onClick={async () => {
                 resetNotification();
                 await multicall(loadingMessage, loadingQuery, notification);
@@ -454,7 +457,9 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
             >
               Submit all Transactions
             </Button>
-            <Button onClick={() => handleResetCalls()}>Clear Cart</Button>
+            <Button disabled={!callExists} onClick={() => handleResetCalls()}>
+              Clear Cart
+            </Button>
           </div>
         </div>
       ) : null}

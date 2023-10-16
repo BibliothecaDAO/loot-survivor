@@ -315,7 +315,7 @@ export const ArcadeAccountCard = ({
               )}
             </div>
             {!arcadeConnectors.some(
-              (conn) => conn.options.options.id == walletAccount.address
+              (conn) => conn.options.id == walletAccount.address
             ) && (
               <Button variant={"ghost"} onClick={() => setTopUpScreen(true)}>
                 Top Ups
@@ -326,7 +326,7 @@ export const ArcadeAccountCard = ({
         {topUpScreen && (
           <div className="flex flex-col sm:flex-row sm:gap-2 items-center">
             {!arcadeConnectors.some(
-              (conn) => conn.options.options.id == walletAccount.address
+              (conn) => conn.options.id == walletAccount.address
             ) && (
               <Button
                 variant={"ghost"}
@@ -342,7 +342,7 @@ export const ArcadeAccountCard = ({
               </Button>
             )}
             {!arcadeConnectors.some(
-              (conn) => conn.options.options.id == walletAccount.address
+              (conn) => conn.options.id == walletAccount.address
             ) && (
               <span className="flex flex-row items-center gap-2">
                 <span className="flex flex-col">

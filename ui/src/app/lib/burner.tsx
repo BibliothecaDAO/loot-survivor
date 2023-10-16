@@ -498,9 +498,7 @@ export const useBurner = () => {
       if (burner) {
         const arcadeConnector = new ArcadeConnector(
           {
-            options: {
-              id: burner.address,
-            },
+            id: burner.address,
           },
           get(burner.address)
         );
