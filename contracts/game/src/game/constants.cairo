@@ -27,13 +27,13 @@ mod messages {
     const RATE_LIMIT_EXCEEDED: felt252 = 'rate limit exceeded';
     const NOT_ON_LEADERBOARD: felt252 = 'Not on leaderboard';
     const TIME_NOT_REACHED: felt252 = 'Time not reached';
-    const CANNOT_PLAY_WITH_TICKET: felt252 = 'Cannot play with ticket';
-    const NOT_OWNER_OF_TICKET: felt252 = 'Not owner of ticket';
+    const CANNOT_PLAY_WITH_TOKEN: felt252 = 'Cannot play with ticket';
+    const NOT_OWNER_OF_TOKEN: felt252 = 'Not owner of ticket';
 }
 
 // TODO: Update for mainnet
 const BLOCKS_IN_A_WEEK: u64 = 1000;
-const COST_TO_PLAY: u256 = 25000000000000000000;
+const COST_TO_PLAY: u256 = 2500000000000000000;
 const NUM_STARTING_STATS: u8 = 9;
 const STARTING_GAME_ENTROPY_ROTATION_INTERVAL: u8 = 6;
 const MINIMUM_DAMAGE_FROM_BEASTS: u8 = 2;

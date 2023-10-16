@@ -110,8 +110,9 @@ mod Game {
         _golden_token: ContractAddress,
         _cost_to_play: u128,
         _games_played_snapshot: LegacyMap::<felt252, felt252>,
+        _games_snapshot_timestamp: LegacyMap::<felt252, felt252>,
         _time_since_price_update: felt252,
-        _snap_shot_period: felt252,
+        _snapshot_period: felt252,
     }
 
     #[event]
@@ -3533,8 +3534,8 @@ mod Game {
             caller
         };
 
-        assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TICKET);
-        assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TICKET);
+        assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
+        assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
 
         self
             ._golden_token_last_use
@@ -3545,30 +3546,37 @@ mod Game {
         self._golden_token_last_use.read(token_id.try_into().unwrap()).into()
     }
 
-    fn _assert_week_past(self: @ContractState) {
-        let time_diff: u128 = get_block_timestamp().into()
-            - self._time_since_price_update.read().try_into().unwrap();
+    fn _assert_week_past(self: @ContractState, time: u64) {
+        let difference: u64 = get_block_timestamp() - time;
 
         // check if time diff is greater than a week    
-        let one_week: u128 = (DAY.into() * 7).try_into().unwrap();
+        let one_week: u64 = (DAY.into() * 7).try_into().unwrap();
 
         // assert enough time passed
-        assert(time_diff > one_week, messages::TIME_NOT_REACHED);
+        assert(difference > one_week, messages::TIME_NOT_REACHED);
     }
 
     fn _initiate_price_change(ref self: ContractState) {
-        // TODO: Put restriction on this, otherwise it will get spammed and a update can never happen
+        let current_period = self._snapshot_period.read();
+        let snapshot_timestamp = self
+            ._games_snapshot_timestamp
+            .read(current_period.into())
+            .try_into()
+            .unwrap();
 
-        let current_period = self._snap_shot_period.read();
+        _assert_week_past(@self, snapshot_timestamp);
 
         // set snapshot to price change game
         self._games_played_snapshot.write(current_period, self._game_counter.read());
+
+        // set snapshot timestamp to now
+        self._games_snapshot_timestamp.write(current_period, get_block_timestamp().into());
 
         // set time since price update to now
         self._time_since_price_update.write(get_block_timestamp().into());
 
         // update snapshot period
-        self._snap_shot_period.write(current_period + 1);
+        self._snapshot_period.write(current_period + 1);
     }
 
     fn _game_count_in_period(self: @ContractState, period: u128) -> u128 {
@@ -3577,25 +3585,31 @@ mod Game {
             .unwrap()
     }
 
-    // TODO: Currently this will only work if 3 periods exist
     fn _moving_average(self: @ContractState, period: u128) -> u128 {
         assert(period > 3, 'Period must be greater than 3');
 
         let mut total_games: u128 = 0;
         let mut window_size: u128 = 3;
+        let mut total_seconds: u128 = 0;
+        let week_in_seconds: u128 = 604800;
 
         let mut i = 0;
 
         loop {
-            if (i > window_size) {
+            if (total_seconds > week_in_seconds * window_size || i == 0) {
                 break;
             }
 
             let game_count = _game_count_in_period(self, period - i);
+            let timestamp = self._games_snapshot_timestamp.read((period - i).into());
+
+            total_seconds += timestamp.try_into().unwrap();
             total_games += game_count;
 
             i += 1;
         };
+
+        assert(total_seconds > week_in_seconds * window_size, 'Total games');
 
         total_games / window_size
     }
@@ -3604,10 +3618,10 @@ mod Game {
         let cost_to_play = self._cost_to_play.read();
 
         // check if time diff is greater than a week since init
-        _assert_week_past(@self);
+        _assert_week_past(@self, self._time_since_price_update.read().try_into().unwrap());
 
         // get current period
-        let current_period = self._snap_shot_period.read().try_into().unwrap();
+        let current_period = self._snapshot_period.read().try_into().unwrap();
 
         // get game count in period
         let game_count: u128 = _game_count_in_period(@self, current_period);

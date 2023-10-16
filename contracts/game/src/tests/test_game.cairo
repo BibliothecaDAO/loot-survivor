@@ -21,7 +21,11 @@ mod tests {
         Game,
         game::{
             interfaces::{IGameDispatcherTrait, IGameDispatcher},
-            constants::{COST_TO_PLAY,BLOCKS_IN_A_WEEK, messages::{STAT_UPGRADES_AVAILABLE}, STARTER_BEAST_ATTACK_DAMAGE}
+            constants::{
+                COST_TO_PLAY, BLOCKS_IN_A_WEEK, Week, REWARD_DISTRIBUTIONS_PHASE1_BP,
+                REWARD_DISTRIBUTIONS_PHASE2_BP, REWARD_DISTRIBUTIONS_PHASE3_BP,
+                messages::{STAT_UPGRADES_AVAILABLE}, STARTER_BEAST_ATTACK_DAMAGE
+            }
         }
     };
     use openzeppelin::utils::serde::SerializedAppend;
@@ -1897,9 +1901,37 @@ mod tests {
         testing::set_block_number(1001 + BLOCKS_IN_A_WEEK * 2);
 
         // spawn new
-        
+
         // DAO doesn't get anything more until stage 2
         assert(lords.balanceOf(DAO()) == COST_TO_PLAY, 'wrong stage 1 balance');
-        
+
+        let cost_to_play: u128 = COST_TO_PLAY.try_into().unwrap();
+
+        let mut week = Week {
+            DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, cost_to_play),
+            INTERFACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, cost_to_play),
+            FIRST_PLACE: _calculate_payout(
+                REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, cost_to_play
+            ),
+            SECOND_PLACE: _calculate_payout(
+                REWARD_DISTRIBUTIONS_PHASE1_BP::SECOND_PLACE, cost_to_play
+            ),
+            THIRD_PLACE: _calculate_payout(
+                REWARD_DISTRIBUTIONS_PHASE1_BP::THIRD_PLACE, cost_to_play
+            )
+        };
+
+        week.FIRST_PLACE.print();
+
+        // assert(lords.balanceOf(DAO()) == COST_TO_PLAY, 'wrong DAO payout');
+        // assert(week.INTERFACE == 0, 'no payout in stage 1');
+        // assert(week.FIRST_PLACE == _calculate_payout(
+        //         REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, cost_to_play
+        //     ), 'wrong FIRST_PLACE payout 1');
+        // assert(week.SECOND_PLACE == 0x6f05b59d3b200000, 'wrong SECOND_PLACE payout 1');
+        // assert(week.THIRD_PLACE == 0x6f05b59d3b20000, 'wrong THIRD_PLACE payout 1');
+
+        (cost_to_play * 11 / 10).print();
+        (cost_to_play * 9 / 10).print();
     }
 }
