@@ -192,7 +192,7 @@ export const ItemDisplay = ({
                         <Button
                           variant={"contrast"}
                           size={"xxs"}
-                          className="p-1 xl:p-0 sm:h-6 sm:w-8"
+                          className="p-1 xl:p-0 sm:h-4 sm:w-8"
                           onClick={() => {
                             setShowInventoryItems(true);
                           }}
@@ -237,7 +237,7 @@ export const ItemDisplay = ({
                         <Button
                           variant={"contrast"}
                           size={"xxs"}
-                          className="p-1 xl:p-0 sm:h-6 sm:w-8"
+                          className="p-1 xl:p-0 sm:h-4 sm:w-8"
                           onClick={() => handleDrop(item.item ?? "")}
                           disabled={checkDropping(item.item ?? "")}
                         >

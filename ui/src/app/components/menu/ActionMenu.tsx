@@ -23,15 +23,15 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
   console.log(buttonsData[0].disabled);
 
   return (
-    <div className={`relative ${className ?? ""} flex  w-full h-full`}>
+    <div className={`relative ${className ?? ""} flex w-full h-full`}>
       <div
         className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${
           buttonsData[0].disabled
             ? "text-slate-400"
             : "border border-terminal-green"
-        } p-2 bg-terminal-black`}
+        } p-1 sm:p-2 bg-terminal-black`}
       >
-        <p className="uppercase">{title}</p>
+        <p className="uppercase text-sm sm:text-base">{title}</p>
       </div>
       {buttonsData.map((buttonData, index) => (
         <Button
@@ -39,7 +39,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
           ref={(ref) => (buttonRefs.current[index] = ref)}
           className={`flex flex-row gap-5 w-full h-full ${
             buttonData.className ?? ""
-          } text-terminal-green`}
+          } text-terminal-green text-sm sm:text-base`}
           variant="outline"
           size={size}
           onClick={() => {

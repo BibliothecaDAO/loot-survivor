@@ -69,7 +69,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
         estimatingFee,
       loading: loading,
       className:
-        "bg-terminal-green-25 hover:bg-terminal-green hover:text-black",
+        "bg-terminal-green-25 hover:bg-terminal-green hover:text-black justify-start sm:justify-center px-2 sm:px-0",
     },
     {
       id: 2,
@@ -85,7 +85,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
         estimatingFee,
       loading: loading,
       className:
-        "bg-terminal-green-50 hover:bg-terminal-green hover:text-black",
+        "bg-terminal-green-50 hover:bg-terminal-green hover:text-black justify-end sm:justify-center px-2 sm:px-0",
     },
   ];
 
@@ -108,7 +108,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
         estimatingFee,
       loading: loading,
       className:
-        "bg-terminal-green-25 hover:bg-terminal-green hover:text-black",
+        "bg-terminal-green-25 hover:bg-terminal-green hover:text-black justify-start sm:justify-center px-2 sm:px-0",
     },
     {
       id: 2,
@@ -128,7 +128,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
         estimatingFee,
       loading: loading,
       className:
-        "bg-terminal-green-50 hover:bg-terminal-green hover:text-black",
+        "bg-terminal-green-50 hover:bg-terminal-green hover:text-black justify-end sm:justify-center px-2 sm:px-0",
     },
   ];
 
@@ -170,7 +170,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       {(blockData?.block_number ?? 1) < (adventurer?.revealBlock ?? 0) && (
         <InterludeScreen />
       )}
-      <div className="sm:w-1/2 order-1 sm:order-2">
+      <div className="sm:w-1/2 order-1 sm:order-2 h-3/4 sm:h-full">
         {hasBeast ? (
           <BeastDisplay beastData={beastData} />
         ) : (
@@ -182,18 +182,18 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
         )}
       </div>
 
-      <div className="flex flex-col gap-1 sm:gap-0 items-center sm:w-1/2 sm:p-4 order-1 text-lg">
+      <div className="flex flex-col gap-1 sm:gap-0 items-center sm:w-1/2 sm:p-4 order-1 text-lg h-1/4 sm:h-full">
         {isAlive && (
           <>
-            <div className="sm:hidden flex flex-row sm:flex-col items-center w-full h-1/4">
-              <div className="flex flex-col items-center border border-terminal-green w-full">
+            <div className="sm:hidden flex flex-row sm:flex-col gap-5 sm:gap-0 items-center justify-center sm:justify-start w-full h-3/4 sm:h-1/4">
+              <div className="flex flex-col items-center w-1/2 sm:w-full h-1/2 sm:h-full">
                 <ActionMenu
                   buttonsData={attackButtonsData}
                   size={"fill"}
                   title="Attack"
                 />
               </div>
-              <div className="flex flex-col items-center border border-terminal-green w-full">
+              <div className="flex flex-col items-center w-1/2 sm:w-full h-1/2 sm:h-full">
                 <ActionMenu
                   buttonsData={fleeButtonsData}
                   size={"fill"}
