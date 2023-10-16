@@ -50,7 +50,12 @@ export const ArcadeDialog = () => {
       { eth: bigint; lords: bigint; lordsGameAllowance: bigint }
     > = {};
     const balancePromises = arcadeConnectors().map((account) => {
-      return fetchBalances(account.name).then((balances) => {
+      return fetchBalances(
+        account.name,
+        ethContract,
+        lordsContract,
+        gameContract
+      ).then((balances) => {
         localBalances[account.name] = {
           eth: BigInt(0),
           lords: BigInt(0),
