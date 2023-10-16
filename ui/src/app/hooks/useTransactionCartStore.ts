@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Call } from "../types";
+import { Call } from "@/app/types";
 import { AccountInterface } from "starknet";
 
 type TransactionCartState = {

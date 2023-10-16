@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Button } from "../../components/buttons/Button";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { Button } from "@/app/components/buttons/Button";
 import { Adventurer } from "@/app/types";
-import ScoreRow from "./ScoreRow";
+import ScoreRow from "@/app/components/leaderboard/ScoreRow";
 import useUIStore from "@/app/hooks/useUIStore";
 import { getScoresInList } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
@@ -19,8 +18,6 @@ const ScoreLeaderboardTable = ({
   adventurers,
 }: ScoreLeaderboardTableProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [loading, setLoading] = useState(false);
-  const { data } = useQueriesStore();
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
   const displayScores = adventurers?.slice(
@@ -53,7 +50,11 @@ const ScoreLeaderboardTable = ({
   let currentRank = 0;
   let rankOffset = 0;
 
-  const rankXp = (adventurer: Adventurer, index: number) => {
+  const rankXp = (
+    adventurer: Adventurer,
+    index: number,
+    rankOffset: number
+  ) => {
     if (adventurer.xp !== previousXp) {
       currentRank = index + 1 + (currentPage - 1) * itemsPerPage;
       rankOffset = 0;
@@ -65,7 +66,6 @@ const ScoreLeaderboardTable = ({
   };
 
   const handleRowSelected = async (adventurerId: number) => {
-    setLoading(true);
     try {
       setProfile(adventurerId);
       setScreen("profile");
@@ -73,7 +73,6 @@ const ScoreLeaderboardTable = ({
     } catch (error) {
       console.error(error);
     } finally {
-      setLoading(false);
     }
   };
 
@@ -102,7 +101,7 @@ const ScoreLeaderboardTable = ({
                 <ScoreRow
                   key={index}
                   adventurer={adventurer}
-                  rank={rankXp(adventurer, index)}
+                  rank={rankXp(adventurer, index, rankOffset)}
                   handleRowSelected={handleRowSelected}
                 />
               ))}

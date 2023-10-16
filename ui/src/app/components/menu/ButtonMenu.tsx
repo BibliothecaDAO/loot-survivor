@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { Button } from "../buttons/Button";
-import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
+import { Button } from "@/app/components/buttons/Button";
+import { soundSelector, useUiSounds } from "@/app/hooks/useUiSound";
 import { ButtonData } from "@/app/types";
 
 interface ButtonMenuProps {

@@ -1,10 +1,10 @@
 "use client";
 
 import { Provider } from "starknet";
-import { useBurner } from "./lib/burner";
-import { connectors } from "./lib/connectors";
+import { useBurner } from "@/app/lib/burner";
+import { connectors } from "@/app/lib/connectors";
 import { StarknetConfig } from "@starknet-react/core";
-import { getRPCUrl } from "./lib/constants";
+import { getRPCUrl } from "@/app/lib/constants";
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const { listConnectors } = useBurner();

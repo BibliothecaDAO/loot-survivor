@@ -1,11 +1,11 @@
 import { useAccount } from "@starknet-react/core";
-import useUIStore from "../hooks/useUIStore";
-import { Button } from "./buttons/Button";
+import useUIStore from "@/app/hooks/useUIStore";
+import { Button } from "@/app/components/buttons/Button";
 import { useConnectors } from "@starknet-react/core";
-import Storage from "../lib/storage";
-import { BurnerStorage } from "../types";
-import { useBurner } from "../lib/burner";
-import { getArcadeConnectors, getWalletConnectors } from "../lib/connectors";
+import Storage from "@/app/lib/storage";
+import { BurnerStorage } from "@/app/types";
+import { useBurner } from "@/app/lib/burner";
+import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 
 interface TopUpDialogProps {
   token: "ETH" | "LORDS";
@@ -17,8 +17,7 @@ export const TopUpDialog = ({ token }: TopUpDialogProps) => {
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const topUpAccount = useUIStore((state) => state.topUpAccount);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
-  const { topUpEth, isToppingUpEth, topUpLords, isToppingUpLords } =
-    useBurner();
+  const { topUpEth, isToppingUpEth } = useBurner();
 
   const arcadeConnectors = getArcadeConnectors(available);
   const walletConnectors = getWalletConnectors(available);

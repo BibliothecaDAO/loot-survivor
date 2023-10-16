@@ -1,21 +1,20 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   getAdventurerByXP,
   getAdventurerById,
   getItemsByAdventurer,
-} from "../hooks/graphql/queries";
-import { Button } from "../components/buttons/Button";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import useUIStore from "../hooks/useUIStore";
-import useCustomQuery from "../hooks/useCustomQuery";
-import { Adventurer } from "../types";
-import ScoreTable from "../components/leaderboard/ScoreTable";
-import LiveTable from "../components/leaderboard/LiveTable";
-import { RefreshIcon } from "../components/icons/Icons";
-import { useBlock } from "@starknet-react/core";
+} from "@/app/hooks/graphql/queries";
+import { Button } from "@/app/components/buttons/Button";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import useUIStore from "@/app/hooks/useUIStore";
+import useCustomQuery from "@/app/hooks/useCustomQuery";
+import { Adventurer } from "@/app/types";
+import ScoreTable from "@/app/components/leaderboard/ScoreTable";
+import LiveTable from "@/app/components/leaderboard/LiveTable";
+import { RefreshIcon } from "@/app/components/icons/Icons";
 // import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
-import LootIconLoader from "../components/icons/Loader";
-import { ProfileIcon, SkullIcon } from "../components/icons/Icons";
+import LootIconLoader from "@/app/components/icons/Loader";
+import { ProfileIcon, SkullIcon } from "@/app/components/icons/Icons";
 
 interface LeaderboardScreenProps {
   slayAllIdles: (...args: any[]) => any;
@@ -40,10 +39,6 @@ export default function LeaderboardScreen({
     undefined
   );
 
-  const { data: blockData } = useBlock({
-    refetchInterval: false,
-  });
-
   const adventurers = data.adventurersByXPQuery?.adventurers
     ? data.adventurersByXPQuery?.adventurers
     : [];
@@ -53,8 +48,6 @@ export default function LeaderboardScreen({
   );
 
   const scores = adventurers.filter((adventurer) => adventurer.health === 0);
-
-  const formatCurrentBlock = (blockData?.block_number ?? 0) % 512;
 
   const profile = useUIStore((state) => state.profile);
 

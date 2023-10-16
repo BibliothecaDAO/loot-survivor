@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from "react";
 import { useQuery } from "@apollo/client";
-import { useQueriesStore, QueryKey } from "./useQueryStore";
+import { useQueriesStore, QueryKey } from "@/app/hooks/useQueryStore";
 
 type Variables = Record<
   string,
@@ -19,7 +19,7 @@ const useCustomQuery = (
     setRefetch: state.setRefetch,
   }));
 
-  const { data, loading, refetch, error } = useQuery(query, {
+  const { data, refetch } = useQuery(query, {
     variables: variables,
     skip: skip,
   });

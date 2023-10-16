@@ -1,5 +1,5 @@
-import Info from "./Info";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
+import Info from "@/app/components/adventurer/Info";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
 export default function Player() {
   const adventurer = useAdventurerStore((state) => state.adventurer);

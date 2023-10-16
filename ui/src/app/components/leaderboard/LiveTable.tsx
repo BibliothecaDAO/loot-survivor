@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { Button } from "../../components/buttons/Button";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { Button } from "@/app/components/buttons/Button";
 import { Adventurer } from "@/app/types";
-import LiveRow from "./LiveRow";
+import LiveRow from "@/app/components/leaderboard/LiveRow";
 import useUIStore from "@/app/hooks/useUIStore";
 
 export interface LiveLeaderboardTableProps {
@@ -17,8 +16,6 @@ const LiveLeaderboardTable = ({
   adventurers,
 }: LiveLeaderboardTableProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [loading, setLoading] = useState(false);
-  const { data } = useQueriesStore();
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
   const displayAdventurers = adventurers?.slice(
@@ -27,23 +24,7 @@ const LiveLeaderboardTable = ({
   );
   const totalPages = Math.ceil(adventurers.length / itemsPerPage);
 
-  let previousXp = -1;
-  let currentRank = 0;
-  let rankOffset = 0;
-
-  const rankXp = (adventurer: Adventurer, index: number) => {
-    if (adventurer.xp !== previousXp) {
-      currentRank = index + 1 + (currentPage - 1) * itemsPerPage;
-      rankOffset = 0;
-    } else {
-      rankOffset++;
-    }
-    previousXp = adventurer.xp ?? 0;
-    return currentRank;
-  };
-
   const handleRowSelected = async (adventurerId: number) => {
-    setLoading(true);
     try {
       setProfile(adventurerId);
       setScreen("profile");
@@ -51,7 +32,6 @@ const LiveLeaderboardTable = ({
     } catch (error) {
       console.error(error);
     } finally {
-      setLoading(false);
     }
   };
 

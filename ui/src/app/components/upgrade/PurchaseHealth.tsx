@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import QuantityButtons from "../buttons/QuantityButtons";
-import { Button } from "../buttons/Button";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { CoinIcon } from "../icons/Icons";
+import QuantityButtons from "@/app/components/buttons/QuantityButtons";
+import { Button } from "@/app/components/buttons/Button";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import { CoinIcon } from "@/app/components/icons/Icons";
 import { getPotionPrice } from "@/app/lib/utils";
 import { UpgradeStats } from "@/app/types";
 
@@ -66,7 +66,6 @@ const PurchaseHealth = ({
     }
   }, [potionAmount, buttonClicked]);
 
-
   return (
     <div className="flex flex-col sm:flex-row items-center">
       <div className="flex flex-col text-sm text-center items-center">
@@ -81,7 +80,6 @@ const PurchaseHealth = ({
             <p className="text-terminal-yellow">{purchaseGoldAmount}</p>
           </span>
         </span>
-
       </div>
       <QuantityButtons
         amount={potionAmount}
@@ -105,7 +103,6 @@ const PurchaseHealth = ({
         Fill to Max
       </Button>
       <div className="flex flex-col gap-2 sm:flex-row items-center p-4">
-
         {!hasBalance && (
           <p className="m-auto text-red-600">Not enough gold to purchase!</p>
         )}
@@ -114,7 +111,6 @@ const PurchaseHealth = ({
           You can only buy up to Max Health! 1 Potion = 10 Health
         </p>
       </div>
-
     </div>
   );
 };

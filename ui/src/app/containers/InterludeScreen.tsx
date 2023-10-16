@@ -4,7 +4,7 @@ import { EntropyCountDown } from "../components/CountDown";
 import Hints from "../components/interlude/Hints";
 import { fetchAverageBlockTime } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
-import { fetchBlockTime } from "../lib/utils";
+// import { fetchBlockTime } from "../lib/utils";
 
 export default function InterludeScreen() {
   const { adventurer } = useAdventurerStore();

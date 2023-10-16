@@ -6,7 +6,7 @@ import {
   ClothIcon,
   HideIcon,
   MetalIcon,
-} from "./Icons";
+} from "@/app/components/icons/Icons";
 
 export type IconSize = "w-4" | "w-5" | "w-6" | "w-7" | "w-8" | "w-10";
 

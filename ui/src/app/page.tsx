@@ -7,34 +7,32 @@ import {
   useTransactionManager,
 } from "@starknet-react/core";
 import { constants } from "starknet";
-import { useState, useEffect, useMemo, useRef } from "react";
-import ActionsScreen from "./containers/ActionsScreen";
-import AdventurerScreen from "./containers/AdventurerScreen";
-import InventoryScreen from "./containers/InventoryScreen";
-import LeaderboardScreen from "./containers/LeaderboardScreen";
-import EncountersScreen from "./containers/EncountersScreen";
-import GuideScreen from "./containers/GuideScreen";
-import UpgradeScreen from "./containers/UpgradeScreen";
-import { padAddress } from "./lib/utils";
-import Intro from "./components/intro/Intro";
-import { TxActivity } from "./components/navigation/TxActivity";
-import useLoadingStore from "./hooks/useLoadingStore";
-import useAdventurerStore from "./hooks/useAdventurerStore";
-import useUIStore from "./hooks/useUIStore";
-import useTransactionCartStore from "./hooks/useTransactionCartStore";
-import { NotificationDisplay } from "./components/notifications/NotificationDisplay";
-import { useMusic } from "./hooks/useMusic";
-import { Menu, NullAdventurer, Call } from "./types";
-import { useQueriesStore } from "./hooks/useQueryStore";
-import Profile from "./containers/ProfileScreen";
-import { DeathDialog } from "./components/adventurer/DeathDialog";
-import WalletSelect from "./components/intro/WalletSelect";
-import Settings from "./components/navigation/Settings";
-import MobileHeader from "./components/navigation/MobileHeader";
-import Player from "./components/adventurer/Player";
-import { useUiSounds } from "./hooks/useUiSound";
-import { soundSelector } from "./hooks/useUiSound";
-import useCustomQuery from "./hooks/useCustomQuery";
+import { useState, useEffect, useMemo } from "react";
+import ActionsScreen from "@/app/containers/ActionsScreen";
+import AdventurerScreen from "@/app/containers/AdventurerScreen";
+import InventoryScreen from "@/app/containers/InventoryScreen";
+import LeaderboardScreen from "@/app/containers/LeaderboardScreen";
+import EncountersScreen from "@/app/containers/EncountersScreen";
+import GuideScreen from "@/app/containers/GuideScreen";
+import UpgradeScreen from "@/app/containers/UpgradeScreen";
+import { padAddress } from "@/app/lib/utils";
+import Intro from "@/app/components/intro/Intro";
+import { TxActivity } from "@/app/components/navigation/TxActivity";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import useUIStore from "@/app/hooks/useUIStore";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { NotificationDisplay } from "@/app/components/notifications/NotificationDisplay";
+import { useMusic } from "@/app/hooks/useMusic";
+import { Menu, Call } from "@/app/types";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import Profile from "@/app/containers/ProfileScreen";
+import { DeathDialog } from "@/app/components/adventurer/DeathDialog";
+import WalletSelect from "@/app/components/intro/WalletSelect";
+import Settings from "@/app/components/navigation/Settings";
+import MobileHeader from "@/app/components/navigation/MobileHeader";
+import Player from "@/app/components/adventurer/Player";
+import useCustomQuery from "@/app/hooks/useCustomQuery";
 import {
   getAdventurerById,
   getAdventurersByOwner,
@@ -44,19 +42,18 @@ import {
   getBattlesByBeast,
   getItemsByAdventurer,
   getLatestMarketItems,
-} from "./hooks/graphql/queries";
-import { ArcadeDialog } from "./components/ArcadeDialog";
-import { TopUpDialog } from "./components/TopUpDialog";
-import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
-import { syscalls } from "./lib/utils/syscalls";
-import { useContracts } from "./hooks/useContracts";
-import { useBalance } from "@starknet-react/core";
-import { ArcadeIntro } from "./components/intro/ArcadeIntro";
-import ScreenMenu from "./components/menu/ScreenMenu";
-import { getArcadeConnectors } from "./lib/connectors";
-import Header from "./components/navigation/Header";
-import { checkArcadeBalance } from "./lib/utils";
-import { fetchBalances } from "./lib/balances";
+} from "@/app/hooks/graphql/queries";
+import { ArcadeDialog } from "@/app/components/ArcadeDialog";
+import { TopUpDialog } from "@/app/components/TopUpDialog";
+import NetworkSwitchError from "@/app/components/navigation/NetworkSwitchError";
+import { syscalls } from "@/app/lib/utils/syscalls";
+import { useContracts } from "@/app/hooks/useContracts";
+import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
+import ScreenMenu from "@/app/components/menu/ScreenMenu";
+import { getArcadeConnectors } from "@/app/lib/connectors";
+import Header from "@/app/components/navigation/Header";
+import { checkArcadeBalance } from "@/app/lib/utils";
+import { fetchBalances } from "@/app/lib/balances";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -391,7 +388,6 @@ export default function Home() {
   };
 
   return (
-    // <Maintenance />
     <main
       className={`min-h-screen container mx-auto flex flex-col sm:pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
     >

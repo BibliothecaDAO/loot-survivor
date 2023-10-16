@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
-import { useAccount } from "@starknet-react/core";
-import { AdventurersList } from "../components/start/AdventurersList";
-import { CreateAdventurer } from "../components/start/CreateAdventurer";
-import ButtonMenu from "../components/menu/ButtonMenu";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import LootIconLoader from "../components/icons/Loader";
-import useLoadingStore from "../hooks/useLoadingStore";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import { NullAdventurer } from "../types";
-import useUIStore from "../hooks/useUIStore";
+import { AdventurersList } from "@/app/components/start/AdventurersList";
+import { CreateAdventurer } from "@/app/components/start/CreateAdventurer";
+import ButtonMenu from "@/app/components/menu/ButtonMenu";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import { NullAdventurer } from "@/app/types";
+import useUIStore from "@/app/hooks/useUIStore";
 
 interface AdventurerScreenProps {
   spawn: (...args: any[]) => any;
@@ -28,7 +25,6 @@ export default function AdventurerScreen({
   mintLords,
 }: AdventurerScreenProps) {
   const [activeMenu, setActiveMenu] = useState(0);
-  const [loading, setLoading] = useState(false);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const adventurers = useQueriesStore(
     (state) => state.data.adventurersByOwnerQuery?.adventurers || []
@@ -65,10 +61,6 @@ export default function AdventurerScreen({
       setStartOption("create adventurer");
     }
   }, []);
-
-  if (loading) {
-    return <LootIconLoader />;
-  }
 
   return (
     <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap h-full">

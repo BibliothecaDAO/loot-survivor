@@ -1,7 +1,6 @@
 import { ReactElement, useEffect, useState, useRef } from "react";
-import QuantityButtons from "../buttons/QuantityButtons";
+import QuantityButtons from "@/app/components/buttons/QuantityButtons";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import { GameData } from "../GameData";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import { UpgradeStats, ZeroUpgrade } from "@/app/types";
@@ -29,7 +28,6 @@ export const StatAttribute = ({
   const prevAmountRef = useRef<{ [key: string]: number }>({ ...ZeroUpgrade });
   const upgrades = useUIStore((state) => state.upgrades);
   const setUpgrades = useUIStore((state) => state.setUpgrades);
-  const gameData = new GameData();
   const [buttonClicked, setButtonClicked] = useState(false);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls

@@ -1,5 +1,5 @@
 import { useState, ChangeEvent } from "react";
-import { Button } from "../buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 import { FormData } from "@/app/types";
 
 export interface AdventurerNameProps {
