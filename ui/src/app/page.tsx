@@ -131,7 +131,7 @@ export default function Home() {
 
   const getBalances = async () => {
     const balances = await fetchBalances(
-      account?.address ?? "0x0",
+      address ?? "0x0",
       ethContract,
       lordsContract,
       gameContract
@@ -142,7 +142,7 @@ export default function Home() {
 
   useEffect(() => {
     getBalances();
-  }, []);
+  }, [address]);
 
   const { data, refetch, resetData, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
