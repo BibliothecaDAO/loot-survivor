@@ -8,6 +8,7 @@ import {
   parseU128,
   parseU16,
   parseU256,
+  parseU64,
   parseU8,
 } from "./parser.ts";
 
@@ -45,6 +46,7 @@ export const ITEMS_LEVELED_UP = eventKey("ItemsLeveledUp");
 
 export const NEW_HIGH_SCORE = eventKey("NewHighScore");
 export const REWARD_DISTRIBUTION = eventKey("RewardDistribution");
+export const GAME_ENTROPY_ROTATED = eventKey("GameEntropyRotatedEvent");
 
 export const parseStats = combineParsers({
   strength: { index: 0, parser: parseU8 },
@@ -170,13 +172,15 @@ export const parseAdventurerDied = combineParsers({
 });
 
 export const parseAdventurerMetadata = combineParsers({
-  name: { index: 0, parser: parseU128 },
-  entropy: { index: 1, parser: parseU128 },
+  startBlock: { index: 0, parser: parseU128 },
+  startingStats: { index: 1, parser: parseStats },
+  name: { index: 2, parser: parseU128 },
 });
 
 export const parseStartGame = combineParsers({
   adventurerState: { index: 0, parser: parseAdventurerState },
   adventurerMeta: { index: 1, parser: parseAdventurerMetadata },
+  revealBlock: { index: 2, parser: parseU64 },
 });
 
 export const parseBag = combineParsers({
@@ -324,6 +328,18 @@ export const parseRewardDistribution = combineParsers({
 });
 
 export const parseNewHighScore = combineParsers({
-  adventurer_state: { index: 0, parser: parseAdventurerState },
+  adventurerState: { index: 0, parser: parseAdventurerState },
   rank: { index: 1, parser: parseU8 },
+});
+
+export const parseGameEntropyRotated = combineParsers({
+  prevHash: { index: 0, parser: parseFelt252 },
+  prevBlockNumber: { index: 1, parser: parseU64 },
+  prevBlockTimestamp: { index: 2, parser: parseU64 },
+  prevNextRotationBlock: { index: 3, parser: parseU64 },
+  newHash: { index: 4, parser: parseFelt252 },
+  newBlockNumber: { index: 5, parser: parseU64 },
+  newBlockTimestamp: { index: 6, parser: parseU64 },
+  newNextRotationBlock: { index: 7, parser: parseU64 },
+  blocksPerHour: { index: 8, parser: parseU64 },
 });

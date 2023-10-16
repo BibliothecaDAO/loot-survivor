@@ -3,7 +3,7 @@ import { Button } from "../buttons/Button";
 import { useConnectors } from "@starknet-react/core";
 import useUIStore from "../../hooks/useUIStore";
 import Image from "next/image";
-import { WalletTutorial } from "../tutorial/WalletTutorial";
+import { WalletTutorial } from "./WalletTutorial";
 
 interface WalletSelectProps {}
 

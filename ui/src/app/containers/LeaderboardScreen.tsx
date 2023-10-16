@@ -12,6 +12,7 @@ import { Adventurer } from "../types";
 import ScoreTable from "../components/leaderboard/ScoreTable";
 import LiveTable from "../components/leaderboard/LiveTable";
 import { RefreshIcon } from "../components/icons/Icons";
+import LootIconLoader from "../components/icons/Loader";
 
 /**
  * @container
@@ -74,44 +75,56 @@ export default function LeaderboardScreen() {
 
   return (
     <div className="flex flex-col items-center h-full xl:overflow-y-auto 2xl:overflow-hidden mt-5 sm:mt-0">
-      <Button
-        onClick={async () => {
-          const adventurersByXPdata = await refetch(
-            "adventurersByXPQuery",
-            undefined
-          );
-          const sortedAdventurersByXP = handleSortXp(adventurersByXPdata);
-          setData("adventurersByXPQuery", sortedAdventurersByXP);
-        }}
-      >
-        <RefreshIcon className="w-8" />
-      </Button>
-      <div className="flex flex-row w-full">
-        <div
-          className={`${showScores ? "hidden " : ""}sm:block w-full sm:w-1/2`}
-        >
-          <LiveTable
-            itemsPerPage={itemsPerPage}
-            handleFetchProfileData={handlefetchProfileData}
-          />
+      {!adventurersByXPdata ? (
+        <div className="flex justify-center items-center h-full">
+          <LootIconLoader className="m-auto" size="w-10" />
         </div>
-        <div
-          className={`${showScores ? "" : "hidden "}sm:block w-full sm:w-1/2`}
-        >
-          <ScoreTable
-            itemsPerPage={itemsPerPage}
-            handleFetchProfileData={handlefetchProfileData}
-          />
-        </div>
-      </div>
-      <Button
-        onClick={() =>
-          showScores ? setShowScores(false) : setShowScores(true)
-        }
-        className="sm:hidden"
-      >
-        {showScores ? "Show Live Leaderboard" : "Show Scores"}
-      </Button>
+      ) : (
+        <>
+          <Button
+            onClick={async () => {
+              const adventurersByXPdata = await refetch(
+                "adventurersByXPQuery",
+                undefined
+              );
+              const sortedAdventurersByXP = handleSortXp(adventurersByXPdata);
+              setData("adventurersByXPQuery", sortedAdventurersByXP);
+            }}
+          >
+            <RefreshIcon className="w-8" />
+          </Button>
+          <div className="flex flex-row w-full">
+            <div
+              className={`${
+                showScores ? "hidden " : ""
+              }sm:block w-full sm:w-1/2`}
+            >
+              <LiveTable
+                itemsPerPage={itemsPerPage}
+                handleFetchProfileData={handlefetchProfileData}
+              />
+            </div>
+            <div
+              className={`${
+                showScores ? "" : "hidden "
+              }sm:block w-full sm:w-1/2`}
+            >
+              <ScoreTable
+                itemsPerPage={itemsPerPage}
+                handleFetchProfileData={handlefetchProfileData}
+              />
+            </div>
+          </div>
+          <Button
+            onClick={() =>
+              showScores ? setShowScores(false) : setShowScores(true)
+            }
+            className="sm:hidden"
+          >
+            {showScores ? "Show Live Leaderboard" : "Show Scores"}
+          </Button>
+        </>
+      )}
     </div>
   );
 }
