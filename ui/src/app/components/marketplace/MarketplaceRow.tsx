@@ -156,7 +156,7 @@ const MarketplaceRow = ({
             <p>Equip?</p>
             <div className="flex flex-col">
               <Button
-                size={"xs"}
+                size={"xxxs"}
                 variant={"ghost"}
                 onClick={() => {
                   const newPurchases = [
@@ -176,7 +176,7 @@ const MarketplaceRow = ({
                 Yes
               </Button>
               <Button
-                size={"xs"}
+                size={"xxxs"}
                 variant={"ghost"}
                 onClick={() => {
                   const newPurchases = [
@@ -194,10 +194,14 @@ const MarketplaceRow = ({
                 }}
               >
                 No
-              </Button>{" "}
+              </Button>
             </div>
 
-            <Button size={"xs"} onClick={() => setActiveMenu(null)}>
+            <Button
+              size={"xxxs"}
+              variant={"ghost"}
+              onClick={() => setActiveMenu(null)}
+            >
               X
             </Button>
           </div>
