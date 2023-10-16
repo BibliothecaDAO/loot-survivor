@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CallData } from "starknet";
 import { useContracts } from "@/app/hooks/useContracts";
 import {
   getItemData,
@@ -22,16 +23,15 @@ import {
   LightbulbIcon,
   ScrollIcon,
   HeartIcon,
-} from "../components/icons/Icons";
-import PurchaseHealth from "../components/actions/PurchaseHealth";
-import MarketplaceScreen from "./MarketplaceScreen";
-import { UpgradeNav } from "../components/upgrade/UpgradeNav";
-import { StatAttribute } from "../components/upgrade/StatAttribute";
-import useUIStore from "../hooks/useUIStore";
-import { UpgradeStats, ZeroUpgrade, UpgradeSummary } from "../types";
-import Summary from "../components/upgrade/Summary";
-import { HealthCountDown } from "../components/CountDown";
-import { CallData } from "starknet";
+} from "@/app/components/icons/Icons";
+import PurchaseHealth from "@/app/components/upgrade/PurchaseHealth";
+import MarketplaceScreen from "@/app/containers/MarketplaceScreen";
+import { UpgradeNav } from "@/app/components/upgrade/UpgradeNav";
+import { StatAttribute } from "@/app/components/upgrade/StatAttribute";
+import useUIStore from "@/app/hooks/useUIStore";
+import { UpgradeStats, ZeroUpgrade, UpgradeSummary } from "@/app/types";
+import Summary from "@/app/components/upgrade/Summary";
+import { HealthCountDown } from "@/app/components/CountDown";
 
 interface UpgradeScreenProps {
   upgrade: (...args: any[]) => any;

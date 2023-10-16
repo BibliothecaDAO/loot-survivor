@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from "react";
-import KeyboardControl, { ButtonData } from "../components/KeyboardControls";
-import { BattleDisplay } from "../components/beast/BattleDisplay";
-import { BeastDisplay } from "../components/beast/BeastDisplay";
-import useLoadingStore from "../hooks/useLoadingStore";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import { processBeastName } from "../lib/utils";
-import { Battle, NullBeast } from "../types";
-import { Button } from "../components/buttons/Button";
-import useUIStore from "../hooks/useUIStore";
-import InterludeScreen from "./InterludeScreen";
-import { getBlock } from "../api/api";
+import React, { useState } from "react";
 import { useBlock } from "@starknet-react/core";
+import KeyboardControl, { ButtonData } from "@/app/components/KeyboardControls";
+import { BattleDisplay } from "@/app/components/beast/BattleDisplay";
+import { BeastDisplay } from "@/app/components/beast/BeastDisplay";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { processBeastName } from "@/app/lib/utils";
+import { Battle, NullBeast } from "@/app/types";
+import { Button } from "@/app/components/buttons/Button";
+import useUIStore from "@/app/hooks/useUIStore";
+import InterludeScreen from "@/app/containers/InterludeScreen";
 
 interface BeastScreenProps {
   attack: (...args: any[]) => any;

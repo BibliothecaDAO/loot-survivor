@@ -48,13 +48,12 @@ import { TopUpDialog } from "@/app/components/TopUpDialog";
 import NetworkSwitchError from "@/app/components/navigation/NetworkSwitchError";
 import { syscalls } from "@/app/lib/utils/syscalls";
 import { useContracts } from "@/app/hooks/useContracts";
-import { useBalance } from "@starknet-react/core";
-import { ArcadeIntro } from "./components/intro/ArcadeIntro";
-import ScreenMenu from "./components/menu/ScreenMenu";
-import { getArcadeConnectors } from "./lib/connectors";
-import Header from "./components/navigation/Header";
-import { checkArcadeBalance } from "./lib/utils";
-import { fetchBalances } from "./lib/balances";
+import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
+import ScreenMenu from "@/app/components/menu/ScreenMenu";
+import { getArcadeConnectors } from "@/app/lib/connectors";
+import Header from "@/app/components/navigation/Header";
+import { checkArcadeBalance } from "@/app/lib/utils";
+import { fetchBalances } from "@/app/lib/balances";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },

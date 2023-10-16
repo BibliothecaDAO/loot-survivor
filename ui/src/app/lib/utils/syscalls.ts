@@ -10,11 +10,13 @@ import {
   NullAdventurer,
   UpgradeStats,
 } from "@/app/types";
-import { QueryKey } from "@/app/hooks/useQueryStore";
-import { getKeyFromValue, stringToFelt } from ".";
-import { parseEvents } from "./parseEvents";
+import {
+  getKeyFromValue,
+  stringToFelt,
+  checkArcadeBalance,
+} from "@/app/lib/utils";
+import { parseEvents } from "@/app/lib/utils/parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
-import { checkArcadeBalance } from ".";
 
 export interface SyscallsProps {
   gameContract: any;

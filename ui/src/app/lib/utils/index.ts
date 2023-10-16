@@ -1,18 +1,18 @@
 import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
-import { Adventurer, Item, BurnerStorage } from "../../types";
-import Storage from "../storage";
-import { GameData } from "../../components/GameData";
+import { z } from "zod";
+\import { Call, AccountInterface, Account } from "starknet";
+import { Adventurer, Item, BurnerStorage } from "@/app/types";
+import Storage from "@/app/lib/storage";
+import { GameData } from "@/app/lib/data/GameData";
 import {
   itemCharismaDiscount,
   itemBasePrice,
   itemMinimumPrice,
   potionBasePrice,
 } from "@/app/lib/constants";
-import { z } from "zod";
-import { deathMessages, FEE_CHECK_BALANCE } from "../constants";
-import { Call, AccountInterface, Account } from "starknet";
+import { deathMessages, FEE_CHECK_BALANCE } from "@/app/lib/constants";
 import { getBlock } from "@/app/api/api";
 
 export function cn(...inputs: ClassValue[]) {
