@@ -131,7 +131,7 @@ export default function Home() {
 
   const getBalances = async () => {
     const balances = await fetchBalances(
-      account?.address ?? "",
+      account?.address ?? "0x0",
       ethContract,
       lordsContract,
       gameContract

@@ -159,7 +159,9 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
 
   return (
     <div className="sm:w-2/3 flex flex-col sm:flex-row h-full">
-      <InterludeScreen />
+      {(blockData?.block_number ?? 1) < (adventurer?.revealBlock ?? 0) && (
+        <InterludeScreen />
+      )}
       <div className="sm:w-1/2 order-1 sm:order-2">
         {hasBeast ? (
           <BeastDisplay beastData={beastData} />
