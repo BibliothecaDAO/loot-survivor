@@ -83,75 +83,81 @@ const ScoreLeaderboardTable = ({
   };
 
   return (
-    <div className="flex flex-col items-center p-2 gap-2">
-      <h4 className="text-2xl text-center sm:text-2xl m-0">Leaderboard</h4>
-      {adventurers.length > 0 ? (
-        <div className="flex flex-col w-full gap-5">
-          <table className="w-full sm:text-lg xl:text-xl border border-terminal-green">
-            <thead className="border border-terminal-green">
-              <tr>
-                <th className="p-1">Rank</th>
-                <th className="p-1">Adventurer</th>
-                <th className="p-1">XP</th>
-                <th className="p-1">Payout</th>
-              </tr>
-            </thead>
-            <tbody>
-              {scoresWithLords.map((adventurer: any, index: number) => (
-                <ScoreRow
-                  key={index}
-                  adventurer={adventurer}
-                  rank={rankXp(adventurer, index, rankOffset)}
-                  handleRowSelected={handleRowSelected}
-                />
-              ))}
-            </tbody>
-          </table>
-          {adventurers?.length > 10 && (
-            <div className="flex justify-center sm:mt-8">
-              <Button
-                variant={"outline"}
-                onClick={() => currentPage > 1 && handleClick(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                back
-              </Button>
+    <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row justify-between w-full">
+      <div className="flex flex-col w-full sm:mr-4 flex-grow-2 p-2 gap-2">
+        {adventurers.length > 0 ? (
+          <>
+            <h4 className="text-2xl text-center sm:text-2xl m-0">
+              Leaderboard
+            </h4>
+            <table className="w-full sm:text-lg xl:text-xl border border-terminal-green">
+              <thead className="border border-terminal-green">
+                <tr>
+                  <th className="p-1">Rank</th>
+                  <th className="p-1">Adventurer</th>
+                  <th className="p-1">XP</th>
+                  <th className="p-1">Payout</th>
+                </tr>
+              </thead>
+              <tbody>
+                {scoresWithLords.map((adventurer: any, index: number) => (
+                  <ScoreRow
+                    key={index}
+                    adventurer={adventurer}
+                    rank={rankXp(adventurer, index, rankOffset)}
+                    handleRowSelected={handleRowSelected}
+                  />
+                ))}
+              </tbody>
+            </table>
+            {adventurers?.length > 10 && (
+              <div className="flex justify-center sm:mt-8 xl:mt-2">
+                <Button
+                  variant={"outline"}
+                  onClick={() =>
+                    currentPage > 1 && handleClick(currentPage - 1)
+                  }
+                  disabled={currentPage === 1}
+                >
+                  back
+                </Button>
 
-              <Button
-                variant={"outline"}
-                key={1}
-                onClick={() => handleClick(1)}
-                className={currentPage === 1 ? "animate-pulse" : ""}
-              >
-                {1}
-              </Button>
+                <Button
+                  variant={"outline"}
+                  key={1}
+                  onClick={() => handleClick(1)}
+                  className={currentPage === 1 ? "animate-pulse" : ""}
+                >
+                  {1}
+                </Button>
 
-              <Button
-                variant={"outline"}
-                key={totalPages}
-                onClick={() => handleClick(totalPages)}
-                className={currentPage === totalPages ? "animate-pulse" : ""}
-              >
-                {totalPages}
-              </Button>
+                <Button
+                  variant={"outline"}
+                  key={totalPages}
+                  onClick={() => handleClick(totalPages)}
+                  className={currentPage === totalPages ? "animate-pulse" : ""}
+                >
+                  {totalPages}
+                </Button>
 
-              <Button
-                variant={"outline"}
-                onClick={() =>
-                  currentPage < totalPages && handleClick(currentPage + 1)
-                }
-                disabled={currentPage === totalPages}
-              >
-                next
-              </Button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <h3 className="text-lg sm:text-2xl py-4">
-          No scores submitted yet. Be the first!
-        </h3>
-      )}
+                <Button
+                  variant={"outline"}
+                  onClick={() =>
+                    currentPage < totalPages && handleClick(currentPage + 1)
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  next
+                </Button>
+              </div>
+            )}
+          </>
+        ) : (
+          <h3 className="text-lg sm:text-2xl py-4">
+            No scores submitted yet. Be the first!
+          </h3>
+        )}
+      </div>
     </div>
   );
 };
