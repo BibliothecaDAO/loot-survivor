@@ -24,7 +24,7 @@ const RowLoader: React.FC = () => {
         {loaderData.map((order, colIndex) => (
           <div
             key={colIndex}
-            className={`w-3 h-3 sm:w-6 sm:h-6 ${
+            className={`w-3 h-3 2xl:w-6 2xl:h-6 ${
               order !== -1 ? "bg-terminal-green animate-ping" : ""
             }`}
             style={{
