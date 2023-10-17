@@ -147,8 +147,8 @@ h6 {
 
 body::-webkit-scrollbar,
 .table-scroll::-webkit-scrollbar {
-  width : 0.5em;
-  height: 0.5em;
+  width : 1em;
+  height: 1em;
 }
 
 @media (min-width: 400px) {
@@ -171,28 +171,35 @@ body::-webkit-scrollbar-thumb,
 }
 
 body::-webkit-scrollbar,
-.item-scroll::-webkit-scrollbar {
+.default-scroll::-webkit-scrollbar {
   width : 0.5em;
   height: 0.5em;
 }
 
-@media (min-width: 400px) {
-
-  body::-webkit-scrollbar,
-  .item-scroll::-webkit-scrollbar {
-    width : 1em;
-    height: 1em;
-  }
-}
-
 body::-webkit-scrollbar-track,
-.item-scroll::-webkit-scrollbar-track {
+.default-scroll::-webkit-scrollbar-track {
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 body::-webkit-scrollbar-thumb,
-.item-scroll::-webkit-scrollbar-thumb {
+.default-scroll::-webkit-scrollbar-thumb {
   @apply bg-terminal-green;
+}
+
+body::-webkit-scrollbar,
+.item-scroll::-webkit-scrollbar {
+  width : 0.2em;
+  height: 0.2em;
+}
+
+body::-webkit-scrollbar-track,
+.item-scroll::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(74, 246, 38, 0.5);
+}
+
+body::-webkit-scrollbar-thumb,
+.item-scroll::-webkit-scrollbar-thumb {
+  @apply bg-black;
 }
 
 .notification-enter {

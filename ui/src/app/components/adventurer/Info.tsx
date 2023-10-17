@@ -155,7 +155,7 @@ export default function Info({
                     </div>
                   ))}
                 </div>
-                <div className="w-full flex flex-col sm:gap-1 2xl:gap-0 text-xs h-[400px] sm:h-[425px] overflow-y-auto 2xl:overflow-hidden">
+                <div className="w-full flex flex-col sm:gap-1 2xl:gap-0 text-xs h-[400px] sm:h-[425px] overflow-y-auto overflow-x-hidden">
                   {bodyParts.map((part) => (
                     <ItemDisplay
                       item={
