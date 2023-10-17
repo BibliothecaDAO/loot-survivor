@@ -10,12 +10,12 @@ import {
   Call,
   selector,
 } from "starknet";
-import Storage from "./storage";
+import Storage from "@/app/lib/storage";
 import { useAccount, useConnectors } from "@starknet-react/core";
-import { ArcadeConnector } from "./arcade";
-import { useContracts } from "../hooks/useContracts";
-import { BurnerStorage } from "../types";
-import { getRPCUrl, getArcadeClassHash } from "./constants";
+import { ArcadeConnector } from "@/app/lib/arcade";
+import { useContracts } from "@/app/hooks/useContracts";
+import { BurnerStorage } from "@/app/types";
+import { getRPCUrl, getArcadeClassHash } from "@/app/lib/constants";
 
 export const ETH_PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
 export const LORDS_PREFUND_AMOUNT = "0x0d8d726b7177a80000"; // 250LORDS

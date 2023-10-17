@@ -1,24 +1,18 @@
 import { useState } from "react";
-import {
-  useAccount,
-  useConnectors,
-  useContractWrite,
-  useBalance,
-} from "@starknet-react/core";
+import { useAccount, useConnectors } from "@starknet-react/core";
 import {
   ETH_PREFUND_AMOUNT,
   LORDS_PREFUND_AMOUNT,
   useBurner,
 } from "@/app/lib/burner";
-import { Button } from "../buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
-import PixelatedImage from "../animations/PixelatedImage";
+import PixelatedImage from "@/app/components/animations/PixelatedImage";
 import { getWalletConnectors } from "@/app/lib/connectors";
-import Lords from "../../../../public/icons/lords.svg";
+import Lords from "public/icons/lords.svg";
 import { useContracts } from "@/app/hooks/useContracts";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Call } from "@/app/types";
-import { fetchBalances } from "@/app/lib/balances";
 
 interface ArcadeIntroProps {
   ethBalance: bigint;
@@ -34,10 +28,9 @@ export const ArcadeIntro = ({
   const { account, address } = useAccount();
   const { connect, available } = useConnectors();
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const { getMasterAccount, create, isDeploying, isSettingPermissions } =
-    useBurner();
+  const { create, isDeploying, isSettingPermissions } = useBurner();
   const walletConnectors = getWalletConnectors(available);
-  const { lordsContract, ethContract, gameContract } = useContracts();
+  const { lordsContract } = useContracts();
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const handleSubmitCalls = useTransactionCartStore(

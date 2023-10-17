@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useCountUp } from "react-countup";
 import { useState } from "react";
-import { penaltyTime } from "../lib/constants";
+import { penaltyTime } from "@/app/lib/constants";
 
 const formatTime = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / 3600);

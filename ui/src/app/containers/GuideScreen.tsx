@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "../components/buttons/Button";
-import { DiscordIcon } from "../components/icons/Icons";
+import { Button } from "@/app/components/buttons/Button";
+import { DiscordIcon } from "@/app/components/icons/Icons";
 
 export default function GuideScreen() {
   const efficacyData = [

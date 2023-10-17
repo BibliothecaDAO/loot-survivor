@@ -1,4 +1,4 @@
-import Lords from "../../../../public/icons/lords.svg";
+import Lords from "public/icons/lords.svg";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
 import { formatNumber } from "@/app/lib/utils";
 

@@ -1,7 +1,7 @@
 import { useContract } from "@starknet-react/core";
-import Game from "../abi/Game.json";
-import Lords from "../abi/Lords.json";
-import { getContracts } from "../lib/constants";
+import Game from "@/app/abi/Game.json";
+import Lords from "@/app/abi/Lords.json";
+import { getContracts } from "@/app/lib/constants";
 
 const ethBalanceABIFragment = [
   {

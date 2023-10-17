@@ -1,5 +1,5 @@
-import { Adventurer, Item } from "../types";
-import { calculateLevel, getItemData } from "./utils";
+import { Adventurer, Item } from "@/app/types";
+import { calculateLevel, getItemData } from "@/app/lib/utils";
 
 export class AdventurerClass implements Adventurer {
   [key: string]: number | string | Date | undefined;

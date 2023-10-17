@@ -1,15 +1,14 @@
 import { useRef, useState } from "react";
-import { useBalance, useAccount, useConnectors } from "@starknet-react/core";
-import { useContracts } from "@/app/hooks/useContracts";
+import { useAccount, useConnectors } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import { useUiSounds } from "@/app/hooks/useUiSound";
 import { soundSelector } from "@/app/hooks/useUiSound";
-import Logo from "../../../../public/icons/logo.svg";
-import Lords from "../../../../public/icons/lords.svg";
-import { PenaltyCountDown } from "../../components/CountDown";
-import { Button } from "../../components/buttons/Button";
+import Logo from "public/icons/logo.svg";
+import Lords from "public/icons/lords.svg";
+import { PenaltyCountDown } from "@/app/components/CountDown";
+import { Button } from "@/app/components/buttons/Button";
 import { formatNumber, displayAddress } from "@/app/lib/utils";
 import {
   ArcadeIcon,
@@ -18,9 +17,9 @@ import {
   CartIcon,
   SettingsIcon,
   GithubIcon,
-} from "../icons/Icons";
-import TransactionCart from "./TransactionCart";
-import TransactionHistory from "./TransactionHistory";
+} from "@/app/components/icons/Icons";
+import TransactionCart from "@/app/components/navigation/TransactionCart";
+import TransactionHistory from "@/app/components/navigation/TransactionHistory";
 import { NullAdventurer } from "@/app/types";
 import { Connector } from "@starknet-react/core";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";

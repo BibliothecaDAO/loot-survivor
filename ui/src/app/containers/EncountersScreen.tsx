@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import { DiscoveryDisplay } from "../components/actions/DiscoveryDisplay";
-import { BattleDisplay } from "../components/beast/BattleDisplay";
-import LootIconLoader from "../components/icons/Loader";
-import { Button } from "../components/buttons/Button";
-import { Battle, Discovery } from "../types";
-import { processBeastName } from "../lib/utils";
-import useAdventurerStore from "../hooks/useAdventurerStore";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { DiscoveryDisplay } from "@/app/components/actions/DiscoveryDisplay";
+import { BattleDisplay } from "@/app/components/beast/BattleDisplay";
+import LootIconLoader from "@/app/components/icons/Loader";
+import { Button } from "@/app/components/buttons/Button";
+import { Battle, Discovery } from "@/app/types";
+import { processBeastName } from "@/app/lib/utils";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import {
   getBattlesByAdventurer,
   getDiscoveries,
-} from "../hooks/graphql/queries";
-import useCustomQuery from "../hooks/useCustomQuery";
+} from "@/app/hooks/graphql/queries";
+import useCustomQuery from "@/app/hooks/useCustomQuery";
 
 export interface EncountersProps {
   profile?: number;

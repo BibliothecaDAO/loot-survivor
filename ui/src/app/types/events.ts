@@ -123,12 +123,6 @@ type CombatSpec = {
   specials: SpecialPowers;
 };
 
-type ItemSpecials = {
-  special1: u8;
-  special2: u8;
-  special3: u8;
-};
-
 type AdventurerStateWithBag = {
   adventurerState: AdventurerState;
   bag: Bag;

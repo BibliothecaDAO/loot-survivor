@@ -3,18 +3,20 @@ import {
   Call,
   AccountInterface,
 } from "starknet";
-import { GameData } from "@/app/components/GameData";
+import { GameData } from "@/app/lib/data/GameData";
 import {
   Adventurer,
   FormData,
   NullAdventurer,
   UpgradeStats,
 } from "@/app/types";
-import { QueryKey } from "@/app/hooks/useQueryStore";
-import { getKeyFromValue, stringToFelt } from ".";
-import { parseEvents } from "./parseEvents";
+import {
+  getKeyFromValue,
+  stringToFelt,
+  checkArcadeBalance,
+} from "@/app/lib/utils";
+import { parseEvents } from "@/app/lib/utils/parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
-import { checkArcadeBalance } from ".";
 
 export interface SyscallsProps {
   gameContract: any;
@@ -125,8 +127,6 @@ export function syscalls({
   resetCalls,
 }: SyscallsProps) {
   const gameData = new GameData();
-
-  const formatAddress = account ? account.address : "0x0";
 
   const updateItemsXP = (adventurerState: Adventurer, itemsXP: number[]) => {
     const weapon = adventurerState.weapon;
@@ -1200,7 +1200,6 @@ export function syscalls({
 
   const multicall = async (
     loadingMessage: string[],
-    loadingQuery: QueryKey | null,
     notification: string[]
   ) => {
     const balanceEmpty = await checkArcadeBalance(
@@ -1231,7 +1230,7 @@ export function syscalls({
           }
         }
       }
-      startLoading("Multicall", loadingMessage, loadingQuery, adventurer?.id);
+      startLoading("Multicall", loadingMessage, undefined, adventurer?.id);
       try {
         const tx = await handleSubmitCalls(account, calls);
         const receipt = await account?.waitForTransaction(

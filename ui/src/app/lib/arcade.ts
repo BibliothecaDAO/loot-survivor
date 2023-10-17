@@ -1,7 +1,7 @@
 import { AccountChangeEventHandler } from "get-starknet-core";
 import { AccountInterface, Account } from "starknet";
 import { Connector } from "@starknet-react/core"; // Assuming Connector is defined in './connector'
-import { shortenHex } from "./utils";
+import { shortenHex } from "@/app/lib/utils";
 
 export class ArcadeConnector extends Connector {
   private _account: AccountInterface | Account | null;

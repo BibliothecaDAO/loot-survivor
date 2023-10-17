@@ -1,11 +1,10 @@
 import Image from "next/image";
-import { getBeastData } from "../../lib/utils";
-import { HeartIcon } from "../icons/Icons";
-import EfficacyIcon from "../icons/EfficacyIcon";
-import { processBeastName } from "../../lib/utils";
+import { getBeastData } from "@/app/lib/utils";
+import { HeartIcon } from "@/app/components/icons/Icons";
+import EfficacyIcon from "@/app/components/icons/EfficacyIcon";
+import { processBeastName } from "@/app/lib/utils";
 import { Beast } from "@/app/types";
-
-import { HealthCountDown } from "../CountDown";
+import { HealthCountDown } from "@/app/components/CountDown";
 
 interface BeastDisplayProps {
   beastData: Beast;

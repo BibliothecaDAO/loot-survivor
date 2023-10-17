@@ -1,5 +1,5 @@
-import LootIcon from "../icons/LootIcon";
-import Efficacyicon from "../icons/EfficacyIcon";
+import LootIcon from "@/app/components/icons/LootIcon";
+import Efficacyicon from "@/app/components/icons/EfficacyIcon";
 import { Item } from "@/app/types";
 import {
   getItemData,
@@ -8,9 +8,9 @@ import {
   getKeyFromValue,
 } from "@/app/lib/utils";
 import { MdClose } from "react-icons/md";
-import { Button } from "../buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
-import { GameData } from "../GameData";
+import { GameData } from "@/app/lib/data/GameData";
 import { useContracts } from "@/app/hooks/useContracts";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";

@@ -1,11 +1,8 @@
-"use client";
-
 import * as React from "react";
 import { VariantProps, cva } from "class-variance-authority";
-
 import { cn } from "@/app/lib/utils";
 import Link from "next/link";
-import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
+import { soundSelector, useUiSounds } from "@/app/hooks/useUiSound";
 
 const buttonVariants = cva(
   "active:scale-95 inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-offset-2 disabled:bg-terminal-black disabled:text-terminal-green disabled:pointer-events-none data-[state=open]:bg-slate-100  uppercase font-sans-serif border border-transparent disabled:text-slate-600",

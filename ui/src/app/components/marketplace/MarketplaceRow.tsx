@@ -1,21 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "../buttons/Button";
-import { getItemData, getItemPrice, getKeyFromValue } from "../../lib/utils";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import LootIcon from "../icons/LootIcon";
+import { Button } from "@/app/components/buttons/Button";
+import { getItemData, getItemPrice, getKeyFromValue } from "@/app/lib/utils";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import LootIcon from "@/app/components/icons/LootIcon";
 import {
   useTransactionManager,
   useWaitForTransaction,
 } from "@starknet-react/core";
-import { Metadata, Item, ItemPurchase, UpgradeStats } from "../../types";
-import { CoinIcon } from "../icons/Icons";
-import EfficacyDisplay from "../icons/EfficacyIcon";
-import { GameData } from "../GameData";
+import { Metadata, Item, ItemPurchase, UpgradeStats } from "@/app/types";
+import { CoinIcon } from "@/app/components/icons/Icons";
+import EfficacyDisplay from "@/app/components/icons/EfficacyIcon";
+import { GameData } from "@/app/lib/data/GameData";
 
 interface MarketplaceRowProps {
   item: Item;
   index: number;
-  selectedIndex: number;
   activeMenu: number | null;
   setActiveMenu: (value: number | null) => void;
   calculatedNewGold: number;
@@ -33,7 +32,6 @@ interface MarketplaceRowProps {
 const MarketplaceRow = ({
   item,
   index,
-  selectedIndex,
   activeMenu,
   setActiveMenu,
   calculatedNewGold,
@@ -121,8 +119,7 @@ const MarketplaceRow = ({
   return (
     <tr
       className={
-        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black w-full" +
-        (selectedIndex === index + 1 ? " bg-terminal-black" : "")
+        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black w-full"
       }
     >
       <td className="text-center">{item.item}</td>

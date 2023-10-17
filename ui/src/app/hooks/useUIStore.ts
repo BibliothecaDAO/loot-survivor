@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ItemPurchase, UpgradeStats, ZeroUpgrade, u256 } from "../types";
+import { ItemPurchase, UpgradeStats, ZeroUpgrade } from "@/app/types";
 
 export type ScreenPage =
   | "start"

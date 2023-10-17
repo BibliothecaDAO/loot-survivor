@@ -1,10 +1,10 @@
 import { useEffect, useState, ReactElement, useCallback } from "react";
-import { useContracts } from "../../hooks/useContracts";
-import { Button } from "../buttons/Button";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import { useContracts } from "@/app/hooks/useContracts";
+import { Button } from "@/app/components/buttons/Button";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Item } from "@/app/types";
-import { GameData } from "../GameData";
+import { GameData } from "@/app/lib/data/GameData";
 import { getKeyFromValue } from "@/app/lib/utils";
 
 interface InventoryRowProps {

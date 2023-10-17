@@ -1,9 +1,9 @@
 import { Adventurer } from "@/app/types";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
-import { CoinIcon, SkullIcon } from "../icons/Icons";
+import { CoinIcon, SkullIcon } from "@/app/components/icons/Icons";
 import { useContracts } from "@/app/hooks/useContracts";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
-import { Button } from "../buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 import { useBlock } from "@starknet-react/core";
 import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
