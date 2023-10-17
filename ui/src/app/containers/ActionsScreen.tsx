@@ -1,13 +1,12 @@
-import { useState } from "react";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import ButtonMenu from "@/app/components/menu/ButtonMenu";
 import Info from "@/app/components/adventurer/Info";
 import Discovery from "@/app/components/actions/Discovery";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import BeastScreen from "@/app/containers/BeastScreen";
 import MazeLoader from "@/app/components/icons/MazeLoader";
 import useUIStore from "@/app/hooks/useUIStore";
+import ActionMenu from "@/app/components/menu/ActionMenu";
 
 interface ActionsScreenProps {
   explore: (...args: any[]) => any;

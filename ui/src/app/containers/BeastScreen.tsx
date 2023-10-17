@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useBlock } from "@starknet-react/core";
-import KeyboardControl, { ButtonData } from "@/app/components/KeyboardControls";
 import { BattleDisplay } from "@/app/components/beast/BattleDisplay";
 import { BeastDisplay } from "@/app/components/beast/BeastDisplay";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
@@ -11,6 +10,8 @@ import { Battle, NullBeast } from "@/app/types";
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import InterludeScreen from "@/app/containers/InterludeScreen";
+import { ButtonData } from "@/app/types";
+import ActionMenu from "@/app/components/menu/ActionMenu";
 
 interface BeastScreenProps {
   attack: (...args: any[]) => any;
