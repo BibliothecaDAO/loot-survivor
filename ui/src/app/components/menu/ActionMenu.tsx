@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
-import { Button } from "../buttons/Button";
-import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
+import React, { useRef } from "react";
+import { Button } from "@/app/components/buttons/Button";
+import { soundSelector, useUiSounds } from "@/app/hooks/useUiSound";
 import { ButtonData } from "@/app/types";
 
 interface ActionMenuProps {
@@ -17,10 +17,7 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
   className,
 }) => {
   const { play } = useUiSounds(soundSelector.click);
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
-  console.log(buttonsData[0].disabled);
 
   return (
     <div className={`relative ${className ?? ""} flex w-full h-full`}>
@@ -44,7 +41,6 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
           size={size}
           onClick={() => {
             play();
-            setSelectedIndex(index);
             buttonData.action();
           }}
           disabled={buttonData.disabled}

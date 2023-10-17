@@ -417,13 +417,13 @@ export default function Home() {
           <NotificationDisplay />
 
           {deathDialog && <DeathDialog />}
-          {/* {arcadeIntro && (
+          {arcadeIntro && (
             <ArcadeIntro
               ethBalance={ethBalance}
               lordsBalance={lordsBalance}
               getBalances={getBalances}
             />
-          )} */}
+          )}
           {status == "connected" && arcadeDialog && <ArcadeDialog />}
           {status == "connected" && topUpDialog && <TopUpDialog token="ETH" />}
 

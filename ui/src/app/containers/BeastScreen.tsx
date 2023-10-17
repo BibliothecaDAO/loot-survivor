@@ -194,7 +194,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
                 <ActionMenu
                   buttonsData={fleeButtonsData}
                   size={"fill"}
-                  title="Flee"
+                  title={buttonText}
                 />
               </div>
             </div>
