@@ -4,6 +4,11 @@ const dir = "/music/ui/";
 
 export const soundSelector = {
   click: "beep.wav",
+  discoverItem: "boost.mp3",
+  flee: "flee.wav",
+  jump: "jump.wav",
+  slay: "slay.mp3",
+  hit: "hurt.mp3",
 };
 
 export const useUiSounds = (selector: string) => {

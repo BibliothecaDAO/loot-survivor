@@ -177,10 +177,10 @@ export default function Home() {
   const playState = useMemo(
     () => ({
       isInBattle: hasBeast,
-      isDead: false, // set this to true when player is dead
+      isDead: deathDialog, // set this to true when player is dead
       isMuted: isMuted,
     }),
-    [hasBeast, isMuted]
+    [hasBeast, deathDialog, isMuted]
   );
 
   const { play, stop } = useMusic(playState, {
