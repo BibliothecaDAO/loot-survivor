@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime
 from typing import List, NewType, Optional, Dict
 import base64
 import ssl
@@ -405,6 +404,17 @@ class IntFilter:
 
 
 @strawberry.input
+class FloatFilter:
+    eq: Optional[float] = None
+    _in: Optional[List[float]] = None
+    notIn: Optional[List[float]] = None
+    lt: Optional[float] = None
+    lte: Optional[float] = None
+    gt: Optional[float] = None
+    gte: Optional[float] = None
+
+
+@strawberry.input
 class BooleanFilter:
     eq: Optional[bool] = None
 
@@ -659,7 +669,7 @@ class ScoresFilter:
     txHash: Optional[HexValueFilter] = None
     scoreTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
-    totalPayout: Optional[IntFilter] = None
+    totalPayout: Optional[FloatFilter] = None
 
 
 @strawberry.input
@@ -744,20 +754,6 @@ class ItemsFilter:
     xp: Optional[FeltValueFilter] = None
     isAvailable: Optional[BooleanFilter] = None
     timestamp: Optional[DateTimeFilter] = None
-
-
-@strawberry.input
-class EntropyFilter:
-    prevHash: Optional[HexValueFilter] = None
-    prevBlockNumber: Optional[FeltValueFilter] = None
-    prevBlockTimestamp: Optional[DateTimeFilter] = None
-    prevNextRotationBlock: Optional[FeltValueFilter] = None
-    newHash: Optional[HexValueFilter] = None
-    newBlockNumber: Optional[FeltValueFilter] = None
-    newBlockTimestamp: Optional[DateTimeFilter] = None
-    newNextRotationBlock: Optional[FeltValueFilter] = None
-    blocksPerHour: Optional[FeltValueFilter] = None
-    currentTimestamp: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
@@ -892,20 +888,6 @@ class ItemsOrderByInput:
     timestamp: Optional[OrderByInput] = None
 
 
-@strawberry.input
-class EntropyOrderByInput:
-    prevHash: Optional[OrderByInput] = None
-    prevBlockNumber: Optional[OrderByInput] = None
-    prevBlockTimestamp: Optional[OrderByInput] = None
-    prevNextRotationBlock: Optional[OrderByInput] = None
-    newHash: Optional[OrderByInput] = None
-    newBlockNumber: Optional[OrderByInput] = None
-    newBlockTimestamp: Optional[OrderByInput] = None
-    newNextRotationBlock: Optional[OrderByInput] = None
-    blocksPerHour: Optional[OrderByInput] = None
-    currentTimestamp: Optional[OrderByInput] = None
-
-
 @strawberry.type
 class Adventurer:
     id: Optional[FeltValue]
@@ -984,7 +966,7 @@ class Score:
     txHash: Optional[HexValue]
     scoreTime: Optional[str]
     timestamp: Optional[str]
-    totalPayout: Optional[int]
+    totalPayout: Optional[float]
 
     @classmethod
     def from_mongo(cls, data):
@@ -1174,35 +1156,6 @@ class Item:
         )
 
 
-@strawberry.type
-class Entropy:
-    prevHash: Optional[HexValue]
-    prevBlockNumber: Optional[int]
-    prevBlockTimestamp: Optional[str]
-    prevNextRotationBlock: Optional[int]
-    newHash: Optional[HexValue]
-    newBlockNumber: Optional[int]
-    newBlockTimestamp: Optional[str]
-    newNextRotationBlock: Optional[int]
-    blocksPerHour: Optional[int]
-    currentTimestamp: Optional[str]
-
-    @classmethod
-    def from_mongo(cls, data):
-        return cls(
-            prevHash=data["prevHash"],
-            prevBlockNumber=data["prevBlockNumber"],
-            prevBlockTimestamp=data["prevBlockTimestamp"],
-            prevNextRotationBlock=data["prevNextRotationBlock"],
-            newHash=data["newHash"],
-            newBlockNumber=data["newBlockNumber"],
-            newBlockTimestamp=data["newBlockTimestamp"],
-            newNextRotationBlock=data["newNextRotationBlock"],
-            blocksPerHour=data["blocksPerHour"],
-            currentTimestamp=data["currentTimestamp"],
-        )
-
-
 def get_str_filters(where: StringFilter) -> List[Dict]:
     filter = {}
     if where.eq:
@@ -1381,6 +1334,8 @@ def get_scores(
             elif isinstance(value, DateTimeFilter):
                 filter[key] = get_date_filters(value)
             elif isinstance(value, FeltValueFilter):
+                filter[key] = get_felt_filters(value)
+            elif isinstance(value, FloatFilter):
                 filter[key] = get_felt_filters(value)
 
     sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
@@ -1591,42 +1546,6 @@ def get_items(
     return [Item.from_mongo(t) for t in query]
 
 
-def get_entropy(
-    info,
-    where: Optional[EntropyFilter] = {},
-    limit: Optional[int] = 10,
-    skip: Optional[int] = 0,
-    orderBy: Optional[EntropyOrderByInput] = {},
-) -> List[Entropy]:
-    db = info.context["db"]
-
-    filter = {"_cursor.to": None}
-
-    if where:
-        processed_filters = process_filters(where)
-        for key, value in processed_filters.items():
-            if isinstance(value, HexValueFilter):
-                filter[key] = get_hex_filters(value)
-
-    sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
-
-    sort_var = "updated_at"
-    sort_dir = -1
-
-    for key, value in sort_options.items():
-        if value.asc:
-            sort_var = key
-            sort_dir = 1
-            break
-        if value.desc:
-            sort_var = key
-            sort_dir = -1
-            break
-    query = db["entropy"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
-
-    return [Entropy.from_mongo(t) for t in query]
-
-
 @strawberry.type
 class Query:
     adventurers: List[Adventurer] = strawberry.field(resolver=get_adventurers)
@@ -1635,7 +1554,6 @@ class Query:
     beasts: List[Beast] = strawberry.field(resolver=get_beasts)
     battles: List[Battle] = strawberry.field(resolver=get_battles)
     items: List[Item] = strawberry.field(resolver=get_items)
-    entropy: List[Entropy] = strawberry.field(resolver=get_entropy)
 
 
 class IndexerGraphQLView(GraphQLView):
