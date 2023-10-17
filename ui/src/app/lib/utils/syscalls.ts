@@ -208,7 +208,7 @@ export function syscalls({
       calldata: [
         "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
-        // stringToFelt(formData.name).toString(),
+        stringToFelt(formData.name).toString(),
       ],
     };
 
@@ -230,17 +230,6 @@ export function syscalls({
         undefined
       );
       try {
-        throw new Error(`Error in the called contract (0x010515a855de4d9a1db962fe18c20ff2245e5cc6c6982f2b41a6e4af0de6d544):
-          Error at pc=0:6482:
-          Got an exception while executing a hint: Custom Hint Error: Execution failed. Failure reason: "Failed to deserialize param #3".
-          Cairo traceback (most recent call last):
-          Unknown location (pc=0:634)
-          Unknown location (pc=0:2959)
-          Unknown location (pc=0:4287)
-          Unknown location (pc=0:5609)
-          Unknown location (pc=0:5609)
-          Unknown location (pc=0:5594)
-        `);
         const tx = await handleSubmitCalls(account, [
           ...calls,
           mintLords,
@@ -260,7 +249,6 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
-        console.log(receipt);
         // Handle if the tx was reverted
         if (
           (receipt as RevertedTransactionReceiptResponse).execution_status ===
@@ -382,6 +370,15 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
+        // Handle if the tx was reverted
+        if (
+          (receipt as RevertedTransactionReceiptResponse).execution_status ===
+          "REVERTED"
+        ) {
+          throw new Error(
+            (receipt as RevertedTransactionReceiptResponse).revert_reason
+          );
+        }
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
           queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
@@ -632,7 +629,15 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
-
+        // Handle if the tx was reverted
+        if (
+          (receipt as RevertedTransactionReceiptResponse).execution_status ===
+          "REVERTED"
+        ) {
+          throw new Error(
+            (receipt as RevertedTransactionReceiptResponse).revert_reason
+          );
+        }
         // reset battles by tx hash
         setData("battlesByTxHashQuery", {
           battles: null,
@@ -860,6 +865,15 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
+        // Handle if the tx was reverted
+        if (
+          (receipt as RevertedTransactionReceiptResponse).execution_status ===
+          "REVERTED"
+        ) {
+          throw new Error(
+            (receipt as RevertedTransactionReceiptResponse).revert_reason
+          );
+        }
         // Add optimistic data
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
@@ -1035,7 +1049,15 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
-
+        // Handle if the tx was reverted
+        if (
+          (receipt as RevertedTransactionReceiptResponse).execution_status ===
+          "REVERTED"
+        ) {
+          throw new Error(
+            (receipt as RevertedTransactionReceiptResponse).revert_reason
+          );
+        }
         // Add optimistic data
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
@@ -1200,7 +1222,15 @@ export function syscalls({
             retryInterval: 100,
           }
         );
-
+        // Handle if the tx was reverted
+        if (
+          (receipt as RevertedTransactionReceiptResponse).execution_status ===
+          "REVERTED"
+        ) {
+          throw new Error(
+            (receipt as RevertedTransactionReceiptResponse).revert_reason
+          );
+        }
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
           queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
@@ -1261,6 +1291,15 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
+        // Handle if the tx was reverted
+        if (
+          (receipt as RevertedTransactionReceiptResponse).execution_status ===
+          "REVERTED"
+        ) {
+          throw new Error(
+            (receipt as RevertedTransactionReceiptResponse).revert_reason
+          );
+        }
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,

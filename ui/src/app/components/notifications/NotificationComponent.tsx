@@ -4,6 +4,7 @@ import { notificationAnimations } from "@/app/lib/constants";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { CSSTransition } from "react-transition-group";
 import { Button } from "@/app/components/buttons/Button";
+import useUIStore from "@/app/hooks/useUIStore";
 
 export interface NotificationComponentProps {
   notifications: any[];
@@ -16,6 +17,7 @@ const NotificationComponent = ({
   const showNotification = useLoadingStore((state) => state.showNotification);
   const error = useLoadingStore((state) => state.error);
   const errorMessage = useLoadingStore((state) => state.errorMessage);
+  const deathDialog = useUIStore((state) => state.deathDialog);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flash, setFlash] = useState(false);
 
@@ -24,16 +26,22 @@ const NotificationComponent = ({
       resetNotification();
     } else {
       if (currentIndex < notifications.length - 1) {
-        const timer = setTimeout(() => {
-          setCurrentIndex((prev) => prev + 1);
-        }, 2000);
+        const timer = setTimeout(
+          () => {
+            setCurrentIndex((prev) => prev + 1);
+          },
+          error ? 5000 : 2000
+        );
         return () => {
           clearTimeout(timer);
         };
       } else if (currentIndex === notifications.length - 1) {
-        const timer = setTimeout(() => {
-          resetNotification();
-        }, 2000);
+        const timer = setTimeout(
+          () => {
+            resetNotification();
+          },
+          error ? 5000 : 2000
+        );
         return () => clearTimeout(timer);
       }
     }
@@ -61,6 +69,10 @@ const NotificationComponent = ({
     }
   };
 
+  if (deathDialog) {
+    return null;
+  }
+
   return (
     <CSSTransition
       in={showNotification}
@@ -69,11 +81,11 @@ const NotificationComponent = ({
       unmountOnExit
     >
       <div
-        className={`fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border-4 z-50 shadow-xl bg-terminal-black ${
+        className={`fixed top-1/16 left-[5%] w-[90%] sm:left-3/8 sm:w-1/4 border-4 z-50 shadow-xl bg-terminal-black h-1/4 sm:h-1/6 ${
           error ? "border-red-600" : "border-terminal-green"
         }`}
       >
-        <div className="relative flex flex-row w-full gap-5 sm:p-2">
+        <div className="relative flex flex-row w-full gap-5 sm:p-2 items-center justify-center h-full">
           {flash && <div className="notification-flash" />}
           <div className="sm:hidden w-1/6 sm:w-1/4">
             <SpriteAnimation
@@ -101,7 +113,7 @@ const NotificationComponent = ({
               adjustment={10}
             />
           </div>
-          <div className="w-2/3 sm:w-3/4 m-auto text-sm sm:text-lg">
+          <div className="flex items-center justify-center w-2/3 sm:w-3/4 m-auto text-sm sm:text-lg h-full default-scroll overflow-auto">
             {notifications[currentIndex]?.message}
           </div>
           {error && (
