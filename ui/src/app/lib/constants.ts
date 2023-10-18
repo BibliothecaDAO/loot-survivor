@@ -44,6 +44,8 @@ export function getContracts() {
           "0x05e367ac160e5f90c5775089b582dfc987dd148a5a2f977c49def2a6644f724b",
         beasts:
           "0x05f9699b308b8544fddab9da50d7374743d0b3ca5b53de9c92e26d6bd99705ed",
+        goldenToken:
+          "0x03af06d4c23f8516e7e75625afb04ca76a18908ed8725534848ca8d11502eb35",
       };
     case "mainnet":
       return {
@@ -52,6 +54,7 @@ export function getContracts() {
         lords:
           "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
         beasts: "0x0",
+        goldenToken: "0x0",
       };
   }
 }

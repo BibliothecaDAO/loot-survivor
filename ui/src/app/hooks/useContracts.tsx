@@ -2,6 +2,7 @@ import { useContract } from "@starknet-react/core";
 import Game from "../abi/Game.json";
 import Lords from "../abi/Lords.json";
 import Beasts from "../abi/Beasts.json";
+import GoldenToken from "../abi/GoldenToken.json";
 import { getContracts } from "../lib/constants";
 
 const ethBalanceABIFragment = [
@@ -87,10 +88,16 @@ export const useContracts = () => {
     abi: Beasts,
   });
 
+  const { contract: goldenToken } = useContract({
+    address: contracts?.goldenToken,
+    abi: GoldenToken,
+  });
+
   return {
     gameContract,
     lordsContract,
     ethContract,
     beastsContract,
+    goldenToken,
   };
 };
