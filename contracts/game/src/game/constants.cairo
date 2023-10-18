@@ -56,7 +56,7 @@ mod REWARD_DISTRIBUTIONS_PHASE1_BP {
     const INTERFACE: u256 = 0;
     const FIRST_PLACE: u256 = 480;
     const SECOND_PLACE: u256 = 320;
-    const THIRD_PLACE: u256 = 20;
+    const THIRD_PLACE: u256 = 200;
 }
 
 mod REWARD_DISTRIBUTIONS_PHASE2_BP {

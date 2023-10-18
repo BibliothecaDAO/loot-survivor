@@ -1218,6 +1218,8 @@ mod Game {
         let second_place_address = self._owner.read(leaderboard.second.adventurer_id.into());
         let third_place_address = self._owner.read(leaderboard.third.adventurer_id.into());
 
+        let current_cost_to_play = self._cost_to_play.read();
+
         // if third place score is less than minimum score for payouts
         if (leaderboard.third.xp < MINIMUM_SCORE_FOR_PAYOUTS) {
             // all rewards go to the DAO
@@ -1239,13 +1241,12 @@ mod Game {
                         adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
                     },
                     client: ClientReward { amount: 0, address: dao_address },
-                    dao: COST_TO_PLAY.into()
+                    dao: current_cost_to_play.into()
                 }
             );
             return;
         }
 
-        let current_cost_to_play = self._cost_to_play.read();
 
         // First phase all rewards go to players
         let mut week = Week {
