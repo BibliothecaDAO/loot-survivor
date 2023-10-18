@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useAccount, useConnectors } from "@starknet-react/core";
+import { useAccount, useDisconnect } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -34,7 +34,7 @@ export default function Header({
   lordsBalance,
 }: HeaderProps) {
   const { account, address } = useAccount();
-  const { disconnect } = useConnectors();
+  const { disconnect } = useDisconnect();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const data = useQueriesStore((state) => state.data);

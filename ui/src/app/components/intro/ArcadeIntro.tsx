@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAccount, useConnectors } from "@starknet-react/core";
+import { useAccount, useConnect } from "@starknet-react/core";
 import {
   ETH_PREFUND_AMOUNT,
   LORDS_PREFUND_AMOUNT,
@@ -26,10 +26,10 @@ export const ArcadeIntro = ({
   getBalances,
 }: ArcadeIntroProps) => {
   const { account, address } = useAccount();
-  const { connect, available } = useConnectors();
+  const { connect, connectors } = useConnect();
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const { create, isDeploying, isSettingPermissions } = useBurner();
-  const walletConnectors = getWalletConnectors(available);
+  const walletConnectors = getWalletConnectors(connectors);
   const { lordsContract } = useContracts();
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -93,7 +93,7 @@ export const ArcadeIntro = ({
             {walletConnectors.map((connector, index) => (
               <Button
                 disabled={address !== undefined}
-                onClick={() => connect(connector)}
+                onClick={() => connect({ connector })}
                 key={index}
               >
                 {connector.id === "braavos" || connector.id === "argentX"
