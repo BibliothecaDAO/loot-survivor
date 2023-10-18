@@ -67,6 +67,8 @@ mod tests {
 
     const DEFAULT_NO_GOLDEN_TOKEN: felt252 = 0;
 
+    const DAY: u64 = 86400;
+
     fn OWNER() -> ContractAddress {
         contract_address_const::<10>()
     }
@@ -1931,4 +1933,75 @@ mod tests {
         (COST_TO_PLAY * 11 / 10).print();
         (COST_TO_PLAY * 9 / 10).print();
     }
+
+    #[test]
+    #[available_gas(90000000)]
+    fn test_moving_average() {
+        let mut total_games: u128 = 0;
+        let mut window_size: u128 = 3;
+        let mut total_seconds: u128 = 0;
+        let week_in_seconds: u128 = 604800;
+
+        // Array of precalculated timestamps each 8 days apart
+        let mut timestamps = ArrayTrait::<felt252>::new();
+        timestamps.append(1696201757);
+        timestamps.append(1696892957);
+        timestamps.append(1697584157);
+        timestamps.append(1698275357);
+
+        // Initialize empty array of game counts
+        let mut game_counts = ArrayTrait::<u128>::new();
+        game_counts.append(0);
+        game_counts.append(0);
+        game_counts.append(0);
+        game_counts.append(1);
+
+        let period = 4;
+
+        let mut i = 1;
+
+        loop {
+            if (total_seconds > week_in_seconds * window_size || i == period) {
+                break;
+            }
+
+            let game_count = *game_counts.at(period - i);
+            let previous_period_timestamp = *timestamps.at(period - i - 1);
+            let current_period_timestamp = *timestamps.at(period - i);
+
+            total_seconds += current_period_timestamp.try_into().unwrap() - previous_period_timestamp.try_into().unwrap();
+            total_games += game_count;
+
+            i += 1;
+        };
+
+        assert(total_seconds > week_in_seconds * window_size, 'Period too small');
+
+        assert(total_games / window_size == 0.try_into().unwrap(), 'wrong moving average');
+    }   
+
+    #[test]
+    #[available_gas(90000000)]
+    fn test_update_cost_to_play() {
+        let (unmut_game, lords) = setup(1000);
+
+        let mut game = unmut_game;
+
+        // We update the game price 4 times over 3 are required to update price
+        game.initiate_price_change();
+        testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 8));
+        game.initiate_price_change();
+        testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 8));
+        game.initiate_price_change();
+        testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 8));
+        // Now we are in the latest period play a game to get the amount above the moving average
+        add_adventurer_to_game(ref game);
+        game.initiate_price_change();
+
+        // Wait for another week to update cost
+        testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 8));
+        game.update_cost_to_play();
+
+        assert(game.get_cost_to_play() == COST_TO_PLAY * 11 / 10, 'cost not raised');
+    }    
 }

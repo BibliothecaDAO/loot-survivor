@@ -29,6 +29,7 @@ mod messages {
     const TIME_NOT_REACHED: felt252 = 'Time not reached';
     const CANNOT_PLAY_WITH_TOKEN: felt252 = 'Cannot play with ticket';
     const NOT_OWNER_OF_TOKEN: felt252 = 'Not owner of ticket';
+    const MA_PERIOD_LESS_THAN_WEEK: felt252 = 'MA period too small';
 }
 
 // TODO: Update for mainnet

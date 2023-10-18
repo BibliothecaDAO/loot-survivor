@@ -3594,9 +3594,9 @@ mod Game {
     }
 
     fn _game_count_in_period(self: @ContractState, period: u128) -> u128 {
-        (self._game_counter.read() - self._games_played_snapshot.read(period.into()))
-            .try_into()
-            .unwrap()
+        let current_games = self._games_played_snapshot.read(period.into());
+        let previous_games = self._games_played_snapshot.read(period.into() - 1);
+        current_games.try_into().unwrap() - previous_games.try_into().unwrap()
     }
 
     fn _moving_average(self: @ContractState, period: u128) -> u128 {
@@ -3607,23 +3607,24 @@ mod Game {
         let mut total_seconds: u128 = 0;
         let week_in_seconds: u128 = 604800;
 
-        let mut i = 0;
+        let mut i = 1;
 
         loop {
-            if (total_seconds > week_in_seconds * window_size || i == 0) {
+            if (total_seconds > week_in_seconds * window_size || i == period) {
                 break;
             }
 
             let game_count = _game_count_in_period(self, period - i);
-            let timestamp = self._games_snapshot_timestamp.read((period - i).into());
+            let previous_period_timestamp = self._games_snapshot_timestamp.read((period - i - 1).into());
+            let current_period_timestamp = self._games_snapshot_timestamp.read((period - i).into());
 
-            total_seconds += timestamp.try_into().unwrap();
+            total_seconds += (current_period_timestamp.try_into().unwrap() - previous_period_timestamp.try_into().unwrap());
             total_games += game_count;
 
             i += 1;
         };
 
-        assert(total_seconds > week_in_seconds * window_size, 'Total games');
+        assert(total_seconds > week_in_seconds * window_size, messages::MA_PERIOD_LESS_THAN_WEEK);
 
         total_games / window_size
     }
@@ -3638,7 +3639,7 @@ mod Game {
         let current_period = self._snapshot_period.read().try_into().unwrap();
 
         // get game count in period
-        let game_count: u128 = _game_count_in_period(@self, current_period);
+        let game_count: u128 = _game_count_in_period(@self, current_period - 1);
 
         // including current period
         let moving_average: u128 = _moving_average(@self, current_period);
