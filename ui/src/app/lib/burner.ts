@@ -9,13 +9,16 @@ import {
   stark,
   Call,
   selector,
+  Contract,
 } from "starknet";
 import Storage from "@/app/lib/storage";
-import { useAccount, useConnectors } from "@starknet-react/core";
 import { ArcadeConnector } from "@/app/lib/arcade";
-import { useContracts } from "@/app/hooks/useContracts";
 import { BurnerStorage } from "@/app/types";
-import { getRPCUrl, getArcadeClassHash } from "@/app/lib/constants";
+import {
+  getRPCUrl,
+  getArcadeClassHash,
+  getContracts,
+} from "@/app/lib/constants";
 
 export const ETH_PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
 export const LORDS_PREFUND_AMOUNT = "0x0d8d726b7177a80000"; // 250LORDS
@@ -26,9 +29,12 @@ const provider = new Provider({
   sequencer: { baseUrl: rpc_addr! },
 });
 
-export const useBurner = () => {
-  const { refresh } = useConnectors();
-  const { account: walletAccount } = useAccount();
+export const useBurner = (
+  walletAccount?: AccountInterface,
+  gameContract?: Contract,
+  lordsContract?: Contract,
+  ethContract?: Contract
+) => {
   const [account, setAccount] = useState<Account>();
   const [isDeploying, setIsDeploying] = useState(false);
   const [isGeneratingNewKey, setIsGeneratingNewKey] = useState(false);
@@ -36,8 +42,8 @@ export const useBurner = () => {
   const [isToppingUpEth, setIsToppingUpEth] = useState(false);
   const [isToppingUpLords, setIsToppingUpLords] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const { gameContract, lordsContract, ethContract } = useContracts();
   const arcadeClassHash = getArcadeClassHash();
+  const contracts = getContracts();
 
   // init
   useEffect(() => {
@@ -71,7 +77,7 @@ export const useBurner = () => {
   const list = useCallback(() => {
     let storage = Storage.get("burners") || {};
     return Object.keys(storage).map((address) => {
-      if (storage[address].gameContract === gameContract?.address) {
+      if (storage[address].gameContract === contracts?.game) {
         return {
           address,
           active: storage[address].active,
@@ -193,10 +199,11 @@ export const useBurner = () => {
 
     // deploy burner
     const burner = new Account(provider, address, privateKey, "1");
+    console.log(burner);
 
     const {
       transaction_hash: deployTx,
-      contract_address: accountAAFinalAdress,
+      contract_address: accountAAFinalAddress,
     } = await burner.deployAccount(
       {
         classHash: arcadeClassHash!,
@@ -214,7 +221,7 @@ export const useBurner = () => {
     setIsSettingPermissions(true);
 
     const setPermissionsAndApprovalTx = await setPermissionsAndApproval(
-      accountAAFinalAdress,
+      accountAAFinalAddress,
       walletAccount
     );
 
@@ -240,7 +247,6 @@ export const useBurner = () => {
     Storage.set("burners", storage);
     setIsSettingPermissions(false);
     setIsDeploying(false);
-    refresh();
     window.location.reload();
     return burner;
   }, [walletAccount]);
@@ -480,7 +486,6 @@ export const useBurner = () => {
 
         Storage.set("burners", storage);
         setIsGeneratingNewKey(false);
-        refresh();
         window.location.reload();
       } catch (e) {
         setIsGeneratingNewKey(false);
@@ -493,17 +498,11 @@ export const useBurner = () => {
   const listConnectors = useCallback(() => {
     const arcadeAccounts = [];
     const burners = list();
+    console.log(burners);
 
     for (const burner of burners) {
       if (burner) {
-        const arcadeConnector = new ArcadeConnector(
-          {
-            options: {
-              id: burner.address,
-            },
-          },
-          get(burner.address)
-        );
+        const arcadeConnector = new ArcadeConnector(get(burner.address));
 
         arcadeAccounts.push(arcadeConnector);
       }

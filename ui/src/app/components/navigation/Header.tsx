@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Contract } from "starknet";
 import { useAccount, useDisconnect } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
@@ -26,12 +27,14 @@ export interface HeaderProps {
   multicall: (...args: any[]) => any;
   mintLords: (...args: any[]) => any;
   lordsBalance: bigint;
+  gameContract: Contract;
 }
 
 export default function Header({
   multicall,
   mintLords,
   lordsBalance,
+  gameContract,
 }: HeaderProps) {
   const { account, address } = useAccount();
   const { disconnect } = useDisconnect();
@@ -147,6 +150,7 @@ export default function Header({
           <TransactionCart
             buttonRef={displayCartButtonRef}
             multicall={multicall}
+            gameContract={gameContract}
           />
         )}
         <div className="flex items-center sm:hidden">

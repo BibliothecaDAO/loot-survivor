@@ -1,10 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { useContracts } from "@/app/hooks/useContracts";
-import {
-  useAccount,
-  useWaitForTransaction,
-  useTransactionManager,
-} from "@starknet-react/core";
+import { Contract } from "starknet";
+import { useAccount, useWaitForTransaction } from "@starknet-react/core";
 import { getKeyFromValue, groupBySlot } from "@/app/lib/utils";
 import { InventoryRow } from "@/app/components/inventory/InventoryRow";
 import Info from "@/app/components/adventurer/Info";
@@ -17,19 +13,25 @@ import { InfoIcon, BagIcon } from "@/app/components/icons/Icons";
 import { Item, Metadata } from "@/app/types";
 import { GameData } from "@/app/lib/data/GameData";
 import useUIStore from "@/app/hooks/useUIStore";
+import useTransactionManager from "@/app/hooks/useTransactionManager";
+
+interface InventoryScreenProps {
+  gameContract: Contract;
+}
 
 /**
  * @container
  * @description Provides the inventory screen for the adventurer.
  */
-export default function InventoryScreen() {
+export default function InventoryScreen({
+  gameContract,
+}: InventoryScreenProps) {
   const { account } = useAccount();
   const formatAddress = account ? account.address : "0x0";
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
-  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const inventorySelected = useUIStore((state) => state.inventorySelected);
@@ -162,7 +164,7 @@ export default function InventoryScreen() {
   return (
     <div className="flex flex-row sm:gap-5 h-full">
       <div className="hidden sm:block sm:w-1/2 lg:w-1/3">
-        <Info adventurer={adventurer} />
+        <Info adventurer={adventurer} gameContract={gameContract} />
       </div>
       <div className="flex flex-col w-1/6">
         <InventoryRow
@@ -177,6 +179,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="bag" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Weapon"}
@@ -190,6 +193,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="weapon" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Chest Armor"}
@@ -203,6 +207,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="chest" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Head Armor"}
@@ -216,6 +221,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="head" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Waist Armor"}
@@ -229,6 +235,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="waist" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Foot Armor"}
@@ -242,6 +249,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="foot" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Hand Armor"}
@@ -255,6 +263,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="hand" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Neck Jewelry"}
@@ -268,6 +277,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="neck" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Ring Jewelry"}
@@ -281,6 +291,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="ring" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
       </div>
       {adventurer?.id ? (

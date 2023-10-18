@@ -2,8 +2,8 @@
 
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { getGraphQLUrl } from "@/app/lib/constants";
-
 import "./globals.css";
+import StarknetProvider from "./provider";
 
 export default function RootLayout({
   children,

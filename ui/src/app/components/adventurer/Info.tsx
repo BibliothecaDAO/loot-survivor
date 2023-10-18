@@ -1,3 +1,4 @@
+import { Contract } from "starknet";
 import { Adventurer, NullAdventurer, NullItem } from "@/app/types";
 import {
   HeartIcon,
@@ -12,17 +13,18 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { Item } from "@/app/types";
 import { HealthCountDown } from "@/app/components/CountDown";
 import { GameData } from "@/app/lib/data/GameData";
-import { useContracts } from "@/app/hooks/useContracts";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
+  gameContract: Contract;
   profileExists?: boolean;
   upgradeCost?: number;
 }
 
 export default function Info({
   adventurer,
+  gameContract,
   profileExists,
   upgradeCost,
 }: InfoProps) {
@@ -36,7 +38,6 @@ export default function Info({
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
-  const { gameContract } = useContracts();
 
   const gameData = new GameData();
 

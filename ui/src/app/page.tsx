@@ -1,10 +1,10 @@
 "use client";
 import {
   useAccount,
-  useConnectors,
+  useConnect,
   useNetwork,
   useProvider,
-  useTransactionManager,
+  useContract,
 } from "@starknet-react/core";
 import { constants } from "starknet";
 import { useState, useEffect, useMemo } from "react";
@@ -47,13 +47,18 @@ import { ArcadeDialog } from "@/app/components/ArcadeDialog";
 import { TopUpDialog } from "@/app/components/TopUpDialog";
 import NetworkSwitchError from "@/app/components/navigation/NetworkSwitchError";
 import { syscalls } from "@/app/lib/utils/syscalls";
-import { useContracts } from "@/app/hooks/useContracts";
+import Game from "@/app/abi/Game.json";
+import Lords from "@/app/abi/Lords.json";
+import EthBalanceFragment from "@/app/abi/EthBalanceFragment.json";
+import { getContracts } from "@/app/lib/constants";
 import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
 import ScreenMenu from "@/app/components/menu/ScreenMenu";
 import { getArcadeConnectors } from "@/app/lib/connectors";
 import Header from "@/app/components/navigation/Header";
 import { checkArcadeBalance } from "@/app/lib/utils";
 import { fetchBalances } from "@/app/lib/balances";
+import useTransactionManager from "./hooks/useTransactionManager";
+import StarknetProvider from "./provider";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -74,8 +79,16 @@ const mobileMenuItems: Menu[] = [
   { id: 6, label: "Guide", screen: "guide", disabled: false },
 ];
 
-export default function Home() {
-  const { available } = useConnectors();
+export default function Main() {
+  return (
+    <StarknetProvider>
+      <Home />
+    </StarknetProvider>
+  );
+}
+
+function Home() {
+  const { connectors } = useConnect();
   const { chain } = useNetwork();
   const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
@@ -104,7 +117,21 @@ export default function Home() {
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
   const setEstimatingFee = useUIStore((state) => state.setEstimatingFee);
-  const { gameContract, lordsContract, ethContract } = useContracts();
+
+  const contracts = getContracts();
+  const { contract: gameContract } = useContract({
+    address: contracts?.game,
+    abi: Game,
+  });
+  const { contract: lordsContract } = useContract({
+    address: contracts?.lords,
+    abi: Lords,
+  });
+  const { contract: ethContract } = useContract({
+    address: contracts?.eth,
+    abi: EthBalanceFragment,
+  });
+
   const { addTransaction } = useTransactionManager();
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const resetCalls = useTransactionCartStore((state) => state.resetCalls);
@@ -121,7 +148,7 @@ export default function Home() {
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const setStartOption = useUIStore((state) => state.setStartOption);
 
-  const arcadeConnectors = getArcadeConnectors(available);
+  const arcadeConnectors = getArcadeConnectors(connectors);
 
   const [ethBalance, setEthBalance] = useState<bigint>(BigInt(0));
   const [lordsBalance, setLordsBalance] = useState<bigint>(BigInt(0));
@@ -297,7 +324,8 @@ export default function Home() {
   }, [play, stop]);
 
   useEffect(() => {
-    const isWrongNetwork = chain?.id !== constants.StarknetChainId.SN_GOERLI;
+    const isWrongNetwork =
+      chain?.id !== BigInt(constants.StarknetChainId.SN_GOERLI);
     setIsWrongNetwork(isWrongNetwork);
   }, [chain, provider, isConnected]);
 
@@ -404,6 +432,7 @@ export default function Home() {
               multicall={multicall}
               mintLords={async () => await mintLords()}
               lordsBalance={lordsBalance}
+              gameContract={gameContract!}
             />
           </div>
           <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
@@ -421,9 +450,18 @@ export default function Home() {
               ethBalance={ethBalance}
               lordsBalance={lordsBalance}
               getBalances={getBalances}
+              gameContract={gameContract!}
+              lordsContract={lordsContract!}
+              ethContract={ethContract!}
             />
           )}
-          {status == "connected" && arcadeDialog && <ArcadeDialog />}
+          {status == "connected" && arcadeDialog && (
+            <ArcadeDialog
+              gameContract={gameContract!}
+              lordsContract={lordsContract!}
+              ethContract={ethContract!}
+            />
+          )}
           {status == "connected" && topUpDialog && <TopUpDialog token="ETH" />}
 
           {introComplete ? (
@@ -467,12 +505,21 @@ export default function Home() {
                       flee={flee}
                     />
                   )}
-                  {screen === "inventory" && <InventoryScreen />}
+                  {screen === "inventory" && (
+                    <InventoryScreen gameContract={gameContract!} />
+                  )}
                   {screen === "leaderboard" && (
                     <LeaderboardScreen slayAllIdles={slayAllIdles} />
                   )}
-                  {screen === "upgrade" && <UpgradeScreen upgrade={upgrade} />}
-                  {screen === "profile" && <Profile />}
+                  {screen === "upgrade" && (
+                    <UpgradeScreen
+                      upgrade={upgrade}
+                      gameContract={gameContract!}
+                    />
+                  )}
+                  {screen === "profile" && (
+                    <Profile gameContract={gameContract!} />
+                  )}
                   {screen === "encounters" && <EncountersScreen />}
                   {screen === "guide" && <GuideScreen />}
                   {screen === "settings" && <Settings />}

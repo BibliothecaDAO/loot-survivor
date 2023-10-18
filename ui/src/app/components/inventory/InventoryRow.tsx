@@ -1,5 +1,5 @@
 import { useEffect, useState, ReactElement, useCallback } from "react";
-import { useContracts } from "@/app/hooks/useContracts";
+import { Contract } from "starknet";
 import { Button } from "@/app/components/buttons/Button";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
@@ -19,6 +19,7 @@ interface InventoryRowProps {
   icon?: ReactElement;
   equipItems: string[];
   setEquipItems: (value: string[]) => void;
+  gameContract: Contract;
 }
 
 export const InventoryRow = ({
@@ -33,9 +34,9 @@ export const InventoryRow = ({
   icon,
   equipItems,
   setEquipItems,
+  gameContract,
 }: InventoryRowProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 

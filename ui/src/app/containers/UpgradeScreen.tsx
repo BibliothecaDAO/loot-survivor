@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { CallData } from "starknet";
-import { useContracts } from "@/app/hooks/useContracts";
+import { CallData, Contract } from "starknet";
+import { useContract } from "@starknet-react/core";
 import {
   getItemData,
   getValueFromKey,
@@ -35,14 +35,17 @@ import { HealthCountDown } from "@/app/components/CountDown";
 
 interface UpgradeScreenProps {
   upgrade: (...args: any[]) => any;
+  gameContract: Contract;
 }
 
 /**
  * @container
  * @description Provides the upgrade screen for the adventurer.
  */
-export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
-  const { gameContract } = useContracts();
+export default function UpgradeScreen({
+  upgrade,
+  gameContract,
+}: UpgradeScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
@@ -328,7 +331,11 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       {hasStatUpgrades ? (
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2">
           <div className="w-1/3 hidden sm:block">
-            <Info adventurer={adventurer} upgradeCost={upgradeTotalCost} />
+            <Info
+              adventurer={adventurer}
+              upgradeCost={upgradeTotalCost}
+              gameContract={gameContract}
+            />
           </div>
           {!checkTransacting ? (
             <div className="w-full sm:w-2/3 xl:h-[500px] xl:overflow-y-auto 2xl:h-full">

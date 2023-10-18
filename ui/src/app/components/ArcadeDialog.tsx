@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { AccountInterface } from "starknet";
+import { AccountInterface, Contract } from "starknet";
 import {
   Connector,
   useAccount,
@@ -9,14 +9,23 @@ import {
 import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "@/app/components/buttons/Button";
 import { useBurner } from "@/app/lib/burner";
-import { useContracts } from "@/app/hooks/useContracts";
 import { MIN_BALANCE } from "@/app/lib/constants";
 import PixelatedImage from "@/app/components/animations/PixelatedImage";
 import { getArcadeConnectors } from "@/app/lib/connectors";
 import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
 import { fetchBalances } from "@/app/lib/balances";
 
-export const ArcadeDialog = () => {
+interface ArcadeDialogProps {
+  gameContract: Contract;
+  lordsContract: Contract;
+  ethContract: Contract;
+}
+
+export const ArcadeDialog = ({
+  gameContract,
+  lordsContract,
+  ethContract,
+}: ArcadeDialogProps) => {
   const [fetchedBalances, setFetchedBalances] = useState(false);
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
@@ -37,8 +46,7 @@ export const ArcadeDialog = () => {
     isToppingUpLords,
     withdraw,
     isWithdrawing,
-  } = useBurner();
-  const { ethContract, lordsContract, gameContract } = useContracts();
+  } = useBurner(walletAccount, gameContract, lordsContract, ethContract);
   const [arcadebalances, setArcadeBalances] = useState<
     Record<string, { eth: bigint; lords: bigint; lordsGameAllowance: bigint }>
   >({});
@@ -316,7 +324,7 @@ export const ArcadeAccountCard = ({
               )}
             </div>
             {!arcadeConnectors.some(
-              (conn) => conn.options.options.id == walletAccount.address
+              (conn) => conn.id == walletAccount?.address
             ) && (
               <Button variant={"ghost"} onClick={() => setTopUpScreen(true)}>
                 Top Ups
@@ -327,7 +335,7 @@ export const ArcadeAccountCard = ({
         {topUpScreen && (
           <div className="flex flex-col sm:flex-row sm:gap-2 items-center">
             {!arcadeConnectors.some(
-              (conn) => conn.options.options.id == walletAccount.address
+              (conn) => conn.id == walletAccount?.address
             ) && (
               <Button
                 variant={"ghost"}
@@ -343,7 +351,7 @@ export const ArcadeAccountCard = ({
               </Button>
             )}
             {!arcadeConnectors.some(
-              (conn) => conn.options.options.id == walletAccount.address
+              (conn) => conn.id == walletAccount?.address
             ) && (
               <span className="flex flex-row items-center gap-2">
                 <span className="flex flex-col">

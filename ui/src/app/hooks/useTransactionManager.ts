@@ -43,8 +43,8 @@ const useTransactionManager = create<TransactionManagerState>((set, get) => {
   };
 
   return {
-    transactions: get().transactions,
-    hashes: get().transactions.map((transaction) => transaction.hash),
+    transactions: [],
+    hashes: [],
     addTransaction,
     removeTransaction,
   };
