@@ -496,6 +496,7 @@ function Home() {
                       handleSwitchAdventurer={handleSwitchAdventurer}
                       lordsBalance={lordsBalance}
                       mintLords={async () => await mintLords()}
+                      gameContract={gameContract!}
                     />
                   )}
                   {screen === "play" && (
@@ -503,13 +504,17 @@ function Home() {
                       explore={explore}
                       attack={attack}
                       flee={flee}
+                      gameContract={gameContract!}
                     />
                   )}
                   {screen === "inventory" && (
                     <InventoryScreen gameContract={gameContract!} />
                   )}
                   {screen === "leaderboard" && (
-                    <LeaderboardScreen slayAllIdles={slayAllIdles} />
+                    <LeaderboardScreen
+                      slayAllIdles={slayAllIdles}
+                      gameContract={gameContract!}
+                    />
                   )}
                   {screen === "upgrade" && (
                     <UpgradeScreen
@@ -523,7 +528,9 @@ function Home() {
                   {screen === "encounters" && <EncountersScreen />}
                   {screen === "guide" && <GuideScreen />}
                   {screen === "settings" && <Settings />}
-                  {screen === "player" && <Player />}
+                  {screen === "player" && (
+                    <Player gameContract={gameContract!} />
+                  )}
                   {screen === "wallet" && <WalletSelect />}
                 </div>
               </>

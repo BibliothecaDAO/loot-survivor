@@ -334,6 +334,7 @@ export default function InventoryScreen({
                           equipItems.includes(itemId)
                         }
                         handleDrop={handleDropItems}
+                        gameContract={gameContract}
                       />
                     </div>
                   );

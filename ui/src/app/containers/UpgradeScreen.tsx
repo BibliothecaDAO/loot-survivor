@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { CallData, Contract } from "starknet";
-import { useContract } from "@starknet-react/core";
 import {
   getItemData,
   getValueFromKey,

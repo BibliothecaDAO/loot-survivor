@@ -173,6 +173,7 @@ export default function Info({
                       }
                       itemSlot={part}
                       handleDrop={handleDropItems}
+                      gameContract={gameContract}
                       key={part}
                     />
                   ))}
