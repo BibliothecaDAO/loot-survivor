@@ -1,6 +1,5 @@
 import React, { useRef, RefObject } from "react";
 import { MdClose } from "react-icons/md";
-import { useTransactionManager } from "@starknet-react/core";
 import { TxStatus } from "@/app/components/navigation/TxStatus";
 import { Metadata, NullAdventurer, Notification } from "@/app/types";
 import { padAddress, shortenHex } from "@/app/lib/utils";
@@ -12,6 +11,7 @@ import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import { useUiSounds } from "@/app/hooks/useUiSound";
 import { soundSelector } from "@/app/hooks/useUiSound";
+import useTransactionManager from "@/app/hooks/useTransactionManager";
 
 export interface TransactionHistoryProps {
   buttonRef: RefObject<HTMLElement>;

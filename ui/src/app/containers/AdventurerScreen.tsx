@@ -6,12 +6,14 @@ import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { NullAdventurer } from "@/app/types";
 import useUIStore from "@/app/hooks/useUIStore";
+import { Contract } from "starknet";
 
 interface AdventurerScreenProps {
   spawn: (...args: any[]) => any;
   handleSwitchAdventurer: (...args: any[]) => any;
   lordsBalance?: bigint;
   mintLords: (...args: any[]) => any;
+  gameContract: Contract;
 }
 
 /**
@@ -23,6 +25,7 @@ export default function AdventurerScreen({
   handleSwitchAdventurer,
   lordsBalance,
   mintLords,
+  gameContract,
 }: AdventurerScreenProps) {
   const [activeMenu, setActiveMenu] = useState(0);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
@@ -96,6 +99,7 @@ export default function AdventurerScreen({
             onEscape={() => setActiveMenu(0)}
             adventurers={adventurers}
             handleSwitchAdventurer={handleSwitchAdventurer}
+            gameContract={gameContract}
           />
         </div>
       )}

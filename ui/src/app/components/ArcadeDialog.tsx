@@ -1,23 +1,38 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { AccountInterface } from "starknet";
-import { Connector, useAccount, useConnectors } from "@starknet-react/core";
+import { AccountInterface, Contract } from "starknet";
+import {
+  Connector,
+  useAccount,
+  useConnect,
+  useDisconnect,
+} from "@starknet-react/core";
 import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "@/app/components/buttons/Button";
 import { useBurner } from "@/app/lib/burner";
-import { useContracts } from "@/app/hooks/useContracts";
 import { MIN_BALANCE } from "@/app/lib/constants";
 import PixelatedImage from "@/app/components/animations/PixelatedImage";
 import { getArcadeConnectors } from "@/app/lib/connectors";
 import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
 import { fetchBalances } from "@/app/lib/balances";
 
-export const ArcadeDialog = () => {
+interface ArcadeDialogProps {
+  gameContract: Contract;
+  lordsContract: Contract;
+  ethContract: Contract;
+}
+
+export const ArcadeDialog = ({
+  gameContract,
+  lordsContract,
+  ethContract,
+}: ArcadeDialogProps) => {
   const [fetchedBalances, setFetchedBalances] = useState(false);
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const { connect, disconnect, connectors, available } = useConnectors();
+  const { connectors } = useConnect();
+  const { disconnect } = useDisconnect();
   const {
     getMasterAccount,
     create,
@@ -31,16 +46,15 @@ export const ArcadeDialog = () => {
     isToppingUpLords,
     withdraw,
     isWithdrawing,
-  } = useBurner();
-  const { ethContract, lordsContract, gameContract } = useContracts();
+  } = useBurner(walletAccount, gameContract, lordsContract, ethContract);
   const [arcadebalances, setArcadeBalances] = useState<
     Record<string, { eth: bigint; lords: bigint; lordsGameAllowance: bigint }>
   >({});
 
   // Needs to be callback else infinite loop
   const arcadeConnectors = useCallback(() => {
-    return getArcadeConnectors(available);
-  }, [available]);
+    return getArcadeConnectors(connectors);
+  }, [connectors]);
 
   const getBalances = async () => {
     const localBalances: Record<
@@ -99,8 +113,7 @@ export const ArcadeDialog = () => {
         </p>
 
         <div className="flex justify-center mb-1">
-          {((connector?.options as any)?.id == "argentX" ||
-            (connector?.options as any)?.id == "braavos") && (
+          {(connector?.id == "argentX" || connector?.id == "braavos") && (
             <div>
               <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
                 Note: This will initiate a transfer of 0.001 ETH from your
@@ -120,7 +133,6 @@ export const ArcadeDialog = () => {
               <ArcadeAccountCard
                 key={index}
                 account={account}
-                onClick={connect}
                 disconnect={disconnect}
                 address={address!}
                 walletAccount={walletAccount!}
@@ -203,7 +215,6 @@ export const ArcadeDialog = () => {
 
 interface ArcadeAccountCardProps {
   account: Connector;
-  onClick: (conn: Connector<any>) => void;
   disconnect: () => void;
   address: string;
   walletAccount: AccountInterface;
@@ -232,7 +243,6 @@ interface ArcadeAccountCardProps {
 
 export const ArcadeAccountCard = ({
   account,
-  onClick,
   disconnect,
   address,
   walletAccount,
@@ -248,6 +258,7 @@ export const ArcadeAccountCard = ({
   withdraw,
   isWithdrawing,
 }: ArcadeAccountCardProps) => {
+  const { connect } = useConnect();
   const [isCopied, setIsCopied] = useState(false);
   const [topUpScreen, setTopUpScreen] = useState<boolean>(false);
   const [lordsAmount, setLordsAmount] = useState<string>("");
@@ -298,7 +309,7 @@ export const ArcadeAccountCard = ({
                 variant={connected ? "default" : "ghost"}
                 onClick={() => {
                   disconnect();
-                  onClick(account);
+                  connect({ connector: account });
                 }}
               >
                 {connected ? "connected" : "connect"}
@@ -313,7 +324,7 @@ export const ArcadeAccountCard = ({
               )}
             </div>
             {!arcadeConnectors.some(
-              (conn) => conn.options.options.id == walletAccount.address
+              (conn) => conn.id == walletAccount?.address
             ) && (
               <Button variant={"ghost"} onClick={() => setTopUpScreen(true)}>
                 Top Ups
@@ -324,7 +335,7 @@ export const ArcadeAccountCard = ({
         {topUpScreen && (
           <div className="flex flex-col sm:flex-row sm:gap-2 items-center">
             {!arcadeConnectors.some(
-              (conn) => conn.options.options.id == walletAccount.address
+              (conn) => conn.id == walletAccount?.address
             ) && (
               <Button
                 variant={"ghost"}
@@ -340,7 +351,7 @@ export const ArcadeAccountCard = ({
               </Button>
             )}
             {!arcadeConnectors.some(
-              (conn) => conn.options.options.id == walletAccount.address
+              (conn) => conn.id == walletAccount?.address
             ) && (
               <span className="flex flex-row items-center gap-2">
                 <span className="flex flex-col">

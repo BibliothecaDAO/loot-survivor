@@ -23,6 +23,17 @@ export function getRPCUrl() {
   }
 }
 
+export function getAPIKey() {
+  switch (NETWORK) {
+    case "goerli":
+      return "6c536e8272f84d3ba63bf9f248c5e128";
+    case "mainnet":
+      return "6c536e8272f84d3ba63bf9f248c5e128";
+    default:
+      return "http://localhost:8000/graphql";
+  }
+}
+
 export function getGraphQLUrl() {
   switch (NETWORK) {
     case "goerli":
