@@ -1,27 +1,18 @@
-import { InjectedConnector, Connector } from "@starknet-react/core";
+import { Connector, argent, braavos } from "@starknet-react/core";
 // import { WebWalletConnector } from "@argent/starknet-react-webwallet-connector";
 
-export const argentConnector = new InjectedConnector({
-  options: {
-    id: "argentX",
-  },
-});
-
-export const braavosConnector = new InjectedConnector({
-  options: {
-    id: "braavos",
-  },
-});
-
-export const getArcadeConnectors = (available: Connector[]) => {
-  return available.filter(
+export const getArcadeConnectors = (connectors: Connector[]) => {
+  return connectors.filter(
     (connector) =>
       typeof connector.id === "string" && connector.id.includes("0x")
   );
 };
 
-export const getWalletConnectors = (available: Connector[]) =>
-  available.filter((connector) => typeof connector.id !== "string");
+export const getWalletConnectors = (connectors: Connector[]) =>
+  connectors.filter(
+    (connector) =>
+      typeof connector.id !== "string" || !connector.id.includes("0x")
+  );
 
 // function argentWebWalletUrl() {
 //   switch (process.env.NEXT_PUBLIC_NETWORK) {
@@ -39,7 +30,7 @@ export const getWalletConnectors = (available: Connector[]) =>
 // });
 
 export const connectors = [
-  argentConnector,
-  braavosConnector,
+  argent(),
+  braavos(),
   // argentWebWalletConnector,
 ];

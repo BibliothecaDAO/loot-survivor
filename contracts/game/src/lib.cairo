@@ -1457,18 +1457,43 @@ mod Game {
         // pull damage taken out of combat result for easy access
         let damage_taken = combat_result.total_damage;
 
-        // attempt to dodge obstacle
-        let dodged = adventurer.dodge_obstacle(entropy);
-        if (!dodged) {
-            // if not dodged, adventurer takes damage
-            adventurer.decrease_health(damage_taken);
-        }
-
         // get base xp reward for obstacle
         let base_reward = obstacle.get_xp_reward();
 
         // get item xp reward for obstacle
         let item_xp_reward = base_reward * ITEM_XP_MULTIPLIER_OBSTACLES;
+
+        // create obstacle details for event
+        let obstacle_details = ObstacleDetails {
+            id: obstacle.id,
+            level: obstacle.combat_spec.level,
+            damage_taken,
+            damage_location: ImplCombat::slot_to_u8(damage_slot),
+            critical_hit: combat_result.critical_hit_bonus > 0,
+            adventurer_xp_reward: base_reward,
+            item_xp_reward
+        };
+
+        // attempt to dodge obstacle
+        let dodged = adventurer.dodge_obstacle(entropy);
+
+        // if adventurer did not dodge obstacle
+        if (!dodged) {
+            // adventurer takes damage
+            adventurer.decrease_health(damage_taken);
+
+            // if adventurer died
+            if (adventurer.health == 0) {
+                // emit obstacle encounter event
+                __event_ObstacleEncounter(
+                    ref self, adventurer, adventurer_id, dodged, obstacle_details
+                );
+                // process death
+                _process_adventurer_death(ref self, adventurer, adventurer_id, 0, obstacle.id);
+                // return without granting xp to adventurer or items
+                return;
+            }
+        }
 
         // grant adventurer xp and get previous and new level
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(base_reward);
@@ -1478,44 +1503,19 @@ mod Game {
             ref self, ref adventurer, adventurer_id, item_xp_reward, entropy
         );
 
-        // event vars
-        let critical_hit = combat_result.critical_hit_bonus > 0;
-        let damage_location = ImplCombat::slot_to_u8(damage_slot);
+        // emit obstacle encounter event after granting xp to adventurer and items
+        __event_ObstacleEncounter(ref self, adventurer, adventurer_id, dodged, obstacle_details);
 
-        __event_ObstacleEncounter(
-            ref self,
-            adventurer,
-            adventurer_id,
-            dodged,
-            ObstacleDetails {
-                id: obstacle.id,
-                level: obstacle.combat_spec.level,
-                damage_taken,
-                damage_location,
-                critical_hit,
-                adventurer_xp_reward: base_reward,
-                item_xp_reward
-            }
-        );
+        // if items leveled up
+        if items_leveled_up.len() != 0 {
+            // emit item leveled up event
+            __event_ItemsLeveledUp(ref self, adventurer, adventurer_id, items_leveled_up);
+        }
 
-        // if adventurer is dead
-        if (adventurer.health == 0) {
-            _process_adventurer_death(ref self, adventurer, adventurer_id, 0, obstacle.id);
-        } else {
-            // if adventurer is still alive
-
-            // check if any items leveled up
-            if items_leveled_up.len() != 0 {
-                // if they did, emit event
-                __event_ItemsLeveledUp(ref self, adventurer, adventurer_id, items_leveled_up);
-            }
-
-            // check if adventurer got new stat upgrades
-            if (adventurer.stat_points_available != 0) {
-                _emit_level_up_events(
-                    ref self, adventurer, adventurer_id, previous_level, new_level
-                );
-            }
+        // if adventurer got new stat upgrades
+        if (adventurer.stat_points_available != 0) {
+            // emit levled up event
+            _emit_level_up_events(ref self, adventurer, adventurer_id, previous_level, new_level);
         }
     }
 

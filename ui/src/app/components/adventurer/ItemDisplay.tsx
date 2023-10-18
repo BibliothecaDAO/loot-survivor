@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Contract } from "starknet";
 import { Item } from "@/app/types";
 import LootIcon from "@/app/components/icons/LootIcon";
 import Efficacyicon from "@/app/components/icons/EfficacyIcon";
@@ -20,6 +21,7 @@ interface ItemDisplayProps {
   equipped?: boolean;
   disabled?: boolean;
   handleDrop: (value: string) => void;
+  gameContract: Contract;
 }
 
 export const ItemDisplay = ({
@@ -30,6 +32,7 @@ export const ItemDisplay = ({
   equipped,
   disabled,
   handleDrop,
+  gameContract,
 }: ItemDisplayProps) => {
   const [showInventoryItems, setShowInventoryItems] = useState(false);
   const itemType = item?.item;
@@ -264,6 +267,7 @@ export const ItemDisplay = ({
             itemSlot={slot}
             setShowInventoryItems={setShowInventoryItems}
             equipItems={equipItems}
+            gameContract={gameContract}
           />
         </div>
       )}

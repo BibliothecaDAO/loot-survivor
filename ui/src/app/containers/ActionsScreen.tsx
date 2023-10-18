@@ -7,11 +7,13 @@ import BeastScreen from "@/app/containers/BeastScreen";
 import MazeLoader from "@/app/components/icons/MazeLoader";
 import useUIStore from "@/app/hooks/useUIStore";
 import ActionMenu from "@/app/components/menu/ActionMenu";
+import { Contract } from "starknet";
 
 interface ActionsScreenProps {
   explore: (...args: any[]) => any;
   attack: (...args: any[]) => any;
   flee: (...args: any[]) => any;
+  gameContract: Contract;
 }
 
 /**
@@ -22,6 +24,7 @@ export default function ActionsScreen({
   explore,
   attack,
   flee,
+  gameContract,
 }: ActionsScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
@@ -71,7 +74,7 @@ export default function ActionsScreen({
   return (
     <div className="flex flex-col sm:flex-row flex-wrap h-full">
       <div className="hidden sm:block sm:w-1/2 lg:w-1/3 h-full">
-        <Info adventurer={adventurer} />
+        <Info adventurer={adventurer} gameContract={gameContract} />
       </div>
 
       {hasBeast ? (

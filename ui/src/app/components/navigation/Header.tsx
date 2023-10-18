@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { useAccount, useConnectors } from "@starknet-react/core";
+import { Contract } from "starknet";
+import { useAccount, useDisconnect } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -29,6 +30,7 @@ export interface HeaderProps {
   mintLords: (...args: any[]) => any;
   lordsBalance: bigint;
   arcadeConnectors: Connector<any>[];
+  gameContract: Contract;
 }
 
 export default function Header({
@@ -36,9 +38,10 @@ export default function Header({
   mintLords,
   lordsBalance,
   arcadeConnectors,
+  gameContract,
 }: HeaderProps) {
   const { account, address } = useAccount();
-  const { disconnect } = useConnectors();
+  const { disconnect } = useDisconnect();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const data = useQueriesStore((state) => state.data);
@@ -158,6 +161,7 @@ export default function Header({
           <TransactionCart
             buttonRef={displayCartButtonRef}
             multicall={multicall}
+            gameContract={gameContract}
           />
         )}
         <div className="flex items-center sm:hidden">

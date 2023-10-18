@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Contract } from "starknet";
 import { Button } from "@/app/components/buttons/Button";
 import Info from "@/app/components/adventurer/Info";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
@@ -13,6 +14,7 @@ export interface AdventurerListProps {
   onEscape: () => void;
   adventurers: Adventurer[];
   handleSwitchAdventurer: (...args: any[]) => any;
+  gameContract: Contract;
 }
 
 export const AdventurersList = ({
@@ -20,6 +22,7 @@ export const AdventurersList = ({
   onEscape,
   adventurers,
   handleSwitchAdventurer,
+  gameContract,
 }: AdventurerListProps) => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [showZeroHealth, setShowZeroHealth] = useState(true);
@@ -124,7 +127,10 @@ export const AdventurersList = ({
               {isLoading.global ? (
                 <LootIconLoader className="m-auto" size="w-10" />
               ) : (
-                <Info adventurer={filteredAdventurers[selectedIndex]} />
+                <Info
+                  adventurer={filteredAdventurers[selectedIndex]}
+                  gameContract={gameContract}
+                />
               )}
             </div>
           )}

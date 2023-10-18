@@ -1,5 +1,5 @@
 import { useState, FormEvent, useEffect } from "react";
-import { useAccount, useConnectors } from "@starknet-react/core";
+import { useAccount, useConnect } from "@starknet-react/core";
 import { TypeAnimation } from "react-type-animation";
 import { MdClose } from "react-icons/md";
 import { WalletTutorial } from "@/app/components/intro/WalletTutorial";
@@ -42,7 +42,7 @@ export const Spawn = ({
   }, [formData]);
 
   const { account } = useAccount();
-  const { connectors, connect } = useConnectors();
+  const { connectors, connect } = useConnect();
 
   const walletConnectors = () =>
     connectors.filter((connector) => !connector.id.includes("0x"));
@@ -104,7 +104,7 @@ export const Spawn = ({
                 <div className="flex flex-col gap-2">
                   {walletConnectors().map((connector, index) => (
                     <Button
-                      onClick={() => connect(connector)}
+                      onClick={() => connect({ connector })}
                       disabled={!formFilled}
                       key={index}
                       className="w-full"

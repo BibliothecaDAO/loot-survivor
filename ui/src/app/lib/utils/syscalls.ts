@@ -2,6 +2,7 @@ import {
   InvokeTransactionReceiptResponse,
   Call,
   AccountInterface,
+  RevertedTransactionReceiptResponse,
 } from "starknet";
 import { GameData } from "@/app/lib/data/GameData";
 import {
@@ -248,6 +249,15 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
+        // Handle if the tx was reverted
+        if (
+          (receipt as RevertedTransactionReceiptResponse).execution_status ===
+          "REVERTED"
+        ) {
+          throw new Error(
+            (receipt as RevertedTransactionReceiptResponse).revert_reason
+          );
+        }
         // Here we need to process the StartGame event first and use the output for AmbushedByBeast event
         const startGameEvents = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
@@ -360,6 +370,15 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
+        // Handle if the tx was reverted
+        if (
+          (receipt as RevertedTransactionReceiptResponse).execution_status ===
+          "REVERTED"
+        ) {
+          throw new Error(
+            (receipt as RevertedTransactionReceiptResponse).revert_reason
+          );
+        }
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
           queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
@@ -610,7 +629,15 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
-
+        // Handle if the tx was reverted
+        if (
+          (receipt as RevertedTransactionReceiptResponse).execution_status ===
+          "REVERTED"
+        ) {
+          throw new Error(
+            (receipt as RevertedTransactionReceiptResponse).revert_reason
+          );
+        }
         // reset battles by tx hash
         setData("battlesByTxHashQuery", {
           battles: null,
@@ -838,6 +865,15 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
+        // Handle if the tx was reverted
+        if (
+          (receipt as RevertedTransactionReceiptResponse).execution_status ===
+          "REVERTED"
+        ) {
+          throw new Error(
+            (receipt as RevertedTransactionReceiptResponse).revert_reason
+          );
+        }
         // Add optimistic data
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
@@ -1013,7 +1049,15 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
-
+        // Handle if the tx was reverted
+        if (
+          (receipt as RevertedTransactionReceiptResponse).execution_status ===
+          "REVERTED"
+        ) {
+          throw new Error(
+            (receipt as RevertedTransactionReceiptResponse).revert_reason
+          );
+        }
         // Add optimistic data
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
@@ -1178,7 +1222,15 @@ export function syscalls({
             retryInterval: 100,
           }
         );
-
+        // Handle if the tx was reverted
+        if (
+          (receipt as RevertedTransactionReceiptResponse).execution_status ===
+          "REVERTED"
+        ) {
+          throw new Error(
+            (receipt as RevertedTransactionReceiptResponse).revert_reason
+          );
+        }
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
           queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
@@ -1239,6 +1291,15 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
+        // Handle if the tx was reverted
+        if (
+          (receipt as RevertedTransactionReceiptResponse).execution_status ===
+          "REVERTED"
+        ) {
+          throw new Error(
+            (receipt as RevertedTransactionReceiptResponse).revert_reason
+          );
+        }
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,

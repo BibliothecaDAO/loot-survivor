@@ -17,13 +17,16 @@ export const TxActivity = () => {
   const { data } = useWaitForTransaction({
     hash,
     watch: true,
-    onAcceptedOnL2: () => {
-      setTxAccepted(true);
-    },
-    onRejected: () => {
-      stopLoading("Rejected");
-    },
   }) as { data: InvokeTransactionReceiptResponse };
+
+  if (data?.status === "ACCEPTED_ON_L2") {
+    setTxAccepted(true);
+  }
+
+  if (data?.status === "REJECTED") {
+    stopLoading("Rejected");
+  }
+
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
 

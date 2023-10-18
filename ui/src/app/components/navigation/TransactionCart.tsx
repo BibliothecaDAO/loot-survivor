@@ -5,9 +5,10 @@ import React, {
   useRef,
   RefObject,
 } from "react";
+import { MdClose } from "react-icons/md";
+import { Contract } from "starknet";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Button } from "@/app/components/buttons/Button";
-import { MdClose } from "react-icons/md";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import {
@@ -25,15 +26,18 @@ import useOnClickOutside from "@/app/hooks/useOnClickOutside";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { chunkArray } from "@/app/lib/utils";
 import { UpgradeStats } from "@/app/types";
-import { useContracts } from "@/app/hooks/useContracts";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
   multicall: (...args: any[]) => any;
+  gameContract: Contract;
 }
 
-const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
-  const { gameContract } = useContracts();
+const TransactionCart = ({
+  buttonRef,
+  multicall,
+  gameContract,
+}: TransactionCartProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);

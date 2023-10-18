@@ -3,14 +3,12 @@ import { Button } from "@/app/components/buttons/Button";
 import { getItemData, getItemPrice, getKeyFromValue } from "@/app/lib/utils";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import LootIcon from "@/app/components/icons/LootIcon";
-import {
-  useTransactionManager,
-  useWaitForTransaction,
-} from "@starknet-react/core";
+import { useWaitForTransaction } from "@starknet-react/core";
 import { Metadata, Item, ItemPurchase, UpgradeStats } from "@/app/types";
 import { CoinIcon } from "@/app/components/icons/Icons";
 import EfficacyDisplay from "@/app/components/icons/EfficacyIcon";
 import { GameData } from "@/app/lib/data/GameData";
+import useTransactionManager from "@/app/hooks/useTransactionManager";
 
 interface MarketplaceRowProps {
   item: Item;

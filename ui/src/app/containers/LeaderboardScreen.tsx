@@ -15,9 +15,11 @@ import { RefreshIcon } from "@/app/components/icons/Icons";
 // import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
 import LootIconLoader from "@/app/components/icons/Loader";
 import { ProfileIcon, SkullIcon } from "@/app/components/icons/Icons";
+import { Contract } from "starknet";
 
 interface LeaderboardScreenProps {
   slayAllIdles: (...args: any[]) => any;
+  gameContract: Contract;
 }
 
 /**
@@ -26,6 +28,7 @@ interface LeaderboardScreenProps {
  */
 export default function LeaderboardScreen({
   slayAllIdles,
+  gameContract,
 }: LeaderboardScreenProps) {
   const itemsPerPage = 10;
   const [showScores, setShowScores] = useState(false);
@@ -161,6 +164,7 @@ export default function LeaderboardScreen({
                 itemsPerPage={itemsPerPage}
                 handleFetchProfileData={handlefetchProfileData}
                 adventurers={aliveAdventurers}
+                gameContract={gameContract}
               />
             </div>
             <div

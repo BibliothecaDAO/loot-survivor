@@ -1,3 +1,5 @@
+import { Contract } from "starknet";
+import { MdClose } from "react-icons/md";
 import LootIcon from "@/app/components/icons/LootIcon";
 import Efficacyicon from "@/app/components/icons/EfficacyIcon";
 import { Item } from "@/app/types";
@@ -7,11 +9,9 @@ import {
   calculateLevel,
   getKeyFromValue,
 } from "@/app/lib/utils";
-import { MdClose } from "react-icons/md";
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import { GameData } from "@/app/lib/data/GameData";
-import { useContracts } from "@/app/hooks/useContracts";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 
@@ -20,6 +20,7 @@ interface InventoryDisplayProps {
   itemSlot: string;
   setShowInventoryItems: (showInventoryItems: boolean) => void;
   equipItems: string[];
+  gameContract: Contract;
 }
 
 export const InventoryDisplay = ({
@@ -27,6 +28,7 @@ export const InventoryDisplay = ({
   itemSlot,
   setShowInventoryItems,
   equipItems,
+  gameContract,
 }: InventoryDisplayProps) => {
   return (
     <div className="flex flex-row items-center justify-between w-full">
@@ -37,6 +39,7 @@ export const InventoryDisplay = ({
               itemSlot={itemSlot}
               item={item}
               equipItems={equipItems}
+              gameContract={gameContract}
               key={index}
             />
           ))}
@@ -55,12 +58,14 @@ interface InventoryCardProps {
   itemSlot: string;
   item: Item;
   equipItems: string[];
+  gameContract: Contract;
 }
 
 export const InventoryCard = ({
   itemSlot,
   item,
   equipItems,
+  gameContract,
 }: InventoryCardProps) => {
   const { adventurer } = useAdventurerStore();
   const { tier, type, slot } = getItemData(item?.item ?? "");
@@ -72,7 +77,6 @@ export const InventoryCard = ({
     (state) => state.removeEntrypointFromCalls
   );
 
-  const { gameContract } = useContracts();
   const gameData = new GameData();
 
   const handleEquipItems = (item: string) => {
