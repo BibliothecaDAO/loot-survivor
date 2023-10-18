@@ -94,7 +94,6 @@ mod tests {
         calldata.append(DAO().into());
         calldata.append(COLLECTIBLE_BEASTS().into());
         calldata.append(GOLDEN_TOKEN().into());
-        calldata.append(COST_TO_PLAY.try_into().unwrap());
 
         let (address0, _) = deploy_syscall(
             Game::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
@@ -1895,7 +1894,7 @@ mod tests {
         let adventurer = game.get_adventurer(ADVENTURER_ID);
 
         // stage 0
-        assert(lords.balanceOf(DAO()) == COST_TO_PLAY, 'wrong stage 1 balance');
+        assert(lords.balanceOf(DAO()) == COST_TO_PLAY.into(), 'wrong stage 1 balance');
 
         // stage 1
         testing::set_block_number(1001 + BLOCKS_IN_A_WEEK * 2);
@@ -1903,21 +1902,19 @@ mod tests {
         // spawn new
 
         // DAO doesn't get anything more until stage 2
-        assert(lords.balanceOf(DAO()) == COST_TO_PLAY, 'wrong stage 1 balance');
-
-        let cost_to_play: u128 = COST_TO_PLAY.try_into().unwrap();
+        assert(lords.balanceOf(DAO()) == COST_TO_PLAY.into(), 'wrong stage 1 balance');
 
         let mut week = Week {
-            DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, cost_to_play),
-            INTERFACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, cost_to_play),
+            DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, COST_TO_PLAY),
+            INTERFACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, COST_TO_PLAY),
             FIRST_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, cost_to_play
+                REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, COST_TO_PLAY
             ),
             SECOND_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::SECOND_PLACE, cost_to_play
+                REWARD_DISTRIBUTIONS_PHASE1_BP::SECOND_PLACE, COST_TO_PLAY
             ),
             THIRD_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::THIRD_PLACE, cost_to_play
+                REWARD_DISTRIBUTIONS_PHASE1_BP::THIRD_PLACE, COST_TO_PLAY
             )
         };
 
@@ -1931,7 +1928,7 @@ mod tests {
         // assert(week.SECOND_PLACE == 0x6f05b59d3b200000, 'wrong SECOND_PLACE payout 1');
         // assert(week.THIRD_PLACE == 0x6f05b59d3b20000, 'wrong THIRD_PLACE payout 1');
 
-        (cost_to_play * 11 / 10).print();
-        (cost_to_play * 9 / 10).print();
+        (COST_TO_PLAY * 11 / 10).print();
+        (COST_TO_PLAY * 9 / 10).print();
     }
 }

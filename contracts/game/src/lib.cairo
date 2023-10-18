@@ -154,7 +154,6 @@ mod Game {
         dao: ContractAddress,
         collectible_beasts: ContractAddress,
         golden_token_address: ContractAddress,
-        cost_to_play: u128
     ) {
         // set the contract addresses
         self._lords.write(lords);
@@ -168,7 +167,7 @@ mod Game {
         self._golden_token.write(golden_token_address);
 
         // set the cost to play
-        self._cost_to_play.write(cost_to_play);
+        self._cost_to_play.write(COST_TO_PLAY);
 
         // initialize game entropy
         let current_block_info = starknet::get_block_info().unbox();
