@@ -29,7 +29,7 @@ export interface HeaderProps {
   multicall: (...args: any[]) => any;
   mintLords: (...args: any[]) => any;
   lordsBalance: bigint;
-  arcadeConnectors: Connector<any>[];
+  arcadeConnectors: Connector[];
   gameContract: Contract;
 }
 
