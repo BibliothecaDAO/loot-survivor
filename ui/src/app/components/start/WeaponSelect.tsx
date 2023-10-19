@@ -44,12 +44,16 @@ export const WeaponSelect = ({
       icon: <BludgeonIcon />,
     },
   ];
-  const handleWeaponSelection = (weapon: string) => {
+  const handleWeaponSelectionMobile = (weapon: string) => {
     setFormData({ ...formData, startingWeapon: weapon });
     setStep(step + 1);
   };
+  const handleWeaponSelectionDesktop = (weapon: string) => {
+    setFormData({ ...formData, startingWeapon: weapon });
+  };
+
   return (
-    <div className="w-full p-4 sm:p-8 md:p-4 2xl:flex 2xl:flex-col 2xl:gap-20 2xl:h-[700px]">
+    <div className="w-full p-4 2xl:flex 2xl:flex-col 2xl:gap-5 2xl:h-1/2">
       <h3 className="uppercase text-center 2xl:text-5xl mb-3">
         Choose your weapon
       </h3>
@@ -57,9 +61,13 @@ export const WeaponSelect = ({
         {weapons.map((weapon) => (
           <div
             key={weapon.name}
-            className="flex flex-col items-center justify-between border sm:w-56 md:w-48 2xl:h-80 2xl:w-64 border-terminal-green"
+            className={`flex flex-col items-center justify-between border sm:w-56 md:w-48 2xl:h-40 2xl:w-64 ${
+              formData.startingWeapon == weapon.name
+                ? "border-terminal-yellow"
+                : "border-terminal-green"
+            }`}
           >
-            <div className="relative w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52">
+            <div className="relative w-28 h-28">
               <Image
                 src={weapon.image}
                 fill={true}
@@ -72,18 +80,21 @@ export const WeaponSelect = ({
               <p className="ml-2">{weapon.description}</p>
             </div>
             <Button
-              className="w-full"
-              onClick={() => handleWeaponSelection(weapon.name)}
+              className="sm:hidden w-full"
+              disabled={formData.startingWeapon == weapon.name}
+              onClick={() => handleWeaponSelectionMobile(weapon.name)}
+            >
+              {weapon.name}
+            </Button>
+            <Button
+              className={`hidden sm:block w-full`}
+              disabled={formData.startingWeapon == weapon.name}
+              onClick={() => handleWeaponSelectionDesktop(weapon.name)}
             >
               {weapon.name}
             </Button>
           </div>
         ))}
-      </div>
-      <div className="flex flex-col items-center">
-        <Button className="my-2" onClick={handleBack}>
-          Back
-        </Button>
       </div>
     </div>
   );

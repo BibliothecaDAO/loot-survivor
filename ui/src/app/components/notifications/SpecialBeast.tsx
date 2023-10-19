@@ -1,8 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  fetchBeastImage,
-  fetchGoldenTokenImage,
-} from "@/app/api/fetchMetadata";
+import { fetchBeastImage } from "@/app/api/fetchMetadata";
 import Image from "next/image";
 import useUIStore from "@/app/hooks/useUIStore";
 import { useContracts } from "@/app/hooks/useContracts";
@@ -15,7 +12,7 @@ import { getTokenViewerUrl } from "@/app/lib/constants";
 
 export const SpecialBeast = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const { beastsContract, goldenToken } = useContracts();
+  const { beastsContract } = useContracts();
   const [beastImage, setBeastImage] = useState(null);
 
   const specialBeast = useUIStore((state) => state.specialBeast);
@@ -25,10 +22,9 @@ export const SpecialBeast = () => {
   );
 
   const fetchBeast = async () => {
-    const image = await fetchGoldenTokenImage(
-      goldenToken?.address ?? ""
-      // specialBeast.tokenId
-      // 3
+    const image = await fetchBeastImage(
+      beastsContract?.address ?? "",
+      specialBeast.tokenId
     );
     setBeastImage(image);
   };
@@ -44,7 +40,7 @@ export const SpecialBeast = () => {
   );
 
   const resetBeast = () => {
-    setSpecialBeast(false);
+    setSpecialBeastDefeated(false);
     setSpecialBeast(null);
   };
 

@@ -10,6 +10,9 @@ import { useAccount, useConnectors } from "@starknet-react/core";
 import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { FormData } from "@/app/types";
+import { fetchGoldenTokenImage } from "@/app/api/fetchMetadata";
+import { getContracts } from "@/app/lib/constants";
+import Lords from "../../../../public/icons/lords.svg";
 
 export interface SpawnProps {
   formData: FormData;
@@ -26,8 +29,10 @@ export const Spawn = ({
   lordsBalance,
   mintLords,
 }: SpawnProps) => {
+  const { goldenToken } = getContracts();
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
   const [formFilled, setFormFilled] = useState(false);
+  const [goldenTokenImage, setGoldenTokenImage] = useState<string | null>(null);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
@@ -58,6 +63,17 @@ export const Spawn = ({
   };
 
   const checkEnoughLords = lordsBalance! >= BigInt(25000000000000000000);
+
+  const goldenTokenExists = true;
+
+  const fetchGoldenToken = async () => {
+    const image = await fetchGoldenTokenImage(goldenToken ?? "");
+    setGoldenTokenImage(image);
+  };
+
+  useEffect(() => {
+    fetchGoldenToken();
+  }, []);
 
   return (
     <div className="flex flex-col w-full h-full justify-center">
@@ -139,12 +155,49 @@ export const Spawn = ({
                       estimatingFee ||
                       !checkEnoughLords
                     }
+                    className="relative"
                   >
-                    {checkEnoughLords
-                      ? formFilled
-                        ? "Start Game!!"
-                        : "Fill details"
-                      : "Not enough Lords"}
+                    <div className="flex flex-row items-center gap-1 w-full h-full">
+                      <p className="whitespace-nowrap w-3/4 mr-5">
+                        {checkEnoughLords
+                          ? formFilled
+                            ? "Insert Lords"
+                            : "Fill details"
+                          : "Not enough Lords"}
+                      </p>
+                      <Lords className="absolute self-center sm:w-5 sm:h-5  h-3 w-3 fill-current right-5" />
+                    </div>
+                  </Button>
+
+                  <Button
+                    type="submit"
+                    size={"xl"}
+                    disabled={
+                      !formFilled ||
+                      !account ||
+                      isWrongNetwork ||
+                      loading ||
+                      estimatingFee ||
+                      !goldenTokenExists
+                    }
+                    className="relative"
+                  >
+                    <div className="flex flex-row items-center gap-1 w-full h-full">
+                      <p className="whitespace-nowrap w-3/4">
+                        {goldenTokenExists
+                          ? formFilled
+                            ? "Insert Golden Token"
+                            : "Fill details"
+                          : "No tokens"}
+                      </p>
+                      <img
+                        src={goldenTokenImage ?? ""}
+                        width={50}
+                        height={50}
+                        alt="Golden Token"
+                        className="absolute text-terminal-green fill-current right-0"
+                      />
+                    </div>
                   </Button>
                 </div>
               </form>
