@@ -35,6 +35,7 @@ export const ArcadeIntro = ({
   const { account, address } = useAccount();
   const { connect, connectors } = useConnect();
   const [step, setStep] = useState(1);
+  const [readDisclaimer, setReadDisclaimer] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const { create, isDeploying, isSettingPermissions } = useBurner(
@@ -85,14 +86,16 @@ export const ArcadeIntro = ({
   const checkAnyETh = eth === 0;
 
   useEffect(() => {
-    if (!checkNotEnoughPrefundEth) {
+    if (!checkNotEnoughPrefundEth && readDisclaimer) {
+      setStep(4);
+    } else if (account && readDisclaimer) {
       setStep(3);
     } else if (account) {
       setStep(2);
     } else {
       setStep(1);
     }
-  }, [account, checkNotEnoughPrefundEth]);
+  }, [account, checkNotEnoughPrefundEth, readDisclaimer]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -149,6 +152,26 @@ export const ArcadeIntro = ({
         )}
         {step == 2 && (
           <div className="flex flex-col gap-10 items-center">
+            <h3 className="mt-4 uppercase">Disclaimers</h3>
+            <p className="text-sm xl:text-xl 2xl:text-2xl">
+              The game is still in testing and there may be things outside of
+              our control that cause incomplete games after Lords have been
+              inserted. We kindly advise that any problems encountered are
+              reported to the discord channel within Biblithecadao.
+            </p>
+            <p className="text-sm xl:text-xl 2xl:text-2xl">
+              The game has an idle penalty counter that will kill the adventurer
+              if a move isn't made within a certain number of blocks (~ 7-10
+              mins). To avoid frustration please keep an eye on the idle
+              penalty.
+            </p>
+            <Button onClick={() => setReadDisclaimer(true)}>
+              I understand
+            </Button>
+          </div>
+        )}
+        {step == 3 && (
+          <div className="flex flex-col gap-10 items-center">
             <h3 className="mt-4 uppercase">Mint Lords</h3>
             <div className="flex flex-col gap-2">
               <p className="m-2 text-sm xl:text-xl 2xl:text-2xl">
@@ -191,7 +214,7 @@ export const ArcadeIntro = ({
             </div>
           </div>
         )}
-        {step == 3 && (
+        {step == 4 && (
           <div className="flex flex-col gap-10 items-center h-full">
             <h3 className="mt-4 uppercase">Deploy Arcade Account</h3>
             <div className="flex flex-col items-center gap-2">
@@ -251,7 +274,12 @@ export const ArcadeIntro = ({
             />
             <div
               className={`w-12 h-12 ${
-                step == 3 ? "bg-terminal-green" : "border border-terminal-green"
+                step >= 3 ? "bg-terminal-green" : "border border-terminal-green"
+              }`}
+            />
+            <div
+              className={`w-12 h-12 ${
+                step == 4 ? "bg-terminal-green" : "border border-terminal-green"
               }`}
             />
           </div>
