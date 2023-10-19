@@ -50,6 +50,7 @@ import { syscalls } from "@/app/lib/utils/syscalls";
 import Game from "@/app/abi/Game.json";
 import Lords from "@/app/abi/Lords.json";
 import EthBalanceFragment from "@/app/abi/EthBalanceFragment.json";
+import Beasts from "@/app/abi/Beasts.json";
 import { getContracts } from "@/app/lib/constants";
 import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
 import ScreenMenu from "@/app/components/menu/ScreenMenu";
@@ -138,6 +139,10 @@ function Home() {
   const { contract: ethContract } = useContract({
     address: contracts?.eth,
     abi: EthBalanceFragment,
+  });
+  const { contract: beastsContract } = useContract({
+    address: contracts?.beasts,
+    abi: Beasts,
   });
 
   const { addTransaction } = useTransactionManager();

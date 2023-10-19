@@ -18,7 +18,6 @@ import {
 } from "@/app/lib/utils";
 import { parseEvents } from "@/app/lib/utils/parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
-import { checkArcadeBalance } from ".";
 import { CallData } from "starknet";
 
 export interface SyscallsProps {
