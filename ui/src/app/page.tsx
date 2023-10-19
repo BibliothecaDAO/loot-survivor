@@ -160,7 +160,6 @@ function Home() {
       lordsContract,
       gameContract
     );
-    console.log(balances);
     setEthBalance(balances[0]);
     setLordsBalance(balances[1]);
   };
