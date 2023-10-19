@@ -35,6 +35,7 @@ export const ArcadeIntro = ({
   const { account, address } = useAccount();
   const { connect, connectors } = useConnect();
   const [step, setStep] = useState(1);
+  const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const { create, isDeploying, isSettingPermissions } = useBurner(
     account,
@@ -92,6 +93,22 @@ export const ArcadeIntro = ({
       setStep(1);
     }
   }, [account, checkNotEnoughPrefundEth]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLoadingMessage((prev) =>
+        prev === "Please Wait" || !prev
+          ? isSettingPermissions
+            ? "Setting Permissions"
+            : "Deploying Arcade Account"
+          : "Please Wait"
+      );
+    }, 5000);
+
+    return () => {
+      clearInterval(timer); // Cleanup timer on component unmount
+    };
+  }, []);
 
   return (
     <>
@@ -238,16 +255,16 @@ export const ArcadeIntro = ({
           </div>
         </div>
         {isDeploying && (
-          <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full">
-            <PixelatedImage
-              src={"/scenes/intro/arcade-account.png"}
-              pixelSize={5}
-              pulsate={true}
-            />
-            <h3 className="text-lg sm:text-3xl loading-ellipsis absolute top-2/3 sm:top-1/2 flex items-center justify-center w-full">
-              {isSettingPermissions
-                ? "Setting Permissions"
-                : "Deploying Arcade Account"}
+          <div className="fixed flex flex-row inset-0 bg-black z-50 m-2 w-full h-full">
+            <div className="w-1/2 h-full">
+              <PixelatedImage
+                src={"/scenes/intro/arcade-account.png"}
+                pixelSize={5}
+                pulsate={true}
+              />
+            </div>
+            <h3 className="text-lg sm:text-3xl loading-ellipsis flex items-center justify-start w-1/2">
+              {loadingMessage}
             </h3>
           </div>
         )}
