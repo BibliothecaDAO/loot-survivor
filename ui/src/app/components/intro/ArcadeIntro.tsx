@@ -125,8 +125,8 @@ export const ArcadeIntro = ({
               signature-free speed runs in Loot Survivor.
             </p>
             <p className="text-sm xl:text-xl 2xl:text-2xl">
-              Your Arcade Account's key is securely stored in your browser and
-              is linked to your main wallet with limited permissions. This
+              Your Arcade Account&apos;s key is securely stored in your browser
+              and is linked to your main wallet with limited permissions. This
               provides a low-risk, superfast onchain gaming experience.
             </p>
             <p className="text-sm xl:text-xl 2xl:text-2xl">
@@ -161,8 +161,8 @@ export const ArcadeIntro = ({
             </p>
             <p className="text-sm xl:text-xl 2xl:text-2xl">
               The game has an idle penalty counter that will kill the adventurer
-              if a move isn't made within a certain number of blocks (~ 7-10
-              mins). To avoid frustration please keep an eye on the idle
+              if a move isn&apos;t made within a certain number of blocks (~
+              7-10 mins). To avoid frustration please keep an eye on the idle
               penalty.
             </p>
             <Button onClick={() => setReadDisclaimer(true)}>
