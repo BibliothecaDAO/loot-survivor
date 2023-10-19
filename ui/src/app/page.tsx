@@ -160,13 +160,14 @@ function Home() {
       lordsContract,
       gameContract
     );
+    console.log(balances);
     setEthBalance(balances[0]);
     setLordsBalance(balances[1]);
   };
 
   useEffect(() => {
     getBalances();
-  }, [address]);
+  }, [account]);
 
   const { data, refetch, resetData, setData, setIsLoading, setNotLoading } =
     useQueriesStore();

@@ -110,6 +110,8 @@ export const ArcadeIntro = ({
     };
   }, []);
 
+  console.log(lordsBalance);
+
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
@@ -182,8 +184,10 @@ export const ArcadeIntro = ({
                   <p className="loading-ellipsis">Minting Lords</p>
                 ) : checkAnyETh ? (
                   "GET GOERLI ETH"
-                ) : (
+                ) : lordsBalance ? (
                   "Mint 250 Lords"
+                ) : (
+                  <p className="loading-ellipsis">Getting Balance</p>
                 )}
               </Button>
             </div>
