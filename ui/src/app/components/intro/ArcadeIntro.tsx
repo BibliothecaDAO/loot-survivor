@@ -111,7 +111,7 @@ export const ArcadeIntro = ({
     return () => {
       clearInterval(timer); // Cleanup timer on component unmount
     };
-  }, []);
+  }, [isSettingPermissions]);
 
   return (
     <>
