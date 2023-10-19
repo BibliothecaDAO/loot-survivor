@@ -1,10 +1,10 @@
+import { Contract } from "starknet";
+import { useBlock } from "@starknet-react/core";
 import { Adventurer } from "@/app/types";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
-import { CoinIcon, SkullIcon } from "../icons/Icons";
-import { useContracts } from "@/app/hooks/useContracts";
+import { CoinIcon, SkullIcon } from "@/app/components/icons/Icons";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
-import { Button } from "../buttons/Button";
-import { useBlock } from "@starknet-react/core";
+import { Button } from "@/app/components/buttons/Button";
 import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -13,13 +13,14 @@ import { chunkArray, calculateLevel } from "@/app/lib/utils";
 interface LiveLeaderboardRowProps {
   adventurer: Adventurer;
   handleRowSelected: (id: number) => void;
+  gameContract: Contract;
 }
 
 const LiveLeaderboardRow = ({
   adventurer,
   handleRowSelected,
+  gameContract,
 }: LiveLeaderboardRowProps) => {
-  const { gameContract } = useContracts();
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(

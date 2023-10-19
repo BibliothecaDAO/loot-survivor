@@ -1,24 +1,30 @@
-import { Adventurer, NullAdventurer, NullItem } from "../../types";
-import { HeartIcon, CoinIcon, QuestionMarkIcon } from "../icons/Icons";
+import { Contract } from "starknet";
+import { Adventurer, NullAdventurer, NullItem } from "@/app/types";
+import {
+  HeartIcon,
+  CoinIcon,
+  QuestionMarkIcon,
+} from "@/app/components/icons/Icons";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
-import { getKeyFromValue } from "../../lib/utils";
-import { useQueriesStore } from "../../hooks/useQueryStore";
-import useUIStore from "../../hooks/useUIStore";
+import { getKeyFromValue } from "@/app/lib/utils";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import useUIStore from "@/app/hooks/useUIStore";
 import { Item } from "@/app/types";
-import { HealthCountDown } from "../CountDown";
-import { GameData } from "../GameData";
-import { useContracts } from "@/app/hooks/useContracts";
+import { HealthCountDown } from "@/app/components/CountDown";
+import { GameData } from "@/app/lib/data/GameData";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
+  gameContract: Contract;
   profileExists?: boolean;
   upgradeCost?: number;
 }
 
 export default function Info({
   adventurer,
+  gameContract,
   profileExists,
   upgradeCost,
 }: InfoProps) {
@@ -32,7 +38,6 @@ export default function Info({
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
-  const { gameContract } = useContracts();
 
   const gameData = new GameData();
 
@@ -168,6 +173,7 @@ export default function Info({
                       }
                       itemSlot={part}
                       handleDrop={handleDropItems}
+                      gameContract={gameContract}
                       key={part}
                     />
                   ))}

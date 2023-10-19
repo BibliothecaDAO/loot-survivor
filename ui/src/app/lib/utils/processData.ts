@@ -1,4 +1,4 @@
-import { GameData } from "@/app/components/GameData";
+import { GameData } from "@/app/lib/data/GameData";
 import {
   DiscoveredHealthEvent,
   DiscoveredGoldEvent,
@@ -25,9 +25,9 @@ import {
   UpgradesAvailableEvent,
   IdleDeathPenaltyEvent,
   AdventurerUpgradedEvent,
-} from "../../types/events";
+} from "@/app/types/events";
 import { Adventurer } from "@/app/types";
-import { feltToString } from ".";
+import { feltToString } from "@/app/lib/utils";
 
 type EventData =
   | DiscoveredHealthEvent
@@ -84,7 +84,8 @@ function processAdventurerState(data: any, currentAdventurer?: any) {
     statUpgrades: data.adventurerState["adventurer"]["statPointsAvailable"],
     actionsPerBlock: data.adventurerState["adventurer"]["actionsPerBlock"],
     name: currentAdventurer["name"],
-    entropy: currentAdventurer["entropy"],
+    startBlock: currentAdventurer["startBlock"],
+    revealBlock: currentAdventurer["revealBlock"],
     createdTime: currentAdventurer.createdTime,
     lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
     timestamp: new Date(), // Equivalent to datetime.now() in Python.
@@ -208,7 +209,8 @@ export function processData(
         actionsPerBlock:
           startGameEvent.adventurerState["adventurer"]["actionsPerBlock"],
         name: feltToString(startGameEvent.adventurerMeta["name"]),
-        entropy: startGameEvent.adventurerMeta["entropy"],
+        startBlock: startGameEvent.adventurerMeta["startBlock"],
+        revealBlock: startGameEvent.revealBlock,
         createdTime: new Date(),
         lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
         timestamp: new Date(),

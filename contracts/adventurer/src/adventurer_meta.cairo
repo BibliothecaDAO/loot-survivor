@@ -1,6 +1,6 @@
 use starknet::{StorePacking};
 use traits::{TryInto, Into};
-use super::stats::{Stats, StatsPacking};
+use super::stats::{Stats, StatsPacking, StatUtils};
 
 #[derive(Drop, Copy, Serde)]
 struct AdventurerMetadata {
@@ -31,6 +31,18 @@ impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
             starting_stats: StatsPacking::unpack(starting_stats.try_into().unwrap()),
             name: name.try_into().unwrap()
         }
+    }
+}
+
+#[generate_trait]
+impl ImplAdventurerMetadata of IAdventurerMetadata {
+    // @notice: Creates a new AdventurerMetadata struct
+    // @dev: AdventurerMetadata is initialized without any starting stats
+    // @param name: The name of the adventurer
+    // @param start_block: The block number at which the adventurer was created
+    // @return: The newly created AdventurerMetadata struct
+    fn new(name: u128, start_block: u64) -> AdventurerMetadata {
+        AdventurerMetadata { name, start_block, starting_stats: StatUtils::new() }
     }
 }
 

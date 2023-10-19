@@ -1,4 +1,4 @@
-import Lords from "../../../../public/icons/lords.svg";
+import Lords from "public/icons/lords.svg";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
 import { formatNumber } from "@/app/lib/utils";
 
@@ -29,7 +29,7 @@ const ScoreRow = ({
         {adventurer.totalPayout > 0 ? (
           <span className="flex flex-row gap-1 items-center justify-center">
             <Lords className="h-4 w-4 sm:w-5 sm:h-5 fill-current" />
-            {formatNumber(parseInt(adventurer.totalPayout))}
+            {formatNumber(parseInt(adventurer.totalPayout) / 10 ** 18)}
           </span>
         ) : (
           "-"

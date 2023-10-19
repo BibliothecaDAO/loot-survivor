@@ -4,9 +4,9 @@ import {
   convertToBoolean,
 } from "@/app/lib/utils";
 import { ItemPurchase, UpgradeSummary } from "@/app/types";
-import { GameData } from "../GameData";
-import { HealthPotionIcon } from "../icons/Icons";
-import LootIcon from "../../components/icons/LootIcon";
+import { GameData } from "@/app/lib/data/GameData";
+import { HealthPotionIcon } from "@/app/components/icons/Icons";
+import LootIcon from "@/app/components/icons/LootIcon";
 
 interface UpgradeSummaryProps {
   summary: UpgradeSummary;

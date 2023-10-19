@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { Button } from "../buttons/Button";
-import { useConnectors } from "@starknet-react/core";
-import useUIStore from "../../hooks/useUIStore";
+import { Button } from "@/app/components/buttons/Button";
+import { useConnect } from "@starknet-react/core";
+import useUIStore from "@/app/hooks/useUIStore";
 import Image from "next/image";
-import { WalletTutorial } from "../tutorial/WalletTutorial";
+import { WalletTutorial } from "@/app/components/intro/WalletTutorial";
 
 interface WalletSelectProps {}
 
 const WalletSelect = ({}: WalletSelectProps) => {
-  const { connectors, connect } = useConnectors();
+  const { connectors, connect } = useConnect();
   const setDisconnected = useUIStore((state) => state.setDisconnected);
   const [screen, setScreen] = useState("wallet");
 
@@ -50,7 +50,7 @@ const WalletSelect = ({}: WalletSelectProps) => {
                 </Button>
                 {walletConnectors().map((connector, index) => (
                   <Button
-                    onClick={() => connect(connector)}
+                    onClick={() => connect({ connector })}
                     key={index}
                     className="w-full"
                   >
@@ -66,7 +66,7 @@ const WalletSelect = ({}: WalletSelectProps) => {
                   <div className="flex flex-col sm:flex-row gap-2 overflow-auto h-[300px] sm:h-full w-full sm:w-[400px]">
                     {arcadeConnectors().map((connector, index) => (
                       <Button
-                        onClick={() => connect(connector)}
+                        onClick={() => connect({ connector })}
                         key={index}
                         className="w-full"
                       >

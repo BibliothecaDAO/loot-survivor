@@ -1,15 +1,15 @@
 import { useState, FormEvent, useEffect } from "react";
-import Image from "next/image";
-import { Button } from "../buttons/Button";
+import { useAccount, useConnect } from "@starknet-react/core";
+import { TypeAnimation } from "react-type-animation";
 import { MdClose } from "react-icons/md";
-import { WalletTutorial } from "../tutorial/WalletTutorial";
-import { TxActivity } from "../navigation/TxActivity";
+import { WalletTutorial } from "@/app/components/intro/WalletTutorial";
+import { TxActivity } from "@/app/components/navigation/TxActivity";
 import useUIStore from "@/app/hooks/useUIStore";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
-import { useAccount, useConnectors } from "@starknet-react/core";
-import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { FormData } from "@/app/types";
+import { Button } from "@/app/components/buttons/Button";
+import Image from "next/image";
 import { fetchGoldenTokenImage } from "@/app/api/fetchMetadata";
 import { getContracts } from "@/app/lib/constants";
 import Lords from "../../../../public/icons/lords.svg";
@@ -47,7 +47,7 @@ export const Spawn = ({
   }, [formData]);
 
   const { account } = useAccount();
-  const { connectors, connect } = useConnectors();
+  const { connectors, connect } = useConnect();
 
   const walletConnectors = () =>
     connectors.filter((connector) => !connector.id.includes("0x"));
@@ -120,7 +120,7 @@ export const Spawn = ({
                 <div className="flex flex-col gap-2">
                   {walletConnectors().map((connector, index) => (
                     <Button
-                      onClick={() => connect(connector)}
+                      onClick={() => connect({ connector })}
                       disabled={!formFilled}
                       key={index}
                       className="w-full"

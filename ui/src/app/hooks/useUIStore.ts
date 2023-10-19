@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ItemPurchase, UpgradeStats, ZeroUpgrade, u256 } from "../types";
+import { ItemPurchase, UpgradeStats, ZeroUpgrade } from "@/app/types";
 
 export type ScreenPage =
   | "start"
@@ -53,8 +53,6 @@ type State = {
   setSlayAdventurers: (value: string[]) => void;
   lastAction: Date | null;
   setLastAction: (value: Date | null) => void;
-  mintAdventurer: boolean;
-  setMintAdventurer: (value: boolean) => void;
   inventorySelected: number | null;
   setInventorySelected: (value: number) => void;
   upgradeScreen: number;
@@ -116,8 +114,6 @@ const useUIStore = create<State>((set) => ({
   slayAdventurers: [],
   setSlayAdventurers: (value) => set({ slayAdventurers: value }),
   setLastAction: (value) => set({ lastAction: value }),
-  mintAdventurer: false,
-  setMintAdventurer: (value) => set({ mintAdventurer: value }),
   inventorySelected: null,
   setInventorySelected: (value) => set({ inventorySelected: value }),
   upgradeScreen: 1,

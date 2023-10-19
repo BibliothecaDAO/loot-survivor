@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { useContracts } from "../hooks/useContracts";
+import { CallData, Contract } from "starknet";
 import {
   getItemData,
   getValueFromKey,
   getItemPrice,
   getPotionPrice,
-} from "../lib/utils";
-import { GameData } from "../components/GameData";
-import ButtonMenu from "../components/menu/ButtonMenu";
-import useLoadingStore from "../hooks/useLoadingStore";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import Info from "../components/adventurer/Info";
-import { Button } from "../components/buttons/Button";
+} from "@/app/lib/utils";
+import { GameData } from "@/app/lib/data/GameData";
+import ButtonMenu from "@/app/components/menu/ButtonMenu";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import Info from "@/app/components/adventurer/Info";
+import { Button } from "@/app/components/buttons/Button";
 import {
   ArrowTargetIcon,
   CatIcon,
@@ -22,26 +22,29 @@ import {
   LightbulbIcon,
   ScrollIcon,
   HeartIcon,
-} from "../components/icons/Icons";
-import PurchaseHealth from "../components/actions/PurchaseHealth";
-import MarketplaceScreen from "./MarketplaceScreen";
-import { UpgradeNav } from "../components/upgrade/UpgradeNav";
-import { StatAttribute } from "../components/upgrade/StatAttribute";
-import useUIStore from "../hooks/useUIStore";
-import { UpgradeStats, ZeroUpgrade, UpgradeSummary } from "../types";
-import Summary from "../components/upgrade/Summary";
-import { HealthCountDown } from "../components/CountDown";
+} from "@/app/components/icons/Icons";
+import PurchaseHealth from "@/app/components/upgrade/PurchaseHealth";
+import MarketplaceScreen from "@/app/containers/MarketplaceScreen";
+import { UpgradeNav } from "@/app/components/upgrade/UpgradeNav";
+import { StatAttribute } from "@/app/components/upgrade/StatAttribute";
+import useUIStore from "@/app/hooks/useUIStore";
+import { UpgradeStats, ZeroUpgrade, UpgradeSummary } from "@/app/types";
+import Summary from "@/app/components/upgrade/Summary";
+import { HealthCountDown } from "@/app/components/CountDown";
 
 interface UpgradeScreenProps {
   upgrade: (...args: any[]) => any;
+  gameContract: Contract;
 }
 
 /**
  * @container
  * @description Provides the upgrade screen for the adventurer.
  */
-export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
-  const { gameContract } = useContracts();
+export default function UpgradeScreen({
+  upgrade,
+  gameContract,
+}: UpgradeScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
@@ -54,6 +57,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
     (state) => state.computed.hasStatUpgrades
   );
   const [selected, setSelected] = useState("");
+  const [nonBoostedStats, setNonBoostedStats] = useState<any | null>(null);
   const upgradeScreen = useUIStore((state) => state.upgradeScreen);
   const setUpgradeScreen = useUIStore((state) => state.setUpgradeScreen);
   const potionAmount = useUIStore((state) => state.potionAmount);
@@ -82,6 +86,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       description: "Strength increases attack damage by 10%",
       buttonText: "Upgrade Strength",
       abbrev: "STR",
+      nonBoostedStat: nonBoostedStats?.strength,
     },
     {
       name: "Dexterity",
@@ -89,6 +94,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       description: "Dexterity increases chance of fleeing Beasts",
       buttonText: "Upgrade Dexterity",
       abbrev: "DEX",
+      nonBoostedStat: nonBoostedStats?.dexterity,
     },
     {
       name: "Vitality",
@@ -97,6 +103,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       description: "Vitality increases max health and gives +10hp ",
       buttonText: "Upgrade Vitality",
       abbrev: "VIT",
+      nonBoostedStat: nonBoostedStats?.vitality,
     },
     {
       name: "Intelligence",
@@ -104,6 +111,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       description: "Intelligence increases chance of avoiding Obstacles",
       buttonText: "Upgrade Intelligence",
       abbrev: "INT",
+      nonBoostedStat: nonBoostedStats?.intelligence,
     },
     {
       name: "Wisdom",
@@ -111,6 +119,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       description: "Wisdom increases chance of avoiding a Beast ambush",
       buttonText: "Upgrade Wisdom",
       abbrev: "WIS",
+      nonBoostedStat: nonBoostedStats?.wisdom,
     },
     {
       name: "Charisma",
@@ -118,6 +127,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       description: "Charisma provides discounts on the marketplace and potions",
       buttonText: "Upgrade Charisma",
       abbrev: "CHA",
+      nonBoostedStat: nonBoostedStats?.charisma,
     },
   ];
 
@@ -257,10 +267,14 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
   const handleSubmitUpgradeTx = async () => {
     renderSummary();
     resetNotification();
-    await upgrade(upgrades, purchaseItems, potionAmount);
-    setPotionAmount(0);
-    setPurchaseItems([]);
-    setUpgrades({ ...ZeroUpgrade });
+    try {
+      await upgrade(upgrades, purchaseItems, potionAmount);
+      setPotionAmount(0);
+      setPurchaseItems([]);
+      setUpgrades({ ...ZeroUpgrade });
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const upgradesTotal = Object.values(upgrades)
@@ -299,12 +313,28 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
     maxHealth
   );
 
+  const getNoBoostedStats = async () => {
+    const stats = await gameContract?.call(
+      "get_base_stats",
+      CallData.compile({ token_id: adventurer?.id! })
+    ); // check whether player can use the current token
+    setNonBoostedStats(stats);
+  };
+
+  useEffect(() => {
+    getNoBoostedStats();
+  }, []);
+
   return (
     <>
       {hasStatUpgrades ? (
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2">
           <div className="w-1/3 hidden sm:block">
-            <Info adventurer={adventurer} upgradeCost={upgradeTotalCost} />
+            <Info
+              adventurer={adventurer}
+              upgradeCost={upgradeTotalCost}
+              gameContract={gameContract}
+            />
           </div>
           {!checkTransacting ? (
             <div className="w-full sm:w-2/3 xl:h-[500px] xl:overflow-y-auto 2xl:h-full">

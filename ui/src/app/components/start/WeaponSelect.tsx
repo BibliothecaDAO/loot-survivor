@@ -1,6 +1,10 @@
 import Image from "next/image";
-import { Button } from "../buttons/Button";
-import { BladeIcon, BludgeonIcon, MagicIcon } from "../icons/Icons";
+import { Button } from "@/app/components/buttons/Button";
+import {
+  BladeIcon,
+  BludgeonIcon,
+  MagicIcon,
+} from "@/app/components/icons/Icons";
 import { FormData } from "@/app/types";
 
 export interface WeaponSelectProps {

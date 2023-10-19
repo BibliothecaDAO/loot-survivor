@@ -1,18 +1,19 @@
 import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
-import { Adventurer, Item, BurnerStorage } from "../../types";
-import Storage from "../storage";
-import { GameData } from "../../components/GameData";
+import { z } from "zod";
+import { Call, AccountInterface, Account } from "starknet";
+import { Adventurer, Item, BurnerStorage } from "@/app/types";
+import Storage from "@/app/lib/storage";
+import { GameData } from "@/app/lib/data/GameData";
 import {
   itemCharismaDiscount,
   itemBasePrice,
   itemMinimumPrice,
   potionBasePrice,
-} from "../constants";
-import { z } from "zod";
-import { deathMessages, FEE_CHECK_BALANCE } from "../constants";
-import { Call, AccountInterface, Account } from "starknet";
+} from "@/app/lib/constants";
+import { deathMessages, FEE_CHECK_BALANCE } from "@/app/lib/constants";
+import { getBlock } from "@/app/api/api";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -35,7 +36,7 @@ export function indexAddress(address: string) {
 }
 
 export function padAddress(address: string) {
-  if (address !== "") {
+  if (address && address !== "") {
     const length = address.length;
     const neededLength = 66 - length;
     let zeros = "";
@@ -402,3 +403,33 @@ export async function checkArcadeBalance(
     return false;
   }
 }
+
+export const fetchAverageBlockTime = async (
+  currentBlock: number,
+  numberOfBlocks: number
+) => {
+  try {
+    let totalTimeInterval = 0;
+
+    for (let i = currentBlock - numberOfBlocks; i < currentBlock; i++) {
+      const currentBlockData = await getBlock(i);
+      const nextBlockData = await getBlock(i + 1);
+
+      const timeInterval = nextBlockData.timestamp - currentBlockData.timestamp;
+      totalTimeInterval += timeInterval;
+    }
+    const averageTime = totalTimeInterval / numberOfBlocks;
+    return averageTime;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
+export const fetchBlockTime = async (currentBlock: number) => {
+  try {
+    const currentBlockData = await getBlock(currentBlock);
+    return currentBlockData.timestamp;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};

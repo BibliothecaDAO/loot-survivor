@@ -23,6 +23,17 @@ export function getRPCUrl() {
   }
 }
 
+export function getAPIKey() {
+  switch (NETWORK) {
+    case "goerli":
+      return "6c536e8272f84d3ba63bf9f248c5e128";
+    case "mainnet":
+      return "6c536e8272f84d3ba63bf9f248c5e128";
+    default:
+      return "http://localhost:8000/graphql";
+  }
+}
+
 export function getGraphQLUrl() {
   switch (NETWORK) {
     case "goerli":
@@ -39,7 +50,7 @@ export function getContracts() {
     case "goerli":
       return {
         eth: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-        game: "0x03f2ac2c55abbf633123ddb72adc3472feefc4e962c4cedc16dda11a2ac8d1d4",
+        game: "0x02348de66cad09fb1750940247c56899b0af597e7167ff673f40a8121f243013",
         lords:
           "0x05e367ac160e5f90c5775089b582dfc987dd148a5a2f977c49def2a6644f724b",
         beasts:
@@ -133,4 +144,10 @@ export const deathMessages = [
   },
   { rank: 100, message: "Brave Combatant! - A commendable effort!" },
   { rank: 250, message: "Daring Challenger! - A brave stand!" },
+];
+
+export const efficacyData = [
+  { weapon: "Blade", metal: "Weak", hide: "Fair", cloth: "Strong" },
+  { weapon: "Bludgeon", metal: "Fair", hide: "Strong", cloth: "Weak" },
+  { weapon: "Magic", metal: "Strong", hide: "Weak", cloth: "Fair" },
 ];

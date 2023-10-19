@@ -1,18 +1,18 @@
 import React, { useEffect, useState, useRef } from "react";
-import TwitterShareButton from "../buttons/TwitterShareButtons";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import useLoadingStore from "../../hooks/useLoadingStore";
-import { Button } from "../buttons/Button";
-import useUIStore from "../../hooks/useUIStore";
-import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
+import TwitterShareButton from "@/app/components/buttons/TwitterShareButtons";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
+import { Button } from "@/app/components/buttons/Button";
+import useUIStore from "@/app/hooks/useUIStore";
+import { getRankFromList, getOrdinalSuffix } from "@/app/lib/utils";
 import { getAppUrl } from "@/app/lib/constants";
 import { getAdventurerByXP } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
 import { NullAdventurer, Adventurer } from "@/app/types";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import GlitchEffect from "../animations/GlitchEffect";
-import PixelatedImage from "../animations/PixelatedImage";
-import { getDeathMessageByRank } from "../../lib/utils";
+import GlitchEffect from "@/app/components/animations/GlitchEffect";
+import PixelatedImage from "@/app/components/animations/PixelatedImage";
+import { getDeathMessageByRank } from "@/app/lib/utils";
 
 export const DeathDialog = () => {
   const messageRef = useRef<HTMLSpanElement>(null);

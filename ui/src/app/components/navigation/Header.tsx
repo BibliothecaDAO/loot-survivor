@@ -1,15 +1,15 @@
 import { useRef, useState } from "react";
-import { useBalance, useAccount, useConnectors } from "@starknet-react/core";
-import { useContracts } from "@/app/hooks/useContracts";
+import { Contract } from "starknet";
+import { useAccount, useDisconnect } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import { useUiSounds } from "@/app/hooks/useUiSound";
 import { soundSelector } from "@/app/hooks/useUiSound";
-import Logo from "../../../../public/icons/logo.svg";
-import Lords from "../../../../public/icons/lords.svg";
-import { PenaltyCountDown } from "../../components/CountDown";
-import { Button } from "../../components/buttons/Button";
+import Logo from "public/icons/logo.svg";
+import Lords from "public/icons/lords.svg";
+import { PenaltyCountDown } from "@/app/components/CountDown";
+import { Button } from "@/app/components/buttons/Button";
 import { formatNumber, displayAddress } from "@/app/lib/utils";
 import {
   ArcadeIcon,
@@ -18,31 +18,31 @@ import {
   CartIcon,
   SettingsIcon,
   GithubIcon,
-} from "../icons/Icons";
-import TransactionCart from "./TransactionCart";
-import TransactionHistory from "./TransactionHistory";
+} from "@/app/components/icons/Icons";
+import TransactionCart from "@/app/components/navigation/TransactionCart";
+import TransactionHistory from "@/app/components/navigation/TransactionHistory";
 import { NullAdventurer } from "@/app/types";
 
 export interface HeaderProps {
   multicall: (...args: any[]) => any;
   mintLords: (...args: any[]) => any;
+  lordsBalance: bigint;
+  gameContract: Contract;
 }
 
-export default function Header({ multicall, mintLords }: HeaderProps) {
+export default function Header({
+  multicall,
+  mintLords,
+  lordsBalance,
+  gameContract,
+}: HeaderProps) {
   const { account, address } = useAccount();
-  const { disconnect } = useConnectors();
+  const { disconnect } = useDisconnect();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const data = useQueriesStore((state) => state.data);
   const resetData = useQueriesStore((state) => state.resetData);
   const isLoading = useQueriesStore((state) => state.isLoading);
-
-  const { lordsContract } = useContracts();
-
-  const lordsBalance = useBalance({
-    token: lordsContract?.address,
-    address,
-  });
 
   const setDisconnected = useUIStore((state) => state.setDisconnected);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
@@ -99,7 +99,7 @@ export default function Header({ multicall, mintLords }: HeaderProps) {
               <>
                 <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
                 <p>
-                  {formatNumber(parseInt(lordsBalance.data?.formatted ?? "0"))}
+                  {formatNumber(parseInt(lordsBalance.toString()) / 10 ** 18)}
                 </p>
               </>
             ) : (
@@ -150,6 +150,7 @@ export default function Header({ multicall, mintLords }: HeaderProps) {
           <TransactionCart
             buttonRef={displayCartButtonRef}
             multicall={multicall}
+            gameContract={gameContract}
           />
         )}
         <div className="flex items-center sm:hidden">
@@ -193,7 +194,7 @@ export default function Header({ multicall, mintLords }: HeaderProps) {
             }}
             className="xl:px-5"
           >
-            {account ? displayAddress(account.address) : "Connect"}
+            {account ? displayAddress(address ?? "") : "Connect"}
           </Button>
 
           <Button

@@ -1,9 +1,13 @@
-import Menu from "../menu/ButtonMenu";
-import { SoundOnIcon, SoundOffIcon, LedgerIcon } from "../icons/Icons";
-import { DiscordIcon } from "../icons/Icons";
-import useUIStore from "../../hooks/useUIStore";
+import Menu from "@/app/components/menu/ButtonMenu";
+import {
+  SoundOnIcon,
+  SoundOffIcon,
+  LedgerIcon,
+} from "@/app/components/icons/Icons";
+import { DiscordIcon } from "@/app/components/icons/Icons";
+import useUIStore from "@/app/hooks/useUIStore";
 import { displayAddress } from "@/app/lib/utils";
-import { useConnectors } from "@starknet-react/core";
+import { useDisconnect } from "@starknet-react/core";
 import { useAccount } from "@starknet-react/core";
 import { ButtonData, NullAdventurer } from "@/app/types";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
@@ -15,7 +19,7 @@ export default function Settings() {
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const setDisconnected = useUIStore((state) => state.setDisconnected);
-  const { disconnect } = useConnectors();
+  const { disconnect } = useDisconnect();
   const { account, isConnected } = useAccount();
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const { resetData } = useQueriesStore();

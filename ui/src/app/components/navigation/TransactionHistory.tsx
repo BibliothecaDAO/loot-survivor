@@ -1,17 +1,17 @@
-import React, { useState, useRef, RefObject } from "react";
-import { useTransactionManager } from "@starknet-react/core";
-import { TxStatus } from "./TxStatus";
-import { Metadata, NullAdventurer, Notification } from "../../types";
-import { padAddress, shortenHex } from "../../lib/utils";
-import useOnClickOutside from "../../hooks/useOnClickOutside";
-import useLoadingStore from "../../hooks/useLoadingStore";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { processNotifications } from "../notifications/NotificationHandler";
-import { useQueriesStore } from "../../hooks/useQueryStore";
-import useUIStore from "../../hooks/useUIStore";
+import React, { useRef, RefObject } from "react";
 import { MdClose } from "react-icons/md";
-import { useUiSounds } from "../../hooks/useUiSound";
-import { soundSelector } from "../../hooks/useUiSound";
+import { TxStatus } from "@/app/components/navigation/TxStatus";
+import { Metadata, NullAdventurer, Notification } from "@/app/types";
+import { padAddress, shortenHex } from "@/app/lib/utils";
+import useOnClickOutside from "@/app/hooks/useOnClickOutside";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import { processNotifications } from "@/app/components/notifications/NotificationHandler";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import useUIStore from "@/app/hooks/useUIStore";
+import { useUiSounds } from "@/app/hooks/useUiSound";
+import { soundSelector } from "@/app/hooks/useUiSound";
+import useTransactionManager from "@/app/hooks/useTransactionManager";
 
 export interface TransactionHistoryProps {
   buttonRef: RefObject<HTMLElement>;

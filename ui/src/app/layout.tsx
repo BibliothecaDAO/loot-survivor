@@ -1,8 +1,7 @@
 "use client";
 
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
-import { getGraphQLUrl } from "./lib/constants";
-
+import { getGraphQLUrl } from "@/app/lib/constants";
 import "./globals.css";
 
 export default function RootLayout({

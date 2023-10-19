@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Item } from "../../types";
-import LootIcon from "../icons/LootIcon";
-import Efficacyicon from "../icons/EfficacyIcon";
-import { processItemName, calculateLevel, getItemData } from "../../lib/utils";
-import ItemBar from "./ItemBar";
-import { GameData } from "../GameData";
-import { getKeyFromValue, getValueFromKey } from "../../lib/utils";
-import { SwapIcon, DownArrowIcon } from "../icons/Icons";
-import { Button } from "../buttons/Button";
+import { Contract } from "starknet";
+import { Item } from "@/app/types";
+import LootIcon from "@/app/components/icons/LootIcon";
+import Efficacyicon from "@/app/components/icons/EfficacyIcon";
+import { processItemName, calculateLevel, getItemData } from "@/app/lib/utils";
+import ItemBar from "@/app/components/adventurer/ItemBar";
+import { GameData } from "@/app/lib/data/GameData";
+import { getKeyFromValue, getValueFromKey } from "@/app/lib/utils";
+import { SwapIcon, DownArrowIcon } from "@/app/components/icons/Icons";
+import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
-import { InventoryDisplay } from "./InventoryDisplay";
+import { InventoryDisplay } from "@/app/components/adventurer/InventoryDisplay";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 
 interface ItemDisplayProps {
@@ -20,6 +21,7 @@ interface ItemDisplayProps {
   equipped?: boolean;
   disabled?: boolean;
   handleDrop: (value: string) => void;
+  gameContract: Contract;
 }
 
 export const ItemDisplay = ({
@@ -30,6 +32,7 @@ export const ItemDisplay = ({
   equipped,
   disabled,
   handleDrop,
+  gameContract,
 }: ItemDisplayProps) => {
   const [showInventoryItems, setShowInventoryItems] = useState(false);
   const itemType = item?.item;
@@ -264,6 +267,7 @@ export const ItemDisplay = ({
             itemSlot={slot}
             setShowInventoryItems={setShowInventoryItems}
             equipItems={equipItems}
+            gameContract={gameContract}
           />
         </div>
       )}

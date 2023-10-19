@@ -1,47 +1,53 @@
 import { useState } from "react";
-import {
-  useAccount,
-  useConnectors,
-  useContractWrite,
-  useBalance,
-} from "@starknet-react/core";
+import { Contract } from "starknet";
+import { useAccount, useConnect } from "@starknet-react/core";
 import {
   ETH_PREFUND_AMOUNT,
   LORDS_PREFUND_AMOUNT,
   useBurner,
 } from "@/app/lib/burner";
-import { Button } from "../buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
-import PixelatedImage from "../animations/PixelatedImage";
+import PixelatedImage from "@/app/components/animations/PixelatedImage";
 import { getWalletConnectors } from "@/app/lib/connectors";
-import Lords from "../../../../public/icons/lords.svg";
-import { useContracts } from "@/app/hooks/useContracts";
+import Lords from "public/icons/lords.svg";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Call } from "@/app/types";
 
-export const ArcadeIntro = () => {
+interface ArcadeIntroProps {
+  ethBalance: bigint;
+  lordsBalance: bigint;
+  getBalances: () => void;
+  gameContract: Contract;
+  lordsContract: Contract;
+  ethContract: Contract;
+}
+
+export const ArcadeIntro = ({
+  ethBalance,
+  lordsBalance,
+  getBalances,
+  gameContract,
+  lordsContract,
+  ethContract,
+}: ArcadeIntroProps) => {
   const { account, address } = useAccount();
-  const { connect, available } = useConnectors();
+  const { connect, connectors } = useConnect();
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const { getMasterAccount, create, isDeploying, isSettingPermissions } =
-    useBurner();
-  const walletConnectors = getWalletConnectors(available);
-  const { lordsContract, ethContract } = useContracts();
+  const { create, isDeploying, isSettingPermissions } = useBurner(
+    account,
+    gameContract,
+    lordsContract,
+    ethContract
+  );
+  const walletConnectors = getWalletConnectors(connectors);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const handleSubmitCalls = useTransactionCartStore(
     (state) => state.handleSubmitCalls
   );
-  const { data: ethBalance } = useBalance({
-    token: ethContract?.address,
-    address,
-  });
-  const { data: lordsBalance, refetch: refetchLordsBalance } = useBalance({
-    token: lordsContract?.address,
-    address,
-  });
-  const lords = Number(lordsBalance?.value);
-  const eth = Number(ethBalance?.value);
+  const lords = Number(lordsBalance);
+  const eth = Number(ethBalance);
   const [isMintingLords, setIsMintingLords] = useState(false);
 
   const mintLords = async () => {
@@ -64,7 +70,7 @@ export const ArcadeIntro = () => {
       }
 
       setIsMintingLords(false);
-      refetchLordsBalance();
+      getBalances();
     } catch (e) {
       setIsMintingLords(false);
       console.log(e);
@@ -97,7 +103,7 @@ export const ArcadeIntro = () => {
             {walletConnectors.map((connector, index) => (
               <Button
                 disabled={address !== undefined}
-                onClick={() => connect(connector)}
+                onClick={() => connect({ connector })}
                 key={index}
               >
                 {connector.id === "braavos" || connector.id === "argentX"

@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime
 from typing import List, NewType, Optional, Dict
 import base64
 import ssl
@@ -405,6 +404,17 @@ class IntFilter:
 
 
 @strawberry.input
+class FloatFilter:
+    eq: Optional[float] = None
+    _in: Optional[List[float]] = None
+    notIn: Optional[List[float]] = None
+    lt: Optional[float] = None
+    lte: Optional[float] = None
+    gt: Optional[float] = None
+    gte: Optional[float] = None
+
+
+@strawberry.input
 class BooleanFilter:
     eq: Optional[bool] = None
 
@@ -641,6 +651,8 @@ class AdventurersFilter:
     ring: Optional[FeltValueFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     statUpgrades: Optional[FeltValueFilter] = None
+    startBlock: Optional[FeltValueFilter] = None
+    revealBlock: Optional[FeltValueFilter] = None
     actionsPerBlock: Optional[FeltValueFilter] = None
     gold: Optional[FeltValueFilter] = None
     createdTime: Optional[OrderByInput] = None
@@ -657,7 +669,7 @@ class ScoresFilter:
     txHash: Optional[HexValueFilter] = None
     scoreTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
-    totalPayout: Optional[IntFilter] = None
+    totalPayout: Optional[FloatFilter] = None
 
 
 @strawberry.input
@@ -770,6 +782,8 @@ class AdventurersOrderByInput:
     ring: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     statUpgrades: Optional[OrderByInput] = None
+    startBlock: Optional[OrderByInput] = None
+    revealBlock: Optional[OrderByInput] = None
     actionsPerBlock: Optional[OrderByInput] = None
     gold: Optional[OrderByInput] = None
     createdTime: Optional[OrderByInput] = None
@@ -899,6 +913,8 @@ class Adventurer:
     ring: Optional[ItemValue]
     beastHealth: Optional[FeltValue]
     statUpgrades: Optional[FeltValue]
+    startBlock: Optional[FeltValue]
+    revealBlock: Optional[FeltValue]
     actionsPerBlock: Optional[FeltValue]
     gold: Optional[FeltValue]
     createdTime: Optional[str]
@@ -931,6 +947,8 @@ class Adventurer:
             ring=data["ring"],
             beastHealth=data["beastHealth"],
             statUpgrades=data["statUpgrades"],
+            startBlock=data["startBlock"],
+            revealBlock=data["revealBlock"],
             actionsPerBlock=data["actionsPerBlock"],
             gold=data["gold"],
             createdTime=data["createdTime"],
@@ -948,7 +966,7 @@ class Score:
     txHash: Optional[HexValue]
     scoreTime: Optional[str]
     timestamp: Optional[str]
-    totalPayout: Optional[int]
+    totalPayout: Optional[float]
 
     @classmethod
     def from_mongo(cls, data):
@@ -1317,6 +1335,8 @@ def get_scores(
                 filter[key] = get_date_filters(value)
             elif isinstance(value, FeltValueFilter):
                 filter[key] = get_felt_filters(value)
+            elif isinstance(value, FloatFilter):
+                filter[key] = get_felt_filters(value)
 
     sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
 
@@ -1496,17 +1516,7 @@ def get_items(
     if where:
         processed_filters = process_filters(where)
         for key, value in processed_filters.items():
-            if (
-                isinstance(value, StringFilter)
-                | isinstance(value, ItemFilter)
-                | isinstance(value, SlotFilter)
-                | isinstance(value, TypeFilter)
-                | isinstance(value, MaterialFilter)
-                | isinstance(value, Special1Filter)
-                | isinstance(value, Special2Filter)
-                | isinstance(value, Special3Filter)
-                | isinstance(value, StatusFilter)
-            ):
+            if isinstance(value, StringFilter):
                 filter[key] = get_str_filters(value)
             elif isinstance(value, HexValueFilter):
                 filter[key] = get_hex_filters(value)
@@ -1557,22 +1567,22 @@ class IndexerGraphQLView(GraphQLView):
 
 async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
     mongo_goerli = MongoClient(mongo_goerli)
-    mongo_mainnet = MongoClient(mongo_mainnet)
+    # mongo_mainnet = MongoClient(mongo_mainnet)
     db_name_goerli = "mongo-goerli".replace("-", "_")
-    db_name_mainnet = "mongo-mainnet".replace("-", "_")
+    # db_name_mainnet = "mongo-mainnet".replace("-", "_")
     db_goerli = mongo_goerli[db_name_goerli]
-    db_mainnet = mongo_mainnet[db_name_mainnet]
+    # db_mainnet = mongo_mainnet[db_name_mainnet]
 
     schema = strawberry.Schema(query=Query)
     view_goerli = IndexerGraphQLView(db_goerli, schema=schema)
-    view_mainnet = IndexerGraphQLView(db_mainnet, schema=schema)
+    # view_mainnet = IndexerGraphQLView(db_mainnet, schema=schema)
 
     app = web.Application()
     # app.router.add_route("*", "/graphql", view_goerli)
 
     cors = aiohttp_cors.setup(app)
     resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
-    resource_mainnet = cors.add(app.router.add_resource("/graphql"))
+    # resource_mainnet = cors.add(app.router.add_resource("/graphql"))
 
     cors.add(
         resource_goerli.add_route("POST", view_goerli),
@@ -1591,22 +1601,22 @@ async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
         },
     )
 
-    cors.add(
-        resource_mainnet.add_route("POST", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
-    cors.add(
-        resource_mainnet.add_route("GET", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
+    # cors.add(
+    #     resource_mainnet.add_route("POST", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
+    # cors.add(
+    #     resource_mainnet.add_route("GET", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
 
     ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     ssl_context.load_cert_chain(

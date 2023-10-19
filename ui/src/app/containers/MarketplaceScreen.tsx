@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import LootIconLoader from "../components/icons/Loader";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import { ItemPurchase, UpgradeStats } from "../types";
-import MarketplaceTable from "../components/marketplace/MarketplaceTable";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import LootIconLoader from "@/app/components/icons/Loader";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { ItemPurchase, UpgradeStats } from "@/app/types";
+import MarketplaceTable from "@/app/components/marketplace/MarketplaceTable";
 
 export interface MarketplaceScreenProps {
   upgradeTotalCost: number;
@@ -29,59 +28,11 @@ export default function MarketplaceScreen({
   totalCharisma,
 }: MarketplaceScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const [activeMenu, setActiveMenu] = useState<number | undefined>();
-  const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
-  const [itemsCount, setItemsCount] = useState(0);
   const { isLoading } = useQueriesStore();
 
   const adventurerItems = useQueriesStore(
     (state) => state.data.itemsByAdventurerQuery?.items || []
   );
-
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      switch (event.key) {
-        case "ArrowDown":
-          setSelectedIndex((prev) => {
-            const newIndex = Math.min(prev + 1, itemsCount - 1);
-            return newIndex;
-          });
-          break;
-        case "ArrowUp":
-          setSelectedIndex((prev) => {
-            const newIndex = Math.max(prev - 1, 0);
-            return newIndex;
-          });
-          break;
-        case "Enter":
-          setActiveMenu(selectedIndex);
-          break;
-      }
-    },
-    [selectedIndex, itemsCount]
-  );
-
-  useEffect(() => {
-    if (!activeMenu) {
-      window.addEventListener("keydown", handleKeyDown);
-      return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-      };
-    }
-  }, [activeMenu, handleKeyDown]);
-
-  useEffect(() => {
-    if (!activeMenu) {
-      const button = rowRefs.current[selectedIndex];
-      if (button) {
-        button.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-        });
-      }
-    }
-  }, [selectedIndex, activeMenu]);
 
   const calculatedNewGold = adventurer?.gold
     ? adventurer?.gold - upgradeTotalCost

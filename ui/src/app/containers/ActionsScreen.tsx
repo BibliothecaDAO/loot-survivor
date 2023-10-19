@@ -1,18 +1,20 @@
 import { useState } from "react";
-import useLoadingStore from "../hooks/useLoadingStore";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import ButtonMenu from "../components/menu/ButtonMenu";
-import Info from "../components/adventurer/Info";
-import Discovery from "../components/actions/Discovery";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import BeastScreen from "./BeastScreen";
-import MazeLoader from "../components/icons/MazeLoader";
-import useUIStore from "../hooks/useUIStore";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import ButtonMenu from "@/app/components/menu/ButtonMenu";
+import Info from "@/app/components/adventurer/Info";
+import Discovery from "@/app/components/actions/Discovery";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import BeastScreen from "@/app/containers/BeastScreen";
+import MazeLoader from "@/app/components/icons/MazeLoader";
+import useUIStore from "@/app/hooks/useUIStore";
+import { Contract } from "starknet";
 
 interface ActionsScreenProps {
   explore: (...args: any[]) => any;
   attack: (...args: any[]) => any;
   flee: (...args: any[]) => any;
+  gameContract: Contract;
 }
 
 /**
@@ -23,6 +25,7 @@ export default function ActionsScreen({
   explore,
   attack,
   flee,
+  gameContract,
 }: ActionsScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
@@ -69,7 +72,7 @@ export default function ActionsScreen({
   return (
     <div className="flex flex-col sm:flex-row flex-wrap h-full">
       <div className="hidden sm:block sm:w-1/2 lg:w-1/3 h-full">
-        <Info adventurer={adventurer} />
+        <Info adventurer={adventurer} gameContract={gameContract} />
       </div>
 
       {hasBeast ? (

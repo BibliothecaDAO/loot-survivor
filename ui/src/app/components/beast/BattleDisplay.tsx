@@ -1,41 +1,39 @@
 import TwitterShareButton from "../buttons/TwitterShareButtons";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { useQueriesStore } from "../../hooks/useQueryStore";
-import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
-import { processBeastName, getBeastData } from "../../lib/utils";
+import { processBeastName, getBeastData } from "@/app/lib/utils";
 import { Battle } from "@/app/types";
-import Head from "../../../../public/icons/loot/head.svg";
-import Hand from "../../../../public/icons/loot/hand.svg";
-import Chest from "../../../../public/icons/loot/chest.svg";
-import Waist from "../../../../public/icons/loot/waist.svg";
-import Foot from "../../../../public/icons/loot/foot.svg";
+// import Head from "public/icons/loot/head.svg";
+// import Hand from "public/icons/loot/hand.svg";
+// import Chest from "public/icons/loot/chest.svg";
+// import Waist from "public/icons/loot/waist.svg";
+// import Foot from "public/icons/loot/foot.svg";
 import { getAppUrl } from "@/app/lib/constants";
 import {
   GiWalkingBootIcon,
   GiFootTripIcon,
   GiBattleGearIcon,
   SkullCrossedBonesIcon,
-} from "../icons/Icons";
+} from "@/app/components/icons/Icons";
 
 interface BattleDisplayProps {
   battleData: Battle;
   beastName: string;
 }
 
-const getAttackLocationIcon = (attackLocation: string) => {
-  if (!attackLocation) return null;
+// const getAttackLocationIcon = (attackLocation: string) => {
+//   if (!attackLocation) return null;
 
-  if (attackLocation == "Hand")
-    return <Hand className="self-center w-6 h-6 fill-current" />;
-  if (attackLocation == "Chest")
-    return <Chest className="self-center w-6 h-6 fill-current" />;
-  if (attackLocation == "Waist")
-    return <Waist className="self-center w-6 h-6 fill-current" />;
-  if (attackLocation == "Foot")
-    return <Foot className="self-center w-6 h-6 fill-current" />;
-  if (attackLocation == "Head")
-    return <Head className="self-center w-6 h-6 fill-current" />;
-};
+//   if (attackLocation == "Hand")
+//     return <Hand className="self-center w-6 h-6 fill-current" />;
+//   if (attackLocation == "Chest")
+//     return <Chest className="self-center w-6 h-6 fill-current" />;
+//   if (attackLocation == "Waist")
+//     return <Waist className="self-center w-6 h-6 fill-current" />;
+//   if (attackLocation == "Foot")
+//     return <Foot className="self-center w-6 h-6 fill-current" />;
+//   if (attackLocation == "Head")
+//     return <Head className="self-center w-6 h-6 fill-current" />;
+// };
 
 /**
  * @component
@@ -46,7 +44,7 @@ export const BattleDisplay = ({
   beastName,
 }: BattleDisplayProps) => {
   const damageLocation = battleData?.damageLocation ?? "";
-  const damageIcon = getAttackLocationIcon(damageLocation);
+  // const damageIcon = getAttackLocationIcon(damageLocation);
   const BeastFled = battleData.fled;
   const AdventurerAttack = battleData.attacker === "Adventurer";
   const BeastAttack = battleData.attacker === "Beast";
@@ -208,13 +206,6 @@ export const NotificationBattleDisplay = ({
   };
 
   const { beastName, beastLevel, tier } = handleBeastInfo();
-  const { data } = useQueriesStore();
-  const rank = getRankFromList(
-    adventurer?.id ?? 0,
-    data.adventurersByXPQuery?.adventurers ?? []
-  );
-  const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
-
   const BeastFled = isArray && battleData.some((data) => data.fled);
   const FailedToFlee =
     isArray &&

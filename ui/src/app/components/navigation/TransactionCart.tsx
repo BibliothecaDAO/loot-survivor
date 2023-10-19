@@ -5,35 +5,39 @@ import React, {
   useRef,
   RefObject,
 } from "react";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import { Button } from "../buttons/Button";
 import { MdClose } from "react-icons/md";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { useQueriesStore, QueryKey } from "../../hooks/useQueryStore";
+import { Contract } from "starknet";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { Button } from "@/app/components/buttons/Button";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import {
   processItemName,
   getItemPrice,
   getItemData,
   getValueFromKey,
-} from "../../lib/utils";
-import useUIStore from "../../hooks/useUIStore";
-import { useUiSounds } from "../../hooks/useUiSound";
-import { soundSelector } from "../../hooks/useUiSound";
-import { Item, NullItem, Call, ItemPurchase, ZeroUpgrade } from "../../types";
-import { GameData } from "../GameData";
+} from "@/app/lib/utils";
+import useUIStore from "@/app/hooks/useUIStore";
+import { useUiSounds } from "@/app/hooks/useUiSound";
+import { soundSelector } from "@/app/hooks/useUiSound";
+import { Item, NullItem, Call, ItemPurchase, ZeroUpgrade } from "@/app/types";
+import { GameData } from "@/app/lib/data/GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
-import { chunkArray } from "../../lib/utils";
-import { UpgradeStats } from "../../types";
-import { useContracts } from "@/app/hooks/useContracts";
+import { chunkArray } from "@/app/lib/utils";
+import { UpgradeStats } from "@/app/types";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
   multicall: (...args: any[]) => any;
+  gameContract: Contract;
 }
 
-const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
-  const { gameContract } = useContracts();
+const TransactionCart = ({
+  buttonRef,
+  multicall,
+  gameContract,
+}: TransactionCartProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -46,7 +50,6 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
   const resetCalls = useTransactionCartStore((state) => state.resetCalls);
   const [notification, setNotification] = useState<any[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
-  const [loadingQuery, setLoadingQuery] = useState<QueryKey | null>(null);
   const { data } = useQueriesStore();
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
@@ -61,7 +64,6 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const upgrades = useUIStore((state) => state.upgrades);
   const setUpgrades = useUIStore((state) => state.setUpgrades);
-  const setUpgradeScreen = useUIStore((state) => state.setUpgradeScreen);
   const slayAdventurers = useUIStore((state) => state.slayAdventurers);
   const setSlayAdventurers = useUIStore((state) => state.setSlayAdventurers);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -448,7 +450,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
             <Button
               onClick={async () => {
                 resetNotification();
-                await multicall(loadingMessage, loadingQuery, notification);
+                await multicall(loadingMessage, notification);
                 handleResetCalls();
               }}
             >

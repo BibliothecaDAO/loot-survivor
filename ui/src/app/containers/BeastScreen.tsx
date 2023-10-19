@@ -1,14 +1,16 @@
-import KeyboardControl, { ButtonData } from "../components/KeyboardControls";
-import { BattleDisplay } from "../components/beast/BattleDisplay";
-import { BeastDisplay } from "../components/beast/BeastDisplay";
-import useLoadingStore from "../hooks/useLoadingStore";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import { useQueriesStore } from "../hooks/useQueryStore";
 import React, { useState } from "react";
-import { processBeastName } from "../lib/utils";
-import { Battle, NullBeast } from "../types";
-import { Button } from "../components/buttons/Button";
-import useUIStore from "../hooks/useUIStore";
+import { useBlock } from "@starknet-react/core";
+import KeyboardControl, { ButtonData } from "@/app/components/KeyboardControls";
+import { BattleDisplay } from "@/app/components/beast/BattleDisplay";
+import { BeastDisplay } from "@/app/components/beast/BeastDisplay";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { processBeastName } from "@/app/lib/utils";
+import { Battle, NullBeast } from "@/app/types";
+import { Button } from "@/app/components/buttons/Button";
+import useUIStore from "@/app/hooks/useUIStore";
+import InterludeScreen from "@/app/containers/InterludeScreen";
 
 interface BeastScreenProps {
   attack: (...args: any[]) => any;
@@ -25,7 +27,6 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
   const estimatingFee = useUIStore((state) => state.estimatingFee);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const [showBattleLog, setShowBattleLog] = useState(false);
-
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
   const beastData = useQueriesStore(
@@ -34,6 +35,10 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
   const formatBattles = useQueriesStore(
     (state) => state.data.battlesByBeastQuery?.battles || []
   );
+
+  const { data: blockData } = useBlock({
+    refetchInterval: false,
+  });
 
   const [buttonText, setButtonText] = useState("Flee");
 
@@ -148,8 +153,13 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
     return <BattleLog />;
   }
 
+  console.log(blockData?.block_number, adventurer?.revealBlock);
+
   return (
     <div className="sm:w-2/3 flex flex-col sm:flex-row h-full">
+      {blockData && blockData.block_number < (adventurer?.revealBlock ?? 0) && (
+        <InterludeScreen />
+      )}
       <div className="sm:w-1/2 order-1 sm:order-2">
         {hasBeast ? (
           <BeastDisplay beastData={beastData} />

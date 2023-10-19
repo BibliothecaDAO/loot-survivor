@@ -1,12 +1,12 @@
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
-import { useCallback, useState } from "react";
-import { useQueriesStore } from "../../hooks/useQueryStore";
+// import { useCallback, useState } from "react";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+// import { soundSelector, useUiSounds } from "@/app/hooks/useUiSound";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { NullAdventurer } from "@/app/types";
-import NotificationComponent from "./NotificationComponent";
+import NotificationComponent from "@/app/components/notifications/NotificationComponent";
 import { Notification } from "@/app/types";
-import { processNotifications } from "./NotificationHandler";
-import useLoadingStore from "../../hooks/useLoadingStore";
+import { processNotifications } from "@/app/components/notifications/NotificationHandler";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
 
 export const NotificationDisplay = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -29,13 +29,13 @@ export const NotificationDisplay = () => {
       )
     : [];
 
-  const [setSound, setSoundState] = useState(soundSelector.click);
+  // const [setSound, setSoundState] = useState(soundSelector.click);
 
-  const { play } = useUiSounds(setSound);
+  // const { play } = useUiSounds(setSound);
 
-  const playSound = useCallback(() => {
-    play();
-  }, [play]);
+  // const playSound = useCallback(() => {
+  //   play();
+  // }, [play]);
 
   return <NotificationComponent notifications={notifications} />;
 };

@@ -1,12 +1,17 @@
-import Info from "../components/adventurer/Info";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import { Button } from "../components/buttons/Button";
-import useUIStore from "../hooks/useUIStore";
 import { useState } from "react";
-import EncountersScreen from "./EncountersScreen";
-import { NullAdventurer } from "../types";
+import { Contract } from "starknet";
+import Info from "@/app/components/adventurer/Info";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { Button } from "@/app/components/buttons/Button";
+import useUIStore from "@/app/hooks/useUIStore";
+import EncountersScreen from "@/app/containers/EncountersScreen";
+import { NullAdventurer } from "@/app/types";
 
-export default function Profile() {
+interface ProfileProps {
+  gameContract: Contract;
+}
+
+export default function Profile({ gameContract }: ProfileProps) {
   const { data } = useQueriesStore();
   const profile = useUIStore((state) => state.profile);
   const [encounters, setEncounters] = useState(false);
@@ -33,7 +38,11 @@ export default function Profile() {
         </Button>
         {!encounters ? (
           <div className="w-full sm:w-1/3">
-            <Info adventurer={adventurer} profileExists={true} />
+            <Info
+              adventurer={adventurer}
+              profileExists={true}
+              gameContract={gameContract}
+            />
           </div>
         ) : (
           <EncountersScreen profile={profile} />
