@@ -32,5 +32,5 @@ export const getWalletConnectors = (connectors: Connector[]) =>
 export const connectors = [
   argent(),
   braavos(),
-  // argentWebWalletConnector,
+  // argentWebWalletConnector
 ];

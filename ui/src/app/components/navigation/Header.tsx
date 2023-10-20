@@ -71,7 +71,7 @@ export default function Header({
   const [showLordsMint, setShowLordsMint] = useState(false);
 
   const checkArcade = arcadeConnectors.some(
-    (connector) => connector.id == address
+    (connector) => connector.name == address
   );
 
   return (
