@@ -22,6 +22,7 @@ interface ArcadeIntroProps {
   gameContract: Contract;
   lordsContract: Contract;
   ethContract: Contract;
+  updateConnectors: () => void;
 }
 
 export const ArcadeIntro = ({
@@ -31,6 +32,7 @@ export const ArcadeIntro = ({
   gameContract,
   lordsContract,
   ethContract,
+  updateConnectors,
 }: ArcadeIntroProps) => {
   const { account, address } = useAccount();
   const { connect, connectors } = useConnect();
@@ -38,12 +40,9 @@ export const ArcadeIntro = ({
   const [readDisclaimer, setReadDisclaimer] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const { create, isDeploying, isSettingPermissions } = useBurner(
-    account,
-    gameContract,
-    lordsContract,
-    ethContract
-  );
+  const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
+  const { create, isDeploying, isSettingPermissions, listConnectors } =
+    useBurner(account, gameContract, lordsContract, ethContract);
   const walletConnectors = getWalletConnectors(connectors);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -240,14 +239,16 @@ export const ArcadeIntro = ({
                 />
               </div>
               <Button
-                onClick={() =>
-                  checkNotEnoughPrefundEth
-                    ? window.open(
-                        "https://faucet.goerli.starknet.io/",
-                        "_blank"
-                      )
-                    : create()
-                }
+                onClick={async () => {
+                  if (checkNotEnoughPrefundEth) {
+                    window.open("https://faucet.goerli.starknet.io/", "_blank");
+                  } else {
+                    await create();
+                    connect({ connector: listConnectors()[0] });
+                    updateConnectors();
+                    showArcadeIntro(false);
+                  }
+                }}
                 disabled={
                   isWrongNetwork ||
                   lords < parseInt(LORDS_PREFUND_AMOUNT) ||

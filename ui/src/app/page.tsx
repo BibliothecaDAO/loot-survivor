@@ -5,6 +5,7 @@ import {
   useNetwork,
   useProvider,
   useContract,
+  Connector,
 } from "@starknet-react/core";
 import { constants } from "starknet";
 import { useState, useEffect, useMemo } from "react";
@@ -59,6 +60,8 @@ import { checkArcadeBalance } from "@/app/lib/utils";
 import { fetchBalances } from "@/app/lib/balances";
 import useTransactionManager from "./hooks/useTransactionManager";
 import StarknetProvider from "./provider";
+import { useBurner } from "./lib/burner";
+import { connectors } from "@/app/lib/connectors";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -80,14 +83,30 @@ const mobileMenuItems: Menu[] = [
 ];
 
 export default function Main() {
+  const [appConnectors, setAppConnectors] = useState<Connector[]>([]);
+
+  const { listConnectors } = useBurner();
+
+  const updateConnectors = () => {
+    const arcadeConnectors = listConnectors();
+    setAppConnectors([...arcadeConnectors, ...connectors]);
+  };
+
+  useEffect(() => {
+    updateConnectors();
+  }, []);
   return (
-    <StarknetProvider>
-      <Home />
+    <StarknetProvider connectors={appConnectors}>
+      <Home updateConnectors={updateConnectors} />
     </StarknetProvider>
   );
 }
 
-function Home() {
+interface HomeProps {
+  updateConnectors: () => void;
+}
+
+function Home({ updateConnectors }: HomeProps) {
   const { connectors } = useConnect();
   const { chain } = useNetwork();
   const { provider } = useProvider();
@@ -454,6 +473,7 @@ function Home() {
               gameContract={gameContract!}
               lordsContract={lordsContract!}
               ethContract={ethContract!}
+              updateConnectors={updateConnectors}
             />
           )}
           {status == "connected" && arcadeDialog && (
