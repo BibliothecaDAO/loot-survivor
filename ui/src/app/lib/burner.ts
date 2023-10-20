@@ -11,7 +11,6 @@ import {
   selector,
   Contract,
 } from "starknet";
-import { useConnect } from "@starknet-react/core";
 import Storage from "@/app/lib/storage";
 import { ArcadeConnector } from "@/app/lib/arcade";
 import { BurnerStorage } from "@/app/types";
