@@ -8,6 +8,7 @@ use survivor::{
     item_meta::{ItemSpecials, ItemSpecialsStorage}, leaderboard::Leaderboard,
     item_primitive::{ItemPrimitive}
 };
+use game_snapshot::GamesPlayedSnapshot;
 
 #[starknet::interface]
 trait IGame<TContractState> {
@@ -149,4 +150,5 @@ trait IGame<TContractState> {
     fn get_game_entropy(self: @TContractState) -> GameEntropy;
     fn get_leaderboard(self: @TContractState) -> Leaderboard;
     fn get_cost_to_play(self: @TContractState) -> u128;
+    fn get_games_played_snapshot(self: @TContractState) -> GamesPlayedSnapshot;
 }

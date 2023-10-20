@@ -17,14 +17,13 @@ mod Game {
     const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 100;
     const LOOT_NAME_STORAGE_INDEX_1: u8 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u8 = 1;
-    const DAY: felt252 = 86400;
-
+    const SECONDS_IN_DAY: u32 = 86400;
     use core::{
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
         clone::Clone, poseidon::poseidon_hash_span, option::OptionTrait, box::BoxTrait,
         starknet::{
             get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const,
-            get_block_timestamp
+            get_block_timestamp, info::BlockInfo
         },
     };
 
@@ -92,6 +91,7 @@ mod Game {
     };
     use beasts::beast::{Beast, IBeast, ImplBeast};
     use game_entropy::game_entropy::{GameEntropy, ImplGameEntropy};
+    use game_snapshot::{GamesPlayedSnapshot, GamesPlayedSnapshotImpl};
 
     #[storage]
     struct Storage {
@@ -103,6 +103,7 @@ mod Game {
         _game_counter: felt252,
         _game_entropy: GameEntropy,
         _genesis_block: u64,
+        _genesis_timestamp: u64,
         _leaderboard: Leaderboard,
         _lords: ContractAddress,
         _owner: LegacyMap::<felt252, ContractAddress>,
@@ -110,10 +111,7 @@ mod Game {
         _golden_token_last_use: LegacyMap::<felt252, felt252>,
         _golden_token: ContractAddress,
         _cost_to_play: u128,
-        _games_played_snapshot: LegacyMap::<felt252, felt252>,
-        _games_snapshot_timestamp: LegacyMap::<felt252, felt252>,
-        _time_since_price_update: felt252,
-        _snapshot_period: felt252,
+        _games_played_snapshot: GamesPlayedSnapshot,
     }
 
     #[event]
@@ -162,6 +160,7 @@ mod Game {
 
         // set the genesis block
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
+        self._genesis_timestamp.write(starknet::get_block_info().unbox().block_timestamp.into());
 
         // set the golden token address
         self._golden_token.write(golden_token_address);
@@ -1021,6 +1020,10 @@ mod Game {
         fn get_cost_to_play(self: @ContractState) -> u128 {
             _get_cost_to_play(self)
         }
+
+        fn get_games_played_snapshot(self: @ContractState) -> GamesPlayedSnapshot {
+            self._games_played_snapshot.read()
+        }
     }
 
     // ------------------------------------------ //
@@ -1245,7 +1248,6 @@ mod Game {
             );
             return;
         }
-
 
         // First phase all rewards go to players
         let mut week = Week {
@@ -3179,7 +3181,10 @@ mod Game {
 
     #[derive(Drop, starknet::Event)]
     struct PriceChangeEvent {
-        new_price: felt252,
+        previous_cost_to_play: u128,
+        new_cost_to_play: u128,
+        global_games_per_day: u64,
+        snapshot_games_per_day: u64,
         changer: ContractAddress
     }
 
@@ -3533,7 +3538,7 @@ mod Game {
     }
 
     fn _can_play(self: @ContractState, token_id: u256) -> bool {
-        _last_usage(self, token_id) + DAY.into() < get_block_timestamp().into()
+        _last_usage(self, token_id) + SECONDS_IN_DAY.into() <= get_block_timestamp().into()
     }
 
     fn _play_with_token(ref self: ContractState, token_id: u256) {
@@ -3564,100 +3569,80 @@ mod Game {
         let difference: u64 = get_block_timestamp() - time;
 
         // check if time diff is greater than a week    
-        let one_week: u64 = (DAY.into() * 7).try_into().unwrap();
+        let one_week: u64 = (SECONDS_IN_DAY.into() * 7).try_into().unwrap();
 
         // assert enough time passed
-        assert(difference > one_week, messages::TIME_NOT_REACHED);
+        assert(difference >= one_week, messages::TIME_NOT_REACHED);
     }
 
     fn _initiate_price_change(ref self: ContractState) {
-        let current_period = self._snapshot_period.read();
-        let snapshot_timestamp = self
-            ._games_snapshot_timestamp
-            .read(current_period.into())
-            .try_into()
-            .unwrap();
+        // get current snapshot and verify it's not locked, pending a price change
+        // @dev this protects this function from being spammed and ensures that
+        // calls to this function are followed by a price change consideration
+        let current_snapshot = self._games_played_snapshot.read();
+        assert(current_snapshot.locked == 0, 'price change already initiated');
 
-        _assert_week_past(@self, snapshot_timestamp);
+        let timestamp = get_block_timestamp();
+        let game_count = self._game_counter.read().try_into().unwrap();
 
-        // set snapshot to price change game
-        self._games_played_snapshot.write(current_period, self._game_counter.read());
+        // initialize a new game snapshot with locked set to true
+        // @dev the price change will unlock it
+        let game_snapshot = GamesPlayedSnapshot { timestamp, game_count, locked: 1 };
 
-        // set snapshot timestamp to now
-        self._games_snapshot_timestamp.write(current_period, get_block_timestamp().into());
-
-        // set time since price update to now
-        self._time_since_price_update.write(get_block_timestamp().into());
-
-        // update snapshot period
-        self._snapshot_period.write(current_period + 1);
-    }
-
-    fn _game_count_in_period(self: @ContractState, period: u128) -> u128 {
-        let current_games = self._games_played_snapshot.read(period.into());
-        let previous_games = self._games_played_snapshot.read(period.into() - 1);
-        current_games.try_into().unwrap() - previous_games.try_into().unwrap()
-    }
-
-    fn _moving_average(self: @ContractState, period: u128) -> u128 {
-        assert(period > 3, 'Period must be greater than 3');
-
-        let mut total_games: u128 = 0;
-        let mut window_size: u128 = 3;
-        let mut total_seconds: u128 = 0;
-        let week_in_seconds: u128 = 604800;
-
-        let mut i = 1;
-
-        loop {
-            if (total_seconds > week_in_seconds * window_size || i == period) {
-                break;
-            }
-
-            let game_count = _game_count_in_period(self, period - i);
-            let previous_period_timestamp = self._games_snapshot_timestamp.read((period - i - 1).into());
-            let current_period_timestamp = self._games_snapshot_timestamp.read((period - i).into());
-
-            total_seconds += (current_period_timestamp.try_into().unwrap() - previous_period_timestamp.try_into().unwrap());
-            total_games += game_count;
-
-            i += 1;
-        };
-
-        assert(total_seconds > week_in_seconds * window_size, messages::MA_PERIOD_LESS_THAN_WEEK);
-
-        total_games / window_size
+        // save snapshot
+        self._games_played_snapshot.write(game_snapshot);
     }
 
     fn _update_cost_to_play(ref self: ContractState) {
-        let cost_to_play = self._cost_to_play.read();
+        // get the current games played snapshot
+        let snapshot = self._games_played_snapshot.read();
 
-        // check if time diff is greater than a week since init
-        _assert_week_past(@self, self._time_since_price_update.read().try_into().unwrap());
+        // assert that the snapshot is locked
+        assert(snapshot.locked == 1, 'price change not initiated');
 
-        // get current period
-        let current_period = self._snapshot_period.read().try_into().unwrap();
+        // assert the time between the snapshot and current timestamp is a week
+        _assert_week_past(@self, snapshot.timestamp);
 
-        // get game count in period
-        let game_count: u128 = _game_count_in_period(@self, current_period - 1);
+        // unlock the game snapshot so that initiate price change can be called again
+        self._games_played_snapshot.write(snapshot.unlock());
 
-        // including current period
-        let moving_average: u128 = _moving_average(@self, current_period);
+        // load storage variables into local vars for cleaner var names
+        let current_game_count = self._game_counter.read();
+        let current_timestamp = get_block_timestamp();
+        // let current_timestamp = 86400;
+        let contract_deployed_timestamp = self._genesis_timestamp.read();
+        let previous_cost_to_play = self._cost_to_play.read();
 
-        if game_count > moving_average {
-            // increase price by 10%
-            self._cost_to_play.write(cost_to_play * 11 / 10);
-        } else if game_count < moving_average {
-            // decrease price by ~10%
-            self._cost_to_play.write(cost_to_play * 9 / 10);
+        // get average number of games played per day during the snapshott
+        let snapshot_games_per_day = snapshot.games_per_day(current_game_count, current_timestamp);
+
+        // get average number of games played per day from genesis to start of snapshot
+        let life_of_game_seconds: u128 = (snapshot.timestamp - contract_deployed_timestamp).into();
+
+        let global_games_per_day: u64 = snapshot.game_count
+            * SECONDS_IN_DAY.into()
+            / life_of_game_seconds.try_into().unwrap();
+
+        // get the adjusted price based on the snapshot and global games per day
+        let new_cost_to_play = GamesPlayedSnapshotImpl::get_price_adjustment(
+            previous_cost_to_play, global_games_per_day, snapshot_games_per_day
+        );
+
+        // if the cost of the game changed
+        if new_cost_to_play != previous_cost_to_play {
+            // update the cost to play
+            self._cost_to_play.write(new_cost_to_play);
+            // emit price changed event
+            self
+                .emit(
+                    PriceChangeEvent {
+                        previous_cost_to_play,
+                        new_cost_to_play,
+                        global_games_per_day,
+                        snapshot_games_per_day,
+                        changer: get_caller_address()
+                    }
+                );
         }
-
-        // emit price change event
-        self
-            .emit(
-                PriceChangeEvent {
-                    new_price: self._cost_to_play.read().into(), changer: get_caller_address()
-                }
-            );
     }
 }

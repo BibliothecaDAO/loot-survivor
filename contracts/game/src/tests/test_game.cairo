@@ -1,7 +1,6 @@
 #[cfg(test)]
 mod tests {
     use game_entropy::game_entropy::IGameEntropy;
-    use debug::PrintTrait;
     use array::ArrayTrait;
     use core::{result::ResultTrait, traits::Into, array::SpanTrait, serde::Serde, clone::Clone};
     use option::OptionTrait;
@@ -60,8 +59,8 @@ mod tests {
 
     const ADVENTURER_ID: felt252 = 1;
 
-    const MAX_LORDS: u256 = 1000000000000000000000;
-    const APPROVE: u256 = 100000000000000000000;
+    const MAX_LORDS: u256 = 10000000000000000000000000000;
+    const APPROVE: u256 = 100000000000000000000000000000;
     const NAME: felt252 = 111;
     const SYMBOL: felt252 = 222;
 
@@ -1920,7 +1919,7 @@ mod tests {
             )
         };
 
-        week.FIRST_PLACE.print();
+        // week.FIRST_PLACE.print();
 
         // assert(lords.balanceOf(DAO()) == COST_TO_PLAY, 'wrong DAO payout');
         // assert(week.INTERFACE == 0, 'no payout in stage 1');
@@ -1930,78 +1929,99 @@ mod tests {
         // assert(week.SECOND_PLACE == 0x6f05b59d3b200000, 'wrong SECOND_PLACE payout 1');
         // assert(week.THIRD_PLACE == 0x6f05b59d3b20000, 'wrong THIRD_PLACE payout 1');
 
-        (COST_TO_PLAY * 11 / 10).print();
-        (COST_TO_PLAY * 9 / 10).print();
+        // (COST_TO_PLAY * 11 / 10).print();
+        // (COST_TO_PLAY * 9 / 10).print();
     }
 
     #[test]
     #[available_gas(90000000)]
-    fn test_moving_average() {
-        let mut total_games: u128 = 0;
-        let mut window_size: u128 = 3;
-        let mut total_seconds: u128 = 0;
-        let week_in_seconds: u128 = 604800;
+    #[should_panic(expected: ('price change already initiated', 'ENTRYPOINT_FAILED'))]
+    fn test_initiate_price_change_too_fast() {
+        let (mut game, lords) = setup(1000);
+        game.initiate_price_change();
+        game.initiate_price_change();
+    }
 
-        // Array of precalculated timestamps each 8 days apart
-        let mut timestamps = ArrayTrait::<felt252>::new();
-        timestamps.append(1696201757);
-        timestamps.append(1696892957);
-        timestamps.append(1697584157);
-        timestamps.append(1698275357);
+    #[test]
+    #[available_gas(9000000000)]
+    fn test_update_cost_to_play() {
+        let (mut game, lords) = setup(1000);
+        let original_cost_to_play = game.get_cost_to_play();
 
-        // Initialize empty array of game counts
-        let mut game_counts = ArrayTrait::<u128>::new();
-        game_counts.append(0);
-        game_counts.append(0);
-        game_counts.append(0);
-        game_counts.append(1);
-
-        let period = 4;
-
-        let mut i = 1;
-
+        // create 10 games during opening week
+        let mut i = 0;
         loop {
-            if (total_seconds > week_in_seconds * window_size || i == period) {
-                break;
+            if i == 10 {
+                break ();
             }
+            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into());
+            i += 1;
+        };
+        testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 7));
 
-            let game_count = *game_counts.at(period - i);
-            let previous_period_timestamp = *timestamps.at(period - i - 1);
-            let current_period_timestamp = *timestamps.at(period - i);
+        // then a price change is initiated
+        game.initiate_price_change();
 
-            total_seconds += current_period_timestamp.try_into().unwrap() - previous_period_timestamp.try_into().unwrap();
-            total_games += game_count;
+        // during price change snapshot, 10 games played (same as opening week)
+        let mut i = 0;
+        loop {
+            if i == 10 {
+                break ();
+            }
+            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into());
+            i += 1;
+        };
+        testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 7));
 
+        // update cost to play is called
+        game.update_cost_to_play();
+
+        // since games 10 games were played first week and 10 games were played second week during snapshot, no price change is warranted
+        assert(game.get_cost_to_play() == original_cost_to_play, 'game cost should be same');
+
+        // someone initiates a new price change
+        game.initiate_price_change();
+
+        // during price change snapshot, 20 games played
+        let mut i = 0;
+        loop {
+            if i == 20 {
+                break ();
+            }
+            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into());
             i += 1;
         };
 
-        assert(total_seconds > week_in_seconds * window_size, 'Period too small');
+        // roll blockchain forward a week
+        testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 7));
 
-        assert(total_games / window_size == 0.try_into().unwrap(), 'wrong moving average');
-    }   
-
-    #[test]
-    #[available_gas(90000000)]
-    fn test_update_cost_to_play() {
-        let (unmut_game, lords) = setup(1000);
-
-        let mut game = unmut_game;
-
-        // We update the game price 4 times over 3 are required to update price
-        game.initiate_price_change();
-        testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 8));
-        game.initiate_price_change();
-        testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 8));
-        game.initiate_price_change();
-        testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 8));
-        // Now we are in the latest period play a game to get the amount above the moving average
-        add_adventurer_to_game(ref game);
-        game.initiate_price_change();
-
-        // Wait for another week to update cost
-        testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 8));
+        // call update cost to play
         game.update_cost_to_play();
 
-        assert(game.get_cost_to_play() == COST_TO_PLAY * 11 / 10, 'cost not raised');
-    }    
+        // verify cost to play game has been increased
+        assert(game.get_cost_to_play() > original_cost_to_play, 'game cost should be higher');
+
+        // record previous cost to play
+        let previous_cost_to_play = game.get_cost_to_play();
+
+        // initiate another price change
+        game.initiate_price_change();
+
+        // this time only 10 games are played during a two week snapshot
+        // roll blockchain forward three weeks without adding any new games
+        let mut i = 0;
+        loop {
+            if i == 10 {
+                break ();
+            }
+            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into());
+            i += 1;
+        };
+        testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 14));
+        game.update_cost_to_play();
+
+        // since average number of games played during snapshot is considerably less than average
+        // price of game should have been reduced
+        assert(game.get_cost_to_play() < previous_cost_to_play, 'game cost should be lower');
+    }
 }
