@@ -8,12 +8,13 @@ use survivor::{
     item_meta::{ItemSpecials, ItemSpecialsStorage}, leaderboard::Leaderboard,
     item_primitive::{ItemPrimitive}
 };
+use game_snapshot::GamesPlayedSnapshot;
 
 #[starknet::interface]
 trait IGame<TContractState> {
     // ------ Game Actions ------
     fn new_game(
-        ref self: TContractState, client_reward_address: ContractAddress, weapon: u8, name: u128
+        ref self: TContractState, client_reward_address: ContractAddress, weapon: u8, name: u128, golden_token_id: u256
     );
     fn explore(ref self: TContractState, adventurer_id: felt252, till_beast: bool);
     fn attack(ref self: TContractState, adventurer_id: felt252, to_the_death: bool);
@@ -29,6 +30,8 @@ trait IGame<TContractState> {
     );
     fn slay_idle_adventurers(ref self: TContractState, adventurer_ids: Array<felt252>);
     fn rotate_game_entropy(ref self: TContractState);
+    fn update_cost_to_play(ref self: TContractState);
+    fn initiate_price_change(ref self: TContractState);
 
     // ------ View Functions ------
 
@@ -146,4 +149,6 @@ trait IGame<TContractState> {
     fn get_lords_address(self: @TContractState) -> ContractAddress;
     fn get_game_entropy(self: @TContractState) -> GameEntropy;
     fn get_leaderboard(self: @TContractState) -> Leaderboard;
+    fn get_cost_to_play(self: @TContractState) -> u128;
+    fn get_games_played_snapshot(self: @TContractState) -> GamesPlayedSnapshot;
 }
