@@ -150,7 +150,7 @@ export const ItemDisplay = ({
         <div
           className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-[8rem] sm:h-10 md:h-full  ${
             item.item
-              ? "bg-terminal-green text-terminal-black 2xl:overflow-x-auto 2xl:overflow-y-hidden"
+              ? "bg-terminal-green text-terminal-black overflow-x-auto item-scroll overflow-y-hidden"
               : ""
           }`}
           ref={scrollableRef}
@@ -195,12 +195,12 @@ export const ItemDisplay = ({
                         <Button
                           variant={"contrast"}
                           size={"xxs"}
-                          className="p-1 xl:p-0 2xl:h-5 2xl:w-6"
+                          className="p-1 xl:p-0 sm:h-4 sm:w-8"
                           onClick={() => {
                             setShowInventoryItems(true);
                           }}
                         >
-                          <SwapIcon className="w-2 h-2 lg:w-3 lg:h-3" />
+                          <SwapIcon className="w-4 h-4" />
                         </Button>
                       )}
                       {inventory && (
@@ -240,11 +240,11 @@ export const ItemDisplay = ({
                         <Button
                           variant={"contrast"}
                           size={"xxs"}
-                          className="p-1 xl:p-0 2xl:h-5 2xl:w-6"
+                          className="p-1 xl:p-0 sm:h-4 sm:w-8"
                           onClick={() => handleDrop(item.item ?? "")}
                           disabled={checkDropping(item.item ?? "")}
                         >
-                          <DownArrowIcon className="w-3 h-3 lg:w-4 lg:h-4" />
+                          <DownArrowIcon className="w-4 h-4" />
                         </Button>
                       )}
                     </span>

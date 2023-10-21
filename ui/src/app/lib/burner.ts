@@ -199,7 +199,6 @@ export const useBurner = (
 
     // deploy burner
     const burner = new Account(provider, address, privateKey, "1");
-    console.log(burner);
 
     const {
       transaction_hash: deployTx,
@@ -247,7 +246,6 @@ export const useBurner = (
     Storage.set("burners", storage);
     setIsSettingPermissions(false);
     setIsDeploying(false);
-    window.location.reload();
     return burner;
   }, [walletAccount]);
 
@@ -498,7 +496,6 @@ export const useBurner = (
   const listConnectors = useCallback(() => {
     const arcadeAccounts = [];
     const burners = list();
-    console.log(burners);
 
     for (const burner of burners) {
       if (burner) {
@@ -510,11 +507,6 @@ export const useBurner = (
 
     return arcadeAccounts;
   }, [account, isDeploying]);
-
-  // useEffect(() => {
-  //     const interval = setInterval(refresh, 2000)
-  //     return () => clearInterval(interval)
-  // }, [refresh])
 
   return {
     get,

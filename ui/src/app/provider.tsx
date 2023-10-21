@@ -1,21 +1,24 @@
 "use client";
-import { useBurner } from "@/app/lib/burner";
-import { connectors } from "@/app/lib/connectors";
-import { StarknetConfig, infuraProvider } from "@starknet-react/core";
-import { getAPIKey } from "@/app/lib/constants";
+import React from "react";
+import {
+  Connector,
+  StarknetConfig,
+  infuraProvider,
+} from "@starknet-react/core";
 import { goerli, mainnet } from "@starknet-react/chains";
+import { getAPIKey } from "@/app/lib/constants";
 
 export default function StarknetProvider({
+  connectors,
   children,
 }: {
+  connectors: Connector[];
   children: React.ReactNode;
 }) {
-  const { listConnectors } = useBurner();
-
   const apiKey = getAPIKey();
   return (
     <StarknetConfig
-      connectors={[...listConnectors(), ...connectors]}
+      connectors={connectors}
       autoConnect
       providers={[infuraProvider({ apiKey })]}
       chains={[goerli, mainnet]}

@@ -7,17 +7,17 @@ export const fetchBalances = async (
   lordsContract?: Contract,
   gameContract?: Contract
 ): Promise<bigint[]> => {
-  const ethResult = await ethContract!.call(
+  const ethResult = await ethContract?.call(
     "balanceOf",
     CallData.compile({ account: accountName })
   );
-  const lordsBalanceResult = await lordsContract!.call(
+  const lordsBalanceResult = await lordsContract?.call(
     "balance_of",
     CallData.compile({
       account: accountName,
     })
   );
-  const lordsAllowanceResult = await lordsContract!.call(
+  const lordsAllowanceResult = await lordsContract?.call(
     "allowance",
     CallData.compile({
       owner: accountName,
@@ -25,7 +25,9 @@ export const fetchBalances = async (
     })
   );
   return [
-    uint256.uint256ToBN(balanceSchema.parse(ethResult).balance),
+    ethResult
+      ? uint256.uint256ToBN(balanceSchema.parse(ethResult).balance)
+      : BigInt(0),
     lordsBalanceResult as bigint,
     lordsAllowanceResult as bigint,
   ];

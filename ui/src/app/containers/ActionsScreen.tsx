@@ -1,13 +1,12 @@
-import { useState } from "react";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import ButtonMenu from "@/app/components/menu/ButtonMenu";
 import Info from "@/app/components/adventurer/Info";
 import Discovery from "@/app/components/actions/Discovery";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import BeastScreen from "@/app/containers/BeastScreen";
 import MazeLoader from "@/app/components/icons/MazeLoader";
 import useUIStore from "@/app/hooks/useUIStore";
+import ActionMenu from "@/app/components/menu/ActionMenu";
 import { Contract } from "starknet";
 
 interface ActionsScreenProps {
@@ -30,7 +29,6 @@ export default function ActionsScreen({
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
-  const [selected, setSelected] = useState<string>("");
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
@@ -43,7 +41,7 @@ export default function ActionsScreen({
   const buttonsData = [
     {
       id: 1,
-      label: loading ? "Exploring..." : hasBeast ? "Beast found!!" : "Explore",
+      label: loading ? "Exploring..." : hasBeast ? "Beast found!!" : "Once",
       value: "explore",
       action: async () => {
         resetNotification();
@@ -51,6 +49,8 @@ export default function ActionsScreen({
       },
       disabled: hasBeast || loading || !adventurer?.id || estimatingFee,
       loading: loading,
+      className:
+        "bg-terminal-green-25 hover:bg-terminal-green hover:text-black",
     },
     {
       id: 2,
@@ -66,6 +66,8 @@ export default function ActionsScreen({
       },
       disabled: hasBeast || loading || !adventurer?.id || estimatingFee,
       loading: loading,
+      className:
+        "bg-terminal-green-50 hover:bg-terminal-green hover:text-black",
     },
   ];
 
@@ -80,25 +82,23 @@ export default function ActionsScreen({
       ) : (
         <>
           {adventurer?.id ? (
-            <div className="flex flex-col items-center sm:w-1/3 bg-terminal-black order-1 sm:order-2">
-              {selected == "explore" && (
-                <Discovery discoveries={latestDiscoveries} />
-              )}
+            <div className="flex flex-col items-center lg:w-1/3 bg-terminal-black order-1 sm:order-2">
+              <Discovery discoveries={latestDiscoveries} />
             </div>
           ) : (
             <p className="text-xl text-center order-1 sm:order-2">
               Please Select an Adventurer
             </p>
           )}
-          <div className="flex flex-col items-center sm:w-1/3 m-auto my-4 w-full px-4 sm:order-1">
+          <div className="flex flex-col items-center lg:w-1/3 m-auto my-4 w-full px-4 sm:order-1">
             {loading && <MazeLoader />}
-            <p className="uppercase text-2xl">Into the Mist</p>
-            <ButtonMenu
-              buttonsData={buttonsData}
-              onSelected={(value) => setSelected(value)}
-              onEnterAction={true}
-              size="sm"
-            />
+            <div className="h-1/6 w-3/4">
+              <ActionMenu
+                buttonsData={buttonsData}
+                size="fill"
+                title="Explore"
+              />
+            </div>
           </div>
         </>
       )}
