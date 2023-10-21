@@ -14,6 +14,8 @@ import PixelatedImage from "@/app/components/animations/PixelatedImage";
 import { getArcadeConnectors } from "@/app/lib/connectors";
 import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
 import { fetchBalances } from "@/app/lib/balances";
+import ArcadeLoader from "./animations/ArcadeLoader";
+import TokenLoader from "./animations/TokenLoader";
 
 interface ArcadeDialogProps {
   gameContract: Contract;
@@ -156,40 +158,14 @@ export const ArcadeDialog = ({
         </div>
       </div>
       {(isDeploying || isGeneratingNewKey) && (
-        <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full">
-          <PixelatedImage
-            src={"/scenes/intro/arcade-account.png"}
-            pixelSize={5}
-            pulsate={true}
-          />
-          <h3 className="text-lg sm:text-3xl loading-ellipsis absolute top-2/3 sm:top-1/2 flex items-center justify-center w-full">
-            {isSettingPermissions
-              ? "Setting Permissions"
-              : isGeneratingNewKey
-              ? "Generating New Key"
-              : "Deploying Account"}
-          </h3>
-        </div>
+        <ArcadeLoader
+          isSettingPermissions={isSettingPermissions}
+          isGeneratingNewKey={isGeneratingNewKey}
+        />
       )}
       {(isToppingUpEth || isToppingUpLords || isWithdrawing) && (
         <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full">
-          <div className="hidden sm:flex flex-row items-center justify-center h-full">
-            <SpriteAnimation
-              frameWidth={400}
-              frameHeight={400}
-              columns={8}
-              rows={1}
-              frameRate={5}
-              className="coin-sprite"
-            />
-            <h3 className="text-lg sm:text-3xl loading-ellipsis flex items-center justify-center w-1/2 h-full">
-              {isToppingUpEth
-                ? "Topping Up Eth"
-                : isToppingUpLords
-                ? "Topping Up Lords"
-                : "Withdrawing Tokens"}
-            </h3>
-          </div>
+          <TokenLoader />
           <div className="sm:hidden flex flex-col items-center justify-center w-full h-full">
             <SpriteAnimation
               frameWidth={200}

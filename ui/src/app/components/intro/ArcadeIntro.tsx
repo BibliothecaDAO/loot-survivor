@@ -9,11 +9,11 @@ import {
 } from "@/app/lib/burner";
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
-import PixelatedImage from "@/app/components/animations/PixelatedImage";
 import { getWalletConnectors } from "@/app/lib/connectors";
 import Lords from "public/icons/lords.svg";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Call } from "@/app/types";
+import ArcadeLoader from "../animations/ArcadeLoader";
 
 interface ArcadeIntroProps {
   ethBalance: bigint;
@@ -38,7 +38,6 @@ export const ArcadeIntro = ({
   const { connect, connectors } = useConnect();
   const [step, setStep] = useState(1);
   const [readDisclaimer, setReadDisclaimer] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
   const { create, isDeploying, isSettingPermissions, listConnectors } =
@@ -96,22 +95,6 @@ export const ArcadeIntro = ({
     }
   }, [account, checkNotEnoughPrefundEth, readDisclaimer]);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setLoadingMessage((prev) =>
-        prev === "Please Wait" || !prev
-          ? isSettingPermissions
-            ? "Setting Permissions"
-            : "Deploying Arcade Account"
-          : "Please Wait"
-      );
-    }, 5000);
-
-    return () => {
-      clearInterval(timer); // Cleanup timer on component unmount
-    };
-  }, [isSettingPermissions]);
-
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
@@ -131,7 +114,7 @@ export const ArcadeIntro = ({
             <p className="text-sm xl:text-xl 2xl:text-2xl">
               Please choose a Starknet Wallet below.
             </p>
-            <div className="flex flex-col gap-2 w-1/4">
+            <div className="flex flex-col gap-2 w-1/2 sm:w-1/4">
               <Button onClick={() => setScreen("tutorial")}>
                 I don&apos;t have a wallet
               </Button>
@@ -182,7 +165,7 @@ export const ArcadeIntro = ({
               </p>
             </div>
             <div className="flex flex-col gap-10 items-center justify-center w-full">
-              <Lords className="w-40 h-40 fill-current" />
+              <Lords className="w-24 h-24 sm:w-40 sm:h-40 fill-current" />
               <Button
                 onClick={() =>
                   checkAnyETh
@@ -264,40 +247,29 @@ export const ArcadeIntro = ({
         <div className="flex items-center justify-center w-full h-1/5">
           <div className="flex flex-row justify-between items-center w-1/2 h-full">
             <div
-              className={`w-12 h-12 ${
+              className={`w-8 h-8 sm:w-12 sm:h-12 ${
                 step >= 1 ? "bg-terminal-green" : "border border-terminal-green"
               }`}
             />
             <div
-              className={`w-12 h-12 ${
+              className={`w-8 h-8 sm:w-12 sm:h-12  ${
                 step >= 2 ? "bg-terminal-green" : "border border-terminal-green"
               }`}
             />
             <div
-              className={`w-12 h-12 ${
+              className={`w-8 h-8 sm:w-12 sm:h-12  ${
                 step >= 3 ? "bg-terminal-green" : "border border-terminal-green"
               }`}
             />
             <div
-              className={`w-12 h-12 ${
+              className={`w-8 h-8 sm:w-12 sm:h-12  ${
                 step == 4 ? "bg-terminal-green" : "border border-terminal-green"
               }`}
             />
           </div>
         </div>
         {isDeploying && (
-          <div className="fixed flex flex-row inset-0 bg-black z-50 m-2 w-full h-full">
-            <div className="w-1/2 h-full">
-              <PixelatedImage
-                src={"/scenes/intro/arcade-account.png"}
-                pixelSize={5}
-                pulsate={true}
-              />
-            </div>
-            <h3 className="text-lg sm:text-3xl loading-ellipsis flex items-center justify-start w-1/2">
-              {loadingMessage}
-            </h3>
-          </div>
+          <ArcadeLoader isSettingPermissions={isSettingPermissions} />
         )}
       </div>
     </>
