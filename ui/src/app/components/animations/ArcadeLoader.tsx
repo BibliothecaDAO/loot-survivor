@@ -39,7 +39,7 @@ export default function ArcadeLoader({
           pulsate={true}
         />
       </div>
-      <h3 className="text-lg sm:text-3xl loading-ellipsis flex items-center justify-center sm:justify-start w-full sm:w-1/2 h-1/2">
+      <h3 className="text-lg sm:text-3xl loading-ellipsis flex items-start sm:items-center justify-center sm:justify-start w-full sm:w-1/2 h-1/2">
         {loadingMessage}
       </h3>
     </div>

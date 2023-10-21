@@ -84,11 +84,6 @@ export const WeaponSelect = ({
           </div>
         ))}
       </div>
-      <div className="flex flex-col items-center">
-        <Button className="my-2" onClick={handleBack}>
-          Back
-        </Button>
-      </div>
     </div>
   );
 };

@@ -65,9 +65,9 @@ export const ArcadeDialog = ({
     const balancePromises = arcadeConnectors().map((account) => {
       return fetchBalances(
         account.name,
-        ethContract,
-        lordsContract,
-        gameContract
+        ethContract!,
+        lordsContract!,
+        gameContract!
       ).then((balances) => {
         localBalances[account.name] = {
           eth: BigInt(0),
@@ -103,6 +103,8 @@ export const ArcadeDialog = ({
 
   if (!connectors) return <div></div>;
 
+  console.log(connectors);
+
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
@@ -114,7 +116,9 @@ export const ArcadeDialog = ({
         </p>
 
         <div className="flex justify-center mb-1">
-          {(connector?.id == "argentX" || connector?.id == "braavos") && (
+          {(connector?.id == "argentX" ||
+            connector?.id == "braavos" ||
+            connector?.id == "argentWebWallet") && (
             <div>
               <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
                 Note: This will initiate a transfer of 0.001 ETH from your
@@ -164,7 +168,10 @@ export const ArcadeDialog = ({
       )}
       {(isToppingUpEth || isToppingUpLords || isWithdrawing) && (
         <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full">
-          <TokenLoader />
+          <TokenLoader
+            isToppingUpEth={isToppingUpEth}
+            isToppingUpLords={isToppingUpLords}
+          />
           <div className="sm:hidden flex flex-col items-center justify-center w-full h-full">
             <SpriteAnimation
               frameWidth={200}

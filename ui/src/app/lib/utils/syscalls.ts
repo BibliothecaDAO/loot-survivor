@@ -202,6 +202,8 @@ export function syscalls({
       entrypoint: "approve",
       calldata: [gameContract?.address ?? "", (250 * 10 ** 18).toString(), "0"],
     };
+
+    // TODO: pull token id from indexer, right now just set to 0
     const mintAdventurerTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "new_game",
@@ -209,6 +211,8 @@ export function syscalls({
         "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         stringToFelt(formData.name).toString(),
+        "0",
+        "0",
       ],
     };
 

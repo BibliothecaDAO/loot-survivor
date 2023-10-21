@@ -388,6 +388,8 @@ function Home({ updateConnectors }: HomeProps) {
     }
   }, [arcadeConnectors]);
 
+  console.log(arcadeConnectors);
+
   if (!isConnected && introComplete && disconnected) {
     return <WalletSelect />;
   }

@@ -31,7 +31,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
             <span className="flex flex-row items-center justify-between">
               <p>
                 YIKES! Ambushed by a {beastName} for {discoveryData.damageTaken}{" "}
-                damage to {discoveryData.damageLocation} !
+                damage to {discoveryData.damageLocation}!
               </p>
               <GiBruteIcon />
             </span>
