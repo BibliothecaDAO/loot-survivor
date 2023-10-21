@@ -13,7 +13,7 @@ import { getWalletConnectors } from "@/app/lib/connectors";
 import Lords from "public/icons/lords.svg";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Call } from "@/app/types";
-import ArcadeLoader from "../animations/ArcadeLoader";
+import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 
 interface ArcadeIntroProps {
   ethBalance: bigint;

@@ -1,4 +1,4 @@
-import SpriteAnimation from "./SpriteAnimation";
+import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
 
 interface TokenLoaderProps {
   isToppingUpEth?: boolean;

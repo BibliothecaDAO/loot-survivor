@@ -59,8 +59,8 @@ import Header from "@/app/components/navigation/Header";
 import { checkArcadeBalance } from "@/app/lib/utils";
 import { fetchBalances } from "@/app/lib/balances";
 import useTransactionManager from "./hooks/useTransactionManager";
-import StarknetProvider from "./provider";
-import { useBurner } from "./lib/burner";
+import StarknetProvider from "@/app//provider";
+import { useBurner } from "@/app/lib/burner";
 import { connectors } from "@/app/lib/connectors";
 
 const allMenuItems: Menu[] = [

@@ -10,12 +10,11 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "@/app/components/buttons/Button";
 import { useBurner } from "@/app/lib/burner";
 import { MIN_BALANCE } from "@/app/lib/constants";
-import PixelatedImage from "@/app/components/animations/PixelatedImage";
 import { getArcadeConnectors } from "@/app/lib/connectors";
 import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
 import { fetchBalances } from "@/app/lib/balances";
-import ArcadeLoader from "./animations/ArcadeLoader";
-import TokenLoader from "./animations/TokenLoader";
+import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
+import TokenLoader from "@/app/components/animations/TokenLoader";
 
 interface ArcadeDialogProps {
   gameContract: Contract;

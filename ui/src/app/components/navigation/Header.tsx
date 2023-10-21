@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Contract } from "starknet";
-import { useAccount, useDisconnect } from "@starknet-react/core";
+import { useAccount, useDisconnect, Connector } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -22,7 +22,6 @@ import {
 import TransactionCart from "@/app/components/navigation/TransactionCart";
 import TransactionHistory from "@/app/components/navigation/TransactionHistory";
 import { NullAdventurer } from "@/app/types";
-import { Connector } from "@starknet-react/core";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 
 export interface HeaderProps {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import PixelatedImage from "./PixelatedImage";
+import PixelatedImage from "@/app/components/animations/PixelatedImage";
 
 interface ArcadeLoaderProps {
   isSettingPermissions?: boolean;
