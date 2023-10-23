@@ -81,10 +81,11 @@ export const ArcadeIntro = ({
   };
 
   const checkNotEnoughPrefundEth = eth < parseInt(ETH_PREFUND_AMOUNT);
+  const checkNotEnoughPrefundLords = lords < parseInt(LORDS_PREFUND_AMOUNT);
   const checkAnyETh = eth === 0;
 
   useEffect(() => {
-    if (account && !checkNotEnoughPrefundEth && readDisclaimer) {
+    if (account && !checkNotEnoughPrefundLords && readDisclaimer) {
       setStep(4);
     } else if (account && readDisclaimer) {
       setStep(3);
@@ -93,7 +94,7 @@ export const ArcadeIntro = ({
     } else {
       setStep(1);
     }
-  }, [account, checkNotEnoughPrefundEth, readDisclaimer]);
+  }, [account, checkNotEnoughPrefundLords, readDisclaimer]);
 
   return (
     <>
@@ -233,9 +234,7 @@ export const ArcadeIntro = ({
                   }
                 }}
                 disabled={
-                  isWrongNetwork ||
-                  lords < parseInt(LORDS_PREFUND_AMOUNT) ||
-                  !account
+                  isWrongNetwork || checkNotEnoughPrefundLords || !account
                 }
                 className="w-1/4 h-1/4"
               >
