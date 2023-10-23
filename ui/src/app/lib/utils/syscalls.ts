@@ -213,6 +213,7 @@ export function syscalls({
         stringToFelt(formData.name).toString(),
         "0",
         "0",
+        "0",
       ],
     };
 

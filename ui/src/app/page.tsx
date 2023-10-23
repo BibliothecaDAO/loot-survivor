@@ -483,6 +483,7 @@ function Home({ updateConnectors }: HomeProps) {
               gameContract={gameContract!}
               lordsContract={lordsContract!}
               ethContract={ethContract!}
+              updateConnectors={updateConnectors}
             />
           )}
           {status == "connected" && topUpDialog && <TopUpDialog token="ETH" />}

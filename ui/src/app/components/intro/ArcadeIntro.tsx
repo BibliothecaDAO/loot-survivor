@@ -34,7 +34,7 @@ export const ArcadeIntro = ({
   ethContract,
   updateConnectors,
 }: ArcadeIntroProps) => {
-  const { account, address } = useAccount();
+  const { account, address, connector } = useAccount();
   const { connect, connectors } = useConnect();
   const [step, setStep] = useState(1);
   const [readDisclaimer, setReadDisclaimer] = useState(false);
@@ -226,7 +226,7 @@ export const ArcadeIntro = ({
                   if (checkNotEnoughPrefundEth) {
                     window.open("https://faucet.goerli.starknet.io/", "_blank");
                   } else {
-                    await create();
+                    await create(connector!);
                     connect({ connector: listConnectors()[0] });
                     updateConnectors();
                     showArcadeIntro(false);

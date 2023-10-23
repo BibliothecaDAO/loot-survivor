@@ -20,19 +20,21 @@ interface ArcadeDialogProps {
   gameContract: Contract;
   lordsContract: Contract;
   ethContract: Contract;
+  updateConnectors: () => void;
 }
 
 export const ArcadeDialog = ({
   gameContract,
   lordsContract,
   ethContract,
+  updateConnectors,
 }: ArcadeDialogProps) => {
   const [fetchedBalances, setFetchedBalances] = useState(false);
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const { connectors } = useConnect();
+  const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const {
     getMasterAccount,
@@ -47,6 +49,7 @@ export const ArcadeDialog = ({
     isToppingUpLords,
     withdraw,
     isWithdrawing,
+    listConnectors,
   } = useBurner(walletAccount, gameContract, lordsContract, ethContract);
   const [arcadebalances, setArcadeBalances] = useState<
     Record<string, { eth: bigint; lords: bigint; lordsGameAllowance: bigint }>
@@ -125,7 +128,14 @@ export const ArcadeDialog = ({
                 connected wallet to the arcade account to cover your transaction
                 costs from normal gameplay.
               </p>
-              <Button onClick={() => create()} disabled={isWrongNetwork}>
+              <Button
+                onClick={async () => {
+                  await create(connector);
+                  connect({ connector: listConnectors()[0] });
+                  updateConnectors();
+                }}
+                disabled={isWrongNetwork}
+              >
                 create arcade account
               </Button>
             </div>
