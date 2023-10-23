@@ -31,7 +31,7 @@ mod Game {
         IERC20Camel, IERC20CamelDispatcher, IERC20CamelDispatcherTrait, IERC20CamelLibraryDispatcher
     };
 
-    use openzeppelin::introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait};
+    use openzeppelin::introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait, ISRC5CamelDispatcher, ISRC5CamelDispatcherTrait};
 
     use openzeppelin::token::erc721::interface::{
         IERC721, IERC721Dispatcher, IERC721DispatcherTrait, IERC721LibraryDispatcher
@@ -199,14 +199,15 @@ mod Game {
             client_reward_address: ContractAddress,
             weapon: u8,
             name: u128,
-            golden_token_id: u256
+            golden_token_id: u256,
+            interface_camel: bool
         ) {
             // assert provided weapon
             _assert_valid_starter_weapon(weapon);
 
             // process payment for game and distribute rewards
             if (golden_token_id != 0) {
-                _play_with_token(ref self, golden_token_id);
+                _play_with_token(ref self, golden_token_id, interface_camel);
             } else {
                 _process_payment_and_distribute_rewards(ref self, client_reward_address);
             }
@@ -3541,24 +3542,39 @@ mod Game {
         _last_usage(self, token_id) + SECONDS_IN_DAY.into() <= get_block_timestamp().into()
     }
 
-    fn _play_with_token(ref self: ContractState, token_id: u256) {
+    fn _play_with_token(ref self: ContractState, token_id: u256, interface_camel: bool) {
         let golden_token = _golden_token_dispatcher(ref self);
 
         let caller = get_caller_address();
 
-        let account = ISRC5Dispatcher { contract_address: caller };
-        let player = if account.supports_interface(ARCADE_ACCOUNT_ID) {
-            IMasterControlDispatcher { contract_address: caller }.get_master_account()
+        let account_snake = ISRC5Dispatcher { contract_address: caller };
+        let account_camel = ISRC5CamelDispatcher { contract_address: caller };
+
+        if interface_camel {
+            let player = if account_camel.supportsInterface(ARCADE_ACCOUNT_ID) {
+                IMasterControlDispatcher { contract_address: caller }.get_master_account()
+            } else {
+                caller
+            };
+            assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
+            assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
+
+            self
+                ._golden_token_last_use
+                .write(token_id.try_into().unwrap(), get_block_timestamp().into());
         } else {
-            caller
-        };
+            let player = if account_snake.supports_interface(ARCADE_ACCOUNT_ID) {
+                IMasterControlDispatcher { contract_address: caller }.get_master_account()
+            } else {
+                caller
+            };
+            assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
+            assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
 
-        assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
-        assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
-
-        self
-            ._golden_token_last_use
-            .write(token_id.try_into().unwrap(), get_block_timestamp().into());
+            self
+                ._golden_token_last_use
+                .write(token_id.try_into().unwrap(), get_block_timestamp().into());
+            }
     }
 
     fn _last_usage(self: @ContractState, token_id: u256) -> u256 {

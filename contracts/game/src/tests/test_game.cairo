@@ -111,7 +111,7 @@ mod tests {
     }
 
     fn add_adventurer_to_game(ref game: IGameDispatcher) {
-        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero', DEFAULT_NO_GOLDEN_TOKEN.into());
+        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero', DEFAULT_NO_GOLDEN_TOKEN.into(), false);
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
@@ -131,7 +131,7 @@ mod tests {
         let name = 'abcdefghijklmno';
 
         // start new game
-        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN.into());
+        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN.into(), false);
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -470,7 +470,7 @@ mod tests {
         let name = 'abcdefghijklmno';
 
         // start new game
-        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN.into());
+        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN.into(), false);
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1954,7 +1954,7 @@ mod tests {
             if i == 10 {
                 break ();
             }
-            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into());
+            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false);
             i += 1;
         };
         testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 7));
@@ -1968,7 +1968,7 @@ mod tests {
             if i == 10 {
                 break ();
             }
-            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into());
+            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false);
             i += 1;
         };
         testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 7));
@@ -1988,7 +1988,7 @@ mod tests {
             if i == 20 {
                 break ();
             }
-            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into());
+            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false);
             i += 1;
         };
 
@@ -2014,7 +2014,7 @@ mod tests {
             if i == 10 {
                 break ();
             }
-            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into());
+            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false);
             i += 1;
         };
         testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 14));
