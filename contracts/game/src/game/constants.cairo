@@ -27,8 +27,8 @@ mod messages {
     const RATE_LIMIT_EXCEEDED: felt252 = 'rate limit exceeded';
     const NOT_ON_LEADERBOARD: felt252 = 'Not on leaderboard';
     const TIME_NOT_REACHED: felt252 = 'Time not reached';
-    const CANNOT_PLAY_WITH_TOKEN: felt252 = 'Cannot play with ticket';
-    const NOT_OWNER_OF_TOKEN: felt252 = 'Not owner of ticket';
+    const CANNOT_PLAY_WITH_TOKEN: felt252 = 'Token already used today';
+    const NOT_OWNER_OF_TOKEN: felt252 = 'Not owner of token';
     const MA_PERIOD_LESS_THAN_WEEK: felt252 = 'MA period too small';
 }
 
