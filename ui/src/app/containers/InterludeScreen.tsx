@@ -35,7 +35,6 @@ export default function InterludeScreen() {
     // const nextEntropyTime = previousBlocktime + secondsUntilNextEntropy * 1000;
     const nextEntropyTime =
       adventurerCreatedTime + secondsUntilNextEntropy * 1000;
-    console.log(adventurerCreatedTime, nextEntropyTime);
     setNextEntropyTime(nextEntropyTime);
   };
 
@@ -46,8 +45,6 @@ export default function InterludeScreen() {
       fetchData();
     }
   }, [fetchedAverageBlockTime]);
-
-  console.log(countDownExpired);
 
   return (
     <>

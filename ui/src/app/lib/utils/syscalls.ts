@@ -1195,7 +1195,6 @@ export function syscalls({
       calldata: [slayAdventurers.length, ...slayAdventurers],
       metadata: `Slaying all Adventurers`,
     };
-    console.log(slayIdleAdventurersTx);
     addToCalls(slayIdleAdventurersTx);
 
     const balanceEmpty = await checkArcadeBalance(

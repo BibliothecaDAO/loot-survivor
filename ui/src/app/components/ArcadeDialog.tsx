@@ -106,8 +106,6 @@ export const ArcadeDialog = ({
 
   if (!connectors) return <div></div>;
 
-  console.log(connectors);
-
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
