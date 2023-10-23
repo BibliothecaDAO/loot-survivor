@@ -84,7 +84,7 @@ export const ArcadeIntro = ({
   const checkAnyETh = eth === 0;
 
   useEffect(() => {
-    if (!checkNotEnoughPrefundEth && readDisclaimer) {
+    if (account && !checkNotEnoughPrefundEth && readDisclaimer) {
       setStep(4);
     } else if (account && readDisclaimer) {
       setStep(3);
