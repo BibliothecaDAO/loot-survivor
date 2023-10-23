@@ -14,6 +14,8 @@ import PixelatedImage from "@/app/components/animations/PixelatedImage";
 import { getArcadeConnectors } from "@/app/lib/connectors";
 import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
 import { fetchBalances } from "@/app/lib/balances";
+import Lords from "public/icons/lords.svg";
+import Eth from "public/icons/eth.svg";
 
 interface ArcadeDialogProps {
   gameContract: Contract;
@@ -295,8 +297,14 @@ export const ArcadeAccountCard = ({
             <span className="loading-ellipsis text-center">Loading</span>
           ) : (
             <span className="flex flex-row justify-between text-sm sm:text-base">
-              <span>{`${formattedEth}ETH`}</span>
-              <span>{`${formattedLords}LORDS`}</span>
+              <span className="flex flex-col">
+                <Eth className="fill-current" />
+                <p>{formattedEth}</p>
+              </span>
+              <span className="flex flex-col">
+                <Lords className="fill-current" />
+                <p>{formattedLords}</p>
+              </span>
             </span>
           )}
         </span>{" "}
