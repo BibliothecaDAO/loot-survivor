@@ -5,6 +5,7 @@ import {
   useNetwork,
   useProvider,
   useContract,
+  Connector,
 } from "@starknet-react/core";
 import { constants } from "starknet";
 import { useState, useEffect, useMemo } from "react";
@@ -59,8 +60,10 @@ import Header from "@/app/components/navigation/Header";
 import { checkArcadeBalance } from "@/app/lib/utils";
 import { fetchBalances } from "@/app/lib/balances";
 import useTransactionManager from "./hooks/useTransactionManager";
-import StarknetProvider from "./provider";
+import StarknetProvider from "@/app//provider";
 import { SpecialBeast } from "./components/notifications/SpecialBeast";
+import { useBurner } from "@/app/lib/burner";
+import { connectors } from "@/app/lib/connectors";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -82,14 +85,30 @@ const mobileMenuItems: Menu[] = [
 ];
 
 export default function Main() {
+  const [appConnectors, setAppConnectors] = useState<Connector[]>([]);
+
+  const { listConnectors } = useBurner();
+
+  const updateConnectors = () => {
+    const arcadeConnectors = listConnectors();
+    setAppConnectors([...arcadeConnectors, ...connectors]);
+  };
+
+  useEffect(() => {
+    updateConnectors();
+  }, []);
   return (
-    <StarknetProvider>
-      <Home />
+    <StarknetProvider connectors={appConnectors}>
+      <Home updateConnectors={updateConnectors} />
     </StarknetProvider>
   );
 }
 
-function Home() {
+interface HomeProps {
+  updateConnectors: () => void;
+}
+
+function Home({ updateConnectors }: HomeProps) {
   const { connectors } = useConnect();
   const { chain } = useNetwork();
   const { provider } = useProvider();
@@ -179,7 +198,7 @@ function Home() {
 
   useEffect(() => {
     getBalances();
-  }, [address]);
+  }, [account]);
 
   const { data, refetch, resetData, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
@@ -220,10 +239,10 @@ function Home() {
   const playState = useMemo(
     () => ({
       isInBattle: hasBeast,
-      isDead: false, // set this to true when player is dead
+      isDead: deathDialog, // set this to true when player is dead
       isMuted: isMuted,
     }),
-    [hasBeast, isMuted]
+    [hasBeast, deathDialog, isMuted]
   );
 
   const { play, stop } = useMusic(playState, {
@@ -449,6 +468,7 @@ function Home() {
               multicall={multicall}
               mintLords={async () => await mintLords()}
               lordsBalance={lordsBalance}
+              arcadeConnectors={arcadeConnectors}
               gameContract={gameContract!}
             />
           </div>
@@ -470,6 +490,7 @@ function Home() {
               gameContract={gameContract!}
               lordsContract={lordsContract!}
               ethContract={ethContract!}
+              updateConnectors={updateConnectors}
             />
           )}
           {status == "connected" && arcadeDialog && (
@@ -477,6 +498,7 @@ function Home() {
               gameContract={gameContract!}
               lordsContract={lordsContract!}
               ethContract={ethContract!}
+              updateConnectors={updateConnectors}
             />
           )}
           {status == "connected" && topUpDialog && <TopUpDialog token="ETH" />}

@@ -17,12 +17,13 @@ mod Game {
     const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 100;
     const LOOT_NAME_STORAGE_INDEX_1: u8 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u8 = 1;
-
+    const SECONDS_IN_DAY: u32 = 86400;
     use core::{
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
         clone::Clone, poseidon::poseidon_hash_span, option::OptionTrait, box::BoxTrait,
         starknet::{
-            get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const
+            get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const,
+            get_block_timestamp, info::BlockInfo
         },
     };
 
@@ -30,11 +31,28 @@ mod Game {
         IERC20Camel, IERC20CamelDispatcher, IERC20CamelDispatcherTrait, IERC20CamelLibraryDispatcher
     };
 
+    use openzeppelin::introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait, ISRC5CamelDispatcher, ISRC5CamelDispatcherTrait};
+
+    use openzeppelin::token::erc721::interface::{
+        IERC721, IERC721Dispatcher, IERC721DispatcherTrait, IERC721LibraryDispatcher
+    };
+
+    use goldenToken::ERC721::{
+        GoldenToken, GoldenTokenDispatcher, GoldenTokenDispatcherTrait, GoldenTokenLibraryDispatcher
+    };
+
+    use arcade_account::{
+        account::interface::{
+            IMasterControl, IMasterControlDispatcher, IMasterControlDispatcherTrait
+        },
+        Account, ARCADE_ACCOUNT_ID
+    };
+
     use super::game::{
         interfaces::{IGame},
         constants::{
-            messages, Week, REWARD_DISTRIBUTIONS_PHASE1, REWARD_DISTRIBUTIONS_PHASE2,
-            REWARD_DISTRIBUTIONS_PHASE3, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
+            messages, Week, REWARD_DISTRIBUTIONS_PHASE1_BP, REWARD_DISTRIBUTIONS_PHASE2_BP,
+            REWARD_DISTRIBUTIONS_PHASE3_BP, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
             STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS,
             STARTING_GAME_ENTROPY_ROTATION_INTERVAL, MINIMUM_DAMAGE_FROM_BEASTS
         }
@@ -73,6 +91,7 @@ mod Game {
     };
     use beasts::beast::{Beast, IBeast, ImplBeast};
     use game_entropy::game_entropy::{GameEntropy, ImplGameEntropy};
+    use game_snapshot::{GamesPlayedSnapshot, GamesPlayedSnapshotImpl};
 
     #[storage]
     struct Storage {
@@ -84,10 +103,15 @@ mod Game {
         _game_counter: felt252,
         _game_entropy: GameEntropy,
         _genesis_block: u64,
+        _genesis_timestamp: u64,
         _leaderboard: Leaderboard,
         _lords: ContractAddress,
         _owner: LegacyMap::<felt252, ContractAddress>,
         _item_specials: LegacyMap::<(felt252, u8), ItemSpecialsStorage>,
+        _golden_token_last_use: LegacyMap::<felt252, felt252>,
+        _golden_token: ContractAddress,
+        _cost_to_play: u128,
+        _games_played_snapshot: GamesPlayedSnapshot,
     }
 
     #[event]
@@ -118,6 +142,7 @@ mod Game {
         IdleDeathPenalty: IdleDeathPenalty,
         RewardDistribution: RewardDistribution,
         GameEntropyRotatedEvent: GameEntropyRotatedEvent,
+        PriceChangeEvent: PriceChangeEvent,
     }
 
     #[constructor]
@@ -125,7 +150,8 @@ mod Game {
         ref self: ContractState,
         lords: ContractAddress,
         dao: ContractAddress,
-        collectible_beasts: ContractAddress
+        collectible_beasts: ContractAddress,
+        golden_token_address: ContractAddress,
     ) {
         // set the contract addresses
         self._lords.write(lords);
@@ -134,6 +160,13 @@ mod Game {
 
         // set the genesis block
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
+        self._genesis_timestamp.write(starknet::get_block_info().unbox().block_timestamp.into());
+
+        // set the golden token address
+        self._golden_token.write(golden_token_address);
+
+        // set the cost to play
+        self._cost_to_play.write(COST_TO_PLAY);
 
         // initialize game entropy
         let current_block_info = starknet::get_block_info().unbox();
@@ -162,13 +195,22 @@ mod Game {
         /// @param weapon A u8 representing the weapon to start the game with. Valid options are: {wand: 12, book: 17, short sword: 46, club: 76}
         /// @param name A u128 value representing the player's name.
         fn new_game(
-            ref self: ContractState, client_reward_address: ContractAddress, weapon: u8, name: u128,
+            ref self: ContractState,
+            client_reward_address: ContractAddress,
+            weapon: u8,
+            name: u128,
+            golden_token_id: u256,
+            interface_camel: bool
         ) {
             // assert provided weapon
             _assert_valid_starter_weapon(weapon);
 
             // process payment for game and distribute rewards
-            _process_payment_and_distribute_rewards(ref self, client_reward_address);
+            if (golden_token_id != 0) {
+                _play_with_token(ref self, golden_token_id, interface_camel);
+            } else {
+                _process_payment_and_distribute_rewards(ref self, client_reward_address);
+            }
 
             // start the game
             _start_game(ref self, weapon, name);
@@ -604,9 +646,21 @@ mod Game {
         ///
         /// @notice Rotates the game entropy
         /// @dev This is intentional callable by anyone
-        /// @players Ideally this is called at the minimum block interval to provide optimal game entropy. If the community does not do this, bots will likely use this to their advantage.
         fn rotate_game_entropy(ref self: ContractState) {
             _rotate_game_entropy(ref self);
+        }
+
+        /// @title Updates cost to play
+        ///
+        /// @notice Adjusts the price up or down
+        /// @dev This is intentional callable by anyone
+        /// @players Adjust the cost to play if the moving price of $LORDS is too high or too low
+        fn update_cost_to_play(ref self: ContractState) {
+            _update_cost_to_play(ref self);
+        }
+
+        fn initiate_price_change(ref self: ContractState) {
+            _initiate_price_change(ref self);
         }
 
         // ------------------------------------------ //
@@ -963,6 +1017,14 @@ mod Game {
         fn strength_bonus_damage(self: @ContractState) -> u8 {
             STRENGTH_DAMAGE_BONUS
         }
+
+        fn get_cost_to_play(self: @ContractState) -> u128 {
+            _get_cost_to_play(self)
+        }
+
+        fn get_games_played_snapshot(self: @ContractState) -> GamesPlayedSnapshot {
+            self._games_played_snapshot.read()
+        }
     }
 
     // ------------------------------------------ //
@@ -1129,13 +1191,28 @@ mod Game {
         }
     }
 
+    fn _golden_token_dispatcher(ref self: ContractState) -> IERC721Dispatcher {
+        IERC721Dispatcher { contract_address: self._golden_token.read() }
+    }
+
+    fn _lords_dispatcher(ref self: ContractState) -> IERC20CamelDispatcher {
+        IERC20CamelDispatcher { contract_address: self._lords.read() }
+    }
+
+    fn _calculate_payout(bp: u256, price: u128) -> u256 {
+        (bp * price.into()) / 1000
+    }
+
+    fn _get_cost_to_play(self: @ContractState) -> u128 {
+        self._cost_to_play.read()
+    }
+
     fn _process_payment_and_distribute_rewards(
         ref self: ContractState, client_address: ContractAddress
     ) {
         let caller = get_caller_address();
         let block_number = starknet::get_block_info().unbox().block_number;
 
-        let lords = self._lords.read();
         let genesis_block = self._genesis_block.read();
         let dao_address = self._dao.read();
 
@@ -1144,14 +1221,15 @@ mod Game {
         let second_place_address = self._owner.read(leaderboard.second.adventurer_id.into());
         let third_place_address = self._owner.read(leaderboard.third.adventurer_id.into());
 
+        let current_cost_to_play = self._cost_to_play.read();
+
         // if third place score is less than minimum score for payouts
         if (leaderboard.third.xp < MINIMUM_SCORE_FOR_PAYOUTS) {
             // all rewards go to the DAO
             // the purpose of this is to let a decent set of top scores get set before payouts begin
             // without this, there would be an incentive to start and die immediately after contract is deployed
             // to capture the rewards from the launch hype
-            IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, dao_address, COST_TO_PLAY.into());
+            _lords_dispatcher(ref self).transferFrom(caller, dao_address, COST_TO_PLAY.into());
 
             __event_RewardDistribution(
                 ref self,
@@ -1166,7 +1244,7 @@ mod Game {
                         adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
                     },
                     client: ClientReward { amount: 0, address: dao_address },
-                    dao: COST_TO_PLAY.into()
+                    dao: current_cost_to_play.into()
                 }
             );
             return;
@@ -1174,22 +1252,40 @@ mod Game {
 
         // First phase all rewards go to players
         let mut week = Week {
-            DAO: REWARD_DISTRIBUTIONS_PHASE1::DAO,
-            INTERFACE: REWARD_DISTRIBUTIONS_PHASE1::INTERFACE,
-            FIRST_PLACE: REWARD_DISTRIBUTIONS_PHASE1::FIRST_PLACE,
-            SECOND_PLACE: REWARD_DISTRIBUTIONS_PHASE1::SECOND_PLACE,
-            THIRD_PLACE: REWARD_DISTRIBUTIONS_PHASE1::THIRD_PLACE
+            DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, current_cost_to_play),
+            INTERFACE: _calculate_payout(
+                REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, current_cost_to_play
+            ),
+            FIRST_PLACE: _calculate_payout(
+                REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, current_cost_to_play
+            ),
+            SECOND_PLACE: _calculate_payout(
+                REWARD_DISTRIBUTIONS_PHASE1_BP::SECOND_PLACE, current_cost_to_play
+            ),
+            THIRD_PLACE: _calculate_payout(
+                REWARD_DISTRIBUTIONS_PHASE1_BP::THIRD_PLACE, current_cost_to_play
+            )
         };
 
         // after 2 weeks, the DAO gets a share of rewards
         if (BLOCKS_IN_A_WEEK * 2 + genesis_block) > block_number {
             week =
                 Week {
-                    DAO: REWARD_DISTRIBUTIONS_PHASE2::DAO,
-                    INTERFACE: REWARD_DISTRIBUTIONS_PHASE2::INTERFACE,
-                    FIRST_PLACE: REWARD_DISTRIBUTIONS_PHASE2::FIRST_PLACE,
-                    SECOND_PLACE: REWARD_DISTRIBUTIONS_PHASE2::SECOND_PLACE,
-                    THIRD_PLACE: REWARD_DISTRIBUTIONS_PHASE2::THIRD_PLACE
+                    DAO: _calculate_payout(
+                        REWARD_DISTRIBUTIONS_PHASE2_BP::DAO, current_cost_to_play
+                    ),
+                    INTERFACE: _calculate_payout(
+                        REWARD_DISTRIBUTIONS_PHASE2_BP::INTERFACE, current_cost_to_play
+                    ),
+                    FIRST_PLACE: _calculate_payout(
+                        REWARD_DISTRIBUTIONS_PHASE2_BP::FIRST_PLACE, current_cost_to_play
+                    ),
+                    SECOND_PLACE: _calculate_payout(
+                        REWARD_DISTRIBUTIONS_PHASE2_BP::SECOND_PLACE, current_cost_to_play
+                    ),
+                    THIRD_PLACE: _calculate_payout(
+                        REWARD_DISTRIBUTIONS_PHASE2_BP::THIRD_PLACE, current_cost_to_play
+                    )
                 };
         }
 
@@ -1197,38 +1293,44 @@ mod Game {
         if (BLOCKS_IN_A_WEEK * 8 + genesis_block) > block_number {
             week =
                 Week {
-                    DAO: REWARD_DISTRIBUTIONS_PHASE3::DAO,
-                    INTERFACE: REWARD_DISTRIBUTIONS_PHASE3::INTERFACE,
-                    FIRST_PLACE: REWARD_DISTRIBUTIONS_PHASE3::FIRST_PLACE,
-                    SECOND_PLACE: REWARD_DISTRIBUTIONS_PHASE3::SECOND_PLACE,
-                    THIRD_PLACE: REWARD_DISTRIBUTIONS_PHASE3::THIRD_PLACE
+                    DAO: _calculate_payout(
+                        REWARD_DISTRIBUTIONS_PHASE3_BP::DAO, current_cost_to_play
+                    ),
+                    INTERFACE: _calculate_payout(
+                        REWARD_DISTRIBUTIONS_PHASE3_BP::INTERFACE, current_cost_to_play
+                    ),
+                    FIRST_PLACE: _calculate_payout(
+                        REWARD_DISTRIBUTIONS_PHASE3_BP::FIRST_PLACE, current_cost_to_play
+                    ),
+                    SECOND_PLACE: _calculate_payout(
+                        REWARD_DISTRIBUTIONS_PHASE3_BP::SECOND_PLACE, current_cost_to_play
+                    ),
+                    THIRD_PLACE: _calculate_payout(
+                        REWARD_DISTRIBUTIONS_PHASE3_BP::THIRD_PLACE, current_cost_to_play
+                    )
                 }
         }
 
         // DAO
         if (week.DAO != 0) {
-            IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, dao_address, week.DAO);
+            _lords_dispatcher(ref self).transferFrom(caller, dao_address, week.DAO);
         }
 
         // interface
         if (week.INTERFACE != 0) {
-            IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, client_address, week.INTERFACE);
+            _lords_dispatcher(ref self).transferFrom(caller, client_address, week.INTERFACE);
         }
 
         // first place
-        IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, first_place_address, week.FIRST_PLACE);
+        _lords_dispatcher(ref self).transferFrom(caller, first_place_address, week.FIRST_PLACE);
 
         // second place
-        IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, second_place_address, week.SECOND_PLACE);
+        _lords_dispatcher(ref self).transferFrom(caller, second_place_address, week.SECOND_PLACE);
 
         // third place
-        IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, third_place_address, week.THIRD_PLACE);
+        _lords_dispatcher(ref self).transferFrom(caller, third_place_address, week.THIRD_PLACE);
 
+        // emit reward distribution event
         __event_RewardDistribution(
             ref self,
             RewardDistribution {
@@ -3078,6 +3180,15 @@ mod Game {
         blocks_per_hour: u64,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct PriceChangeEvent {
+        previous_cost_to_play: u128,
+        new_cost_to_play: u128,
+        global_games_per_day: u64,
+        snapshot_games_per_day: u64,
+        changer: ContractAddress
+    }
+
     #[derive(Drop, Serde)]
     struct PlayerReward {
         adventurer_id: felt252,
@@ -3425,5 +3536,129 @@ mod Game {
         );
         fn isMinted(self: @T, beast: u8, prefix: u8, suffix: u8) -> bool;
         fn getMinter(self: @T) -> ContractAddress;
+    }
+
+    fn _can_play(self: @ContractState, token_id: u256) -> bool {
+        _last_usage(self, token_id) + SECONDS_IN_DAY.into() <= get_block_timestamp().into()
+    }
+
+    fn _play_with_token(ref self: ContractState, token_id: u256, interface_camel: bool) {
+        let golden_token = _golden_token_dispatcher(ref self);
+
+        let caller = get_caller_address();
+
+        let account_snake = ISRC5Dispatcher { contract_address: caller };
+        let account_camel = ISRC5CamelDispatcher { contract_address: caller };
+
+        if interface_camel {
+            let player = if account_camel.supportsInterface(ARCADE_ACCOUNT_ID) {
+                IMasterControlDispatcher { contract_address: caller }.get_master_account()
+            } else {
+                caller
+            };
+            assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
+            assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
+
+            self
+                ._golden_token_last_use
+                .write(token_id.try_into().unwrap(), get_block_timestamp().into());
+        } else {
+            let player = if account_snake.supports_interface(ARCADE_ACCOUNT_ID) {
+                IMasterControlDispatcher { contract_address: caller }.get_master_account()
+            } else {
+                caller
+            };
+            assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
+            assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
+
+            self
+                ._golden_token_last_use
+                .write(token_id.try_into().unwrap(), get_block_timestamp().into());
+            }
+    }
+
+    fn _last_usage(self: @ContractState, token_id: u256) -> u256 {
+        self._golden_token_last_use.read(token_id.try_into().unwrap()).into()
+    }
+
+    fn _assert_week_past(self: @ContractState, time: u64) {
+        let difference: u64 = get_block_timestamp() - time;
+
+        // check if time diff is greater than a week    
+        let one_week: u64 = (SECONDS_IN_DAY.into() * 7).try_into().unwrap();
+
+        // assert enough time passed
+        assert(difference >= one_week, messages::TIME_NOT_REACHED);
+    }
+
+    fn _initiate_price_change(ref self: ContractState) {
+        // get current snapshot and verify it's not locked, pending a price change
+        // @dev this protects this function from being spammed and ensures that
+        // calls to this function are followed by a price change consideration
+        let current_snapshot = self._games_played_snapshot.read();
+        assert(current_snapshot.locked == 0, 'price change already initiated');
+
+        let timestamp = get_block_timestamp();
+        let game_count = self._game_counter.read().try_into().unwrap();
+
+        // initialize a new game snapshot with locked set to true
+        // @dev the price change will unlock it
+        let game_snapshot = GamesPlayedSnapshot { timestamp, game_count, locked: 1 };
+
+        // save snapshot
+        self._games_played_snapshot.write(game_snapshot);
+    }
+
+    fn _update_cost_to_play(ref self: ContractState) {
+        // get the current games played snapshot
+        let snapshot = self._games_played_snapshot.read();
+
+        // assert that the snapshot is locked
+        assert(snapshot.locked == 1, 'price change not initiated');
+
+        // assert the time between the snapshot and current timestamp is a week
+        _assert_week_past(@self, snapshot.timestamp);
+
+        // unlock the game snapshot so that initiate price change can be called again
+        self._games_played_snapshot.write(snapshot.unlock());
+
+        // load storage variables into local vars for cleaner var names
+        let current_game_count = self._game_counter.read();
+        let current_timestamp = get_block_timestamp();
+        // let current_timestamp = 86400;
+        let contract_deployed_timestamp = self._genesis_timestamp.read();
+        let previous_cost_to_play = self._cost_to_play.read();
+
+        // get average number of games played per day during the snapshott
+        let snapshot_games_per_day = snapshot.games_per_day(current_game_count, current_timestamp);
+
+        // get average number of games played per day from genesis to start of snapshot
+        let life_of_game_seconds: u128 = (snapshot.timestamp - contract_deployed_timestamp).into();
+
+        let global_games_per_day: u64 = snapshot.game_count
+            * SECONDS_IN_DAY.into()
+            / life_of_game_seconds.try_into().unwrap();
+
+        // get the adjusted price based on the snapshot and global games per day
+        let new_cost_to_play = GamesPlayedSnapshotImpl::get_price_adjustment(
+            previous_cost_to_play, global_games_per_day, snapshot_games_per_day
+        );
+
+        // if the cost of the game changed
+        if new_cost_to_play != previous_cost_to_play {
+            // update the cost to play
+            self._cost_to_play.write(new_cost_to_play);
+            // emit price changed event
+            self
+                .emit(
+                    PriceChangeEvent {
+                        previous_cost_to_play,
+                        new_cost_to_play,
+                        global_games_per_day,
+                        snapshot_games_per_day,
+                        changer: get_caller_address()
+                    }
+                );
+        }
     }
 }

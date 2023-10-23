@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { soundSelector, useUiSounds } from "@/app/hooks/useUiSound";
 import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
 import { notificationAnimations } from "@/app/lib/constants";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
@@ -21,17 +22,38 @@ const NotificationComponent = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flash, setFlash] = useState(false);
 
+  const [setSound, setSoundState] = useState(soundSelector.click);
+
+  const { play } = useUiSounds(setSound);
+
+  const playSound = useCallback(() => {
+    if (notifications[0]?.animation === "discoverItem") {
+      setSoundState(soundSelector.discoverItem);
+    }
+    if (
+      notifications[0]?.animation === "jump" ||
+      notifications[0]?.animation == "slide"
+    ) {
+      setSoundState(soundSelector.jump);
+    }
+    if (notifications[0]?.animation === "run") {
+      setSoundState(soundSelector.flee);
+    }
+    if (notifications[0]?.animation === "damage") {
+      setSoundState(soundSelector.hit);
+    }
+    play();
+  }, [play]);
+
   useEffect(() => {
     if (notifications.length === 0) {
       resetNotification();
     } else {
       if (currentIndex < notifications.length - 1) {
-        const timer = setTimeout(
-          () => {
-            setCurrentIndex((prev) => prev + 1);
-          },
-          error ? 5000 : 2000
-        );
+        const timer = setTimeout(() => {
+          setCurrentIndex((prev) => prev + 1);
+          playSound();
+        }, 2000);
         return () => {
           clearTimeout(timer);
         };
@@ -39,6 +61,7 @@ const NotificationComponent = ({
         const timer = setTimeout(
           () => {
             resetNotification();
+            playSound();
           },
           error ? 5000 : 2000
         );

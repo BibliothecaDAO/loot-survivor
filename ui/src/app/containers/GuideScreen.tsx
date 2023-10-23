@@ -91,8 +91,7 @@ export default function GuideScreen() {
 
   return (
     <div className="overflow-y-auto p-2 table-scroll text-xs sm:text-base sm:text-left h-full">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-        <h1>Loot Survivor</h1>
+      <div className="flex justify-center items-center mb-4">
         <a
           href="https://discord.gg/bibliothecadao"
           target="_blank"

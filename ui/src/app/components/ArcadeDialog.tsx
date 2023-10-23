@@ -10,30 +10,33 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "@/app/components/buttons/Button";
 import { useBurner } from "@/app/lib/burner";
 import { MIN_BALANCE } from "@/app/lib/constants";
-import PixelatedImage from "@/app/components/animations/PixelatedImage";
 import { getArcadeConnectors } from "@/app/lib/connectors";
 import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
 import { fetchBalances } from "@/app/lib/balances";
 import Lords from "public/icons/lords.svg";
 import Eth from "public/icons/eth.svg";
+import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
+import TokenLoader from "@/app/components/animations/TokenLoader";
 
 interface ArcadeDialogProps {
   gameContract: Contract;
   lordsContract: Contract;
   ethContract: Contract;
+  updateConnectors: () => void;
 }
 
 export const ArcadeDialog = ({
   gameContract,
   lordsContract,
   ethContract,
+  updateConnectors,
 }: ArcadeDialogProps) => {
   const [fetchedBalances, setFetchedBalances] = useState(false);
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const { connectors } = useConnect();
+  const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const {
     getMasterAccount,
@@ -48,6 +51,7 @@ export const ArcadeDialog = ({
     isToppingUpLords,
     withdraw,
     isWithdrawing,
+    listConnectors,
   } = useBurner(walletAccount, gameContract, lordsContract, ethContract);
   const [arcadebalances, setArcadeBalances] = useState<
     Record<string, { eth: bigint; lords: bigint; lordsGameAllowance: bigint }>
@@ -66,9 +70,9 @@ export const ArcadeDialog = ({
     const balancePromises = arcadeConnectors().map((account) => {
       return fetchBalances(
         account.name,
-        ethContract,
-        lordsContract,
-        gameContract
+        ethContract!,
+        lordsContract!,
+        gameContract!
       ).then((balances) => {
         localBalances[account.name] = {
           eth: BigInt(0),
@@ -115,14 +119,23 @@ export const ArcadeDialog = ({
         </p>
 
         <div className="flex justify-center mb-1">
-          {(connector?.id == "argentX" || connector?.id == "braavos") && (
+          {(connector?.id == "argentX" ||
+            connector?.id == "braavos" ||
+            connector?.id == "argentWebWallet") && (
             <div>
               <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
                 Note: This will initiate a transfer of 0.001 ETH from your
                 connected wallet to the arcade account to cover your transaction
                 costs from normal gameplay.
               </p>
-              <Button onClick={() => create()} disabled={isWrongNetwork}>
+              <Button
+                onClick={async () => {
+                  await create(connector);
+                  connect({ connector: listConnectors()[0] });
+                  updateConnectors();
+                }}
+                disabled={isWrongNetwork}
+              >
                 create arcade account
               </Button>
             </div>
@@ -158,40 +171,17 @@ export const ArcadeDialog = ({
         </div>
       </div>
       {(isDeploying || isGeneratingNewKey) && (
-        <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full">
-          <PixelatedImage
-            src={"/scenes/intro/arcade-account.png"}
-            pixelSize={5}
-            pulsate={true}
-          />
-          <h3 className="text-lg sm:text-3xl loading-ellipsis absolute top-2/3 sm:top-1/2 flex items-center justify-center w-full">
-            {isSettingPermissions
-              ? "Setting Permissions"
-              : isGeneratingNewKey
-              ? "Generating New Key"
-              : "Deploying Account"}
-          </h3>
-        </div>
+        <ArcadeLoader
+          isSettingPermissions={isSettingPermissions}
+          isGeneratingNewKey={isGeneratingNewKey}
+        />
       )}
       {(isToppingUpEth || isToppingUpLords || isWithdrawing) && (
         <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full">
-          <div className="hidden sm:flex flex-row items-center justify-center h-full">
-            <SpriteAnimation
-              frameWidth={400}
-              frameHeight={400}
-              columns={8}
-              rows={1}
-              frameRate={5}
-              className="coin-sprite"
-            />
-            <h3 className="text-lg sm:text-3xl loading-ellipsis flex items-center justify-center w-1/2 h-full">
-              {isToppingUpEth
-                ? "Topping Up Eth"
-                : isToppingUpLords
-                ? "Topping Up Lords"
-                : "Withdrawing Tokens"}
-            </h3>
-          </div>
+          <TokenLoader
+            isToppingUpEth={isToppingUpEth}
+            isToppingUpLords={isToppingUpLords}
+          />
           <div className="sm:hidden flex flex-col items-center justify-center w-full h-full">
             <SpriteAnimation
               frameWidth={200}

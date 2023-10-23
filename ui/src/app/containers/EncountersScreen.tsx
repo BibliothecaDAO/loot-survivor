@@ -91,7 +91,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
               {(isLoading.latestDiscoveriesQuery || loadingData) && (
                 <LootIconLoader />
               )}
-              <div className="flex flex-col items-center gap-2 overflow-auto">
+              <div className="flex flex-col items-center gap-2 overflow-auto default-scroll">
                 {displayEncounters.map((encounter: any, index: number) => {
                   return (
                     <div
