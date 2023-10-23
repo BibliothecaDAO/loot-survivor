@@ -179,7 +179,7 @@ export const ArcadeIntro = ({
                 disabled={
                   isWrongNetwork ||
                   isMintingLords ||
-                  lords >= parseInt(LORDS_PREFUND_AMOUNT) ||
+                  !checkNotEnoughPrefundLords ||
                   !account
                 }
                 className="flex flex-row w-1/4"
