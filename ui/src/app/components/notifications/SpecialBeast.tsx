@@ -69,7 +69,7 @@ export const SpecialBeast = () => {
                 adventurer?.name
               } just defeated the first ${beastName} and collects the 1:1 Beast #LootSurvivor.\n\nSee the token here: ${getAppUrl()}👹\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
             />
-            <a href={getTokenViewerUrl()} target="_blank">
+            <a href={getTokenViewerUrl() + "1"} target="_blank">
               <Button>View Token</Button>
             </a>
             <Button onClick={() => resetBeast()}>Continue</Button>

@@ -180,7 +180,8 @@ export const Spawn = ({
                       isWrongNetwork ||
                       loading ||
                       estimatingFee ||
-                      !goldenTokenExists
+                      !goldenTokenExists ||
+                      true //TODO: UNCOMMENT
                     }
                     className="relative"
                   >

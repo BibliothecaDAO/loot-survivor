@@ -142,7 +142,6 @@ function Home({ updateConnectors }: HomeProps) {
   const specialBeastDefeated = useUIStore(
     (state) => state.specialBeastDefeated
   );
-  // const specialBeastDefeated = true;
   const setSpecialBeastDefeated = useUIStore(
     (state) => state.setSpecialBeastDefeated
   );

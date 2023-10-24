@@ -91,9 +91,9 @@ export function getAppUrl() {
 export function getTokenViewerUrl() {
   switch (NETWORK) {
     case "goerli":
-      return "https://goerli-realms.world/token-viewer/";
+      return "https://realmsworld-git-ls-updates-loot-bibliotheca.vercel.app/collection/beasts/";
     case "mainnet":
-      return "https://realms.world/token-viewer/";
+      return "https://realmsworld-git-ls-updates-loot-bibliotheca.vercel.app/collection/beasts/";
   }
 }
 
