@@ -231,7 +231,19 @@ export async function parseEvents(
       }
       eventName = null;
     } else {
-      eventName = getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]);
+      if (event) {
+        const eventFromKey = getKeyFromValue(
+          gameData.SELECTOR_KEYS,
+          raw.keys[0]
+        )!;
+        if (event == eventFromKey) {
+          eventName = event;
+        } else {
+          eventName = null;
+        }
+      } else {
+        eventName = getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]);
+      }
     }
 
     switch (eventName) {

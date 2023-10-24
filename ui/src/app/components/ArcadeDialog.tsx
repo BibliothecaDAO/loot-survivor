@@ -19,6 +19,7 @@ import TokenLoader from "@/app/components/animations/TokenLoader";
 import { fetchGoldenTokenImage } from "@/app/api/fetchMetadata";
 import { getContracts } from "@/app/lib/constants";
 import TopupInput from "./arcade/TopupInput";
+import Image from "next/image";
 
 interface ArcadeDialogProps {
   gameContract: Contract;
@@ -161,7 +162,7 @@ export const ArcadeDialog = ({
             )}
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 2xl:grid-cols-4 gap-4 overflow-hidden my-6 h-1/3 w-full overflow-y-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 2xl:grid-cols-4 gap-4 overflow-hidden my-6 h-1/2 w-full overflow-y-auto">
           {arcadeConnectors().map((account, index) => {
             const masterAccount = getMasterAccount(account.name);
             return (
@@ -189,7 +190,7 @@ export const ArcadeDialog = ({
         </div>
         <Button
           onClick={() => showArcadeDialog(!arcadeDialog)}
-          className="w-1/2"
+          className="w-1/2 sm:w-1/4"
         >
           close
         </Button>
@@ -358,11 +359,13 @@ export const ArcadeAccountCard = ({
                 </Button>
               </span>
               <span className="flex flex-col items-center w-1/3">
-                <img
-                  src={goldenTokenImage ?? ""}
-                  alt="Golden Token"
-                  className="fill-current right-0 h-6 sm:h-8"
-                />
+                <div className="relative w-6 h-6 sm:w-8 sm:h-8">
+                  <Image
+                    src={"/golden-token.png"}
+                    alt="Golden Token"
+                    fill={true}
+                  />
+                </div>
                 <p className="sm:text-xl">0</p>
                 <Button size={"xxxs"} className="text-black" disabled={true}>
                   Buy

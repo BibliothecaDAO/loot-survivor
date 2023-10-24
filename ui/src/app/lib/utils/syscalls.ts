@@ -274,9 +274,9 @@ export function syscalls({
         const startGameEvents = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
           undefined,
+          beastsContract,
           "StartGame"
         );
-        console.log(startGameEvents);
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
           {

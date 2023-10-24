@@ -13,6 +13,7 @@ import Image from "next/image";
 import { fetchGoldenTokenImage } from "@/app/api/fetchMetadata";
 import { getContracts } from "@/app/lib/constants";
 import Lords from "../../../../public/icons/lords.svg";
+import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 
 export interface SpawnProps {
   formData: FormData;
@@ -49,8 +50,8 @@ export const Spawn = ({
   const { account } = useAccount();
   const { connectors, connect } = useConnect();
 
-  const walletConnectors = () =>
-    connectors.filter((connector) => !connector.id.includes("0x"));
+  const walletConnectors = getWalletConnectors(connectors);
+  const arcadeConnectors = getArcadeConnectors(connectors);
 
   const handleButtonClick = () => {
     setShowWalletTutorial(true);
@@ -79,7 +80,6 @@ export const Spawn = ({
     <div className="flex flex-col w-full h-full justify-center">
       {showWalletTutorial && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1/2 h-4/5 z-20 bg-terminal-black overflow-y-auto flex flex-col items-center gap-4">
-          {" "}
           <Button
             onClick={() => setShowWalletTutorial(false)}
             className="text-red-500 hover:text-red-700"
@@ -116,21 +116,36 @@ export const Spawn = ({
           </span>
           {!account ? (
             <>
-              <div className="flex flex-col justify-between">
+              <div className="flex flex-col gap-5 items-center justify-center">
                 <div className="flex flex-col gap-2">
-                  {walletConnectors().map((connector, index) => (
+                  {walletConnectors.map((connector, index) => (
                     <Button
                       onClick={() => connect({ connector })}
                       disabled={!formFilled}
                       key={index}
                       className="w-full"
                     >
-                      Connect {connector.id}
+                      {connector.id === "braavos" || connector.id === "argentX"
+                        ? `Connect ${connector.id}`
+                        : "Login With Email"}
                     </Button>
                   ))}
                   <Button onClick={handleButtonClick}>
                     I don&apos;t have a wallet
                   </Button>
+                </div>
+                <p className="text-xl">Arcade Accounts</p>
+                <div className="flex flex-col items-center justify-center sm:flex-row gap-2 overflow-auto h-[300px] sm:h-full w-full sm:w-[400px]">
+                  {arcadeConnectors.map((connector, index) => (
+                    <Button
+                      onClick={() => connect({ connector })}
+                      disabled={!formFilled}
+                      key={index}
+                      className="w-1/3"
+                    >
+                      Connect {connector.id}
+                    </Button>
+                  ))}
                 </div>
               </div>
             </>
@@ -190,13 +205,13 @@ export const Spawn = ({
                             : "Fill details"
                           : "No tokens"}
                       </p>
-                      <img
-                        src={goldenTokenImage ?? ""}
-                        width={50}
-                        height={50}
-                        alt="Golden Token"
-                        className="absolute text-terminal-green fill-current right-0"
-                      />
+                      <div className="absolute right-3 w-6 h-6 sm:w-8 sm:h-8">
+                        <Image
+                          src={"/golden-token.png"}
+                          alt="Golden Token"
+                          fill={true}
+                        />
+                      </div>
                     </div>
                   </Button>
                 </div>
