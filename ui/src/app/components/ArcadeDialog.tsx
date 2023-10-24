@@ -283,7 +283,7 @@ export const ArcadeAccountCard = ({
   const walletConnectors = getWalletConnectors(connectors);
 
   const masterConnector = walletConnectors.find(
-    (conn: any) => conn._wallet.selectedAddress === masterAccountAddress
+    (conn: any) => conn._wallet?.selectedAddress === masterAccountAddress
   );
 
   const isArcade = arcadeConnectors.some(
