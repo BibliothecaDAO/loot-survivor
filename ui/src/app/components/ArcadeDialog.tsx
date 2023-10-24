@@ -129,37 +129,39 @@ export const ArcadeDialog = ({
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
-      <div className="fixed text-center sm:top-1/8 sm:left-1/8 sm:left-1/4 sm:w-3/4 sm:w-1/2 h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4 overflow-y-auto">
+      <div className="fixed flex flex-col text-center items-center justify-between sm:top-1/8 sm:left-1/8 sm:left-1/4 sm:w-3/4 sm:w-1/2 h-full sm:h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4">
         <h3 className="mt-4">Arcade Accounts</h3>
-        <p className="m-2 text-sm xl:text-xl 2xl:text-2xl">
-          Go deep into the mist with signature free gameplay! Simply connect
-          your wallet and create a free arcade account.
-        </p>
+        <div className="flex flex-col">
+          <p className="m-2 text-sm xl:text-xl 2xl:text-2xl">
+            Go deep into the mist with signature free gameplay! Simply connect
+            your wallet and create a free arcade account.
+          </p>
 
-        <div className="flex justify-center mb-1">
-          {(connector?.id == "argentX" ||
-            connector?.id == "braavos" ||
-            connector?.id == "argentWebWallet") && (
-            <div>
-              <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                Note: This will initiate a transfer of 0.001 ETH & 250 LORDS
-                from your connected wallet to the arcade account to cover your
-                transaction costs from normal gameplay.
-              </p>
-              <Button
-                onClick={async () => {
-                  await create(connector);
-                  connect({ connector: listConnectors()[0] });
-                  updateConnectors();
-                }}
-                disabled={isWrongNetwork}
-              >
-                create arcade account
-              </Button>
-            </div>
-          )}
+          <div className="flex justify-center mb-1">
+            {(connector?.id == "argentX" ||
+              connector?.id == "braavos" ||
+              connector?.id == "argentWebWallet") && (
+              <div>
+                <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
+                  Note: This will initiate a transfer of 0.001 ETH & 250 LORDS
+                  from your connected wallet to the arcade account to cover your
+                  transaction costs from normal gameplay.
+                </p>
+                <Button
+                  onClick={async () => {
+                    await create(connector);
+                    connect({ connector: listConnectors()[0] });
+                    updateConnectors();
+                  }}
+                  disabled={isWrongNetwork}
+                >
+                  create arcade account
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 2xl:grid-cols-4 gap-4 overflow-hidden my-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 2xl:grid-cols-4 gap-4 overflow-hidden my-6 h-1/3 w-full overflow-y-auto">
           {arcadeConnectors().map((account, index) => {
             const masterAccount = getMasterAccount(account.name);
             return (
@@ -185,9 +187,12 @@ export const ArcadeDialog = ({
             );
           })}
         </div>
-        <div>
-          <Button onClick={() => showArcadeDialog(!arcadeDialog)}>close</Button>
-        </div>
+        <Button
+          onClick={() => showArcadeDialog(!arcadeDialog)}
+          className="w-1/2"
+        >
+          close
+        </Button>
       </div>
       {(isDeploying || isGeneratingNewKey) && (
         <ArcadeLoader

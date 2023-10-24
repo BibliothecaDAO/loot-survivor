@@ -153,9 +153,11 @@ export function processData(
   currentAdventurer?: any
 ) {
   const gameData = new GameData();
+  console.log(eventName);
   switch (eventName) {
     case "StartGame":
       const startGameEvent = event as StartGameEvent;
+      console.log(startGameEvent);
       const updateAdventurerDoc: Adventurer = {
         id: startGameEvent.adventurerState["adventurerId"],
         owner: startGameEvent.adventurerState["owner"],

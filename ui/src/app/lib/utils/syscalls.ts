@@ -276,6 +276,7 @@ export function syscalls({
           undefined,
           "StartGame"
         );
+        console.log(startGameEvents);
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
           {
