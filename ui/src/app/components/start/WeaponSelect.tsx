@@ -57,21 +57,21 @@ export const WeaponSelect = ({
   };
 
   return (
-    <div className="w-full p-4 2xl:flex 2xl:flex-col 2xl:gap-5 2xl:h-1/2">
-      <h3 className="uppercase text-center 2xl:text-5xl mb-3">
+    <div className="w-full p-4 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:h-1/2">
+      <h3 className="uppercase text-center 2xl:text-5xl h-1/6 m-0">
         Choose your weapon
       </h3>
-      <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:justify-between gap-2 sm:gap-20 md:gap-5">
+      <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:justify-between gap-2 md:gap-5 h-5/6">
         {weapons.map((weapon) => (
           <div
             key={weapon.name}
-            className={`flex flex-col items-center justify-between border sm:w-56 md:w-48 2xl:h-40 2xl:w-64 ${
+            className={`flex flex-col items-center border sm:w-56 md:w-48 2xl:w-64 2xl:h-64 ${
               formData.startingWeapon == weapon.name
                 ? "border-terminal-yellow"
                 : "border-terminal-green"
             }`}
           >
-            <div className="relative w-28 h-28">
+            <div className="relative w-28 h-28 2xl:w-40 2xl:h-48">
               <Image
                 src={weapon.image}
                 fill={true}

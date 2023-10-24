@@ -330,7 +330,7 @@ export default function UpgradeScreen({
     <>
       {hasStatUpgrades ? (
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 h-full">
-          <div className="w-1/3 hidden sm:block h-full">
+          <div className="w-1/3 hidden sm:flex h-full">
             <Info
               adventurer={adventurer}
               upgradeCost={upgradeTotalCost}

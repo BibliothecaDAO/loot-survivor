@@ -74,7 +74,7 @@ export const CreateAdventurer = ({
     <>
       {step == 1 && (
         <>
-          <div className="hidden sm:flex flex-col justify-center items-center">
+          <div className="hidden sm:flex flex-col 2xl:gap-5 justify-center items-center">
             <WeaponSelect
               setFormData={setFormData}
               formData={formData}
