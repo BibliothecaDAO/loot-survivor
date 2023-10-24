@@ -11,7 +11,6 @@ import { Button } from "@/app/components/buttons/Button";
 import { useBurner } from "@/app/lib/burner";
 import { MIN_BALANCE } from "@/app/lib/constants";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
-import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
 import { fetchBalances } from "@/app/lib/balances";
 import Lords from "public/icons/lords.svg";
 import Eth from "public/icons/eth-2.svg";
@@ -143,9 +142,9 @@ export const ArcadeDialog = ({
             connector?.id == "argentWebWallet") && (
             <div>
               <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                Note: This will initiate a transfer of 0.001 ETH from your
-                connected wallet to the arcade account to cover your transaction
-                costs from normal gameplay.
+                Note: This will initiate a transfer of 0.001 ETH & 250 Lords
+                from your connected wallet to the arcade account to cover your
+                transaction costs from normal gameplay.
               </p>
               <Button
                 onClick={async () => {
@@ -255,6 +254,7 @@ export const ArcadeAccountCard = ({
 }: ArcadeAccountCardProps) => {
   const { connect, connectors } = useConnect();
   const [isCopied, setIsCopied] = useState(false);
+  const [selectedTopup, setSelectedTopup] = useState<string | null>(null);
 
   const connected = address == account.name;
 
@@ -303,52 +303,83 @@ export const ArcadeAccountCard = ({
           ) : (
             <span className="flex flex-row justify-between text-sm sm:text-base">
               <span className="flex flex-col items-center w-1/3">
-                <Eth className="fill-black h-8" />
-                <p className="text-xl">{formattedEth}</p>
-                <TopupInput
-                  balanceType="eth"
-                  increment={0.0001}
-                  disabled={isArcade}
-                  topup={topUpEth}
-                  account={account.name}
-                  master={walletAccount}
-                  lordsGameAllowance={0}
-                  getBalances={async () =>
-                    await getAccountBalances(account.name)
-                  }
-                  className="w-1/2"
-                />
+                <Eth className="fill-black h-6 sm:h-8" />
+                <p className="sm:text-xl">{formattedEth}</p>
+                <div className="hidden sm:block">
+                  <TopupInput
+                    balanceType="eth"
+                    increment={0.0001}
+                    disabled={isArcade}
+                    topup={topUpEth}
+                    account={account.name}
+                    master={walletAccount}
+                    lordsGameAllowance={0}
+                    getBalances={async () =>
+                      await getAccountBalances(account.name)
+                    }
+                  />
+                </div>
+                <Button
+                  className="sm:hidden"
+                  onClick={() => setSelectedTopup("eth")}
+                  disabled={selectedTopup === "eth"}
+                >
+                  Add
+                </Button>
               </span>
               <span className="flex flex-col items-center w-1/3">
-                <Lords className="fill-current h-8" />
-                <p className="text-xl">{formattedLords}</p>
-                <TopupInput
-                  balanceType="lords"
-                  increment={50}
-                  disabled={isArcade}
-                  topup={topUpLords}
-                  account={account.name}
-                  master={walletAccount}
-                  lordsGameAllowance={Number(balances?.lordsGameAllowance)}
-                  getBalances={async () =>
-                    await getAccountBalances(account.name)
-                  }
-                />
+                <Lords className="fill-current h-6 sm:h-8" />
+                <p className="sm:text-xl">{formattedLords}</p>
+                <div className="hidden sm:block">
+                  <TopupInput
+                    balanceType="lords"
+                    increment={50}
+                    disabled={isArcade}
+                    topup={topUpLords}
+                    account={account.name}
+                    master={walletAccount}
+                    lordsGameAllowance={Number(balances?.lordsGameAllowance)}
+                    getBalances={async () =>
+                      await getAccountBalances(account.name)
+                    }
+                  />
+                </div>
+                <Button
+                  className="sm:hidden"
+                  onClick={() => setSelectedTopup("lords")}
+                  disabled={selectedTopup === "lords"}
+                >
+                  Add
+                </Button>
               </span>
               <span className="flex flex-col items-center w-1/3">
                 <img
                   src={goldenTokenImage ?? ""}
                   alt="Golden Token"
-                  className="fill-current right-0 h-8"
+                  className="fill-current right-0 h-6 sm:h-8"
                 />
-                <p className="text-xl">0</p>
+                <p className="sm:text-xl">0</p>
                 <Button size={"xxxs"} className="text-black" disabled={true}>
                   Buy
                 </Button>
               </span>
             </span>
           )}
-        </span>{" "}
+        </span>
+        {selectedTopup && (
+          <TopupInput
+            balanceType={selectedTopup!}
+            increment={selectedTopup === "eth" ? 0.0001 : 50}
+            disabled={isArcade}
+            topup={selectedTopup === "eth" ? topUpEth : topUpLords}
+            account={account.name}
+            master={walletAccount}
+            lordsGameAllowance={
+              selectedTopup === "eth" ? 0 : Number(balances?.lordsGameAllowance)
+            }
+            getBalances={async () => await getAccountBalances(account.name)}
+          />
+        )}
       </div>
       <div className="flex flex-col gap-2 items-center">
         <Button
