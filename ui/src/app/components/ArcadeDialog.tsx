@@ -142,7 +142,7 @@ export const ArcadeDialog = ({
             connector?.id == "argentWebWallet") && (
             <div>
               <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                Note: This will initiate a transfer of 0.001 ETH & 250 Lords
+                Note: This will initiate a transfer of 0.001 ETH & 250 LORDS
                 from your connected wallet to the arcade account to cover your
                 transaction costs from normal gameplay.
               </p>
@@ -159,7 +159,7 @@ export const ArcadeDialog = ({
             </div>
           )}
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 overflow-hidden my-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 2xl:grid-cols-4 gap-4 overflow-hidden my-6">
           {arcadeConnectors().map((account, index) => {
             const masterAccount = getMasterAccount(account.name);
             return (
