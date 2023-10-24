@@ -10,13 +10,16 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "@/app/components/buttons/Button";
 import { useBurner } from "@/app/lib/burner";
 import { MIN_BALANCE } from "@/app/lib/constants";
-import { getArcadeConnectors } from "@/app/lib/connectors";
+import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
 import { fetchBalances } from "@/app/lib/balances";
 import Lords from "public/icons/lords.svg";
-import Eth from "public/icons/eth.svg";
+import Eth from "public/icons/eth-2.svg";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import TokenLoader from "@/app/components/animations/TokenLoader";
+import { fetchGoldenTokenImage } from "@/app/api/fetchMetadata";
+import { getContracts } from "@/app/lib/constants";
+import TopupInput from "./arcade/TopupInput";
 
 interface ArcadeDialogProps {
   gameContract: Contract;
@@ -31,6 +34,8 @@ export const ArcadeDialog = ({
   ethContract,
   updateConnectors,
 }: ArcadeDialogProps) => {
+  const { goldenToken } = getContracts();
+  const [goldenTokenImage, setGoldenTokenImage] = useState<string | null>(null);
   const [fetchedBalances, setFetchedBalances] = useState(false);
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
@@ -91,7 +96,12 @@ export const ArcadeDialog = ({
   };
 
   const getAccountBalances = async (account: string) => {
-    const balances = await fetchBalances(account);
+    const balances = await fetchBalances(
+      account,
+      ethContract!,
+      lordsContract!,
+      gameContract!
+    );
     setArcadeBalances({
       ...arcadebalances,
       [account]: {
@@ -101,6 +111,15 @@ export const ArcadeDialog = ({
       },
     });
   };
+
+  const fetchGoldenToken = async () => {
+    const image = await fetchGoldenTokenImage(goldenToken ?? "");
+    setGoldenTokenImage(image);
+  };
+
+  useEffect(() => {
+    fetchGoldenToken();
+  }, []);
 
   useEffect(() => {
     getBalances();
@@ -162,6 +181,7 @@ export const ArcadeDialog = ({
                 isToppingUpLords={isToppingUpLords}
                 withdraw={withdraw}
                 isWithdrawing={isWithdrawing}
+                goldenTokenImage={goldenTokenImage}
               />
             );
           })}
@@ -177,29 +197,10 @@ export const ArcadeDialog = ({
         />
       )}
       {(isToppingUpEth || isToppingUpLords || isWithdrawing) && (
-        <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full">
-          <TokenLoader
-            isToppingUpEth={isToppingUpEth}
-            isToppingUpLords={isToppingUpLords}
-          />
-          <div className="sm:hidden flex flex-col items-center justify-center w-full h-full">
-            <SpriteAnimation
-              frameWidth={200}
-              frameHeight={200}
-              columns={8}
-              rows={1}
-              frameRate={5}
-              className="coin-sprite"
-            />
-            <h3 className="text-lg sm:text-3xl loading-ellipsis flex items-center justify-center w-full">
-              {isToppingUpEth
-                ? "Topping Up Eth"
-                : isToppingUpLords
-                ? "Topping Up Lords"
-                : "Withdrawing Tokens"}
-            </h3>
-          </div>
-        </div>
+        <TokenLoader
+          isToppingUpEth={isToppingUpEth}
+          isToppingUpLords={isToppingUpLords}
+        />
       )}
     </>
   );
@@ -231,6 +232,7 @@ interface ArcadeAccountCardProps {
     lordsBalance: bigint
   ) => Promise<any>;
   isWithdrawing: boolean;
+  goldenTokenImage: any;
 }
 
 export const ArcadeAccountCard = ({
@@ -249,11 +251,10 @@ export const ArcadeAccountCard = ({
   isToppingUpLords,
   withdraw,
   isWithdrawing,
+  goldenTokenImage,
 }: ArcadeAccountCardProps) => {
-  const { connect } = useConnect();
+  const { connect, connectors } = useConnect();
   const [isCopied, setIsCopied] = useState(false);
-  const [topUpScreen, setTopUpScreen] = useState<boolean>(false);
-  const [lordsAmount, setLordsAmount] = useState<string>("");
 
   const connected = address == account.name;
 
@@ -273,118 +274,101 @@ export const ArcadeAccountCard = ({
   const minimalBalance =
     balances?.eth < BigInt(MIN_BALANCE) && balances?.eth < BigInt(MIN_BALANCE);
 
+  const walletConnectors = getWalletConnectors(connectors);
+
+  const masterConnector = walletConnectors.find(
+    (conn: any) => conn._wallet.selectedAddress === masterAccountAddress
+  );
+
+  const isArcade = arcadeConnectors.some(
+    (conn) => conn.name == walletAccount?.address
+  );
+
   return (
     <div className="border border-terminal-green p-3 items-center">
-      <div className="text-left flex flex-col text-sm sm:text-xl mb-0 sm:mb-4 items-center">
-        <span
-          onClick={() => copyToClipboard(account.name)}
-          style={{ cursor: "pointer" }}
-        >
-          {account.id}
-        </span>
+      <div className="text-left flex flex-col gap-2 text-sm sm:text-xl mb-0 sm:mb-4 items-center">
+        <div className="flex flex-row items-center gap-2">
+          <Button
+            onClick={() => copyToClipboard(account.name)}
+            variant={connected ? "default" : "outline"}
+            size={"md"}
+          >
+            {account.id}
+          </Button>
+          {isCopied && <span>Copied!</span>}
+        </div>
         <span className="text-lg w-full">
           {formattedEth === "NaN" ? (
             <span className="loading-ellipsis text-center">Loading</span>
           ) : (
             <span className="flex flex-row justify-between text-sm sm:text-base">
-              <span className="flex flex-col">
-                <Eth className="fill-current" />
-                <p>{formattedEth}</p>
+              <span className="flex flex-col items-center w-1/3">
+                <Eth className="fill-black h-8" />
+                <p className="text-xl">{formattedEth}</p>
+                <TopupInput
+                  balanceType="eth"
+                  increment={0.0001}
+                  disabled={isArcade}
+                  topup={topUpEth}
+                  account={account.name}
+                  master={walletAccount}
+                  lordsGameAllowance={0}
+                  getBalances={async () =>
+                    await getAccountBalances(account.name)
+                  }
+                  className="w-1/2"
+                />
               </span>
-              <span className="flex flex-col">
-                <Lords className="fill-current" />
-                <p>{formattedLords}</p>
+              <span className="flex flex-col items-center w-1/3">
+                <Lords className="fill-current h-8" />
+                <p className="text-xl">{formattedLords}</p>
+                <TopupInput
+                  balanceType="lords"
+                  increment={50}
+                  disabled={isArcade}
+                  topup={topUpLords}
+                  account={account.name}
+                  master={walletAccount}
+                  lordsGameAllowance={Number(balances?.lordsGameAllowance)}
+                  getBalances={async () =>
+                    await getAccountBalances(account.name)
+                  }
+                />
+              </span>
+              <span className="flex flex-col items-center w-1/3">
+                <img
+                  src={goldenTokenImage ?? ""}
+                  alt="Golden Token"
+                  className="fill-current right-0 h-8"
+                />
+                <p className="text-xl">0</p>
+                <Button size={"xxxs"} className="text-black" disabled={true}>
+                  Buy
+                </Button>
               </span>
             </span>
           )}
         </span>{" "}
       </div>
       <div className="flex flex-col gap-2 items-center">
-        {!topUpScreen && (
-          <>
-            <div className="flex flex-row">
-              <Button
-                variant={connected ? "default" : "ghost"}
-                onClick={() => {
-                  disconnect();
-                  connect({ connector: account });
-                }}
-              >
-                {connected ? "connected" : "connect"}
-              </Button>
-              {masterAccountAddress == walletAccount?.address && (
-                <Button
-                  variant={"ghost"}
-                  onClick={async () => await genNewKey(account.name)}
-                >
-                  Create New Keys
-                </Button>
-              )}
-            </div>
-            {!arcadeConnectors.some(
-              (conn) => conn.id == walletAccount?.address
-            ) && (
-              <Button variant={"ghost"} onClick={() => setTopUpScreen(true)}>
-                Top Ups
-              </Button>
-            )}
-          </>
-        )}
-        {topUpScreen && (
-          <div className="flex flex-col sm:flex-row sm:gap-2 items-center">
-            {!arcadeConnectors.some(
-              (conn) => conn.id == walletAccount?.address
-            ) && (
-              <Button
-                variant={"ghost"}
-                onClick={async () => {
-                  await topUpEth(account.name, walletAccount);
-                  await getAccountBalances(account.name);
-                }}
-                disabled={isToppingUpEth}
-              >
-                <span className="flex flex-col">
-                  <span>Add 0.001ETH</span>
-                </span>
-              </Button>
-            )}
-            {!arcadeConnectors.some(
-              (conn) => conn.id == walletAccount?.address
-            ) && (
-              <span className="flex flex-row items-center gap-2">
-                <span className="flex flex-col">
-                  <span>Add Lords</span>
-                  <span className="flex flex-row">
-                    <input
-                      type="number"
-                      value={lordsAmount}
-                      onChange={(e) => setLordsAmount(e.target.value)}
-                      min="1"
-                      className="p-1 bg-terminal-black border border-terminal-green text-terminal-green w-20"
-                    />
-                    <Button
-                      variant={"ghost"}
-                      onClick={async () => {
-                        await topUpLords(
-                          account.name,
-                          walletAccount,
-                          parseInt(lordsAmount),
-                          Number(balances?.lordsGameAllowance)
-                        );
-                        await getAccountBalances(account.name);
-                      }}
-                      disabled={isToppingUpLords}
-                    >
-                      Add
-                    </Button>
-                  </span>
-                </span>
-              </span>
-            )}
-            <Button variant={"ghost"} onClick={() => setTopUpScreen(false)}>
-              Back
-            </Button>
-          </div>
+        <Button
+          variant={"ghost"}
+          onClick={() => {
+            disconnect();
+            connected
+              ? connect({ connector: masterConnector! })
+              : connect({ connector: account });
+          }}
+        >
+          {connected ? "Connect to Master" : "Connect"}
+        </Button>
+        {masterAccountAddress == walletAccount?.address && (
+          <Button
+            variant={"ghost"}
+            onClick={async () => await genNewKey(account.name)}
+          >
+            Create New Keys
+          </Button>
         )}
         {connected && (
           <Button
@@ -404,8 +388,6 @@ export const ArcadeAccountCard = ({
           </Button>
         )}
       </div>
-
-      {isCopied && <span>Copied!</span>}
     </div>
   );
 };
