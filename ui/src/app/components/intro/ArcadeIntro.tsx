@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Contract } from "starknet";
-import { useAccount, useConnect } from "@starknet-react/core";
+import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import Image from "next/image";
 import {
   ETH_PREFUND_AMOUNT,
@@ -36,6 +36,7 @@ export const ArcadeIntro = ({
 }: ArcadeIntroProps) => {
   const { account, address, connector } = useAccount();
   const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
   const [step, setStep] = useState(1);
   const [readDisclaimer, setReadDisclaimer] = useState(false);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
@@ -122,7 +123,10 @@ export const ArcadeIntro = ({
               {walletConnectors.map((connector, index) => (
                 <Button
                   disabled={address !== undefined}
-                  onClick={() => connect({ connector })}
+                  onClick={() => {
+                    disconnect();
+                    connect({ connector });
+                  }}
                   key={index}
                 >
                   {connector.id === "braavos" || connector.id === "argentX"

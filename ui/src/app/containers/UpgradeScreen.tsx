@@ -330,7 +330,7 @@ export default function UpgradeScreen({
     <>
       {hasStatUpgrades ? (
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 h-full">
-          <div className="w-1/3 hidden sm:block">
+          <div className="w-1/3 hidden sm:block h-full">
             <Info
               adventurer={adventurer}
               upgradeCost={upgradeTotalCost}
@@ -338,8 +338,8 @@ export default function UpgradeScreen({
             />
           </div>
           {!checkTransacting ? (
-            <div className="w-full sm:w-2/3 xl:h-[500px] xl:overflow-y-auto 2xl:h-full">
-              <div className="flex flex-col gap-2 xl:gap-0 xl:h-[300px] 2xl:h-full">
+            <div className="w-full sm:w-2/3 h-full">
+              <div className="flex flex-col gap-2 xl:gap-0 h-full">
                 <div className="justify-center text-terminal-green h-1/4">
                   <div className="w-full flex flex-row gap-2 mx-auto border border-terminal-green justify-between">
                     <Button
@@ -466,7 +466,7 @@ export default function UpgradeScreen({
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2 h-3/4">
+                <div className="flex flex-col h-3/4">
                   {upgradeScreen === 1 && (
                     <div className="flex flex-col sm:gap-2 items-center w-full h-full">
                       <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border sm:items-center h-full">
@@ -478,7 +478,7 @@ export default function UpgradeScreen({
 
                   {upgradeScreen === 2 && (
                     <div
-                      className="flex flex-col gap-5 sm:gap-2
+                      className="flex
                      sm:flex-row items-center justify-center flex-wrap border border-terminal-green p-4 h-1/4"
                     >
                       {/* <h4>Potions</h4> */}
@@ -494,7 +494,7 @@ export default function UpgradeScreen({
                   )}
 
                   {upgradeScreen === 2 && (
-                    <div className="hidden sm:flex flex-col items-center sm:gap-2 w-full h-3/4">
+                    <div className="hidden sm:flex items-center w-full h-3/4">
                       <MarketplaceScreen
                         upgradeTotalCost={upgradeTotalCost}
                         purchaseItems={purchaseItems}

@@ -528,7 +528,7 @@ function Home({ updateConnectors }: HomeProps) {
                 <div className="sm:hidden">
                   <MobileHeader />
                 </div>
-                <div className="h-[550px] sm:h-[580px]">
+                <div className="h-[550px] xl:h-[500px] 2xl:h-[580px]">
                   {screen === "start" && (
                     <AdventurerScreen
                       spawn={spawn}

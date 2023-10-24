@@ -18,7 +18,7 @@ import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import { fetchGoldenTokenImage } from "@/app/api/fetchMetadata";
 import { getContracts } from "@/app/lib/constants";
-import TopupInput from "./arcade/TopupInput";
+import TopupInput from "@/app/components/arcade/TopupInput";
 import Image from "next/image";
 
 interface ArcadeDialogProps {

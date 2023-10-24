@@ -43,7 +43,7 @@ export default function MarketplaceScreen({
   return (
     <>
       {underMaxItems ? (
-        <div className="w-full sm:mx-auto overflow-y-auto h-[300px] sm:h-[400px] border border-terminal-green table-scroll">
+        <div className="w-full sm:mx-auto overflow-y-auto h-full border border-terminal-green table-scroll">
           {isLoading.latestMarketItemsQuery && (
             <div className="flex justify-center p-10 text-center">
               <LootIconLoader />

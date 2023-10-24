@@ -10,8 +10,6 @@ import { battle } from "@/app/lib/constants";
 import { FormData } from "@/app/types";
 import { Button } from "@/app/components/buttons/Button";
 import Image from "next/image";
-import { fetchGoldenTokenImage } from "@/app/api/fetchMetadata";
-import { getContracts } from "@/app/lib/constants";
 import Lords from "../../../../public/icons/lords.svg";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 
@@ -30,10 +28,8 @@ export const Spawn = ({
   lordsBalance,
   mintLords,
 }: SpawnProps) => {
-  const { goldenToken } = getContracts();
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
   const [formFilled, setFormFilled] = useState(false);
-  const [goldenTokenImage, setGoldenTokenImage] = useState<string | null>(null);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
@@ -66,15 +62,6 @@ export const Spawn = ({
   const checkEnoughLords = lordsBalance! >= BigInt(25000000000000000000);
 
   const goldenTokenExists = true;
-
-  const fetchGoldenToken = async () => {
-    const image = await fetchGoldenTokenImage(goldenToken ?? "");
-    setGoldenTokenImage(image);
-  };
-
-  useEffect(() => {
-    fetchGoldenToken();
-  }, []);
 
   return (
     <div className="flex flex-col w-full h-full justify-center">
