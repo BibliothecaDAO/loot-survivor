@@ -103,11 +103,7 @@ const PurchaseHealth = ({
         Fill to Max
       </Button>
       <div className="flex flex-col gap-2 sm:flex-row items-center p-4">
-        {!hasBalance && (
-          <p className="m-auto text-red-600">Not enough gold to purchase!</p>
-        )}
-        <p className="xl:text-xs text-center">
-          {" "}
+        <p className="text-center">
           You can only buy up to Max Health! 1 Potion = 10 Health
         </p>
       </div>

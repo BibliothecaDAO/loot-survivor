@@ -87,6 +87,7 @@ export const StatAttribute = ({
                 setUpgrades(upgrades);
                 setButtonClicked(true);
               }}
+              size="lg"
             />
           </span>
         </>

@@ -194,12 +194,13 @@ export default function UpgradeScreen({
       },
     ];
     return (
-      <div className="order-2 sm:order-1 sm:w-1/3 sm:border-r sm:border-terminal-green">
+      <div className="order-2 sm:order-1 sm:w-1/3 sm:border-r sm:border-terminal-green h-full">
         <ButtonMenu
           buttonsData={upgradeMenu}
           onSelected={setSelected}
           onEnterAction={true}
-          className="flex-col"
+          className="flex-col items-center justify-center h-full"
+          size="lg"
         />
       </div>
     );
@@ -328,7 +329,7 @@ export default function UpgradeScreen({
   return (
     <>
       {hasStatUpgrades ? (
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 h-full">
           <div className="w-1/3 hidden sm:block">
             <Info
               adventurer={adventurer}
@@ -339,7 +340,7 @@ export default function UpgradeScreen({
           {!checkTransacting ? (
             <div className="w-full sm:w-2/3 xl:h-[500px] xl:overflow-y-auto 2xl:h-full">
               <div className="flex flex-col gap-2 xl:gap-0 xl:h-[300px] 2xl:h-full">
-                <div className="justify-center text-terminal-green">
+                <div className="justify-center text-terminal-green h-1/4">
                   <div className="w-full flex flex-row gap-2 mx-auto border border-terminal-green justify-between">
                     <Button
                       variant={"outline"}
@@ -465,10 +466,10 @@ export default function UpgradeScreen({
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 h-3/4">
                   {upgradeScreen === 1 && (
-                    <div className="flex flex-col sm:gap-2 items-center w-full">
-                      <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border sm:items-center">
+                    <div className="flex flex-col sm:gap-2 items-center w-full h-full">
+                      <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border sm:items-center h-full">
                         {renderContent()}
                         {renderButtonMenu()}
                       </div>
@@ -478,7 +479,7 @@ export default function UpgradeScreen({
                   {upgradeScreen === 2 && (
                     <div
                       className="flex flex-col gap-5 sm:gap-2
-                     sm:flex-row items-center justify-center flex-wrap border border-terminal-green p-4"
+                     sm:flex-row items-center justify-center flex-wrap border border-terminal-green p-4 h-1/4"
                     >
                       {/* <h4>Potions</h4> */}
                       <PurchaseHealth
@@ -493,10 +494,7 @@ export default function UpgradeScreen({
                   )}
 
                   {upgradeScreen === 2 && (
-                    <div className="hidden sm:flex flex-col items-center sm:gap-2 w-full">
-                      <p className="text-xl text-center lg:text-2xl sm:hidden">
-                        Loot Fountain
-                      </p>
+                    <div className="hidden sm:flex flex-col items-center sm:gap-2 w-full h-3/4">
                       <MarketplaceScreen
                         upgradeTotalCost={upgradeTotalCost}
                         purchaseItems={purchaseItems}
