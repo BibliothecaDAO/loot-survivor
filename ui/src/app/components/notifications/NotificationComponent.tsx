@@ -93,6 +93,7 @@ const NotificationComponent = ({
   };
 
   const checkRateLimit = errorMessage?.includes("rate limit exceeded");
+  const checkBlockReached = errorMessage?.includes("Block number out of range");
 
   if (deathDialog) {
     return null;
@@ -140,7 +141,9 @@ const NotificationComponent = ({
           </div>
           <div className="flex items-center justify-center w-2/3 sm:w-3/4 m-auto text-sm sm:text-lg h-full default-scroll overflow-auto">
             {checkRateLimit
-              ? "Bot Protection: Rate Limit Exceeded.\n\nPlease wait a few moments before retyring."
+              ? "Bot Protection: Rate Limit Exceeded.\n\nPlease wait a few moments before retrying."
+              : checkBlockReached
+              ? "Bot Protection: Block Delay Not Reached\n\nPlease wait a few moments before retrying."
               : notifications[currentIndex]?.message}
           </div>
           {error && (
