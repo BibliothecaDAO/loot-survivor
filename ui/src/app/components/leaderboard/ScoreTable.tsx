@@ -95,6 +95,7 @@ const ScoreLeaderboardTable = ({
                 <tr>
                   <th className="p-1">Rank</th>
                   <th className="p-1">Adventurer</th>
+                  <th className="p-1">Level</th>
                   <th className="p-1">XP</th>
                   <th className="p-1">Payout</th>
                 </tr>
