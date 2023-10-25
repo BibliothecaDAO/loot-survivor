@@ -54,9 +54,9 @@ export function getContracts() {
         lords:
           "0x05e367ac160e5f90c5775089b582dfc987dd148a5a2f977c49def2a6644f724b",
         beasts:
-          "0x05f9699b308b8544fddab9da50d7374743d0b3ca5b53de9c92e26d6bd99705ed",
+          "0x05ffc59bb38e18a1ddc09e4c92963642ee7b66b6fc32dc76aa6c33a3b4197f82",
         goldenToken:
-          "0x01702a257408fbdc70c7f8d21aa505bd4b140169cfbf60c9324d695dcc3734ac",
+          "0x04a71260d6e29274b760195acdc5379592bd78383713ddce5d2c635d237edf55",
       };
     case "mainnet":
       return {
