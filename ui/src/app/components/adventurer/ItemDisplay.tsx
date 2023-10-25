@@ -148,7 +148,7 @@ export const ItemDisplay = ({
     <>
       {!showInventoryItems ? (
         <div
-          className={`flex flex-row items-center text-sm sm:text-base w-full h-24 ${
+          className={`flex flex-row items-center text-sm sm:text-base w-full h-16 ${
             item.item ? "bg-terminal-green text-terminal-black" : ""
           }`}
         >
