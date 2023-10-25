@@ -479,7 +479,7 @@ export default function UpgradeScreen({
                   {upgradeScreen === 2 && (
                     <div
                       className="flex
-                     sm:flex-row items-center justify-center flex-wrap border border-terminal-green p-4 h-1/4"
+                     sm:flex-row items-center justify-center flex-wrap border border-terminal-green p-2 h-1/6"
                     >
                       {/* <h4>Potions</h4> */}
                       <PurchaseHealth
@@ -494,7 +494,7 @@ export default function UpgradeScreen({
                   )}
 
                   {upgradeScreen === 2 && (
-                    <div className="hidden sm:flex items-center w-full h-3/4">
+                    <div className="hidden sm:flex items-center w-full h-5/6">
                       <MarketplaceScreen
                         upgradeTotalCost={upgradeTotalCost}
                         purchaseItems={purchaseItems}

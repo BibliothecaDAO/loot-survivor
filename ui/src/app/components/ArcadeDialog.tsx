@@ -16,8 +16,6 @@ import Lords from "public/icons/lords.svg";
 import Eth from "public/icons/eth-2.svg";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import TokenLoader from "@/app/components/animations/TokenLoader";
-import { fetchGoldenTokenImage } from "@/app/api/fetchMetadata";
-import { getContracts } from "@/app/lib/constants";
 import TopupInput from "@/app/components/arcade/TopupInput";
 import Image from "next/image";
 
@@ -34,8 +32,6 @@ export const ArcadeDialog = ({
   ethContract,
   updateConnectors,
 }: ArcadeDialogProps) => {
-  const { goldenToken } = getContracts();
-  const [goldenTokenImage, setGoldenTokenImage] = useState<string | null>(null);
   const [fetchedBalances, setFetchedBalances] = useState(false);
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
@@ -112,15 +108,6 @@ export const ArcadeDialog = ({
     });
   };
 
-  const fetchGoldenToken = async () => {
-    const image = await fetchGoldenTokenImage(goldenToken ?? "");
-    setGoldenTokenImage(image);
-  };
-
-  useEffect(() => {
-    fetchGoldenToken();
-  }, []);
-
   useEffect(() => {
     getBalances();
   }, [arcadeConnectors, fetchedBalances]);
@@ -162,7 +149,7 @@ export const ArcadeDialog = ({
             )}
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 2xl:grid-cols-4 gap-4 overflow-hidden my-6 h-1/2 w-full overflow-y-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 2xl:grid-cols-4 gap-4 overflow-hidden my-6 h-1/2 w-full overflow-y-auto default-scroll">
           {arcadeConnectors().map((account, index) => {
             const masterAccount = getMasterAccount(account.name);
             return (
@@ -178,12 +165,9 @@ export const ArcadeDialog = ({
                 balances={arcadebalances[account.name]}
                 getAccountBalances={getAccountBalances}
                 topUpEth={topUpEth}
-                isToppingUpEth={isToppingUpEth}
                 topUpLords={topUpLords}
-                isToppingUpLords={isToppingUpLords}
                 withdraw={withdraw}
                 isWithdrawing={isWithdrawing}
-                goldenTokenImage={goldenTokenImage}
               />
             );
           })}
@@ -222,14 +206,12 @@ interface ArcadeAccountCardProps {
   balances: { eth: bigint; lords: bigint; lordsGameAllowance: bigint };
   getAccountBalances: (address: string) => Promise<void>;
   topUpEth: (address: string, account: AccountInterface) => Promise<any>;
-  isToppingUpEth: boolean;
   topUpLords: (
     address: string,
     account: AccountInterface,
     lordsAmount: number,
     lordsGameAllowance: number
   ) => Promise<any>;
-  isToppingUpLords: boolean;
   withdraw: (
     masterAccountAddress: string,
     account: AccountInterface,
@@ -237,7 +219,6 @@ interface ArcadeAccountCardProps {
     lordsBalance: bigint
   ) => Promise<any>;
   isWithdrawing: boolean;
-  goldenTokenImage: any;
 }
 
 export const ArcadeAccountCard = ({
@@ -251,12 +232,9 @@ export const ArcadeAccountCard = ({
   balances,
   getAccountBalances,
   topUpEth,
-  isToppingUpEth,
   topUpLords,
-  isToppingUpLords,
   withdraw,
   isWithdrawing,
-  goldenTokenImage,
 }: ArcadeAccountCardProps) => {
   const { connect, connectors } = useConnect();
   const [isCopied, setIsCopied] = useState(false);

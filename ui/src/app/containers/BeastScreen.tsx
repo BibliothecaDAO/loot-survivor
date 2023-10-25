@@ -136,18 +136,18 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
   );
 
   const BattleLog: React.FC = () => (
-    <div className="flex flex-col p-2 items-center">
+    <div className="flex flex-col p-2 items-center h-full">
       <Button
         className="w-1/2 sm:hidden"
         onClick={() => setShowBattleLog(false)}
       >
         Back
       </Button>
-      <div className="flex flex-col items-center gap-5 p-2">
+      <div className="flex flex-col items-center gap-5 h-full">
         <div className="text-xl uppercase">
           Battle log with {beastData?.beast}
         </div>
-        <div className="flex flex-col gap-2 ext-sm overflow-y-auto h-96 text-center">
+        <div className="flex flex-col gap-2 ext-sm overflow-y-auto default-scroll h-full text-center">
           {formatBattles.map((battle: Battle, index: number) => (
             <div className="border p-2 border-terminal-green" key={index}>
               <BattleDisplay battleData={battle} beastName={beastName} />
@@ -179,7 +179,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
         )}
       </div>
 
-      <div className="flex flex-col gap-1 sm:gap-0 items-center sm:w-1/2 sm:p-4 order-1 text-lg h-1/4 sm:h-full">
+      <div className="flex flex-col gap-1 sm:gap-5 items-center sm:w-1/2 order-1 text-lg h-1/4 sm:h-full">
         {isAlive && (
           <>
             <div className="sm:hidden flex flex-row sm:flex-col gap-5 items-center justify-center sm:justify-start w-full h-3/4 sm:h-1/4">
@@ -198,7 +198,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
                 />
               </div>
             </div>
-            <div className="hidden sm:flex flex-row gap-2 sm:flex-col items-center justify-center h-1/2 w-3/4">
+            <div className="hidden sm:flex flex-row gap-2 sm:flex-col items-center justify-center h-1/3 w-3/4">
               <div className="flex flex-col items-center justify-center h-1/2 w-full">
                 <ActionMenu
                   buttonsData={attackButtonsData}

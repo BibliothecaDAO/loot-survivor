@@ -85,19 +85,14 @@ export const Spawn = ({
           fill
         />
 
-        {!isWrongNetwork && (
-          <div className="absolute text-xs text-center sm:text-start sm:text-xl leading-normal sm:leading-loose z-10 top-1/4">
-            <TypeAnimation
-              sequence={[battle]}
-              wrapper="span"
-              cursor={true}
-              speed={40}
-              style={{ fontSize: "2em" }}
-            />
-          </div>
-        )}
-
-        <div className="absolute top-1/2 left-0 right-0 flex flex-col items-center gap-4 z-10">
+        <div className="absolute top-1/3 left-0 right-0 flex flex-col items-center text-center gap-4 z-10">
+          <TypeAnimation
+            sequence={[battle]}
+            wrapper="span"
+            cursor={true}
+            speed={40}
+            style={{ fontSize: "2em" }}
+          />
           <span className="hidden sm:block">
             <TxActivity />
           </span>

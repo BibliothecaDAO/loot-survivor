@@ -68,19 +68,6 @@ const PurchaseHealth = ({
 
   return (
     <div className="flex flex-col sm:flex-row items-center">
-      <div className="flex flex-col text-sm text-center items-center">
-        <span className="flex flex-row gap-1 2xl:text-lg">
-          <p>
-            Purchasing{" "}
-            <strong className="text-terminal-yellow">{potionAmount}</strong>{" "}
-            potion(s) for{" "}
-          </p>
-          <span className="flex flex-row">
-            <CoinIcon className="mt-1 w-5 h-5 fill-current text-terminal-yellow" />
-            <p className="text-terminal-yellow">{purchaseGoldAmount}</p>
-          </span>
-        </span>
-      </div>
       <QuantityButtons
         amount={potionAmount}
         min={0}
@@ -97,7 +84,7 @@ const PurchaseHealth = ({
           potionAmount === max
         }
         onClick={fillToMax}
-        size={"xs"}
+        size={"xxs"}
         className="m-auto"
       >
         Fill to Max
