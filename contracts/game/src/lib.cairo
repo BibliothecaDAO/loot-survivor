@@ -31,7 +31,9 @@ mod Game {
         IERC20Camel, IERC20CamelDispatcher, IERC20CamelDispatcherTrait, IERC20CamelLibraryDispatcher
     };
 
-    use openzeppelin::introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait, ISRC5CamelDispatcher, ISRC5CamelDispatcherTrait};
+    use openzeppelin::introspection::interface::{
+        ISRC5Dispatcher, ISRC5DispatcherTrait, ISRC5CamelDispatcher, ISRC5CamelDispatcherTrait
+    };
 
     use openzeppelin::token::erc721::interface::{
         IERC721, IERC721Dispatcher, IERC721DispatcherTrait, IERC721LibraryDispatcher
@@ -2022,14 +2024,14 @@ mod Game {
         // get a clone of our items to equip to keep ownership for event
         let equipped_items = items_to_equip.clone();
 
-        // for we item we need to equip
+        // for each item we need to equip
         let mut i: u32 = 0;
         loop {
             if i == items_to_equip.len() {
                 break ();
             }
 
-            // get the item
+            // get the item id
             let item_id = *items_to_equip.at(i);
 
             // assume we won't need to unequip an item to equip new one
@@ -2167,9 +2169,15 @@ mod Game {
         // if we have items to equip as part of the purchase
         if (items_to_equip.len() != 0) {
             // equip them and record the items that were unequipped
-            let unequipped_items = _equip_items(
-                contract_state, ref adventurer, ref bag, adventurer_id, items_to_equip.clone(), true
-            );
+            unequipped_items =
+                _equip_items(
+                    contract_state,
+                    ref adventurer,
+                    ref bag,
+                    adventurer_id,
+                    items_to_equip.clone(),
+                    true
+                );
         }
 
         (purchases, items_to_equip, unequipped_items)
@@ -3574,7 +3582,7 @@ mod Game {
             self
                 ._golden_token_last_use
                 .write(token_id.try_into().unwrap(), get_block_timestamp().into());
-            }
+        }
     }
 
     fn _last_usage(self: @ContractState, token_id: u256) -> u256 {
