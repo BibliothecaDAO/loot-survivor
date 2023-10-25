@@ -17,7 +17,7 @@ import Eth from "public/icons/eth-2.svg";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import TopupInput from "@/app/components/arcade/TopupInput";
-import Image from "next/image";
+// import Image from "next/image";
 
 interface ArcadeDialogProps {
   gameContract: Contract;
