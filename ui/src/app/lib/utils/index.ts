@@ -436,9 +436,10 @@ export const fetchBlockTime = async (currentBlock: number) => {
   }
 };
 
-export const checkVitBoostRemoved = (
+export const calculateVitBoostRemoved = (
   purchases: ItemPurchase[],
-  adventurer: Adventurer
+  adventurer: Adventurer,
+  items: any[]
 ) => {
   const gameData = new GameData();
   const equippedItems = purchases.filter((purchase) => purchase.equip === "1");
@@ -450,32 +451,125 @@ export const checkVitBoostRemoved = (
   );
 
   // loop through slots and check what item is equipped
-  const unequippedItems = [];
+  const unequippedSuffixBoosts = [];
   for (const slot of slotStrings) {
     if (slot === "Weapon") {
-      unequippedItems.push(adventurer.weapon);
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.weapon)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
     }
     if (slot === "Chest") {
-      unequippedItems.push(adventurer.chest);
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.chest)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
     }
     if (slot === "Head") {
-      unequippedItems.push(adventurer.head);
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.head)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
     }
     if (slot === "Waist") {
-      unequippedItems.push(adventurer.waist);
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.waist)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
     }
     if (slot === "Foot") {
-      unequippedItems.push(adventurer.foot);
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.foot)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
     }
     if (slot === "Hand") {
-      unequippedItems.push(adventurer.hand);
+      console.log(adventurer.hand);
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.hand)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
     }
     if (slot === "Neck") {
-      unequippedItems.push(adventurer.neck);
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.neck)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
     }
     if (slot === "Ring") {
-      unequippedItems.push(adventurer.ring);
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.ring)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
     }
   }
-  return unequippedItems;
+  const vitTotal = findAndSumVitValues(unequippedSuffixBoosts);
+  return vitTotal;
 };
+
+function findAndSumVitValues(arr: string[]): number {
+  let total = 0;
+
+  arr.forEach((str) => {
+    const matches = str.match(/VIT \+\d+/g);
+    console.log(matches);
+
+    if (matches) {
+      matches.forEach((match) => {
+        const value = parseInt(match.split("+")[1]);
+        console.log(value);
+        total += value;
+      });
+    }
+  });
+
+  return total;
+}

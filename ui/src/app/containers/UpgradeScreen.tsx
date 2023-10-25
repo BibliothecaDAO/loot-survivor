@@ -31,6 +31,8 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { UpgradeStats, ZeroUpgrade, UpgradeSummary } from "@/app/types";
 import Summary from "@/app/components/upgrade/Summary";
 import { HealthCountDown } from "@/app/components/CountDown";
+import { calculateVitBoostRemoved } from "@/app/lib/utils";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
 
 interface UpgradeScreenProps {
   upgrade: (...args: any[]) => any;
@@ -268,8 +270,14 @@ export default function UpgradeScreen({
   const handleSubmitUpgradeTx = async () => {
     renderSummary();
     resetNotification();
+    const vitBoostRemoved = calculateVitBoostRemoved(
+      purchaseItems,
+      adventurer!,
+      adventurerItems
+    );
+    handleAddUpgradeTx(undefined, potionAmount - vitBoostRemoved, undefined)
     try {
-      await upgrade(upgrades, purchaseItems, potionAmount);
+      await upgrade(upgrades, purchaseItems, potionAmount - vitBoostRemoved);
       setPotionAmount(0);
       setPurchaseItems([]);
       setUpgrades({ ...ZeroUpgrade });
@@ -325,6 +333,10 @@ export default function UpgradeScreen({
   useEffect(() => {
     getNoBoostedStats();
   }, []);
+
+  const adventurerItems = useQueriesStore(
+    (state) => state.data.itemsByAdventurerQuery?.items || []
+  );
 
   return (
     <>
@@ -501,6 +513,7 @@ export default function UpgradeScreen({
                         setPurchaseItems={setPurchaseItems}
                         upgradeHandler={handleAddUpgradeTx}
                         totalCharisma={totalCharisma}
+                        adventurerItems={adventurerItems}
                       />
                     </div>
                   )}
@@ -512,6 +525,7 @@ export default function UpgradeScreen({
                         setPurchaseItems={setPurchaseItems}
                         upgradeHandler={handleAddUpgradeTx}
                         totalCharisma={totalCharisma}
+                        adventurerItems={adventurerItems}
                       />
                     </div>
                   )}

@@ -61,7 +61,7 @@ export const Spawn = ({
 
   const checkEnoughLords = lordsBalance! >= BigInt(25000000000000000000);
 
-  const goldenTokenExists = true;
+  // const goldenTokenExists = true;
 
   return (
     <div className="flex flex-col w-full h-full justify-center">
