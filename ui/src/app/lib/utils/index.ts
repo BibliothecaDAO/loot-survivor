@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 import { z } from "zod";
 import { Call, AccountInterface } from "starknet";
-import { Adventurer, Item } from "@/app/types";
+import { Adventurer, Item, ItemPurchase } from "@/app/types";
 import { GameData } from "@/app/lib/data/GameData";
 import {
   itemCharismaDiscount,
@@ -434,4 +434,48 @@ export const fetchBlockTime = async (currentBlock: number) => {
   } catch (error) {
     console.error("Error:", error);
   }
+};
+
+export const checkVitBoostRemoved = (
+  purchases: ItemPurchase[],
+  adventurer: Adventurer
+) => {
+  const gameData = new GameData();
+  const equippedItems = purchases.filter((purchase) => purchase.equip === "1");
+  const itemStrings = equippedItems.map(
+    (purchase) => gameData.ITEMS[parseInt(purchase?.item) ?? 0]
+  );
+  const slotStrings = itemStrings.map(
+    (itemString) => gameData.ITEM_SLOTS[itemString.split(" ").join("")]
+  );
+
+  // loop through slots and check what item is equipped
+  const unequippedItems = [];
+  for (const slot of slotStrings) {
+    if (slot === "Weapon") {
+      unequippedItems.push(adventurer.weapon);
+    }
+    if (slot === "Chest") {
+      unequippedItems.push(adventurer.chest);
+    }
+    if (slot === "Head") {
+      unequippedItems.push(adventurer.head);
+    }
+    if (slot === "Waist") {
+      unequippedItems.push(adventurer.waist);
+    }
+    if (slot === "Foot") {
+      unequippedItems.push(adventurer.foot);
+    }
+    if (slot === "Hand") {
+      unequippedItems.push(adventurer.hand);
+    }
+    if (slot === "Neck") {
+      unequippedItems.push(adventurer.neck);
+    }
+    if (slot === "Ring") {
+      unequippedItems.push(adventurer.ring);
+    }
+  }
+  return unequippedItems;
 };
