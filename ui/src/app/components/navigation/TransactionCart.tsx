@@ -26,6 +26,7 @@ import useOnClickOutside from "@/app/hooks/useOnClickOutside";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { chunkArray } from "@/app/lib/utils";
 import { UpgradeStats } from "@/app/types";
+import { calculateVitBoostRemoved } from "@/app/lib/utils";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
@@ -453,6 +454,19 @@ const TransactionCart = ({
               disabled={!callExists}
               onClick={async () => {
                 resetNotification();
+                // Handle for vitBoostRemoval
+                if (potionAmount > 0) {
+                  const vitBoostRemoved = calculateVitBoostRemoved(
+                    purchaseItems,
+                    adventurer!,
+                    data.itemsByAdventurerQuery?.items ?? []
+                  );
+                  handleAddUpgradeTx(
+                    undefined,
+                    potionAmount - vitBoostRemoved,
+                    undefined
+                  );
+                }
                 await multicall(loadingMessage, notification);
                 handleResetCalls();
               }}
