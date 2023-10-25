@@ -674,15 +674,15 @@ export function processData(
           slayedBeastEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: slayedBeastEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             slayedBeastEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             slayedBeastEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             slayedBeastEvent.beastSpecs["specials"]["special3"]
           ],
         seed: slayedBeastEvent.seed,

@@ -30,6 +30,7 @@ import {
   ERC721TransferEvent,
 } from "@/app/types/events";
 import { processData } from "@/app/lib/utils/processData";
+import { hash } from "starknet";
 
 function parseAdventurerState(data: string[]) {
   return {
@@ -224,12 +225,17 @@ export async function parseEvents(
 
   for (let raw of receipt.events) {
     let eventName: string | null = "";
+    console.log(getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]));
+    console.log(raw.keys[0], hash.getSelectorFromName("Transfer"));
+    console.log(raw.from_address, beastsContract);
     // If event is a Transfer, make sure it is just the beast contract that
     if (getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]) == "Transfer") {
       if (raw.from_address == beastsContract) {
+        console.log("TRANSFERRED");
         eventName = "Transfer";
+      } else {
+        eventName = null;
       }
-      eventName = null;
     } else {
       if (event) {
         const eventFromKey = getKeyFromValue(

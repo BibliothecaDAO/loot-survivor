@@ -29,9 +29,11 @@ export const SpecialBeast = () => {
     setBeastImage(image);
   };
 
+  console.log(beastsContract?.address ?? "", specialBeast.tokenId);
+
   useEffect(() => {
     fetchBeast();
-  }, []);
+  }, [specialBeast.tokenId]);
 
   const beastName = processBeastName(
     specialBeast?.data?.beast ?? "Ent",
