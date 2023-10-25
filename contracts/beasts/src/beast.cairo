@@ -109,22 +109,11 @@ impl ImplBeast of IBeast {
         }
     }
 
-    // TODO: Change this to use the beasts level instead of adventurer level
-    //       Use Level 20 as the level gate
-    fn get_special_names(
-        adventurer_level: u8, seed: u128, special2_size: u128, special3_size: u128
-    ) -> SpecialPowers {
-        // if adventurer is below level 10, beasts don't get any special powers
-        if (adventurer_level < BEAST_SPECIAL_NAME_UNLOCK_LEVEL) {
-            SpecialPowers { special1: 0, special2: 0, special3: 0 }
-        } else {
-            // return special powers for beast
-            // special1 is intentionally 0 for now
-            SpecialPowers {
-                special1: 0,
-                special2: (1 + (seed % special2_size)).try_into().unwrap(),
-                special3: (1 + (seed % special3_size)).try_into().unwrap()
-            }
+    fn get_special_names(seed: u128, special2_size: u128, special3_size: u128) -> SpecialPowers {
+        SpecialPowers {
+            special1: 0,
+            special2: (1 + (seed % special2_size)).try_into().unwrap(),
+            special3: (1 + (seed % special3_size)).try_into().unwrap()
         }
     }
     fn get_level(adventurer_level: u8, seed: u128) -> u16 {
