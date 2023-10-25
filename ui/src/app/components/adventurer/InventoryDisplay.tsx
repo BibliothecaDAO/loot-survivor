@@ -9,7 +9,6 @@ import {
   calculateLevel,
   getKeyFromValue,
 } from "@/app/lib/utils";
-import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import { GameData } from "@/app/lib/data/GameData";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
@@ -131,11 +130,6 @@ export const InventoryCard = ({
                   `}
             </span>
             <span>Greatness {calculateLevel(item?.xp ?? 0)}</span>
-            {/* <Button
-              size={"xxxs"}
-              onClick={() => handleEquipItems(item?.item ?? "")}
-              disabled={equipItems.includes(itemId)}
-            > */}
             <button
               onClick={() => handleEquipItems(item?.item ?? "")}
               disabled={equipItems.includes(itemId)}
@@ -143,7 +137,6 @@ export const InventoryCard = ({
             >
               <p className="text-xxs sm:text-xs">Equip</p>
             </button>
-            {/* </Button> */}
           </div>
           <p className="text-text-ellipsis">{itemName}</p>
         </span>
