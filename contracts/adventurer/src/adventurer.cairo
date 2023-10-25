@@ -292,10 +292,7 @@ impl ImplAdventurer of IAdventurer {
             if (beast_level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK) {
                 special_names =
                     ImplBeast::get_special_names(
-                        adventurer_level,
-                        beast_seed,
-                        NamePrefixLength.into(),
-                        NameSuffixLength.into()
+                        beast_seed, NamePrefixLength.into(), NameSuffixLength.into()
                     );
             }
 
