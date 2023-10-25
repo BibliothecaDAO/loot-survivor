@@ -92,6 +92,8 @@ const NotificationComponent = ({
     }
   };
 
+  const checkRateLimit = errorMessage?.includes("rate limit exceeded");
+
   if (deathDialog) {
     return null;
   }
@@ -137,7 +139,9 @@ const NotificationComponent = ({
             />
           </div>
           <div className="flex items-center justify-center w-2/3 sm:w-3/4 m-auto text-sm sm:text-lg h-full default-scroll overflow-auto">
-            {notifications[currentIndex]?.message}
+            {checkRateLimit
+              ? "Bot Protection: Rate Limit Exceeded.\n\nPlease wait a few moments before retyring."
+              : notifications[currentIndex]?.message}
           </div>
           {error && (
             <Button onClick={() => copyToClipboard(errorMessage ?? "")}>
