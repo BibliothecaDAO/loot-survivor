@@ -270,14 +270,31 @@ export default function UpgradeScreen({
   const handleSubmitUpgradeTx = async () => {
     renderSummary();
     resetNotification();
+    // Handle for vitBoostRemoval
     const vitBoostRemoved = calculateVitBoostRemoved(
       purchaseItems,
       adventurer!,
       adventurerItems
     );
-    handleAddUpgradeTx(undefined, potionAmount - vitBoostRemoved, undefined)
+    if (potionAmount > 0) {
+      // Check whether health + pots is within vitBoostRemoved of the maxHealth
+      const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
+      const healthPlusPots = 100 + potionAmount * 10;
+      const checkInRange = maxHealth - healthPlusPots < vitBoostRemoved * 10;
+      if (checkInRange) {
+        handleAddUpgradeTx(
+          undefined,
+          Math.max(potionAmount - vitBoostRemoved, 0),
+          undefined
+        );
+      }
+    }
     try {
-      await upgrade(upgrades, purchaseItems, potionAmount - vitBoostRemoved);
+      await upgrade(
+        upgrades,
+        purchaseItems,
+        Math.max(potionAmount - vitBoostRemoved, 0)
+      );
       setPotionAmount(0);
       setPurchaseItems([]);
       setUpgrades({ ...ZeroUpgrade });
