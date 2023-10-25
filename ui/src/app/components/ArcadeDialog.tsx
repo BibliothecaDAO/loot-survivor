@@ -17,7 +17,7 @@ import Eth from "public/icons/eth-2.svg";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import TopupInput from "@/app/components/arcade/TopupInput";
-import Image from "next/image";
+// import Image from "next/image";
 
 interface ArcadeDialogProps {
   gameContract: Contract;
@@ -336,7 +336,7 @@ export const ArcadeAccountCard = ({
                   Add
                 </Button>
               </span>
-              <span className="flex flex-col items-center w-1/3">
+              {/* <span className="flex flex-col items-center w-1/3">
                 <div className="relative w-6 h-6 sm:w-8 sm:h-8">
                   <Image
                     src={"/golden-token.png"}
@@ -348,7 +348,7 @@ export const ArcadeAccountCard = ({
                 <Button size={"xxxs"} className="text-black" disabled={true}>
                   Buy
                 </Button>
-              </span>
+              </span> */}
             </span>
           )}
         </span>

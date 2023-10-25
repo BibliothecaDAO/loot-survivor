@@ -8,7 +8,7 @@ import {
   MetalIcon,
 } from "@/app/components/icons/Icons";
 
-export type IconSize = "w-4" | "w-5" | "w-6" | "w-7" | "w-8" | "w-10";
+export type IconSize = "w-3" | "w-4" | "w-5" | "w-6" | "w-7" | "w-8" | "w-10";
 
 export interface EfficacyDisplayProps {
   type: string;
