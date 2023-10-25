@@ -4,6 +4,7 @@ import { Button } from "@/app/components/buttons/Button";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { getPotionPrice } from "@/app/lib/utils";
 import { UpgradeStats } from "@/app/types";
+import { CoinIcon } from "../icons/Icons";
 
 interface PurchaseHealthProps {
   upgradeTotalCost: number;
@@ -65,6 +66,10 @@ const PurchaseHealth = ({
 
   return (
     <div className="flex flex-col sm:flex-row items-center">
+      <span className="flex flex-row">
+        <CoinIcon className="mt-1 w-5 h-5 fill-current text-terminal-yellow" />
+        <p className="text-terminal-yellow">{potionCost}</p>
+      </span>
       <QuantityButtons
         amount={potionAmount}
         min={0}

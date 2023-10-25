@@ -113,11 +113,11 @@ export const InventoryCard = ({
   };
 
   return (
-    <div className="flex flex-row items-center justify-between w-1/2 border border-terminal-green p-1">
+    <div className="flex flex-row items-center justify-between w-1/2 border border-terminal-green p-1 w-full">
       <div className="flex flex-row items-center">
         <div className="sm:hidden flex flex-col items-center justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
           <LootIcon size={"w-3"} type={itemSlot ? itemSlot : slot} />
-          <Efficacyicon size={"w-4"} type={type} />
+          <Efficacyicon size={"w-3"} type={type} />
         </div>
         <div className="hidden sm:flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
           <LootIcon size={"w-4"} type={itemSlot ? itemSlot : slot} />
