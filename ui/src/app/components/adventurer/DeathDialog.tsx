@@ -53,6 +53,8 @@ export const DeathDialog = () => {
       .catch((error) => console.error("Error refetching data:", error));
   }, []);
 
+  console.log(messageRef.current?.innerText, deathMessage);
+
   return (
     <>
       {rank && (
@@ -120,6 +122,7 @@ export const DeathDialog = () => {
                 } XP.\n\nGravestone bears the inscription:\n\n"${
                   messageRef.current?.innerText
                 }"🪦\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+                className="animate-pulse"
               />
               <Button
                 onClick={() => {

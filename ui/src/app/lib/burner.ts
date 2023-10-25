@@ -299,13 +299,21 @@ export const useBurner = (
     []
   );
 
-  const topUpEth = async (address: string, account: AccountInterface) => {
+  const topUpEth = async (
+    address: string,
+    account: AccountInterface,
+    ethAmount?: number
+  ) => {
     try {
       setIsToppingUpEth(true);
       const { transaction_hash } = await account.execute({
         contractAddress: ethContract?.address ?? "",
         entrypoint: "transfer",
-        calldata: CallData.compile([address, ETH_PREFUND_AMOUNT, "0x0"]),
+        calldata: CallData.compile([
+          address,
+          ethAmount ? (ethAmount * 10 ** 18).toString() : ETH_PREFUND_AMOUNT,
+          "0x0",
+        ]),
       });
 
       const result = await account.waitForTransaction(transaction_hash, {

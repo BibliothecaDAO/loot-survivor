@@ -71,6 +71,10 @@ type State = {
   setEstimatingFee: (value: boolean) => void;
   switchAdventurer: boolean;
   setSwitchAdventurer: (value: boolean) => void;
+  specialBeastDefeated: boolean;
+  setSpecialBeastDefeated: (value: boolean) => void;
+  specialBeast: any;
+  setSpecialBeast: (value: any) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -128,6 +132,10 @@ const useUIStore = create<State>((set) => ({
   setEstimatingFee: (value) => set({ estimatingFee: value }),
   switchAdventurer: false,
   setSwitchAdventurer: (value) => set({ switchAdventurer: value }),
+  specialBeastDefeated: false,
+  setSpecialBeastDefeated: (value) => set({ specialBeastDefeated: value }),
+  specialBeast: null,
+  setSpecialBeast: (value) => set({ specialBeast: value }),
 }));
 
 export default useUIStore;

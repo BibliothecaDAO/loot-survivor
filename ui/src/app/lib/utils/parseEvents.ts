@@ -27,6 +27,7 @@ import {
   UpgradesAvailableEvent,
   IdleDeathPenaltyEvent,
   AdventurerUpgradedEvent,
+  ERC721TransferEvent,
 } from "@/app/types/events";
 import { processData } from "@/app/lib/utils/processData";
 
@@ -211,6 +212,7 @@ function parseEquippedItems(data: string[]) {
 export async function parseEvents(
   receipt: InvokeTransactionReceiptResponse,
   currentAdventurer?: any,
+  beastsContract?: string,
   event?: string
 ) {
   if (!receipt.events) {
@@ -221,17 +223,27 @@ export async function parseEvents(
   let events: Array<any> = [];
 
   for (let raw of receipt.events) {
-    let eventName = "";
-    if (event) {
-      const eventFromKey = getKeyFromValue(
-        gameData.SELECTOR_KEYS,
-        raw.keys[0]
-      )!;
-      if (event == eventFromKey) {
-        eventName = event;
+    let eventName: string | null = "";
+    // If event is a Transfer, make sure it is just the beast contract that
+    if (getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]) == "Transfer") {
+      if (raw.from_address == beastsContract) {
+        eventName = "Transfer";
       }
+      eventName = null;
     } else {
-      eventName = getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0])!;
+      if (event) {
+        const eventFromKey = getKeyFromValue(
+          gameData.SELECTOR_KEYS,
+          raw.keys[0]
+        )!;
+        if (event == eventFromKey) {
+          eventName = event;
+        } else {
+          eventName = null;
+        }
+      } else {
+        eventName = getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]);
+      }
     }
 
     switch (eventName) {
@@ -718,6 +730,17 @@ export async function parseEvents(
           currentAdventurer
         );
         events.push({ name: eventName, data: idleDeathPenaltyEvent });
+        break;
+      case "Transfer":
+        const beastTransferData: ERC721TransferEvent = {
+          from: parseInt(raw.data[0]),
+          to: parseInt(raw.data[1]),
+          tokenId: {
+            low: parseInt(raw.data[2]),
+            high: parseInt(raw.data[3]),
+          },
+        };
+        events.push({ name: eventName, data: beastTransferData });
         break;
     }
   }

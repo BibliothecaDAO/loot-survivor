@@ -18,10 +18,12 @@ import {
 } from "@/app/lib/utils";
 import { parseEvents } from "@/app/lib/utils/parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
+import { CallData } from "starknet";
 
 export interface SyscallsProps {
   gameContract: any;
   lordsContract: any;
+  beastsContract: any;
   addTransaction: any;
   queryData: any;
   resetData: (...args: any[]) => any;
@@ -46,6 +48,8 @@ export interface SyscallsProps {
   setEstimatingFee: (...args: any[]) => any;
   account?: AccountInterface;
   resetCalls: (...args: any[]) => any;
+  setSpecialBeastDefeated: (...args: any[]) => any;
+  setSpecialBeast: (...args: any[]) => any;
 }
 
 function handleEquip(
@@ -102,6 +106,7 @@ function handleDrop(
 export function syscalls({
   gameContract,
   lordsContract,
+  beastsContract,
   addTransaction,
   account,
   queryData,
@@ -126,6 +131,8 @@ export function syscalls({
   setTopUpAccount,
   setEstimatingFee,
   resetCalls,
+  setSpecialBeastDefeated,
+  setSpecialBeast,
 }: SyscallsProps) {
   const gameData = new GameData();
 
@@ -267,6 +274,7 @@ export function syscalls({
         const startGameEvents = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
           undefined,
+          beastsContract,
           "StartGame"
         );
         const events = await parseEvents(
@@ -722,6 +730,33 @@ export function syscalls({
                   "special3",
                   ownedItemIndex
                 );
+              }
+            }
+          }
+
+          const transferEvents = events.filter(
+            (event) => event.name === "Transfer"
+          );
+          for (let transferEvent of transferEvents) {
+            // Check whether beast has a prefix and suffix, if so check token
+            if (
+              slayedBeastEvent.data[1].special2 &&
+              slayedBeastEvent.data[1].special3
+            ) {
+              const tokenMinted = await beastsContract.call(
+                "isMinted",
+                CallData.compile({
+                  beast: slayedBeastEvent.data[1].beast,
+                  prefix: slayedBeastEvent.data[1].special2,
+                  suffix: slayedBeastEvent.data[1].special3,
+                })
+              ); // check if token has been minted
+              if (!tokenMinted) {
+                setSpecialBeastDefeated(true);
+                setSpecialBeast({
+                  data: slayedBeastEvent.data[1],
+                  tokenId: transferEvent.data.tokenId.low,
+                });
               }
             }
           }

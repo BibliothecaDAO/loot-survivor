@@ -344,6 +344,7 @@ export const NotificationBattleDisplay = ({
             text={`${
               adventurer?.name
             } just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+            className="animate-pulse"
           />
         </div>
       );

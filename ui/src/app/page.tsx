@@ -51,6 +51,7 @@ import { syscalls } from "@/app/lib/utils/syscalls";
 import Game from "@/app/abi/Game.json";
 import Lords from "@/app/abi/Lords.json";
 import EthBalanceFragment from "@/app/abi/EthBalanceFragment.json";
+import Beasts from "@/app/abi/Beasts.json";
 import { getContracts } from "@/app/lib/constants";
 import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
 import ScreenMenu from "@/app/components/menu/ScreenMenu";
@@ -60,6 +61,7 @@ import { checkArcadeBalance } from "@/app/lib/utils";
 import { fetchBalances } from "@/app/lib/balances";
 import useTransactionManager from "./hooks/useTransactionManager";
 import StarknetProvider from "@/app//provider";
+import { SpecialBeast } from "./components/notifications/SpecialBeast";
 import { useBurner } from "@/app/lib/burner";
 import { connectors } from "@/app/lib/connectors";
 
@@ -136,7 +138,13 @@ function Home({ updateConnectors }: HomeProps) {
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
   const setEstimatingFee = useUIStore((state) => state.setEstimatingFee);
-
+  const setSpecialBeast = useUIStore((state) => state.setSpecialBeast);
+  const specialBeastDefeated = useUIStore(
+    (state) => state.specialBeastDefeated
+  );
+  const setSpecialBeastDefeated = useUIStore(
+    (state) => state.setSpecialBeastDefeated
+  );
   const contracts = getContracts();
   const { contract: gameContract } = useContract({
     address: contracts?.game,
@@ -149,6 +157,10 @@ function Home({ updateConnectors }: HomeProps) {
   const { contract: ethContract } = useContract({
     address: contracts?.eth,
     abi: EthBalanceFragment,
+  });
+  const { contract: beastsContract } = useContract({
+    address: contracts?.beasts,
+    abi: Beasts,
   });
 
   const { addTransaction } = useTransactionManager();
@@ -194,6 +206,7 @@ function Home({ updateConnectors }: HomeProps) {
     syscalls({
       gameContract,
       lordsContract,
+      beastsContract,
       addTransaction,
       queryData: data,
       resetData,
@@ -218,6 +231,8 @@ function Home({ updateConnectors }: HomeProps) {
       setEstimatingFee,
       account,
       resetCalls,
+      setSpecialBeastDefeated,
+      setSpecialBeast,
     });
 
   const playState = useMemo(
@@ -442,6 +457,7 @@ function Home({ updateConnectors }: HomeProps) {
         <>
           <div className="flex flex-col w-full">
             <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
+            {specialBeastDefeated && <SpecialBeast />}
             {!spawnLoader && (
               <div className="sm:hidden">
                 <TxActivity />
@@ -511,7 +527,7 @@ function Home({ updateConnectors }: HomeProps) {
                 <div className="sm:hidden">
                   <MobileHeader />
                 </div>
-                <div className="h-[550px] sm:h-[600px]">
+                <div className="h-[550px] xl:h-[500px] 2xl:h-[580px]">
                   {screen === "start" && (
                     <AdventurerScreen
                       spawn={spawn}

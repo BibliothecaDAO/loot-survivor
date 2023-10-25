@@ -1,3 +1,8 @@
+type u256 = {
+  low: u128;
+  high: u128;
+};
+
 type u128 = number;
 type u64 = number;
 type u16 = number;
@@ -315,4 +320,10 @@ export type AdventurerUpgradedEvent = {
   intelligenceIncrease: u8;
   wisdomIncrease: u8;
   charismaIncrease: u8;
+};
+
+export type ERC721TransferEvent = {
+  from: ContractAddress;
+  to: ContractAddress;
+  tokenId: u256;
 };

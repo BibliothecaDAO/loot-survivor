@@ -53,6 +53,10 @@ export function getContracts() {
         game: "0x04cfd4feff2185113e07bee4b354a82480dd6c79189baf18e4bc93093149f2ab",
         lords:
           "0x05e367ac160e5f90c5775089b582dfc987dd148a5a2f977c49def2a6644f724b",
+        beasts:
+          "0x05f9699b308b8544fddab9da50d7374743d0b3ca5b53de9c92e26d6bd99705ed",
+        goldenToken:
+          "0x01702a257408fbdc70c7f8d21aa505bd4b140169cfbf60c9324d695dcc3734ac",
       };
     case "mainnet":
       return {
@@ -60,6 +64,8 @@ export function getContracts() {
         game: "0x0",
         lords:
           "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+        beasts: "0x0",
+        goldenToken: "0x0",
       };
   }
 }
@@ -79,6 +85,15 @@ export function getAppUrl() {
       return "https://goerli-survivor.realms.world/";
     case "mainnet":
       return "https://survivor.realms.world/";
+  }
+}
+
+export function getTokenViewerUrl() {
+  switch (NETWORK) {
+    case "goerli":
+      return "https://realmsworld-git-ls-updates-loot-bibliotheca.vercel.app/collection/beasts/";
+    case "mainnet":
+      return "https://realmsworld-git-ls-updates-loot-bibliotheca.vercel.app/collection/beasts/";
   }
 }
 
@@ -108,7 +123,7 @@ export const idleDeathPenaltyBlocks = 300;
 
 // UI PARAMS
 export const MIN_BALANCE = 10000000000000; // 0.00001ETH or $0.015
-export const FEE_CHECK_BALANCE = 250000000000000; // 0.00025ETH or $0.45
+export const FEE_CHECK_BALANCE = 200000000000000; // 0.00025ETH or $0.45
 
 export const deathMessages = [
   {
