@@ -26,6 +26,7 @@ import useOnClickOutside from "@/app/hooks/useOnClickOutside";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { chunkArray } from "@/app/lib/utils";
 import { UpgradeStats } from "@/app/types";
+import { calculateVitBoostRemoved } from "@/app/lib/utils";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
@@ -453,6 +454,26 @@ const TransactionCart = ({
               disabled={!callExists}
               onClick={async () => {
                 resetNotification();
+                // Handle for vitBoostRemoval
+                if (potionAmount > 0) {
+                  // Check whether health + pots is within vitBoostRemoved of the maxHealth
+                  const vitBoostRemoved = calculateVitBoostRemoved(
+                    purchaseItems,
+                    adventurer!,
+                    data.itemsByAdventurerQuery?.items ?? []
+                  );
+                  const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
+                  const healthPlusPots = 100 + potionAmount * 10;
+                  const checkInRange =
+                    maxHealth - healthPlusPots < vitBoostRemoved * 10;
+                  if (checkInRange) {
+                    handleAddUpgradeTx(
+                      undefined,
+                      Math.max(potionAmount - vitBoostRemoved, 0),
+                      undefined
+                    );
+                  }
+                }
                 await multicall(loadingMessage, notification);
                 handleResetCalls();
               }}

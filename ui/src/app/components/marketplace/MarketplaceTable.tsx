@@ -17,6 +17,7 @@ export interface MarketplaceTableProps {
   ) => void;
   totalCharisma: number;
   calculatedNewGold: number;
+  adventurerItems: Item[];
 }
 
 const MarketplaceTable = ({
@@ -25,6 +26,7 @@ const MarketplaceTable = ({
   upgradeHandler,
   totalCharisma,
   calculatedNewGold,
+  adventurerItems,
 }: MarketplaceTableProps) => {
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -36,9 +38,6 @@ const MarketplaceTable = ({
 
   const marketLatestItems = useQueriesStore(
     (state) => state.data.latestMarketItemsQuery?.items || []
-  );
-  const adventurerItems = useQueriesStore(
-    (state) => state.data.itemsByAdventurerQuery?.items || []
   );
 
   const headings = ["Item", "Tier", "Slot", "Type", "Cost", "Actions"];

@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 import { z } from "zod";
 import { Call, AccountInterface } from "starknet";
-import { Adventurer, Item } from "@/app/types";
+import { Adventurer, Item, ItemPurchase } from "@/app/types";
 import { GameData } from "@/app/lib/data/GameData";
 import {
   itemCharismaDiscount,
@@ -435,3 +435,144 @@ export const fetchBlockTime = async (currentBlock: number) => {
     console.error("Error:", error);
   }
 };
+
+export const calculateVitBoostRemoved = (
+  purchases: ItemPurchase[],
+  adventurer: Adventurer,
+  items: any[]
+) => {
+  const gameData = new GameData();
+  const equippedItems = purchases.filter((purchase) => purchase.equip === "1");
+  const itemStrings = equippedItems.map(
+    (purchase) => gameData.ITEMS[parseInt(purchase?.item) ?? 0]
+  );
+  const slotStrings = itemStrings.map(
+    (itemString) => gameData.ITEM_SLOTS[itemString.split(" ").join("")]
+  );
+
+  // loop through slots and check what item is equipped
+  const unequippedSuffixBoosts = [];
+  for (const slot of slotStrings) {
+    if (slot === "Weapon") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.weapon)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Chest") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.chest)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Head") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.head)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Waist") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.waist)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Foot") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.foot)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Hand") {
+      console.log(adventurer.hand);
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.hand)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Neck") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.neck)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Ring") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.ring)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+  }
+  const filteredSuffixBoosts = unequippedSuffixBoosts.filter(
+    (suffix) => suffix !== undefined
+  );
+  const vitTotal = findAndSumVitValues(filteredSuffixBoosts);
+  return vitTotal;
+};
+
+function findAndSumVitValues(arr: string[]): number {
+  let total = 0;
+
+  arr.forEach((str) => {
+    const matches = str.match(/VIT \+\d+/g);
+    console.log(matches);
+
+    if (matches) {
+      matches.forEach((match) => {
+        const value = parseInt(match.split("+")[1]);
+        console.log(value);
+        total += value;
+      });
+    }
+  });
+
+  return total;
+}
