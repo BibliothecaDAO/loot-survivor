@@ -588,11 +588,6 @@ mod Game {
             // upgrade adventurer's stats
             _upgrade_stats(@self, ref adventurer, stat_upgrades);
 
-            // if the player is buying potions as part of the upgrade
-            if potions != 0 {
-                _buy_potions(ref self, ref adventurer, adventurer_id, potions);
-            }
-
             // if the player is buying items, process purchases
             if (items.len() != 0) {
                 let (purchases, equipped_items, unequipped_items) = _buy_items(
@@ -614,6 +609,12 @@ mod Game {
                         ref self, adventurer, adventurer_id, bag, equipped_items, unequipped_items,
                     );
                 }
+            }
+
+            // if the player is buying potions as part of the upgrade, process purchase
+            // @dev process potion purchase after items in case item purchases changes item stat boosts
+            if potions != 0 {
+                _buy_potions(ref self, ref adventurer, adventurer_id, potions);
             }
 
             // emit adventurer upgraded event
@@ -2378,6 +2379,13 @@ mod Game {
         let (name_storage1, name_storage2) = _get_special_storages(self, adventurer_id);
         let item_specials = ImplItemSpecials::get_specials_full(name_storage1, name_storage2, item);
         adventurer.stats.remove_suffix_boost(item_specials.special1);
+
+        // if the adventurer's health is now above the max health due to a change in Vitality
+        let max_health = AdventurerUtils::get_max_health(adventurer.stats.vitality);
+        if adventurer.health > max_health {
+            // lower adventurer's health to max health 
+            adventurer.health = max_health;
+        }
     }
 
     fn _apply_equipment_stat_boosts(
