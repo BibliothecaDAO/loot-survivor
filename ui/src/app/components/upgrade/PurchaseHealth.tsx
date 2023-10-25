@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import QuantityButtons from "@/app/components/buttons/QuantityButtons";
 import { Button } from "@/app/components/buttons/Button";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import { CoinIcon } from "@/app/components/icons/Icons";
 import { getPotionPrice } from "@/app/lib/utils";
 import { UpgradeStats } from "@/app/types";
 
@@ -31,8 +30,6 @@ const PurchaseHealth = ({
   const [buttonClicked, setButtonClicked] = useState(false);
 
   const potionCost = getPotionPrice(adventurer?.level ?? 0, totalCharisma);
-
-  const purchaseGoldAmount = potionAmount * potionCost;
 
   const hasBalance = adventurer?.gold && adventurer?.gold >= upgradeTotalCost;
 

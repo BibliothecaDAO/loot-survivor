@@ -133,7 +133,7 @@ export const formatTime = (date: Date) => {
 };
 
 export function shortenHex(hexString: string, numDigits = 6) {
-  if (hexString.length <= numDigits) {
+  if (hexString?.length <= numDigits) {
     return hexString;
   }
 
