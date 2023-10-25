@@ -296,7 +296,7 @@ export default function InventoryScreen({
       </div>
       {adventurer?.id ? (
         <div className="w-5/6 sm:w-1/2">
-          <div className="flex flex-col sm:gap-5">
+          <div className="flex flex-col sm:gap-5 h-full">
             <span className="flex flex-row justify-between">
               <h4 className="m-0">{selected} Loot</h4>{" "}
               <span className="flex text-lg items-center sm:text-3xl">
@@ -313,30 +313,29 @@ export default function InventoryScreen({
                 items of Tier 5 offer the most basic value.
               </p>
             </div>
-            <div className="flex flex-col overflow-y-auto h-[450px] sm:h-[360px] 2xl:h-full 2xl:overflow-y-hidden">
+            <div className="flex flex-col overflow-y-auto h-[450px] table-scroll">
               {selectedItems.length ? (
                 selectedItems.map((item: Item, index: number) => {
                   const itemId =
                     getKeyFromValue(gameData.ITEMS, item?.item ?? "") ?? "";
                   return (
-                    <div className="w-full mb-1" key={index}>
-                      <ItemDisplay
-                        item={item}
-                        inventory={true}
-                        equip={() => {
-                          setEquipItems([...equipItems, itemId]);
-                          handleEquipItems(item.item ?? "");
-                        }}
-                        equipped={item.equipped}
-                        disabled={
-                          item.equipped ||
-                          checkTransacting(item.item ?? "") ||
-                          equipItems.includes(itemId)
-                        }
-                        handleDrop={handleDropItems}
-                        gameContract={gameContract}
-                      />
-                    </div>
+                    <ItemDisplay
+                      item={item}
+                      inventory={true}
+                      equip={() => {
+                        setEquipItems([...equipItems, itemId]);
+                        handleEquipItems(item.item ?? "");
+                      }}
+                      equipped={item.equipped}
+                      disabled={
+                        item.equipped ||
+                        checkTransacting(item.item ?? "") ||
+                        equipItems.includes(itemId)
+                      }
+                      handleDrop={handleDropItems}
+                      gameContract={gameContract}
+                      key={index}
+                    />
                   );
                 })
               ) : (
