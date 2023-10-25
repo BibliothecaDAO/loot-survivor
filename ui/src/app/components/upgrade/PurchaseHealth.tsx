@@ -41,14 +41,6 @@ const PurchaseHealth = ({
     Math.floor((adventurer?.gold! - potionAmount * potionCost) / potionCost)
   );
 
-  console.log(
-    Math.ceil((maxHealth - (adventurer?.health ?? 0)) / 10),
-    Math.floor(
-      adventurer?.gold! -
-        (upgradeTotalCost - potionAmount * potionCost) / potionCost
-    )
-  );
-
   const fillToMax = () => {
     if (hasBalance) {
       setPotionAmount(max);
