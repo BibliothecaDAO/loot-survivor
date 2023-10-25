@@ -158,7 +158,7 @@ export const Spawn = ({
                       <p className="whitespace-nowrap w-3/4 mr-5">
                         {checkEnoughLords
                           ? formFilled
-                            ? "Insert Lords"
+                            ? "Play With Lords Tokens"
                             : "Fill details"
                           : "Not enough Lords"}
                       </p>
@@ -166,7 +166,7 @@ export const Spawn = ({
                     </div>
                   </Button>
 
-                  <Button
+                  {/* <Button
                     type="submit"
                     size={"xl"}
                     disabled={
@@ -175,8 +175,7 @@ export const Spawn = ({
                       isWrongNetwork ||
                       loading ||
                       estimatingFee ||
-                      !goldenTokenExists ||
-                      true //TODO: UNCOMMENT
+                      !goldenTokenExists
                     }
                     className="relative"
                   >
@@ -184,7 +183,7 @@ export const Spawn = ({
                       <p className="whitespace-nowrap w-3/4">
                         {goldenTokenExists
                           ? formFilled
-                            ? "Insert Golden Token"
+                            ? "Play With Golden Token"
                             : "Fill details"
                           : "No tokens"}
                       </p>
@@ -196,7 +195,7 @@ export const Spawn = ({
                         />
                       </div>
                     </div>
-                  </Button>
+                  </Button> */}
                 </div>
               </form>
               {!checkEnoughLords && (
