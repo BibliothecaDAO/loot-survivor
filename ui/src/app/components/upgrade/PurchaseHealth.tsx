@@ -38,7 +38,10 @@ const PurchaseHealth = ({
 
   const max = Math.min(
     Math.ceil((maxHealth - (adventurer?.health ?? 0)) / 10),
-    Math.floor((adventurer?.gold! - potionAmount * potionCost) / potionCost)
+    Math.floor(
+      (adventurer?.gold! - (upgradeTotalCost - potionAmount * potionCost)) /
+        potionCost
+    )
   );
 
   const fillToMax = () => {
