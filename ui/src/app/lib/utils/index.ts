@@ -514,7 +514,6 @@ export const calculateVitBoostRemoved = (
       );
     }
     if (slot === "Hand") {
-      console.log(adventurer.hand);
       unequippedSuffixBoosts.push(
         gameData.ITEM_SUFFIX_BOOST[
           parseInt(
@@ -563,12 +562,10 @@ function findAndSumVitValues(arr: string[]): number {
 
   arr.forEach((str) => {
     const matches = str.match(/VIT \+\d+/g);
-    console.log(matches);
 
     if (matches) {
       matches.forEach((match) => {
         const value = parseInt(match.split("+")[1]);
-        console.log(value);
         total += value;
       });
     }

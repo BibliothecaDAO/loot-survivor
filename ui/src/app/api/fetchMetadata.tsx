@@ -5,8 +5,6 @@ export const fetchBeastImage = async (
   beastsAddress: string,
   tokenId: number
 ) => {
-  console.log(beastsAddress);
-  console.log(tokenId);
   const rpcUrl = getRPCUrl();
   const response = await fetch(rpcUrl, {
     method: "POST",
@@ -21,7 +19,7 @@ export const fetchBeastImage = async (
           contract_address: beastsAddress,
           entry_point_selector:
             "0x012a7823b0c6bee58f8c694888f32f862c6584caa8afa0242de046d298ba684d", // tokenURI
-          calldata: ["40", "0x0"],
+          calldata: [tokenId.toString(16), "0x0"],
         },
         "pending",
       ],
@@ -29,11 +27,7 @@ export const fetchBeastImage = async (
     }),
   });
 
-  console.log(tokenId.toString(), "0x0");
-
   const data = await response.json();
-
-  console.log(data);
 
   if (response.ok) {
     console.log("Beast fetched successfully");

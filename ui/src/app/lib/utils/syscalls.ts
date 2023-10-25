@@ -19,7 +19,6 @@ import {
 } from "@/app/lib/utils";
 import { parseEvents } from "@/app/lib/utils/parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
-import { CallData } from "starknet";
 
 export interface SyscallsProps {
   gameContract: any;
@@ -226,7 +225,6 @@ export function syscalls({
     };
 
     addToCalls(mintAdventurerTx);
-    console.log(ethBalance);
     const balanceEmpty = await checkArcadeBalance(
       [...calls, mintLords, approveLordsSpendingTx, mintAdventurerTx],
       ethBalance,
@@ -741,8 +739,6 @@ export function syscalls({
             (event) => event.name === "Transfer"
           );
           for (let transferEvent of transferEvents) {
-            // Check whether beast has a prefix and suffix, if so check token
-            console.log(slayedBeastEvent);
             if (
               slayedBeastEvent.data[1].special2 &&
               slayedBeastEvent.data[1].special3
@@ -752,10 +748,6 @@ export function syscalls({
                 data: slayedBeastEvent.data[1],
                 tokenId: transferEvent.data.tokenId.low,
               });
-              console.log(
-                slayedBeastEvent.data[1],
-                transferEvent.data.tokenId.low
-              );
             }
           }
         }

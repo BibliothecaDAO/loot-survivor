@@ -53,8 +53,6 @@ export const DeathDialog = () => {
       .catch((error) => console.error("Error refetching data:", error));
   }, []);
 
-  console.log(messageRef.current?.innerText, deathMessage);
-
   return (
     <>
       {rank && (

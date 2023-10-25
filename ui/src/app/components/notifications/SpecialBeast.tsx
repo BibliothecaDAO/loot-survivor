@@ -24,16 +24,14 @@ export const SpecialBeast = () => {
   const fetchBeast = async () => {
     const image = await fetchBeastImage(
       beastsContract?.address ?? "",
-      specialBeast.tokenId
+      specialBeast?.tokenId
     );
     setBeastImage(image);
   };
 
-  console.log(beastsContract?.address ?? "", specialBeast.tokenId);
-
   useEffect(() => {
     fetchBeast();
-  }, [specialBeast.tokenId]);
+  }, []);
 
   const beastName = processBeastName(
     specialBeast?.data?.beast ?? "Ent",
@@ -69,10 +67,12 @@ export const SpecialBeast = () => {
             <TwitterShareButton
               text={`${
                 adventurer?.name
-              } just defeated the first ${beastName} and collects the 1:1 Beast #LootSurvivor.\n\nSee the token here: ${getAppUrl()}👹\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+              } just defeated the first ${beastName} and collects the 1:1 Beast #LootSurvivor.\n\nToken: ${
+                getTokenViewerUrl() + specialBeast?.tokenId.toString()
+              }👹\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
             />
             <a
-              href={getTokenViewerUrl() + specialBeast.tokenId.toString()}
+              href={getTokenViewerUrl() + specialBeast?.tokenId.toString()}
               target="_blank"
             >
               <Button>View Token</Button>
