@@ -551,7 +551,10 @@ export const calculateVitBoostRemoved = (
       );
     }
   }
-  const vitTotal = findAndSumVitValues(unequippedSuffixBoosts);
+  const filteredSuffixBoosts = unequippedSuffixBoosts.filter(
+    (suffix) => suffix !== undefined
+  );
+  const vitTotal = findAndSumVitValues(filteredSuffixBoosts);
   return vitTotal;
 };
 
