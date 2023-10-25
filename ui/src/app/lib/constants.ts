@@ -50,11 +50,11 @@ export function getContracts() {
     case "goerli":
       return {
         eth: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-        game: "0x0759060edbce85ab703ecca246194f625387e44ef5b1b7b91e685e70b2a1c342",
+        game: "0x03f956f9bd8734f809f3ea1a0388bf70072cc63223f0e92ec5a1313539e13b7a",
         lords:
           "0x05e367ac160e5f90c5775089b582dfc987dd148a5a2f977c49def2a6644f724b",
         beasts:
-          "0x05ffc59bb38e18a1ddc09e4c92963642ee7b66b6fc32dc76aa6c33a3b4197f82",
+          "0x04c96c8135e17ffe161ed2f2d34c52ffc8eb03b47c774c38ca8ac8e34f45485c",
         goldenToken:
           "0x04a71260d6e29274b760195acdc5379592bd78383713ddce5d2c635d237edf55",
       };

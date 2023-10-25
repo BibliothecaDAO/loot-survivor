@@ -246,6 +246,8 @@ export async function parseEvents(
       }
     }
 
+    console.log(eventName);
+
     switch (eventName) {
       case "StartGame":
         const startGameData: StartGameEvent = {

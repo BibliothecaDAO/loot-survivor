@@ -449,6 +449,8 @@ function Home({ updateConnectors }: HomeProps) {
     }
   };
 
+  console.log(specialBeastDefeated);
+
   return (
     <main
       className={`min-h-screen container mx-auto flex flex-col sm:pt-8 sm:p-8 lg:p-10 2xl:p-20 `}

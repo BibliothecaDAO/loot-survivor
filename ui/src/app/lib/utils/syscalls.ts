@@ -225,6 +225,7 @@ export function syscalls({
     };
 
     addToCalls(mintAdventurerTx);
+    console.log(ethBalance);
     const balanceEmpty = await checkArcadeBalance(
       [...calls, mintLords, approveLordsSpendingTx, mintAdventurerTx],
       ethBalance,
@@ -743,6 +744,7 @@ export function syscalls({
               slayedBeastEvent.data[1].special2 &&
               slayedBeastEvent.data[1].special3
             ) {
+              console.log("HERE");
               const tokenMinted = await beastsContract.call(
                 "isMinted",
                 CallData.compile({
@@ -751,6 +753,7 @@ export function syscalls({
                   suffix: slayedBeastEvent.data[1].special3,
                 })
               ); // check if token has been minted
+              console.log(tokenMinted);
               if (!tokenMinted) {
                 setSpecialBeastDefeated(true);
                 setSpecialBeast({
