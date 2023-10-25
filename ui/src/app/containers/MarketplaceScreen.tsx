@@ -1,7 +1,7 @@
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import LootIconLoader from "@/app/components/icons/Loader";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import { ItemPurchase, UpgradeStats } from "@/app/types";
+import { Item, ItemPurchase, UpgradeStats } from "@/app/types";
 import MarketplaceTable from "@/app/components/marketplace/MarketplaceTable";
 
 export interface MarketplaceScreenProps {
@@ -14,6 +14,7 @@ export interface MarketplaceScreenProps {
     purchases?: any[]
   ) => void;
   totalCharisma: number;
+  adventurerItems: Item[];
 }
 /**
  * @container
@@ -26,13 +27,10 @@ export default function MarketplaceScreen({
   setPurchaseItems,
   upgradeHandler,
   totalCharisma,
+  adventurerItems,
 }: MarketplaceScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const { isLoading } = useQueriesStore();
-
-  const adventurerItems = useQueriesStore(
-    (state) => state.data.itemsByAdventurerQuery?.items || []
-  );
 
   const calculatedNewGold = adventurer?.gold
     ? adventurer?.gold - upgradeTotalCost
@@ -55,6 +53,7 @@ export default function MarketplaceScreen({
             upgradeHandler={upgradeHandler}
             totalCharisma={totalCharisma}
             calculatedNewGold={calculatedNewGold}
+            adventurerItems={adventurerItems}
           />
         </div>
       ) : (

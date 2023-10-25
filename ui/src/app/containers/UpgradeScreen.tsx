@@ -31,6 +31,8 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { UpgradeStats, ZeroUpgrade, UpgradeSummary } from "@/app/types";
 import Summary from "@/app/components/upgrade/Summary";
 import { HealthCountDown } from "@/app/components/CountDown";
+import { calculateVitBoostRemoved } from "@/app/lib/utils";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
 
 interface UpgradeScreenProps {
   upgrade: (...args: any[]) => any;
@@ -268,8 +270,31 @@ export default function UpgradeScreen({
   const handleSubmitUpgradeTx = async () => {
     renderSummary();
     resetNotification();
+    // Handle for vitBoostRemoval
+    const vitBoostRemoved = calculateVitBoostRemoved(
+      purchaseItems,
+      adventurer!,
+      adventurerItems
+    );
+    if (potionAmount > 0) {
+      // Check whether health + pots is within vitBoostRemoved of the maxHealth
+      const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
+      const healthPlusPots = 100 + potionAmount * 10;
+      const checkInRange = maxHealth - healthPlusPots < vitBoostRemoved * 10;
+      if (checkInRange) {
+        handleAddUpgradeTx(
+          undefined,
+          Math.max(potionAmount - vitBoostRemoved, 0),
+          undefined
+        );
+      }
+    }
     try {
-      await upgrade(upgrades, purchaseItems, potionAmount);
+      await upgrade(
+        upgrades,
+        purchaseItems,
+        Math.max(potionAmount - vitBoostRemoved, 0)
+      );
       setPotionAmount(0);
       setPurchaseItems([]);
       setUpgrades({ ...ZeroUpgrade });
@@ -325,6 +350,10 @@ export default function UpgradeScreen({
   useEffect(() => {
     getNoBoostedStats();
   }, []);
+
+  const adventurerItems = useQueriesStore(
+    (state) => state.data.itemsByAdventurerQuery?.items || []
+  );
 
   return (
     <>
@@ -501,6 +530,7 @@ export default function UpgradeScreen({
                         setPurchaseItems={setPurchaseItems}
                         upgradeHandler={handleAddUpgradeTx}
                         totalCharisma={totalCharisma}
+                        adventurerItems={adventurerItems}
                       />
                     </div>
                   )}
@@ -512,6 +542,7 @@ export default function UpgradeScreen({
                         setPurchaseItems={setPurchaseItems}
                         upgradeHandler={handleAddUpgradeTx}
                         totalCharisma={totalCharisma}
+                        adventurerItems={adventurerItems}
                       />
                     </div>
                   )}
