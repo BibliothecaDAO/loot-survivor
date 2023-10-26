@@ -16,7 +16,6 @@ export function StarknetProvider({
   children: React.ReactNode;
 }) {
   const apiKey = process.env.NEXT_PUBLIC_RPC_API_KEY!;
-  console.log(apiKey);
   // const providers = [infuraProvider({ apiKey })]
   const providers = [alchemyProvider({ apiKey })];
   return (

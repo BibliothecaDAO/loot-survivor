@@ -4,7 +4,7 @@ import { displayAddress, padAddress } from "@/app/lib/utils";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import LootIconLoader from "@/app/components/icons/Loader";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
-import { InvokeTransactionReceiptResponse } from "starknet";
+// import { InvokeTransactionReceiptResponse } from "starknet";
 
 export const TxActivity = () => {
   const stopLoading = useLoadingStore((state) => state.stopLoading);
@@ -16,8 +16,7 @@ export const TxActivity = () => {
   const setError = useTransactionCartStore((state) => state.setError);
   const { data } = useWaitForTransaction({
     hash,
-    watch: true,
-  }) as { data: InvokeTransactionReceiptResponse };
+  });
 
   if (data?.status === "ACCEPTED_ON_L2") {
     setTxAccepted(true);
@@ -79,7 +78,7 @@ export const TxActivity = () => {
           {hash && (
             <div className="flex flex-row gap-2">
               <span className="hidden sm:block">Status:</span>{" "}
-              {data?.finality_status ?? "PENDING"}
+              {data?.status ?? "PENDING"}
             </div>
           )}
         </div>

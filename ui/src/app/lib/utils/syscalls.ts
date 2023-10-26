@@ -256,11 +256,12 @@ export function syscalls({
           },
         });
         const receipt = await account?.waitForTransaction(
-          tx?.transaction_hash,
-          {
-            retryInterval: 2000,
-          }
+          tx?.transaction_hash
+          // {
+          //   retryInterval: 2000,
+          // }
         );
+        console.log(receipt);
         // Handle if the tx was reverted
         if (
           (receipt as RevertedTransactionReceiptResponse).execution_status ===
