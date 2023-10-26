@@ -32,7 +32,7 @@ const QuantityButtons: React.FC<ButtonProps> = ({
     <div className="text-xl">
       <Button
         size={size}
-        variant={"outline"}
+        variant={"default"}
         onClick={handleDecrement}
         disabled={amount <= min}
       >
@@ -41,7 +41,7 @@ const QuantityButtons: React.FC<ButtonProps> = ({
       <span className=" p-2">{amount}</span>
       <Button
         size={size}
-        variant={"outline"}
+        variant={"default"}
         onClick={handleIncrement}
         disabled={amount >= max}
       >
