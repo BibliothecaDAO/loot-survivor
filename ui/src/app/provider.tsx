@@ -3,7 +3,7 @@ import React from "react";
 import {
   Connector,
   StarknetConfig,
-  infuraProvider,
+  // infuraProvider,
   alchemyProvider,
 } from "@starknet-react/core";
 import { goerli, mainnet } from "@starknet-react/chains";
@@ -16,7 +16,7 @@ export default function StarknetProvider({
   connectors: Connector[];
   children: React.ReactNode;
 }) {
-  const apiKey = getAPIKey();
+  const apiKey = getAPIKey()!;
   // const providers = [infuraProvider({ apiKey })]
   const providers = [alchemyProvider({ apiKey })];
   return (
