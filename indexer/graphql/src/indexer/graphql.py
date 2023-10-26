@@ -14,6 +14,14 @@ from indexer.config import Config
 config = Config()
 
 
+def parse_u256(value):
+    return value * (10**18)
+
+
+def serialize_u256(value):
+    return value / (10**18)
+
+
 def parse_hex(value):
     if not value.startswith("0x"):
         raise ValueError("invalid Hex value")
@@ -236,6 +244,11 @@ def serialize_adventurer(value):
     return config.ATTACKERS.get(felt)
 
 
+U256Value = strawberry.scalar(
+    NewType("U256Value", bytes), parse_value=parse_u256, serialize=serialize_u256
+)
+
+
 HexValue = strawberry.scalar(
     NewType("HexValue", bytes), parse_value=parse_hex, serialize=serialize_hex
 )
@@ -343,6 +356,17 @@ AttackerValue = strawberry.scalar(
     parse_value=parse_adventurer,
     serialize=serialize_adventurer,
 )
+
+
+@strawberry.input
+class U256ValueFilter:
+    eq: Optional[U256Value] = None
+    _in: Optional[List[U256Value]] = None
+    notIn: Optional[List[U256Value]] = None
+    lt: Optional[U256Value] = None
+    lte: Optional[U256Value] = None
+    gt: Optional[U256Value] = None
+    gte: Optional[U256Value] = None
 
 
 @strawberry.input
@@ -669,7 +693,7 @@ class ScoresFilter:
     txHash: Optional[HexValueFilter] = None
     scoreTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
-    totalPayout: Optional[FloatFilter] = None
+    totalPayout: Optional[U256ValueFilter] = None
 
 
 @strawberry.input
@@ -966,7 +990,7 @@ class Score:
     txHash: Optional[HexValue]
     scoreTime: Optional[str]
     timestamp: Optional[str]
-    totalPayout: Optional[float]
+    totalPayout: Optional[U256Value]
 
     @classmethod
     def from_mongo(cls, data):
@@ -1335,7 +1359,7 @@ def get_scores(
                 filter[key] = get_date_filters(value)
             elif isinstance(value, FeltValueFilter):
                 filter[key] = get_felt_filters(value)
-            elif isinstance(value, FloatFilter):
+            elif isinstance(value, U256ValueFilter):
                 filter[key] = get_felt_filters(value)
 
     sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
