@@ -27,7 +27,7 @@ export const ItemsTutorial = () => {
         There are three types of weapons: Blades, Bludgeons, and Magical
       </p>
       <p className="sm:text-xl sm:text-lg">
-        There are three types of armor: Hide, Metal, and Magic
+        There are three types of armor: Hide, Metal, and Cloth
       </p>
     </div>
   );
