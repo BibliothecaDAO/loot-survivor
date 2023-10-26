@@ -14,17 +14,12 @@ import {
 import Storage from "@/app/lib/storage";
 import { ArcadeConnector } from "@/app/lib/arcade";
 import { BurnerStorage } from "@/app/types";
-import {
-  getRPCUrl,
-  getArcadeClassHash,
-  getContracts,
-} from "@/app/lib/constants";
 import { Connector } from "@starknet-react/core";
 
 export const ETH_PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
 export const LORDS_PREFUND_AMOUNT = "0x0d8d726b7177a80000"; // 250LORDS
 
-const rpc_addr = getRPCUrl();
+const rpc_addr = process.env.NEXT_PUBLIC_RPC_URL;
 const provider = new Provider({
   rpc: { nodeUrl: rpc_addr! },
   sequencer: { baseUrl: rpc_addr! },
@@ -43,8 +38,7 @@ export const useBurner = (
   const [isToppingUpEth, setIsToppingUpEth] = useState(false);
   const [isToppingUpLords, setIsToppingUpLords] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const arcadeClassHash = getArcadeClassHash();
-  const contracts = getContracts();
+  const arcadeClassHash = process.env.NEXT_PUBLIC_ARCADE_ACCOUNT_CLASS_HASH;
 
   // init
   useEffect(() => {
@@ -78,7 +72,9 @@ export const useBurner = (
   const list = useCallback(() => {
     let storage = Storage.get("burners") || {};
     return Object.keys(storage).map((address) => {
-      if (storage[address].gameContract === contracts?.game) {
+      if (
+        storage[address].gameContract === process.env.NEXT_PUBLIC_GAME_ADDRESS
+      ) {
         return {
           address,
           active: storage[address].active,

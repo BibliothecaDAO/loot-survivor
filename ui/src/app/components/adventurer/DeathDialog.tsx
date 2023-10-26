@@ -5,7 +5,6 @@ import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import { getRankFromList, getOrdinalSuffix } from "@/app/lib/utils";
-import { getAppUrl } from "@/app/lib/constants";
 import { getAdventurerByXP } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
 import { NullAdventurer, Adventurer } from "@/app/types";
@@ -119,7 +118,9 @@ export const DeathDialog = () => {
                   adventurer?.xp
                 } XP.\n\nGravestone bears the inscription:\n\n"${
                   messageRef.current?.innerText
-                }"🪦\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+                }"🪦\n\nEnter here and try to survive: ${
+                  process.env.NEXT_PUBLIC_APP_URL
+                }\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
                 className="animate-pulse"
               />
               <Button

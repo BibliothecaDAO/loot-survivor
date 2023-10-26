@@ -1,11 +1,9 @@
-import { getRPCUrl } from "../lib/constants";
-
 interface MintEthProps {
   address: string;
 }
 
 export const getBlock = async (blockNumber: number) => {
-  const rpcUrl = getRPCUrl();
+  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL!;
   try {
     const requestBody = {
       jsonrpc: "2.0",

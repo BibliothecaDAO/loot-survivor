@@ -3,7 +3,6 @@ import Game from "../abi/Game.json";
 import Lords from "../abi/Lords.json";
 import Beasts from "../abi/Beasts.json";
 import GoldenToken from "../abi/GoldenToken.json";
-import { getContracts } from "../lib/constants";
 
 const ethBalanceABIFragment = [
   {
@@ -67,29 +66,27 @@ const ethBalanceABIFragment = [
 ];
 
 export const useContracts = () => {
-  const contracts = getContracts();
-
   const { contract: gameContract } = useContract({
-    address: contracts?.game,
+    address: process.env.NEXT_PUBLIC_GAME_ADDRESS,
     abi: Game,
   });
   const { contract: lordsContract } = useContract({
-    address: contracts?.lords,
+    address: process.env.NEXT_PUBLIC_LORDS_ADDRESS,
     abi: Lords,
   });
 
   const { contract: ethContract } = useContract({
-    address: contracts?.eth,
+    address: process.env.NEXT_PUBLIC_ETH_ADDRESS,
     abi: ethBalanceABIFragment,
   });
 
   const { contract: beastsContract } = useContract({
-    address: contracts?.beasts,
+    address: process.env.NEXT_PUBLIC_BEASTS_ADDRESS,
     abi: Beasts,
   });
 
   const { contract: goldenToken } = useContract({
-    address: contracts?.goldenToken,
+    address: process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS,
     abi: GoldenToken,
   });
 

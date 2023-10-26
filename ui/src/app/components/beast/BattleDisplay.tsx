@@ -7,7 +7,6 @@ import { Battle } from "@/app/types";
 // import Chest from "public/icons/loot/chest.svg";
 // import Waist from "public/icons/loot/waist.svg";
 // import Foot from "public/icons/loot/foot.svg";
-import { getAppUrl } from "@/app/lib/constants";
 import {
   GiWalkingBootIcon,
   GiFootTripIcon,
@@ -341,9 +340,7 @@ export const NotificationBattleDisplay = ({
             <GiBattleGearIcon />
           </span>
           <TwitterShareButton
-            text={`${
-              adventurer?.name
-            } just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+            text={`${adventurer?.name} just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${process.env.NEXT_PUBLIC_APP_URL}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
             className="animate-pulse"
           />
         </div>
