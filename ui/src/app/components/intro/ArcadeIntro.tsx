@@ -61,7 +61,7 @@ export const ArcadeIntro = ({
       const mintLords: Call = {
         contractAddress: lordsContract?.address ?? "",
         entrypoint: "mint",
-        calldata: [address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+        calldata: [address ?? "0x0", (260 * 10 ** 18).toString(), "0"],
       };
       addToCalls(mintLords);
       const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
