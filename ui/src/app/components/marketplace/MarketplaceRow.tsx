@@ -133,11 +133,7 @@ const MarketplaceRow = ({
       <td className="text-center">
         <div className="flex flex-row items-center justify-center gap-2">
           <p className="hidden sm:block">{type}</p>
-          <EfficacyDisplay
-            size="w-5"
-            className="h-5 sm:w-8 sm:h-8"
-            type={type}
-          />
+          <EfficacyDisplay size="w-5" className="h-5 sm:w-8" type={type} />
         </div>
       </td>
       <td className="text-center">
