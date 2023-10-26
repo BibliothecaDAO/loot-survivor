@@ -75,7 +75,7 @@ export const SpecialBeast = () => {
               href={getTokenViewerUrl() + specialBeast?.tokenId.toString()}
               target="_blank"
             >
-              <Button>View Token</Button>
+              <Button>View Collectible</Button>
             </a>
             <Button onClick={() => resetBeast()}>Continue</Button>
           </div>
