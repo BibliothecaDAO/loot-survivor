@@ -508,7 +508,7 @@ export default function UpgradeScreen({
                   {upgradeScreen === 2 && (
                     <div
                       className="flex
-                     sm:flex-row items-center justify-center flex-wrap border border-terminal-green p-2 h-1/6"
+                     sm:flex-row items-center justify-center flex-wrap border border-terminal-green p-2 h-full sm:h-1/6"
                     >
                       {/* <h4>Potions</h4> */}
                       <PurchaseHealth

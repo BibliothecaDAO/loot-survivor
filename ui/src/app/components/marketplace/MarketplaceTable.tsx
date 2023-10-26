@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import MarketplaceRow from "@/app/components/marketplace/MarketplaceRow";
 import { Item, UpgradeStats, ItemPurchase } from "@/app/types";
 import { getItemData, getKeyFromValue } from "@/app/lib/utils";
@@ -94,6 +94,10 @@ const MarketplaceTable = ({
     });
     return sortedItems;
   }, [marketLatestItems, sortField, sortDirection]);
+
+  useEffect(() => {
+    handleSort("Tier");
+  }, []);
 
   return (
     <>

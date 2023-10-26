@@ -68,7 +68,7 @@ const PurchaseHealth = ({
   }, [potionAmount, buttonClicked]);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center">
+    <div className="flex flex-col sm:flex-row gap-5 items-center">
       <span className="flex flex-row">
         <CoinIcon className="mt-1 w-5 h-5 fill-current text-terminal-yellow" />
         <p className="text-terminal-yellow">{potionCost}</p>
