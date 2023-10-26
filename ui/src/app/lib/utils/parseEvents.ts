@@ -228,8 +228,9 @@ export async function parseEvents(
     if (getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]) == "Transfer") {
       if (raw.from_address == beastsContract) {
         eventName = "Transfer";
+      } else {
+        eventName = null;
       }
-      eventName = null;
     } else {
       if (event) {
         const eventFromKey = getKeyFromValue(

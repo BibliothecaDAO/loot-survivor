@@ -19,7 +19,7 @@ export const fetchBeastImage = async (
           contract_address: beastsAddress,
           entry_point_selector:
             "0x012a7823b0c6bee58f8c694888f32f862c6584caa8afa0242de046d298ba684d", // tokenURI
-          calldata: ["0x" + tokenId.toString(), "0x0"],
+          calldata: [tokenId.toString(16), "0x0"],
         },
         "pending",
       ],
@@ -36,7 +36,7 @@ export const fetchBeastImage = async (
   }
 
   const value: any = [];
-  for (let i = 2; i < data.result.length; i++) {
+  for (let i = 2; i < data.result?.length; i++) {
     let result = shortString.decodeShortString(data.result[i]);
     value.push(result);
   }

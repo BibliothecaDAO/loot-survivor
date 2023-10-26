@@ -15,10 +15,10 @@ import {
   getKeyFromValue,
   stringToFelt,
   checkArcadeBalance,
+  indexAddress,
 } from "@/app/lib/utils";
 import { parseEvents } from "@/app/lib/utils/parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
-import { CallData } from "starknet";
 
 export interface SyscallsProps {
   gameContract: any;
@@ -657,7 +657,8 @@ export function syscalls({
         });
         const events = await parseEvents(
           receipt as InvokeTransactionReceiptResponse,
-          queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
+          queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer,
+          indexAddress(beastsContract.address)
         );
 
         // If there are any equip or drops, do them first
@@ -738,26 +739,15 @@ export function syscalls({
             (event) => event.name === "Transfer"
           );
           for (let transferEvent of transferEvents) {
-            // Check whether beast has a prefix and suffix, if so check token
             if (
               slayedBeastEvent.data[1].special2 &&
               slayedBeastEvent.data[1].special3
             ) {
-              const tokenMinted = await beastsContract.call(
-                "isMinted",
-                CallData.compile({
-                  beast: slayedBeastEvent.data[1].beast,
-                  prefix: slayedBeastEvent.data[1].special2,
-                  suffix: slayedBeastEvent.data[1].special3,
-                })
-              ); // check if token has been minted
-              if (!tokenMinted) {
-                setSpecialBeastDefeated(true);
-                setSpecialBeast({
-                  data: slayedBeastEvent.data[1],
-                  tokenId: transferEvent.data.tokenId.low,
-                });
-              }
+              setSpecialBeastDefeated(true);
+              setSpecialBeast({
+                data: slayedBeastEvent.data[1],
+                tokenId: transferEvent.data.tokenId.low,
+              });
             }
           }
         }
