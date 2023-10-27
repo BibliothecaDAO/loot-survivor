@@ -179,7 +179,7 @@ export default function LeaderboardScreen({
               <ScoreTable
                 itemsPerPage={itemsPerPage}
                 handleFetchProfileData={handlefetchProfileData}
-                adventurers={tempTop10Adventurers}
+                adventurers={scores}
               />
             </div>
           </div>
