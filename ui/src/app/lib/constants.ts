@@ -15,9 +15,9 @@ export const NETWORK: "goerli" | "mainnet" = "goerli";
 export function getRPCUrl() {
   switch (NETWORK) {
     case "goerli":
-      return "https://starknet-goerli.infura.io/v3/f35941d792b347dfae151bff9fab4ad8";
+      return "https://starknet-goerli.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
     case "mainnet":
-      return "https://starknet-mainnet.infura.io/v3/f35941d792b347dfae151bff9fab4ad8";
+      return "https://starknet-mainnet.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
     default:
       return "http://localhost:8000/graphql";
   }
@@ -26,9 +26,9 @@ export function getRPCUrl() {
 export function getAPIKey() {
   switch (NETWORK) {
     case "goerli":
-      return "f35941d792b347dfae151bff9fab4ad8";
+      return "6c536e8272f84d3ba63bf9f248c5e128";
     case "mainnet":
-      return "f35941d792b347dfae151bff9fab4ad8";
+      return "6c536e8272f84d3ba63bf9f248c5e128";
     default:
       return "http://localhost:8000/graphql";
   }
