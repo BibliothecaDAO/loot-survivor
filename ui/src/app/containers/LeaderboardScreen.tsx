@@ -16,6 +16,7 @@ import { RefreshIcon } from "@/app/components/icons/Icons";
 import LootIconLoader from "@/app/components/icons/Loader";
 import { ProfileIcon, SkullIcon } from "@/app/components/icons/Icons";
 import { Contract } from "starknet";
+import { tempTop10Adventurers } from "../lib/constants";
 
 interface LeaderboardScreenProps {
   slayAllIdles: (...args: any[]) => any;
@@ -118,6 +119,9 @@ export default function LeaderboardScreen({
   //   await slayAllIdles(getIdleAdventurers());
   // };
 
+  // Append temp top 10
+  scores.unshift(...tempTop10Adventurers);
+
   return (
     <div className="flex flex-col items-center h-full xl:overflow-y-auto 2xl:overflow-hidden mt-5 sm:mt-0">
       {!adventurersByXPdata ? (
@@ -175,7 +179,7 @@ export default function LeaderboardScreen({
               <ScoreTable
                 itemsPerPage={itemsPerPage}
                 handleFetchProfileData={handlefetchProfileData}
-                adventurers={scores}
+                adventurers={tempTop10Adventurers}
               />
             </div>
           </div>
