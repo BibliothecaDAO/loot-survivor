@@ -109,7 +109,7 @@ interface HomeProps {
 }
 
 function Home({ updateConnectors }: HomeProps) {
-  const { connectors } = useConnect();
+  const { connector, connectors } = useConnect();
   const { chain } = useNetwork();
   const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
@@ -233,6 +233,7 @@ function Home({ updateConnectors }: HomeProps) {
       resetCalls,
       setSpecialBeastDefeated,
       setSpecialBeast,
+      connector,
     });
 
   const playState = useMemo(

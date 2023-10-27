@@ -436,6 +436,7 @@ export type BurnerStorage = {
     deployTx: string;
     active: boolean;
     masterAccount: string;
+    masterAccountProvider: string;
     gameContract: string;
   };
 };

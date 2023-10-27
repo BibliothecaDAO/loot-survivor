@@ -19,6 +19,10 @@ import {
 } from "@/app/lib/utils";
 import { parseEvents } from "@/app/lib/utils/parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
+import Storage from "@/app/lib/storage";
+import { BurnerStorage } from "@/app/types";
+import { Connector } from "@starknet-react/core";
+import { providerInterfaceCamel } from "../connectors";
 
 export interface SyscallsProps {
   gameContract: any;
@@ -50,6 +54,7 @@ export interface SyscallsProps {
   resetCalls: (...args: any[]) => any;
   setSpecialBeastDefeated: (...args: any[]) => any;
   setSpecialBeast: (...args: any[]) => any;
+  connector?: Connector;
 }
 
 function handleEquip(
@@ -133,6 +138,7 @@ export function syscalls({
   resetCalls,
   setSpecialBeastDefeated,
   setSpecialBeast,
+  connector,
 }: SyscallsProps) {
   const gameData = new GameData();
 
@@ -199,6 +205,15 @@ export function syscalls({
   };
 
   const spawn = async (formData: FormData) => {
+    const storage: BurnerStorage = Storage.get("burners");
+    let interfaceCamel = "";
+    if (typeof connector?.id === "string" && connector.id.includes("0x")) {
+      const walletProvider = storage[account?.address!].masterAccountProvider;
+      interfaceCamel = providerInterfaceCamel(walletProvider);
+    } else {
+      interfaceCamel = providerInterfaceCamel(connector!.id);
+    }
+
     const mintLords: Call = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "mint",
@@ -220,7 +235,7 @@ export function syscalls({
         stringToFelt(formData.name).toString(),
         "0",
         "0",
-        "0",
+        interfaceCamel,
       ],
     };
 
