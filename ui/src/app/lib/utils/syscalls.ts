@@ -1242,14 +1242,6 @@ export function syscalls({
             ...purchasedItems,
           ],
         });
-        for (let i = 0; i < unequipIndexes.length; i++) {
-          setData(
-            "itemsByAdventurerQuery",
-            false,
-            "equipped",
-            unequipIndexes[i]
-          );
-        }
 
         const adventurerDiedEvents = events.filter(
           (event) => event.name === "AdventurerDied"
