@@ -30,12 +30,19 @@ const provider = new Provider({
   sequencer: { baseUrl: rpc_addr! },
 });
 
-export const useBurner = (
-  walletAccount?: AccountInterface,
-  gameContract?: Contract,
-  lordsContract?: Contract,
-  ethContract?: Contract
-) => {
+interface UseBurnerProps {
+  walletAccount?: AccountInterface;
+  gameContract?: Contract;
+  lordsContract?: Contract;
+  ethContract?: Contract;
+}
+
+export const useBurner = ({
+  walletAccount,
+  gameContract,
+  lordsContract,
+  ethContract,
+}: UseBurnerProps) => {
   const [account, setAccount] = useState<Account>();
   const [isDeploying, setIsDeploying] = useState(false);
   const [isGeneratingNewKey, setIsGeneratingNewKey] = useState(false);

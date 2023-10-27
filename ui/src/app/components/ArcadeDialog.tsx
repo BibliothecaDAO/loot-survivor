@@ -53,7 +53,7 @@ export const ArcadeDialog = ({
     withdraw,
     isWithdrawing,
     listConnectors,
-  } = useBurner(walletAccount, gameContract, lordsContract, ethContract);
+  } = useBurner({ walletAccount, gameContract, lordsContract, ethContract });
   const [arcadebalances, setArcadeBalances] = useState<
     Record<string, { eth: bigint; lords: bigint; lordsGameAllowance: bigint }>
   >({});

@@ -87,7 +87,7 @@ const mobileMenuItems: Menu[] = [
 export default function Main() {
   const [appConnectors, setAppConnectors] = useState<Connector[]>([]);
 
-  const { listConnectors } = useBurner();
+  const { listConnectors } = useBurner({});
 
   const updateConnectors = () => {
     const arcadeConnectors = listConnectors();
@@ -500,7 +500,9 @@ function Home({ updateConnectors }: HomeProps) {
               updateConnectors={updateConnectors}
             />
           )}
-          {status == "connected" && topUpDialog && <TopUpDialog token="ETH" />}
+          {status == "connected" && topUpDialog && (
+            <TopUpDialog ethContract={ethContract!} getBalances={getBalances} />
+          )}
 
           {introComplete ? (
             <div className="flex flex-col w-full h-[600px] sm:h-[625px]">

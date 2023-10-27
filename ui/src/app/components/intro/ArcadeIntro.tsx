@@ -42,7 +42,12 @@ export const ArcadeIntro = ({
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
   const { create, isDeploying, isSettingPermissions, listConnectors } =
-    useBurner(account, gameContract, lordsContract, ethContract);
+    useBurner({
+      walletAccount: account,
+      gameContract,
+      lordsContract,
+      ethContract,
+    });
   const walletConnectors = getWalletConnectors(connectors);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
