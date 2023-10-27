@@ -160,21 +160,6 @@ const SCORES_FRAGMENT = `
   }
 `;
 
-const GOLDEN_TOKEN_FIELDS = `
-  contract_address
-  id
-  image
-  name
-  owner
-  token_id
-`;
-
-const GOLDEN_TOKEN_FRAGMENT = `
-  fragment GoldenTokenFields on Score {
-    ${GOLDEN_TOKEN_FIELDS}
-  }
-`;
-
 const getAdventurer = gql`
   ${ADVENTURERS_FRAGMENT}
   query getAdventurer($owner: HexValue) {
@@ -484,20 +469,6 @@ const getScoresInList = gql`
   }
 `;
 
-const getGoldenTokensByOwner = gql`
-  ${GOLDEN_TOKEN_FRAGMENT}
-  query getGoldenTokensByOwner($contractAddress: String!, $owner: String!) {
-    getERC721Tokens(
-      contract_address: $contractAddress
-      cursor: 0
-      limit: 10000
-      owner: $owner
-    ) {
-      ...GoldenTokenFields
-    }
-  }
-`;
-
 export {
   getAdventurer,
   getDiscoveries,
@@ -526,5 +497,4 @@ export {
   getAdventurersByXPPaginated,
   getTopScores,
   getScoresInList,
-  getGoldenTokensByOwner,
 };
