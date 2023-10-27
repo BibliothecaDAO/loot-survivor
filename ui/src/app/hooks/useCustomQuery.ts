@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "@/app/hooks/useQueryStore";
-import { gameClient } from "../layout";
+import { gameClient } from "../lib/clients";
 
 type Variables = Record<
   string,

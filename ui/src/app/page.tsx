@@ -35,7 +35,7 @@ import MobileHeader from "@/app/components/navigation/MobileHeader";
 import Player from "@/app/components/adventurer/Player";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
 import { useQuery } from "@apollo/client";
-import { goldenTokenClient } from "./layout";
+import { goldenTokenClient } from "./lib/clients";
 import {
   getAdventurerById,
   getAdventurersByOwner,
@@ -67,7 +67,6 @@ import StarknetProvider from "@/app//provider";
 import { SpecialBeast } from "./components/notifications/SpecialBeast";
 import { useBurner } from "@/app/lib/burner";
 import { connectors } from "@/app/lib/connectors";
-import { gql } from "@apollo/client";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
