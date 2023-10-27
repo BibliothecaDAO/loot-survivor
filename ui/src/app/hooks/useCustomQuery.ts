@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "@/app/hooks/useQueryStore";
+import { gameClient } from "../layout";
 
 type Variables = Record<
   string,
@@ -20,6 +21,7 @@ const useCustomQuery = (
   }));
 
   const { data, refetch } = useQuery(query, {
+    client: gameClient,
     variables: variables,
     skip: skip,
   });
