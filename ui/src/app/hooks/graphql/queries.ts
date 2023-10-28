@@ -170,7 +170,7 @@ const GOLDEN_TOKEN_FIELDS = `
 `;
 
 const GOLDEN_TOKEN_FRAGMENT = `
-  fragment GoldenTokenFields on Score {
+  fragment GoldenTokenFields on ERC721Tokens {
     ${GOLDEN_TOKEN_FIELDS}
   }
 `;

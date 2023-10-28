@@ -334,7 +334,7 @@ function Home({ updateConnectors }: HomeProps) {
   } = useQuery(getGoldenTokensByOwner, {
     client: goldenTokenClient,
     variables: {
-      contract_address: contracts?.goldenToken,
+      contractAddress: contracts?.goldenToken,
       // owner: address,
       owner:
         "0x074f91d284351a8603933b648684b6a990126d7c78a1b867353a57a3bc2097da",
