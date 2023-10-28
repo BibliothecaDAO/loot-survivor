@@ -63,6 +63,7 @@ import { StarknetProvider } from "@/app//provider";
 import { SpecialBeast } from "./components/notifications/SpecialBeast";
 import { useBurner } from "@/app/lib/burner";
 import { connectors } from "@/app/lib/connectors";
+import { MainnetDialog } from "./components/MainnetDialog";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -463,6 +464,7 @@ function Home({ updateConnectors }: HomeProps) {
     <main
       className={`min-h-screen container mx-auto flex flex-col sm:pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
     >
+      <MainnetDialog />
       {introComplete ? (
         <>
           <div className="flex flex-col w-full">
