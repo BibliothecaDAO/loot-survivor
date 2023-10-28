@@ -4,9 +4,9 @@ import Image from "next/image";
 import useUIStore from "@/app/hooks/useUIStore";
 import { useContracts } from "@/app/hooks/useContracts";
 import { processBeastName } from "@/app/lib/utils";
-import TwitterShareButton from "../buttons/TwitterShareButtons";
+import TwitterShareButton from "@/app/components/buttons/TwitterShareButtons";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import { Button } from "../buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 
 export const SpecialBeast = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);

@@ -1,8 +1,8 @@
 import { useContract } from "@starknet-react/core";
-import Game from "../abi/Game.json";
-import Lords from "../abi/Lords.json";
-import Beasts from "../abi/Beasts.json";
-import GoldenToken from "../abi/GoldenToken.json";
+import Game from "@/app/abi/Game.json";
+import Lords from "@/app/abi/Lords.json";
+import Beasts from "@/app/abi/Beasts.json";
+import GoldenToken from "@/app/abi/GoldenToken.json";
 
 const ethBalanceABIFragment = [
   {
