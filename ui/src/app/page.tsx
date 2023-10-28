@@ -34,6 +34,8 @@ import Settings from "@/app/components/navigation/Settings";
 import MobileHeader from "@/app/components/navigation/MobileHeader";
 import Player from "@/app/components/adventurer/Player";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
+import { useQuery } from "@apollo/client";
+import { goldenTokenClient } from "./lib/clients";
 import {
   getAdventurerById,
   getAdventurersByOwner,
@@ -43,6 +45,7 @@ import {
   getBattlesByBeast,
   getItemsByAdventurer,
   getLatestMarketItems,
+  getGoldenTokensByOwner,
 } from "@/app/hooks/graphql/queries";
 import { ArcadeDialog } from "@/app/components/ArcadeDialog";
 import { TopUpDialog } from "@/app/components/TopUpDialog";
@@ -314,6 +317,32 @@ function Home({ updateConnectors }: HomeProps) {
   useCustomQuery("beastQuery", getBeast, beastVariables);
 
   useCustomQuery("battlesByBeastQuery", getBattlesByBeast, beastVariables);
+
+  // const {
+  //   data: goldenTokenData,
+  //   error,
+  //   loading,
+  // } = useQuery(gql`
+  //   {
+  //     hello
+  //   }
+  // `);
+
+  const {
+    data: goldenTokenData,
+    error,
+    loading,
+  } = useQuery(getGoldenTokensByOwner, {
+    client: goldenTokenClient,
+    variables: {
+      contractAddress: contracts?.goldenToken,
+      // owner: address,
+      owner:
+        "0x074f91d284351a8603933b648684b6a990126d7c78a1b867353a57a3bc2097da",
+    },
+  });
+
+  console.log(goldenTokenData, error, loading);
 
   const handleSwitchAdventurer = async (adventurerId: number) => {
     setIsLoading();
