@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import "../../GlitchEffect.css";
+import "@/app/GlitchEffect.css";
 
 const GlitchEffect: React.FC = () => {
   const textRef = useRef<HTMLDivElement | null>(null);

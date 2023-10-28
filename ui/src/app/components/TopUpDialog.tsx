@@ -1,27 +1,33 @@
 import { useAccount } from "@starknet-react/core";
-import useUIStore from "../hooks/useUIStore";
-import { Button } from "./buttons/Button";
-import { useConnectors } from "@starknet-react/core";
-import Storage from "../lib/storage";
-import { BurnerStorage } from "../types";
-import { useBurner } from "../lib/burner";
-import { getArcadeConnectors, getWalletConnectors } from "../lib/connectors";
+import { Contract } from "starknet";
+import useUIStore from "@/app/hooks/useUIStore";
+import { Button } from "@/app/components/buttons/Button";
+import { useConnect, useDisconnect } from "@starknet-react/core";
+import Storage from "@/app/lib/storage";
+import { BurnerStorage } from "@/app/types";
+import { useBurner } from "@/app/lib/burner";
+import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
+import TokenLoader from "./animations/TokenLoader";
 
 interface TopUpDialogProps {
-  token: "ETH" | "LORDS";
+  ethContract: Contract;
+  getBalances: () => void;
 }
 
-export const TopUpDialog = ({ token }: TopUpDialogProps) => {
+export const TopUpDialog = ({ ethContract, getBalances }: TopUpDialogProps) => {
   const { account: walletAccount, address } = useAccount();
-  const { connect, available } = useConnectors();
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const topUpAccount = useUIStore((state) => state.topUpAccount);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
-  const { topUpEth, isToppingUpEth, topUpLords, isToppingUpLords } =
-    useBurner();
+  const { topUpEth, isToppingUpEth } = useBurner({
+    walletAccount,
+    ethContract,
+  });
 
-  const arcadeConnectors = getArcadeConnectors(available);
-  const walletConnectors = getWalletConnectors(available);
+  const arcadeConnectors = getArcadeConnectors(connectors);
+  const walletConnectors = getWalletConnectors(connectors);
 
   let storage: BurnerStorage = Storage.get("burners") || {};
   const masterConnected = address === storage[topUpAccount]?.masterAccount;
@@ -44,7 +50,10 @@ export const TopUpDialog = ({ token }: TopUpDialogProps) => {
           {walletConnectors.map((connector, index) => (
             <Button
               disabled={masterConnected}
-              onClick={() => connect(connector)}
+              onClick={() => {
+                disconnect();
+                connect({ connector });
+              }}
               key={index}
             >
               {connector.id === "braavos" || connector.id === "argentX"
@@ -60,22 +69,16 @@ export const TopUpDialog = ({ token }: TopUpDialogProps) => {
             onClick={async () => {
               await topUpEth(topUpAccount, walletAccount!);
               setTopUpAccount("");
-              connect(arcadeConnector!);
+              connect({ connector: arcadeConnector! });
+              getBalances();
               showTopUpDialog(false);
             }}
           >
-            {masterConnected ? (
-              isToppingUpEth ? (
-                <span className="loading-ellipsis">Topping Up</span>
-              ) : (
-                "Top Up"
-              )
-            ) : (
-              "Connect Master"
-            )}
+            {masterConnected ? "Top Up" : "Connect Master"}
           </Button>
           <Button onClick={() => showTopUpDialog(false)}>Close</Button>
         </div>
+        {isToppingUpEth && <TokenLoader isToppingUpEth={isToppingUpEth} />}
       </div>
     </>
   );

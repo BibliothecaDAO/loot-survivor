@@ -1,4 +1,4 @@
-import { Adventurer, Item, Battle, Discovery } from "../types";
+import { Adventurer, Item, Battle, Discovery } from "@/app/types";
 
 export const AdventurerTemplate: Adventurer = {
   id: 1,

@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime
 from typing import List, NewType, Optional, Dict
 import base64
 import ssl
@@ -13,6 +12,14 @@ from indexer.utils import felt_to_str, str_to_felt, get_key_by_value
 from indexer.config import Config
 
 config = Config()
+
+
+def parse_u256(value):
+    return value * (10**18)
+
+
+def serialize_u256(value):
+    return value / (10**18)
 
 
 def parse_hex(value):
@@ -237,6 +244,11 @@ def serialize_adventurer(value):
     return config.ATTACKERS.get(felt)
 
 
+U256Value = strawberry.scalar(
+    NewType("U256Value", bytes), parse_value=parse_u256, serialize=serialize_u256
+)
+
+
 HexValue = strawberry.scalar(
     NewType("HexValue", bytes), parse_value=parse_hex, serialize=serialize_hex
 )
@@ -347,6 +359,17 @@ AttackerValue = strawberry.scalar(
 
 
 @strawberry.input
+class U256ValueFilter:
+    eq: Optional[U256Value] = None
+    _in: Optional[List[U256Value]] = None
+    notIn: Optional[List[U256Value]] = None
+    lt: Optional[U256Value] = None
+    lte: Optional[U256Value] = None
+    gt: Optional[U256Value] = None
+    gte: Optional[U256Value] = None
+
+
+@strawberry.input
 class StringFilter:
     eq: Optional[StringValue] = None
     _in: Optional[List[StringValue]] = None
@@ -402,6 +425,17 @@ class IntFilter:
     lte: Optional[int] = None
     gt: Optional[int] = None
     gte: Optional[int] = None
+
+
+@strawberry.input
+class FloatFilter:
+    eq: Optional[float] = None
+    _in: Optional[List[float]] = None
+    notIn: Optional[List[float]] = None
+    lt: Optional[float] = None
+    lte: Optional[float] = None
+    gt: Optional[float] = None
+    gte: Optional[float] = None
 
 
 @strawberry.input
@@ -641,6 +675,8 @@ class AdventurersFilter:
     ring: Optional[FeltValueFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     statUpgrades: Optional[FeltValueFilter] = None
+    startBlock: Optional[FeltValueFilter] = None
+    revealBlock: Optional[FeltValueFilter] = None
     actionsPerBlock: Optional[FeltValueFilter] = None
     gold: Optional[FeltValueFilter] = None
     createdTime: Optional[OrderByInput] = None
@@ -657,7 +693,7 @@ class ScoresFilter:
     txHash: Optional[HexValueFilter] = None
     scoreTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
-    totalPayout: Optional[IntFilter] = None
+    totalPayout: Optional[U256ValueFilter] = None
 
 
 @strawberry.input
@@ -770,6 +806,8 @@ class AdventurersOrderByInput:
     ring: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     statUpgrades: Optional[OrderByInput] = None
+    startBlock: Optional[OrderByInput] = None
+    revealBlock: Optional[OrderByInput] = None
     actionsPerBlock: Optional[OrderByInput] = None
     gold: Optional[OrderByInput] = None
     createdTime: Optional[OrderByInput] = None
@@ -899,6 +937,8 @@ class Adventurer:
     ring: Optional[ItemValue]
     beastHealth: Optional[FeltValue]
     statUpgrades: Optional[FeltValue]
+    startBlock: Optional[FeltValue]
+    revealBlock: Optional[FeltValue]
     actionsPerBlock: Optional[FeltValue]
     gold: Optional[FeltValue]
     createdTime: Optional[str]
@@ -931,6 +971,8 @@ class Adventurer:
             ring=data["ring"],
             beastHealth=data["beastHealth"],
             statUpgrades=data["statUpgrades"],
+            startBlock=data["startBlock"],
+            revealBlock=data["revealBlock"],
             actionsPerBlock=data["actionsPerBlock"],
             gold=data["gold"],
             createdTime=data["createdTime"],
@@ -948,7 +990,7 @@ class Score:
     txHash: Optional[HexValue]
     scoreTime: Optional[str]
     timestamp: Optional[str]
-    totalPayout: Optional[int]
+    totalPayout: Optional[U256Value]
 
     @classmethod
     def from_mongo(cls, data):
@@ -1317,6 +1359,8 @@ def get_scores(
                 filter[key] = get_date_filters(value)
             elif isinstance(value, FeltValueFilter):
                 filter[key] = get_felt_filters(value)
+            elif isinstance(value, U256ValueFilter):
+                filter[key] = get_felt_filters(value)
 
     sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
 
@@ -1496,17 +1540,7 @@ def get_items(
     if where:
         processed_filters = process_filters(where)
         for key, value in processed_filters.items():
-            if (
-                isinstance(value, StringFilter)
-                | isinstance(value, ItemFilter)
-                | isinstance(value, SlotFilter)
-                | isinstance(value, TypeFilter)
-                | isinstance(value, MaterialFilter)
-                | isinstance(value, Special1Filter)
-                | isinstance(value, Special2Filter)
-                | isinstance(value, Special3Filter)
-                | isinstance(value, StatusFilter)
-            ):
+            if isinstance(value, StringFilter):
                 filter[key] = get_str_filters(value)
             elif isinstance(value, HexValueFilter):
                 filter[key] = get_hex_filters(value)

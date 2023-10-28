@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import ItemDisplay, { IconSize } from "./LootIcon";
+import ItemDisplay, { IconSize } from "@/app/components/icons/LootIcon";
 
 interface Loader {
   size?: IconSize;

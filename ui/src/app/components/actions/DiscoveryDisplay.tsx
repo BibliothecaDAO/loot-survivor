@@ -1,4 +1,4 @@
-import { processBeastName } from "../../lib/utils";
+import { processBeastName } from "@/app/lib/utils";
 import {
   CoinIcon,
   GiBruteIcon,
@@ -7,7 +7,7 @@ import {
   GiSandsOfTimeIcon,
   TwoCoinIcon,
   HealthPotionIcon,
-} from "../icons/Icons";
+} from "@/app/components/icons/Icons";
 import { Discovery } from "@/app/types";
 
 interface DiscoveryProps {
@@ -31,7 +31,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
             <span className="flex flex-row items-center justify-between">
               <p>
                 YIKES! Ambushed by a {beastName} for {discoveryData.damageTaken}{" "}
-                damage to {discoveryData.damageLocation} !
+                damage to {discoveryData.damageLocation}!
               </p>
               <GiBruteIcon />
             </span>

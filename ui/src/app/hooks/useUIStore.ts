@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ItemPurchase, UpgradeStats, ZeroUpgrade, u256 } from "../types";
+import { ItemPurchase, UpgradeStats, ZeroUpgrade } from "@/app/types";
 
 export type ScreenPage =
   | "start"
@@ -53,8 +53,6 @@ type State = {
   setSlayAdventurers: (value: string[]) => void;
   lastAction: Date | null;
   setLastAction: (value: Date | null) => void;
-  mintAdventurer: boolean;
-  setMintAdventurer: (value: boolean) => void;
   inventorySelected: number | null;
   setInventorySelected: (value: number) => void;
   upgradeScreen: number;
@@ -73,6 +71,10 @@ type State = {
   setEstimatingFee: (value: boolean) => void;
   switchAdventurer: boolean;
   setSwitchAdventurer: (value: boolean) => void;
+  specialBeastDefeated: boolean;
+  setSpecialBeastDefeated: (value: boolean) => void;
+  specialBeast: any;
+  setSpecialBeast: (value: any) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -112,8 +114,6 @@ const useUIStore = create<State>((set) => ({
   slayAdventurers: [],
   setSlayAdventurers: (value) => set({ slayAdventurers: value }),
   setLastAction: (value) => set({ lastAction: value }),
-  mintAdventurer: false,
-  setMintAdventurer: (value) => set({ mintAdventurer: value }),
   inventorySelected: null,
   setInventorySelected: (value) => set({ inventorySelected: value }),
   upgradeScreen: 1,
@@ -132,6 +132,10 @@ const useUIStore = create<State>((set) => ({
   setEstimatingFee: (value) => set({ estimatingFee: value }),
   switchAdventurer: false,
   setSwitchAdventurer: (value) => set({ switchAdventurer: value }),
+  specialBeastDefeated: false,
+  setSpecialBeastDefeated: (value) => set({ specialBeastDefeated: value }),
+  specialBeast: null,
+  setSpecialBeast: (value) => set({ specialBeast: value }),
 }));
 
 export default useUIStore;

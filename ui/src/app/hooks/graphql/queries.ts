@@ -24,6 +24,8 @@ const ADVENTURER_FIELDS = `
   ring
   beastHealth
   statUpgrades
+  startBlock
+  revealBlock
   actionsPerBlock
   gold
   createdTime
@@ -287,15 +289,6 @@ const getAdventurerByGold = gql`
 `;
 
 const getAdventurerByXP = gql`
-  ${ADVENTURERS_FRAGMENT}
-  query get_adventurer_by_xp {
-    adventurers(orderBy: { xp: { desc: true } }, limit: 10000000) {
-      ...AdventurerFields
-    }
-  }
-`;
-
-const getDeadAdventurerByXP = gql`
   ${ADVENTURERS_FRAGMENT}
   query get_adventurer_by_xp {
     adventurers(orderBy: { xp: { desc: true } }, limit: 10000000) {

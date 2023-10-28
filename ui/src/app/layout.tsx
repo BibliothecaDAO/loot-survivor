@@ -1,8 +1,6 @@
 "use client";
 
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
-import { getGraphQLUrl } from "./lib/constants";
-
 import "./globals.css";
 
 export default function RootLayout({
@@ -11,7 +9,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const client = new ApolloClient({
-    uri: getGraphQLUrl(),
+    uri: process.env.NEXT_PUBLIC_LS_GQL_URL,
     cache: new InMemoryCache({
       typePolicies: {
         Query: {

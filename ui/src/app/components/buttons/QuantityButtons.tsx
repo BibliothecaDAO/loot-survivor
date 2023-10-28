@@ -1,18 +1,20 @@
 import React from "react";
-import { Button } from "./Button";
+import { Button } from "@/app/components/buttons/Button";
 
 interface ButtonProps {
   amount: number;
   max: number;
   min: number;
   setAmount: (value: number) => void;
+  size?: "default" | "xs" | "sm" | "lg" | "xl" | "fill";
 }
 
-const HealthButtons: React.FC<ButtonProps> = ({
+const QuantityButtons: React.FC<ButtonProps> = ({
   amount,
   max,
   min,
   setAmount,
+  size,
 }) => {
   const handleIncrement = () => {
     if (amount < max) {
@@ -29,8 +31,8 @@ const HealthButtons: React.FC<ButtonProps> = ({
   return (
     <div className="text-xl">
       <Button
-        size={"xs"}
-        variant={"outline"}
+        size={size}
+        variant={"default"}
         onClick={handleDecrement}
         disabled={amount <= min}
       >
@@ -38,8 +40,8 @@ const HealthButtons: React.FC<ButtonProps> = ({
       </Button>
       <span className=" p-2">{amount}</span>
       <Button
-        size={"sm"}
-        variant={"outline"}
+        size={size}
+        variant={"default"}
         onClick={handleIncrement}
         disabled={amount >= max}
       >
@@ -49,4 +51,4 @@ const HealthButtons: React.FC<ButtonProps> = ({
   );
 };
 
-export default HealthButtons;
+export default QuantityButtons;

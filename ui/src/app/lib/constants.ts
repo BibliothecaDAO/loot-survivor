@@ -12,65 +12,6 @@ export const battle = "A beast lurks in the shadow, prepare for battle!";
 
 export const NETWORK: "goerli" | "mainnet" = "goerli";
 
-export function getRPCUrl() {
-  switch (NETWORK) {
-    case "goerli":
-      return "https://starknet-goerli.infura.io/v3/bba03efe093c494c9ce604963eaf0252";
-    case "mainnet":
-      return "https://starknet-mainnet.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
-    default:
-      return "http://localhost:8000/graphql";
-  }
-}
-
-export function getGraphQLUrl() {
-  switch (NETWORK) {
-    case "goerli":
-      return "https://survivor-indexer.realms.world/goerli-graphql";
-    case "mainnet":
-      return "https://survivor-indexer.realms.world/graphql";
-    default:
-      return "http://localhost:8000/graphql";
-  }
-}
-
-export function getContracts() {
-  switch (NETWORK) {
-    case "goerli":
-      return {
-        eth: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-        game: "0x03f2ac2c55abbf633123ddb72adc3472feefc4e962c4cedc16dda11a2ac8d1d4",
-        lords:
-          "0x05e367ac160e5f90c5775089b582dfc987dd148a5a2f977c49def2a6644f724b",
-      };
-    case "mainnet":
-      return {
-        eth: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-        game: "0x0",
-        lords:
-          "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
-      };
-  }
-}
-
-export function getArcadeClassHash() {
-  switch (NETWORK) {
-    case "goerli":
-      return "0x0715b5e10bf63c36e69c402a81e1eb96b9107ef56eb5e821b00893e39bdcf545";
-    case "mainnet":
-      return "0x0";
-  }
-}
-
-export function getAppUrl() {
-  switch (NETWORK) {
-    case "goerli":
-      return "https://goerli-survivor.realms.world/";
-    case "mainnet":
-      return "https://survivor.realms.world/";
-  }
-}
-
 export const notificationAnimations = [
   { name: "idle", startFrame: 0, frameCount: 4 },
   { name: "run", startFrame: 9, frameCount: 5 },
@@ -97,7 +38,7 @@ export const idleDeathPenaltyBlocks = 300;
 
 // UI PARAMS
 export const MIN_BALANCE = 10000000000000; // 0.00001ETH or $0.015
-export const FEE_CHECK_BALANCE = 250000000000000; // 0.00025ETH or $0.45
+export const FEE_CHECK_BALANCE = 200000000000000; // 0.00025ETH or $0.45
 
 export const deathMessages = [
   {
@@ -118,4 +59,10 @@ export const deathMessages = [
   },
   { rank: 100, message: "Brave Combatant! - A commendable effort!" },
   { rank: 250, message: "Daring Challenger! - A brave stand!" },
+];
+
+export const efficacyData = [
+  { weapon: "Blade", metal: "Weak", hide: "Fair", cloth: "Strong" },
+  { weapon: "Bludgeon", metal: "Fair", hide: "Strong", cloth: "Weak" },
+  { weapon: "Magic", metal: "Strong", hide: "Weak", cloth: "Fair" },
 ];

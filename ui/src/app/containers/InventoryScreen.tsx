@@ -1,36 +1,37 @@
 import { useState, useEffect, useCallback } from "react";
-import { useContracts } from "../hooks/useContracts";
-import {
-  useAccount,
-  useWaitForTransaction,
-  useTransactionManager,
-} from "@starknet-react/core";
-import { getKeyFromValue, groupBySlot } from "../lib/utils";
-import { InventoryRow } from "../components/inventory/InventoryRow";
-import Info from "../components/adventurer/Info";
-import { ItemDisplay } from "../components/adventurer/ItemDisplay";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import LootIcon from "../components/icons/LootIcon";
-import { InfoIcon, BagIcon } from "../components/icons/Icons";
-import { Item, Metadata } from "../types";
-import { GameData } from "../components/GameData";
-import useUIStore from "../hooks/useUIStore";
+import { Contract } from "starknet";
+import { useAccount, useWaitForTransaction } from "@starknet-react/core";
+import { getKeyFromValue, groupBySlot } from "@/app/lib/utils";
+import { InventoryRow } from "@/app/components/inventory/InventoryRow";
+import Info from "@/app/components/adventurer/Info";
+import { ItemDisplay } from "@/app/components/adventurer/ItemDisplay";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import LootIcon from "@/app/components/icons/LootIcon";
+import { InfoIcon, BagIcon } from "@/app/components/icons/Icons";
+import { Item, Metadata } from "@/app/types";
+import { GameData } from "@/app/lib/data/GameData";
+import useUIStore from "@/app/hooks/useUIStore";
+import useTransactionManager from "@/app/hooks/useTransactionManager";
+
+interface InventoryScreenProps {
+  gameContract: Contract;
+}
 
 /**
  * @container
  * @description Provides the inventory screen for the adventurer.
  */
-export default function InventoryScreen() {
+export default function InventoryScreen({
+  gameContract,
+}: InventoryScreenProps) {
   const { account } = useAccount();
   const formatAddress = account ? account.address : "0x0";
-  const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
-  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const inventorySelected = useUIStore((state) => state.inventorySelected);
@@ -163,7 +164,7 @@ export default function InventoryScreen() {
   return (
     <div className="flex flex-row sm:gap-5 h-full">
       <div className="hidden sm:block sm:w-1/2 lg:w-1/3">
-        <Info adventurer={adventurer} />
+        <Info adventurer={adventurer} gameContract={gameContract} />
       </div>
       <div className="flex flex-col w-1/6">
         <InventoryRow
@@ -178,6 +179,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="bag" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Weapon"}
@@ -191,6 +193,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="weapon" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Chest Armor"}
@@ -204,6 +207,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="chest" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Head Armor"}
@@ -217,6 +221,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="head" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Waist Armor"}
@@ -230,6 +235,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="waist" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Foot Armor"}
@@ -243,6 +249,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="foot" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Hand Armor"}
@@ -256,6 +263,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="hand" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Neck Jewelry"}
@@ -269,6 +277,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="neck" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
         <InventoryRow
           title={"Ring Jewelry"}
@@ -282,11 +291,12 @@ export default function InventoryScreen() {
           icon={<LootIcon type="ring" size="w-8" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
+          gameContract={gameContract}
         />
       </div>
       {adventurer?.id ? (
         <div className="w-5/6 sm:w-1/2">
-          <div className="flex flex-col sm:gap-5">
+          <div className="flex flex-col sm:gap-5 h-full">
             <span className="flex flex-row justify-between">
               <h4 className="m-0">{selected} Loot</h4>{" "}
               <span className="flex text-lg items-center sm:text-3xl">
@@ -303,29 +313,29 @@ export default function InventoryScreen() {
                 items of Tier 5 offer the most basic value.
               </p>
             </div>
-            <div className="flex flex-col overflow-y-auto h-[450px] sm:h-[360px] 2xl:h-full 2xl:overflow-y-hidden">
+            <div className="flex flex-col gap-1 overflow-y-auto h-[450px] table-scroll">
               {selectedItems.length ? (
                 selectedItems.map((item: Item, index: number) => {
                   const itemId =
                     getKeyFromValue(gameData.ITEMS, item?.item ?? "") ?? "";
                   return (
-                    <div className="w-full mb-1" key={index}>
-                      <ItemDisplay
-                        item={item}
-                        inventory={true}
-                        equip={() => {
-                          setEquipItems([...equipItems, itemId]);
-                          handleEquipItems(item.item ?? "");
-                        }}
-                        equipped={item.equipped}
-                        disabled={
-                          item.equipped ||
-                          checkTransacting(item.item ?? "") ||
-                          equipItems.includes(itemId)
-                        }
-                        handleDrop={handleDropItems}
-                      />
-                    </div>
+                    <ItemDisplay
+                      item={item}
+                      inventory={true}
+                      equip={() => {
+                        setEquipItems([...equipItems, itemId]);
+                        handleEquipItems(item.item ?? "");
+                      }}
+                      equipped={item.equipped}
+                      disabled={
+                        item.equipped ||
+                        checkTransacting(item.item ?? "") ||
+                        equipItems.includes(itemId)
+                      }
+                      handleDrop={handleDropItems}
+                      gameContract={gameContract}
+                      key={index}
+                    />
                   );
                 })
               ) : (

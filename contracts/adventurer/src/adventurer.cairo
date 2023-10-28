@@ -30,7 +30,7 @@ use super::{
 };
 use lootitems::{
     loot::{Loot, ILoot, ImplLoot},
-    constants::{ItemSuffix, ItemId, NamePrefixLength, NameSuffixLength}
+    constants::{ItemSuffix, ItemId, NamePrefixLength, NameSuffixLength, SUFFIX_UNLOCK_GREANTESS}
 };
 use combat::{
     combat::{ImplCombat, CombatSpec, SpecialPowers, CombatResult},
@@ -292,10 +292,7 @@ impl ImplAdventurer of IAdventurer {
             if (beast_level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK) {
                 special_names =
                     ImplBeast::get_special_names(
-                        adventurer_level,
-                        beast_seed,
-                        NamePrefixLength.into(),
-                        NameSuffixLength.into()
+                        beast_seed, NamePrefixLength.into(), NameSuffixLength.into()
                     );
             }
 
@@ -569,12 +566,8 @@ impl ImplAdventurer of IAdventurer {
     // @param amount The amount to be subtracted from the strength stat.
     #[inline(always)]
     fn decrease_strength(ref self: Stats, amount: u8) {
-        // underflow protection
-        if amount > self.strength {
-            self.strength = 0;
-        } else {
-            self.strength -= amount;
-        }
+        assert(amount <= self.strength, 'amount exceeds strength');
+        self.strength -= amount;
     }
 
     // @notice Decrease the Adventurer's dexterity stat.
@@ -582,12 +575,8 @@ impl ImplAdventurer of IAdventurer {
     // @param amount The amount to be deducted from the dexterity stat.
     #[inline(always)]
     fn decrease_dexterity(ref self: Stats, amount: u8) {
-        // underflow protection
-        if amount > self.dexterity {
-            self.dexterity = 0;
-        } else {
-            self.dexterity -= amount;
-        }
+        assert(amount <= self.dexterity, 'amount exceeds dexterity');
+        self.dexterity -= amount;
     }
 
     // @notice Decrease the Adventurer's vitality stat.
@@ -595,12 +584,8 @@ impl ImplAdventurer of IAdventurer {
     // @param amount The amount to be deducted from the vitality stat.
     #[inline(always)]
     fn decrease_vitality(ref self: Stats, amount: u8) {
-        // underflow protection
-        if amount > self.vitality {
-            self.vitality = 0;
-        } else {
-            self.vitality -= amount;
-        }
+        assert(amount <= self.vitality, 'amount exceeds vitality');
+        self.vitality -= amount;
     }
 
     // @notice Decrease the Adventurer's intelligence stat.
@@ -608,12 +593,8 @@ impl ImplAdventurer of IAdventurer {
     // @param amount The amount to be deducted from the intelligence stat.
     #[inline(always)]
     fn decrease_intelligence(ref self: Stats, amount: u8) {
-        // underflow protection
-        if amount > self.intelligence {
-            self.intelligence = 0;
-        } else {
-            self.intelligence -= amount;
-        }
+        assert(amount <= self.intelligence, 'amount exceeds intelligence');
+        self.intelligence -= amount;
     }
 
     // @notice Decrease the Adventurer's wisdom stat.
@@ -621,12 +602,8 @@ impl ImplAdventurer of IAdventurer {
     // @param amount The amount to be deducted from the wisdom stat.
     #[inline(always)]
     fn decrease_wisdom(ref self: Stats, amount: u8) {
-        // underflow protection
-        if amount > self.wisdom {
-            self.wisdom = 0;
-        } else {
-            self.wisdom -= amount;
-        }
+        assert(amount <= self.wisdom, 'amount exceeds wisdom');
+        self.wisdom -= amount;
     }
 
     // @notice Decrease the Adventurer's charisma stat.
@@ -634,12 +611,8 @@ impl ImplAdventurer of IAdventurer {
     // @param amount The amount to be deducted from the charisma stat.
     #[inline(always)]
     fn decrease_charisma(ref self: Stats, amount: u8) {
-        // underflow protection
-        if amount > self.charisma {
-            self.charisma = 0;
-        } else {
-            self.charisma -= amount;
-        }
+        assert(amount <= self.charisma, 'amount exceeds charisma');
+        self.charisma -= amount;
     }
 
     // @notice Adds an item to the adventurer's equipment.
@@ -838,7 +811,8 @@ impl ImplAdventurer of IAdventurer {
         if (previous_level < 15 && new_level >= 19) {
             // if previous level was below G15 and new level is G19+, sufix and prefixes were unlocked
             return (true, true);
-        } else if (previous_level < 15 && new_level >= 15) {
+        } else if (previous_level < SUFFIX_UNLOCK_GREANTESS
+            && new_level >= SUFFIX_UNLOCK_GREANTESS) {
             // if previous level was below G15 and new level is G15+, suffix was unlocked
             return (true, false);
         } else if (previous_level < 19 && new_level >= 19) {
@@ -1048,52 +1022,52 @@ impl ImplAdventurer of IAdventurer {
     // @notice Removes a specified suffix boost from an adventurer's stats.
     // @param self The instance of the Stats struct which contains the adventurer's stats.
     // @param suffix The suffix to be removed from the adventurer's stats.
-    fn remove_suffix_boost(ref self: Adventurer, suffix: u8) {
+    fn remove_suffix_boost(ref self: Stats, suffix: u8) {
         if (suffix == ItemSuffix::of_Power) {
-            self.stats.decrease_strength(3);
+            self.decrease_strength(3);
         } else if (suffix == ItemSuffix::of_Giant) {
-            self.stats.decrease_vitality(3);
+            self.decrease_vitality(3);
         } else if (suffix == ItemSuffix::of_Titans) {
-            self.stats.decrease_strength(2);
-            self.stats.decrease_vitality(1);
+            self.decrease_strength(2);
+            self.decrease_charisma(1);
         } else if (suffix == ItemSuffix::of_Skill) {
-            self.stats.decrease_dexterity(3);
+            self.decrease_dexterity(3);
         } else if (suffix == ItemSuffix::of_Perfection) {
-            self.stats.decrease_strength(1);
-            self.stats.decrease_dexterity(1);
-            self.stats.decrease_vitality(1);
+            self.decrease_strength(1);
+            self.decrease_dexterity(1);
+            self.decrease_vitality(1);
         } else if (suffix == ItemSuffix::of_Brilliance) {
-            self.stats.decrease_vitality(3);
+            self.decrease_intelligence(3);
         } else if (suffix == ItemSuffix::of_Enlightenment) {
-            self.stats.decrease_vitality(3);
+            self.decrease_wisdom(3);
         } else if (suffix == ItemSuffix::of_Protection) {
-            self.stats.decrease_vitality(2);
-            self.stats.decrease_dexterity(1);
+            self.decrease_vitality(2);
+            self.decrease_dexterity(1);
         } else if (suffix == ItemSuffix::of_Anger) {
-            self.stats.decrease_strength(2);
-            self.stats.decrease_dexterity(1);
+            self.decrease_strength(2);
+            self.decrease_dexterity(1);
         } else if (suffix == ItemSuffix::of_Rage) {
-            self.stats.decrease_strength(1);
-            self.stats.decrease_vitality(1);
-            self.stats.decrease_vitality(1);
+            self.decrease_strength(1);
+            self.decrease_charisma(1);
+            self.decrease_wisdom(1);
         } else if (suffix == ItemSuffix::of_Fury) {
-            self.stats.decrease_vitality(1);
-            self.stats.decrease_vitality(1);
-            self.stats.decrease_vitality(1);
+            self.decrease_vitality(1);
+            self.decrease_charisma(1);
+            self.decrease_intelligence(1);
         } else if (suffix == ItemSuffix::of_Vitriol) {
-            self.stats.decrease_vitality(2);
-            self.stats.decrease_vitality(1);
+            self.decrease_intelligence(2);
+            self.decrease_wisdom(1);
         } else if (suffix == ItemSuffix::of_the_Fox) {
-            self.stats.decrease_dexterity(2);
-            self.stats.decrease_vitality(1);
+            self.decrease_dexterity(2);
+            self.decrease_charisma(1);
         } else if (suffix == ItemSuffix::of_Detection) {
-            self.stats.decrease_vitality(2);
-            self.stats.decrease_dexterity(1);
+            self.decrease_wisdom(2);
+            self.decrease_dexterity(1);
         } else if (suffix == ItemSuffix::of_Reflection) {
-            self.stats.decrease_vitality(1);
-            self.stats.decrease_vitality(2);
+            self.decrease_intelligence(1);
+            self.decrease_wisdom(2);
         } else if (suffix == ItemSuffix::of_the_Twins) {
-            self.stats.decrease_vitality(3);
+            self.decrease_charisma(3);
         }
     }
 
@@ -1101,21 +1075,21 @@ impl ImplAdventurer of IAdventurer {
     // @param self The Adventurer to check for item specials.
     // @return Returns true if adventurer has item specials, false otherwise.
     fn has_item_specials(self: Adventurer) -> bool {
-        if (self.weapon.get_greatness() >= 15) {
+        if (self.weapon.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.chest.get_greatness() >= 15) {
+        } else if (self.chest.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.head.get_greatness() >= 15) {
+        } else if (self.head.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.waist.get_greatness() >= 15) {
+        } else if (self.waist.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.foot.get_greatness() >= 15) {
+        } else if (self.foot.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.hand.get_greatness() >= 15) {
+        } else if (self.hand.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.neck.get_greatness() >= 15) {
+        } else if (self.neck.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
-        } else if (self.ring.get_greatness() >= 15) {
+        } else if (self.ring.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             true
         } else {
             false
@@ -1162,28 +1136,28 @@ impl ImplAdventurer of IAdventurer {
             strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
         };
 
-        if (self.weapon.get_greatness() >= 15) {
+        if (self.weapon.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.weapon)
                         .special1
                 );
         }
-        if (self.chest.get_greatness() >= 15) {
+        if (self.chest.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.chest)
                         .special1
                 );
         }
-        if (self.head.get_greatness() >= 15) {
+        if (self.head.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.head)
                         .special1
                 );
         }
-        if (self.waist.get_greatness() >= 15) {
+        if (self.waist.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.waist)
@@ -1191,7 +1165,7 @@ impl ImplAdventurer of IAdventurer {
                 );
         }
 
-        if (self.foot.get_greatness() >= 15) {
+        if (self.foot.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.foot)
@@ -1199,7 +1173,7 @@ impl ImplAdventurer of IAdventurer {
                 );
         }
 
-        if (self.hand.get_greatness() >= 15) {
+        if (self.hand.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.hand)
@@ -1207,7 +1181,7 @@ impl ImplAdventurer of IAdventurer {
                 );
         }
 
-        if (self.neck.get_greatness() >= 15) {
+        if (self.neck.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.neck)
@@ -1215,7 +1189,7 @@ impl ImplAdventurer of IAdventurer {
                 );
         }
 
-        if (self.ring.get_greatness() >= 15) {
+        if (self.ring.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
             stats
                 .apply_suffix_boost(
                     ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.ring)
@@ -3281,95 +3255,147 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(192164)]
+    #[available_gas(8850)]
+    fn test_decrease_strength_gas() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.decrease_strength(0);
+    }
+
+    #[test]
     fn test_decrease_strength() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        // basic case
         adventurer.stats.increase_strength(2);
+        assert(adventurer.stats.strength == 2, 'strength should be 2');
         adventurer.stats.decrease_strength(1);
         assert(adventurer.stats.strength == 1, 'strength should be 1');
-        // underflow case
-        adventurer.stats.increase_strength(5);
-        adventurer.stats.decrease_strength(255);
-        assert(adventurer.stats.strength == 0, 'strength should be 0');
     }
 
     #[test]
-    #[available_gas(192164)]
+    #[should_panic(expected: ('amount exceeds strength',))]
+    fn test_decrease_strength_underflow() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.increase_strength(5);
+        adventurer.stats.decrease_strength(6);
+    }
+
+    #[test]
+    #[available_gas(8850)]
+    fn test_decrease_dexterity_gas() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.decrease_dexterity(0);
+    }
+
+    #[test]
     fn test_decrease_dexterity() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        // basic case
         adventurer.stats.increase_dexterity(2);
+        assert(adventurer.stats.dexterity == 2, 'dexterity should be 2');
         adventurer.stats.decrease_dexterity(1);
         assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
-        // underflow case
-        adventurer.stats.increase_dexterity(5);
-        adventurer.stats.decrease_dexterity(255);
-        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
     }
 
     #[test]
-    #[available_gas(192164)]
+    #[should_panic(expected: ('amount exceeds dexterity',))]
+    fn test_decrease_dexterity_underflow() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.increase_dexterity(5);
+        adventurer.stats.decrease_dexterity(6);
+    }
+
+    #[test]
+    #[available_gas(8850)]
+    fn test_decrease_vitality_gas() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.decrease_vitality(0);
+    }
+
+    #[test]
     fn test_decrease_vitality() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        // basic case
         adventurer.stats.increase_vitality(2);
+        assert(adventurer.stats.vitality == 2, 'vitality should be 2');
         adventurer.stats.decrease_vitality(1);
         assert(adventurer.stats.vitality == 1, 'vitality should be 1');
-        // underflow case
-        adventurer.stats.increase_vitality(5);
-        adventurer.stats.decrease_vitality(255);
-        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
     }
 
     #[test]
-    #[available_gas(192164)]
+    #[should_panic(expected: ('amount exceeds vitality',))]
+    fn test_decrease_vitality_underflow() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.increase_vitality(5);
+        adventurer.stats.decrease_vitality(6);
+    }
+
+    #[test]
+    #[available_gas(8850)]
+    fn test_decrease_intelligence_gas() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.decrease_intelligence(0);
+    }
+
+    #[test]
     fn test_decrease_intelligence() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        // basic case
         adventurer.stats.increase_intelligence(2);
+        assert(adventurer.stats.intelligence == 2, 'intelligence should be 2');
         adventurer.stats.decrease_intelligence(1);
         assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
-        // underflow case
-        adventurer.stats.increase_intelligence(5);
-        adventurer.stats.decrease_intelligence(255);
-        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
     }
 
     #[test]
-    #[available_gas(192164)]
+    #[should_panic(expected: ('amount exceeds intelligence',))]
+    fn test_decrease_intelligence_underflow() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.increase_intelligence(5);
+        adventurer.stats.decrease_intelligence(6);
+    }
+
+    #[test]
+    #[available_gas(8850)]
     fn test_decrease_wisdom_gas() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.stats.decrease_wisdom(1);
+        adventurer.stats.decrease_wisdom(0);
     }
 
     #[test]
-    #[available_gas(192164)]
     fn test_decrease_wisdom() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        // basic case
         adventurer.stats.increase_wisdom(2);
+        assert(adventurer.stats.wisdom == 2, 'wisdom should be 2');
         adventurer.stats.decrease_wisdom(1);
         assert(adventurer.stats.wisdom == 1, 'wisdom should be 1');
-        // underflow case
-        adventurer.stats.increase_wisdom(5);
-        adventurer.stats.decrease_wisdom(255);
-        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
     }
 
     #[test]
-    #[available_gas(192164)]
+    #[should_panic(expected: ('amount exceeds wisdom',))]
+    fn test_decrease_wisdom_underflow() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.increase_wisdom(5);
+        adventurer.stats.decrease_wisdom(6);
+    }
+
+    #[test]
+    #[available_gas(8850)]
+    fn test_decrease_charisma_gas() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.decrease_charisma(0);
+    }
+
+    #[test]
     fn test_decrease_charisma() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        // basic case
         adventurer.stats.increase_charisma(2);
+        assert(adventurer.stats.charisma == 2, 'charisma should be 2');
         adventurer.stats.decrease_charisma(1);
         assert(adventurer.stats.charisma == 1, 'charisma should be 1');
+    }
 
-        // underflow case
+    #[test]
+    #[should_panic(expected: ('amount exceeds charisma',))]
+    fn test_decrease_charisma_underflow() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         adventurer.stats.increase_charisma(5);
-        adventurer.stats.decrease_charisma(255);
-        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+        adventurer.stats.decrease_charisma(6);
     }
 
     // TODO: Use conditional compilation to test this in the future
@@ -4063,18 +4089,397 @@ mod tests {
     #[available_gas(1900000)]
     fn test_remove_suffix_boost() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-        // verify starting state
-        assert(adventurer.stats.strength == 0, 'strength should be 0');
-
-        // test base case
         adventurer.stats.strength = 4;
-        adventurer.remove_suffix_boost(1);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Power);
         assert(adventurer.stats.strength == 1, 'strength should be 1');
+    }
 
-        // underflow check
-        adventurer.remove_suffix_boost(1);
-        assert(adventurer.stats.strength == 0, 'strength should still be 0');
+    #[test]
+    fn test_apply_power_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Power);
+        assert(adventurer.stats.strength == 3, 'strength should be 3');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_giant_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Giant);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 3, 'vitality should be 3');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_skill_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Skill);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 3, 'dexterity should be 3');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_perfection_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Perfection);
+        assert(adventurer.stats.strength == 1, 'strength should be 1');
+        assert(adventurer.stats.vitality == 1, 'vitality should be 1');
+        assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_brilliance_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Brilliance);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 3, 'intelligence should be 3');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_enlightenment_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Enlightenment);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 3, 'wisdom should be 3');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_protection_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Protection);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 2, 'vitality should be 2');
+        assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_anger_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Anger);
+        assert(adventurer.stats.strength == 2, 'strength should be 2');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_rage_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Rage);
+        assert(adventurer.stats.strength == 1, 'strength should be 1');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 1, 'wisdom should be 1');
+        assert(adventurer.stats.charisma == 1, 'charisma should be 1');
+    }
+
+    #[test]
+    fn test_apply_fury_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Fury);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 1, 'vitality should be 1');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 1, 'charisma should be 1');
+    }
+
+    #[test]
+    fn test_apply_vitriol_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Vitriol);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 2, 'intelligence should be 2');
+        assert(adventurer.stats.wisdom == 1, 'wisdom should be 1');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_fox_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_the_Fox);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 2, 'dexterity should be 2');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 1, 'charisma should be 1');
+    }
+
+    #[test]
+    fn test_apply_detection_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Detection);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 2, 'wisdom should be 2');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_reflection_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Reflection);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
+        assert(adventurer.stats.wisdom == 2, 'wisdom should be 2');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_twins_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_the_Twins);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 3, 'charisma should be 3');
+    }
+
+    #[test]
+    fn test_apply_and_remove_power_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Power);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Power);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_giant_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Giant);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Giant);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_titans_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Titans);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Titans);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_skill_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Skill);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Skill);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_perfection_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Perfection);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Perfection);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_brilliance_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Brilliance);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Brilliance);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_enlightenment_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Enlightenment);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Enlightenment);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_protection_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Protection);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Protection);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_anger_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Anger);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Anger);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_rage_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Rage);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Rage);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_fury_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Fury);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Fury);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_vitriol_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Vitriol);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Vitriol);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_fox_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_the_Fox);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_the_Fox);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_detection_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Detection);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Detection);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_reflection_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_Reflection);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_Reflection);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+    }
+
+    #[test]
+    fn test_apply_and_remove_twins_boost() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.apply_suffix_boost(ItemSuffix::of_the_Twins);
+        adventurer.stats.remove_suffix_boost(ItemSuffix::of_the_Twins);
+        assert(adventurer.stats.strength == 0, 'strength should be 0');
+        assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+        assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+        assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+        assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+        assert(adventurer.stats.charisma == 0, 'charisma should be 0');
     }
 
     #[test]
@@ -4264,13 +4669,7 @@ mod tests {
         };
 
         let boost_stats = Stats {
-            strength: 5,
-            dexterity: 4,
-            vitality: 3,
-            intelligence: 2,
-            wisdom: 1,
-            charisma: 20,
-            luck: 1
+            strength: 5, dexterity: 4, vitality: 3, intelligence: 2, wisdom: 1, charisma: 0, luck: 1
         };
 
         adventurer.remove_stat_boosts(boost_stats);
@@ -4329,19 +4728,18 @@ mod tests {
 
     // max values case
     #[test]
-    #[available_gas(53430)]
     fn test_remove_stat_boosts_max() {
         let mut adventurer = Adventurer {
             last_action_block: 511,
             health: 100,
             xp: 1,
             stats: Stats {
-                strength: 5,
-                dexterity: 4,
-                vitality: 3,
-                intelligence: 2,
-                wisdom: 1,
-                charisma: 0,
+                strength: 255,
+                dexterity: 255,
+                vitality: 255,
+                intelligence: 255,
+                wisdom: 255,
+                charisma: 255,
                 luck: 0
             },
             gold: 40,

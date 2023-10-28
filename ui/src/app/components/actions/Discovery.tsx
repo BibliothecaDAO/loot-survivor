@@ -1,6 +1,6 @@
-import { useQueriesStore } from "../../hooks/useQueryStore";
-import { DiscoveryDisplay } from "./DiscoveryDisplay";
-import LootIconLoader from "../icons/Loader";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { DiscoveryDisplay } from "@/app/components/actions/DiscoveryDisplay";
+import LootIconLoader from "@/app/components/icons/Loader";
 import { Discovery } from "@/app/types";
 
 interface DiscoveryProps {

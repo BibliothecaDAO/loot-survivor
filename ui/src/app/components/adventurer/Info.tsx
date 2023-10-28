@@ -1,24 +1,31 @@
-import { Adventurer, NullAdventurer, NullItem } from "../../types";
-import { HeartIcon, CoinIcon, QuestionMarkIcon } from "../icons/Icons";
+import { Contract } from "starknet";
+import { Adventurer, NullAdventurer, NullItem } from "@/app/types";
+import {
+  HeartIcon,
+  CoinIcon,
+  QuestionMarkIcon,
+} from "@/app/components/icons/Icons";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
-import { getKeyFromValue } from "../../lib/utils";
-import { useQueriesStore } from "../../hooks/useQueryStore";
-import useUIStore from "../../hooks/useUIStore";
+import { getKeyFromValue } from "@/app/lib/utils";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import useUIStore from "@/app/hooks/useUIStore";
 import { Item } from "@/app/types";
-import { HealthCountDown } from "../CountDown";
-import { GameData } from "../GameData";
-import { useContracts } from "@/app/hooks/useContracts";
+import { HealthCountDown } from "@/app/components/CountDown";
+import { GameData } from "@/app/lib/data/GameData";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { calculateLevel } from "@/app/lib/utils";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
+  gameContract: Contract;
   profileExists?: boolean;
   upgradeCost?: number;
 }
 
 export default function Info({
   adventurer,
+  gameContract,
   profileExists,
   upgradeCost,
 }: InfoProps) {
@@ -32,7 +39,6 @@ export default function Info({
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
-  const { gameContract } = useContracts();
 
   const gameData = new GameData();
 
@@ -105,75 +111,78 @@ export default function Info({
     maxHealth
   );
 
+  const adventurerLevel = calculateLevel(adventurer?.xp ?? 0);
+
   return (
     <>
       {adventurer?.id ? (
-        <div className="border border-terminal-green h-full">
-          <div className="flex flex-row flex-wrap gap-2 p-2 h-full">
-            <div className="flex flex-col w-full uppercase h-full">
-              <div className="relative flex justify-between w-full text-xl sm:text-2xl lg:text-3xl border-b border-terminal-green">
-                {formatAdventurer.name}
-                <span className="relative flex items-center text-terminal-yellow">
-                  <CoinIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
-                  {formatAdventurer.gold
-                    ? formatAdventurer.gold - (upgradeCost ?? 0)
-                    : 0}
-                  <span className="absolute top-0 right-[-20px] text-xs">
-                    {formatAdventurer.gold === 511 ? "Full" : ""}
-                  </span>
-                </span>
-                <span className="flex items-center ">
-                  <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
-                  <HealthCountDown health={totalHealth || 0} />
-                  {`/${maxHealth}`}
-                </span>
-                {(potionAmount > 0 || vitalitySelected > 0) && (
-                  <p className="absolute top-[-5px] sm:top-[-10px] right-[30px] sm:right-[40px] text-xs sm:text-sm">
-                    +{healthPlus}
-                  </p>
-                )}
-                {vitalitySelected > 0 && (
-                  <p className="absolute top-[-5px] sm:top-[-10px] right-0 text-xs sm:text-sm">
-                    +{maxHealthPlus}
-                  </p>
-                )}
-              </div>
-              <hr className="border-terminal-green" />
-              <div className="flex justify-between w-full sm:text-sm lg:text-xl pb-1">
-                <LevelBar xp={formatAdventurer.xp ?? 0} />
-              </div>
+        <div className="flex flex-col w-full uppercase h-full p-2 border border-terminal-green">
+          <div className="relative flex justify-between w-full text-xl sm:text-2xl lg:text-3xl">
+            {formatAdventurer.name}
+            <span className="flex items-center text-terminal-yellow">
+              <CoinIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
+              {formatAdventurer.gold
+                ? formatAdventurer.gold - (upgradeCost ?? 0)
+                : 0}
+              <span className="absolute top-0 right-[-20px] text-xs">
+                {formatAdventurer.gold === 511 ? "Full" : ""}
+              </span>
+            </span>
+            <span className="flex items-center ">
+              <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
+              <HealthCountDown health={totalHealth || 0} />
+              {`/${maxHealth}`}
+            </span>
+            {(potionAmount > 0 || vitalitySelected > 0) && (
+              <p className="absolute top-[-5px] sm:top-[-10px] right-[30px] sm:right-[40px] text-xs sm:text-sm">
+                +{healthPlus}
+              </p>
+            )}
+            {vitalitySelected > 0 && (
+              <p className="absolute top-[-5px] sm:top-[-10px] right-0 text-xs sm:text-sm">
+                +{maxHealthPlus}
+              </p>
+            )}
+          </div>
+          <hr className="border-terminal-green" />
+          <div className="flex justify-between w-full sm:text-sm lg:text-xl pb-1">
+            <LevelBar xp={formatAdventurer.xp ?? 0} />
+          </div>
 
-              <div className="flex flex-col w-full gap-1 overflow-hidden h-[450px] sm:h-full">
-                <div className="flex flex-row w-full font-semibold text-xs sm:text-sm lg:text-base">
-                  {attributes.map((attribute) => (
-                    <div
-                      key={attribute.key}
-                      className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black"
-                    >
-                      {attribute.key}
-                      <span className="pl-1">{attribute.value}</span>
-                    </div>
-                  ))}
+          {adventurerLevel > 1 ? (
+            <div className="flex flex-row w-full font-semibold text-xs sm:text-sm lg:text-base mb-1">
+              {attributes.map((attribute) => (
+                <div
+                  key={attribute.key}
+                  className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black"
+                >
+                  {attribute.key}
+                  <span className="pl-1">{attribute.value}</span>
                 </div>
-                <div className="w-full flex flex-col sm:gap-1 2xl:gap-0 text-xs h-[400px] sm:h-[425px] overflow-y-auto 2xl:overflow-hidden">
-                  {bodyParts.map((part) => (
-                    <ItemDisplay
-                      item={
-                        items.find(
-                          (item: Item) =>
-                            item.item ===
-                              formatAdventurer[part.toLowerCase()] &&
-                            item.equipped
-                        ) || NullItem
-                      }
-                      itemSlot={part}
-                      handleDrop={handleDropItems}
-                      key={part}
-                    />
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
+          ) : (
+            <div className="w-full bg-terminal-green text-terminal-black text-center font-semibold mb-1">
+              Stats Hidden
+            </div>
+          )}
+
+          <div className="w-full flex flex-col gap-1 text-xs overflow-y-scroll default-scroll h-[500px]">
+            {bodyParts.map((part) => (
+              <ItemDisplay
+                item={
+                  items.find(
+                    (item: Item) =>
+                      item.item === formatAdventurer[part.toLowerCase()] &&
+                      item.equipped
+                  ) || NullItem
+                }
+                itemSlot={part}
+                handleDrop={handleDropItems}
+                gameContract={gameContract}
+                key={part}
+              />
+            ))}
           </div>
         </div>
       ) : (

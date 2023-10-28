@@ -1,6 +1,6 @@
 import { InvokeTransactionReceiptResponse } from "starknet";
-import { GameData } from "../../components/GameData";
-import { getKeyFromValue, convertToBoolean, chunkArray } from ".";
+import { GameData } from "@/app/lib/data/GameData";
+import { getKeyFromValue, convertToBoolean, chunkArray } from "@/app/lib/utils";
 import {
   DiscoveredHealthEvent,
   DiscoveredGoldEvent,
@@ -27,8 +27,9 @@ import {
   UpgradesAvailableEvent,
   IdleDeathPenaltyEvent,
   AdventurerUpgradedEvent,
-} from "../../types/events";
-import { processData } from "./processData";
+  ERC721TransferEvent,
+} from "@/app/types/events";
+import { processData } from "@/app/lib/utils/processData";
 
 function parseAdventurerState(data: string[]) {
   return {
@@ -210,7 +211,9 @@ function parseEquippedItems(data: string[]) {
 
 export async function parseEvents(
   receipt: InvokeTransactionReceiptResponse,
-  currentAdventurer?: any
+  currentAdventurer?: any,
+  beastsContract?: string,
+  event?: string
 ) {
   if (!receipt.events) {
     throw new Error(`No events found`);
@@ -220,16 +223,48 @@ export async function parseEvents(
   let events: Array<any> = [];
 
   for (let raw of receipt.events) {
-    const eventName = getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]);
+    let eventName: string | null = "";
+    // If event is a Transfer, make sure it is just the beast contract that
+    if (getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]) == "Transfer") {
+      if (raw.from_address == beastsContract) {
+        eventName = "Transfer";
+      } else {
+        eventName = null;
+      }
+    } else {
+      if (event) {
+        const eventFromKey = getKeyFromValue(
+          gameData.SELECTOR_KEYS,
+          raw.keys[0]
+        )!;
+        if (event == eventFromKey) {
+          eventName = event;
+        } else {
+          eventName = null;
+        }
+      } else {
+        eventName = getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]);
+      }
+    }
 
     switch (eventName) {
       case "StartGame":
         const startGameData: StartGameEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
           adventurerMeta: {
-            name: parseInt(raw.data[41]),
-            entropy: parseInt(raw.data[42]),
+            startBlock: parseInt(raw.data[41]),
+            startingStats: {
+              strength: parseInt(raw.data[42]),
+              dexterity: parseInt(raw.data[43]),
+              vitality: parseInt(raw.data[44]),
+              intelligence: parseInt(raw.data[45]),
+              wisdom: parseInt(raw.data[46]),
+              charisma: parseInt(raw.data[47]),
+              luck: parseInt(raw.data[48]),
+            },
+            name: parseInt(raw.data[49]),
           },
+          revealBlock: parseInt(raw.data[50]),
         };
         const startGameEvent = processData(
           startGameData,
@@ -572,7 +607,7 @@ export async function parseEvents(
       case "DroppedItems":
         const itemIds = [];
         // Skip array length
-        const itemsData = raw.data.slice(77);
+        const itemsData = raw.data.slice(76);
         for (let i = 0; i < itemsData.length; i++) {
           itemIds.push(parseInt(itemsData[i]));
         }
@@ -696,6 +731,17 @@ export async function parseEvents(
           currentAdventurer
         );
         events.push({ name: eventName, data: idleDeathPenaltyEvent });
+        break;
+      case "Transfer":
+        const beastTransferData: ERC721TransferEvent = {
+          from: parseInt(raw.data[0]),
+          to: parseInt(raw.data[1]),
+          tokenId: {
+            low: parseInt(raw.data[2]),
+            high: parseInt(raw.data[3]),
+          },
+        };
+        events.push({ name: eventName, data: beastTransferData });
         break;
     }
   }

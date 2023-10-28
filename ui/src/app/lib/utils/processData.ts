@@ -1,4 +1,4 @@
-import { GameData } from "@/app/components/GameData";
+import { GameData } from "@/app/lib/data/GameData";
 import {
   DiscoveredHealthEvent,
   DiscoveredGoldEvent,
@@ -25,9 +25,9 @@ import {
   UpgradesAvailableEvent,
   IdleDeathPenaltyEvent,
   AdventurerUpgradedEvent,
-} from "../../types/events";
+} from "@/app/types/events";
 import { Adventurer } from "@/app/types";
-import { feltToString } from ".";
+import { feltToString } from "@/app/lib/utils";
 
 type EventData =
   | DiscoveredHealthEvent
@@ -84,7 +84,8 @@ function processAdventurerState(data: any, currentAdventurer?: any) {
     statUpgrades: data.adventurerState["adventurer"]["statPointsAvailable"],
     actionsPerBlock: data.adventurerState["adventurer"]["actionsPerBlock"],
     name: currentAdventurer["name"],
-    entropy: currentAdventurer["entropy"],
+    startBlock: currentAdventurer["startBlock"],
+    revealBlock: currentAdventurer["revealBlock"],
     createdTime: currentAdventurer.createdTime,
     lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
     timestamp: new Date(), // Equivalent to datetime.now() in Python.
@@ -208,7 +209,8 @@ export function processData(
         actionsPerBlock:
           startGameEvent.adventurerState["adventurer"]["actionsPerBlock"],
         name: feltToString(startGameEvent.adventurerMeta["name"]),
-        entropy: startGameEvent.adventurerMeta["entropy"],
+        startBlock: startGameEvent.adventurerMeta["startBlock"],
+        revealBlock: startGameEvent.revealBlock,
         createdTime: new Date(),
         lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
         timestamp: new Date(),
@@ -588,15 +590,15 @@ export function processData(
           attackedBeastEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: attackedBeastEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             attackedBeastEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             attackedBeastEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             attackedBeastEvent.beastSpecs["specials"]["special3"]
           ],
         seed: attackedBeastEvent.seed,
@@ -630,15 +632,15 @@ export function processData(
           attackedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: attackedByBeastEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             attackedByBeastEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             attackedByBeastEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             attackedByBeastEvent.beastSpecs["specials"]["special3"]
           ],
         seed: attackedByBeastEvent.seed,
@@ -672,15 +674,15 @@ export function processData(
           slayedBeastEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: slayedBeastEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             slayedBeastEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             slayedBeastEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             slayedBeastEvent.beastSpecs["specials"]["special3"]
           ],
         seed: slayedBeastEvent.seed,
@@ -715,15 +717,15 @@ export function processData(
           fleeFailedEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: fleeFailedEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             fleeFailedEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             fleeFailedEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             fleeFailedEvent.beastSpecs["specials"]["special3"]
           ],
         seed: fleeFailedEvent.seed,
@@ -757,15 +759,15 @@ export function processData(
           fleeSucceededEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: fleeSucceededEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             fleeSucceededEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             fleeSucceededEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             fleeSucceededEvent.beastSpecs["specials"]["special3"]
           ],
         seed: fleeSucceededEvent.seed,

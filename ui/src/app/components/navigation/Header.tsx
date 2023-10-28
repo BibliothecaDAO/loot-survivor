@@ -1,15 +1,15 @@
 import { useRef, useState } from "react";
-import { useBalance, useAccount, useConnectors } from "@starknet-react/core";
-import { useContracts } from "@/app/hooks/useContracts";
+import { Contract } from "starknet";
+import { useAccount, useDisconnect, Connector } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import { useUiSounds } from "@/app/hooks/useUiSound";
 import { soundSelector } from "@/app/hooks/useUiSound";
-import Logo from "../../../../public/icons/logo.svg";
-import Lords from "../../../../public/icons/lords.svg";
-import { PenaltyCountDown } from "../../components/CountDown";
-import { Button } from "../../components/buttons/Button";
+import Logo from "public/icons/logo.svg";
+import Lords from "public/icons/lords.svg";
+import { PenaltyCountDown } from "@/app/components/CountDown";
+import { Button } from "@/app/components/buttons/Button";
 import { formatNumber, displayAddress } from "@/app/lib/utils";
 import {
   ArcadeIcon,
@@ -18,31 +18,34 @@ import {
   CartIcon,
   SettingsIcon,
   GithubIcon,
-} from "../icons/Icons";
-import TransactionCart from "./TransactionCart";
-import TransactionHistory from "./TransactionHistory";
+} from "@/app/components/icons/Icons";
+import TransactionCart from "@/app/components/navigation/TransactionCart";
+import TransactionHistory from "@/app/components/navigation/TransactionHistory";
 import { NullAdventurer } from "@/app/types";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 
 export interface HeaderProps {
   multicall: (...args: any[]) => any;
   mintLords: (...args: any[]) => any;
+  lordsBalance: bigint;
+  arcadeConnectors: Connector[];
+  gameContract: Contract;
 }
 
-export default function Header({ multicall, mintLords }: HeaderProps) {
+export default function Header({
+  multicall,
+  mintLords,
+  lordsBalance,
+  arcadeConnectors,
+  gameContract,
+}: HeaderProps) {
   const { account, address } = useAccount();
-  const { disconnect } = useConnectors();
+  const { disconnect } = useDisconnect();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const data = useQueriesStore((state) => state.data);
   const resetData = useQueriesStore((state) => state.resetData);
   const isLoading = useQueriesStore((state) => state.isLoading);
-
-  const { lordsContract } = useContracts();
-
-  const lordsBalance = useBalance({
-    token: lordsContract?.address,
-    address,
-  });
 
   const setDisconnected = useUIStore((state) => state.setDisconnected);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
@@ -56,6 +59,9 @@ export default function Header({ multicall, mintLords }: HeaderProps) {
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const setScreen = useUIStore((state) => state.setScreen);
 
+  const calls = useTransactionCartStore((state) => state.calls);
+  const txInCart = calls.length > 0;
+
   const { play: clickPlay } = useUiSounds(soundSelector.click);
 
   const displayCartButtonRef = useRef<HTMLButtonElement>(null);
@@ -63,12 +69,16 @@ export default function Header({ multicall, mintLords }: HeaderProps) {
 
   const [showLordsMint, setShowLordsMint] = useState(false);
 
+  const checkArcade = arcadeConnectors.some(
+    (connector) => connector.name == address
+  );
+
   return (
     <div className="flex flex-row justify-between px-1  ">
       <div className="flex flex-row items-center gap-2 sm:gap-5">
         <Logo className="fill-current w-24 md:w-32 xl:w-40 2xl:w-64" />
       </div>
-      <div className="flex flex-row items-center self-end sm:gap-1 space-x-1 self-center">
+      <div className="flex flex-row items-center self-end sm:gap-1 self-center">
         {adventurer?.id && (
           <PenaltyCountDown
             lastDiscoveryTime={
@@ -99,7 +109,7 @@ export default function Header({ multicall, mintLords }: HeaderProps) {
               <>
                 <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
                 <p>
-                  {formatNumber(parseInt(lordsBalance.data?.formatted ?? "0"))}
+                  {formatNumber(parseInt(lordsBalance.toString()) / 10 ** 18)}
                 </p>
               </>
             ) : (
@@ -109,10 +119,10 @@ export default function Header({ multicall, mintLords }: HeaderProps) {
         </Button>
         <Button
           size={"xs"}
-          variant={"outline"}
+          variant={checkArcade ? "outline" : "default"}
           onClick={() => showArcadeDialog(!arcadeDialog)}
-          disabled={isWrongNetwork}
-          className="xl:px-5"
+          disabled={isWrongNetwork || !account}
+          className={`xl:px-5 ${checkArcade ? "" : "animate-pulse"}`}
         >
           <ArcadeIcon className="sm:w-5 sm:h-5  h-3 w-3 justify-center fill-current mr-2" />
           <span className="hidden sm:block">arcade account</span>
@@ -134,14 +144,14 @@ export default function Header({ multicall, mintLords }: HeaderProps) {
         </Button>
         {account && (
           <Button
-            variant={"outline"}
+            variant={txInCart ? "default" : "outline"}
             size={"xs"}
             ref={displayCartButtonRef}
             onClick={() => {
               setDisplayCart(!displayCart);
               clickPlay();
             }}
-            className="xl:px-5"
+            className={`xl:px-5 ${txInCart ? "animate-pulse" : ""}`}
           >
             <CartIcon className="sm:w-5 sm:h-5 h-3 w-3 fill-current" />
           </Button>
@@ -150,6 +160,7 @@ export default function Header({ multicall, mintLords }: HeaderProps) {
           <TransactionCart
             buttonRef={displayCartButtonRef}
             multicall={multicall}
+            gameContract={gameContract}
           />
         )}
         <div className="flex items-center sm:hidden">
@@ -181,20 +192,26 @@ export default function Header({ multicall, mintLords }: HeaderProps) {
               </Button>
             </>
           )}
-
-          <Button
-            variant={"outline"}
-            size={"sm"}
-            onClick={() => {
-              disconnect();
-              resetData();
-              setAdventurer(NullAdventurer);
-              setDisconnected(true);
-            }}
-            className="xl:px-5"
-          >
-            {account ? displayAddress(account.address) : "Connect"}
-          </Button>
+          <div className="relative">
+            <Button
+              variant={"outline"}
+              size={"sm"}
+              onClick={() => {
+                disconnect();
+                resetData();
+                setAdventurer(NullAdventurer);
+                setDisconnected(true);
+              }}
+              className="xl:px-5"
+            >
+              {account ? displayAddress(account.address) : "Connect"}
+            </Button>
+            {checkArcade && (
+              <div className="absolute top-0 right-0">
+                <ArcadeIcon className="fill-current w-4" />
+              </div>
+            )}
+          </div>
 
           <Button
             variant={"outline"}

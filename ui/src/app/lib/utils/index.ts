@@ -1,18 +1,18 @@
 import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
-import { Adventurer, Item, BurnerStorage } from "../../types";
-import Storage from "../storage";
-import { GameData } from "../../components/GameData";
+import { z } from "zod";
+import { Call, AccountInterface } from "starknet";
+import { Adventurer, Item, ItemPurchase } from "@/app/types";
+import { GameData } from "@/app/lib/data/GameData";
 import {
   itemCharismaDiscount,
   itemBasePrice,
   itemMinimumPrice,
   potionBasePrice,
-} from "../constants";
-import { z } from "zod";
-import { deathMessages, FEE_CHECK_BALANCE } from "../constants";
-import { Call, AccountInterface, Account } from "starknet";
+} from "@/app/lib/constants";
+import { deathMessages, FEE_CHECK_BALANCE } from "@/app/lib/constants";
+import { getBlock } from "@/app/api/api";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -35,7 +35,7 @@ export function indexAddress(address: string) {
 }
 
 export function padAddress(address: string) {
-  if (address !== "") {
+  if (address && address !== "") {
     const length = address.length;
     const neededLength = 66 - length;
     let zeros = "";
@@ -133,7 +133,7 @@ export const formatTime = (date: Date) => {
 };
 
 export function shortenHex(hexString: string, numDigits = 6) {
-  if (hexString.length <= numDigits) {
+  if (hexString?.length <= numDigits) {
     return hexString;
   }
 
@@ -369,36 +369,207 @@ export async function checkArcadeBalance(
   account?: AccountInterface
 ) {
   if (ethBalance < FEE_CHECK_BALANCE) {
-    const storage: BurnerStorage = Storage.get("burners");
-    if (account && (account?.address ?? "0x0") in storage) {
-      try {
-        setEstimatingFee(true);
-        const newAccount = new Account(
-          account,
-          account?.address,
-          storage[account?.address]["privateKey"],
-          "1"
-        );
-        const { suggestedMaxFee: estimatedFee } = await newAccount.estimateFee(
-          calls
-        );
-        // Add 10% to fee for safety
-        const formattedFee = estimatedFee * (BigInt(11) / BigInt(10));
-        setEstimatingFee(false);
-        if (ethBalance < formattedFee) {
-          showTopUpDialog(true);
-          setTopUpAccount(account?.address);
-          return true;
-        } else {
-          return false;
-        }
-      } catch (e) {
-        console.log(e);
-        setEstimatingFee(false);
-        return false;
-      }
-    }
+    // const storage: BurnerStorage = Storage.get("burners");
+    // if (account && (account?.address ?? "0x0") in storage) {
+    //   try {
+    //     setEstimatingFee(true);
+    //     const newAccount = new Account(
+    //       account,
+    //       account?.address,
+    //       storage[account?.address]["privateKey"],
+    //       "1"
+    //     );
+    //     const { suggestedMaxFee: estimatedFee } = await newAccount.estimateFee(
+    //       calls
+    //     );
+    //     // Add 10% to fee for safety
+    //     const formattedFee = estimatedFee * (BigInt(11) / BigInt(10));
+    //     setEstimatingFee(false);
+    //     if (ethBalance < formattedFee) {
+    // showTopUpDialog(true);
+    // setTopUpAccount(account?.address);
+    //       return true;
+    //     } else {
+    //       return false;
+    //     }
+    //   } catch (e) {
+    //     console.log(e);
+    //     setEstimatingFee(false);
+    //     return false;
+    //   }
+    // }
+    showTopUpDialog(true);
+    setTopUpAccount(account?.address);
+    return true;
   } else {
     return false;
   }
+}
+
+export const fetchAverageBlockTime = async (
+  currentBlock: number,
+  numberOfBlocks: number
+) => {
+  try {
+    let totalTimeInterval = 0;
+
+    for (let i = currentBlock - numberOfBlocks; i < currentBlock; i++) {
+      const currentBlockData = await getBlock(i);
+      const nextBlockData = await getBlock(i + 1);
+
+      const timeInterval = nextBlockData.timestamp - currentBlockData.timestamp;
+      totalTimeInterval += timeInterval;
+    }
+    const averageTime = totalTimeInterval / numberOfBlocks;
+    return averageTime;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
+export const fetchBlockTime = async (currentBlock: number) => {
+  try {
+    const currentBlockData = await getBlock(currentBlock);
+    return currentBlockData.timestamp;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
+export const calculateVitBoostRemoved = (
+  purchases: ItemPurchase[],
+  adventurer: Adventurer,
+  items: any[]
+) => {
+  const gameData = new GameData();
+  const equippedItems = purchases.filter((purchase) => purchase.equip === "1");
+  const itemStrings = equippedItems.map(
+    (purchase) => gameData.ITEMS[parseInt(purchase?.item) ?? 0]
+  );
+  const slotStrings = itemStrings.map(
+    (itemString) => gameData.ITEM_SLOTS[itemString.split(" ").join("")]
+  );
+
+  // loop through slots and check what item is equipped
+  const unequippedSuffixBoosts = [];
+  for (const slot of slotStrings) {
+    if (slot === "Weapon") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.weapon)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Chest") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.chest)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Head") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.head)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Waist") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.waist)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Foot") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.foot)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Hand") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.hand)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Neck") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.neck)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+    if (slot === "Ring") {
+      unequippedSuffixBoosts.push(
+        gameData.ITEM_SUFFIX_BOOST[
+          parseInt(
+            getKeyFromValue(
+              gameData.ITEM_SUFFIXES,
+              items.find((item) => item.item === adventurer.ring)?.special1
+            ) ?? "0"
+          )
+        ]
+      );
+    }
+  }
+  const filteredSuffixBoosts = unequippedSuffixBoosts.filter(
+    (suffix) => suffix !== undefined
+  );
+  const vitTotal = findAndSumVitValues(filteredSuffixBoosts);
+  return vitTotal;
+};
+
+function findAndSumVitValues(arr: string[]): number {
+  let total = 0;
+
+  arr.forEach((str) => {
+    const matches = str.match(/VIT \+\d+/g);
+
+    if (matches) {
+      matches.forEach((match) => {
+        const value = parseInt(match.split("+")[1]);
+        total += value;
+      });
+    }
+  });
+
+  return total;
 }

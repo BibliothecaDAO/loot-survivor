@@ -1,5 +1,5 @@
 import { RawArgs } from "starknet";
-import { ScreenPage } from "../hooks/useUIStore";
+import { ScreenPage } from "@/app/hooks/useUIStore";
 import { ReactElement } from "react";
 
 export interface Adventurer {
@@ -31,6 +31,8 @@ export interface Adventurer {
   ring?: string; // Ring of the adventure
   beastHealth?: number; // Beast health adventurer is engaging
   statUpgrades?: number; // Stat upgrades adventurer has
+  startBlock?: number; // The block number the adventurer was minted
+  revealBlock?: number; // The next block number that the game entropy rotates from spawn
   gold?: number; // Gold adventurer has
   createdTime?: Date; // Block time the adventurer was created
   lastUpdatedTime?: Date; // Block time the adventurer was last updated
@@ -178,10 +180,14 @@ export interface ButtonData {
   id: number;
   label: string;
   icon?: ReactElement;
+  loading?: boolean;
   value?: string;
+  mouseEnter?: () => void;
+  mouseLeave?: () => void;
   action: () => void;
   disabled?: boolean;
   variant?: "default" | "outline";
+  className?: string;
 }
 
 export interface ItemPurchase {
