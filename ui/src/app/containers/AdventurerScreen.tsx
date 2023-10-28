@@ -65,8 +65,6 @@ export default function AdventurerScreen({
     }
   }, []);
 
-  throw new Error("test");
-
   return (
     <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap h-full">
       <div className="w-full sm:w-2/12">
