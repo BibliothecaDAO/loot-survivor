@@ -16,6 +16,9 @@ import { getDeathMessageByRank } from "@/app/lib/utils";
 export const DeathDialog = () => {
   const messageRef = useRef<HTMLSpanElement>(null);
   const [rank, setRank] = useState<number | null>(null);
+  const [twitterDeathMessage, setTwitterDeathMessage] = useState<
+    string | undefined
+  >();
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -51,6 +54,10 @@ export const DeathDialog = () => {
       })
       .catch((error) => console.error("Error refetching data:", error));
   }, []);
+
+  useEffect(() => {
+    setTwitterDeathMessage(messageRef.current?.innerText);
+  }, [messageRef.current]);
 
   return (
     <>
@@ -116,9 +123,7 @@ export const DeathDialog = () => {
                   rank! ?? 0
                 )} place on #LootSurvivor with ${
                   adventurer?.xp
-                } XP.\n\nGravestone bears the inscription:\n\n"${
-                  messageRef.current?.innerText
-                }"🪦\n\nEnter here and try to survive: ${
+                } XP.\n\nGravestone bears the inscription:\n\n"${twitterDeathMessage}"🪦\n\nEnter here and try to survive: ${
                   process.env.NEXT_PUBLIC_APP_URL
                 }\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
                 className="animate-pulse"
