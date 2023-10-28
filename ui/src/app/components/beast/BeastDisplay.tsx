@@ -10,12 +10,12 @@ import { HealthCountDown } from "@/app/components/CountDown";
 
 interface BeastDisplayProps {
   beastData: Beast;
-  beastContract: Contract;
+  beastsContract: Contract;
 }
 
 export const BeastDisplay = ({
   beastData,
-  beastContract,
+  beastsContract,
 }: BeastDisplayProps) => {
   const [isMinted, setIsMinted] = useState(false);
   const beastName = processBeastName(
@@ -28,7 +28,7 @@ export const BeastDisplay = ({
   const namedBeast = beastData?.special2 ? true : false;
 
   const handleIsMinted = async () => {
-    const minted = await beastContract.call(
+    const minted = await beastsContract.call(
       "isMinted",
       CallData.compile({
         beast: beastData?.beast ?? "",
