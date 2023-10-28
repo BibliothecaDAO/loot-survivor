@@ -10,8 +10,6 @@ export const chapter4 =
   "They find golden coins in their pocket, glimmering in the dim light - an enigma wrapped in the shroud of the unexpected.";
 export const battle = "A beast lurks in the shadow, prepare for battle!";
 
-export const NETWORK: "goerli" | "mainnet" = "goerli";
-
 export const notificationAnimations = [
   { name: "idle", startFrame: 0, frameCount: 4 },
   { name: "run", startFrame: 9, frameCount: 5 },
