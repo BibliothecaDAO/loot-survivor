@@ -14,6 +14,7 @@ interface ActionsScreenProps {
   attack: (...args: any[]) => any;
   flee: (...args: any[]) => any;
   gameContract: Contract;
+  beastsContract: Contract;
 }
 
 /**
@@ -25,6 +26,7 @@ export default function ActionsScreen({
   attack,
   flee,
   gameContract,
+  beastsContract,
 }: ActionsScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
@@ -78,7 +80,11 @@ export default function ActionsScreen({
       </div>
 
       {hasBeast ? (
-        <BeastScreen attack={attack} flee={flee} />
+        <BeastScreen
+          attack={attack}
+          flee={flee}
+          beastsContract={beastsContract}
+        />
       ) : (
         <div className="flex flex-col sm:flex-row h-full w-full sm:w-1/2 lg:w-2/3">
           {adventurer?.id ? (

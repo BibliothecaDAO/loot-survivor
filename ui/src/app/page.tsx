@@ -557,6 +557,7 @@ function Home({ updateConnectors }: HomeProps) {
                       attack={attack}
                       flee={flee}
                       gameContract={gameContract!}
+                      beastsContract={beastsContract!}
                     />
                   )}
                   {screen === "inventory" && (
