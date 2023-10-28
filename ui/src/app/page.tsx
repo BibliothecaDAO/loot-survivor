@@ -25,7 +25,7 @@ import useUIStore from "@/app/hooks/useUIStore";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { NotificationDisplay } from "@/app/components/notifications/NotificationDisplay";
 import { useMusic } from "@/app/hooks/useMusic";
-import { Menu, Call } from "@/app/types";
+import { Menu, Call, ZeroUpgrade } from "@/app/types";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import Profile from "@/app/containers/ProfileScreen";
 import { DeathDialog } from "@/app/components/adventurer/DeathDialog";
@@ -175,6 +175,9 @@ function Home({ updateConnectors }: HomeProps) {
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const setEquipItems = useUIStore((state) => state.setEquipItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
+  const setPotionAmount = useUIStore((state) => state.setPotionAmount);
+  const setUpgrades = useUIStore((state) => state.setUpgrades);
+  const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const setStartOption = useUIStore((state) => state.setStartOption);
@@ -402,6 +405,15 @@ function Home({ updateConnectors }: HomeProps) {
       showArcadeIntro(false);
     }
   }, [arcadeConnectors]);
+
+  useEffect(() => {
+    resetCalls();
+    setDropItems([]);
+    setEquipItems([]);
+    setPotionAmount(0);
+    setPurchaseItems([]);
+    setUpgrades({ ...ZeroUpgrade });
+  }, [adventurer]);
 
   if (!isConnected && introComplete && disconnected) {
     return <WalletSelect />;
