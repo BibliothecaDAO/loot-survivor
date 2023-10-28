@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "./buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 
 export interface ButtonData {
   id: number;
@@ -49,7 +49,9 @@ const KeyboardControl = ({ buttonsData, size, direction }: ButtonProps) => {
 
   return (
     <div
-      className={`flex ${direction === "row" ? "flex-row" : "flex-col"} w-full justify-between`}
+      className={`flex ${
+        direction === "row" ? "flex-row" : "flex-col"
+      } w-full justify-between`}
     >
       {buttonsData.map((buttonData, index) => (
         <Button
@@ -57,8 +59,8 @@ const KeyboardControl = ({ buttonsData, size, direction }: ButtonProps) => {
           onMouseLeave={buttonData.mouseLeave}
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
-          className={`w-full ${selectedIndex === index ? "animate-pulse" : ""}`}
-          variant={selectedIndex === index ? "default" : "outline"}
+          className={`w-full`}
+          variant={"outline"}
           onClick={() => {
             buttonData.action();
             setSelectedIndex(index);

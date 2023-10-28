@@ -51,7 +51,7 @@ impl ImplMarket of IMarket {
     // @param adventurer_stat_points The stat points of the adventurer used for market size
     // @return An array of items that are available on the market.
     fn get_market_items(
-        adventurer_entropy: u128, adventurer_xp: u16, adventurer_stat_points: u8
+        adventurer_entropy: felt252, adventurer_xp: u16, adventurer_stat_points: u8
     ) -> Array<u8> {
         let market_size = ImplMarket::get_market_size(adventurer_stat_points);
         if market_size >= NUM_ITEMS.into() {
@@ -82,7 +82,7 @@ impl ImplMarket of IMarket {
     // @param slot The slot of the item to filter by
     // @return An array of items that are available on the market that match the slot
     fn get_items_by_slot(
-        adventurer_entropy: u128, adventurer_xp: u16, adventurer_stat_points: u8, slot: Slot
+        adventurer_entropy: felt252, adventurer_xp: u16, adventurer_stat_points: u8, slot: Slot
     ) -> Array<u8> {
         let (seed, offset) = ImplMarket::get_market_seed_and_offset(
             adventurer_entropy, adventurer_xp
@@ -112,7 +112,7 @@ impl ImplMarket of IMarket {
     // @param tier The tier of the item to filter by
     // @return An array of items that are available on the market that match the tier
     fn get_items_by_tier(
-        adventurer_entropy: u128, adventurer_xp: u16, adventurer_stat_points: u8, tier: Tier
+        adventurer_entropy: felt252, adventurer_xp: u16, adventurer_stat_points: u8, tier: Tier
     ) -> Array<u8> {
         let (seed, offset) = ImplMarket::get_market_seed_and_offset(
             adventurer_entropy, adventurer_xp
@@ -159,7 +159,7 @@ impl ImplMarket of IMarket {
     // @param item_id The item id to check for availability
     // @return A boolean indicating if the item is available on the market.
     fn is_item_available(
-        adventurer_entropy: u128, adventurer_xp: u16, adventurer_stat_points: u8, item_id: u8
+        adventurer_entropy: felt252, adventurer_xp: u16, adventurer_stat_points: u8, item_id: u8
     ) -> bool {
         // if the size of the market is larger than the number of items
         let market_size = ImplMarket::get_market_size(adventurer_stat_points);
@@ -206,9 +206,9 @@ impl ImplMarket of IMarket {
     // @param adventurer_entropy The entropy of the adventurer used for randomness.
     // @param xp The experience points of the adventurer.
     // @return A 128bit hash used for market seed and an 8bit offset used for market offset.z
-    fn get_market_seed_and_offset(adventurer_entropy: u128, xp: u16) -> (u256, u8) {
+    fn get_market_seed_and_offset(adventurer_entropy: felt252, xp: u16) -> (u256, u8) {
         let mut hash_span = ArrayTrait::new();
-        hash_span.append(adventurer_entropy.into());
+        hash_span.append(adventurer_entropy);
         hash_span.append(xp.into());
         ImplMarket::split_hash_into_seed_and_offset(poseidon_hash_span(hash_span.span()))
     }

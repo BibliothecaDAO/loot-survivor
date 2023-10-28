@@ -1,40 +1,39 @@
 "use client";
 import {
   useAccount,
-  useConnectors,
+  useConnect,
   useNetwork,
   useProvider,
-  useTransactionManager,
+  useContract,
+  Connector,
 } from "@starknet-react/core";
 import { constants } from "starknet";
-import { useState, useEffect, useMemo, useRef } from "react";
-import ActionsScreen from "./containers/ActionsScreen";
-import AdventurerScreen from "./containers/AdventurerScreen";
-import InventoryScreen from "./containers/InventoryScreen";
-import LeaderboardScreen from "./containers/LeaderboardScreen";
-import EncountersScreen from "./containers/EncountersScreen";
-import GuideScreen from "./containers/GuideScreen";
-import UpgradeScreen from "./containers/UpgradeScreen";
-import { padAddress } from "./lib/utils";
-import Intro from "./components/intro/Intro";
-import { TxActivity } from "./components/navigation/TxActivity";
-import useLoadingStore from "./hooks/useLoadingStore";
-import useAdventurerStore from "./hooks/useAdventurerStore";
-import useUIStore from "./hooks/useUIStore";
-import useTransactionCartStore from "./hooks/useTransactionCartStore";
-import { NotificationDisplay } from "./components/notifications/NotificationDisplay";
-import { useMusic } from "./hooks/useMusic";
-import { Menu } from "./types";
-import { useQueriesStore } from "./hooks/useQueryStore";
-import Profile from "./containers/ProfileScreen";
-import { DeathDialog } from "./components/adventurer/DeathDialog";
-import WalletSelect from "./components/intro/WalletSelect";
-import Settings from "./components/navigation/Settings";
-import MobileHeader from "./components/navigation/MobileHeader";
-import Player from "./components/adventurer/Player";
-import { useUiSounds } from "./hooks/useUiSound";
-import { soundSelector } from "./hooks/useUiSound";
-import useCustomQuery from "./hooks/useCustomQuery";
+import { useState, useEffect, useMemo } from "react";
+import ActionsScreen from "@/app/containers/ActionsScreen";
+import AdventurerScreen from "@/app/containers/AdventurerScreen";
+import InventoryScreen from "@/app/containers/InventoryScreen";
+import LeaderboardScreen from "@/app/containers/LeaderboardScreen";
+import EncountersScreen from "@/app/containers/EncountersScreen";
+import GuideScreen from "@/app/containers/GuideScreen";
+import UpgradeScreen from "@/app/containers/UpgradeScreen";
+import { padAddress } from "@/app/lib/utils";
+import Intro from "@/app/components/intro/Intro";
+import { TxActivity } from "@/app/components/navigation/TxActivity";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import useUIStore from "@/app/hooks/useUIStore";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { NotificationDisplay } from "@/app/components/notifications/NotificationDisplay";
+import { useMusic } from "@/app/hooks/useMusic";
+import { Menu, Call, ZeroUpgrade } from "@/app/types";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import Profile from "@/app/containers/ProfileScreen";
+import { DeathDialog } from "@/app/components/adventurer/DeathDialog";
+import WalletSelect from "@/app/components/intro/WalletSelect";
+import Settings from "@/app/components/navigation/Settings";
+import MobileHeader from "@/app/components/navigation/MobileHeader";
+import Player from "@/app/components/adventurer/Player";
+import useCustomQuery from "@/app/hooks/useCustomQuery";
 import {
   getAdventurerById,
   getAdventurersByOwner,
@@ -44,17 +43,26 @@ import {
   getBattlesByBeast,
   getItemsByAdventurer,
   getLatestMarketItems,
-} from "./hooks/graphql/queries";
-import { ArcadeDialog } from "./components/ArcadeDialog";
-import { TopUpDialog } from "./components/TopUpDialog";
-import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
-import { syscalls } from "./lib/utils/syscalls";
-import { useContracts } from "./hooks/useContracts";
-import { useBalance } from "@starknet-react/core";
-import ScreenMenu from "./components/menu/ScreenMenu";
-import Header from "./components/navigation/Header";
-import { Maintenance } from "./components/archived/Maintenance";
-import { MainnetDialog } from "./components/MainnetDialog";
+} from "@/app/hooks/graphql/queries";
+import { ArcadeDialog } from "@/app/components/ArcadeDialog";
+import { TopUpDialog } from "@/app/components/TopUpDialog";
+import NetworkSwitchError from "@/app/components/navigation/NetworkSwitchError";
+import { syscalls } from "@/app/lib/utils/syscalls";
+import Game from "@/app/abi/Game.json";
+import Lords from "@/app/abi/Lords.json";
+import EthBalanceFragment from "@/app/abi/EthBalanceFragment.json";
+import Beasts from "@/app/abi/Beasts.json";
+import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
+import ScreenMenu from "@/app/components/menu/ScreenMenu";
+import { getArcadeConnectors } from "@/app/lib/connectors";
+import Header from "@/app/components/navigation/Header";
+import { checkArcadeBalance } from "@/app/lib/utils";
+import { fetchBalances } from "@/app/lib/balances";
+import useTransactionManager from "./hooks/useTransactionManager";
+import { StarknetProvider } from "@/app//provider";
+import { SpecialBeast } from "./components/notifications/SpecialBeast";
+import { useBurner } from "@/app/lib/burner";
+import { connectors } from "@/app/lib/connectors";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -75,7 +83,32 @@ const mobileMenuItems: Menu[] = [
   { id: 6, label: "Guide", screen: "guide", disabled: false },
 ];
 
-export default function Home() {
+export default function Main() {
+  const [appConnectors, setAppConnectors] = useState<Connector[]>([]);
+
+  const { listConnectors } = useBurner({});
+
+  const updateConnectors = () => {
+    const arcadeConnectors = listConnectors();
+    setAppConnectors([...arcadeConnectors, ...connectors]);
+  };
+
+  useEffect(() => {
+    updateConnectors();
+  }, []);
+  return (
+    <StarknetProvider connectors={appConnectors}>
+      <Home updateConnectors={updateConnectors} />
+    </StarknetProvider>
+  );
+}
+
+interface HomeProps {
+  updateConnectors: () => void;
+}
+
+function Home({ updateConnectors }: HomeProps) {
+  const { connectors } = useConnect();
   const { chain } = useNetwork();
   const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
@@ -89,7 +122,6 @@ export default function Home() {
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const deathDialog = useUIStore((state) => state.deathDialog);
-  const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
@@ -99,13 +131,39 @@ export default function Home() {
   const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
+  const arcadeIntro = useUIStore((state) => state.arcadeIntro);
+  const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
   const topUpDialog = useUIStore((state) => state.topUpDialog);
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
   const setEstimatingFee = useUIStore((state) => state.setEstimatingFee);
-  const { gameContract, lordsContract, ethContract } = useContracts();
+  const setSpecialBeast = useUIStore((state) => state.setSpecialBeast);
+  const specialBeastDefeated = useUIStore(
+    (state) => state.specialBeastDefeated
+  );
+  const setSpecialBeastDefeated = useUIStore(
+    (state) => state.setSpecialBeastDefeated
+  );
+  const { contract: gameContract } = useContract({
+    address: process.env.NEXT_PUBLIC_GAME_ADDRESS,
+    abi: Game,
+  });
+  const { contract: lordsContract } = useContract({
+    address: process.env.NEXT_PUBLIC_LORDS_ADDRESS,
+    abi: Lords,
+  });
+  const { contract: ethContract } = useContract({
+    address: process.env.NEXT_PUBLIC_ETH_ADDRESS,
+    abi: EthBalanceFragment,
+  });
+  const { contract: beastsContract } = useContract({
+    address: process.env.NEXT_PUBLIC_BEASTS_ADDRESS,
+    abi: Beasts,
+  });
+
   const { addTransaction } = useTransactionManager();
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const resetCalls = useTransactionCartStore((state) => state.resetCalls);
   const handleSubmitCalls = useTransactionCartStore(
     (state) => state.handleSubmitCalls
   );
@@ -115,59 +173,76 @@ export default function Home() {
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const setEquipItems = useUIStore((state) => state.setEquipItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
+  const setPotionAmount = useUIStore((state) => state.setPotionAmount);
+  const setUpgrades = useUIStore((state) => state.setUpgrades);
+  const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const setStartOption = useUIStore((state) => state.setStartOption);
 
-  const lordsBalance = useBalance({
-    token: lordsContract?.address,
-    address,
-  });
+  const arcadeConnectors = getArcadeConnectors(connectors);
 
-  const ethBalance = useBalance({
-    token: ethContract?.address,
-    address,
-  });
+  const [ethBalance, setEthBalance] = useState<bigint>(BigInt(0));
+  const [lordsBalance, setLordsBalance] = useState<bigint>(BigInt(0));
+
+  const getBalances = async () => {
+    const balances = await fetchBalances(
+      address ?? "0x0",
+      ethContract,
+      lordsContract,
+      gameContract
+    );
+    setEthBalance(balances[0]);
+    setLordsBalance(balances[1]);
+  };
+
+  useEffect(() => {
+    getBalances();
+  }, [account]);
 
   const { data, refetch, resetData, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
 
-  const { spawn, explore, attack, flee, upgrade, multicall } = syscalls({
-    gameContract,
-    lordsContract,
-    addTransaction,
-    queryData: data,
-    resetData,
-    setData,
-    adventurer,
-    addToCalls,
-    calls,
-    handleSubmitCalls,
-    startLoading,
-    stopLoading,
-    setTxHash,
-    setEquipItems,
-    setDropItems,
-    setDeathMessage,
-    showDeathDialog,
-    setScreen,
-    setAdventurer,
-    setMintAdventurer,
-    setStartOption,
-    ethBalance: ethBalance.data?.value ?? BigInt(0),
-    showTopUpDialog,
-    setTopUpAccount,
-    setEstimatingFee,
-    account,
-  });
+  const { spawn, explore, attack, flee, upgrade, slayAllIdles, multicall } =
+    syscalls({
+      gameContract,
+      lordsContract,
+      beastsContract,
+      addTransaction,
+      queryData: data,
+      resetData,
+      setData,
+      adventurer,
+      addToCalls,
+      calls,
+      handleSubmitCalls,
+      startLoading,
+      stopLoading,
+      setTxHash,
+      setEquipItems,
+      setDropItems,
+      setDeathMessage,
+      showDeathDialog,
+      setScreen,
+      setAdventurer,
+      setStartOption,
+      ethBalance: ethBalance,
+      showTopUpDialog,
+      setTopUpAccount,
+      setEstimatingFee,
+      account,
+      resetCalls,
+      setSpecialBeastDefeated,
+      setSpecialBeast,
+    });
 
   const playState = useMemo(
     () => ({
       isInBattle: hasBeast,
-      isDead: false, // set this to true when player is dead
+      isDead: deathDialog, // set this to true when player is dead
       isMuted: isMuted,
     }),
-    [hasBeast, isMuted]
+    [hasBeast, deathDialog, isMuted]
   );
 
   const { play, stop } = useMusic(playState, {
@@ -284,7 +359,8 @@ export default function Home() {
   }, [play, stop]);
 
   useEffect(() => {
-    const isWrongNetwork = chain?.id !== constants.StarknetChainId.SN_GOERLI;
+    const isWrongNetwork =
+      chain?.id !== BigInt(constants.StarknetChainId.SN_GOERLI);
     setIsWrongNetwork(isWrongNetwork);
   }, [chain, provider, isConnected]);
 
@@ -320,6 +396,23 @@ export default function Home() {
     }
   }, [isConnected]);
 
+  useEffect(() => {
+    if (arcadeConnectors.length === 0) {
+      showArcadeIntro(true);
+    } else {
+      showArcadeIntro(false);
+    }
+  }, [arcadeConnectors]);
+
+  useEffect(() => {
+    resetCalls();
+    setDropItems([]);
+    setEquipItems([]);
+    setPotionAmount(0);
+    setPurchaseItems([]);
+    setUpgrades({ ...ZeroUpgrade });
+  }, [adventurer]);
+
   if (!isConnected && introComplete && disconnected) {
     return <WalletSelect />;
   }
@@ -329,15 +422,65 @@ export default function Home() {
     (pendingMessage === "Spawning Adventurer" ||
       pendingMessage.includes("Spawning Adventurer"));
 
+  // TEMPORARY FOR TESTING
+  const mintLords = async () => {
+    // Mint 250 LORDS
+    const mintLords: Call = {
+      contractAddress: lordsContract?.address ?? "",
+      entrypoint: "mint",
+      calldata: [address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+    };
+    const balanceEmpty = await checkArcadeBalance(
+      [...calls, mintLords],
+      ethBalance,
+      showTopUpDialog,
+      setTopUpAccount,
+      setEstimatingFee,
+      account
+    );
+    if (!balanceEmpty) {
+      try {
+        addToCalls(mintLords);
+        const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
+        const result = await account?.waitForTransaction(tx?.transaction_hash, {
+          retryInterval: 2000,
+        });
+
+        if (!result) {
+          throw new Error("Lords Mint did not complete successfully.");
+        }
+
+        getBalances();
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      resetCalls();
+    }
+  };
+
   return (
-    // <Maintenance />
     <main
       className={`min-h-screen container mx-auto flex flex-col sm:pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
     >
-      <MainnetDialog />
       {introComplete ? (
         <>
-          <Header multicall={multicall} />
+          <div className="flex flex-col w-full">
+            <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
+            {specialBeastDefeated && <SpecialBeast />}
+            {!spawnLoader && (
+              <div className="sm:hidden">
+                <TxActivity />
+              </div>
+            )}
+            <Header
+              multicall={multicall}
+              mintLords={async () => await mintLords()}
+              lordsBalance={lordsBalance}
+              arcadeConnectors={arcadeConnectors}
+              gameContract={gameContract!}
+            />
+          </div>
           <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
             {!spawnLoader && (
               <div className="hidden sm:block">
@@ -348,12 +491,31 @@ export default function Home() {
           <NotificationDisplay />
 
           {deathDialog && <DeathDialog />}
-
-          {status == "connected" && arcadeDialog && <ArcadeDialog />}
-          {status == "connected" && topUpDialog && <TopUpDialog />}
+          {arcadeIntro && (
+            <ArcadeIntro
+              ethBalance={ethBalance}
+              lordsBalance={lordsBalance}
+              getBalances={getBalances}
+              gameContract={gameContract!}
+              lordsContract={lordsContract!}
+              ethContract={ethContract!}
+              updateConnectors={updateConnectors}
+            />
+          )}
+          {status == "connected" && arcadeDialog && (
+            <ArcadeDialog
+              gameContract={gameContract!}
+              lordsContract={lordsContract!}
+              ethContract={ethContract!}
+              updateConnectors={updateConnectors}
+            />
+          )}
+          {status == "connected" && topUpDialog && (
+            <TopUpDialog ethContract={ethContract!} getBalances={getBalances} />
+          )}
 
           {introComplete ? (
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-full h-[600px] sm:h-[625px]">
               <>
                 <div className="sm:hidden flex  sm:justify-normal sm:pb-2">
                   <ScreenMenu
@@ -377,11 +539,14 @@ export default function Home() {
                 <div className="sm:hidden">
                   <MobileHeader />
                 </div>
-                <>
+                <div className="h-[550px] xl:h-[500px] 2xl:h-[580px]">
                   {screen === "start" && (
                     <AdventurerScreen
                       spawn={spawn}
                       handleSwitchAdventurer={handleSwitchAdventurer}
+                      lordsBalance={lordsBalance}
+                      mintLords={async () => await mintLords()}
+                      gameContract={gameContract!}
                     />
                   )}
                   {screen === "play" && (
@@ -389,18 +554,36 @@ export default function Home() {
                       explore={explore}
                       attack={attack}
                       flee={flee}
+                      gameContract={gameContract!}
+                      beastsContract={beastsContract!}
                     />
                   )}
-                  {screen === "inventory" && <InventoryScreen />}
-                  {screen === "leaderboard" && <LeaderboardScreen />}
-                  {screen === "upgrade" && <UpgradeScreen upgrade={upgrade} />}
-                  {screen === "profile" && <Profile />}
+                  {screen === "inventory" && (
+                    <InventoryScreen gameContract={gameContract!} />
+                  )}
+                  {screen === "leaderboard" && (
+                    <LeaderboardScreen
+                      slayAllIdles={slayAllIdles}
+                      gameContract={gameContract!}
+                    />
+                  )}
+                  {screen === "upgrade" && (
+                    <UpgradeScreen
+                      upgrade={upgrade}
+                      gameContract={gameContract!}
+                    />
+                  )}
+                  {screen === "profile" && (
+                    <Profile gameContract={gameContract!} />
+                  )}
                   {screen === "encounters" && <EncountersScreen />}
                   {screen === "guide" && <GuideScreen />}
                   {screen === "settings" && <Settings />}
-                  {screen === "player" && <Player />}
+                  {screen === "player" && (
+                    <Player gameContract={gameContract!} />
+                  )}
                   {screen === "wallet" && <WalletSelect />}
-                </>
+                </div>
               </>
             </div>
           ) : null}

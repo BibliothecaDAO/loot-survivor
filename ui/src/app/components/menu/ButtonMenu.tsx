@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { Button } from "../buttons/Button";
-import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
+import { Button } from "@/app/components/buttons/Button";
+import { soundSelector, useUiSounds } from "@/app/hooks/useUiSound";
 import { ButtonData } from "@/app/types";
 
 interface ButtonMenuProps {
@@ -85,18 +85,8 @@ const ButtonMenu: React.FC<ButtonMenuProps> = ({
         <Button
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
-          className={
-            selectedIndex === index && isActive
-              ? "flex flex-row gap-5 animate-pulse w-full"
-              : "flex flex-row gap-5 w-full"
-          }
-          variant={
-            buttonData.variant
-              ? buttonData.variant
-              : selectedIndex === index
-              ? "default"
-              : "outline"
-          }
+          className="flex flex-row gap-5 w-full"
+          variant="outline"
           size={size}
           onClick={() => {
             setSelectedIndex(index);

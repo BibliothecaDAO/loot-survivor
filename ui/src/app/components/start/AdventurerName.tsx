@@ -1,5 +1,5 @@
 import { useState, ChangeEvent } from "react";
-import { Button } from "../buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 import { FormData } from "@/app/types";
 
 export interface AdventurerNameProps {
@@ -43,7 +43,7 @@ export const AdventurerName = ({
 
   return (
     <>
-      <div className="sm:w-3/4 text-center p-4 uppercase 2xl:flex 2xl:flex-col 2xl:gap-10 2xl:h-[700px]">
+      <div className="sm:w-3/4 text-center p-4 uppercase 2xl:flex 2xl:flex-col 2xl:gap-5 2xl:h-1/2">
         <h3 className="2xl:text-5xl">Enter adventurer name</h3>
         <div className="relative items-center flex flex-col gap-2">
           <input
@@ -61,15 +61,24 @@ export const AdventurerName = ({
           <Button size={"sm"} onClick={handleBack}>
             Back
           </Button>
-          <Button size={"sm"} onClick={() => handleNameEntry(formData.name)}>
+          <Button
+            size={"sm"}
+            disabled={
+              !formData.startingWeapon || !formData.name || formData.name === ""
+            }
+            onClick={() => handleNameEntry(formData.name)}
+          >
             Next
           </Button>
         </div>
-        <div className="hidden sm:flex flex-row justify-between">
-          <Button size={"lg"} onClick={handleBack}>
-            Back
-          </Button>
-          <Button size={"lg"} onClick={() => handleNameEntry(formData.name)}>
+        <div className="hidden sm:flex items-center justify-center">
+          <Button
+            size={"lg"}
+            disabled={
+              !formData.startingWeapon || !formData.name || formData.name === ""
+            }
+            onClick={() => handleNameEntry(formData.name)}
+          >
             Next
           </Button>
         </div>

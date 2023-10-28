@@ -1,13 +1,11 @@
-import { Adventurer, Item } from "../types";
-import { calculateLevel, getItemData } from "./utils";
+import { Adventurer, Item } from "@/app/types";
+import { calculateLevel, getItemData } from "@/app/lib/utils";
 
 export class AdventurerClass implements Adventurer {
   [key: string]: number | string | Date | undefined;
   id?: number; // Adventurer ID
   lastAction?: number; // Block number from last action
   owner?: string; // Hex address of the owner
-  classType?: string; // Class of the adventurer
-  homeRealm?: number; // Home Realm of the adventurer
   name?: string; // Name of the adventurer
   order?: string; // Order of the adventurer
   health?: number; // Health of the adventurer
@@ -30,6 +28,8 @@ export class AdventurerClass implements Adventurer {
   ring?: string; // Ring of the adventure
   beastHealth?: number; // Beast health adventurer is engaging
   statUpgrades?: number; // Stat upgrades adventurer has
+  startBlock?: number; // The block number the adventurer was minted
+  revealBlock?: number; // The next block number that the game entropy rotates from spawn
   gold?: number; // Gold adventurer has
   createdTime?: Date; // Block time the adventurer was created
   lastUpdatedTime?: Date; // Block time the adventurer was last updated
@@ -39,8 +39,6 @@ export class AdventurerClass implements Adventurer {
       id,
       lastAction,
       owner,
-      classType,
-      homeRealm,
       name,
       order,
       health,
@@ -62,6 +60,8 @@ export class AdventurerClass implements Adventurer {
       ring,
       beastHealth,
       statUpgrades,
+      startBlock,
+      revealBlock,
       gold,
       createdTime,
       lastUpdatedTime,
@@ -71,8 +71,6 @@ export class AdventurerClass implements Adventurer {
     this.id = id;
     this.lastAction = lastAction;
     this.owner = owner;
-    this.classType = classType;
-    this.homeRealm = homeRealm;
     this.name = name;
     this.order = order;
     this.health = health;
@@ -97,6 +95,8 @@ export class AdventurerClass implements Adventurer {
     this.ring = ring;
     this.beastHealth = beastHealth;
     this.statUpgrades = statUpgrades;
+    this.startBlock = startBlock;
+    this.revealBlock = revealBlock;
     this.gold = gold;
     this.createdTime = createdTime;
     this.lastUpdatedTime = lastUpdatedTime;

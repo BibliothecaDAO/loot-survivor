@@ -1,11 +1,11 @@
-import { useState, useMemo } from "react";
-import MarketplaceRow from "../../components/marketplace/MarketplaceRow";
+import { useState, useMemo, useEffect } from "react";
+import MarketplaceRow from "@/app/components/marketplace/MarketplaceRow";
 import { Item, UpgradeStats, ItemPurchase } from "@/app/types";
 import { getItemData, getKeyFromValue } from "@/app/lib/utils";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import LootIconLoader from "../../components/icons/Loader";
-import { Button } from "../buttons/Button";
-import { GameData } from "../../components/GameData";
+import LootIconLoader from "@/app/components/icons/Loader";
+import { Button } from "@/app/components/buttons/Button";
+import { GameData } from "@/app/lib/data/GameData";
 
 export interface MarketplaceTableProps {
   purchaseItems: ItemPurchase[];
@@ -17,6 +17,7 @@ export interface MarketplaceTableProps {
   ) => void;
   totalCharisma: number;
   calculatedNewGold: number;
+  adventurerItems: Item[];
 }
 
 const MarketplaceTable = ({
@@ -25,8 +26,8 @@ const MarketplaceTable = ({
   upgradeHandler,
   totalCharisma,
   calculatedNewGold,
+  adventurerItems,
 }: MarketplaceTableProps) => {
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showEquipQ, setShowEquipQ] = useState<number | null>(null);
@@ -37,12 +38,6 @@ const MarketplaceTable = ({
 
   const marketLatestItems = useQueriesStore(
     (state) => state.data.latestMarketItemsQuery?.items || []
-  );
-  const adventurers = useQueriesStore(
-    (state) => state.data.adventurersInListQuery?.adventurers || []
-  );
-  const adventurerItems = useQueriesStore(
-    (state) => state.data.itemsByAdventurerQuery?.items || []
   );
 
   const headings = ["Item", "Tier", "Slot", "Type", "Cost", "Actions"];
@@ -100,56 +95,56 @@ const MarketplaceTable = ({
     return sortedItems;
   }, [marketLatestItems, sortField, sortDirection]);
 
+  useEffect(() => {
+    handleSort("Tier");
+  }, []);
+
   return (
     <>
-      <div>
-        <table
-          className={`w-full sm:border sm:border-terminal-green ${
-            showEquipQ === null ? "" : "hidden sm:table"
-          }`}
-        >
-          <thead className="sticky top-0 sm:border z-5 sm:border-terminal-green bg-terminal-black sm:text-xl">
-            <tr className="">
-              {headings.map((heading, index) => (
-                <th
-                  key={index}
-                  className="px-2.5 sm:px-3 cursor-pointer"
-                  onClick={() => handleSort(heading)}
-                >
-                  {heading}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="text-xs sm:text-base">
-            {!isLoading.latestMarketItemsQuery ? (
-              sortedMarketLatestItems.map((item: Item, index: number) => (
-                <MarketplaceRow
-                  item={item}
-                  index={index}
-                  selectedIndex={selectedIndex}
-                  adventurers={adventurers}
-                  activeMenu={showEquipQ}
-                  setActiveMenu={setShowEquipQ}
-                  calculatedNewGold={calculatedNewGold}
-                  ownedItems={adventurerItems}
-                  purchaseItems={purchaseItems}
-                  setPurchaseItems={setPurchaseItems}
-                  upgradeHandler={upgradeHandler}
-                  totalCharisma={totalCharisma}
-                  key={index}
-                />
-              ))
-            ) : (
-              <div className="h-full w-full flex justify-center p-10 align-center">
-                Generating Loot{" "}
-                <LootIconLoader className="self-center ml-3" size={"w-4"} />
-              </div>
-            )}
-          </tbody>
-        </table>
-      </div>
-      {showEquipQ! >= 0 && (
+      <table
+        className={`w-full sm:border sm:border-terminal-green ${
+          showEquipQ === null ? "" : "hidden sm:table h-full"
+        }`}
+      >
+        <thead className="sticky top-0 sm:border z-5 sm:border-terminal-green bg-terminal-black sm:text-xl">
+          <tr className="">
+            {headings.map((heading, index) => (
+              <th
+                key={index}
+                className="px-2.5 sm:px-3 cursor-pointer"
+                onClick={() => handleSort(heading)}
+              >
+                {heading}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="text-xs sm:text-base">
+          {!isLoading.latestMarketItemsQuery ? (
+            sortedMarketLatestItems.map((item: Item, index: number) => (
+              <MarketplaceRow
+                item={item}
+                index={index}
+                activeMenu={showEquipQ}
+                setActiveMenu={setShowEquipQ}
+                calculatedNewGold={calculatedNewGold}
+                ownedItems={adventurerItems}
+                purchaseItems={purchaseItems}
+                setPurchaseItems={setPurchaseItems}
+                upgradeHandler={upgradeHandler}
+                totalCharisma={totalCharisma}
+                key={index}
+              />
+            ))
+          ) : (
+            <div className="h-full w-full flex justify-center p-10 align-center">
+              Generating Loot{" "}
+              <LootIconLoader className="self-center ml-3" size={"w-4"} />
+            </div>
+          )}
+        </tbody>
+      </table>
+      {showEquipQ !== null && showEquipQ >= 0 && (
         <div className="sm:hidden h-full">
           {(() => {
             const item = sortedMarketLatestItems[showEquipQ ?? 0];

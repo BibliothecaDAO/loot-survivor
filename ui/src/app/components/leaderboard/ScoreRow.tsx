@@ -1,16 +1,14 @@
-import Lords from "../../../../public/icons/lords.svg";
+import Lords from "public/icons/lords.svg";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
-import { formatNumber } from "@/app/lib/utils";
+import { formatNumber, calculateLevel } from "@/app/lib/utils";
 
 interface ScoreLeaderboardRowProps {
-  index: number;
   adventurer: any;
   rank: number;
   handleRowSelected: (id: number) => void;
 }
 
 const ScoreRow = ({
-  index,
   adventurer,
   rank,
   handleRowSelected,
@@ -26,12 +24,13 @@ const ScoreRow = ({
     >
       <td>{rank}</td>
       <td>{`${adventurer.name} - ${adventurer.id}`}</td>
+      <td>{calculateLevel(adventurer.xp ?? 0)}</td>
       <td>{adventurer.xp}</td>
       <td>
         {adventurer.totalPayout > 0 ? (
           <span className="flex flex-row gap-1 items-center justify-center">
             <Lords className="h-4 w-4 sm:w-5 sm:h-5 fill-current" />
-            {formatNumber(parseInt(adventurer.totalPayout))}
+            {formatNumber(adventurer.totalPayout)}
           </span>
         ) : (
           "-"

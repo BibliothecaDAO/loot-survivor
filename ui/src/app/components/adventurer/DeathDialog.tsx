@@ -1,22 +1,24 @@
 import React, { useEffect, useState, useRef } from "react";
-import TwitterShareButton from "../buttons/TwitterShareButtons";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import useLoadingStore from "../../hooks/useLoadingStore";
-import { Button } from "../buttons/Button";
-import useUIStore from "../../hooks/useUIStore";
-import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
-import { getAppUrl } from "@/app/lib/constants";
+import TwitterShareButton from "@/app/components/buttons/TwitterShareButtons";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
+import { Button } from "@/app/components/buttons/Button";
+import useUIStore from "@/app/hooks/useUIStore";
+import { getRankFromList, getOrdinalSuffix } from "@/app/lib/utils";
 import { getAdventurerByXP } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
 import { NullAdventurer, Adventurer } from "@/app/types";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import GlitchEffect from "../animations/GlitchEffect";
-import PixelatedImage from "../animations/PixelatedImage";
-import { getDeathMessageByRank } from "../../lib/utils";
+import GlitchEffect from "@/app/components/animations/GlitchEffect";
+import PixelatedImage from "@/app/components/animations/PixelatedImage";
+import { getDeathMessageByRank } from "@/app/lib/utils";
 
 export const DeathDialog = () => {
   const messageRef = useRef<HTMLSpanElement>(null);
   const [rank, setRank] = useState<number | null>(null);
+  const [twitterDeathMessage, setTwitterDeathMessage] = useState<
+    string | undefined
+  >();
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -24,7 +26,7 @@ export const DeathDialog = () => {
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const [imageLoading, setImageLoading] = useState(false);
 
-  const { data, refetch, setData } = useQueriesStore();
+  const { refetch, setData } = useQueriesStore();
 
   useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
 
@@ -53,6 +55,10 @@ export const DeathDialog = () => {
       .catch((error) => console.error("Error refetching data:", error));
   }, []);
 
+  useEffect(() => {
+    setTwitterDeathMessage(messageRef.current?.innerText);
+  }, [messageRef.current]);
+
   return (
     <>
       {rank && (
@@ -61,6 +67,7 @@ export const DeathDialog = () => {
             src={"/scenes/intro/skulls.png"}
             pixelSize={rank <= 100 ? 10 : 20}
             setImageLoading={setImageLoading}
+            fill={true}
           />
 
           <div className="absolute inset-0 bg-black opacity-50"></div>
@@ -116,9 +123,10 @@ export const DeathDialog = () => {
                   rank! ?? 0
                 )} place on #LootSurvivor with ${
                   adventurer?.xp
-                } XP.\n\nGravestone bears the inscription:\n\n"${
-                  messageRef.current?.innerText
-                }"🪦\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+                } XP.\n\nGravestone bears the inscription:\n\n"${twitterDeathMessage}"🪦\n\nEnter here and try to survive: ${
+                  process.env.NEXT_PUBLIC_APP_URL
+                }\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+                className="animate-pulse"
               />
               <Button
                 onClick={() => {

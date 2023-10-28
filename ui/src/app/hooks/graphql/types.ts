@@ -20,7 +20,6 @@ export type AdventurerQuery = {
     lastAction: Maybe<Scalars["Int"]>;
     owner: Maybe<Scalars["Hex"]>;
     race: Maybe<Scalars["String"]>;
-    homeRealm: Maybe<Scalars["String"]>;
     name: Maybe<Scalars["String"]>;
     order: Maybe<Scalars["String"]>;
     health: Maybe<Scalars["Int"]>;
@@ -43,6 +42,9 @@ export type AdventurerQuery = {
     beast: Maybe<Scalars["String"]>;
     beastHealth: Maybe<Scalars["Int"]>;
     statUpgrades: Maybe<Scalars["Int"]>;
+    startBlock: Maybe<Scalars["Int"]>;
+    revealBlock: Maybe<Scalars["Int"]>;
+    actionsPerBlock: Maybe<Scalars["Int"]>;
     gold: Maybe<Scalars["Int"]>;
     createdTime: Maybe<Scalars["Timestamp"]>;
     lastUpdatedTime: Maybe<Scalars["Timestamp"]>;

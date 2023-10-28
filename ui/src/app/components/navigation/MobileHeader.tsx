@@ -1,8 +1,7 @@
-import { Button } from "../buttons/Button";
-import { ProfileIcon, TrophyIcon } from "../icons/Icons";
-import useUIStore from "../../hooks/useUIStore";
-import { capitalizeFirstLetter } from "../../lib/utils";
-import Image from "next/image";
+import { Button } from "@/app/components/buttons/Button";
+import { ProfileIcon, TrophyIcon } from "@/app/components/icons/Icons";
+import useUIStore from "@/app/hooks/useUIStore";
+import { capitalizeFirstLetter } from "@/app/lib/utils";
 
 export default function MobileHeader() {
   const screen = useUIStore((state) => state.screen);

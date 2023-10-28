@@ -1,18 +1,17 @@
 import { useEffect, useState } from "react";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import { DiscoveryDisplay } from "../components/actions/DiscoveryDisplay";
-import { BattleDisplay } from "../components/beast/BattleDisplay";
-import LootIconLoader from "../components/icons/Loader";
-import { Button } from "../components/buttons/Button";
-import { Battle, Discovery, NullAdventurer, NullDiscovery } from "../types";
-import { processBeastName } from "../lib/utils";
-import useAdventurerStore from "../hooks/useAdventurerStore";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { DiscoveryDisplay } from "@/app/components/actions/DiscoveryDisplay";
+import { BattleDisplay } from "@/app/components/beast/BattleDisplay";
+import LootIconLoader from "@/app/components/icons/Loader";
+import { Button } from "@/app/components/buttons/Button";
+import { Battle, Discovery } from "@/app/types";
+import { processBeastName } from "@/app/lib/utils";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import {
   getBattlesByAdventurer,
   getDiscoveries,
-} from "../hooks/graphql/queries";
-import useCustomQuery from "../hooks/useCustomQuery";
-import useLoadingStore from "../hooks/useLoadingStore";
+} from "@/app/hooks/graphql/queries";
+import useCustomQuery from "@/app/hooks/useCustomQuery";
 
 export interface EncountersProps {
   profile?: number;
@@ -32,8 +31,6 @@ export default function EncountersScreen({ profile }: EncountersProps) {
   const [sortedCombined, setSortedCombined] = useState<Battle[] | Discovery[]>(
     []
   );
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
-  const queryData = useQueriesStore((state) => state.data);
 
   const discoveriesData = useCustomQuery("discoveriesQuery", getDiscoveries, {
     id: profile ? profile : adventurer?.id ?? 0,
@@ -46,14 +43,6 @@ export default function EncountersScreen({ profile }: EncountersProps) {
       adventurerId: profile ? profile : adventurer?.id ?? 0,
     }
   );
-
-  // useEffect(() => {
-  //   if (adventurersByXPdata) {
-  //     setIsLoading();
-  //     setData("adventurersByXPQuery", adventurersByXPdata);
-  //     setNotLoading();
-  //   }
-  // }, [adventurersByXPdata]);
 
   useEffect(() => {
     if (data) {
@@ -90,16 +79,8 @@ export default function EncountersScreen({ profile }: EncountersProps) {
     currentPage * encountersPerPage
   );
 
-  // if (!discoveriesByAdventurerData || !battlesByAdventurerData) {
-  //   return (
-  //     <div className="flex flex-col items-center m-auto">
-  //       <LootIconLoader />
-  //     </div>
-  //   );
-  // }
-
   return (
-    <div className="flex flex-col items-center mx-auto text-sm sm:text-xl xl:h-[500px] xl:overflow-y-auto 2xl:h-full 2xl:overflow-hidden">
+    <div className="flex flex-col items-center mx-auto text-sm sm:text-xl xl:h-[500px] xl:overflow-y-auto 2xl:h-full 2xl:overflow-hidden w-full">
       {adventurer?.id || profile ? (
         <>
           {displayEncounters.length > 0 ? (
@@ -110,7 +91,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
               {(isLoading.latestDiscoveriesQuery || loadingData) && (
                 <LootIconLoader />
               )}
-              <div className="flex flex-col items-center gap-2 overflow-auto">
+              <div className="flex flex-col items-center gap-2 overflow-auto default-scroll">
                 {displayEncounters.map((encounter: any, index: number) => {
                   return (
                     <div

@@ -1,14 +1,17 @@
-import Info from "./Info";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
+import { Contract } from "starknet";
+import Info from "@/app/components/adventurer/Info";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
-export default function Player() {
+interface PlayerProps {
+  gameContract: Contract;
+}
+
+export default function Player({ gameContract }: PlayerProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   return (
     <>
       {adventurer?.id ? (
-        <div className="w-full">
-          <Info adventurer={adventurer} />
-        </div>
+        <Info adventurer={adventurer} gameContract={gameContract} />
       ) : (
         <div className="flex items-center justify-center">
           <p>Please select an adventurer!</p>

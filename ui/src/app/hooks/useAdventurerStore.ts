@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { Adventurer, NullAdventurer } from "../types";
-import { AdventurerClass } from "../lib/classes";
+import { Adventurer, NullAdventurer } from "@/app/types";
+import { AdventurerClass } from "@/app/lib/classes";
 
 export interface AdventurerProps {
   adventurer: AdventurerClass | undefined;

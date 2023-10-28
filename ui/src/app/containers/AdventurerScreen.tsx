@@ -1,19 +1,19 @@
-import { useEffect, useState, useMemo } from "react";
-import { useAccount } from "@starknet-react/core";
-// import { getAdventurersByOwner } from "../hooks/graphql/queries";
-import { AdventurersList } from "../components/start/AdventurersList";
-import { CreateAdventurer } from "../components/start/CreateAdventurer";
-import ButtonMenu from "../components/menu/ButtonMenu";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import LootIconLoader from "../components/icons/Loader";
-import useLoadingStore from "../hooks/useLoadingStore";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import { NullAdventurer } from "../types";
-import useUIStore from "../hooks/useUIStore";
+import { useEffect, useState } from "react";
+import { AdventurersList } from "@/app/components/start/AdventurersList";
+import { CreateAdventurer } from "@/app/components/start/CreateAdventurer";
+import ButtonMenu from "@/app/components/menu/ButtonMenu";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import { NullAdventurer } from "@/app/types";
+import useUIStore from "@/app/hooks/useUIStore";
+import { Contract } from "starknet";
 
 interface AdventurerScreenProps {
   spawn: (...args: any[]) => any;
   handleSwitchAdventurer: (...args: any[]) => any;
+  lordsBalance?: bigint;
+  mintLords: (...args: any[]) => any;
+  gameContract: Contract;
 }
 
 /**
@@ -23,40 +23,18 @@ interface AdventurerScreenProps {
 export default function AdventurerScreen({
   spawn,
   handleSwitchAdventurer,
+  lordsBalance,
+  mintLords,
+  gameContract,
 }: AdventurerScreenProps) {
   const [activeMenu, setActiveMenu] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const { account } = useAccount();
-  const adventurer = useAdventurerStore((state) => state.adventurer);
-
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
-  const { data } = useQueriesStore();
   const adventurers = useQueriesStore(
     (state) => state.data.adventurersByOwnerQuery?.adventurers || []
-  );
-  const queryAdventurer = useQueriesStore(
-    (state) => state.data.adventurerByIdQuery?.adventurers[0] || NullAdventurer
   );
   const resetData = useQueriesStore((state) => state.resetData);
   const startOption = useUIStore((state) => state.startOption);
   const setStartOption = useUIStore((state) => state.setStartOption);
-
-  console.log(startOption);
-
-  // const owner = account?.address ? padAddress(account.address) : "";
-
-  // const ownerVariables = useMemo(() => {
-  //   return {
-  //     owner: owner,
-  //   };
-  // }, [owner]);
-
-  // useCustomQuery(
-  //   "adventurersByOwnerQuery",
-  //   getAdventurersByOwner,
-  //   ownerVariables
-  // );
 
   const menu = [
     {
@@ -87,12 +65,8 @@ export default function AdventurerScreen({
     }
   }, []);
 
-  if (loading) {
-    return <LootIconLoader />;
-  }
-
   return (
-    <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap">
+    <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap h-full">
       <div className="w-full sm:w-2/12">
         <ButtonMenu
           buttonsData={menu}
@@ -110,12 +84,14 @@ export default function AdventurerScreen({
             isActive={activeMenu == 1}
             onEscape={() => setActiveMenu(0)}
             spawn={spawn}
+            lordsBalance={lordsBalance}
+            mintLords={mintLords}
           />
         </div>
       )}
 
       {startOption === "choose adventurer" && (
-        <div className="flex flex-col sm:w-5/6">
+        <div className="flex flex-col sm:w-5/6 h-[500px] sm:h-full">
           <p className="text-center text-xl sm:hidden uppercase">Adventurers</p>
 
           <AdventurersList
@@ -123,6 +99,7 @@ export default function AdventurerScreen({
             onEscape={() => setActiveMenu(0)}
             adventurers={adventurers}
             handleSwitchAdventurer={handleSwitchAdventurer}
+            gameContract={gameContract}
           />
         </div>
       )}

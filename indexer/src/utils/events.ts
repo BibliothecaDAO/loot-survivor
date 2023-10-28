@@ -8,6 +8,7 @@ import {
   parseU128,
   parseU16,
   parseU256,
+  parseU64,
   parseU8,
 } from "./parser.ts";
 
@@ -45,6 +46,7 @@ export const ITEMS_LEVELED_UP = eventKey("ItemsLeveledUp");
 
 export const NEW_HIGH_SCORE = eventKey("NewHighScore");
 export const REWARD_DISTRIBUTION = eventKey("RewardDistribution");
+export const GAME_ENTROPY_ROTATED = eventKey("GameEntropyRotatedEvent");
 
 export const parseStats = combineParsers({
   strength: { index: 0, parser: parseU8 },
@@ -75,7 +77,7 @@ export const parseLootWithPrice = combineParsers({
 });
 
 export const parseAdventurer = combineParsers({
-  lastAction: { index: 0, parser: parseU16 },
+  lastActionBlock: { index: 0, parser: parseU16 },
   health: { index: 1, parser: parseU16 },
   xp: { index: 2, parser: parseU16 },
   stats: { index: 3, parser: parseStats },
@@ -90,12 +92,13 @@ export const parseAdventurer = combineParsers({
   ring: { index: 12, parser: parseLootStatistics },
   beastHealth: { index: 13, parser: parseU16 },
   statsPointsAvailable: { index: 14, parser: parseU8 },
-  mutated: { index: 15, parser: parseBoolean },
+  actionsPerBlock: { index: 15, parser: parseU8 },
+  mutated: { index: 16, parser: parseBoolean },
 });
 
 export const parseAdventurerState = combineParsers({
   owner: { index: 0, parser: parseFelt252 },
-  adventurerId: { index: 1, parser: parseU256 },
+  adventurerId: { index: 1, parser: parseFelt252 },
   adventurer: { index: 2, parser: parseAdventurer },
 });
 
@@ -169,15 +172,15 @@ export const parseAdventurerDied = combineParsers({
 });
 
 export const parseAdventurerMetadata = combineParsers({
-  name: { index: 0, parser: parseU128 },
-  homeRealm: { index: 1, parser: parseU16 },
-  class: { index: 2, parser: parseU8 },
-  entropy: { index: 3, parser: parseU128 },
+  startBlock: { index: 0, parser: parseU128 },
+  startingStats: { index: 1, parser: parseStats },
+  name: { index: 2, parser: parseU128 },
 });
 
 export const parseStartGame = combineParsers({
   adventurerState: { index: 0, parser: parseAdventurerState },
   adventurerMeta: { index: 1, parser: parseAdventurerMetadata },
+  revealBlock: { index: 2, parser: parseU64 },
 });
 
 export const parseBag = combineParsers({
@@ -305,7 +308,7 @@ export const parseItemsLeveledUp = combineParsers({
 });
 
 export const parsePlayerReward = combineParsers({
-  adventurerId: { index: 0, parser: parseU256 },
+  adventurerId: { index: 0, parser: parseFelt252 },
   rank: { index: 1, parser: parseU8 },
   amount: { index: 2, parser: parseU256 },
   address: { index: 3, parser: parseFelt252 },
@@ -325,6 +328,18 @@ export const parseRewardDistribution = combineParsers({
 });
 
 export const parseNewHighScore = combineParsers({
-  adventurer_state: { index: 0, parser: parseAdventurerState },
+  adventurerState: { index: 0, parser: parseAdventurerState },
   rank: { index: 1, parser: parseU8 },
+});
+
+export const parseGameEntropyRotated = combineParsers({
+  prevHash: { index: 0, parser: parseFelt252 },
+  prevBlockNumber: { index: 1, parser: parseU64 },
+  prevBlockTimestamp: { index: 2, parser: parseU64 },
+  prevNextRotationBlock: { index: 3, parser: parseU64 },
+  newHash: { index: 4, parser: parseFelt252 },
+  newBlockNumber: { index: 5, parser: parseU64 },
+  newBlockTimestamp: { index: 6, parser: parseU64 },
+  newNextRotationBlock: { index: 7, parser: parseU64 },
+  blocksPerHour: { index: 8, parser: parseU64 },
 });

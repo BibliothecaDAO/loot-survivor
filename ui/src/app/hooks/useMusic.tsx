@@ -1,5 +1,3 @@
-"use effect";
-
 import useSound from "use-sound";
 import { useCallback, useEffect, useState, useRef } from "react";
 

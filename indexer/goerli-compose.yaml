@@ -8,9 +8,12 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+      - ./scripts/mongo-init:/docker-entrypoint-initdb.d
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
+    networks:
+      - indexer
 
   etcd:
     image: docker.io/bitnami/etcd:3.5
@@ -18,10 +21,12 @@ services:
       ALLOW_NONE_AUTHENTICATION: "yes"
     volumes:
       - etcd_data:/bitnami/etcd
+    networks:
+      - indexer
 
 
   adventurers_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
       - mongo
@@ -35,10 +40,12 @@ services:
     environment:
       PERSIST_TO_ETCD: http://etcd:2379
       SINK_ID: adventurers
-      AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
+      AUTH_TOKEN: ${AUTH_TOKEN}
+    networks:
+      - indexer
 
   battles_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
       - mongo
@@ -52,10 +59,12 @@ services:
     environment:
       PERSIST_TO_ETCD: http://etcd:2379
       SINK_ID: battles
-      AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
+      AUTH_TOKEN: ${AUTH_TOKEN}
+    networks:
+      - indexer
 
   beasts_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
       - mongo
@@ -69,10 +78,12 @@ services:
     environment:
       PERSIST_TO_ETCD: http://etcd:2379
       SINK_ID: beasts
-      AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
+      AUTH_TOKEN: ${AUTH_TOKEN}
+    networks:
+      - indexer
 
   discoveries_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
       - mongo
@@ -86,10 +97,12 @@ services:
     environment:
       PERSIST_TO_ETCD: http://etcd:2379
       SINK_ID: discoveries
-      AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
+      AUTH_TOKEN: ${AUTH_TOKEN}
+    networks:
+      - indexer
 
   items_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
       - mongo
@@ -103,10 +116,12 @@ services:
     environment:
       PERSIST_TO_ETCD: http://etcd:2379
       SINK_ID: items
-      AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
+      AUTH_TOKEN: ${AUTH_TOKEN}
+    networks:
+      - indexer
 
   scores_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
       - mongo
@@ -120,8 +135,13 @@ services:
     environment:
       PERSIST_TO_ETCD: http://etcd:2379
       SINK_ID: scores
-      AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
-
+      AUTH_TOKEN: ${AUTH_TOKEN}
+    networks:
+      - indexer
+  
 volumes:
   etcd_data:
   mongo_data:
+
+networks:
+  indexer:

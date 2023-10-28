@@ -1,7 +1,8 @@
 import { useContract } from "@starknet-react/core";
-import Adventurer from "../abi/Adventurer.json";
-import Lords_ERC20_Mintable from "../abi/Lords_ERC20_Mintable.json";
-import { getContracts } from "../lib/constants";
+import Game from "@/app/abi/Game.json";
+import Lords from "@/app/abi/Lords.json";
+import Beasts from "@/app/abi/Beasts.json";
+import GoldenToken from "@/app/abi/GoldenToken.json";
 
 const ethBalanceABIFragment = [
   {
@@ -65,25 +66,35 @@ const ethBalanceABIFragment = [
 ];
 
 export const useContracts = () => {
-  const contracts = getContracts();
-
   const { contract: gameContract } = useContract({
-    address: contracts?.game,
-    abi: Adventurer,
+    address: process.env.NEXT_PUBLIC_GAME_ADDRESS,
+    abi: Game,
   });
   const { contract: lordsContract } = useContract({
-    address: contracts?.lords,
-    abi: Lords_ERC20_Mintable,
+    address: process.env.NEXT_PUBLIC_LORDS_ADDRESS,
+    abi: Lords,
   });
 
   const { contract: ethContract } = useContract({
-    address: contracts?.eth,
+    address: process.env.NEXT_PUBLIC_ETH_ADDRESS,
     abi: ethBalanceABIFragment,
+  });
+
+  const { contract: beastsContract } = useContract({
+    address: process.env.NEXT_PUBLIC_BEASTS_ADDRESS,
+    abi: Beasts,
+  });
+
+  const { contract: goldenToken } = useContract({
+    address: process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS,
+    abi: GoldenToken,
   });
 
   return {
     gameContract,
     lordsContract,
     ethContract,
+    beastsContract,
+    goldenToken,
   };
 };

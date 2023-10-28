@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Item } from "../../types";
-import LootIcon from "../icons/LootIcon";
-import Efficacyicon from "../icons/EfficacyIcon";
-import { processItemName, calculateLevel, getItemData } from "../../lib/utils";
-import ItemBar from "./ItemBar";
-import { GameData } from "../GameData";
-import { getKeyFromValue, getValueFromKey } from "../../lib/utils";
-import { SwapIcon, DownArrowIcon } from "../icons/Icons";
-import { Button } from "../buttons/Button";
+import { Contract } from "starknet";
+import { Item } from "@/app/types";
+import LootIcon from "@/app/components/icons/LootIcon";
+import Efficacyicon from "@/app/components/icons/EfficacyIcon";
+import { processItemName, calculateLevel, getItemData } from "@/app/lib/utils";
+import ItemBar from "@/app/components/adventurer/ItemBar";
+import { GameData } from "@/app/lib/data/GameData";
+import { getKeyFromValue, getValueFromKey } from "@/app/lib/utils";
+import { SwapIcon, DownArrowIcon } from "@/app/components/icons/Icons";
+import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
-import { InventoryDisplay } from "./InventoryDisplay";
+import { InventoryDisplay } from "@/app/components/adventurer/InventoryDisplay";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 
 interface ItemDisplayProps {
@@ -20,6 +21,7 @@ interface ItemDisplayProps {
   equipped?: boolean;
   disabled?: boolean;
   handleDrop: (value: string) => void;
+  gameContract: Contract;
 }
 
 export const ItemDisplay = ({
@@ -30,6 +32,7 @@ export const ItemDisplay = ({
   equipped,
   disabled,
   handleDrop,
+  gameContract,
 }: ItemDisplayProps) => {
   const [showInventoryItems, setShowInventoryItems] = useState(false);
   const itemType = item?.item;
@@ -145,108 +148,102 @@ export const ItemDisplay = ({
     <>
       {!showInventoryItems ? (
         <div
-          className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-10 sm:h-10 md:h-full  ${
-            item.item
-              ? "bg-terminal-green text-terminal-black 2xl:overflow-x-auto 2xl:overflow-y-hidden"
-              : ""
+          className={`flex flex-row items-center text-sm sm:text-base w-full h-16 ${
+            item.item ? "bg-terminal-green text-terminal-black" : ""
           }`}
-          ref={scrollableRef}
         >
-          <div className="sm:hidden flex flex-col items-center justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
-            <LootIcon size={"w-3"} type={itemSlot ? itemSlot : slot} />
-            <Efficacyicon size={"w-4"} type={type} />
-          </div>
-          <div className="hidden sm:flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
-            <LootIcon size={"w-4"} type={itemSlot ? itemSlot : slot} />
-            <Efficacyicon size={"w-4"} type={type} />
+          <div className="flex flex-col items-center justify-center border-r border-terminal-black p-1 sm:p-2 gap-2 h-full">
+            <LootIcon size={"w-5"} type={itemSlot ? itemSlot : slot} />
+            <Efficacyicon size={"w-5"} type={type} />
           </div>
 
           {item.item ? (
-            <div className="flex flex-row justify-between w-full px-1 self-center">
-              <div className="w-full whitespace-normal">
-                <div className="flex flex-col text-xs sm:text-sm space-between">
-                  <div className="flex flex-row font-semibold text-xs space-x-3">
-                    <span className="self-center">
-                      {item &&
-                        `Tier ${tier ?? 0}
+            <div
+              className="flex flex-row justify-between w-full px-1 h-full overflow-x-auto item-scroll"
+              ref={scrollableRef}
+            >
+              <div className="flex flex-col justify-center text-xs sm:text-sm w-full h-full whitespace-normal">
+                <div className="flex flex-row font-semibold text-xs space-x-3">
+                  <span className="self-center">
+                    {item &&
+                      `Tier ${tier ?? 0}
                   `}
-                    </span>
-                    <span className="whitespace-nowrap w-1/2">
-                      <ItemBar xp={item.xp ?? 0} />
-                    </span>
-                    <span className="text-xxs sm:text-sm">{boost}</span>
-                  </div>
-                  <span className="flex flex-row justify-between gap-5">
-                    <span className="flex flex-row gap-1 whitespace-nowrap text-sm sm:text-xxs md:text-lg">
-                      <p>{itemName}</p>
-                      <span className="text-xxs sm:text-sm">
-                        {slot == "Neck" || slot == "Ring"
-                          ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
-                          : ""}
-                      </span>
-                    </span>
-                    <span className="flex flex-row items-center gap-1">
-                      {(screen == "play" ||
-                        screen == "upgrade" ||
-                        screen == "player") && (
-                        <Button
-                          variant={"contrast"}
-                          size={"xxs"}
-                          className="p-1"
-                          onClick={() => {
-                            setShowInventoryItems(true);
-                          }}
-                        >
-                          <SwapIcon className="w-3 h-3 lg:w-4 lg:h-4" />
-                        </Button>
-                      )}
-                      {inventory && (
-                        <>
-                          <div className="sm:hidden">
-                            <Button
-                              className="sm:h-6 sm:p-2"
-                              variant={"contrast"}
-                              size={"xxs"}
-                              onClick={equip}
-                              disabled={disabled}
-                            >
-                              <p className="text-xxs sm:text-sm">
-                                {equipped ? "Equipped" : "Equip"}
-                              </p>
-                            </Button>
-                          </div>
-                          <div className="hidden sm:block">
-                            <Button
-                              className="sm:h-6 sm:p-2"
-                              variant={"contrast"}
-                              size={"xxs"}
-                              onClick={equip}
-                              disabled={disabled}
-                            >
-                              <p className="text-xxs sm:text-sm">
-                                {equipped ? "Equipped" : "Equip"}
-                              </p>
-                            </Button>
-                          </div>
-                        </>
-                      )}
-                      {(screen == "play" ||
-                        screen == "upgrade" ||
-                        screen == "player" ||
-                        screen == "inventory") && (
-                        <Button
-                          variant={"contrast"}
-                          size={"xxs"}
-                          className="p-1"
-                          onClick={() => handleDrop(item.item ?? "")}
-                          disabled={checkDropping(item.item ?? "")}
-                        >
-                          <DownArrowIcon className="w-3 h-3 lg:w-4 lg:h-4" />
-                        </Button>
-                      )}
+                  </span>
+                  <span className="whitespace-nowrap w-1/2">
+                    <ItemBar xp={item.xp ?? 0} />
+                  </span>
+                  <span className="text-xxs sm:text-sm">{boost}</span>
+                </div>
+                <span className="flex flex-row justify-between gap-5">
+                  <span className="flex flex-row gap-1 whitespace-nowrap text-sm sm:text-xxs md:text-lg">
+                    <p>{itemName}</p>
+                    <span className="text-xxs sm:text-sm">
+                      {slot == "Neck" || slot == "Ring"
+                        ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
+                        : ""}
                     </span>
                   </span>
-                </div>
+                  <span className="flex flex-row items-center gap-1">
+                    {(screen == "play" ||
+                      screen == "upgrade" ||
+                      screen == "player") && (
+                      <Button
+                        variant={"contrast"}
+                        size={"xxs"}
+                        className="p-1 xl:p-0 sm:h-4 sm:w-8"
+                        onClick={() => {
+                          setShowInventoryItems(true);
+                        }}
+                      >
+                        <SwapIcon className="w-4 h-4" />
+                      </Button>
+                    )}
+                    {inventory && (
+                      <>
+                        <div className="sm:hidden">
+                          <Button
+                            className="sm:h-6 sm:p-2"
+                            variant={"contrast"}
+                            size={"xxs"}
+                            onClick={equip}
+                            disabled={disabled}
+                          >
+                            <p className="text-xxs sm:text-sm">
+                              {equipped ? "Equipped" : "Equip"}
+                            </p>
+                          </Button>
+                        </div>
+                        <div className="hidden sm:block">
+                          <Button
+                            className="sm:h-6 sm:p-2"
+                            variant={"contrast"}
+                            size={"xxs"}
+                            onClick={equip}
+                            disabled={disabled}
+                          >
+                            <p className="text-xxs sm:text-sm">
+                              {equipped ? "Equipped" : "Equip"}
+                            </p>
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                    {(screen == "play" ||
+                      screen == "upgrade" ||
+                      screen == "player" ||
+                      screen == "inventory") && (
+                      <Button
+                        variant={"contrast"}
+                        size={"xxs"}
+                        className="p-1 xl:p-0 sm:h-4 sm:w-8"
+                        onClick={() => handleDrop(item.item ?? "")}
+                        disabled={checkDropping(item.item ?? "")}
+                      >
+                        <DownArrowIcon className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </span>
+                </span>
               </div>
             </div>
           ) : (
@@ -264,6 +261,7 @@ export const ItemDisplay = ({
             itemSlot={slot}
             setShowInventoryItems={setShowInventoryItems}
             equipItems={equipItems}
+            gameContract={gameContract}
           />
         </div>
       )}

@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "../components/buttons/Button";
-import { DiscordIcon } from "../components/icons/Icons";
+import { Button } from "@/app/components/buttons/Button";
+import { DiscordIcon } from "@/app/components/icons/Icons";
 
 export default function GuideScreen() {
   const efficacyData = [
@@ -61,10 +61,19 @@ export default function GuideScreen() {
       items: [
         {
           name: "(T2) Necklace",
-          ability: "Bonus stat at G20 (+2 instead of normal +1)",
+          ability:
+            "Bonus stat at G20 (+2 instead of normal +1) and 3% increase per greatness metal armor defense",
         },
-        { name: "(T1) Amulet", ability: "2x health from health discoveries" },
-        { name: "(T1) Pendant", ability: "2x gold from gold discoveries" },
+        {
+          name: "(T1) Amulet",
+          ability:
+            "2x health from health discoveries and 3% increase per greatness cloth armor defense",
+        },
+        {
+          name: "(T1) Pendant",
+          ability:
+            "2x gold from gold discoveries and 3% increase per greatness hide armor defense",
+        },
       ],
     },
     {
@@ -72,27 +81,37 @@ export default function GuideScreen() {
       items: [
         {
           name: "Bronze Ring (T3)",
-          ability: "No special ability",
+          ability: "Contributes to luck even when bagged ",
         },
         {
           name: "Silver Ring (T2)",
-          ability: "+20 luck (total of +40 luck at G20)",
+          ability:
+            "+20 luck (total of +40 luck at G20) and +1 bonus luck per greatness when equipped",
         },
-        { name: "Gold Ring (T1)", ability: "2x gold when defeating beasts" },
-        { name: "Platinum Ring (T1)", ability: "2x critical hit damage" },
+        {
+          name: "Gold Ring (T1)",
+          ability:
+            "2x gold when defeating beasts and 3% per greatness increase in gold rewards from beasts",
+        },
+
+        {
+          name: "Platinum Ring (T1)",
+          ability:
+            "2x discovery rewards and then 4x at G20 and 3% per greatness increase in name match damage bonus",
+        },
+
         {
           name: "Titanium Ring (T1)",
           ability:
-            "2x special name damage (when weapon name prefix matches beast)",
+            "2x special name damage (when weapon name prefix matches beast) and 3% per greatness increase in critical hit damage bonus",
         },
       ],
     },
   ];
 
   return (
-    <div className="h-[500px] overflow-y-auto 2xl:h-[650px] p-2 table-scroll text-xs sm:text-base sm:text-left">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-        <h1>Loot Survivor</h1>
+    <div className="overflow-y-auto p-2 table-scroll text-xs sm:text-base sm:text-left h-full">
+      <div className="flex justify-center items-center mb-4">
         <a
           href="https://discord.gg/bibliothecadao"
           target="_blank"
@@ -304,8 +323,8 @@ export default function GuideScreen() {
       </div>
       <h3 className="">Jewelery Abilities</h3>
       <p>
-        Jewelry items provide unique abilities that will unlock once they reach
-        Greatness 20.
+        Jewelry items provide unique abilities and contribute to luck when
+        bagged.
       </p>
       <div>
         {jewelryData.map((category, i) => (

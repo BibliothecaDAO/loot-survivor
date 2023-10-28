@@ -1,7 +1,6 @@
 import { create } from "zustand";
-import { isEqual } from "lodash";
-import { Battle, Beast, Item, Adventurer, Discovery, Score } from "../types";
-import { GameData } from "../components/GameData";
+import { Battle, Beast, Item, Adventurer, Discovery, Score } from "@/app/types";
+import { GameData } from "@/app/lib/data/GameData";
 
 export type QueryKey =
   | "lastBattleQuery"

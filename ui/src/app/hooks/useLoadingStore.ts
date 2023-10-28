@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { QueryKey } from "./useQueryStore";
 
 // TODO: Notification Data type
 
@@ -60,14 +59,16 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
       errorMessage: error ? notificationData.message : undefined,
       loading: false,
       pendingMessage: undefined,
-      history: [
-        ...get().history,
-        {
-          hash: get().hash,
-          type: get().type,
-          notificationData: notificationData,
-        },
-      ],
+      history: !error
+        ? [
+            ...get().history,
+            {
+              hash: get().hash,
+              type: get().type,
+              notificationData: notificationData,
+            },
+          ]
+        : [...get().history],
       hash: "",
       adventurer: undefined,
       txAccepted: false,

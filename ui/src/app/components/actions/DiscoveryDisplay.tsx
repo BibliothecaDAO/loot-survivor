@@ -1,7 +1,5 @@
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { processBeastName } from "../../lib/utils";
+import { processBeastName } from "@/app/lib/utils";
 import {
-  HeartIcon,
   CoinIcon,
   GiBruteIcon,
   SkullCrossedBonesIcon,
@@ -9,8 +7,7 @@ import {
   GiSandsOfTimeIcon,
   TwoCoinIcon,
   HealthPotionIcon,
-  GiStarsStackIcon,
-} from "../icons/Icons";
+} from "@/app/components/icons/Icons";
 import { Discovery } from "@/app/types";
 
 interface DiscoveryProps {
@@ -34,7 +31,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
             <span className="flex flex-row items-center justify-between">
               <p>
                 YIKES! Ambushed by a {beastName} for {discoveryData.damageTaken}{" "}
-                damage to {discoveryData.damageLocation} !
+                damage to {discoveryData.damageLocation}!
               </p>
               <GiBruteIcon />
             </span>
@@ -140,15 +137,6 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
               <p>GREAT! Discovered {discoveryData?.outputAmount} health! </p>
             </div>
             <HealthPotionIcon />
-          </span>
-        );
-      }
-
-      if (discoveryData?.subDiscoveryType === "XP") {
-        return (
-          <span className="flex flex-row items-center justify-between">
-            <p>NICE! Discovered {discoveryData.outputAmount} XP!</p>
-            <GiStarsStackIcon />
           </span>
         );
       }

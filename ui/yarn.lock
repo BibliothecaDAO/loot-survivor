@@ -34,14 +34,14 @@
     tslib "^2.3.0"
     zen-observable-ts "^1.2.5"
 
-"@argent/starknet-react-webwallet-connector@^6.4.2":
-  version "6.4.2"
-  resolved "https://registry.yarnpkg.com/@argent/starknet-react-webwallet-connector/-/starknet-react-webwallet-connector-6.4.2.tgz#46baec8d86bcd2f35cd6e13f8d0a7ce15ca1f067"
-  integrity sha512-60B8wxpbKQoKNccawx4DKyZ2WNES9IFbzbKTWwST5ahCQz/GJKIU1Ad2gns7xy0OlxIFEs2aJfcMKSMrE1zlwg==
+"@argent/starknet-react-webwallet-connector@^6.6.0":
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/@argent/starknet-react-webwallet-connector/-/starknet-react-webwallet-connector-6.6.0.tgz#5f0ba8c5d2535959d6623abb7d1e22e8f0b0d5e6"
+  integrity sha512-megg03CygKEFbvfq7VELB1PUU8pWNXD+abmrb1vBglw7gcR1b5/9VcZy34mKDnKkN+Q2ABlRcfqtmvxmjv639g==
   dependencies:
     "@argent/web-sdk" "^6.4.1"
     "@argent/x-window" "^6.4.0"
-    "@starknet-react/core" "^0.17.0"
+    "@starknet-react/core" "2.0.0-next.0"
 
 "@argent/web-sdk@^6.4.1":
   version "6.4.1"
@@ -1428,6 +1428,22 @@
     "@noble/curves" "~1.2.0"
     "@noble/hashes" "~1.3.2"
 
+"@starknet-react/chains@^0.1.0-next.0":
+  version "0.1.0-next.0"
+  resolved "https://registry.yarnpkg.com/@starknet-react/chains/-/chains-0.1.0-next.0.tgz#c9e5e1c1788e4166292852287769a980306cfb91"
+  integrity sha512-g5wxh8yoD1upym0onHFifODpw1Eb0TF+C3J/Kso+hopTIIq3goRw7uQ1i4dBlrIlx9uP8iNA/yKdED24uwvWJQ==
+
+"@starknet-react/core@2.0.0-next.0":
+  version "2.0.0-next.0"
+  resolved "https://registry.yarnpkg.com/@starknet-react/core/-/core-2.0.0-next.0.tgz#3aae8f84af791a0b29e0f83fc177b1c2dd66aeab"
+  integrity sha512-OZf45Na0NyfDyd4utFkY32I4x0MWzpbA5XG6Q6tWHbsYSWBA7YIxdOktY5iLqhzUgxzN6g/9QMWaRtxx5Iw5WA==
+  dependencies:
+    "@starknet-react/chains" "^0.1.0-next.0"
+    "@tanstack/react-query" "^4.35.3"
+    eventemitter3 "^5.0.1"
+    immutable "^4.3.4"
+    zod "^3.22.2"
+
 "@starknet-react/core@^0.16.0":
   version "0.16.0"
   resolved "https://registry.npmjs.org/@starknet-react/core/-/core-0.16.0.tgz"
@@ -1436,26 +1452,6 @@
     "@tanstack/react-query" "^4.3.4"
     get-starknet-core "^2.0.0"
     immutable "^4.0.0"
-
-"@starknet-react/core@^0.17.0":
-  version "0.17.6"
-  resolved "https://registry.yarnpkg.com/@starknet-react/core/-/core-0.17.6.tgz#721f787795ed849132891bc50c0c4e68c7a66989"
-  integrity sha512-VJR7jx62FnYL5bGU3EUEBMp7Ym6eiY29QFjD5aljLagIsEn8SDAyNRxyKBNfHhx3/xi1q0cxuHp5r9EIOT1Yeg==
-  dependencies:
-    "@tanstack/react-query" "^4.29.12"
-    get-starknet-core "^2.1.0"
-    immutable "^4.3.0"
-    react "^18.2.0"
-    starknet "^4.22.0"
-
-"@starknet-react/core@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@starknet-react/core/-/core-1.0.4.tgz#08ed280382621cc78d031095a4293f043dbadc98"
-  integrity sha512-TQiRnb0moqim6+HqioGGzd3FgjPVJFMdMH8Q5AQlJ7oEUNprKkFyHlVGJJlcwvdRaCPD5BQuD2WUL2rQfgMRuw==
-  dependencies:
-    "@tanstack/react-query" "^4.29.12"
-    immutable "^4.3.0"
-    zod "^3.21.4"
 
 "@svgr/babel-plugin-add-jsx-attribute@^7.0.0":
   version "7.0.0"
@@ -1569,23 +1565,15 @@
   dependencies:
     tslib "^2.4.0"
 
-"@tanstack/query-core@4.29.19":
-  version "4.29.19"
-  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.29.19.tgz#49ccbd0606633d1e55baf3b91ab7cc7aef411b1d"
-  integrity sha512-uPe1DukeIpIHpQi6UzIgBcXsjjsDaLnc7hF+zLBKnaUlh7jFE/A+P8t4cU4VzKPMFB/C970n/9SxtpO5hmIRgw==
-
 "@tanstack/query-core@4.29.5":
   version "4.29.5"
   resolved "https://registry.npmjs.org/@tanstack/query-core/-/query-core-4.29.5.tgz"
   integrity sha512-xXIiyQ/4r9KfaJ3k6kejqcaqFXXBTzN2aOJ5H1J6aTJE9hl/nbgAdfF6oiIu0CD5xowejJEJ6bBg8TO7BN4NuQ==
 
-"@tanstack/react-query@^4.29.12":
-  version "4.29.19"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.29.19.tgz#6ba187f2d0ea36ae83ff1f67068f53c88ce7b228"
-  integrity sha512-XiTIOHHQ5Cw1WUlHaD4fmVUMhoWjuNJlAeJGq7eM4BraI5z7y8WkZO+NR8PSuRnQGblpuVdjClQbDFtwxTtTUw==
-  dependencies:
-    "@tanstack/query-core" "4.29.19"
-    use-sync-external-store "^1.2.0"
+"@tanstack/query-core@4.36.1":
+  version "4.36.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.36.1.tgz#79f8c1a539d47c83104210be2388813a7af2e524"
+  integrity sha512-DJSilV5+ytBP1FbFcEJovv4rnnm/CokuVvrBEtW/Va9DvuJ3HksbXUJEpI0aV1KtuL4ZoO9AVE6PyNLzF7tLeA==
 
 "@tanstack/react-query@^4.3.4":
   version "4.29.5"
@@ -1593,6 +1581,14 @@
   integrity sha512-F87cibC3s3eG0Q90g2O+hqntpCrudKFnR8P24qkH9uccEhXErnJxBC/AAI4cJRV2bfMO8IeGZQYf3WyYgmSg0w==
   dependencies:
     "@tanstack/query-core" "4.29.5"
+    use-sync-external-store "^1.2.0"
+
+"@tanstack/react-query@^4.35.3":
+  version "4.36.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.36.1.tgz#acb589fab4085060e2e78013164868c9c785e5d2"
+  integrity sha512-y7ySVHFyyQblPl3J3eQBWpXZkliroki3ARnBKsdJchlgt7yJLRDUcf4B8soufgiYt3pEQIkBWBx1N9/ZPIeUWw==
+  dependencies:
+    "@tanstack/query-core" "4.36.1"
     use-sync-external-store "^1.2.0"
 
 "@trysound/sax@0.2.0":
@@ -2784,6 +2780,11 @@ ethereum-cryptography@^1.0.3:
     "@scure/bip32" "1.1.5"
     "@scure/bip39" "1.1.1"
 
+eventemitter3@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-5.0.1.tgz#53f5ffd0a492ac800721bb42c66b841de96423c4"
+  integrity sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==
+
 execa@^5.0.0:
   version "5.1.1"
   resolved "https://registry.npmjs.org/execa/-/execa-5.1.1.tgz"
@@ -2957,12 +2958,17 @@ get-intrinsic@^1.0.2, get-intrinsic@^1.1.1, get-intrinsic@^1.1.3, get-intrinsic@
     has "^1.0.3"
     has-symbols "^1.0.3"
 
-get-starknet-core@^2.0.0, get-starknet-core@^2.1.0:
+get-starknet-core@^2.0.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/get-starknet-core/-/get-starknet-core-2.1.0.tgz"
   integrity sha512-sT9fxIiM3maEqz1cVggiB/jGn+nUCavhhhJRnU/G1zKMmJFYORjRNohEZ1xXgRt6MFVUNPnAzxQrhI1F645VNA==
 
-get-starknet-core@^3.0.1, get-starknet-core@^3.1.0:
+get-starknet-core@^3.0.1:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/get-starknet-core/-/get-starknet-core-3.2.0.tgz#44cabcbd573262340d575cb6b9a38e469a8029ed"
+  integrity sha512-SZhxtLlKoPKLZ2H3l9WIU7CiNmkL3qLWGksALmvZdAXa/9PykYfLtvIB5B8A2UZMpf2ojTZlWLfuo1KhgmVobA==
+
+get-starknet-core@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/get-starknet-core/-/get-starknet-core-3.1.0.tgz#adc29ba2c29c2b72cc73a46bfadee531efa1d324"
   integrity sha512-SPeYnzqKRXuukNoEr5aobxBmvhUSt4uWs6kFhMXl+3fG2R43u2D2DreDkA1n6T5DF10x5zLogldiHqn/jGlxEA==
@@ -3196,10 +3202,15 @@ ignore@^5.2.0:
   resolved "https://registry.npmjs.org/ignore/-/ignore-5.2.4.tgz"
   integrity sha512-MAb38BcSbH0eHNBxn7ql2NH/kX33OkB3lZ1BNdh7ENeRChHTYsTvWrMubiIAMNS2llXEEgZ1MUOBtXChP3kaFQ==
 
-immutable@^4.0.0, immutable@^4.3.0:
+immutable@^4.0.0:
   version "4.3.0"
   resolved "https://registry.npmjs.org/immutable/-/immutable-4.3.0.tgz"
   integrity sha512-0AOCmOip+xgJwEVTQj1EfiDDOkPmuyllDuTuEX+DDXUgapLAsBIfkg3sxCYyCEA8mQqZrrxPUGjcOQ2JS3WLkg==
+
+immutable@^4.3.4:
+  version "4.3.4"
+  resolved "https://registry.yarnpkg.com/immutable/-/immutable-4.3.4.tgz#2e07b33837b4bb7662f288c244d1ced1ef65a78f"
+  integrity sha512-fsXeu4J4i6WNWSikpI88v/PcVflZz+6kMhUfIwc5SY+poQRPnaf5V7qds6SUyUN3cVxEzuCab7QIoLOQ+DQ1wA==
 
 import-fresh@^3.0.0, import-fresh@^3.2.1:
   version "3.3.0"
@@ -4157,7 +4168,7 @@ react-type-animation@^3.0.1:
   resolved "https://registry.npmjs.org/react-type-animation/-/react-type-animation-3.0.1.tgz"
   integrity sha512-n6erVzng071lN8A0UbNT9Q7m5D6puaa9OE1lakwu5UKxMkEnUbjs2MLT3jN/SUjuxNtKmDP2GqJKb3uQ5wZNkQ==
 
-react@18.2.0, react@^18.2.0:
+react@18.2.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
@@ -4957,7 +4968,7 @@ zen-observable@0.8.15:
   resolved "https://registry.npmjs.org/zen-observable/-/zen-observable-0.8.15.tgz"
   integrity sha512-PQ2PC7R9rslx84ndNBZB/Dkv8V8fZEpk83RLgXtYd0fwUgEjseMn1Dgajh2x6S8QbZAFa9p2qVCEuYZNgve0dQ==
 
-zod@^3.21.4:
+zod@^3.22.2:
   version "3.22.4"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.22.4.tgz#f31c3a9386f61b1f228af56faa9255e845cf3fff"
   integrity sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==

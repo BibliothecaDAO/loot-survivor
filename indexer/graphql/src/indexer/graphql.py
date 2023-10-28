@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime
 from typing import List, NewType, Optional, Dict
 import base64
 import ssl
@@ -13,6 +12,14 @@ from indexer.utils import felt_to_str, str_to_felt, get_key_by_value
 from indexer.config import Config
 
 config = Config()
+
+
+def parse_u256(value):
+    return value * (10**18)
+
+
+def serialize_u256(value):
+    return value / (10**18)
 
 
 def parse_hex(value):
@@ -237,6 +244,11 @@ def serialize_adventurer(value):
     return config.ATTACKERS.get(felt)
 
 
+U256Value = strawberry.scalar(
+    NewType("U256Value", bytes), parse_value=parse_u256, serialize=serialize_u256
+)
+
+
 HexValue = strawberry.scalar(
     NewType("HexValue", bytes), parse_value=parse_hex, serialize=serialize_hex
 )
@@ -347,6 +359,17 @@ AttackerValue = strawberry.scalar(
 
 
 @strawberry.input
+class U256ValueFilter:
+    eq: Optional[U256Value] = None
+    _in: Optional[List[U256Value]] = None
+    notIn: Optional[List[U256Value]] = None
+    lt: Optional[U256Value] = None
+    lte: Optional[U256Value] = None
+    gt: Optional[U256Value] = None
+    gte: Optional[U256Value] = None
+
+
+@strawberry.input
 class StringFilter:
     eq: Optional[StringValue] = None
     _in: Optional[List[StringValue]] = None
@@ -402,6 +425,17 @@ class IntFilter:
     lte: Optional[int] = None
     gt: Optional[int] = None
     gte: Optional[int] = None
+
+
+@strawberry.input
+class FloatFilter:
+    eq: Optional[float] = None
+    _in: Optional[List[float]] = None
+    notIn: Optional[List[float]] = None
+    lt: Optional[float] = None
+    lte: Optional[float] = None
+    gt: Optional[float] = None
+    gte: Optional[float] = None
 
 
 @strawberry.input
@@ -621,8 +655,6 @@ class AdventurersFilter:
     id: Optional[FeltValueFilter] = None
     lastAction: Optional[FeltValueFilter] = None
     owner: Optional[HexValueFilter] = None
-    classType: Optional[ClassFilter] = None
-    homeRealm: Optional[FeltValueFilter] = None
     name: Optional[StringFilter] = None
     health: Optional[FeltValueFilter] = None
     strength: Optional[FeltValueFilter] = None
@@ -643,6 +675,9 @@ class AdventurersFilter:
     ring: Optional[FeltValueFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     statUpgrades: Optional[FeltValueFilter] = None
+    startBlock: Optional[FeltValueFilter] = None
+    revealBlock: Optional[FeltValueFilter] = None
+    actionsPerBlock: Optional[FeltValueFilter] = None
     gold: Optional[FeltValueFilter] = None
     createdTime: Optional[OrderByInput] = None
     lastUpdatedTime: Optional[DateTimeFilter] = None
@@ -658,7 +693,7 @@ class ScoresFilter:
     txHash: Optional[HexValueFilter] = None
     scoreTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
-    totalPayout: Optional[IntFilter] = None
+    totalPayout: Optional[U256ValueFilter] = None
 
 
 @strawberry.input
@@ -750,8 +785,6 @@ class AdventurersOrderByInput:
     id: Optional[OrderByInput] = None
     lastAction: Optional[OrderByInput] = None
     owner: Optional[OrderByInput] = None
-    classType: Optional[OrderByInput] = None
-    homeRealm: Optional[OrderByInput] = None
     name: Optional[OrderByInput] = None
     health: Optional[OrderByInput] = None
     level: Optional[OrderByInput] = None
@@ -773,6 +806,9 @@ class AdventurersOrderByInput:
     ring: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     statUpgrades: Optional[OrderByInput] = None
+    startBlock: Optional[OrderByInput] = None
+    revealBlock: Optional[OrderByInput] = None
+    actionsPerBlock: Optional[OrderByInput] = None
     gold: Optional[OrderByInput] = None
     createdTime: Optional[OrderByInput] = None
     lastUpdatedTime: Optional[OrderByInput] = None
@@ -881,8 +917,6 @@ class Adventurer:
     id: Optional[FeltValue]
     lastAction: Optional[FeltValue]
     owner: Optional[HexValue]
-    classType: Optional[ClassValue]
-    homeRealm: Optional[FeltValue]
     name: Optional[StringValue]
     health: Optional[FeltValue]
     strength: Optional[FeltValue]
@@ -903,6 +937,9 @@ class Adventurer:
     ring: Optional[ItemValue]
     beastHealth: Optional[FeltValue]
     statUpgrades: Optional[FeltValue]
+    startBlock: Optional[FeltValue]
+    revealBlock: Optional[FeltValue]
+    actionsPerBlock: Optional[FeltValue]
     gold: Optional[FeltValue]
     createdTime: Optional[str]
     lastUpdatedTime: Optional[str]
@@ -914,8 +951,6 @@ class Adventurer:
             id=data["id"],
             lastAction=data["lastAction"],
             owner=data["owner"],
-            classType=data["classType"],
-            homeRealm=data["homeRealm"],
             name=data["name"],
             health=data["health"],
             strength=data["strength"],
@@ -936,6 +971,9 @@ class Adventurer:
             ring=data["ring"],
             beastHealth=data["beastHealth"],
             statUpgrades=data["statUpgrades"],
+            startBlock=data["startBlock"],
+            revealBlock=data["revealBlock"],
+            actionsPerBlock=data["actionsPerBlock"],
             gold=data["gold"],
             createdTime=data["createdTime"],
             lastUpdatedTime=data["lastUpdatedTime"],
@@ -952,7 +990,7 @@ class Score:
     txHash: Optional[HexValue]
     scoreTime: Optional[str]
     timestamp: Optional[str]
-    totalPayout: Optional[int]
+    totalPayout: Optional[U256Value]
 
     @classmethod
     def from_mongo(cls, data):
@@ -1321,6 +1359,8 @@ def get_scores(
                 filter[key] = get_date_filters(value)
             elif isinstance(value, FeltValueFilter):
                 filter[key] = get_felt_filters(value)
+            elif isinstance(value, U256ValueFilter):
+                filter[key] = get_felt_filters(value)
 
     sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
 
@@ -1500,17 +1540,7 @@ def get_items(
     if where:
         processed_filters = process_filters(where)
         for key, value in processed_filters.items():
-            if (
-                isinstance(value, StringFilter)
-                | isinstance(value, ItemFilter)
-                | isinstance(value, SlotFilter)
-                | isinstance(value, TypeFilter)
-                | isinstance(value, MaterialFilter)
-                | isinstance(value, Special1Filter)
-                | isinstance(value, Special2Filter)
-                | isinstance(value, Special3Filter)
-                | isinstance(value, StatusFilter)
-            ):
+            if isinstance(value, StringFilter):
                 filter[key] = get_str_filters(value)
             elif isinstance(value, HexValueFilter):
                 filter[key] = get_hex_filters(value)
@@ -1561,22 +1591,22 @@ class IndexerGraphQLView(GraphQLView):
 
 async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
     mongo_goerli = MongoClient(mongo_goerli)
-    mongo_mainnet = MongoClient(mongo_mainnet)
+    # mongo_mainnet = MongoClient(mongo_mainnet)
     db_name_goerli = "mongo-goerli".replace("-", "_")
-    db_name_mainnet = "mongo-mainnet".replace("-", "_")
+    # db_name_mainnet = "mongo-mainnet".replace("-", "_")
     db_goerli = mongo_goerli[db_name_goerli]
-    db_mainnet = mongo_mainnet[db_name_mainnet]
+    # db_mainnet = mongo_mainnet[db_name_mainnet]
 
     schema = strawberry.Schema(query=Query)
     view_goerli = IndexerGraphQLView(db_goerli, schema=schema)
-    view_mainnet = IndexerGraphQLView(db_mainnet, schema=schema)
+    # view_mainnet = IndexerGraphQLView(db_mainnet, schema=schema)
 
     app = web.Application()
     # app.router.add_route("*", "/graphql", view_goerli)
 
     cors = aiohttp_cors.setup(app)
     resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
-    resource_mainnet = cors.add(app.router.add_resource("/graphql"))
+    # resource_mainnet = cors.add(app.router.add_resource("/graphql"))
 
     cors.add(
         resource_goerli.add_route("POST", view_goerli),
@@ -1595,22 +1625,22 @@ async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
         },
     )
 
-    cors.add(
-        resource_mainnet.add_route("POST", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
-    cors.add(
-        resource_mainnet.add_route("GET", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
+    # cors.add(
+    #     resource_mainnet.add_route("POST", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
+    # cors.add(
+    #     resource_mainnet.add_route("GET", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
 
     ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     ssl_context.load_cert_chain(

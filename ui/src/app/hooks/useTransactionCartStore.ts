@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Call } from "../types";
+import { Call } from "@/app/types";
 import { AccountInterface } from "starknet";
 
 type TransactionCartState = {
@@ -42,7 +42,6 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
     calls: Call[]
   ) => {
     try {
-      // const tx = await writeAsync();
       const tx = await account.execute(calls, undefined, {
         maxFee: "100000000000000", // currently setting to 0.0001ETH
       });

@@ -65,15 +65,14 @@ impl ExploreUtils of Explore {
 #[cfg(test)]
 mod tests {
     use survivor::{
-        exploration::ExploreUtils, adventurer::{ImplAdventurer, ItemPrimitive},
-        stats::Stats
+        exploration::ExploreUtils, adventurer::{ImplAdventurer, ItemPrimitive}, stats::Stats
     };
     use lootitems::constants::ItemId;
 
     #[test]
     #[available_gas(328654)]
     fn test_get_gold_discovery_gas() {
-        let adventurer = ImplAdventurer::new(12, 6, 0, 0);
+        let adventurer = ImplAdventurer::new(ItemId::Wand);
         let entropy = 0;
         ExploreUtils::get_gold_discovery(adventurer, entropy);
     }
@@ -81,7 +80,7 @@ mod tests {
     #[test]
     #[available_gas(329054)]
     fn test_get_gold_discovery() {
-        let mut adventurer = ImplAdventurer::new(12, 6, 0, 0);
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // base discovery for level 1 adventurer with 0 entropy should be 1
         let entropy = 0;
@@ -92,7 +91,7 @@ mod tests {
     #[test]
     #[available_gas(328854)]
     fn test_get_health_discovery_gas() {
-        let adventurer = ImplAdventurer::new(12, 6, 0, 0);
+        let adventurer = ImplAdventurer::new(ItemId::Wand);
         let entropy = 12345;
         ExploreUtils::get_health_discovery(adventurer, entropy);
     }
@@ -100,7 +99,7 @@ mod tests {
     #[test]
     #[available_gas(329054)]
     fn test_get_health_discovery() {
-        let mut adventurer = ImplAdventurer::new(12, 6, 0, 0);
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // base discovery for level 1 adventurer with 0 entropy should be 1
         let entropy = 0;

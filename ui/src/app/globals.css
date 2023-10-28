@@ -6,10 +6,25 @@
 
 body,
 input[type="text"] {
-  font-family: "VT323", monospace;
-  font-weight: 400;
-  text-shadow: rgb(39, 168, 115, 0.9) 1px 0 10px;
-  animation  : textShadow 0.3s infinite;
+  font-family  : "VT323", monospace;
+  font-weight  : 400;
+  text-shadow  : rgb(39, 168, 115, 0.9) 1px 0 10px;
+  animation    : textShadow 0.3s infinite;
+  outline-color: rgba(74, 246, 38, 1);
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin            : 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+input:focus {
+  outline-style: solid;
 }
 
 ::selection {
@@ -142,6 +157,12 @@ h6 {
 
 body::-webkit-scrollbar,
 .table-scroll::-webkit-scrollbar {
+  width : 1em;
+  height: 1em;
+}
+
+body::-webkit-scrollbar,
+.default-scroll::-webkit-scrollbar {
   width : 0.5em;
   height: 0.5em;
 }
@@ -160,34 +181,51 @@ body::-webkit-scrollbar-track,
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
+body::-webkit-scrollbar-track,
+.default-scroll::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
 body::-webkit-scrollbar-thumb,
 .table-scroll::-webkit-scrollbar-thumb {
   @apply bg-terminal-green;
 }
 
+body::-webkit-scrollbar-thumb,
+.default-scroll::-webkit-scrollbar-thumb {
+  @apply bg-terminal-green;
+}
+
 body::-webkit-scrollbar,
-.item-scroll::-webkit-scrollbar {
+.default-scroll::-webkit-scrollbar {
   width : 0.5em;
   height: 0.5em;
 }
 
-@media (min-width: 400px) {
-
-  body::-webkit-scrollbar,
-  .item-scroll::-webkit-scrollbar {
-    width : 1em;
-    height: 1em;
-  }
-}
-
 body::-webkit-scrollbar-track,
-.item-scroll::-webkit-scrollbar-track {
+.default-scroll::-webkit-scrollbar-track {
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
 body::-webkit-scrollbar-thumb,
-.item-scroll::-webkit-scrollbar-thumb {
+.default-scroll::-webkit-scrollbar-thumb {
   @apply bg-terminal-green;
+}
+
+body::-webkit-scrollbar,
+.item-scroll::-webkit-scrollbar {
+  width : 0.2em;
+  height: 0.2em;
+}
+
+body::-webkit-scrollbar-track,
+.item-scroll::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(74, 246, 38, 0.5);
+}
+
+body::-webkit-scrollbar-thumb,
+.item-scroll::-webkit-scrollbar-thumb {
+  @apply bg-black;
 }
 
 .notification-enter {
@@ -285,4 +323,16 @@ body::-webkit-scrollbar-thumb,
   to {
     opacity: 1;
   }
+}
+
+.notification-sprite {
+  background-image : url("/adventurer-sprites.png");
+  display          : inline-block;
+  background-repeat: no-repeat;
+}
+
+.coin-sprite {
+  background-image : url("/coin-sprites.png");
+  display          : inline-block;
+  background-repeat: no-repeat;
 }

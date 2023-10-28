@@ -1,11 +1,10 @@
-import { useEffect, useState, useRef, ReactElement, useCallback } from "react";
-import { useContracts } from "../../hooks/useContracts";
-import { Button } from "../buttons/Button";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import { useMediaQuery } from "react-responsive";
-import { Item, Menu, Metadata } from "@/app/types";
-import { GameData } from "../GameData";
+import { useEffect, useState, ReactElement, useCallback } from "react";
+import { Contract } from "starknet";
+import { Button } from "@/app/components/buttons/Button";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { Item } from "@/app/types";
+import { GameData } from "@/app/lib/data/GameData";
 import { getKeyFromValue } from "@/app/lib/utils";
 
 interface InventoryRowProps {
@@ -20,6 +19,7 @@ interface InventoryRowProps {
   icon?: ReactElement;
   equipItems: string[];
   setEquipItems: (value: string[]) => void;
+  gameContract: Contract;
 }
 
 export const InventoryRow = ({
@@ -34,9 +34,9 @@ export const InventoryRow = ({
   icon,
   equipItems,
   setEquipItems,
+  gameContract,
 }: InventoryRowProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
@@ -50,10 +50,8 @@ export const InventoryRow = ({
         entrypoint: "equip",
         calldata: [
           adventurer?.id?.toString() ?? "",
-          "0",
           equipItems.length,
           ...equipItems,
-          // getKeyFromValue(gameData.ITEMS, item) ?? "",
         ],
         metadata: `Equipping ${item}!`,
       };

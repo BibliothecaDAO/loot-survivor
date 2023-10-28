@@ -1,14 +1,13 @@
 import { AccountChangeEventHandler } from "get-starknet-core";
 import { AccountInterface, Account } from "starknet";
-import { Connector } from "@starknet-react/core"; // Assuming Connector is defined in './connector'
-import { padAddress, shortenHex } from "./utils";
+import { Connector } from "@starknet-react/core";
+import { shortenHex } from "@/app/lib/utils";
 
 export class ArcadeConnector extends Connector {
   private _account: AccountInterface | Account | null;
 
-  // Use the "options" type as per your need. Here, I am assuming it to be an object.
-  constructor(options: object, account: AccountInterface | Account | null) {
-    super({ options });
+  constructor(account: AccountInterface | Account | null) {
+    super();
     this._account = account;
   }
 
@@ -59,8 +58,15 @@ export class ArcadeConnector extends Connector {
     return this._account?.address.toString() || "Arcade Account";
   }
 
-  get icon(): string {
-    // Implement your logic here.
-    return "my-icon-url";
+  get icon(): {
+    /** Dark-mode icon. */
+    dark?: string;
+    /** Light-mode icon. */
+    light?: string;
+  } {
+    return {
+      light: "my-icon-url",
+      dark: "my-icon-url",
+    };
   }
 }

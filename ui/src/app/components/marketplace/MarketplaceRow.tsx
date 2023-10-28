@@ -1,32 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "../buttons/Button";
-import { useContracts } from "../../hooks/useContracts";
-import { getItemData, getItemPrice, getKeyFromValue } from "../../lib/utils";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import LootIcon from "../icons/LootIcon";
-import {
-  useTransactionManager,
-  useWaitForTransaction,
-} from "@starknet-react/core";
-import {
-  Metadata,
-  Item,
-  Adventurer,
-  Call,
-  ItemPurchase,
-  UpgradeStats,
-} from "../../types";
-import { CoinIcon } from "../icons/Icons";
-import EfficacyDisplay from "../icons/EfficacyIcon";
-import { GameData } from "../GameData";
-import { useMediaQuery } from "react-responsive";
+import { Button } from "@/app/components/buttons/Button";
+import { getItemData, getItemPrice, getKeyFromValue } from "@/app/lib/utils";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import LootIcon from "@/app/components/icons/LootIcon";
+import { useWaitForTransaction } from "@starknet-react/core";
+import { Metadata, Item, ItemPurchase, UpgradeStats } from "@/app/types";
+import { CoinIcon } from "@/app/components/icons/Icons";
+import EfficacyDisplay from "@/app/components/icons/EfficacyIcon";
+import { GameData } from "@/app/lib/data/GameData";
+import useTransactionManager from "@/app/hooks/useTransactionManager";
 
 interface MarketplaceRowProps {
   item: Item;
   index: number;
-  selectedIndex: number;
-  adventurers: Adventurer[];
   activeMenu: number | null;
   setActiveMenu: (value: number | null) => void;
   calculatedNewGold: number;
@@ -44,8 +30,6 @@ interface MarketplaceRowProps {
 const MarketplaceRow = ({
   item,
   index,
-  selectedIndex,
-  adventurers,
   activeMenu,
   setActiveMenu,
   calculatedNewGold,
@@ -56,25 +40,15 @@ const MarketplaceRow = ({
   totalCharisma,
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
-  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const calls = useTransactionCartStore((state) => state.calls);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { hashes, transactions } = useTransactionManager();
   const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
-  // const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
 
   const transactingMarketIds = (transactions[0]?.metadata as Metadata)?.items;
 
   const gameData = new GameData();
 
   const singlePurchaseExists = (item: string) => {
-    // return calls.some(
-    //   (call: Call) =>
-    //     call.entrypoint == "buy_items_and_upgrade_stats" &&
-    //     Array.isArray(call.calldata) &&
-    //     call.calldata[2] == getKeyFromValue(gameData.ITEMS, item)?.toString()
-    // );
     return purchaseItems.some(
       (purchasingItem: ItemPurchase) => purchasingItem.item == item
     );
@@ -143,15 +117,14 @@ const MarketplaceRow = ({
   return (
     <tr
       className={
-        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black w-full" +
-        (selectedIndex === index + 1 ? " bg-terminal-black" : "")
+        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black w-full h-12 sm:h-full"
       }
     >
       <td className="text-center">{item.item}</td>
       <td className="text-center">{tier}</td>
       <td className="text-center">
         <div className="sm:hidden flex justify-center items-center">
-          <LootIcon size={"w-4"} type={slot} />
+          <LootIcon size={"w-5"} type={slot} />
         </div>
         <div className="hidden sm:flex justify-center items-center">
           <LootIcon size={"w-5"} type={slot} />
@@ -160,7 +133,7 @@ const MarketplaceRow = ({
       <td className="text-center">
         <div className="flex flex-row items-center justify-center gap-2">
           <p className="hidden sm:block">{type}</p>
-          <EfficacyDisplay className="sm:w-8" type={type} />
+          <EfficacyDisplay size="w-5" className="h-5 sm:w-8" type={type} />
         </div>
       </td>
       <td className="text-center">
@@ -178,7 +151,7 @@ const MarketplaceRow = ({
             <p>Equip?</p>
             <div className="flex flex-col">
               <Button
-                size={"xs"}
+                size={"xxxs"}
                 variant={"ghost"}
                 onClick={() => {
                   const newPurchases = [
@@ -198,7 +171,7 @@ const MarketplaceRow = ({
                 Yes
               </Button>
               <Button
-                size={"xs"}
+                size={"xxxs"}
                 variant={"ghost"}
                 onClick={() => {
                   const newPurchases = [
@@ -216,10 +189,14 @@ const MarketplaceRow = ({
                 }}
               >
                 No
-              </Button>{" "}
+              </Button>
             </div>
 
-            <Button size={"xs"} onClick={() => setActiveMenu(null)}>
+            <Button
+              size={"xxxs"}
+              variant={"ghost"}
+              onClick={() => setActiveMenu(null)}
+            >
               X
             </Button>
           </div>

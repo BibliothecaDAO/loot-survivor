@@ -1,4 +1,4 @@
-import { GameData } from "@/app/components/GameData";
+import { GameData } from "@/app/lib/data/GameData";
 import {
   DiscoveredHealthEvent,
   DiscoveredGoldEvent,
@@ -25,10 +25,9 @@ import {
   UpgradesAvailableEvent,
   IdleDeathPenaltyEvent,
   AdventurerUpgradedEvent,
-  AdventurerState,
-} from "../../types/events";
+} from "@/app/types/events";
 import { Adventurer } from "@/app/types";
-import { feltToString } from ".";
+import { feltToString } from "@/app/lib/utils";
 
 type EventData =
   | DiscoveredHealthEvent
@@ -60,7 +59,7 @@ type EventData =
 function processAdventurerState(data: any, currentAdventurer?: any) {
   const gameData = new GameData();
   const updateAdventurerDoc: Adventurer = {
-    id: data.adventurerState["adventurerId"].low,
+    id: data.adventurerState["adventurerId"],
     owner: data.adventurerState["owner"],
     lastAction: data.adventurerState["adventurer"]["lastAction"],
     health: data.adventurerState["adventurer"]["health"],
@@ -83,10 +82,10 @@ function processAdventurerState(data: any, currentAdventurer?: any) {
     ring: gameData.ITEMS[data.adventurerState["adventurer"]["ring"]["id"]],
     beastHealth: data.adventurerState["adventurer"]["beastHealth"],
     statUpgrades: data.adventurerState["adventurer"]["statPointsAvailable"],
+    actionsPerBlock: data.adventurerState["adventurer"]["actionsPerBlock"],
     name: currentAdventurer["name"],
-    homeRealm: currentAdventurer["homeRealm"],
-    classType: currentAdventurer["classType"],
-    entropy: currentAdventurer["entropy"],
+    startBlock: currentAdventurer["startBlock"],
+    revealBlock: currentAdventurer["revealBlock"],
     createdTime: currentAdventurer.createdTime,
     lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
     timestamp: new Date(), // Equivalent to datetime.now() in Python.
@@ -100,7 +99,7 @@ export function processPurchases(data: any, adventurerState: any) {
   for (let item of data) {
     purchasedItems.push({
       item: gameData.ITEMS[item.item.id],
-      adventurerId: adventurerState["adventurerId"].low,
+      adventurerId: adventurerState["adventurerId"],
       owner: true,
       equipped: false,
       ownerAddress: adventurerState["owner"],
@@ -158,7 +157,7 @@ export function processData(
     case "StartGame":
       const startGameEvent = event as StartGameEvent;
       const updateAdventurerDoc: Adventurer = {
-        id: startGameEvent.adventurerState["adventurerId"].low,
+        id: startGameEvent.adventurerState["adventurerId"],
         owner: startGameEvent.adventurerState["owner"],
         lastAction: startGameEvent.adventurerState["adventurer"]["lastAction"],
         health: startGameEvent.adventurerState["adventurer"]["health"],
@@ -207,10 +206,11 @@ export function processData(
           startGameEvent.adventurerState["adventurer"]["beastHealth"],
         statUpgrades:
           startGameEvent.adventurerState["adventurer"]["statPointsAvailable"],
+        actionsPerBlock:
+          startGameEvent.adventurerState["adventurer"]["actionsPerBlock"],
         name: feltToString(startGameEvent.adventurerMeta["name"]),
-        homeRealm: startGameEvent.adventurerMeta["homeRealm"],
-        classType: gameData.CLASSES[startGameEvent.adventurerMeta["class"]],
-        entropy: startGameEvent.adventurerMeta["entropy"],
+        startBlock: startGameEvent.adventurerMeta["startBlock"],
+        revealBlock: startGameEvent.revealBlock,
         createdTime: new Date(),
         lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
         timestamp: new Date(),
@@ -230,7 +230,7 @@ export function processData(
       );
       const discoverHealthData = {
         txHash: txHash,
-        adventurerId: discoveredHealthEvent.adventurerState["adventurerId"].low,
+        adventurerId: discoveredHealthEvent.adventurerState["adventurerId"],
         adventurerHealth:
           discoveredHealthEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[3],
@@ -263,7 +263,7 @@ export function processData(
       );
       const discoverGoldData = {
         txHash: txHash,
-        adventurerId: discoveredGoldEvent.adventurerState["adventurerId"].low,
+        adventurerId: discoveredGoldEvent.adventurerState["adventurerId"],
         adventurerHealth:
           discoveredGoldEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[3],
@@ -297,7 +297,7 @@ export function processData(
       );
       const discoverXPData = {
         txHash: txHash,
-        adventurerId: discoveredXPEvent.adventurerState["adventurerId"].low,
+        adventurerId: discoveredXPEvent.adventurerState["adventurerId"],
         adventurerHealth:
           discoveredXPEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[3],
@@ -331,7 +331,7 @@ export function processData(
       );
       const dodgedObstacleData = {
         txHash: txHash,
-        adventurerId: dodgedObstacleEvent.adventurerState["adventurerId"].low,
+        adventurerId: dodgedObstacleEvent.adventurerState["adventurerId"],
         adventurerHealth:
           dodgedObstacleEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[2],
@@ -369,7 +369,7 @@ export function processData(
       );
       const hitByObstacleData = {
         txHash: txHash,
-        adventurerId: hitByObstacleEvent.adventurerState["adventurerId"].low,
+        adventurerId: hitByObstacleEvent.adventurerState["adventurerId"],
         adventurerHealth:
           hitByObstacleEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[2],
@@ -407,7 +407,7 @@ export function processData(
       );
       const discoveredBeastData = {
         txHash: txHash,
-        adventurerId: discoveredBeastEvent.adventurerState["adventurerId"].low,
+        adventurerId: discoveredBeastEvent.adventurerState["adventurerId"],
         adventurerHealth:
           discoveredBeastEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[1],
@@ -459,7 +459,7 @@ export function processData(
             discoveredBeastEvent.beastSpecs["specials"]["special3"]
           ],
         seed: discoveredBeastEvent.seed,
-        adventurerId: discoveredBeastEvent.adventurerState["adventurerId"].low,
+        adventurerId: discoveredBeastEvent.adventurerState["adventurerId"],
         slainOnTime: null,
         createdTime: new Date(),
         lastUpdatedTime: new Date(),
@@ -478,7 +478,7 @@ export function processData(
       );
       const ambushedByBeastData = {
         txHash: txHash,
-        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"].low,
+        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"],
         adventurerHealth:
           ambushedByBeastEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[1],
@@ -530,7 +530,7 @@ export function processData(
             ambushedByBeastEvent.beastSpecs["specials"]["special3"]
           ],
         seed: ambushedByBeastEvent.seed,
-        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"].low,
+        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"],
         slainOnTime: null,
         createdTime: new Date(),
         lastUpdatedTime: new Date(),
@@ -555,7 +555,7 @@ export function processData(
             ambushedByBeastEvent.beastSpecs["specials"]["special3"]
           ],
         seed: ambushedByBeastEvent.seed,
-        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"].low,
+        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"],
         adventurerHealth:
           ambushedByBeastEvent.adventurerState["adventurer"]["health"],
         attacker: "Beast",
@@ -590,19 +590,19 @@ export function processData(
           attackedBeastEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: attackedBeastEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             attackedBeastEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             attackedBeastEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             attackedBeastEvent.beastSpecs["specials"]["special3"]
           ],
         seed: attackedBeastEvent.seed,
-        adventurerId: attackedBeastEvent.adventurerState["adventurerId"].low,
+        adventurerId: attackedBeastEvent.adventurerState["adventurerId"],
         adventurerHealth:
           attackedBeastEvent.adventurerState["adventurer"]["health"],
         attacker: "Adventurer",
@@ -632,19 +632,19 @@ export function processData(
           attackedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: attackedByBeastEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             attackedByBeastEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             attackedByBeastEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             attackedByBeastEvent.beastSpecs["specials"]["special3"]
           ],
         seed: attackedByBeastEvent.seed,
-        adventurerId: attackedByBeastEvent.adventurerState["adventurerId"].low,
+        adventurerId: attackedByBeastEvent.adventurerState["adventurerId"],
         adventurerHealth:
           attackedByBeastEvent.adventurerState["adventurer"]["health"],
         attacker: "Beast",
@@ -674,19 +674,19 @@ export function processData(
           slayedBeastEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: slayedBeastEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             slayedBeastEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             slayedBeastEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             slayedBeastEvent.beastSpecs["specials"]["special3"]
           ],
         seed: slayedBeastEvent.seed,
-        adventurerId: slayedBeastEvent.adventurerState["adventurerId"].low,
+        adventurerId: slayedBeastEvent.adventurerState["adventurerId"],
         adventurerHealth:
           slayedBeastEvent.adventurerState["adventurer"]["health"],
         attacker: "Adventurer",
@@ -717,19 +717,19 @@ export function processData(
           fleeFailedEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: fleeFailedEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             fleeFailedEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             fleeFailedEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             fleeFailedEvent.beastSpecs["specials"]["special3"]
           ],
         seed: fleeFailedEvent.seed,
-        adventurerId: fleeFailedEvent.adventurerState["adventurerId"].low,
+        adventurerId: fleeFailedEvent.adventurerState["adventurerId"],
         adventurerHealth:
           fleeFailedEvent.adventurerState["adventurer"]["health"],
         attacker: "Adventurer",
@@ -759,19 +759,19 @@ export function processData(
           fleeSucceededEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: fleeSucceededEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             fleeSucceededEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             fleeSucceededEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             fleeSucceededEvent.beastSpecs["specials"]["special3"]
           ],
         seed: fleeSucceededEvent.seed,
-        adventurerId: fleeSucceededEvent.adventurerState["adventurerId"].low,
+        adventurerId: fleeSucceededEvent.adventurerState["adventurerId"],
         adventurerHealth:
           fleeSucceededEvent.adventurerState["adventurer"]["health"],
         attacker: "Adventurer",
@@ -896,7 +896,7 @@ export function processData(
         special2: null,
         special3: null,
         seed: 0,
-        adventurerId: idleDeathPenaltyEvent.adventurerState["adventurerId"].low,
+        adventurerId: idleDeathPenaltyEvent.adventurerState["adventurerId"],
         adventurerHealth:
           idleDeathPenaltyEvent.adventurerState["adventurer"]["health"],
         attacker: null,
@@ -914,7 +914,7 @@ export function processData(
       };
       const penaltyDiscoveryData = {
         txHash: txHash,
-        adventurerId: idleDeathPenaltyEvent.adventurerState["adventurerId"].low,
+        adventurerId: idleDeathPenaltyEvent.adventurerState["adventurerId"],
         adventurerHealth:
           idleDeathPenaltyEvent.adventurerState["adventurer"]["health"],
         discoveryType: null,

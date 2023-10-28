@@ -5,41 +5,52 @@ import React, {
   useRef,
   RefObject,
 } from "react";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import { Button } from "../buttons/Button";
 import { MdClose } from "react-icons/md";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { useQueriesStore, QueryKey } from "../../hooks/useQueryStore";
+import { Contract } from "starknet";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { Button } from "@/app/components/buttons/Button";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import {
   processItemName,
   getItemPrice,
   getItemData,
   getValueFromKey,
-} from "../../lib/utils";
-import useUIStore from "../../hooks/useUIStore";
-import { useUiSounds } from "../../hooks/useUiSound";
-import { soundSelector } from "../../hooks/useUiSound";
-import { Item, NullItem, Call, ItemPurchase, ZeroUpgrade } from "../../types";
-import { GameData } from "../GameData";
+} from "@/app/lib/utils";
+import useUIStore from "@/app/hooks/useUIStore";
+import { useUiSounds } from "@/app/hooks/useUiSound";
+import { soundSelector } from "@/app/hooks/useUiSound";
+import { Item, NullItem, Call, ItemPurchase, ZeroUpgrade } from "@/app/types";
+import { GameData } from "@/app/lib/data/GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
-import { chunkArray } from "../../lib/utils";
+import { chunkArray } from "@/app/lib/utils";
+import { UpgradeStats } from "@/app/types";
+import { calculateVitBoostRemoved } from "@/app/lib/utils";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
   multicall: (...args: any[]) => any;
+  gameContract: Contract;
 }
 
-const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
+const TransactionCart = ({
+  buttonRef,
+  multicall,
+  gameContract,
+}: TransactionCartProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeFromCalls = useTransactionCartStore(
     (state) => state.removeFromCalls
+  );
+  const removeEntrypointFromCalls = useTransactionCartStore(
+    (state) => state.removeEntrypointFromCalls
   );
   const resetCalls = useTransactionCartStore((state) => state.resetCalls);
   const [notification, setNotification] = useState<any[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
-  const [loadingQuery, setLoadingQuery] = useState<QueryKey | null>(null);
   const { data } = useQueriesStore();
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
@@ -54,12 +65,13 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const upgrades = useUIStore((state) => state.upgrades);
   const setUpgrades = useUIStore((state) => state.setUpgrades);
-  const setUpgradeScreen = useUIStore((state) => state.setUpgradeScreen);
   const slayAdventurers = useUIStore((state) => state.slayAdventurers);
   const setSlayAdventurers = useUIStore((state) => state.setSlayAdventurers);
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(wrapperRef, () => setDisplayCart(false), buttonRef);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
+
+  const callExists = calls.length > 0;
 
   const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
@@ -134,10 +146,10 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
         case "equip":
           handleEquipItem();
           break;
-        case "drop_items":
+        case "drop":
           handleDropItems();
           break;
-        case "upgrade_adventurer":
+        case "upgrade":
           handleUpgradeAdventurer();
           break;
         case "slay_idle_adventurers":
@@ -168,6 +180,46 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
     setPurchaseItems([]);
     setUpgrades({ ...ZeroUpgrade });
     setSlayAdventurers([]);
+  };
+
+  const handleAddUpgradeTx = (
+    currentUpgrades?: UpgradeStats,
+    potions?: number,
+    items?: any[]
+  ) => {
+    removeEntrypointFromCalls("upgrade");
+    const upgradeTx = {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "upgrade",
+      calldata: [
+        adventurer?.id?.toString() ?? "",
+        potions! >= 0 ? potions?.toString() : potionAmount.toString(),
+        currentUpgrades
+          ? currentUpgrades["Strength"].toString()
+          : upgrades["Strength"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Dexterity"].toString()
+          : upgrades["Dexterity"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Vitality"].toString()
+          : upgrades["Vitality"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Intelligence"].toString()
+          : upgrades["Intelligence"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Wisdom"].toString()
+          : upgrades["Wisdom"].toString(),
+        currentUpgrades
+          ? currentUpgrades["Charisma"].toString()
+          : upgrades["Charisma"].toString(),
+        "0",
+        items ? items.length.toString() : purchaseItems.length.toString(),
+        ...(items
+          ? items.flatMap(Object.values)
+          : purchaseItems.flatMap(Object.values)),
+      ],
+    };
+    addToCalls(upgradeTx);
   };
 
   const filteredStats = Object.entries(upgrades).filter(
@@ -235,7 +287,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                             </div>
                           ))}
                         </div>
-                      ) : call.entrypoint === "drop_items" ? (
+                      ) : call.entrypoint === "drop" ? (
                         <div className="flex flex-col">
                           {dropItems.map((item: string, index: number) => (
                             <div className="flex flex-row" key={index}>
@@ -263,7 +315,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                             </div>
                           ))}
                         </div>
-                      ) : call.entrypoint === "upgrade_adventurer" ? (
+                      ) : call.entrypoint === "upgrade" ? (
                         <div className="flex flex-col">
                           {filteredStats.map(
                             ([string, number], index: number) => (
@@ -298,6 +350,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                                 onClick={() => {
                                   clickPlay();
                                   setPotionAmount(0);
+                                  handleAddUpgradeTx(undefined, 0, undefined);
                                 }}
                                 className="text-red-500 hover:text-red-700"
                               >
@@ -326,6 +379,11 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                                       (i) => i.item !== item.item
                                     );
                                     setPurchaseItems(newItems);
+                                    handleAddUpgradeTx(
+                                      undefined,
+                                      undefined,
+                                      newItems
+                                    );
                                   }}
                                   className="text-red-500 hover:text-red-700"
                                 >
@@ -370,10 +428,10 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                           if (call.entrypoint === "equip") {
                             setEquipItems([]);
                           }
-                          if (call.entrypoint === "drop_items") {
+                          if (call.entrypoint === "drop") {
                             setDropItems([]);
                           }
-                          if (call.entrypoint === "upgrade_adventurer") {
+                          if (call.entrypoint === "upgrade") {
                             setUpgrades({ ...ZeroUpgrade });
                             setPurchaseItems([]);
                           }
@@ -393,15 +451,38 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
           </div>
           <div className="flex flex-row gap-2 absolute bottom-4">
             <Button
+              disabled={!callExists}
               onClick={async () => {
                 resetNotification();
-                await multicall(loadingMessage, loadingQuery, notification);
+                // Handle for vitBoostRemoval
+                if (potionAmount > 0) {
+                  // Check whether health + pots is within vitBoostRemoved of the maxHealth
+                  const vitBoostRemoved = calculateVitBoostRemoved(
+                    purchaseItems,
+                    adventurer!,
+                    data.itemsByAdventurerQuery?.items ?? []
+                  );
+                  const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
+                  const healthPlusPots = 100 + potionAmount * 10;
+                  const checkInRange =
+                    maxHealth - healthPlusPots < vitBoostRemoved * 10;
+                  if (checkInRange) {
+                    handleAddUpgradeTx(
+                      undefined,
+                      Math.max(potionAmount - vitBoostRemoved, 0),
+                      undefined
+                    );
+                  }
+                }
+                await multicall(loadingMessage, notification);
                 handleResetCalls();
               }}
             >
               Submit all Transactions
             </Button>
-            <Button onClick={() => handleResetCalls()}>Clear Cart</Button>
+            <Button disabled={!callExists} onClick={() => handleResetCalls()}>
+              Clear Cart
+            </Button>
           </div>
         </div>
       ) : null}

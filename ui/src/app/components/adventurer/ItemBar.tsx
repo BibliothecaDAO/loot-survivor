@@ -1,5 +1,5 @@
 import React from "react";
-import { calculateLevel } from "../../lib/utils";
+import { calculateLevel } from "@/app/lib/utils";
 
 interface ItemBarProps {
   xp: number;
