@@ -30,12 +30,19 @@ const provider = new Provider({
   sequencer: { baseUrl: rpc_addr! },
 });
 
-export const useBurner = (
-  walletAccount?: AccountInterface,
-  gameContract?: Contract,
-  lordsContract?: Contract,
-  ethContract?: Contract
-) => {
+interface UseBurnerProps {
+  walletAccount?: AccountInterface;
+  gameContract?: Contract;
+  lordsContract?: Contract;
+  ethContract?: Contract;
+}
+
+export const useBurner = ({
+  walletAccount,
+  gameContract,
+  lordsContract,
+  ethContract,
+}: UseBurnerProps) => {
   const [account, setAccount] = useState<Account>();
   const [isDeploying, setIsDeploying] = useState(false);
   const [isGeneratingNewKey, setIsGeneratingNewKey] = useState(false);
@@ -311,7 +318,9 @@ export const useBurner = (
         entrypoint: "transfer",
         calldata: CallData.compile([
           address,
-          ethAmount ? (ethAmount * 10 ** 18).toString() : ETH_PREFUND_AMOUNT,
+          ethAmount
+            ? Math.round(ethAmount * 10 ** 18).toString()
+            : ETH_PREFUND_AMOUNT,
           "0x0",
         ]),
       });
@@ -345,11 +354,12 @@ export const useBurner = (
         entrypoint: "transfer",
         calldata: CallData.compile([
           address,
-          (lordsAmount * 10 ** 18).toString(),
+          Math.round(lordsAmount * 10 ** 18).toString(),
           "0x0",
         ]),
       };
-      const increasedAllowance = lordsAmount * 10 ** 18 + lordsGameAllowance;
+      const increasedAllowance =
+        Math.round(lordsAmount * 10 ** 18) + lordsGameAllowance;
       const lordsGameApprovalTx = {
         contractAddress: lordsContract?.address ?? "",
         entrypoint: "approve",
