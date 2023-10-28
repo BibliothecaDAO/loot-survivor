@@ -68,10 +68,12 @@ const PurchaseHealth = ({
   }, [potionAmount, buttonClicked]);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center">
-      <span className="flex flex-row">
-        <CoinIcon className="mt-1 w-5 h-5 fill-current text-terminal-yellow" />
-        <p className="text-terminal-yellow">{potionCost}</p>
+    <div className="flex flex-col sm:flex-row gap-5 items-center">
+      <span className="flex flex-row items-center">
+        <CoinIcon className="mt-1 w-8 h-8 sm:w-5 sm:h-5 fill-current text-terminal-yellow" />
+        <p className="text-xl sm:text-base text-terminal-yellow">
+          {potionCost}
+        </p>
       </span>
       <QuantityButtons
         amount={potionAmount}
@@ -90,7 +92,19 @@ const PurchaseHealth = ({
         }
         onClick={fillToMax}
         size={"xxs"}
-        className="m-auto"
+        className="hidden sm:block m-auto"
+      >
+        Fill to Max
+      </Button>
+      <Button
+        disabled={
+          !hasBalance ||
+          adventurer?.health === maxHealth ||
+          potionAmount === max
+        }
+        onClick={fillToMax}
+        size={"sm"}
+        className="sm:hidden m-auto"
       >
         Fill to Max
       </Button>

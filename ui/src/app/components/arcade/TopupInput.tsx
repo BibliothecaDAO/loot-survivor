@@ -52,7 +52,7 @@ const TopupInput = ({
 
   const handleSubmitDefault = async () => {
     if (balanceType === "lords") {
-      await topup(account, master, 250, lordsGameAllowance);
+      await topup(account, master, 260, lordsGameAllowance);
     } else {
       await topup(account, master);
     }

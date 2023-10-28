@@ -117,14 +117,14 @@ const MarketplaceRow = ({
   return (
     <tr
       className={
-        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black w-full"
+        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black w-full h-12 sm:h-full"
       }
     >
       <td className="text-center">{item.item}</td>
       <td className="text-center">{tier}</td>
       <td className="text-center">
         <div className="sm:hidden flex justify-center items-center">
-          <LootIcon size={"w-4"} type={slot} />
+          <LootIcon size={"w-5"} type={slot} />
         </div>
         <div className="hidden sm:flex justify-center items-center">
           <LootIcon size={"w-5"} type={slot} />
@@ -133,7 +133,7 @@ const MarketplaceRow = ({
       <td className="text-center">
         <div className="flex flex-row items-center justify-center gap-2">
           <p className="hidden sm:block">{type}</p>
-          <EfficacyDisplay className="sm:w-8" type={type} />
+          <EfficacyDisplay size="w-5" className="h-5 sm:w-8" type={type} />
         </div>
       </td>
       <td className="text-center">

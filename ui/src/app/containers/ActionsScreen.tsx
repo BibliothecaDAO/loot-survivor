@@ -72,7 +72,7 @@ export default function ActionsScreen({
   ];
 
   return (
-    <div className="flex flex-col sm:flex-row flex-wrap h-full">
+    <div className="flex flex-col sm:flex-row flex-wrap h-full w-full">
       <div className="hidden sm:block sm:w-1/2 lg:w-1/3 h-full">
         <Info adventurer={adventurer} gameContract={gameContract} />
       </div>
@@ -80,9 +80,9 @@ export default function ActionsScreen({
       {hasBeast ? (
         <BeastScreen attack={attack} flee={flee} />
       ) : (
-        <>
+        <div className="flex flex-col sm:flex-row h-full w-full sm:w-1/2 lg:w-2/3">
           {adventurer?.id ? (
-            <div className="flex flex-col items-center lg:w-1/3 bg-terminal-black order-1 sm:order-2">
+            <div className="flex flex-col items-center lg:w-1/2 bg-terminal-black order-1 sm:order-2 h-5/6 sm:h-full">
               <Discovery discoveries={latestDiscoveries} />
             </div>
           ) : (
@@ -90,9 +90,9 @@ export default function ActionsScreen({
               Please Select an Adventurer
             </p>
           )}
-          <div className="flex flex-col items-center lg:w-1/3 m-auto my-4 w-full px-4 sm:order-1">
+          <div className="flex flex-col items-center lg:w-1/2 my-4 w-full px-4 sm:order-1 h-1/6 sm:h-full">
             {loading && <MazeLoader />}
-            <div className="h-1/6 w-3/4">
+            <div className="w-3/4 h-full sm:h-1/6">
               <ActionMenu
                 buttonsData={buttonsData}
                 size="fill"
@@ -100,7 +100,7 @@ export default function ActionsScreen({
               />
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

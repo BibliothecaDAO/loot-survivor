@@ -82,7 +82,7 @@ export const PenaltyCountDown = ({
   }, [targetTime]);
 
   return (
-    <div className="text-xs sm:text-lg self-center border px-1 border border-terminal-green">
+    <div className="text-xxs sm:text-lg self-center border px-1 border border-terminal-green">
       {!dataLoading ? (
         seconds > 0 ? (
           <span className="flex flex-row gap-1 items-center">

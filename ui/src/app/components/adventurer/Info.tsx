@@ -14,6 +14,7 @@ import { Item } from "@/app/types";
 import { HealthCountDown } from "@/app/components/CountDown";
 import { GameData } from "@/app/lib/data/GameData";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { calculateLevel } from "@/app/lib/utils";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
@@ -110,6 +111,8 @@ export default function Info({
     maxHealth
   );
 
+  const adventurerLevel = calculateLevel(adventurer?.xp ?? 0);
+
   return (
     <>
       {adventurer?.id ? (
@@ -146,17 +149,23 @@ export default function Info({
             <LevelBar xp={formatAdventurer.xp ?? 0} />
           </div>
 
-          <div className="flex flex-row w-full font-semibold text-xs sm:text-sm lg:text-base mb-1">
-            {attributes.map((attribute) => (
-              <div
-                key={attribute.key}
-                className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black"
-              >
-                {attribute.key}
-                <span className="pl-1">{attribute.value}</span>
-              </div>
-            ))}
-          </div>
+          {adventurerLevel > 1 ? (
+            <div className="flex flex-row w-full font-semibold text-xs sm:text-sm lg:text-base mb-1">
+              {attributes.map((attribute) => (
+                <div
+                  key={attribute.key}
+                  className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black"
+                >
+                  {attribute.key}
+                  <span className="pl-1">{attribute.value}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="w-full bg-terminal-green text-terminal-black text-center font-semibold mb-1">
+              Stats Hidden
+            </div>
+          )}
 
           <div className="w-full flex flex-col gap-1 text-xs overflow-y-scroll default-scroll h-[500px]">
             {bodyParts.map((part) => (

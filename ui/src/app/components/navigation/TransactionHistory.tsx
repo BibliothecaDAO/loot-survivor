@@ -1,6 +1,5 @@
 import React, { useRef, RefObject } from "react";
 import { MdClose } from "react-icons/md";
-import { TxStatus } from "@/app/components/navigation/TxStatus";
 import { Metadata, NullAdventurer, Notification } from "@/app/types";
 import { padAddress, shortenHex } from "@/app/lib/utils";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
@@ -87,7 +86,7 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                               {method}
                             </p>
                             {/* </div> */}
-                            <div className="mr-4 text-xs sm:text-lg">
+                            <div className="flex flex-row gap-1 text-xs sm:text-lg">
                               <span className="hidden sm:block">Hash:</span>
                               <a
                                 href={`https://goerli.voyager.online/tx/${padAddress(
@@ -98,7 +97,6 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                                 {shortenHex(tx.hash)}
                               </a>
                             </div>
-                            <TxStatus hash={tx.hash} />
                           </div>
                           {response &&
                             notifications.map(

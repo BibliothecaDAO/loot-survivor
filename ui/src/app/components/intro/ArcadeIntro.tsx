@@ -42,7 +42,12 @@ export const ArcadeIntro = ({
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
   const { create, isDeploying, isSettingPermissions, listConnectors } =
-    useBurner(account, gameContract, lordsContract, ethContract);
+    useBurner({
+      walletAccount: account,
+      gameContract,
+      lordsContract,
+      ethContract,
+    });
   const walletConnectors = getWalletConnectors(connectors);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -61,7 +66,7 @@ export const ArcadeIntro = ({
       const mintLords: Call = {
         contractAddress: lordsContract?.address ?? "",
         entrypoint: "mint",
-        calldata: [address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+        calldata: [address ?? "0x0", (260 * 10 ** 18).toString(), "0"],
       };
       addToCalls(mintLords);
       const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
@@ -206,12 +211,15 @@ export const ArcadeIntro = ({
             <h3 className="mt-4 uppercase">Deploy Arcade Account</h3>
             <div className="flex flex-col items-center gap-2">
               <p className="text-sm xl:text-xl 2xl:text-2xl">
-                You are about to deploy a new Arcade Account! You will be asked
-                to sign 2 transactions:
+                You are about to deploy a new Arcade Account (AA)! You will be
+                asked to sign 2 transactions:
               </p>
               <ul className="text-sm xl:text-xl 2xl:text-2xl list-disc w-2/3">
                 <li>Pre-fund the AA with Eth and Lords</li>
-                <li>Set Permissions on the AA to play LS and transfer back</li>
+                <li>
+                  Set Permissions on the AA to play Loot Survivor and transfer
+                  back
+                </li>
               </ul>
               <p className="text-sm xl:text-xl 2xl:text-2xl">
                 Transactions may take some time, please be patient. Avoid

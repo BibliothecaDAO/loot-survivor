@@ -7,6 +7,7 @@ import { processBeastName } from "@/app/lib/utils";
 import TwitterShareButton from "../buttons/TwitterShareButtons";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { Button } from "../buttons/Button";
+import { getTokenViewerUrl, getAppUrl } from "@/app/lib/constants";
 
 export const SpecialBeast = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -63,24 +64,21 @@ export const SpecialBeast = () => {
           )}
           <div className="flex flex-col gap-5 items-center justify-center w-1/6">
             <TwitterShareButton
+              // text={`${
+              //   adventurer?.name
+              // } just defeated the first ${beastName} and collects the 1:1 Beast #LootSurvivor.\n\nToken: ${
+              //   getTokenViewerUrl() + specialBeast?.tokenId.toString()
+              // }👹\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
               text={`${
                 adventurer?.name
-              } just defeated the first ${beastName} and collects the 1:1 Beast #LootSurvivor.\n\nToken: ${
-                process.env.NEXT_PUBLIC_BEASTS_VIEWER_URL +
-                specialBeast?.tokenId.toString()
-              }👹\n\nEnter here and try to survive: ${
-                process.env.NEXT_PUBLIC_APP_URL
-              }\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+              } just defeated the first ${beastName} and collects the 1:1 Beast #LootSurvivor.\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
             />
-            <a
-              href={
-                process.env.NEXT_PUBLIC_BEASTS_VIEWER_URL +
-                specialBeast?.tokenId.toString()
-              }
+            {/* <a
+              href={getTokenViewerUrl() + specialBeast?.tokenId.toString()}
               target="_blank"
             >
               <Button>View Collectible</Button>
-            </a>
+            </a> */}
             <Button onClick={() => resetBeast()}>Continue</Button>
           </div>
         </div>

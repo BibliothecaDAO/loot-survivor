@@ -369,7 +369,7 @@ export default function UpgradeScreen({
           {!checkTransacting ? (
             <div className="w-full sm:w-2/3 h-full">
               <div className="flex flex-col gap-2 xl:gap-0 h-full">
-                <div className="justify-center text-terminal-green h-1/4">
+                <div className="flex flex-col gap-2 sm:gap-0 justify-center text-terminal-green h-1/3 sm:h-1/4">
                   <div className="w-full flex flex-row gap-2 mx-auto border border-terminal-green justify-between">
                     <Button
                       variant={"outline"}
@@ -466,7 +466,7 @@ export default function UpgradeScreen({
                         </span>
                       </span>
                     </div>
-                    <div className="sm:hidden flex flex-row gap-3 items-center text-lg">
+                    <div className="sm:hidden flex flex-row gap-3 py-2 items-center text-lg">
                       <span className="flex flex-row">
                         Gold:{" "}
                         <span className="flex flex-row text-terminal-yellow">
@@ -495,7 +495,7 @@ export default function UpgradeScreen({
                   </div>
                 </div>
 
-                <div className="flex flex-col h-3/4">
+                <div className="flex flex-col h-2/3 sm:h-3/4">
                   {upgradeScreen === 1 && (
                     <div className="flex flex-col sm:gap-2 items-center w-full h-full">
                       <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border sm:items-center h-full">
@@ -508,7 +508,7 @@ export default function UpgradeScreen({
                   {upgradeScreen === 2 && (
                     <div
                       className="flex
-                     sm:flex-row items-center justify-center flex-wrap border border-terminal-green p-2 h-1/6"
+                     sm:flex-row items-center justify-center flex-wrap border border-terminal-green p-2 h-full sm:h-1/6"
                     >
                       {/* <h4>Potions</h4> */}
                       <PurchaseHealth
@@ -535,7 +535,7 @@ export default function UpgradeScreen({
                     </div>
                   )}
                   {upgradeScreen === 3 && (
-                    <div className="sm:hidden flex-col items-center sm:gap-2 w-full">
+                    <div className="sm:hidden flex-col items-center sm:gap-2 w-full h-full">
                       <MarketplaceScreen
                         upgradeTotalCost={upgradeTotalCost}
                         purchaseItems={purchaseItems}

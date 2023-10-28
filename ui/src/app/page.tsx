@@ -25,7 +25,7 @@ import useUIStore from "@/app/hooks/useUIStore";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { NotificationDisplay } from "@/app/components/notifications/NotificationDisplay";
 import { useMusic } from "@/app/hooks/useMusic";
-import { Menu, Call } from "@/app/types";
+import { Menu, Call, ZeroUpgrade } from "@/app/types";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import Profile from "@/app/containers/ProfileScreen";
 import { DeathDialog } from "@/app/components/adventurer/DeathDialog";
@@ -86,7 +86,7 @@ const mobileMenuItems: Menu[] = [
 export default function Main() {
   const [appConnectors, setAppConnectors] = useState<Connector[]>([]);
 
-  const { listConnectors } = useBurner();
+  const { listConnectors } = useBurner({});
 
   const updateConnectors = () => {
     const arcadeConnectors = listConnectors();
@@ -173,6 +173,9 @@ function Home({ updateConnectors }: HomeProps) {
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const setEquipItems = useUIStore((state) => state.setEquipItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
+  const setPotionAmount = useUIStore((state) => state.setPotionAmount);
+  const setUpgrades = useUIStore((state) => state.setUpgrades);
+  const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const setStartOption = useUIStore((state) => state.setStartOption);
@@ -401,6 +404,15 @@ function Home({ updateConnectors }: HomeProps) {
     }
   }, [arcadeConnectors]);
 
+  useEffect(() => {
+    resetCalls();
+    setDropItems([]);
+    setEquipItems([]);
+    setPotionAmount(0);
+    setPurchaseItems([]);
+    setUpgrades({ ...ZeroUpgrade });
+  }, [adventurer]);
+
   if (!isConnected && introComplete && disconnected) {
     return <WalletSelect />;
   }
@@ -498,7 +510,9 @@ function Home({ updateConnectors }: HomeProps) {
               updateConnectors={updateConnectors}
             />
           )}
-          {status == "connected" && topUpDialog && <TopUpDialog token="ETH" />}
+          {status == "connected" && topUpDialog && (
+            <TopUpDialog ethContract={ethContract!} getBalances={getBalances} />
+          )}
 
           {introComplete ? (
             <div className="flex flex-col w-full h-[600px] sm:h-[625px]">
