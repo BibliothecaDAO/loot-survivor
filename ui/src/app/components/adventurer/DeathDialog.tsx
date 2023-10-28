@@ -5,7 +5,6 @@ import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import { getRankFromList, getOrdinalSuffix } from "@/app/lib/utils";
-import { getAppUrl } from "@/app/lib/constants";
 import { getAdventurerByXP } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
 import { NullAdventurer, Adventurer } from "@/app/types";
@@ -17,6 +16,9 @@ import { getDeathMessageByRank } from "@/app/lib/utils";
 export const DeathDialog = () => {
   const messageRef = useRef<HTMLSpanElement>(null);
   const [rank, setRank] = useState<number | null>(null);
+  const [twitterDeathMessage, setTwitterDeathMessage] = useState<
+    string | undefined
+  >();
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -52,6 +54,10 @@ export const DeathDialog = () => {
       })
       .catch((error) => console.error("Error refetching data:", error));
   }, []);
+
+  useEffect(() => {
+    setTwitterDeathMessage(messageRef.current?.innerText);
+  }, [messageRef.current]);
 
   return (
     <>
@@ -117,9 +123,9 @@ export const DeathDialog = () => {
                   rank! ?? 0
                 )} place on #LootSurvivor with ${
                   adventurer?.xp
-                } XP.\n\nGravestone bears the inscription:\n\n"${
-                  messageRef.current?.innerText
-                }"🪦\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+                } XP.\n\nGravestone bears the inscription:\n\n"${twitterDeathMessage}"🪦\n\nEnter here and try to survive: ${
+                  process.env.NEXT_PUBLIC_APP_URL
+                }\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
                 className="animate-pulse"
               />
               <Button
