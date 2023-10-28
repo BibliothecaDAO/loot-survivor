@@ -4,10 +4,9 @@ import Image from "next/image";
 import useUIStore from "@/app/hooks/useUIStore";
 import { useContracts } from "@/app/hooks/useContracts";
 import { processBeastName } from "@/app/lib/utils";
-import TwitterShareButton from "../buttons/TwitterShareButtons";
-import { getAppUrl, getTokenViewerUrl } from "@/app/lib/constants";
+import TwitterShareButton from "@/app/components/buttons/TwitterShareButtons";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import { Button } from "../buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 
 export const SpecialBeast = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -67,11 +66,17 @@ export const SpecialBeast = () => {
               text={`${
                 adventurer?.name
               } just defeated the first ${beastName} and collects the 1:1 Beast #LootSurvivor.\n\nToken: ${
-                getTokenViewerUrl() + specialBeast?.tokenId.toString()
-              }👹\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+                process.env.NEXT_PUBLIC_BEASTS_VIEWER_URL +
+                specialBeast?.tokenId.toString()
+              }👹\n\nEnter here and try to survive: ${
+                process.env.NEXT_PUBLIC_APP_URL
+              }\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
             />
             <a
-              href={getTokenViewerUrl() + specialBeast?.tokenId.toString()}
+              href={
+                process.env.NEXT_PUBLIC_BEASTS_VIEWER_URL +
+                specialBeast?.tokenId.toString()
+              }
               target="_blank"
             >
               <Button>View Collectible</Button>
