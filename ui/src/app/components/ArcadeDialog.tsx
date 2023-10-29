@@ -13,13 +13,15 @@ import { useBurner } from "@/app/lib/burner";
 import { MIN_BALANCE } from "@/app/lib/constants";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import { fetchBalances } from "@/app/lib/balances";
-import { isChecksumAddress } from "../lib/utils";
+import { isChecksumAddress, padAddress, indexAddress } from "../lib/utils";
 import Lords from "public/icons/lords.svg";
 import Eth from "public/icons/eth-2.svg";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import TopupInput from "@/app/components/arcade/TopupInput";
 import ArcadeAccount from "@/app/abi/ArcadeAccount.json";
+import Storage from "../lib/storage";
+import { BurnerStorage } from "../types";
 
 interface ArcadeDialogProps {
   gameContract: Contract;
@@ -75,8 +77,12 @@ export const ArcadeDialog = ({
     (walletConnector) => walletConnector == connector
   );
 
+  const formattedRecoveryAddress = padAddress(
+    padAddress(recoveryAddress ?? "")
+  );
+
   const { contract: arcadeContract } = useContract({
-    address: recoveryAddress,
+    address: formattedRecoveryAddress,
     abi: ArcadeAccount,
   });
 
@@ -142,14 +148,21 @@ export const ArcadeDialog = ({
   }, [arcadeConnectors, fetchedBalances]);
 
   useEffect(() => {
-    if (isChecksumAddress(recoveryAddress ?? "")) {
+    if (isChecksumAddress(formattedRecoveryAddress)) {
       handleGetMaster();
     }
   }, [recoveryAddress]);
 
-  const isMasterAccount = address === recoveryMasterAddress;
-
-  console.log(address, recoveryMasterAddress);
+  const isMasterAccount =
+    padAddress(address ?? "") === padAddress(recoveryMasterAddress ?? "");
+  const recoveryAccountExists = () => {
+    const storage: BurnerStorage = Storage.get("burners");
+    if (storage) {
+      return Object.keys(storage).includes(formattedRecoveryAddress ?? "");
+    } else {
+      return false;
+    }
+  };
 
   if (!connectors) return <div></div>;
 
@@ -161,7 +174,7 @@ export const ArcadeDialog = ({
         {recoverArcade ? (
           <div className="flex flex-col items-center gap-5 h-3/4 w-full">
             <p className="text-3xl uppercase">Recover Arcade</p>
-            <p className="text-lg">Enter address of the Master Account.</p>
+            <p className="text-lg">Enter address of the Arcade Account.</p>
             <input
               type="text"
               name="address"
@@ -169,31 +182,40 @@ export const ArcadeDialog = ({
               className="p-1 m-2 bg-terminal-black border border-terminal-green animate-pulse transform w-1/2 2xl:h-16 2xl:text-4xl"
               maxLength={66}
             />
-            <p className="text-lg">Connect Master Account</p>
-            {walletConnectors.map((connector, index) => (
-              <Button
-                disabled={address !== undefined}
-                onClick={() => {
-                  disconnect();
-                  connect({ connector });
-                }}
-                key={index}
-              >
-                {connector.id === "braavos" || connector.id === "argentX"
-                  ? `Connect ${connector.id}`
-                  : "Login With Email"}
-              </Button>
-            ))}
+            {recoveryAddress && !isMasterAccount && (
+              <>
+                <p className="text-lg">Connect Master Account</p>
+                {walletConnectors.map((connector, index) => (
+                  <Button
+                    disabled={
+                      !isChecksumAddress(formattedRecoveryAddress) ||
+                      isMasterAccount
+                    }
+                    onClick={() => {
+                      disconnect();
+                      connect({ connector });
+                    }}
+                    key={index}
+                  >
+                    {connector.id === "braavos" || connector.id === "argentX"
+                      ? `Connect ${connector.id}`
+                      : "Login With Email"}
+                  </Button>
+                ))}
+              </>
+            )}
             <Button
               onClick={async () => {
-                await genNewKey(recoveryAddress ?? "", connector!);
+                await genNewKey(formattedRecoveryAddress, connector!);
                 updateConnectors();
                 setRecoverArcade(false);
               }}
-              disabled={!isMasterAccount}
+              disabled={!isMasterAccount || recoveryAccountExists()}
               className="w-1/4"
             >
-              Recover Account
+              {recoveryAccountExists()
+                ? "Account Already Stored"
+                : "Recover Account"}
             </Button>
           </div>
         ) : (
@@ -362,7 +384,7 @@ export const ArcadeAccountCard = ({
             variant={connected ? "default" : "outline"}
             size={"md"}
           >
-            {account.id}
+            {indexAddress(account.id)}
           </Button>
           {isCopied && <span>Copied!</span>}
         </div>
