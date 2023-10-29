@@ -84,9 +84,11 @@ mod tests {
         lords0
     }
 
-    fn setup(starting_block: u64) -> (IGameDispatcher, IERC20CamelDispatcher) {
+    fn setup(
+        starting_block: u64, starting_timestamp: u64, terminal_block: u64
+    ) -> (IGameDispatcher, IERC20CamelDispatcher) {
         testing::set_block_number(starting_block);
-        testing::set_block_timestamp(1696201757);
+        testing::set_block_timestamp(starting_timestamp);
 
         let lords = deploy_lords();
 
@@ -95,6 +97,7 @@ mod tests {
         calldata.append(DAO().into());
         calldata.append(COLLECTIBLE_BEASTS().into());
         calldata.append(GOLDEN_TOKEN().into());
+        calldata.append(terminal_block.into());
 
         let (address0, _) = deploy_syscall(
             Game::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
@@ -111,7 +114,10 @@ mod tests {
     }
 
     fn add_adventurer_to_game(ref game: IGameDispatcher) {
-        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero', DEFAULT_NO_GOLDEN_TOKEN.into(), false);
+        game
+            .new_game(
+                INTERFACE_ID(), ItemId::Wand, 'loothero', DEFAULT_NO_GOLDEN_TOKEN.into(), false
+            );
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
@@ -123,10 +129,9 @@ mod tests {
     }
 
     fn new_adventurer(starting_block: u64) -> IGameDispatcher {
-        let (unmut_game, lords) = setup(starting_block);
-
-        let mut game = unmut_game;
-
+        let starting_timestamp = 1696201757;
+        let terminal_block = 0;
+        let (mut game, lords) = setup(starting_block, starting_timestamp, terminal_block);
         let starting_weapon = ItemId::Wand;
         let name = 'abcdefghijklmno';
 
@@ -462,10 +467,9 @@ mod tests {
     }
 
     fn new_adventurer_with_lords(starting_block: u64) -> (IGameDispatcher, IERC20CamelDispatcher) {
-        let (unmut_game, lords) = setup(starting_block);
-
-        let mut game = unmut_game;
-
+        let starting_timestamp = 1;
+        let terminal_timestamp = 0;
+        let (mut game, lords) = setup(starting_block, starting_timestamp, terminal_timestamp);
         let starting_weapon = ItemId::Wand;
         let name = 'abcdefghijklmno';
 
@@ -1918,26 +1922,25 @@ mod tests {
                 REWARD_DISTRIBUTIONS_PHASE1_BP::THIRD_PLACE, COST_TO_PLAY
             )
         };
+    // week.FIRST_PLACE.print();
 
-        // week.FIRST_PLACE.print();
+    // assert(lords.balanceOf(DAO()) == COST_TO_PLAY, 'wrong DAO payout');
+    // assert(week.INTERFACE == 0, 'no payout in stage 1');
+    // assert(week.FIRST_PLACE == _calculate_payout(
+    //         REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, cost_to_play
+    //     ), 'wrong FIRST_PLACE payout 1');
+    // assert(week.SECOND_PLACE == 0x6f05b59d3b200000, 'wrong SECOND_PLACE payout 1');
+    // assert(week.THIRD_PLACE == 0x6f05b59d3b20000, 'wrong THIRD_PLACE payout 1');
 
-        // assert(lords.balanceOf(DAO()) == COST_TO_PLAY, 'wrong DAO payout');
-        // assert(week.INTERFACE == 0, 'no payout in stage 1');
-        // assert(week.FIRST_PLACE == _calculate_payout(
-        //         REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, cost_to_play
-        //     ), 'wrong FIRST_PLACE payout 1');
-        // assert(week.SECOND_PLACE == 0x6f05b59d3b200000, 'wrong SECOND_PLACE payout 1');
-        // assert(week.THIRD_PLACE == 0x6f05b59d3b20000, 'wrong THIRD_PLACE payout 1');
-
-        // (COST_TO_PLAY * 11 / 10).print();
-        // (COST_TO_PLAY * 9 / 10).print();
+    // (COST_TO_PLAY * 11 / 10).print();
+    // (COST_TO_PLAY * 9 / 10).print();
     }
 
     #[test]
     #[available_gas(90000000)]
     #[should_panic(expected: ('price change already initiated', 'ENTRYPOINT_FAILED'))]
     fn test_initiate_price_change_too_fast() {
-        let (mut game, lords) = setup(1000);
+        let (mut game, lords) = setup(1000, 1, 0);
         game.initiate_price_change();
         game.initiate_price_change();
     }
@@ -1945,7 +1948,7 @@ mod tests {
     #[test]
     #[available_gas(9000000000)]
     fn test_update_cost_to_play() {
-        let (mut game, lords) = setup(1000);
+        let (mut game, lords) = setup(1000, 1, 0);
         let original_cost_to_play = game.get_cost_to_play();
 
         // create 10 games during opening week
@@ -1954,7 +1957,10 @@ mod tests {
             if i == 10 {
                 break ();
             }
-            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false);
+            game
+                .new_game(
+                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false
+                );
             i += 1;
         };
         testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 7));
@@ -1968,7 +1974,10 @@ mod tests {
             if i == 10 {
                 break ();
             }
-            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false);
+            game
+                .new_game(
+                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false
+                );
             i += 1;
         };
         testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 7));
@@ -1988,7 +1997,10 @@ mod tests {
             if i == 20 {
                 break ();
             }
-            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false);
+            game
+                .new_game(
+                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false
+                );
             i += 1;
         };
 
@@ -2014,7 +2026,10 @@ mod tests {
             if i == 10 {
                 break ();
             }
-            game.new_game(INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false);
+            game
+                .new_game(
+                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false
+                );
             i += 1;
         };
         testing::set_block_timestamp(starknet::get_block_timestamp() + (DAY * 14));
@@ -2023,5 +2038,44 @@ mod tests {
         // since average number of games played during snapshot is considerably less than average
         // price of game should have been reduced
         assert(game.get_cost_to_play() < previous_cost_to_play, 'game cost should be lower');
+    }
+
+    #[test]
+    #[available_gas(9000000000)]
+    #[should_panic(expected: ('terminal time reached', 'ENTRYPOINT_FAILED'))]
+    fn test_terminal_timestamp_reached() {
+        let starting_block = 1;
+        let starting_timestamp = 1;
+        let terminal_timestamp = 100;
+        let (mut game, lords) = setup(starting_block, starting_timestamp, terminal_timestamp);
+
+        // add a player to the game
+        add_adventurer_to_game(ref game);
+        // advance blockchain timestamp beyond terminal timestamp
+        starknet::testing::set_block_timestamp(terminal_timestamp + 1);
+
+        // try to start a new game
+        // should panic with 'terminal time reached'
+        // which test is annotated to expect
+        add_adventurer_to_game(ref game);
+    }
+
+    #[test]
+    #[available_gas(9000000000)]
+    fn test_terminal_timestamp_not_set() {
+        let starting_block = 1;
+        let starting_timestamp = 1;
+        let terminal_timestamp = 0;
+        let (mut game, lords) = setup(starting_block, starting_timestamp, terminal_timestamp);
+
+        // add a player to the game
+        add_adventurer_to_game(ref game);
+
+        // advance blockchain timestamp to max u64
+        let max_u64_timestamp = 18446744073709551615;
+        starknet::testing::set_block_timestamp(max_u64_timestamp);
+
+        // verify we can still start a new game
+        add_adventurer_to_game(ref game);
     }
 }

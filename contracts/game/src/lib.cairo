@@ -118,6 +118,7 @@ mod Game {
         _golden_token: ContractAddress,
         _cost_to_play: u128,
         _games_played_snapshot: GamesPlayedSnapshot,
+        _terminal_timestamp: u64,
     }
 
     #[event]
@@ -158,13 +159,13 @@ mod Game {
         dao: ContractAddress,
         collectible_beasts: ContractAddress,
         golden_token_address: ContractAddress,
+        terminal_timestamp: u64,
     ) {
-        // set the contract addresses
+        // init storage
         self._lords.write(lords);
         self._dao.write(dao);
         self._collectible_beasts.write(collectible_beasts);
-
-        // set the genesis block
+        self._terminal_timestamp.write(terminal_timestamp);
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
         self._genesis_timestamp.write(starknet::get_block_info().unbox().block_timestamp.into());
 
@@ -208,6 +209,9 @@ mod Game {
             golden_token_id: u256,
             interface_camel: bool
         ) {
+            // assert game terminal time has not been reached
+            _assert_terminal_time_not_reached(@self);
+
             // assert provided weapon
             _assert_valid_starter_weapon(weapon);
 
@@ -1037,6 +1041,15 @@ mod Game {
     // ------------------------------------------ //
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
+
+    fn _assert_terminal_time_not_reached(self: @ContractState) {
+        let current_timestamp = starknet::get_block_info().unbox().block_timestamp;
+        let terminal_timestamp = self._terminal_timestamp.read();
+        assert(
+            terminal_timestamp == 0 || current_timestamp < terminal_timestamp,
+            messages::TERMINAL_TIME_REACHED
+        );
+    }
 
     fn _slay_idle_adventurer(ref self: ContractState, adventurer_id: felt252) {
         // unpack adventurer from storage (no need for stat boosts)
