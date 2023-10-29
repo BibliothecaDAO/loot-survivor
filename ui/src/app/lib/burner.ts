@@ -469,7 +469,7 @@ export const useBurner = ({
   };
 
   const genNewKey = useCallback(
-    async (burnerAddress: string) => {
+    async (burnerAddress: string, connector: Connector) => {
       try {
         setIsGeneratingNewKey(true);
         const privateKey = stark.randomAddress();
@@ -497,13 +497,13 @@ export const useBurner = ({
           privateKey,
           publicKey,
           masterAccount: walletAccount.address,
+          masterAccountProvider: connector.id,
           gameContract: gameContract?.address,
           active: true,
         };
 
         Storage.set("burners", storage);
         setIsGeneratingNewKey(false);
-        window.location.reload();
       } catch (e) {
         setIsGeneratingNewKey(false);
         console.log(e);

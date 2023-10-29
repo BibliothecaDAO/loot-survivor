@@ -240,6 +240,7 @@ export const ArcadeIntro = ({
                     window.open("https://faucet.goerli.starknet.io/", "_blank");
                   } else {
                     await create(connector!);
+                    disconnect();
                     connect({ connector: listConnectors()[0] });
                     updateConnectors();
                     showArcadeIntro(false);
