@@ -30,6 +30,7 @@ mod messages {
     const CANNOT_PLAY_WITH_TOKEN: felt252 = 'Token already used today';
     const NOT_OWNER_OF_TOKEN: felt252 = 'Not owner of token';
     const MA_PERIOD_LESS_THAN_WEEK: felt252 = 'MA period too small';
+    const TERMINAL_TIME_REACHED: felt252 = 'terminal time reached';
 }
 
 // TODO: Update for mainnet
