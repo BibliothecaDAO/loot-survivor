@@ -27,9 +27,15 @@ export interface ItemDisplayProps {
 }
 
 const ItemDisplay = ({ type, size = "w-5", className }: ItemDisplayProps) => {
-  const classes = `fill-current ${size} ${
-    size == "w-8" ? "h-8" : ""
-  } ${className}`;
+  const sizeNumber = Number(size.match(/\d+/)?.[0]); // Extract the number from size
+
+  if (isNaN(sizeNumber)) {
+    // Handle case where size is not a valid number
+    console.error(`Invalid size prop: ${size}`);
+    return null; // or return some default value
+  }
+
+  const classes = `fill-current w-${sizeNumber} h-${sizeNumber} ${className}`;
   const Components: { [key in string]: ReactElement } = {
     chest: <Chest className={classes} />,
     weapon: <Weapon className={classes} />,

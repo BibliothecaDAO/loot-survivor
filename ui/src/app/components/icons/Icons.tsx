@@ -1,10 +1,3 @@
-import { GiRolledCloth } from "react-icons/gi";
-import { GiAnimalHide } from "react-icons/gi";
-import { GiAnvil } from "react-icons/gi";
-import { GiCurvyKnife } from "react-icons/gi";
-import { GiWoodClub } from "react-icons/gi";
-import { BsMagic } from "react-icons/bs";
-import { IoMdSwap } from "react-icons/io";
 import { GiSwapBag } from "react-icons/gi";
 import { GiSpikedWall } from "react-icons/gi";
 import { GiSkullCrossedBones } from "react-icons/gi";
@@ -19,8 +12,14 @@ import { GiBrute } from "react-icons/gi";
 import { GiBattleGear } from "react-icons/gi";
 import { GiPowderBag } from "react-icons/gi";
 import { TbArrowBigRight } from "react-icons/tb";
-import { TbArrowBigDownFilled } from "react-icons/tb";
 
+import Cloth from "public/icons/cloth.svg";
+import Hide from "public/icons/hide.svg";
+import Metal from "public/icons/metal.svg";
+import Sword from "public/icons/sword.svg";
+import Bludgeon from "public/icons/bludgeon.svg";
+import Wand from "public/icons/wand.svg";
+import Swap from "public/icons/swap.svg";
 import HealthPotions from "public/icons/health-potions.svg";
 import Twitter from "public/icons/twitter.svg";
 import Trophy from "public/icons/trophy.svg";
@@ -30,7 +29,6 @@ import Attack from "public/icons/attack.svg";
 import Flag from "public/icons/flag.svg";
 import Ledger from "public/icons/ledger.svg";
 import Guide from "public/icons/guide.svg";
-import Chat from "public/icons/chat.svg";
 import Encounters from "public/icons/encounters.svg";
 import Target from "public/icons/target.svg";
 import Heart from "public/icons/heart.svg";
@@ -56,14 +54,15 @@ import SoundOff from "public/icons/sound_off.svg";
 import Discord from "public/icons/discord.svg";
 import Refresh from "public/icons/refresh.svg";
 import Settings from "public/icons/settings.svg";
+import Drop from "public/icons/drop.svg";
 
-const ClothIcon = GiRolledCloth;
-const HideIcon = GiAnimalHide;
-const MetalIcon = GiAnvil;
-const BladeIcon = GiCurvyKnife;
-const BludgeonIcon = GiWoodClub;
-const MagicIcon = BsMagic;
-const SwapIcon = IoMdSwap;
+const ClothIcon = Cloth;
+const HideIcon = Hide;
+const MetalIcon = Metal;
+const BladeIcon = Sword;
+const BludgeonIcon = Bludgeon;
+const MagicIcon = Wand;
+const SwapIcon = Swap;
 const RefreshIcon = Refresh;
 const SoundOnIcon = SoundOn;
 const SoundOffIcon = SoundOff;
@@ -81,7 +80,7 @@ const GiBruteIcon = GiBrute;
 const GiBattleGearIcon = GiBattleGear;
 const PowderBagIcon = GiPowderBag;
 const RightArrowIcon = TbArrowBigRight;
-const DownArrowIcon = TbArrowBigDownFilled;
+const DownArrowIcon = Drop;
 const HealthPotionsIcon = HealthPotions;
 const TwitterIcon = Twitter;
 const TrophyIcon = Trophy;
@@ -91,7 +90,6 @@ const AttackIcon = Attack;
 const FlagIcon = Flag;
 const LedgerIcon = Ledger;
 const GuideIcon = Guide;
-const ChatIcon = Chat;
 const EncountersIcon = Encounters;
 const TargetIcon = Target;
 const HeartIcon = Heart;
@@ -152,7 +150,6 @@ export {
   FlagIcon,
   LedgerIcon,
   GuideIcon,
-  ChatIcon,
   EncountersIcon,
   TargetIcon,
   HeartIcon,

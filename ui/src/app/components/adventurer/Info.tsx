@@ -128,7 +128,7 @@ export default function Info({
                 {formatAdventurer.gold === 511 ? "Full" : ""}
               </span>
             </span>
-            <span className="flex items-center ">
+            <span className="flex flex-row gap-1 items-center ">
               <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
               <HealthCountDown health={totalHealth || 0} />
               {`/${maxHealth}`}

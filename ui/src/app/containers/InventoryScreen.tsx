@@ -176,7 +176,7 @@ export default function InventoryScreen({
           isSelected={inventorySelected == 0}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.weapon}
-          icon={<LootIcon type="bag" size="w-8" />}
+          icon={<LootIcon type="bag" size="w-6" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
           gameContract={gameContract}
@@ -190,7 +190,7 @@ export default function InventoryScreen({
           isSelected={inventorySelected == 1}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.weapon}
-          icon={<LootIcon type="weapon" size="w-8" />}
+          icon={<LootIcon type="weapon" size="w-6" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
           gameContract={gameContract}
@@ -204,7 +204,7 @@ export default function InventoryScreen({
           isSelected={inventorySelected == 2}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.chest}
-          icon={<LootIcon type="chest" size="w-8" />}
+          icon={<LootIcon type="chest" size="w-6" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
           gameContract={gameContract}
@@ -218,7 +218,7 @@ export default function InventoryScreen({
           isSelected={inventorySelected == 3}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.head}
-          icon={<LootIcon type="head" size="w-8" />}
+          icon={<LootIcon type="head" size="w-6" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
           gameContract={gameContract}
@@ -232,7 +232,7 @@ export default function InventoryScreen({
           isSelected={inventorySelected == 4}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.waist}
-          icon={<LootIcon type="waist" size="w-8" />}
+          icon={<LootIcon type="waist" size="w-6" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
           gameContract={gameContract}
@@ -246,7 +246,7 @@ export default function InventoryScreen({
           isSelected={inventorySelected == 5}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.foot}
-          icon={<LootIcon type="foot" size="w-8" />}
+          icon={<LootIcon type="foot" size="w-6" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
           gameContract={gameContract}
@@ -260,7 +260,7 @@ export default function InventoryScreen({
           isSelected={inventorySelected == 6}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.hand}
-          icon={<LootIcon type="hand" size="w-8" />}
+          icon={<LootIcon type="hand" size="w-6" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
           gameContract={gameContract}
@@ -274,7 +274,7 @@ export default function InventoryScreen({
           isSelected={inventorySelected == 7}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.neck}
-          icon={<LootIcon type="neck" size="w-8" />}
+          icon={<LootIcon type="neck" size="w-6" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
           gameContract={gameContract}
@@ -288,7 +288,7 @@ export default function InventoryScreen({
           isSelected={inventorySelected == 8}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.ring}
-          icon={<LootIcon type="ring" size="w-8" />}
+          icon={<LootIcon type="ring" size="w-6" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
           gameContract={gameContract}
