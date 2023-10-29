@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { ReactElement, JSXElementConstructor } from "react";
 
 // TODO: Notification Data type
 
@@ -24,8 +25,10 @@ type LoadingState = {
   setTxHash: (hash: string) => void;
   setTxAccepted: (txAccepted: boolean) => void;
   stopLoading: (notificationData: any, error?: boolean) => void;
-  deathMessage: any;
-  setDeathMessage: (deathMessage: any) => void;
+  deathMessage: ReactElement<any, string | JSXElementConstructor<any>> | null;
+  setDeathMessage: (
+    deathMessage: ReactElement<any, string | JSXElementConstructor<any>> | null
+  ) => void;
 };
 
 const useLoadingStore = create<LoadingState>((set, get) => ({

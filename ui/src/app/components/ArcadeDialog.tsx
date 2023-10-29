@@ -201,7 +201,7 @@ interface ArcadeAccountCardProps {
   address: string;
   walletAccount: AccountInterface;
   masterAccountAddress: string;
-  arcadeConnectors: any[];
+  arcadeConnectors: Connector[];
   genNewKey: (address: string) => Promise<void>;
   balances: { eth: bigint; lords: bigint; lordsGameAllowance: bigint };
   getAccountBalances: (address: string) => Promise<void>;

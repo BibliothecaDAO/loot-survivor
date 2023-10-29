@@ -734,8 +734,8 @@ export async function parseEvents(
         break;
       case "Transfer":
         const beastTransferData: ERC721TransferEvent = {
-          from: parseInt(raw.data[0]),
-          to: parseInt(raw.data[1]),
+          from: raw.data[0],
+          to: raw.data[1],
           tokenId: {
             low: parseInt(raw.data[2]),
             high: parseInt(raw.data[3]),

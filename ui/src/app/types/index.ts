@@ -155,6 +155,11 @@ export interface Metadata {
   items?: string[]; // Items in the transaction
 }
 
+export interface TransactionParams {
+  hash: string;
+  metadata?: Metadata;
+}
+
 export type Menu = {
   id: number;
   label: string | ReactElement;
@@ -209,8 +214,8 @@ export interface UpgradeSummary {
   Stats: {
     [key: string]: number;
   };
-  Items: any;
-  Potions: any;
+  Items: string[];
+  Potions: number;
 }
 
 export interface Notification {

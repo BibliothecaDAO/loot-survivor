@@ -205,14 +205,14 @@ function Home({ updateConnectors }: HomeProps) {
 
   const { spawn, explore, attack, flee, upgrade, slayAllIdles, multicall } =
     syscalls({
-      gameContract,
-      lordsContract,
-      beastsContract,
+      gameContract: gameContract!,
+      lordsContract: lordsContract!,
+      beastsContract: beastsContract!,
       addTransaction,
       queryData: data,
       resetData,
       setData,
-      adventurer,
+      adventurer: adventurer!,
       addToCalls,
       calls,
       handleSubmitCalls,
@@ -230,7 +230,7 @@ function Home({ updateConnectors }: HomeProps) {
       showTopUpDialog,
       setTopUpAccount,
       setEstimatingFee,
-      account,
+      account: account!,
       resetCalls,
       setSpecialBeastDefeated,
       setSpecialBeast,

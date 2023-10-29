@@ -28,6 +28,7 @@ import {
 } from "@/app/types/events";
 import { Adventurer } from "@/app/types";
 import { feltToString } from "@/app/lib/utils";
+import { AdventurerClass } from "../classes";
 
 type EventData =
   | DiscoveredHealthEvent
@@ -56,7 +57,10 @@ type EventData =
   | IdleDeathPenaltyEvent
   | AdventurerUpgradedEvent;
 
-function processAdventurerState(data: any, currentAdventurer?: any) {
+function processAdventurerState(
+  data: any,
+  currentAdventurer?: AdventurerClass
+) {
   const gameData = new GameData();
   const updateAdventurerDoc: Adventurer = {
     id: data.adventurerState["adventurerId"],
@@ -83,10 +87,10 @@ function processAdventurerState(data: any, currentAdventurer?: any) {
     beastHealth: data.adventurerState["adventurer"]["beastHealth"],
     statUpgrades: data.adventurerState["adventurer"]["statPointsAvailable"],
     actionsPerBlock: data.adventurerState["adventurer"]["actionsPerBlock"],
-    name: currentAdventurer["name"],
-    startBlock: currentAdventurer["startBlock"],
-    revealBlock: currentAdventurer["revealBlock"],
-    createdTime: currentAdventurer.createdTime,
+    name: currentAdventurer!["name"],
+    startBlock: currentAdventurer!["startBlock"],
+    revealBlock: currentAdventurer!["revealBlock"],
+    createdTime: currentAdventurer?.createdTime,
     lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
     timestamp: new Date(), // Equivalent to datetime.now() in Python.
   };
@@ -150,7 +154,7 @@ export function processData(
   event: EventData,
   eventName: string,
   txHash?: string,
-  currentAdventurer?: any
+  currentAdventurer?: AdventurerClass
 ) {
   const gameData = new GameData();
   switch (eventName) {

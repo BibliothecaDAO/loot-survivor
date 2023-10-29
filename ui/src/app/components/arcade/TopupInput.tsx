@@ -6,7 +6,7 @@ interface TopupInputProps {
   balanceType: string;
   increment: number;
   disabled: boolean;
-  topup: (...args: any[]) => Promise<void>;
+  topup: any;
   account: string;
   master: AccountInterface;
   lordsGameAllowance: number;

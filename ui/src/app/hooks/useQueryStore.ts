@@ -56,8 +56,7 @@ interface ScoresResult {
   scores: Score[];
 }
 
-interface InitialData {
-  // [key: string]: BattlesResult | DiscoveriesResult | BeastsResult | AdventurersResult | ItemsResult | ScoresResult | null;
+export interface QueryData {
   lastBattleQuery: BattlesResult | null;
   lastBeastBattleQuery: BattlesResult | null;
   battlesByAdventurerQuery: BattlesResult | null;
@@ -83,7 +82,7 @@ interface InitialData {
 }
 
 type QueriesState = {
-  data: InitialData;
+  data: QueryData;
   setData: (
     queryKey: QueryKey,
     data: any,
@@ -99,7 +98,7 @@ type QueriesState = {
   resetData: (queryKey?: QueryKey) => void;
 };
 
-const initialData: InitialData = {
+const initialData: QueryData = {
   lastBattleQuery: null,
   lastBeastBattleQuery: null,
   battlesByAdventurerQuery: null,
