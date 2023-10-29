@@ -30,6 +30,7 @@ import {
   ERC721TransferEvent,
 } from "@/app/types/events";
 import { processData } from "@/app/lib/utils/processData";
+import { AdventurerClass } from "../classes";
 
 function parseAdventurerState(data: string[]) {
   return {
@@ -211,7 +212,7 @@ function parseEquippedItems(data: string[]) {
 
 export async function parseEvents(
   receipt: InvokeTransactionReceiptResponse,
-  currentAdventurer?: any,
+  currentAdventurer?: AdventurerClass,
   beastsContract?: string,
   event?: string
 ) {

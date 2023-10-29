@@ -10,7 +10,7 @@ import { Contract } from "starknet";
 
 interface AdventurerScreenProps {
   spawn: (...args: any[]) => any;
-  handleSwitchAdventurer: (...args: any[]) => any;
+  handleSwitchAdventurer: (adventurerId: number) => Promise<void>;
   lordsBalance?: bigint;
   mintLords: (...args: any[]) => any;
   gameContract: Contract;

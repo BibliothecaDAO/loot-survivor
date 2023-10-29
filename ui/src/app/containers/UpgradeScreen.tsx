@@ -28,14 +28,23 @@ import MarketplaceScreen from "@/app/containers/MarketplaceScreen";
 import { UpgradeNav } from "@/app/components/upgrade/UpgradeNav";
 import { StatAttribute } from "@/app/components/upgrade/StatAttribute";
 import useUIStore from "@/app/hooks/useUIStore";
-import { UpgradeStats, ZeroUpgrade, UpgradeSummary } from "@/app/types";
+import {
+  UpgradeStats,
+  ZeroUpgrade,
+  UpgradeSummary,
+  ItemPurchase,
+} from "@/app/types";
 import Summary from "@/app/components/upgrade/Summary";
 import { HealthCountDown } from "@/app/components/CountDown";
 import { calculateVitBoostRemoved } from "@/app/lib/utils";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 
 interface UpgradeScreenProps {
-  upgrade: (...args: any[]) => any;
+  upgrade: (
+    upgrades: UpgradeStats,
+    purchaseItems: string[],
+    potionAmount: number
+  ) => Promise<void>;
   gameContract: Contract;
 }
 

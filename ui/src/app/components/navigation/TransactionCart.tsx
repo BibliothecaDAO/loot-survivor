@@ -30,7 +30,10 @@ import { calculateVitBoostRemoved } from "@/app/lib/utils";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
-  multicall: (...args: any[]) => any;
+  multicall: (
+    loadingMessage: string[],
+    notification: string[]
+  ) => Promise<void>;
   gameContract: Contract;
 }
 

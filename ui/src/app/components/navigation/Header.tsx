@@ -26,7 +26,7 @@ import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 
 export interface HeaderProps {
   multicall: (...args: any[]) => any;
-  mintLords: (...args: any[]) => any;
+  mintLords: () => Promise<void>;
   lordsBalance: bigint;
   arcadeConnectors: Connector[];
   gameContract: Contract;
