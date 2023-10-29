@@ -18,6 +18,10 @@ mod Game {
     const LOOT_NAME_STORAGE_INDEX_1: u8 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u8 = 1;
     const SECONDS_IN_DAY: u32 = 86400;
+    const SECONDS_IN_WEEK: u32 = 604800;
+    const PHASE2_START_WEEKS: u8 = 12;
+    const PHASE3_START_WEEKS: u8 = 24;
+
     use core::{
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
         clone::Clone, poseidon::poseidon_hash_span, option::OptionTrait, box::BoxTrait,
@@ -1210,20 +1214,21 @@ mod Game {
         self._cost_to_play.read()
     }
 
+    fn _age_of_game_weeks(contract: @ContractState) -> u64 {
+        let genesis_timestamp = contract._genesis_timestamp.read();
+        let current_timestamp = starknet::get_block_info().unbox().block_timestamp;
+        (current_timestamp - genesis_timestamp) / SECONDS_IN_WEEK.into()
+    }
+
     fn _process_payment_and_distribute_rewards(
         ref self: ContractState, client_address: ContractAddress
     ) {
         let caller = get_caller_address();
-        let block_number = starknet::get_block_info().unbox().block_number;
-
-        let genesis_block = self._genesis_block.read();
         let dao_address = self._dao.read();
-
         let leaderboard = self._leaderboard.read();
         let first_place_address = self._owner.read(leaderboard.first.adventurer_id.into());
         let second_place_address = self._owner.read(leaderboard.second.adventurer_id.into());
         let third_place_address = self._owner.read(leaderboard.third.adventurer_id.into());
-
         let current_cost_to_play = self._cost_to_play.read();
 
         // if third place score is less than minimum score for payouts
@@ -1270,8 +1275,8 @@ mod Game {
             )
         };
 
-        // after 2 weeks, the DAO gets a share of rewards
-        if (BLOCKS_IN_A_WEEK * 2 + genesis_block) > block_number {
+        let age_of_game_weeks = _age_of_game_weeks(@self);
+        if age_of_game_weeks > PHASE2_START_WEEKS.into() {
             week =
                 Week {
                     DAO: _calculate_payout(
@@ -1291,9 +1296,7 @@ mod Game {
                     )
                 };
         }
-
-        // after 8 weeks, client builders start getting rewards
-        if (BLOCKS_IN_A_WEEK * 8 + genesis_block) > block_number {
+        if age_of_game_weeks > PHASE3_START_WEEKS.into() {
             week =
                 Week {
                     DAO: _calculate_payout(
