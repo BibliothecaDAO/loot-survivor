@@ -6,7 +6,7 @@ export const goldenTokenClient = new ApolloClient({
 });
 
 export const gameClient = new ApolloClient({
-  uri: process.env.NEXT_PUBLIC_GAME_ADDRESS,
+  uri: process.env.NEXT_PUBLIC_LS_GQL_URL,
   cache: new InMemoryCache({
     typePolicies: {
       Query: {
