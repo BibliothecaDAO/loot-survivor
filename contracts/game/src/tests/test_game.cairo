@@ -1,5 +1,14 @@
 #[cfg(test)]
 mod tests {
+    use arcade_account::{Account, TRANSACTION_VERSION};
+    use arcade_account::tests::utils::helper_contracts::{
+        ISimpleTestContractDispatcher, ISimpleTestContractDispatcherTrait, simple_test_contract,
+    };
+    use arcade_account::account::interface::{
+        IMasterControl, IMasterControlDispatcher, IMasterControlDispatcherTrait,
+        ArcadeAccountABIDispatcher, ArcadeAccountABIDispatcherTrait,
+        ArcadeAccountCamelABIDispatcher, ArcadeAccountCamelABIDispatcherTrait,
+    };
     use game_entropy::game_entropy::IGameEntropy;
     use array::ArrayTrait;
     use core::{result::ResultTrait, traits::Into, array::SpanTrait, serde::Serde, clone::Clone};
@@ -53,14 +62,10 @@ mod tests {
         contract_address_const::<1>()
     }
 
-    fn GOLDEN_TOKEN() -> ContractAddress {
-        contract_address_const::<2>()
-    }
-
     const ADVENTURER_ID: felt252 = 1;
 
-    const MAX_LORDS: u256 = 10000000000000000000000000000000000;
-    const APPROVE: u256 = 100000000000000000000000000000;
+    const MAX_LORDS: u256 = 10000000000000000000000000000000000000000;
+    const APPROVE: u256 = 10000000000000000000000000000000000000000;
     const NAME: felt252 = 111;
     const SYMBOL: felt252 = 222;
 
@@ -70,6 +75,27 @@ mod tests {
 
     fn OWNER() -> ContractAddress {
         contract_address_const::<10>()
+    }
+
+    use goldenToken::ERC721::{
+        GoldenToken, GoldenTokenDispatcher, GoldenTokenDispatcherTrait, GoldenTokenLibraryDispatcher
+    };
+
+
+    fn deploy_golden_token(eth: ContractAddress) -> GoldenTokenDispatcher {
+        let mut calldata = ArrayTrait::new();
+        calldata.append(NAME);
+        calldata.append(SYMBOL);
+        calldata.append(OWNER().into());
+        calldata.append(DAO().into());
+        calldata.append(eth.into());
+
+        let (golden_token, _) = deploy_syscall(
+            goldenToken::ERC721::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
+        )
+            .unwrap();
+
+        GoldenTokenDispatcher { contract_address: golden_token }
     }
 
     fn deploy_lords() -> ContractAddress {
@@ -84,15 +110,17 @@ mod tests {
         lords0
     }
 
-    use arcade_account::{Account, TRANSACTION_VERSION};
-    use arcade_account::tests::utils::helper_contracts::{
-        ISimpleTestContractDispatcher, ISimpleTestContractDispatcherTrait, simple_test_contract,
-    };
-    use arcade_account::account::interface::{
-        IMasterControl, IMasterControlDispatcher, IMasterControlDispatcherTrait,
-        ArcadeAccountABIDispatcher, ArcadeAccountABIDispatcherTrait,
-        ArcadeAccountCamelABIDispatcher, ArcadeAccountCamelABIDispatcherTrait,
-    };
+    fn deploy_eth() -> ContractAddress {
+        let mut calldata = array![];
+        // we just need an erc20 for ETH, details don't matter for test purposes
+        calldata.append_serde(NAME);
+        calldata.append_serde(SYMBOL);
+        calldata.append_serde(MAX_LORDS);
+        calldata.append_serde(OWNER());
+        utils::deploy(CamelERC20Mock::TEST_CLASS_HASH, calldata)
+    }
+
+
     const PUBLIC_KEY: felt252 = 0x333333;
     const NEW_PUBKEY: felt252 = 0x789789;
     const SALT: felt252 = 123;
@@ -149,25 +177,42 @@ mod tests {
 
     fn setup(
         starting_block: u64, starting_timestamp: u64, terminal_block: u64
-    ) -> (IGameDispatcher, IERC20CamelDispatcher) {
+    ) -> (IGameDispatcher, IERC20CamelDispatcher, GoldenTokenDispatcher, ContractAddress) {
         testing::set_block_number(starting_block);
         testing::set_block_timestamp(starting_timestamp);
 
+        // deploy lords, eth, and golden token
         let lords = deploy_lords();
+        let eth = deploy_eth();
+        let golden_token = deploy_golden_token(eth);
 
+        // format call data and deploy loot survivor
         let mut calldata = ArrayTrait::new();
         calldata.append(lords.into());
         calldata.append(DAO().into());
         calldata.append(COLLECTIBLE_BEASTS().into());
-        calldata.append(GOLDEN_TOKEN().into());
+        calldata.append(golden_token.contract_address.into());
         calldata.append(terminal_block.into());
-
         let (address0, _) = deploy_syscall(
             Game::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
         )
             .unwrap();
 
+        // set contract address (aka caller) to specific address
         testing::set_contract_address(OWNER());
+
+        // transfer lords to caller address and approve 
+        let lords_contract = IERC20CamelDispatcher { contract_address: lords };
+        let eth_contract = IERC20CamelDispatcher { contract_address: eth };
+        lords_contract.transfer(OWNER(), 100000000000000000000000000000000);
+        eth_contract.transfer(OWNER(), 100000000000000000000000000000000);
+
+        // give golden token contract approval to access ETH
+        eth_contract.approve(golden_token.contract_address, APPROVE.into());
+        // open golden token open edition
+        golden_token.open();
+        // mint golden token
+        golden_token.mint();
 
         let arcade_account = ArcadeAccountABIDispatcher {
             contract_address: deploy_arcade_account(Option::None(()))
@@ -178,20 +223,20 @@ mod tests {
 
         master_control_dispatcher.update_whitelisted_contracts(array![(address0, true)]);
 
-        let lords_contract = IERC20CamelDispatcher { contract_address: lords };
-
-        lords_contract.transfer(arcade_account.contract_address, 1000000000000000000000000000);
+        lords_contract.transfer(arcade_account.contract_address, 1000000000000000000000000);
 
         testing::set_contract_address(arcade_account.contract_address);
         lords_contract.approve(address0, APPROVE.into());
-        (IGameDispatcher { contract_address: address0 }, lords_contract)
+        (
+            IGameDispatcher { contract_address: address0 },
+            lords_contract,
+            golden_token,
+            arcade_account.contract_address
+        )
     }
 
-    fn add_adventurer_to_game(ref game: IGameDispatcher) {
-        game
-            .new_game(
-                INTERFACE_ID(), ItemId::Wand, 'loothero', DEFAULT_NO_GOLDEN_TOKEN.into(), false
-            );
+    fn add_adventurer_to_game(ref game: IGameDispatcher, golden_token_id: u256) {
+        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero', golden_token_id, false);
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
@@ -205,7 +250,7 @@ mod tests {
     fn new_adventurer(starting_block: u64) -> IGameDispatcher {
         let starting_timestamp = 1696201757;
         let terminal_block = 0;
-        let (mut game, lords) = setup(starting_block, starting_timestamp, terminal_block);
+        let (mut game, lords, _, _) = setup(starting_block, starting_timestamp, terminal_block);
         let starting_weapon = ItemId::Wand;
         let name = 'abcdefghijklmno';
 
@@ -543,7 +588,7 @@ mod tests {
     fn new_adventurer_with_lords(starting_block: u64) -> (IGameDispatcher, IERC20CamelDispatcher) {
         let starting_timestamp = 1;
         let terminal_timestamp = 0;
-        let (mut game, lords) = setup(starting_block, starting_timestamp, terminal_timestamp);
+        let (mut game, lords, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
         let starting_weapon = ItemId::Wand;
         let name = 'abcdefghijklmno';
 
@@ -1390,8 +1435,8 @@ mod tests {
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
-        let adventurer2 = add_adventurer_to_game(ref game);
-        let adventurer3 = add_adventurer_to_game(ref game);
+        let adventurer2 = add_adventurer_to_game(ref game, 0);
+        let adventurer3 = add_adventurer_to_game(ref game, 0);
 
         // attack starter beast, resulting in adventurer last action block number being 1
         game.attack(ADVENTURER_ID, false);
@@ -1969,7 +2014,7 @@ mod tests {
     #[test]
     #[available_gas(90000000)]
     fn test_bp_distribution() {
-        let (game, lords) = new_adventurer_with_lords(1000);
+        let (mut game, lords) = new_adventurer_with_lords(1000);
         let adventurer = game.get_adventurer(ADVENTURER_ID);
 
         // stage 0
@@ -2014,7 +2059,7 @@ mod tests {
     #[available_gas(90000000)]
     #[should_panic(expected: ('price change already initiated', 'ENTRYPOINT_FAILED'))]
     fn test_initiate_price_change_too_fast() {
-        let (mut game, lords) = setup(1000, 1, 0);
+        let (mut game, lords, _, _) = setup(1000, 1, 0);
         game.initiate_price_change();
         game.initiate_price_change();
     }
@@ -2022,7 +2067,7 @@ mod tests {
     #[test]
     #[available_gas(9000000000)]
     fn test_update_cost_to_play() {
-        let (mut game, lords) = setup(1000, 1, 0);
+        let (mut game, lords, _, _) = setup(1000, 1, 0);
         let original_cost_to_play = game.get_cost_to_play();
 
         // create 10 games during opening week
@@ -2121,17 +2166,17 @@ mod tests {
         let starting_block = 1;
         let starting_timestamp = 1;
         let terminal_timestamp = 100;
-        let (mut game, lords) = setup(starting_block, starting_timestamp, terminal_timestamp);
+        let (mut game, lords, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
 
         // add a player to the game
-        add_adventurer_to_game(ref game);
+        add_adventurer_to_game(ref game, 0);
         // advance blockchain timestamp beyond terminal timestamp
         starknet::testing::set_block_timestamp(terminal_timestamp + 1);
 
         // try to start a new game
         // should panic with 'terminal time reached'
         // which test is annotated to expect
-        add_adventurer_to_game(ref game);
+        add_adventurer_to_game(ref game, 0);
     }
 
     #[test]
@@ -2140,16 +2185,83 @@ mod tests {
         let starting_block = 1;
         let starting_timestamp = 1;
         let terminal_timestamp = 0;
-        let (mut game, lords) = setup(starting_block, starting_timestamp, terminal_timestamp);
+        let (mut game, lords, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
 
         // add a player to the game
-        add_adventurer_to_game(ref game);
+        add_adventurer_to_game(ref game, 0);
 
         // advance blockchain timestamp to max u64
         let max_u64_timestamp = 18446744073709551615;
         starknet::testing::set_block_timestamp(max_u64_timestamp);
 
         // verify we can still start a new game
-        add_adventurer_to_game(ref game);
+        add_adventurer_to_game(ref game, 0);
+    }
+
+    #[test]
+    #[available_gas(9000000000)]
+    fn test_golden_token_new_game() {
+        let starting_block = 364063;
+        let starting_timestamp = 1698678554;
+        let terminal_timestamp = 0;
+        let (mut game, lords, golden_token, arcade_account_address) = setup(
+            starting_block, starting_timestamp, terminal_timestamp
+        );
+        add_adventurer_to_game(ref game, 1);
+        testing::set_block_timestamp(starting_timestamp + DAY);
+        add_adventurer_to_game(ref game, 1);
+    }
+
+    #[test]
+    #[available_gas(9000000000)]
+    fn test_golden_token_can_play() {
+        let golden_token_id = 1;
+        let starting_block = 364063;
+        let starting_timestamp = 1698678554;
+        let terminal_timestamp = 0;
+        let (mut game, lords, golden_token, arcade_account_address) = setup(
+            starting_block, starting_timestamp, terminal_timestamp
+        );
+        assert(game.can_play(1), 'should be able to play');
+        add_adventurer_to_game(ref game, golden_token_id);
+        assert(!game.can_play(1), 'should not be able to play');
+        testing::set_block_timestamp(starting_timestamp + DAY);
+        assert(game.can_play(1), 'should be able to play again');
+    }
+
+    #[test]
+    #[available_gas(9000000000)]
+    #[should_panic(
+        expected: ('ERC721: invalid token ID', 'ENTRYPOINT_FAILED', 'ENTRYPOINT_FAILED')
+    )]
+    fn test_golden_token_unminted_token() {
+        let golden_token_id = 500;
+        let starting_block = 364063;
+        let starting_timestamp = 1698678554;
+        let terminal_timestamp = 0;
+        let (mut game, lords, golden_token, arcade_account_address) = setup(
+            starting_block, starting_timestamp, terminal_timestamp
+        );
+        add_adventurer_to_game(ref game, golden_token_id);
+    }
+
+    #[test]
+    #[available_gas(9000000000)]
+    #[should_panic(expected: ('Token already used today', 'ENTRYPOINT_FAILED'))]
+    fn test_golden_token_double_play() {
+        let golden_token_id = 1;
+        let starting_block = 364063;
+        let starting_timestamp = 1698678554;
+        let terminal_timestamp = 0;
+        let (mut game, lords, golden_token, arcade_account_address) = setup(
+            starting_block, starting_timestamp, terminal_timestamp
+        );
+        add_adventurer_to_game(ref game, golden_token_id);
+
+        // roll blockchain forward 1 second less than a day
+        testing::set_block_timestamp(starting_timestamp + (DAY - 1));
+
+        // try to play again with golden token which should cause panic
+        add_adventurer_to_game(ref game, golden_token_id);
     }
 }
