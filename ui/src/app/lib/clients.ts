@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 export const goldenTokenClient = new ApolloClient({
-  uri: "https://realmsworld-git-ls-updates-loot-bibliotheca.vercel.app/api/graphql",
+  uri: process.env.NEXT_PUBLIC_TOKENS_GQL_URL,
   cache: new InMemoryCache(),
 });
 

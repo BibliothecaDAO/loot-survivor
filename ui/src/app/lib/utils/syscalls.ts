@@ -209,7 +209,7 @@ export function syscalls({
     showDeathDialog(true);
   };
 
-  const spawn = async (formData: FormData) => {
+  const spawn = async (formData: FormData, goldenTokenId: string) => {
     const storage: BurnerStorage = Storage.get("burners");
     let interfaceCamel = "";
     if (typeof connector?.id === "string" && connector.id.includes("0x")) {
@@ -238,7 +238,7 @@ export function syscalls({
         "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         stringToFelt(formData.name).toString(),
-        "0",
+        goldenTokenId,
         "0",
         interfaceCamel,
       ],

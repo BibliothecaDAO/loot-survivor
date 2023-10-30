@@ -1,4 +1,5 @@
 import { useState, FormEvent, useEffect } from "react";
+import { Contract } from "starknet";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { TypeAnimation } from "react-type-animation";
 import { MdClose } from "react-icons/md";
@@ -7,7 +8,7 @@ import { TxActivity } from "@/app/components/navigation/TxActivity";
 import useUIStore from "@/app/hooks/useUIStore";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { battle } from "@/app/lib/constants";
-import { FormData } from "@/app/types";
+import { FormData, GameToken } from "@/app/types";
 import { Button } from "@/app/components/buttons/Button";
 import Image from "next/image";
 import Lords from "../../../../public/icons/lords.svg";
@@ -19,6 +20,8 @@ export interface SpawnProps {
   handleBack: () => void;
   lordsBalance?: bigint;
   mintLords: (...args: any[]) => any;
+  goldenTokenData: any;
+  goldenTokenContract: Contract;
 }
 
 export const Spawn = ({
@@ -27,6 +30,8 @@ export const Spawn = ({
   handleBack,
   lordsBalance,
   mintLords,
+  goldenTokenData,
+  goldenTokenContract,
 }: SpawnProps) => {
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
   const [formFilled, setFormFilled] = useState(false);
@@ -56,12 +61,26 @@ export const Spawn = ({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     resetNotification();
-    await spawn(formData);
+    const goldenToken = await getUsableGoldenToken(getGoldenTokens());
+    await spawn(formData, goldenToken);
   };
 
   const checkEnoughLords = lordsBalance! >= BigInt(25000000000000000000);
 
-  // const goldenTokenExists = true;
+  const getGoldenTokens = () => {
+    const tokens = goldenTokenData.getERC721Tokens;
+    return tokens.map((token: GameToken) => token.token_id);
+  };
+
+  const goldenTokenExists = getGoldenTokens().length > 0;
+
+  const getUsableGoldenToken = async (tokenIds: number[]) => {
+    // Loop through contract calls to see if the token is usable, if none then return 0
+    for (let tokenId of tokenIds) {
+      return tokenId.toString();
+    }
+    return "0";
+  };
 
   return (
     <div className="flex flex-col w-full h-full justify-center">
@@ -166,7 +185,7 @@ export const Spawn = ({
                     </div>
                   </Button>
 
-                  {/* <Button
+                  <Button
                     type="submit"
                     size={"xl"}
                     disabled={
@@ -195,7 +214,7 @@ export const Spawn = ({
                         />
                       </div>
                     </div>
-                  </Button> */}
+                  </Button>
                 </div>
               </form>
               {!checkEnoughLords && (

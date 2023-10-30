@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Contract } from "starknet";
 import { FormData } from "@/app/types";
 import { AdventurerName } from "@/app/components/start/AdventurerName";
 import { WeaponSelect } from "@/app/components/start/WeaponSelect";
@@ -10,6 +11,8 @@ export interface CreateAdventurerProps {
   spawn: (...args: any[]) => any;
   lordsBalance?: bigint;
   mintLords: (...args: any[]) => any;
+  goldenTokenData: any;
+  goldenTokenContract: Contract;
 }
 
 export const CreateAdventurer = ({
@@ -18,6 +21,8 @@ export const CreateAdventurer = ({
   spawn,
   lordsBalance,
   mintLords,
+  goldenTokenData,
+  goldenTokenContract,
 }: CreateAdventurerProps) => {
   const [formData, setFormData] = useState<FormData>({
     startingWeapon: "",
@@ -110,6 +115,8 @@ export const CreateAdventurer = ({
               handleBack={handleBack}
               lordsBalance={lordsBalance}
               mintLords={mintLords}
+              goldenTokenData={goldenTokenData}
+              goldenTokenContract={goldenTokenContract}
             />
           </div>
           <div className="sm:hidden">
@@ -131,6 +138,8 @@ export const CreateAdventurer = ({
             handleBack={handleBack}
             lordsBalance={lordsBalance}
             mintLords={mintLords}
+            goldenTokenData={goldenTokenData}
+            goldenTokenContract={goldenTokenContract}
           />
         </div>
       )}

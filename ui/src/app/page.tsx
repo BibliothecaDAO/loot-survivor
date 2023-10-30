@@ -163,6 +163,10 @@ function Home({ updateConnectors }: HomeProps) {
     address: process.env.NEXT_PUBLIC_BEASTS_ADDRESS,
     abi: Beasts,
   });
+  const { contract: goldenTokenContract } = useContract({
+    address: process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS,
+    abi: Beasts,
+  });
 
   const { addTransaction } = useTransactionManager();
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -329,19 +333,14 @@ function Home({ updateConnectors }: HomeProps) {
   //   }
   // `);
 
-  const {
-    data: goldenTokenData,
-    error,
-    loading,
-  } = useQuery(getGoldenTokensByOwner, {
+  const { data: goldenTokenData } = useQuery(getGoldenTokensByOwner, {
     client: goldenTokenClient,
     variables: {
-      contractAddress: process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS,
-      owner: address,
+      contractAddress:
+        process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS?.toLowerCase(),
+      owner: padAddress(address ?? ""),
     },
   });
-
-  console.log(goldenTokenData, error, loading);
 
   const handleSwitchAdventurer = async (adventurerId: number) => {
     setIsLoading();
@@ -575,6 +574,8 @@ function Home({ updateConnectors }: HomeProps) {
                       lordsBalance={lordsBalance}
                       mintLords={async () => await mintLords()}
                       gameContract={gameContract!}
+                      goldenTokenData={goldenTokenData}
+                      goldenTokenContract={goldenTokenContract!}
                     />
                   )}
                   {screen === "play" && (
