@@ -1,5 +1,4 @@
 import { ApolloClient, InMemoryCache } from "@apollo/client";
-import { getGraphQLUrl } from "@/app/lib/constants";
 
 export const goldenTokenClient = new ApolloClient({
   uri: "https://realmsworld-git-ls-updates-loot-bibliotheca.vercel.app/api/graphql",
@@ -7,7 +6,7 @@ export const goldenTokenClient = new ApolloClient({
 });
 
 export const gameClient = new ApolloClient({
-  uri: getGraphQLUrl(),
+  uri: process.env.NEXT_PUBLIC_GAME_ADDRESS,
   cache: new InMemoryCache({
     typePolicies: {
       Query: {

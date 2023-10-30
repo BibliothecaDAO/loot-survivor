@@ -336,10 +336,8 @@ function Home({ updateConnectors }: HomeProps) {
   } = useQuery(getGoldenTokensByOwner, {
     client: goldenTokenClient,
     variables: {
-      contractAddress: contracts?.goldenToken,
-      // owner: address,
-      owner:
-        "0x074f91d284351a8603933b648684b6a990126d7c78a1b867353a57a3bc2097da",
+      contractAddress: process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS,
+      owner: address,
     },
   });
 
