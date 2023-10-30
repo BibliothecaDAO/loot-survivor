@@ -436,6 +436,16 @@ export type BurnerStorage = {
     deployTx: string;
     active: boolean;
     masterAccount: string;
+    masterAccountProvider: string;
     gameContract: string;
   };
+};
+
+export type GameToken = {
+  contract_address: string;
+  id: string;
+  image: string;
+  name: string;
+  owner: string;
+  token_id: number;
 };
