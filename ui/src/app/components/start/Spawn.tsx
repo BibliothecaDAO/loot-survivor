@@ -1,4 +1,4 @@
-import { useState, FormEvent, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { CallData, Contract } from "starknet";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { TypeAnimation } from "react-type-animation";

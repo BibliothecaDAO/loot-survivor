@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Contract } from "starknet";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import Image from "next/image";
 import {
   ETH_PREFUND_AMOUNT,
   LORDS_PREFUND_AMOUNT,

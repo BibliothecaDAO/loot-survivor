@@ -163,10 +163,6 @@ function Home({ updateConnectors }: HomeProps) {
     address: process.env.NEXT_PUBLIC_BEASTS_ADDRESS,
     abi: Beasts,
   });
-  const { contract: goldenTokenContract } = useContract({
-    address: process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS,
-    abi: Beasts,
-  });
 
   const { addTransaction } = useTransactionManager();
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
