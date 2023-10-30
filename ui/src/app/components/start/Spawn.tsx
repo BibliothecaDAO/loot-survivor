@@ -210,10 +210,12 @@ export const Spawn = ({
                     <div className="flex flex-row items-center gap-1 w-full h-full">
                       <p className="whitespace-nowrap w-3/4">
                         {goldenTokenExists
-                          ? formFilled
-                            ? "Play With Golden Token"
-                            : "Fill details"
-                          : "No tokens"}
+                          ? usableToken !== "0"
+                            ? formFilled
+                              ? "Play With Golden Token"
+                              : "Fill details"
+                            : "No Usable Tokens"
+                          : "No Golden Tokens"}
                       </p>
                       <div className="absolute right-3 w-6 h-6 sm:w-8 sm:h-8">
                         <Image
