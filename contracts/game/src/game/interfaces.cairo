@@ -151,4 +151,5 @@ trait IGame<TContractState> {
     fn get_leaderboard(self: @TContractState) -> Leaderboard;
     fn get_cost_to_play(self: @TContractState) -> u128;
     fn get_games_played_snapshot(self: @TContractState) -> GamesPlayedSnapshot;
+    fn can_play(self: @TContractState, golden_token_id: u256) -> bool;
 }

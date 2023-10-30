@@ -30,6 +30,7 @@ mod messages {
     const CANNOT_PLAY_WITH_TOKEN: felt252 = 'Token already used today';
     const NOT_OWNER_OF_TOKEN: felt252 = 'Not owner of token';
     const MA_PERIOD_LESS_THAN_WEEK: felt252 = 'MA period too small';
+    const TERMINAL_TIME_REACHED: felt252 = 'terminal time reached';
 }
 
 // TODO: Update for mainnet
@@ -61,17 +62,17 @@ mod REWARD_DISTRIBUTIONS_PHASE1_BP {
 }
 
 mod REWARD_DISTRIBUTIONS_PHASE2_BP {
-    const DAO: u256 = 200;
-    const INTERFACE: u256 = 0;
-    const FIRST_PLACE: u256 = 400;
+    const DAO: u256 = 0;
+    const INTERFACE: u256 = 280;
+    const FIRST_PLACE: u256 = 320;
     const SECOND_PLACE: u256 = 240;
     const THIRD_PLACE: u256 = 160;
 }
 
 mod REWARD_DISTRIBUTIONS_PHASE3_BP {
     const DAO: u256 = 200;
-    const INTERFACE: u256 = 160;
-    const FIRST_PLACE: u256 = 360;
+    const INTERFACE: u256 = 240;
+    const FIRST_PLACE: u256 = 280;
     const SECOND_PLACE: u256 = 160;
     const THIRD_PLACE: u256 = 120;
 }
