@@ -8,7 +8,7 @@ import { Button } from "@/app/components/buttons/Button";
 import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
-import { chunkArray, calculateLevel } from "@/app/lib/utils";
+import { calculateLevel } from "@/app/lib/utils";
 
 interface LiveLeaderboardRowProps {
   adventurer: Adventurer;
@@ -45,22 +45,17 @@ const LiveLeaderboardRow = ({
   const topScoreAdventurer = topScores[0]?.id === adventurer.id;
   const handleSlayAdventurer = async () => {
     removeEntrypointFromCalls("slay_idle_adventurers");
-    setSlayAdventurers([
+    setSlayAdventurers([...slayAdventurers, adventurer?.id?.toString() ?? "0"]);
+    const formattedSlayedAdventurers = [
       ...slayAdventurers,
       adventurer?.id?.toString() ?? "0",
-      "0",
-    ]);
-    const formattedSlayedAdventurers = chunkArray(
-      [...slayAdventurers, adventurer?.id?.toString() ?? "0", "0"],
-      2
-    );
+    ];
     const slayIdleAdventurerTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "slay_idle_adventurers",
       calldata: [
         formattedSlayedAdventurers.length.toString(),
-        ...slayAdventurers,
-        adventurer?.id?.toString() ?? "0",
+        ...formattedSlayedAdventurers,
       ],
       metadata: `Slaying ${adventurer.name}`,
     };
