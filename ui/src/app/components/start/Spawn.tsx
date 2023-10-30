@@ -76,7 +76,7 @@ export const Spawn = ({
     (token: GameToken) => token.token_id
   );
 
-  const goldenTokenExists = goldenTokens.length > 0;
+  const goldenTokenExists = goldenTokens?.length > 0;
 
   const getUsableGoldenToken = async (tokenIds: number[]) => {
     // Loop through contract calls to see if the token is usable, if none then return 0
