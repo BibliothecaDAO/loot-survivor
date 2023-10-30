@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useBlock } from "@starknet-react/core";
+import { Contract } from "starknet";
 import { BattleDisplay } from "@/app/components/beast/BattleDisplay";
 import { BeastDisplay } from "@/app/components/beast/BeastDisplay";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
@@ -16,13 +17,18 @@ import ActionMenu from "@/app/components/menu/ActionMenu";
 interface BeastScreenProps {
   attack: (...args: any[]) => any;
   flee: (...args: any[]) => any;
+  beastsContract: Contract;
 }
 
 /**
  * @container
  * @description Provides the beast screen for adventurer battles.
  */
-export default function BeastScreen({ attack, flee }: BeastScreenProps) {
+export default function BeastScreen({
+  attack,
+  flee,
+  beastsContract,
+}: BeastScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
@@ -169,7 +175,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       )}
       <div className="sm:w-1/2 order-1 sm:order-2 h-3/4 sm:h-full">
         {hasBeast ? (
-          <BeastDisplay beastData={beastData} />
+          <BeastDisplay beastData={beastData} beastsContract={beastsContract} />
         ) : (
           <div className="flex flex-col items-center border-2 border-terminal-green">
             <p className="m-auto text-lg uppercase text-terminal-green">

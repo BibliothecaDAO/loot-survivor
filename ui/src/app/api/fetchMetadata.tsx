@@ -1,11 +1,10 @@
 import { shortString } from "starknet";
-import { getRPCUrl } from "../lib/constants";
 
 export const fetchBeastImage = async (
   beastsAddress: string,
   tokenId: number
 ) => {
-  const rpcUrl = getRPCUrl();
+  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL!;
   const response = await fetch(rpcUrl, {
     method: "POST",
     headers: {
@@ -56,7 +55,7 @@ export const fetchBeastImage = async (
 };
 
 export const fetchGoldenTokenImage = async (goldenTokenAddress: string) => {
-  const rpcUrl = getRPCUrl();
+  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL!;
   const response = await fetch(rpcUrl, {
     method: "POST",
     headers: {

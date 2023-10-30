@@ -80,7 +80,7 @@ export const WeaponSelect = ({
               />
             </div>
             <div className="flex items-center pb-2 sm:pb-2 md:pb-4 text-base sm:text-md">
-              {weapon.icon}
+              <div className="w-4">{weapon.icon}</div>
               <p className="ml-2">{weapon.description}</p>
             </div>
             <Button

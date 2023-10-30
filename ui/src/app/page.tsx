@@ -25,7 +25,7 @@ import useUIStore from "@/app/hooks/useUIStore";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { NotificationDisplay } from "@/app/components/notifications/NotificationDisplay";
 import { useMusic } from "@/app/hooks/useMusic";
-import { Menu, Call } from "@/app/types";
+import { Menu, Call, ZeroUpgrade } from "@/app/types";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import Profile from "@/app/containers/ProfileScreen";
 import { DeathDialog } from "@/app/components/adventurer/DeathDialog";
@@ -55,7 +55,6 @@ import Game from "@/app/abi/Game.json";
 import Lords from "@/app/abi/Lords.json";
 import EthBalanceFragment from "@/app/abi/EthBalanceFragment.json";
 import Beasts from "@/app/abi/Beasts.json";
-import { getContracts } from "@/app/lib/constants";
 import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
 import ScreenMenu from "@/app/components/menu/ScreenMenu";
 import { getArcadeConnectors } from "@/app/lib/connectors";
@@ -63,7 +62,7 @@ import Header from "@/app/components/navigation/Header";
 import { checkArcadeBalance } from "@/app/lib/utils";
 import { fetchBalances } from "@/app/lib/balances";
 import useTransactionManager from "./hooks/useTransactionManager";
-import StarknetProvider from "@/app//provider";
+import { StarknetProvider } from "@/app//provider";
 import { SpecialBeast } from "./components/notifications/SpecialBeast";
 import { useBurner } from "@/app/lib/burner";
 import { connectors } from "@/app/lib/connectors";
@@ -148,21 +147,20 @@ function Home({ updateConnectors }: HomeProps) {
   const setSpecialBeastDefeated = useUIStore(
     (state) => state.setSpecialBeastDefeated
   );
-  const contracts = getContracts();
   const { contract: gameContract } = useContract({
-    address: contracts?.game,
+    address: process.env.NEXT_PUBLIC_GAME_ADDRESS,
     abi: Game,
   });
   const { contract: lordsContract } = useContract({
-    address: contracts?.lords,
+    address: process.env.NEXT_PUBLIC_LORDS_ADDRESS,
     abi: Lords,
   });
   const { contract: ethContract } = useContract({
-    address: contracts?.eth,
+    address: process.env.NEXT_PUBLIC_ETH_ADDRESS,
     abi: EthBalanceFragment,
   });
   const { contract: beastsContract } = useContract({
-    address: contracts?.beasts,
+    address: process.env.NEXT_PUBLIC_BEASTS_ADDRESS,
     abi: Beasts,
   });
 
@@ -178,6 +176,9 @@ function Home({ updateConnectors }: HomeProps) {
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const setEquipItems = useUIStore((state) => state.setEquipItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
+  const setPotionAmount = useUIStore((state) => state.setPotionAmount);
+  const setUpgrades = useUIStore((state) => state.setUpgrades);
+  const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const setStartOption = useUIStore((state) => state.setStartOption);
@@ -433,6 +434,15 @@ function Home({ updateConnectors }: HomeProps) {
     }
   }, [arcadeConnectors]);
 
+  useEffect(() => {
+    resetCalls();
+    setDropItems([]);
+    setEquipItems([]);
+    setPotionAmount(0);
+    setPurchaseItems([]);
+    setUpgrades({ ...ZeroUpgrade });
+  }, [adventurer]);
+
   if (!isConnected && introComplete && disconnected) {
     return <WalletSelect />;
   }
@@ -575,6 +585,7 @@ function Home({ updateConnectors }: HomeProps) {
                       attack={attack}
                       flee={flee}
                       gameContract={gameContract!}
+                      beastsContract={beastsContract!}
                     />
                   )}
                   {screen === "inventory" && (
