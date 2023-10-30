@@ -1036,6 +1036,9 @@ mod Game {
         fn get_games_played_snapshot(self: @ContractState) -> GamesPlayedSnapshot {
             self._games_played_snapshot.read()
         }
+        fn can_play(self: @ContractState, golden_token_id: u256) -> bool {
+            _can_play(self, golden_token_id)
+        }
     }
 
     // ------------------------------------------ //
