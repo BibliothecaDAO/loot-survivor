@@ -1622,8 +1622,8 @@ async def run_graphql_api(mongo=None, port="8080"):
 
     ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     ssl_context.load_cert_chain(
-        "/etc/letsencrypt/live/survivor-indexer.realms.world/fullchain.pem",
-        "/etc/letsencrypt/live/survivor-indexer.realms.world/privkey.pem",
+        "/etc/letsencrypt/live/survivor-goerli-indexer.realms.world/fullchain.pem",
+        "/etc/letsencrypt/live/survivor-goerli-indexer.realms.world/privkey.pem",
     )
 
     runner = web.AppRunner(app)

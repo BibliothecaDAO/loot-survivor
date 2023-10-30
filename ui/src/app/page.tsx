@@ -34,6 +34,8 @@ import Settings from "@/app/components/navigation/Settings";
 import MobileHeader from "@/app/components/navigation/MobileHeader";
 import Player from "@/app/components/adventurer/Player";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
+import { useQuery } from "@apollo/client";
+import { goldenTokenClient } from "./lib/clients";
 import {
   getAdventurerById,
   getAdventurersByOwner,
@@ -43,6 +45,7 @@ import {
   getBattlesByBeast,
   getItemsByAdventurer,
   getLatestMarketItems,
+  getGoldenTokensByOwner,
 } from "@/app/hooks/graphql/queries";
 import { ArcadeDialog } from "@/app/components/ArcadeDialog";
 import { TopUpDialog } from "@/app/components/TopUpDialog";
@@ -108,7 +111,7 @@ interface HomeProps {
 }
 
 function Home({ updateConnectors }: HomeProps) {
-  const { connectors } = useConnect();
+  const { connector, connectors } = useConnect();
   const { chain } = useNetwork();
   const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
@@ -234,6 +237,7 @@ function Home({ updateConnectors }: HomeProps) {
       resetCalls,
       setSpecialBeastDefeated,
       setSpecialBeast,
+      connector,
     });
 
   const playState = useMemo(
@@ -314,6 +318,25 @@ function Home({ updateConnectors }: HomeProps) {
   useCustomQuery("beastQuery", getBeast, beastVariables);
 
   useCustomQuery("battlesByBeastQuery", getBattlesByBeast, beastVariables);
+
+  // const {
+  //   data: goldenTokenData,
+  //   error,
+  //   loading,
+  // } = useQuery(gql`
+  //   {
+  //     hello
+  //   }
+  // `);
+
+  const { data: goldenTokenData } = useQuery(getGoldenTokensByOwner, {
+    client: goldenTokenClient,
+    variables: {
+      contractAddress:
+        process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS?.toLowerCase(),
+      owner: padAddress(address ?? ""),
+    },
+  });
 
   const handleSwitchAdventurer = async (adventurerId: number) => {
     setIsLoading();
@@ -547,6 +570,7 @@ function Home({ updateConnectors }: HomeProps) {
                       lordsBalance={lordsBalance}
                       mintLords={async () => await mintLords()}
                       gameContract={gameContract!}
+                      goldenTokenData={goldenTokenData}
                     />
                   )}
                   {screen === "play" && (

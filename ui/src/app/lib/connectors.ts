@@ -14,6 +14,15 @@ export const getWalletConnectors = (connectors: Connector[]) =>
       typeof connector.id !== "string" || !connector.id.includes("0x")
   );
 
+export const providerInterfaceCamel = (provider: string) => {
+  // check provider, braavos interface is camel, argent is snake
+  if (provider === "braavos") {
+    return "1";
+  } else {
+    return "0";
+  }
+};
+
 function argentWebWalletUrl() {
   switch (process.env.NEXT_PUBLIC_NETWORK) {
     case "goerli":

@@ -12,6 +12,7 @@ type AdventurerMetadata = {
   startBlock: u64;
   startingStats: Stats;
   name: u128;
+  interfaceCamel: boolean;
 };
 
 type Stats = {
