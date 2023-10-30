@@ -227,13 +227,6 @@ export const ArcadeIntro = ({
               </p>
             </div>
             <div className="flex flex-col items-center justify-between h-1/2 w-full">
-              <div className="relative w-1/4 h-full">
-                <Image
-                  src={"/scenes/intro/arcade-account.png"}
-                  alt="Arcade Account"
-                  fill={true}
-                />
-              </div>
               <Button
                 onClick={async () => {
                   if (checkNotEnoughPrefundEth) {

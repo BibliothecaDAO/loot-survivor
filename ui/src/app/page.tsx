@@ -575,7 +575,6 @@ function Home({ updateConnectors }: HomeProps) {
                       mintLords={async () => await mintLords()}
                       gameContract={gameContract!}
                       goldenTokenData={goldenTokenData}
-                      goldenTokenContract={goldenTokenContract!}
                     />
                   )}
                   {screen === "play" && (

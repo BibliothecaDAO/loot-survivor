@@ -1,5 +1,5 @@
 import { useState, FormEvent, useEffect } from "react";
-import { Contract } from "starknet";
+import { CallData, Contract } from "starknet";
 import { useAccount, useConnect } from "@starknet-react/core";
 import { TypeAnimation } from "react-type-animation";
 import { MdClose } from "react-icons/md";
@@ -21,7 +21,7 @@ export interface SpawnProps {
   lordsBalance?: bigint;
   mintLords: (...args: any[]) => any;
   goldenTokenData: any;
-  goldenTokenContract: Contract;
+  gameContract: Contract;
 }
 
 export const Spawn = ({
@@ -31,10 +31,11 @@ export const Spawn = ({
   lordsBalance,
   mintLords,
   goldenTokenData,
-  goldenTokenContract,
+  gameContract,
 }: SpawnProps) => {
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
   const [formFilled, setFormFilled] = useState(false);
+  const [usableToken, setUsableToken] = useState<string>("0");
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
@@ -58,29 +59,42 @@ export const Spawn = ({
     setShowWalletTutorial(true);
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmitLords = async () => {
     resetNotification();
-    const goldenToken = await getUsableGoldenToken(getGoldenTokens());
-    await spawn(formData, goldenToken);
+    await spawn(formData, "0");
+  };
+
+  const handleSubmitGoldenToken = async () => {
+    resetNotification();
+    await spawn(formData, usableToken);
   };
 
   const checkEnoughLords = lordsBalance! >= BigInt(25000000000000000000);
 
-  const getGoldenTokens = () => {
-    const tokens = goldenTokenData.getERC721Tokens;
-    return tokens.map((token: GameToken) => token.token_id);
-  };
+  const tokens = goldenTokenData?.getERC721Tokens;
+  const goldenTokens: number[] = tokens?.map(
+    (token: GameToken) => token.token_id
+  );
 
-  const goldenTokenExists = getGoldenTokens().length > 0;
+  const goldenTokenExists = goldenTokens.length > 0;
 
   const getUsableGoldenToken = async (tokenIds: number[]) => {
     // Loop through contract calls to see if the token is usable, if none then return 0
     for (let tokenId of tokenIds) {
-      return tokenId.toString();
+      const canPlay = await gameContract.call(
+        "can_play",
+        CallData.compile([tokenId.toString(), "0"])
+      );
+      if (canPlay) {
+        setUsableToken(tokenId.toString());
+        break;
+      }
     }
-    return "0";
   };
+
+  useEffect(() => {
+    getUsableGoldenToken(goldenTokens);
+  }, []);
 
   return (
     <div className="flex flex-col w-full h-full justify-center">
@@ -152,41 +166,35 @@ export const Spawn = ({
             </>
           ) : (
             <>
-              <form
-                onSubmit={async (e) => {
-                  if (formData) {
-                    await handleSubmit(e);
+              <div className="flex flex-col gap-2">
+                <Button
+                  size={"xl"}
+                  disabled={
+                    !formFilled ||
+                    !account ||
+                    isWrongNetwork ||
+                    loading ||
+                    estimatingFee ||
+                    !checkEnoughLords
                   }
-                }}
-              >
-                <div className="flex flex-col gap-2">
-                  <Button
-                    type="submit"
-                    size={"xl"}
-                    disabled={
-                      !formFilled ||
-                      !account ||
-                      isWrongNetwork ||
-                      loading ||
-                      estimatingFee ||
-                      !checkEnoughLords
-                    }
-                    className="relative"
-                  >
-                    <div className="flex flex-row items-center gap-1 w-full h-full">
-                      <p className="whitespace-nowrap w-3/4 mr-5">
-                        {checkEnoughLords
-                          ? formFilled
-                            ? "Play With Lords Tokens"
-                            : "Fill details"
-                          : "Not enough Lords"}
-                      </p>
-                      <Lords className="absolute self-center sm:w-5 sm:h-5  h-3 w-3 fill-current right-5" />
-                    </div>
-                  </Button>
+                  onClick={() => handleSubmitLords()}
+                  className="relative"
+                >
+                  <div className="flex flex-row items-center gap-1 w-full h-full">
+                    <p className="whitespace-nowrap w-3/4 mr-5">
+                      {checkEnoughLords
+                        ? formFilled
+                          ? "Play With Lords Tokens"
+                          : "Fill details"
+                        : "Not enough Lords"}
+                    </p>
+                    <Lords className="absolute self-center sm:w-5 sm:h-5  h-3 w-3 fill-current right-5" />
+                  </div>
+                </Button>
 
+                <div className="flex flex-row items-center gap-2 w-full">
                   <Button
-                    type="submit"
+                    onClick={() => handleSubmitGoldenToken()}
                     size={"xl"}
                     disabled={
                       !formFilled ||
@@ -194,9 +202,10 @@ export const Spawn = ({
                       isWrongNetwork ||
                       loading ||
                       estimatingFee ||
-                      !goldenTokenExists
+                      !goldenTokenExists ||
+                      usableToken === "0"
                     }
-                    className="relative"
+                    className="relative w-full"
                   >
                     <div className="flex flex-row items-center gap-1 w-full h-full">
                       <p className="whitespace-nowrap w-3/4">
@@ -215,8 +224,16 @@ export const Spawn = ({
                       </div>
                     </div>
                   </Button>
+                  <a
+                    href={process.env.NEXT_PUBLIC_GOLDEN_TOKEN_MINT_URL}
+                    target="_blank"
+                  >
+                    <Button type="button" className="text-black">
+                      Buy
+                    </Button>
+                  </a>
                 </div>
-              </form>
+              </div>
               {!checkEnoughLords && (
                 <Button onClick={mintLords}>Mint Lords</Button>
               )}

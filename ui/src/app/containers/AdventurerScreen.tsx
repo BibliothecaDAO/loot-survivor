@@ -15,7 +15,6 @@ interface AdventurerScreenProps {
   mintLords: (...args: any[]) => any;
   gameContract: Contract;
   goldenTokenData: any;
-  goldenTokenContract: Contract;
 }
 
 /**
@@ -29,7 +28,6 @@ export default function AdventurerScreen({
   mintLords,
   gameContract,
   goldenTokenData,
-  goldenTokenContract,
 }: AdventurerScreenProps) {
   const [activeMenu, setActiveMenu] = useState(0);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
@@ -91,7 +89,7 @@ export default function AdventurerScreen({
             lordsBalance={lordsBalance}
             mintLords={mintLords}
             goldenTokenData={goldenTokenData}
-            goldenTokenContract={goldenTokenContract}
+            gameContract={gameContract}
           />
         </div>
       )}
