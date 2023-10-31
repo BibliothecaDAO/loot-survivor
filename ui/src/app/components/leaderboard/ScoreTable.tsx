@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/app/components/buttons/Button";
-import { Adventurer } from "@/app/types";
+import { Adventurer, Score } from "@/app/types";
 import ScoreRow from "@/app/components/leaderboard/ScoreRow";
 import useUIStore from "@/app/hooks/useUIStore";
 import { getScoresInList } from "@/app/hooks/graphql/queries";
@@ -33,7 +33,7 @@ const ScoreLeaderboardTable = ({
 
   const mergedScores = displayScores.map((item1) => {
     const matchingItem2 = scoresData?.scores.find(
-      (item2: any) => item2.adventurerId === item1.id
+      (item2: Score) => item2.adventurerId === item1.id
     );
 
     return {

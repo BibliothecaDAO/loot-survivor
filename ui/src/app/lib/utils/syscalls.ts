@@ -94,8 +94,8 @@ function handleEquip(
     (event) => event.name === "EquippedItems"
   );
   // Equip items that are not purchases
-  let equippedItems: any[] = [];
-  let unequippedItems: any[] = [];
+  let equippedItems: Item[] = [];
+  let unequippedItems: Item[] = [];
   for (let equippedItemsEvent of equippedItemsEvents) {
     setData("adventurerByIdQuery", {
       adventurers: [equippedItemsEvent.data[0]],

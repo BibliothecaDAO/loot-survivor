@@ -25,7 +25,10 @@ import { NullAdventurer } from "@/app/types";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 
 export interface HeaderProps {
-  multicall: (...args: any[]) => any;
+  multicall: (
+    loadingMessage: string[],
+    notification: string[]
+  ) => Promise<void>;
   mintLords: () => Promise<void>;
   lordsBalance: bigint;
   arcadeConnectors: Connector[];

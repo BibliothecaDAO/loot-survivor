@@ -96,6 +96,7 @@ export interface Battle {
   txHash?: string; // Transaction hash
   blockTime?: Date; // Block time of the battle
   timestamp?: Date; // Indexer timestamp of event process
+  discoveryTime?: Date; // Datetime of beast discovery
 }
 
 export interface Discovery {
@@ -147,6 +148,26 @@ export interface Score {
   txHash?: string; // Hex of the transaction hash
   blockTime?: Date; // Time of the score
   timestamp?: Date; // Indexer timestamp of event process
+}
+
+export interface ProcessedItemLeveledUp {
+  item: string;
+  suffixUnlocked: boolean;
+  prefixesUnlocked: boolean;
+  special1: string;
+  special2: string;
+  special3: string;
+}
+
+export interface AdventurerDied {
+  killedByBeast: number; // Beast ID that killed adventurer
+  killedByObstacle: number; // Obstacle ID that killed adventurer
+  callerAddress: string; // Address of the caller that killed adventurer
+}
+
+export interface SpecialBeast {
+  data: Beast;
+  tokenId: number;
 }
 
 export interface Metadata {

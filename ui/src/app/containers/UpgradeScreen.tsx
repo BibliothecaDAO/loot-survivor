@@ -239,7 +239,7 @@ export default function UpgradeScreen({
   const handleAddUpgradeTx = (
     currentUpgrades?: UpgradeStats,
     potions?: number,
-    items?: any[]
+    items?: ItemPurchase[]
   ) => {
     removeEntrypointFromCalls("upgrade");
     const upgradeTx = {

@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import { ItemPurchase, UpgradeStats, ZeroUpgrade } from "@/app/types";
+import {
+  ItemPurchase,
+  UpgradeStats,
+  ZeroUpgrade,
+  SpecialBeast,
+} from "@/app/types";
 
 export type ScreenPage =
   | "start"
@@ -73,8 +78,8 @@ type State = {
   setSwitchAdventurer: (value: boolean) => void;
   specialBeastDefeated: boolean;
   setSpecialBeastDefeated: (value: boolean) => void;
-  specialBeast: any;
-  setSpecialBeast: (value: any) => void;
+  specialBeast: SpecialBeast | null;
+  setSpecialBeast: (value: SpecialBeast) => void;
 };
 
 const useUIStore = create<State>((set) => ({
