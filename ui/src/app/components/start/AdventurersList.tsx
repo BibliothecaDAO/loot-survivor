@@ -125,7 +125,9 @@ export const AdventurersList = ({
           {filteredAdventurers.length > 0 && (
             <div className="hidden sm:block sm:w-6/12 md:w-6/12 lg:w-2/3 w-full h-full">
               {isLoading.global ? (
-                <LootIconLoader className="m-auto" size="w-10" />
+                <div className="flex justify-center items-center h-full">
+                  <LootIconLoader size="w-10" />
+                </div>
               ) : (
                 <Info
                   adventurer={filteredAdventurers[selectedIndex]}

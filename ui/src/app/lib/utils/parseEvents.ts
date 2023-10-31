@@ -30,6 +30,7 @@ import {
   ERC721TransferEvent,
 } from "@/app/types/events";
 import { processData } from "@/app/lib/utils/processData";
+import { AdventurerClass } from "../classes";
 
 function parseAdventurerState(data: string[]) {
   return {
@@ -211,7 +212,7 @@ function parseEquippedItems(data: string[]) {
 
 export async function parseEvents(
   receipt: InvokeTransactionReceiptResponse,
-  currentAdventurer?: any,
+  currentAdventurer?: AdventurerClass,
   beastsContract?: string,
   event?: string
 ) {
@@ -263,8 +264,9 @@ export async function parseEvents(
               luck: parseInt(raw.data[48]),
             },
             name: parseInt(raw.data[49]),
+            interfaceCamel: convertToBoolean(parseInt(raw.data[50])),
           },
-          revealBlock: parseInt(raw.data[50]),
+          revealBlock: parseInt(raw.data[51]),
         };
         const startGameEvent = processData(
           startGameData,
@@ -734,8 +736,8 @@ export async function parseEvents(
         break;
       case "Transfer":
         const beastTransferData: ERC721TransferEvent = {
-          from: parseInt(raw.data[0]),
-          to: parseInt(raw.data[1]),
+          from: raw.data[0],
+          to: raw.data[1],
           tokenId: {
             low: parseInt(raw.data[2]),
             high: parseInt(raw.data[3]),

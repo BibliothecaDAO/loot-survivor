@@ -5,8 +5,8 @@ import {
   CoinIcon,
   QuestionMarkIcon,
 } from "@/app/components/icons/Icons";
-import { ItemDisplay } from "./ItemDisplay";
-import LevelBar from "./LevelBar";
+import { ItemDisplay } from "@/app/components/adventurer/ItemDisplay";
+import LevelBar from "@/app/components/adventurer/LevelBar";
 import { getKeyFromValue } from "@/app/lib/utils";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -128,7 +128,7 @@ export default function Info({
                 {formatAdventurer.gold === 511 ? "Full" : ""}
               </span>
             </span>
-            <span className="flex items-center ">
+            <span className="flex flex-row gap-1 items-center ">
               <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
               <HealthCountDown health={totalHealth || 0} />
               {`/${maxHealth}`}

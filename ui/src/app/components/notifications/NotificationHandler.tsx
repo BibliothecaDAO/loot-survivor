@@ -238,7 +238,7 @@ export const processNotifications = (
     | UpgradeSummary
     | Error
     | any[],
-  adventurer: Adventurer,
+  adventurer?: Adventurer,
   hasBeast?: boolean,
   battles?: Battle[],
   error?: boolean

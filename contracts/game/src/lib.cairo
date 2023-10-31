@@ -14,10 +14,15 @@ mod Game {
     const TEST_ENTROPY: u64 = 12303548;
     const MAINNET_CHAIN_ID: felt252 = 0x534e5f4d41494e;
     const GOERLI_CHAIN_ID: felt252 = 0x534e5f474f45524c49;
-    const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 100;
+    const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 200;
     const LOOT_NAME_STORAGE_INDEX_1: u8 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u8 = 1;
+    const SECONDS_IN_HOUR: u32 = 3600;
     const SECONDS_IN_DAY: u32 = 86400;
+    const SECONDS_IN_WEEK: u32 = 604800;
+    const PHASE2_START: u8 = 12;
+    const PHASE3_START: u8 = 24;
+
     use core::{
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
         clone::Clone, poseidon::poseidon_hash_span, option::OptionTrait, box::BoxTrait,
@@ -53,7 +58,7 @@ mod Game {
     use super::game::{
         interfaces::{IGame},
         constants::{
-            messages, Week, REWARD_DISTRIBUTIONS_PHASE1_BP, REWARD_DISTRIBUTIONS_PHASE2_BP,
+            messages, Rewards, REWARD_DISTRIBUTIONS_PHASE1_BP, REWARD_DISTRIBUTIONS_PHASE2_BP,
             REWARD_DISTRIBUTIONS_PHASE3_BP, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
             STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS,
             STARTING_GAME_ENTROPY_ROTATION_INTERVAL, MINIMUM_DAMAGE_FROM_BEASTS
@@ -114,6 +119,7 @@ mod Game {
         _golden_token: ContractAddress,
         _cost_to_play: u128,
         _games_played_snapshot: GamesPlayedSnapshot,
+        _terminal_timestamp: u64,
     }
 
     #[event]
@@ -154,13 +160,13 @@ mod Game {
         dao: ContractAddress,
         collectible_beasts: ContractAddress,
         golden_token_address: ContractAddress,
+        terminal_timestamp: u64,
     ) {
-        // set the contract addresses
+        // init storage
         self._lords.write(lords);
         self._dao.write(dao);
         self._collectible_beasts.write(collectible_beasts);
-
-        // set the genesis block
+        self._terminal_timestamp.write(terminal_timestamp);
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
         self._genesis_timestamp.write(starknet::get_block_info().unbox().block_timestamp.into());
 
@@ -204,6 +210,9 @@ mod Game {
             golden_token_id: u256,
             interface_camel: bool
         ) {
+            // assert game terminal time has not been reached
+            _assert_terminal_time_not_reached(@self);
+
             // assert provided weapon
             _assert_valid_starter_weapon(weapon);
 
@@ -215,7 +224,7 @@ mod Game {
             }
 
             // start the game
-            _start_game(ref self, weapon, name);
+            _start_game(ref self, weapon, name, interface_camel);
         }
 
         /// @title Explore Function
@@ -1028,11 +1037,23 @@ mod Game {
         fn get_games_played_snapshot(self: @ContractState) -> GamesPlayedSnapshot {
             self._games_played_snapshot.read()
         }
+        fn can_play(self: @ContractState, golden_token_id: u256) -> bool {
+            _can_play(self, golden_token_id)
+        }
     }
 
     // ------------------------------------------ //
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
+
+    fn _assert_terminal_time_not_reached(self: @ContractState) {
+        let current_timestamp = starknet::get_block_info().unbox().block_timestamp;
+        let terminal_timestamp = self._terminal_timestamp.read();
+        assert(
+            terminal_timestamp == 0 || current_timestamp < terminal_timestamp,
+            messages::TERMINAL_TIME_REACHED
+        );
+    }
 
     fn _slay_idle_adventurer(ref self: ContractState, adventurer_id: felt252) {
         // unpack adventurer from storage (no need for stat boosts)
@@ -1111,8 +1132,12 @@ mod Game {
 
         // if beast beast level is above collectible threshold
         if beast.combat_spec.level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK {
+            // mint beast to the players Primary Account address instead of Arcade Account
+            let primary_address = _get_primary_account_address(
+                @self, _load_adventurer_metadata(@self, adventurer_id).interface_camel
+            );
             // adventurers gets the beast
-            _mint_beast(@self, beast);
+            _mint_beast(@self, beast, primary_address);
         }
     }
 
@@ -1146,7 +1171,7 @@ mod Game {
         adventurer_meta
     }
 
-    fn _mint_beast(self: @ContractState, beast: Beast) {
+    fn _mint_beast(self: @ContractState, beast: Beast, to_address: ContractAddress) {
         let collectible_beasts_contract = ILeetLootDispatcher {
             contract_address: self._collectible_beasts.read()
         };
@@ -1161,7 +1186,7 @@ mod Game {
         if !is_beast_minted && beasts_minter == starknet::get_contract_address() {
             collectible_beasts_contract
                 .mint(
-                    get_caller_address(),
+                    to_address,
                     beast.id,
                     beast.combat_spec.specials.special2,
                     beast.combat_spec.specials.special3,
@@ -1210,158 +1235,154 @@ mod Game {
         self._cost_to_play.read()
     }
 
+    fn _age_of_game_weeks(contract: @ContractState) -> u64 {
+        let genesis_timestamp = contract._genesis_timestamp.read();
+        let current_timestamp = starknet::get_block_info().unbox().block_timestamp;
+        (current_timestamp - genesis_timestamp) / SECONDS_IN_WEEK.into()
+    }
+
+    fn _age_of_game_hours(contract: @ContractState) -> u64 {
+        let genesis_timestamp = contract._genesis_timestamp.read();
+        let current_timestamp = starknet::get_block_info().unbox().block_timestamp;
+        (current_timestamp - genesis_timestamp) / SECONDS_IN_HOUR.into()
+    }
+
+    fn _get_reward_distribution(self: @ContractState) -> Rewards {
+        let cost_to_play = self._cost_to_play.read();
+        let third_place_score = self._leaderboard.read().third.xp;
+
+        // use hours for distribution phases on testnet and weeks for mainnet
+        let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
+        let age_of_game = if chain_id == MAINNET_CHAIN_ID {
+            _age_of_game_weeks(self)
+        } else {
+            _age_of_game_hours(self)
+        };
+
+        // distribute all rewards to DAO until we get a reasonable third place score
+        if (third_place_score < MINIMUM_SCORE_FOR_PAYOUTS) {
+            Rewards {
+                DAO: cost_to_play.into(),
+                INTERFACE: 0,
+                FIRST_PLACE: 0,
+                SECOND_PLACE: 0,
+                THIRD_PLACE: 0
+            }
+        } else if age_of_game > PHASE3_START.into() {
+            // use phase 3 distribution
+            Rewards {
+                DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3_BP::DAO, cost_to_play),
+                INTERFACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE3_BP::INTERFACE, cost_to_play
+                ),
+                FIRST_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE3_BP::FIRST_PLACE, cost_to_play
+                ),
+                SECOND_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE3_BP::SECOND_PLACE, cost_to_play
+                ),
+                THIRD_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE3_BP::THIRD_PLACE, cost_to_play
+                )
+            }
+        } else if age_of_game > PHASE2_START.into() {
+            Rewards {
+                DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE2_BP::DAO, cost_to_play),
+                INTERFACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE2_BP::INTERFACE, cost_to_play
+                ),
+                FIRST_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE2_BP::FIRST_PLACE, cost_to_play
+                ),
+                SECOND_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE2_BP::SECOND_PLACE, cost_to_play
+                ),
+                THIRD_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE2_BP::THIRD_PLACE, cost_to_play
+                )
+            }
+        } else {
+            Rewards {
+                DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, cost_to_play),
+                INTERFACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, cost_to_play
+                ),
+                FIRST_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, cost_to_play
+                ),
+                SECOND_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE1_BP::SECOND_PLACE, cost_to_play
+                ),
+                THIRD_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE1_BP::THIRD_PLACE, cost_to_play
+                )
+            }
+        }
+    }
+
     fn _process_payment_and_distribute_rewards(
         ref self: ContractState, client_address: ContractAddress
     ) {
         let caller = get_caller_address();
-        let block_number = starknet::get_block_info().unbox().block_number;
-
-        let genesis_block = self._genesis_block.read();
         let dao_address = self._dao.read();
-
         let leaderboard = self._leaderboard.read();
         let first_place_address = self._owner.read(leaderboard.first.adventurer_id.into());
         let second_place_address = self._owner.read(leaderboard.second.adventurer_id.into());
         let third_place_address = self._owner.read(leaderboard.third.adventurer_id.into());
 
-        let current_cost_to_play = self._cost_to_play.read();
+        let rewards = _get_reward_distribution(@self);
 
-        // if third place score is less than minimum score for payouts
-        if (leaderboard.third.xp < MINIMUM_SCORE_FOR_PAYOUTS) {
-            // all rewards go to the DAO
-            // the purpose of this is to let a decent set of top scores get set before payouts begin
-            // without this, there would be an incentive to start and die immediately after contract is deployed
-            // to capture the rewards from the launch hype
-            _lords_dispatcher(ref self).transferFrom(caller, dao_address, COST_TO_PLAY.into());
-
-            __event_RewardDistribution(
-                ref self,
-                RewardDistribution {
-                    first_place: PlayerReward {
-                        adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
-                    },
-                    second_place: PlayerReward {
-                        adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
-                    },
-                    third_place: PlayerReward {
-                        adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
-                    },
-                    client: ClientReward { amount: 0, address: dao_address },
-                    dao: current_cost_to_play.into()
-                }
-            );
-            return;
+        if (rewards.DAO != 0) {
+            _lords_dispatcher(ref self).transferFrom(caller, dao_address, rewards.DAO);
         }
 
-        // First phase all rewards go to players
-        let mut week = Week {
-            DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, current_cost_to_play),
-            INTERFACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, current_cost_to_play
-            ),
-            FIRST_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, current_cost_to_play
-            ),
-            SECOND_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::SECOND_PLACE, current_cost_to_play
-            ),
-            THIRD_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::THIRD_PLACE, current_cost_to_play
-            )
-        };
-
-        // after 2 weeks, the DAO gets a share of rewards
-        if (BLOCKS_IN_A_WEEK * 2 + genesis_block) > block_number {
-            week =
-                Week {
-                    DAO: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE2_BP::DAO, current_cost_to_play
-                    ),
-                    INTERFACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE2_BP::INTERFACE, current_cost_to_play
-                    ),
-                    FIRST_PLACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE2_BP::FIRST_PLACE, current_cost_to_play
-                    ),
-                    SECOND_PLACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE2_BP::SECOND_PLACE, current_cost_to_play
-                    ),
-                    THIRD_PLACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE2_BP::THIRD_PLACE, current_cost_to_play
-                    )
-                };
+        if (rewards.INTERFACE != 0) {
+            _lords_dispatcher(ref self).transferFrom(caller, client_address, rewards.INTERFACE);
         }
 
-        // after 8 weeks, client builders start getting rewards
-        if (BLOCKS_IN_A_WEEK * 8 + genesis_block) > block_number {
-            week =
-                Week {
-                    DAO: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE3_BP::DAO, current_cost_to_play
-                    ),
-                    INTERFACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE3_BP::INTERFACE, current_cost_to_play
-                    ),
-                    FIRST_PLACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE3_BP::FIRST_PLACE, current_cost_to_play
-                    ),
-                    SECOND_PLACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE3_BP::SECOND_PLACE, current_cost_to_play
-                    ),
-                    THIRD_PLACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE3_BP::THIRD_PLACE, current_cost_to_play
-                    )
-                }
+        if (rewards.FIRST_PLACE != 0) {
+            _lords_dispatcher(ref self)
+                .transferFrom(caller, first_place_address, rewards.FIRST_PLACE);
         }
 
-        // DAO
-        if (week.DAO != 0) {
-            _lords_dispatcher(ref self).transferFrom(caller, dao_address, week.DAO);
+        if (rewards.SECOND_PLACE != 0) {
+            _lords_dispatcher(ref self)
+                .transferFrom(caller, second_place_address, rewards.SECOND_PLACE);
         }
 
-        // interface
-        if (week.INTERFACE != 0) {
-            _lords_dispatcher(ref self).transferFrom(caller, client_address, week.INTERFACE);
+        if (rewards.THIRD_PLACE != 0) {
+            _lords_dispatcher(ref self)
+                .transferFrom(caller, third_place_address, rewards.THIRD_PLACE);
         }
 
-        // first place
-        _lords_dispatcher(ref self).transferFrom(caller, first_place_address, week.FIRST_PLACE);
-
-        // second place
-        _lords_dispatcher(ref self).transferFrom(caller, second_place_address, week.SECOND_PLACE);
-
-        // third place
-        _lords_dispatcher(ref self).transferFrom(caller, third_place_address, week.THIRD_PLACE);
-
-        // emit reward distribution event
         __event_RewardDistribution(
             ref self,
             RewardDistribution {
                 first_place: PlayerReward {
                     adventurer_id: leaderboard.first.adventurer_id.into(),
                     rank: 1,
-                    amount: week.FIRST_PLACE,
+                    amount: rewards.FIRST_PLACE,
                     address: first_place_address
                 },
                 second_place: PlayerReward {
                     adventurer_id: leaderboard.second.adventurer_id.into(),
                     rank: 2,
-                    amount: week.SECOND_PLACE,
+                    amount: rewards.SECOND_PLACE,
                     address: second_place_address
                 },
                 third_place: PlayerReward {
                     adventurer_id: leaderboard.third.adventurer_id.into(),
                     rank: 3,
-                    amount: week.THIRD_PLACE,
+                    amount: rewards.THIRD_PLACE,
                     address: third_place_address
                 },
-                client: ClientReward { amount: week.INTERFACE, address: client_address },
-                dao: week.DAO
+                client: ClientReward { amount: rewards.INTERFACE, address: client_address },
+                dao: rewards.DAO
             }
         );
     }
 
-    fn _start_game(ref self: ContractState, weapon: u8, name: u128) {
+    fn _start_game(ref self: ContractState, weapon: u8, name: u128, interface_camel: bool) {
         // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._game_counter.read() + 1;
 
@@ -1380,7 +1401,7 @@ mod Game {
         adventurer.set_last_action_block(current_block + _get_reveal_block_delay());
 
         // create meta data for the adventurer
-        let adventurer_meta = ImplAdventurerMetadata::new(name, current_block);
+        let adventurer_meta = ImplAdventurerMetadata::new(name, current_block, interface_camel);
 
         // adventurer immediately gets ambushed by a starter beast
         let beast_battle_details = _starter_beast_ambush(
@@ -2842,7 +2863,7 @@ mod Game {
     #[inline(always)]
     fn _get_testnet_entropy(adventurer_id: felt252, start_block: u64) -> felt252 {
         ImplAdventurer::get_entropy(
-            adventurer_id, starknet::get_block_hash_syscall(start_block - 9).unwrap_syscall()
+            adventurer_id, starknet::get_block_hash_syscall(start_block - 10).unwrap_syscall()
         )
     }
 
@@ -2857,24 +2878,18 @@ mod Game {
     fn _get_reveal_block(self: @ContractState, adventurer_id: felt252) -> u64 {
         let start_block = _load_adventurer_metadata(self, adventurer_id).start_block;
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
-        // wait a full 11 blocks on mainnet so that we can do the minimum current_block - 10 and still get a future block
         if chain_id == MAINNET_CHAIN_ID {
-            start_block + 11
-        } else if chain_id == GOERLI_CHAIN_ID {
-            // on testnet just wait a single block
-            start_block + 1
+            start_block + _get_reveal_block_delay()
         } else {
-            // devnet/testing, just return the start block
-            start_block
+            start_block + _get_reveal_block_delay()
         }
     }
 
     fn _get_reveal_block_delay() -> u64 {
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
+        // delay 11 blocks on mainnet to ensure we can do current_block - 10 and still get a future block
         if chain_id == MAINNET_CHAIN_ID {
             11
-        } else if chain_id == GOERLI_CHAIN_ID {
-            1
         } else {
             0
         }
@@ -2900,6 +2915,14 @@ mod Game {
         }
     }
 
+    fn _update_owner_to_primary_account(ref self: ContractState, adventurer_id: felt252) {
+        let interface_camel = _load_adventurer_metadata(@self, adventurer_id).interface_camel;
+        let primary_address = _get_primary_account_address(@self, interface_camel);
+        if primary_address != self._owner.read(adventurer_id) {
+            self._owner.write(adventurer_id, primary_address)
+        }
+    }
+
     // @title Update Leaderboard Function
     //
     // @param adventurer_id The unique identifier of the adventurer
@@ -2907,6 +2930,10 @@ mod Game {
     fn _update_leaderboard(
         ref self: ContractState, adventurer_id: felt252, adventurer: Adventurer
     ) {
+        // if player was using an Arcade Account (AA), update owner of their adventurer to their Primary Account (PA)
+        // so their rewards get distributed to their PA instead of AA
+        _update_owner_to_primary_account(ref self, adventurer_id);
+
         // get current leaderboard which will be mutated as part of this function
         let mut leaderboard = self._leaderboard.read();
 
@@ -3558,39 +3585,37 @@ mod Game {
         _last_usage(self, token_id) + SECONDS_IN_DAY.into() <= get_block_timestamp().into()
     }
 
-    fn _play_with_token(ref self: ContractState, token_id: u256, interface_camel: bool) {
-        let golden_token = _golden_token_dispatcher(ref self);
-
+    fn _get_primary_account_address(
+        self: @ContractState, interface_camel: bool
+    ) -> ContractAddress {
         let caller = get_caller_address();
-
-        let account_snake = ISRC5Dispatcher { contract_address: caller };
-        let account_camel = ISRC5CamelDispatcher { contract_address: caller };
-
         if interface_camel {
-            let player = if account_camel.supportsInterface(ARCADE_ACCOUNT_ID) {
+            let account_camel = ISRC5CamelDispatcher { contract_address: caller };
+            if account_camel.supportsInterface(ARCADE_ACCOUNT_ID) {
                 IMasterControlDispatcher { contract_address: caller }.get_master_account()
             } else {
                 caller
-            };
-            assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
-            assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
-
-            self
-                ._golden_token_last_use
-                .write(token_id.try_into().unwrap(), get_block_timestamp().into());
+            }
         } else {
-            let player = if account_snake.supports_interface(ARCADE_ACCOUNT_ID) {
+            let account_snake = ISRC5Dispatcher { contract_address: caller };
+            if account_snake.supports_interface(ARCADE_ACCOUNT_ID) {
                 IMasterControlDispatcher { contract_address: caller }.get_master_account()
             } else {
                 caller
-            };
-            assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
-            assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
-
-            self
-                ._golden_token_last_use
-                .write(token_id.try_into().unwrap(), get_block_timestamp().into());
+            }
         }
+    }
+
+    fn _play_with_token(ref self: ContractState, token_id: u256, interface_camel: bool) {
+        assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
+
+        let golden_token = _golden_token_dispatcher(ref self);
+        let player = _get_primary_account_address(@self, interface_camel);
+        assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
+
+        self
+            ._golden_token_last_use
+            .write(token_id.try_into().unwrap(), get_block_timestamp().into());
     }
 
     fn _last_usage(self: @ContractState, token_id: u256) -> u256 {

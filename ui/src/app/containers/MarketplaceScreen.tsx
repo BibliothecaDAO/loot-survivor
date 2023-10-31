@@ -11,7 +11,7 @@ export interface MarketplaceScreenProps {
   upgradeHandler: (
     upgrades?: UpgradeStats,
     potions?: number,
-    purchases?: any[]
+    purchases?: ItemPurchase[]
   ) => void;
   totalCharisma: number;
   adventurerItems: Item[];

@@ -1,5 +1,5 @@
 import { CallData, uint256, Contract } from "starknet";
-import { balanceSchema } from "./utils";
+import { balanceSchema } from "@/app/lib/utils";
 
 export const fetchBalances = async (
   accountName: string,

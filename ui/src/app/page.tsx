@@ -25,7 +25,7 @@ import useUIStore from "@/app/hooks/useUIStore";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { NotificationDisplay } from "@/app/components/notifications/NotificationDisplay";
 import { useMusic } from "@/app/hooks/useMusic";
-import { Menu, Call, ZeroUpgrade } from "@/app/types";
+import { Menu, Call, ZeroUpgrade, BurnerStorage } from "@/app/types";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import Profile from "@/app/containers/ProfileScreen";
 import { DeathDialog } from "@/app/components/adventurer/DeathDialog";
@@ -34,6 +34,8 @@ import Settings from "@/app/components/navigation/Settings";
 import MobileHeader from "@/app/components/navigation/MobileHeader";
 import Player from "@/app/components/adventurer/Player";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
+import { useQuery } from "@apollo/client";
+import { goldenTokenClient } from "@/app/lib/clients";
 import {
   getAdventurerById,
   getAdventurersByOwner,
@@ -43,6 +45,7 @@ import {
   getBattlesByBeast,
   getItemsByAdventurer,
   getLatestMarketItems,
+  getGoldenTokensByOwner,
 } from "@/app/hooks/graphql/queries";
 import { ArcadeDialog } from "@/app/components/ArcadeDialog";
 import { TopUpDialog } from "@/app/components/TopUpDialog";
@@ -58,11 +61,12 @@ import { getArcadeConnectors } from "@/app/lib/connectors";
 import Header from "@/app/components/navigation/Header";
 import { checkArcadeBalance } from "@/app/lib/utils";
 import { fetchBalances } from "@/app/lib/balances";
-import useTransactionManager from "./hooks/useTransactionManager";
+import useTransactionManager from "@/app/hooks/useTransactionManager";
 import { StarknetProvider } from "@/app//provider";
-import { SpecialBeast } from "./components/notifications/SpecialBeast";
+import { SpecialBeast } from "@/app/components/notifications/SpecialBeast";
 import { useBurner } from "@/app/lib/burner";
 import { connectors } from "@/app/lib/connectors";
+import Storage from "@/app/lib/storage";
 import { MainnetDialog } from "./components/MainnetDialog";
 
 const allMenuItems: Menu[] = [
@@ -109,7 +113,7 @@ interface HomeProps {
 }
 
 function Home({ updateConnectors }: HomeProps) {
-  const { connectors } = useConnect();
+  const { connector, connectors } = useConnect();
   const { chain } = useNetwork();
   const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
@@ -206,14 +210,14 @@ function Home({ updateConnectors }: HomeProps) {
 
   const { spawn, explore, attack, flee, upgrade, slayAllIdles, multicall } =
     syscalls({
-      gameContract,
-      lordsContract,
-      beastsContract,
+      gameContract: gameContract!,
+      lordsContract: lordsContract!,
+      beastsContract: beastsContract!,
       addTransaction,
       queryData: data,
       resetData,
       setData,
-      adventurer,
+      adventurer: adventurer!,
       addToCalls,
       calls,
       handleSubmitCalls,
@@ -231,10 +235,11 @@ function Home({ updateConnectors }: HomeProps) {
       showTopUpDialog,
       setTopUpAccount,
       setEstimatingFee,
-      account,
+      account: account!,
       resetCalls,
       setSpecialBeastDefeated,
       setSpecialBeast,
+      connector,
     });
 
   const playState = useMemo(
@@ -315,6 +320,29 @@ function Home({ updateConnectors }: HomeProps) {
   useCustomQuery("beastQuery", getBeast, beastVariables);
 
   useCustomQuery("battlesByBeastQuery", getBattlesByBeast, beastVariables);
+
+  const goldenTokenVariables = useMemo(() => {
+    const storage: BurnerStorage = Storage.get("burners");
+    if (typeof connector?.id === "string" && connector.id.includes("0x")) {
+      const masterAccount = storage[account?.address!].masterAccount;
+      return {
+        contractAddress:
+          process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS?.toLowerCase(),
+        owner: padAddress(masterAccount ?? ""),
+      };
+    } else {
+      return {
+        contractAddress:
+          process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS?.toLowerCase(),
+        owner: padAddress(address ?? ""),
+      };
+    }
+  }, [address]);
+
+  const { data: goldenTokenData } = useQuery(getGoldenTokensByOwner, {
+    client: goldenTokenClient,
+    variables: goldenTokenVariables,
+  });
 
   const handleSwitchAdventurer = async (adventurerId: number) => {
     setIsLoading();
@@ -549,6 +577,7 @@ function Home({ updateConnectors }: HomeProps) {
                       lordsBalance={lordsBalance}
                       mintLords={async () => await mintLords()}
                       gameContract={gameContract!}
+                      goldenTokenData={goldenTokenData}
                     />
                   )}
                   {screen === "play" && (

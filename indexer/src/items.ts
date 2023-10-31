@@ -26,10 +26,11 @@ import {
 } from "./utils/events.ts";
 import { insertItem, updateItemsXP } from "./utils/helpers.ts";
 import { checkExistsInt, encodeIntAsBytes } from "./utils/encode.ts";
-import { MONGO_CONNECTION_STRING, ITEMS_NUMBER } from "./utils/constants.ts";
+import { MONGO_CONNECTION_STRING } from "./utils/constants.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
+const STREAM_URL = Deno.env.get("STREAM_URL");
 
 const filter = {
   header: { weak: true },
@@ -48,7 +49,7 @@ const filter = {
 };
 
 export const config: Config<Starknet, Mongo | Console> = {
-  streamUrl: "https://goerli.starknet.a5a.ch",
+  streamUrl: STREAM_URL,
   network: "starknet",
   filter,
   startingBlock: START,

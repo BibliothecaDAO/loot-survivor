@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Contract } from "starknet";
 import { FormData } from "@/app/types";
 import { AdventurerName } from "@/app/components/start/AdventurerName";
 import { WeaponSelect } from "@/app/components/start/WeaponSelect";
@@ -9,7 +10,9 @@ export interface CreateAdventurerProps {
   onEscape: () => void;
   spawn: (...args: any[]) => any;
   lordsBalance?: bigint;
-  mintLords: (...args: any[]) => any;
+  mintLords: () => Promise<void>;
+  goldenTokenData: any;
+  gameContract: Contract;
 }
 
 export const CreateAdventurer = ({
@@ -18,6 +21,8 @@ export const CreateAdventurer = ({
   spawn,
   lordsBalance,
   mintLords,
+  goldenTokenData,
+  gameContract,
 }: CreateAdventurerProps) => {
   const [formData, setFormData] = useState<FormData>({
     startingWeapon: "",
@@ -110,6 +115,8 @@ export const CreateAdventurer = ({
               handleBack={handleBack}
               lordsBalance={lordsBalance}
               mintLords={mintLords}
+              goldenTokenData={goldenTokenData}
+              gameContract={gameContract}
             />
           </div>
           <div className="sm:hidden">
@@ -131,6 +138,8 @@ export const CreateAdventurer = ({
             handleBack={handleBack}
             lordsBalance={lordsBalance}
             mintLords={mintLords}
+            goldenTokenData={goldenTokenData}
+            gameContract={gameContract}
           />
         </div>
       )}

@@ -16,6 +16,7 @@ import {
   getItemPrice,
   getItemData,
   getValueFromKey,
+  calculateVitBoostRemoved,
 } from "@/app/lib/utils";
 import useUIStore from "@/app/hooks/useUIStore";
 import { useUiSounds } from "@/app/hooks/useUiSound";
@@ -24,13 +25,14 @@ import { Item, NullItem, Call, ItemPurchase, ZeroUpgrade } from "@/app/types";
 import { GameData } from "@/app/lib/data/GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
-import { chunkArray } from "@/app/lib/utils";
 import { UpgradeStats } from "@/app/types";
-import { calculateVitBoostRemoved } from "@/app/lib/utils";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
-  multicall: (...args: any[]) => any;
+  multicall: (
+    loadingMessage: string[],
+    notification: string[]
+  ) => Promise<void>;
   gameContract: Contract;
 }
 
@@ -226,8 +228,6 @@ const TransactionCart = ({
     (stat: any) => stat[1] !== 0
   );
 
-  const formattedSlayedAdventurers = chunkArray(slayAdventurers, 2);
-
   return (
     <>
       {displayCart ? (
@@ -395,28 +395,22 @@ const TransactionCart = ({
                         </div>
                       ) : call.entrypoint === "slay_idle_adventurers" ? (
                         <div className="flex flex-col">
-                          {formattedSlayedAdventurers.map(
-                            (adventurer: string[], index: number) => (
-                              <div className="flex flex-row gap-1" key={index}>
-                                <p className="text-sm">Slay {adventurer[0]}</p>
-                                <button
-                                  onClick={() => {
-                                    clickPlay();
-                                    const newSlayAdventurers =
-                                      formattedSlayedAdventurers.filter(
-                                        (adv) => adv[0] !== adventurer[0]
-                                      );
-                                    setSlayAdventurers(
-                                      newSlayAdventurers.flat()
-                                    );
-                                  }}
-                                  className="text-red-500 hover:text-red-700"
-                                >
-                                  <MdClose size={20} />
-                                </button>
-                              </div>
-                            )
-                          )}
+                          {slayAdventurers.map((id: string, index: number) => (
+                            <div className="flex flex-row gap-1" key={index}>
+                              <p className="text-sm">Slay {id}</p>
+                              <button
+                                onClick={() => {
+                                  clickPlay();
+                                  const newSlayAdventurers =
+                                    slayAdventurers.filter((adv) => adv !== id);
+                                  setSlayAdventurers(newSlayAdventurers);
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <MdClose size={20} />
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       ) : (
                         <p>{call.metadata}</p>

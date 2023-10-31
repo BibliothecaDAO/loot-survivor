@@ -1,5 +1,4 @@
-// import { useState } from "react";
-import { Button } from "../buttons/Button";
+import { Button } from "@/app/components/buttons/Button";
 
 export const WalletTutorial = () => {
   const openInNewTab = (url: string) => {

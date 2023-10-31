@@ -1,12 +1,12 @@
 import React, { useState, ChangeEvent } from "react";
-import { Button } from "../buttons/Button";
 import { AccountInterface } from "starknet";
+import { Button } from "@/app/components/buttons/Button";
 
 interface TopupInputProps {
   balanceType: string;
   increment: number;
   disabled: boolean;
-  topup: (...args: any[]) => Promise<void>;
+  topup: any;
   account: string;
   master: AccountInterface;
   lordsGameAllowance: number;

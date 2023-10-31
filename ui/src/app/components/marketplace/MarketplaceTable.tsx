@@ -13,7 +13,7 @@ export interface MarketplaceTableProps {
   upgradeHandler: (
     upgrades?: UpgradeStats,
     potions?: number,
-    purchases?: any[]
+    purchases?: ItemPurchase[]
   ) => void;
   totalCharisma: number;
   calculatedNewGold: number;

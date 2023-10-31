@@ -1,12 +1,5 @@
 class Config:
-    def __init__(self, network=None, game=None, start_block=None):
-        self.network = network
-        self.GAME_CONTRACT = game
-        if start_block:
-            self.STARTING_BLOCK = int(start_block)
-        else:
-            self.STARTING_BLOCK = start_block
-
+    def __init__(self):
         self.BEASTS = {
             1: "Warlock",
             2: "Typhon",

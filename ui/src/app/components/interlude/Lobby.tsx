@@ -3,8 +3,8 @@ import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { Adventurer, NullAdventurer } from "@/app/types";
 import { useBlock } from "@starknet-react/core";
 import useUIStore from "@/app/hooks/useUIStore";
-import LobbyRow from "./LobbyRow";
-import { Button } from "../buttons/Button";
+import LobbyRow from "@/app/components/interlude/LobbyRow";
+import { Button } from "@/app/components/buttons/Button";
 
 export default function Lobby() {
   const [currentPage, setCurrentPage] = useState<number>(1);

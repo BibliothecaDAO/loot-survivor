@@ -49,6 +49,10 @@ export function padAddress(address: string) {
   }
 }
 
+export function isChecksumAddress(address: string) {
+  return /^0x[0-9a-f]{63,64}$/.test(address);
+}
+
 export function displayAddress(string: string) {
   if (string === undefined) return "unknown";
   return string.substring(0, 6) + "..." + string.substring(string.length - 4);
@@ -363,9 +367,9 @@ export function getDeathMessageByRank(rank: number): string {
 export async function checkArcadeBalance(
   calls: Call[],
   ethBalance: bigint,
-  showTopUpDialog: (...args: any[]) => any,
-  setTopUpAccount: (...args: any[]) => any,
-  setEstimatingFee: (...args: any[]) => any,
+  showTopUpDialog: (value: boolean) => void,
+  setTopUpAccount: (value: string) => void,
+  setEstimatingFee: (value: boolean) => void,
   account?: AccountInterface
 ) {
   if (ethBalance < FEE_CHECK_BALANCE) {
@@ -399,7 +403,7 @@ export async function checkArcadeBalance(
     //   }
     // }
     showTopUpDialog(true);
-    setTopUpAccount(account?.address);
+    setTopUpAccount(account?.address ?? "");
     return true;
   } else {
     return false;
@@ -439,7 +443,7 @@ export const fetchBlockTime = async (currentBlock: number) => {
 export const calculateVitBoostRemoved = (
   purchases: ItemPurchase[],
   adventurer: Adventurer,
-  items: any[]
+  items: Item[]
 ) => {
   const gameData = new GameData();
   const equippedItems = purchases.filter((purchase) => purchase.equip === "1");
@@ -459,7 +463,8 @@ export const calculateVitBoostRemoved = (
           parseInt(
             getKeyFromValue(
               gameData.ITEM_SUFFIXES,
-              items.find((item) => item.item === adventurer.weapon)?.special1
+              items.find((item) => item.item === adventurer.weapon)?.special1 ??
+                ""
             ) ?? "0"
           )
         ]
@@ -471,7 +476,8 @@ export const calculateVitBoostRemoved = (
           parseInt(
             getKeyFromValue(
               gameData.ITEM_SUFFIXES,
-              items.find((item) => item.item === adventurer.chest)?.special1
+              items.find((item) => item.item === adventurer.chest)?.special1 ??
+                ""
             ) ?? "0"
           )
         ]
@@ -483,7 +489,8 @@ export const calculateVitBoostRemoved = (
           parseInt(
             getKeyFromValue(
               gameData.ITEM_SUFFIXES,
-              items.find((item) => item.item === adventurer.head)?.special1
+              items.find((item) => item.item === adventurer.head)?.special1 ??
+                ""
             ) ?? "0"
           )
         ]
@@ -495,7 +502,8 @@ export const calculateVitBoostRemoved = (
           parseInt(
             getKeyFromValue(
               gameData.ITEM_SUFFIXES,
-              items.find((item) => item.item === adventurer.waist)?.special1
+              items.find((item) => item.item === adventurer.waist)?.special1 ??
+                ""
             ) ?? "0"
           )
         ]
@@ -507,7 +515,8 @@ export const calculateVitBoostRemoved = (
           parseInt(
             getKeyFromValue(
               gameData.ITEM_SUFFIXES,
-              items.find((item) => item.item === adventurer.foot)?.special1
+              items.find((item) => item.item === adventurer.foot)?.special1 ??
+                ""
             ) ?? "0"
           )
         ]
@@ -519,7 +528,8 @@ export const calculateVitBoostRemoved = (
           parseInt(
             getKeyFromValue(
               gameData.ITEM_SUFFIXES,
-              items.find((item) => item.item === adventurer.hand)?.special1
+              items.find((item) => item.item === adventurer.hand)?.special1 ??
+                ""
             ) ?? "0"
           )
         ]
@@ -531,7 +541,8 @@ export const calculateVitBoostRemoved = (
           parseInt(
             getKeyFromValue(
               gameData.ITEM_SUFFIXES,
-              items.find((item) => item.item === adventurer.neck)?.special1
+              items.find((item) => item.item === adventurer.neck)?.special1 ??
+                ""
             ) ?? "0"
           )
         ]
@@ -543,7 +554,8 @@ export const calculateVitBoostRemoved = (
           parseInt(
             getKeyFromValue(
               gameData.ITEM_SUFFIXES,
-              items.find((item) => item.item === adventurer.ring)?.special1
+              items.find((item) => item.item === adventurer.ring)?.special1 ??
+                ""
             ) ?? "0"
           )
         ]

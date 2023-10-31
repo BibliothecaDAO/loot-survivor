@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, ChangeEvent } from "react";
 import { AccountInterface, Contract } from "starknet";
 import {
   Connector,
   useAccount,
   useConnect,
   useDisconnect,
+  useContract,
 } from "@starknet-react/core";
 import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "@/app/components/buttons/Button";
@@ -12,12 +13,15 @@ import { useBurner } from "@/app/lib/burner";
 import { MIN_BALANCE } from "@/app/lib/constants";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import { fetchBalances } from "@/app/lib/balances";
+import { isChecksumAddress, padAddress, indexAddress } from "../lib/utils";
 import Lords from "public/icons/lords.svg";
 import Eth from "public/icons/eth-2.svg";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import TopupInput from "@/app/components/arcade/TopupInput";
-// import Image from "next/image";
+import ArcadeAccount from "@/app/abi/ArcadeAccount.json";
+import Storage from "@/app/lib/storage";
+import { BurnerStorage } from "@/app/types";
 
 interface ArcadeDialogProps {
   gameContract: Contract;
@@ -33,6 +37,11 @@ export const ArcadeDialog = ({
   updateConnectors,
 }: ArcadeDialogProps) => {
   const [fetchedBalances, setFetchedBalances] = useState(false);
+  const [recoverArcade, setRecoverArcade] = useState(false);
+  const [recoveryAddress, setRecoveryAddress] = useState<string | undefined>();
+  const [recoveryMasterAddress, setRecoveryMasterAddress] = useState<
+    string | undefined
+  >();
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
@@ -62,6 +71,20 @@ export const ArcadeDialog = ({
   const arcadeConnectors = useCallback(() => {
     return getArcadeConnectors(connectors);
   }, [connectors]);
+
+  const walletConnectors = getWalletConnectors(connectors);
+  const walletConnected = walletConnectors.some(
+    (walletConnector) => walletConnector == connector
+  );
+
+  const formattedRecoveryAddress = padAddress(
+    padAddress(recoveryAddress ?? "")
+  );
+
+  const { contract: arcadeContract } = useContract({
+    address: formattedRecoveryAddress,
+    abi: ArcadeAccount,
+  });
 
   const getBalances = async () => {
     const localBalances: Record<
@@ -108,9 +131,38 @@ export const ArcadeDialog = ({
     });
   };
 
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { value } = e.target;
+    setRecoveryAddress(value);
+  };
+
+  const handleGetMaster = async () => {
+    const masterAccount = await arcadeContract?.call("get_master_account");
+    setRecoveryMasterAddress("0x" + masterAccount?.toString(16));
+  };
+
   useEffect(() => {
     getBalances();
   }, [arcadeConnectors, fetchedBalances]);
+
+  useEffect(() => {
+    if (isChecksumAddress(formattedRecoveryAddress)) {
+      handleGetMaster();
+    }
+  }, [recoveryAddress]);
+
+  const isMasterAccount =
+    padAddress(address ?? "") === padAddress(recoveryMasterAddress ?? "");
+  const recoveryAccountExists = () => {
+    const storage: BurnerStorage = Storage.get("burners");
+    if (storage) {
+      return Object.keys(storage).includes(formattedRecoveryAddress ?? "");
+    } else {
+      return false;
+    }
+  };
 
   if (!connectors) return <div></div>;
 
@@ -119,59 +171,112 @@ export const ArcadeDialog = ({
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
       <div className="fixed flex flex-col text-center items-center justify-between sm:top-1/8 sm:left-1/8 sm:left-1/4 sm:w-3/4 sm:w-1/2 h-full sm:h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4">
         <h3 className="mt-4">Arcade Accounts</h3>
-        <div className="flex flex-col">
-          <p className="m-2 text-sm xl:text-xl 2xl:text-2xl">
-            Go deep into the mist with signature free gameplay! Simply connect
-            your wallet and create a free arcade account.
-          </p>
-
-          <div className="flex justify-center mb-1">
-            {(connector?.id == "argentX" ||
-              connector?.id == "braavos" ||
-              connector?.id == "argentWebWallet") && (
-              <div>
-                <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                  Note: This will initiate a transfer of 0.001 ETH & 250 LORDS
-                  from your connected wallet to the arcade account to cover your
-                  transaction costs from normal gameplay.
-                </p>
-                <Button
-                  onClick={async () => {
-                    await create(connector);
-                    connect({ connector: listConnectors()[0] });
-                    updateConnectors();
-                  }}
-                  disabled={isWrongNetwork}
-                >
-                  create arcade account
-                </Button>
-              </div>
+        {recoverArcade ? (
+          <div className="flex flex-col items-center gap-5 h-3/4 w-full">
+            <p className="text-3xl uppercase">Recover Arcade</p>
+            <p className="text-lg">Enter address of the Arcade Account.</p>
+            <input
+              type="text"
+              name="address"
+              onChange={handleChange}
+              className="p-1 m-2 bg-terminal-black border border-terminal-green animate-pulse transform w-1/2 2xl:h-16 2xl:text-4xl"
+              maxLength={66}
+            />
+            {recoveryAddress && !isMasterAccount && (
+              <>
+                <p className="text-lg">Connect Master Account</p>
+                {walletConnectors.map((connector, index) => (
+                  <Button
+                    disabled={
+                      !isChecksumAddress(formattedRecoveryAddress) ||
+                      isMasterAccount
+                    }
+                    onClick={() => {
+                      disconnect();
+                      connect({ connector });
+                    }}
+                    key={index}
+                  >
+                    {connector.id === "braavos" || connector.id === "argentX"
+                      ? `Connect ${connector.id}`
+                      : "Login With Email"}
+                  </Button>
+                ))}
+              </>
             )}
+            <Button
+              onClick={async () => {
+                await genNewKey(formattedRecoveryAddress, connector!);
+                updateConnectors();
+                setRecoverArcade(false);
+              }}
+              disabled={!isMasterAccount || recoveryAccountExists()}
+              className="w-1/4"
+            >
+              {recoveryAccountExists()
+                ? "Account Already Stored"
+                : "Recover Account"}
+            </Button>
           </div>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 2xl:grid-cols-4 gap-4 overflow-hidden my-6 h-1/2 w-full overflow-y-auto default-scroll">
-          {arcadeConnectors().map((account, index) => {
-            const masterAccount = getMasterAccount(account.name);
-            return (
-              <ArcadeAccountCard
-                key={index}
-                account={account}
-                disconnect={disconnect}
-                address={address!}
-                walletAccount={walletAccount!}
-                masterAccountAddress={masterAccount}
-                arcadeConnectors={arcadeConnectors()}
-                genNewKey={genNewKey}
-                balances={arcadebalances[account.name]}
-                getAccountBalances={getAccountBalances}
-                topUpEth={topUpEth}
-                topUpLords={topUpLords}
-                withdraw={withdraw}
-                isWithdrawing={isWithdrawing}
-              />
-            );
-          })}
-        </div>
+        ) : (
+          <>
+            <div className="flex flex-col">
+              <p className="m-2 text-sm xl:text-xl 2xl:text-2xl">
+                Go deep into the mist with signature free gameplay! Simply
+                connect your wallet and create a free arcade account.
+              </p>
+
+              <div className="flex justify-center mb-1">
+                <div className="flex flex-col">
+                  <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
+                    Note: Creating an account will initiate a transfer of 0.001
+                    ETH & 250 LORDS from your connected wallet to the arcade
+                    account to cover your transaction costs from gameplay.
+                  </p>
+                  <div className="flex flex-row justify-center gap-5">
+                    <Button
+                      onClick={async () => {
+                        await create(connector!);
+                        connect({ connector: listConnectors()[0] });
+                        updateConnectors();
+                      }}
+                      disabled={isWrongNetwork || !walletConnected}
+                    >
+                      Create Account
+                    </Button>
+                    <Button onClick={() => setRecoverArcade(true)}>
+                      Recover Account
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 2xl:grid-cols-4 gap-4 overflow-hidden my-6 h-1/2 w-full overflow-y-auto default-scroll">
+              {arcadeConnectors().map((account, index) => {
+                const masterAccount = getMasterAccount(account.name);
+                return (
+                  <ArcadeAccountCard
+                    key={index}
+                    account={account}
+                    disconnect={disconnect}
+                    address={address!}
+                    walletAccount={walletAccount!}
+                    connector={connector!}
+                    masterAccountAddress={masterAccount}
+                    arcadeConnectors={arcadeConnectors()}
+                    genNewKey={genNewKey}
+                    balances={arcadebalances[account.name]}
+                    getAccountBalances={getAccountBalances}
+                    topUpEth={topUpEth}
+                    topUpLords={topUpLords}
+                    withdraw={withdraw}
+                    isWithdrawing={isWithdrawing}
+                  />
+                );
+              })}
+            </div>
+          </>
+        )}
         <Button
           onClick={() => showArcadeDialog(!arcadeDialog)}
           className="w-1/2 sm:w-1/4"
@@ -200,9 +305,10 @@ interface ArcadeAccountCardProps {
   disconnect: () => void;
   address: string;
   walletAccount: AccountInterface;
+  connector: Connector;
   masterAccountAddress: string;
-  arcadeConnectors: any[];
-  genNewKey: (address: string) => Promise<void>;
+  arcadeConnectors: Connector[];
+  genNewKey: (address: string, connector: Connector) => Promise<void>;
   balances: { eth: bigint; lords: bigint; lordsGameAllowance: bigint };
   getAccountBalances: (address: string) => Promise<void>;
   topUpEth: (address: string, account: AccountInterface) => Promise<any>;
@@ -226,6 +332,7 @@ export const ArcadeAccountCard = ({
   disconnect,
   address,
   walletAccount,
+  connector,
   masterAccountAddress,
   arcadeConnectors,
   genNewKey,
@@ -277,7 +384,7 @@ export const ArcadeAccountCard = ({
             variant={connected ? "default" : "outline"}
             size={"md"}
           >
-            {account.id}
+            {indexAddress(account.id)}
           </Button>
           {isCopied && <span>Copied!</span>}
         </div>
@@ -382,7 +489,7 @@ export const ArcadeAccountCard = ({
         {masterAccountAddress == walletAccount?.address && (
           <Button
             variant={"ghost"}
-            onClick={async () => await genNewKey(account.name)}
+            onClick={async () => await genNewKey(account.name, connector!)}
           >
             Create New Keys
           </Button>

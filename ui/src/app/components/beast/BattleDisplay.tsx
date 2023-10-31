@@ -1,12 +1,7 @@
-import TwitterShareButton from "../buttons/TwitterShareButtons";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
+import TwitterShareButton from "@/app/components/buttons/TwitterShareButtons";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { processBeastName, getBeastData } from "@/app/lib/utils";
 import { Battle } from "@/app/types";
-// import Head from "public/icons/loot/head.svg";
-// import Hand from "public/icons/loot/hand.svg";
-// import Chest from "public/icons/loot/chest.svg";
-// import Waist from "public/icons/loot/waist.svg";
-// import Foot from "public/icons/loot/foot.svg";
 import {
   GiWalkingBootIcon,
   GiFootTripIcon,
@@ -19,21 +14,6 @@ interface BattleDisplayProps {
   beastName: string;
 }
 
-// const getAttackLocationIcon = (attackLocation: string) => {
-//   if (!attackLocation) return null;
-
-//   if (attackLocation == "Hand")
-//     return <Hand className="self-center w-6 h-6 fill-current" />;
-//   if (attackLocation == "Chest")
-//     return <Chest className="self-center w-6 h-6 fill-current" />;
-//   if (attackLocation == "Waist")
-//     return <Waist className="self-center w-6 h-6 fill-current" />;
-//   if (attackLocation == "Foot")
-//     return <Foot className="self-center w-6 h-6 fill-current" />;
-//   if (attackLocation == "Head")
-//     return <Head className="self-center w-6 h-6 fill-current" />;
-// };
-
 /**
  * @component
  * @description Displays the battle results.
@@ -43,7 +23,6 @@ export const BattleDisplay = ({
   beastName,
 }: BattleDisplayProps) => {
   const damageLocation = battleData?.damageLocation ?? "";
-  // const damageIcon = getAttackLocationIcon(damageLocation);
   const BeastFled = battleData.fled;
   const AdventurerAttack = battleData.attacker === "Adventurer";
   const BeastAttack = battleData.attacker === "Beast";

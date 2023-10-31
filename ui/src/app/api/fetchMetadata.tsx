@@ -34,7 +34,7 @@ export const fetchBeastImage = async (
     console.error("Error in response:", data);
   }
 
-  const value: any = [];
+  const value: string[] = [];
   for (let i = 2; i < data.result?.length; i++) {
     let result = shortString.decodeShortString(data.result[i]);
     value.push(result);
@@ -85,7 +85,7 @@ export const fetchGoldenTokenImage = async (goldenTokenAddress: string) => {
     console.error("Error in response:", data);
   }
 
-  const value: any = [];
+  const value: string[] = [];
   for (let i = 2; i < data.result.length; i++) {
     let result = shortString.decodeShortString(data.result[i]);
     value.push(result);
