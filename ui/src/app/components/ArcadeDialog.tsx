@@ -20,8 +20,8 @@ import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import TopupInput from "@/app/components/arcade/TopupInput";
 import ArcadeAccount from "@/app/abi/ArcadeAccount.json";
-import Storage from "../lib/storage";
-import { BurnerStorage } from "../types";
+import Storage from "@/app/lib/storage";
+import { BurnerStorage } from "@/app/types";
 
 interface ArcadeDialogProps {
   gameContract: Contract;

@@ -1,9 +1,9 @@
 import { useState } from "react";
+import { Contract } from "starknet";
 import { Button } from "@/app/components/buttons/Button";
 import { Adventurer } from "@/app/types";
 import LiveRow from "@/app/components/leaderboard/LiveRow";
 import useUIStore from "@/app/hooks/useUIStore";
-import { Contract } from "starknet";
 
 export interface LiveLeaderboardTableProps {
   itemsPerPage: number;

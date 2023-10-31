@@ -35,7 +35,7 @@ import MobileHeader from "@/app/components/navigation/MobileHeader";
 import Player from "@/app/components/adventurer/Player";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
 import { useQuery } from "@apollo/client";
-import { goldenTokenClient } from "./lib/clients";
+import { goldenTokenClient } from "@/app/lib/clients";
 import {
   getAdventurerById,
   getAdventurersByOwner,
@@ -61,12 +61,12 @@ import { getArcadeConnectors } from "@/app/lib/connectors";
 import Header from "@/app/components/navigation/Header";
 import { checkArcadeBalance } from "@/app/lib/utils";
 import { fetchBalances } from "@/app/lib/balances";
-import useTransactionManager from "./hooks/useTransactionManager";
+import useTransactionManager from "@/app/hooks/useTransactionManager";
 import { StarknetProvider } from "@/app//provider";
-import { SpecialBeast } from "./components/notifications/SpecialBeast";
+import { SpecialBeast } from "@/app/components/notifications/SpecialBeast";
 import { useBurner } from "@/app/lib/burner";
 import { connectors } from "@/app/lib/connectors";
-import Storage from "./lib/storage";
+import Storage from "@/app/lib/storage";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },

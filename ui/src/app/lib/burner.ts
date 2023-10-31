@@ -11,11 +11,11 @@ import {
   selector,
   Contract,
 } from "starknet";
+import { Connector } from "@starknet-react/core";
 import Storage from "@/app/lib/storage";
 import { ArcadeConnector } from "@/app/lib/arcade";
 import { BurnerStorage } from "@/app/types";
-import { Connector } from "@starknet-react/core";
-import { padAddress } from "./utils";
+import { padAddress } from "@/app/lib/utils";
 
 export const ETH_PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
 export const LORDS_PREFUND_AMOUNT = "0x0d8d726b7177a80000"; // 250LORDS
