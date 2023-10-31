@@ -7,16 +7,15 @@ import useLoadingStore from "@/app/hooks/useLoadingStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { processBeastName } from "@/app/lib/utils";
-import { Battle, NullBeast } from "@/app/types";
+import { Battle, NullBeast, ButtonData, Beast } from "@/app/types";
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import InterludeScreen from "@/app/containers/InterludeScreen";
-import { ButtonData } from "@/app/types";
 import ActionMenu from "@/app/components/menu/ActionMenu";
 
 interface BeastScreenProps {
-  attack: (...args: any[]) => any;
-  flee: (...args: any[]) => any;
+  attack: (tillDeath: boolean, beastData: Beast) => Promise<void>;
+  flee: (tillDeath: boolean, beastData: Beast) => Promise<void>;
   beastsContract: Contract;
 }
 

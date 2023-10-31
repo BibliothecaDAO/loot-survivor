@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Metadata } from "../types";
+import { Metadata, TransactionParams } from "../types";
 
 export interface ManagedTransaction<Metadata extends object> {
   /** The transaction hash. */
@@ -11,13 +11,7 @@ export interface ManagedTransaction<Metadata extends object> {
 type TransactionManagerState = {
   transactions: ManagedTransaction<Metadata>[];
   hashes: string[];
-  addTransaction: ({
-    hash,
-    metadata,
-  }: {
-    hash: string;
-    metadata?: Metadata;
-  }) => void;
+  addTransaction: ({ hash, metadata }: TransactionParams) => void;
   removeTransaction: ({ hash }: { hash: string }) => void;
 };
 

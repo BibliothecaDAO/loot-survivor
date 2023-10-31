@@ -259,7 +259,7 @@ export const useBurner = ({
   );
 
   const setPermissionsAndApproval = useCallback(
-    async (accountAAFinalAdress: any, walletAccount: any) => {
+    async (accountAAFinalAdress: string, walletAccount: AccountInterface) => {
       const permissions: Call[] = [
         {
           contractAddress: accountAAFinalAdress,

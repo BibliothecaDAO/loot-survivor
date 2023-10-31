@@ -307,7 +307,7 @@ interface ArcadeAccountCardProps {
   walletAccount: AccountInterface;
   connector: Connector;
   masterAccountAddress: string;
-  arcadeConnectors: any[];
+  arcadeConnectors: Connector[];
   genNewKey: (address: string, connector: Connector) => Promise<void>;
   balances: { eth: bigint; lords: bigint; lordsGameAllowance: bigint };
   getAccountBalances: (address: string) => Promise<void>;

@@ -18,7 +18,7 @@ import { ProfileIcon, SkullIcon } from "@/app/components/icons/Icons";
 import { Contract } from "starknet";
 
 interface LeaderboardScreenProps {
-  slayAllIdles: (...args: any[]) => any;
+  slayAllIdles: (slayAdventurers: number[]) => Promise<void>;
   gameContract: Contract;
 }
 

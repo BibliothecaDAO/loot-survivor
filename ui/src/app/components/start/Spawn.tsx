@@ -16,10 +16,10 @@ import Lords from "public/icons/lords.svg";
 
 export interface SpawnProps {
   formData: FormData;
-  spawn: (...args: any[]) => any;
+  spawn: (formData: FormData, goldenTokenId: string) => Promise<void>;
   handleBack: () => void;
   lordsBalance?: bigint;
-  mintLords: (...args: any[]) => any;
+  mintLords: () => Promise<void>;
   goldenTokenData: any;
   gameContract: Contract;
 }
