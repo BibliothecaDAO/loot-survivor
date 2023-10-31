@@ -4,7 +4,7 @@ import { Button } from "@/app/components/buttons/Button";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { getPotionPrice } from "@/app/lib/utils";
 import { UpgradeStats } from "@/app/types";
-import { CoinIcon } from "../icons/Icons";
+import { CoinIcon } from "@/app/components/icons/Icons";
 
 interface PurchaseHealthProps {
   upgradeTotalCost: number;

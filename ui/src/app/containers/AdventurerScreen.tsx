@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Contract } from "starknet";
 import { AdventurersList } from "@/app/components/start/AdventurersList";
 import { CreateAdventurer } from "@/app/components/start/CreateAdventurer";
 import ButtonMenu from "@/app/components/menu/ButtonMenu";
@@ -6,7 +7,6 @@ import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { NullAdventurer } from "@/app/types";
 import useUIStore from "@/app/hooks/useUIStore";
-import { Contract } from "starknet";
 
 interface AdventurerScreenProps {
   spawn: (...args: any[]) => any;
@@ -14,6 +14,7 @@ interface AdventurerScreenProps {
   lordsBalance?: bigint;
   mintLords: (...args: any[]) => any;
   gameContract: Contract;
+  goldenTokenData: any;
 }
 
 /**
@@ -26,6 +27,7 @@ export default function AdventurerScreen({
   lordsBalance,
   mintLords,
   gameContract,
+  goldenTokenData,
 }: AdventurerScreenProps) {
   const [activeMenu, setActiveMenu] = useState(0);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
@@ -86,6 +88,8 @@ export default function AdventurerScreen({
             spawn={spawn}
             lordsBalance={lordsBalance}
             mintLords={mintLords}
+            goldenTokenData={goldenTokenData}
+            gameContract={gameContract}
           />
         </div>
       )}

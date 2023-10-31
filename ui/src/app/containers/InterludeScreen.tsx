@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { useBlock } from "@starknet-react/core";
-import { EntropyCountDown } from "../components/CountDown";
-import Hints from "../components/interlude/Hints";
-import { fetchAverageBlockTime } from "../lib/utils";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-// import { fetchBlockTime } from "../lib/utils";
+import { EntropyCountDown } from "@/app/components/CountDown";
+import Hints from "@/app/components/interlude/Hints";
+import { fetchAverageBlockTime } from "@/app/lib/utils";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
 export default function InterludeScreen() {
   const { adventurer } = useAdventurerStore();
@@ -29,10 +28,6 @@ export default function InterludeScreen() {
     const blockDifference = nextBlockHashBlock - adventurerStartBlock;
     const secondsUntilNextEntropy = blockDifference * averageBlockTime;
     const adventurerCreatedTime = new Date(adventurer?.createdTime!).getTime();
-    // const previousBlocktimePlus1 =
-    //   (await fetchBlockTime(adventurer?.startBlock! - 1)) * 1000;
-    // const previousBlocktime = previousBlocktimePlus1 + averageBlockTime * 1000;
-    // const nextEntropyTime = previousBlocktime + secondsUntilNextEntropy * 1000;
     const nextEntropyTime =
       adventurerCreatedTime + secondsUntilNextEntropy * 1000;
     setNextEntropyTime(nextEntropyTime);

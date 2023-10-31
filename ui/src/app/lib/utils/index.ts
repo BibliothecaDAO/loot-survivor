@@ -49,6 +49,10 @@ export function padAddress(address: string) {
   }
 }
 
+export function isChecksumAddress(address: string) {
+  return /^0x[0-9a-f]{63,64}$/.test(address);
+}
+
 export function displayAddress(string: string) {
   if (string === undefined) return "unknown";
   return string.substring(0, 6) + "..." + string.substring(string.length - 4);

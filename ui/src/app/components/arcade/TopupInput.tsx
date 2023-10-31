@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent } from "react";
-import { Button } from "../buttons/Button";
 import { AccountInterface } from "starknet";
+import { Button } from "@/app/components/buttons/Button";
 
 interface TopupInputProps {
   balanceType: string;

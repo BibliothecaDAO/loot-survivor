@@ -264,8 +264,9 @@ export async function parseEvents(
               luck: parseInt(raw.data[48]),
             },
             name: parseInt(raw.data[49]),
+            interfaceCamel: convertToBoolean(parseInt(raw.data[50])),
           },
-          revealBlock: parseInt(raw.data[50]),
+          revealBlock: parseInt(raw.data[51]),
         };
         const startGameEvent = processData(
           startGameData,

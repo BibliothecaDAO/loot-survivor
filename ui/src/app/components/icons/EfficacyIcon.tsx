@@ -22,7 +22,15 @@ const EfficacyDisplay = ({
   className,
 }: EfficacyDisplayProps) => {
   const efficacy = type?.split(" ")[0].toLowerCase();
-  const classes = `fill-current ${size} ${className}`;
+  const sizeNumber = Number(size.match(/\d+/)?.[0]); // Extract the number from size
+
+  if (isNaN(sizeNumber)) {
+    // Handle case where size is not a valid number
+    console.error(`Invalid size prop: ${size}`);
+    return null; // or return some default value
+  }
+
+  const classes = `fill-current w-${sizeNumber} h-${sizeNumber} ${className}`;
   const Components: { [key in string]: ReactElement } = {
     blade: <BladeIcon className={classes} />,
     bludgeon: <BludgeonIcon className={classes} />,

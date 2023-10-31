@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Contract } from "starknet";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import Image from "next/image";
 import {
   ETH_PREFUND_AMOUNT,
   LORDS_PREFUND_AMOUNT,
@@ -10,10 +9,10 @@ import {
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import { getWalletConnectors } from "@/app/lib/connectors";
-import Lords from "public/icons/lords.svg";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Call } from "@/app/types";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
+import Lords from "public/icons/lords.svg";
 
 interface ArcadeIntroProps {
   ethBalance: bigint;
@@ -227,19 +226,13 @@ export const ArcadeIntro = ({
               </p>
             </div>
             <div className="flex flex-col items-center justify-between h-1/2 w-full">
-              <div className="relative w-1/4 h-full">
-                <Image
-                  src={"/scenes/intro/arcade-account.png"}
-                  alt="Arcade Account"
-                  fill={true}
-                />
-              </div>
               <Button
                 onClick={async () => {
                   if (checkNotEnoughPrefundEth) {
                     window.open("https://faucet.goerli.starknet.io/", "_blank");
                   } else {
                     await create(connector!);
+                    disconnect();
                     connect({ connector: listConnectors()[0] });
                     updateConnectors();
                     showArcadeIntro(false);

@@ -175,6 +175,7 @@ export const parseAdventurerMetadata = combineParsers({
   startBlock: { index: 0, parser: parseU128 },
   startingStats: { index: 1, parser: parseStats },
   name: { index: 2, parser: parseU128 },
+  interfaceCamel: { index: 3, parser: parseBoolean },
 });
 
 export const parseStartGame = combineParsers({

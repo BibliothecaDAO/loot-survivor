@@ -1,7 +1,7 @@
 import * as React from "react";
+import Link from "next/link";
 import { VariantProps, cva } from "class-variance-authority";
 import { cn } from "@/app/lib/utils";
-import Link from "next/link";
 import { soundSelector, useUiSounds } from "@/app/hooks/useUiSound";
 
 const buttonVariants = cva(

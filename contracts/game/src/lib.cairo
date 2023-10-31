@@ -18,6 +18,10 @@ mod Game {
     const LOOT_NAME_STORAGE_INDEX_1: u8 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u8 = 1;
     const SECONDS_IN_DAY: u32 = 86400;
+    const SECONDS_IN_WEEK: u32 = 604800;
+    const PHASE2_START_WEEKS: u8 = 12;
+    const PHASE3_START_WEEKS: u8 = 24;
+
     use core::{
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
         clone::Clone, poseidon::poseidon_hash_span, option::OptionTrait, box::BoxTrait,
@@ -114,6 +118,7 @@ mod Game {
         _golden_token: ContractAddress,
         _cost_to_play: u128,
         _games_played_snapshot: GamesPlayedSnapshot,
+        _terminal_timestamp: u64,
     }
 
     #[event]
@@ -154,13 +159,13 @@ mod Game {
         dao: ContractAddress,
         collectible_beasts: ContractAddress,
         golden_token_address: ContractAddress,
+        terminal_timestamp: u64,
     ) {
-        // set the contract addresses
+        // init storage
         self._lords.write(lords);
         self._dao.write(dao);
         self._collectible_beasts.write(collectible_beasts);
-
-        // set the genesis block
+        self._terminal_timestamp.write(terminal_timestamp);
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
         self._genesis_timestamp.write(starknet::get_block_info().unbox().block_timestamp.into());
 
@@ -204,6 +209,9 @@ mod Game {
             golden_token_id: u256,
             interface_camel: bool
         ) {
+            // assert game terminal time has not been reached
+            _assert_terminal_time_not_reached(@self);
+
             // assert provided weapon
             _assert_valid_starter_weapon(weapon);
 
@@ -215,7 +223,7 @@ mod Game {
             }
 
             // start the game
-            _start_game(ref self, weapon, name);
+            _start_game(ref self, weapon, name, interface_camel);
         }
 
         /// @title Explore Function
@@ -1028,11 +1036,23 @@ mod Game {
         fn get_games_played_snapshot(self: @ContractState) -> GamesPlayedSnapshot {
             self._games_played_snapshot.read()
         }
+        fn can_play(self: @ContractState, golden_token_id: u256) -> bool {
+            _can_play(self, golden_token_id)
+        }
     }
 
     // ------------------------------------------ //
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
+
+    fn _assert_terminal_time_not_reached(self: @ContractState) {
+        let current_timestamp = starknet::get_block_info().unbox().block_timestamp;
+        let terminal_timestamp = self._terminal_timestamp.read();
+        assert(
+            terminal_timestamp == 0 || current_timestamp < terminal_timestamp,
+            messages::TERMINAL_TIME_REACHED
+        );
+    }
 
     fn _slay_idle_adventurer(ref self: ContractState, adventurer_id: felt252) {
         // unpack adventurer from storage (no need for stat boosts)
@@ -1111,8 +1131,12 @@ mod Game {
 
         // if beast beast level is above collectible threshold
         if beast.combat_spec.level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK {
+            // mint beast to the players Primary Account address instead of Arcade Account
+            let primary_address = _get_primary_account_address(
+                @self, _load_adventurer_metadata(@self, adventurer_id).interface_camel
+            );
             // adventurers gets the beast
-            _mint_beast(@self, beast);
+            _mint_beast(@self, beast, primary_address);
         }
     }
 
@@ -1146,7 +1170,7 @@ mod Game {
         adventurer_meta
     }
 
-    fn _mint_beast(self: @ContractState, beast: Beast) {
+    fn _mint_beast(self: @ContractState, beast: Beast, to_address: ContractAddress) {
         let collectible_beasts_contract = ILeetLootDispatcher {
             contract_address: self._collectible_beasts.read()
         };
@@ -1161,7 +1185,7 @@ mod Game {
         if !is_beast_minted && beasts_minter == starknet::get_contract_address() {
             collectible_beasts_contract
                 .mint(
-                    get_caller_address(),
+                    to_address,
                     beast.id,
                     beast.combat_spec.specials.special2,
                     beast.combat_spec.specials.special3,
@@ -1210,20 +1234,21 @@ mod Game {
         self._cost_to_play.read()
     }
 
+    fn _age_of_game_weeks(contract: @ContractState) -> u64 {
+        let genesis_timestamp = contract._genesis_timestamp.read();
+        let current_timestamp = starknet::get_block_info().unbox().block_timestamp;
+        (current_timestamp - genesis_timestamp) / SECONDS_IN_WEEK.into()
+    }
+
     fn _process_payment_and_distribute_rewards(
         ref self: ContractState, client_address: ContractAddress
     ) {
         let caller = get_caller_address();
-        let block_number = starknet::get_block_info().unbox().block_number;
-
-        let genesis_block = self._genesis_block.read();
         let dao_address = self._dao.read();
-
         let leaderboard = self._leaderboard.read();
         let first_place_address = self._owner.read(leaderboard.first.adventurer_id.into());
         let second_place_address = self._owner.read(leaderboard.second.adventurer_id.into());
         let third_place_address = self._owner.read(leaderboard.third.adventurer_id.into());
-
         let current_cost_to_play = self._cost_to_play.read();
 
         // if third place score is less than minimum score for payouts
@@ -1270,8 +1295,8 @@ mod Game {
             )
         };
 
-        // after 2 weeks, the DAO gets a share of rewards
-        if (BLOCKS_IN_A_WEEK * 2 + genesis_block) > block_number {
+        let age_of_game_weeks = _age_of_game_weeks(@self);
+        if age_of_game_weeks > PHASE2_START_WEEKS.into() {
             week =
                 Week {
                     DAO: _calculate_payout(
@@ -1291,9 +1316,7 @@ mod Game {
                     )
                 };
         }
-
-        // after 8 weeks, client builders start getting rewards
-        if (BLOCKS_IN_A_WEEK * 8 + genesis_block) > block_number {
+        if age_of_game_weeks > PHASE3_START_WEEKS.into() {
             week =
                 Week {
                     DAO: _calculate_payout(
@@ -1361,7 +1384,7 @@ mod Game {
         );
     }
 
-    fn _start_game(ref self: ContractState, weapon: u8, name: u128) {
+    fn _start_game(ref self: ContractState, weapon: u8, name: u128, interface_camel: bool) {
         // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._game_counter.read() + 1;
 
@@ -1380,7 +1403,7 @@ mod Game {
         adventurer.set_last_action_block(current_block + _get_reveal_block_delay());
 
         // create meta data for the adventurer
-        let adventurer_meta = ImplAdventurerMetadata::new(name, current_block);
+        let adventurer_meta = ImplAdventurerMetadata::new(name, current_block, interface_camel);
 
         // adventurer immediately gets ambushed by a starter beast
         let beast_battle_details = _starter_beast_ambush(
@@ -2900,6 +2923,14 @@ mod Game {
         }
     }
 
+    fn _update_owner_to_primary_account(ref self: ContractState, adventurer_id: felt252) {
+        let interface_camel = _load_adventurer_metadata(@self, adventurer_id).interface_camel;
+        let primary_address = _get_primary_account_address(@self, interface_camel);
+        if primary_address != self._owner.read(adventurer_id) {
+            self._owner.write(adventurer_id, primary_address)
+        }
+    }
+
     // @title Update Leaderboard Function
     //
     // @param adventurer_id The unique identifier of the adventurer
@@ -2907,6 +2938,10 @@ mod Game {
     fn _update_leaderboard(
         ref self: ContractState, adventurer_id: felt252, adventurer: Adventurer
     ) {
+        // if player was using an Arcade Account (AA), update owner of their adventurer to their Primary Account (PA)
+        // so their rewards get distributed to their PA instead of AA
+        _update_owner_to_primary_account(ref self, adventurer_id);
+
         // get current leaderboard which will be mutated as part of this function
         let mut leaderboard = self._leaderboard.read();
 
@@ -3558,39 +3593,37 @@ mod Game {
         _last_usage(self, token_id) + SECONDS_IN_DAY.into() <= get_block_timestamp().into()
     }
 
-    fn _play_with_token(ref self: ContractState, token_id: u256, interface_camel: bool) {
-        let golden_token = _golden_token_dispatcher(ref self);
-
+    fn _get_primary_account_address(
+        self: @ContractState, interface_camel: bool
+    ) -> ContractAddress {
         let caller = get_caller_address();
-
-        let account_snake = ISRC5Dispatcher { contract_address: caller };
-        let account_camel = ISRC5CamelDispatcher { contract_address: caller };
-
         if interface_camel {
-            let player = if account_camel.supportsInterface(ARCADE_ACCOUNT_ID) {
+            let account_camel = ISRC5CamelDispatcher { contract_address: caller };
+            if account_camel.supportsInterface(ARCADE_ACCOUNT_ID) {
                 IMasterControlDispatcher { contract_address: caller }.get_master_account()
             } else {
                 caller
-            };
-            assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
-            assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
-
-            self
-                ._golden_token_last_use
-                .write(token_id.try_into().unwrap(), get_block_timestamp().into());
+            }
         } else {
-            let player = if account_snake.supports_interface(ARCADE_ACCOUNT_ID) {
+            let account_snake = ISRC5Dispatcher { contract_address: caller };
+            if account_snake.supports_interface(ARCADE_ACCOUNT_ID) {
                 IMasterControlDispatcher { contract_address: caller }.get_master_account()
             } else {
                 caller
-            };
-            assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
-            assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
-
-            self
-                ._golden_token_last_use
-                .write(token_id.try_into().unwrap(), get_block_timestamp().into());
+            }
         }
+    }
+
+    fn _play_with_token(ref self: ContractState, token_id: u256, interface_camel: bool) {
+        assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
+
+        let golden_token = _golden_token_dispatcher(ref self);
+        let player = _get_primary_account_address(@self, interface_camel);
+        assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
+
+        self
+            ._golden_token_last_use
+            .write(token_id.try_into().unwrap(), get_block_timestamp().into());
     }
 
     fn _last_usage(self: @ContractState, token_id: u256) -> u256 {

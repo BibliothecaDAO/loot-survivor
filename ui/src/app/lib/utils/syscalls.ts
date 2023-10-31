@@ -26,6 +26,10 @@ import {
 } from "@/app/lib/utils";
 import { parseEvents } from "@/app/lib/utils/parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
+import Storage from "@/app/lib/storage";
+import { BurnerStorage } from "@/app/types";
+import { Connector } from "@starknet-react/core";
+import { providerInterfaceCamel } from "../connectors";
 import { QueryData, QueryKey } from "@/app/hooks/useQueryStore";
 import { AdventurerClass } from "@/app/lib/classes";
 import { ScreenPage } from "@/app/hooks/useUIStore";
@@ -72,6 +76,7 @@ export interface SyscallsProps {
   resetCalls: () => void;
   setSpecialBeastDefeated: (value: boolean) => void;
   setSpecialBeast: (value: any) => void;
+  connector?: Connector;
 }
 
 function handleEquip(
@@ -89,24 +94,33 @@ function handleEquip(
     (event) => event.name === "EquippedItems"
   );
   // Equip items that are not purchases
+  let equippedItems: any[] = [];
+  let unequippedItems: any[] = [];
   for (let equippedItemsEvent of equippedItemsEvents) {
     setData("adventurerByIdQuery", {
       adventurers: [equippedItemsEvent.data[0]],
     });
     setAdventurer(equippedItemsEvent.data[0]);
     for (let equippedItem of equippedItemsEvent.data[1]) {
-      const ownedItemIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
+      const ownedItem = queryData.itemsByAdventurerQuery?.items.find(
         (item: Item) => item.item == equippedItem
       );
-      setData("itemsByAdventurerQuery", true, "equipped", ownedItemIndex);
+      if (ownedItem) {
+        ownedItem.equipped = true;
+        equippedItems.push(ownedItem);
+      }
     }
     for (let unequippedItem of equippedItemsEvent.data[2]) {
-      const ownedItemIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
+      const ownedItem = queryData.itemsByAdventurerQuery?.items.find(
         (item: Item) => item.item == unequippedItem
       );
-      setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
+      if (ownedItem) {
+        ownedItem.equipped = false;
+        unequippedItems.push(ownedItem);
+      }
     }
   }
+  return { equippedItems, unequippedItems };
 }
 
 function handleDrop(
@@ -165,6 +179,7 @@ export function syscalls({
   resetCalls,
   setSpecialBeastDefeated,
   setSpecialBeast,
+  connector,
 }: SyscallsProps) {
   const gameData = new GameData();
 
@@ -230,7 +245,16 @@ export function syscalls({
     showDeathDialog(true);
   };
 
-  const spawn = async (formData: FormData) => {
+  const spawn = async (formData: FormData, goldenTokenId: string) => {
+    const storage: BurnerStorage = Storage.get("burners");
+    let interfaceCamel = "";
+    if (typeof connector?.id === "string" && connector.id.includes("0x")) {
+      const walletProvider = storage[account?.address!].masterAccountProvider;
+      interfaceCamel = providerInterfaceCamel(walletProvider);
+    } else {
+      interfaceCamel = providerInterfaceCamel(connector!.id);
+    }
+
     const mintLords: Call = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "mint",
@@ -250,9 +274,9 @@ export function syscalls({
         "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         stringToFelt(formData.name).toString(),
+        goldenTokenId,
         "0",
-        "0",
-        "0",
+        interfaceCamel,
       ],
     };
 
@@ -430,14 +454,47 @@ export function syscalls({
         );
 
         // If there are any equip or drops, do them first
-        handleEquip(events, setData, setAdventurer, queryData);
+        const { equippedItems, unequippedItems } = handleEquip(
+          events,
+          setData,
+          setAdventurer,
+          queryData
+        );
         const droppedItems = handleDrop(events, setData, setAdventurer);
 
         const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
           (item: Item) => !droppedItems.includes(item.item ?? "")
         );
+        const filteredEquips = filteredDrops.filter(
+          (item: any) =>
+            !equippedItems.some(
+              (equippedItem) => equippedItem.item == item.item
+            )
+        );
+        const filteredUnequips = filteredEquips.filter(
+          (item: any) =>
+            !unequippedItems.some(
+              (droppedItem) => droppedItem.item == item.item
+            )
+        );
+        const filteredEquips = filteredDrops.filter(
+          (item: any) =>
+            !equippedItems.some(
+              (equippedItem) => equippedItem.item == item.item
+            )
+        );
+        const filteredUnequips = filteredEquips.filter(
+          (item: any) =>
+            !unequippedItems.some(
+              (droppedItem) => droppedItem.item == item.item
+            )
+        );
         setData("itemsByAdventurerQuery", {
-          items: [...(filteredDrops ?? [])],
+          items: [
+            ...(filteredUnequips ?? []),
+            ...equippedItems,
+            ...unequippedItems,
+          ],
         });
 
         const discoveries = [];
@@ -701,14 +758,47 @@ export function syscalls({
         );
 
         // If there are any equip or drops, do them first
-        handleEquip(events, setData, setAdventurer, queryData);
+        const { equippedItems, unequippedItems } = handleEquip(
+          events,
+          setData,
+          setAdventurer,
+          queryData
+        );
         const droppedItems = handleDrop(events, setData, setAdventurer);
 
         const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
           (item: Item) => !droppedItems.includes(item.item ?? "")
         );
+        const filteredEquips = filteredDrops.filter(
+          (item: any) =>
+            !equippedItems.some(
+              (equippedItem) => equippedItem.item == item.item
+            )
+        );
+        const filteredUnequips = filteredEquips.filter(
+          (item: any) =>
+            !unequippedItems.some(
+              (droppedItem) => droppedItem.item == item.item
+            )
+        );
+        const filteredEquips = filteredDrops.filter(
+          (item: any) =>
+            !equippedItems.some(
+              (equippedItem) => equippedItem.item == item.item
+            )
+        );
+        const filteredUnequips = filteredEquips.filter(
+          (item: any) =>
+            !unequippedItems.some(
+              (droppedItem) => droppedItem.item == item.item
+            )
+        );
         setData("itemsByAdventurerQuery", {
-          items: [...(filteredDrops ?? [])],
+          items: [
+            ...(filteredUnequips ?? []),
+            ...equippedItems,
+            ...unequippedItems,
+          ],
         });
 
         const battles = [];
@@ -957,14 +1047,47 @@ export function syscalls({
         );
 
         // If there are any equip or drops, do them first
-        handleEquip(events, setData, setAdventurer, queryData);
+        const { equippedItems, unequippedItems } = handleEquip(
+          events,
+          setData,
+          setAdventurer,
+          queryData
+        );
         const droppedItems = handleDrop(events, setData, setAdventurer);
 
         const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
           (item: Item) => !droppedItems.includes(item.item ?? "")
         );
+        const filteredEquips = filteredDrops.filter(
+          (item: any) =>
+            !equippedItems.some(
+              (equippedItem) => equippedItem.item == item.item
+            )
+        );
+        const filteredUnequips = filteredEquips.filter(
+          (item: any) =>
+            !unequippedItems.some(
+              (droppedItem) => droppedItem.item == item.item
+            )
+        );
+        const filteredEquips = filteredDrops.filter(
+          (item: any) =>
+            !equippedItems.some(
+              (equippedItem) => equippedItem.item == item.item
+            )
+        );
+        const filteredUnequips = filteredEquips.filter(
+          (item: any) =>
+            !unequippedItems.some(
+              (droppedItem) => droppedItem.item == item.item
+            )
+        );
         setData("itemsByAdventurerQuery", {
-          items: [...(filteredDrops ?? [])],
+          items: [
+            ...(filteredUnequips ?? []),
+            ...equippedItems,
+            ...unequippedItems,
+          ],
         });
 
         const battles = [];
@@ -1148,7 +1271,12 @@ export function syscalls({
         );
 
         // If there are any equip or drops, do them first
-        handleEquip(events, setData, setAdventurer, queryData);
+        const { equippedItems, unequippedItems } = handleEquip(
+          events,
+          setData,
+          setAdventurer,
+          queryData
+        );
         const droppedItems = handleDrop(events, setData, setAdventurer);
 
         const adventurerUpgradedEvents = events.filter(
@@ -1184,38 +1312,56 @@ export function syscalls({
             item.equipped = true;
           }
         }
-        let unequipIndexes = [];
-        for (let equippedItemsEvent of equippedItemsEvents) {
-          for (let unequippedItem of equippedItemsEvent.data[2]) {
-            const ownedItemIndex =
-              queryData.itemsByAdventurerQuery?.items.findIndex(
-                (item: Item) => item.item == unequippedItem
-              );
-            let item = purchasedItems.find(
-              (item) => item.item === unequippedItem
-            );
-            if (item) {
-              item.equipped = false;
-            } else {
-              unequipIndexes.push(ownedItemIndex);
-            }
-          }
-        }
 
         const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
           (item: Item) => !droppedItems.includes(item.item ?? "")
         );
+        const filteredEquips = filteredDrops.filter(
+          (item: any) =>
+            !equippedItems.some(
+              (equippedItem) => equippedItem.item == item.item
+            )
+        );
+        const filteredUnequips = filteredEquips.filter(
+          (item: any) =>
+            !unequippedItems.some(
+              (droppedItem) => droppedItem.item == item.item
+            )
+        );
+
+        console.log(
+          filteredUnequips,
+          equippedItems,
+          unequippedItems,
+          purchasedItems
+        );
+        const filteredEquips = filteredDrops.filter(
+          (item: any) =>
+            !equippedItems.some(
+              (equippedItem) => equippedItem.item == item.item
+            )
+        );
+        const filteredUnequips = filteredEquips.filter(
+          (item: any) =>
+            !unequippedItems.some(
+              (droppedItem) => droppedItem.item == item.item
+            )
+        );
+
+        console.log(
+          filteredUnequips,
+          equippedItems,
+          unequippedItems,
+          purchasedItems
+        );
         setData("itemsByAdventurerQuery", {
-          items: [...(filteredDrops ?? []), ...purchasedItems],
+          items: [
+            ...(filteredUnequips ?? []),
+            ...equippedItems,
+            ...unequippedItems,
+            ...purchasedItems,
+          ],
         });
-        for (let i = 0; i < unequipIndexes.length; i++) {
-          setData(
-            "itemsByAdventurerQuery",
-            false,
-            "equipped",
-            unequipIndexes[i]
-          );
-        }
 
         const adventurerDiedEvents = events.filter(
           (event) => event.name === "AdventurerDied"
@@ -1319,14 +1465,47 @@ export function syscalls({
         );
 
         // If there are any equip or drops, do them first
-        handleEquip(events, setData, setAdventurer, queryData);
+        const { equippedItems, unequippedItems } = handleEquip(
+          events,
+          setData,
+          setAdventurer,
+          queryData
+        );
         const droppedItems = handleDrop(events, setData, setAdventurer);
 
         const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
           (item: Item) => !droppedItems.includes(item.item ?? "")
         );
+        const filteredEquips = filteredDrops.filter(
+          (item: any) =>
+            !equippedItems.some(
+              (equippedItem) => equippedItem.item == item.item
+            )
+        );
+        const filteredUnequips = filteredEquips.filter(
+          (item: any) =>
+            !unequippedItems.some(
+              (droppedItem) => droppedItem.item == item.item
+            )
+        );
+        const filteredEquips = filteredDrops.filter(
+          (item: any) =>
+            !equippedItems.some(
+              (equippedItem) => equippedItem.item == item.item
+            )
+        );
+        const filteredUnequips = filteredEquips.filter(
+          (item: any) =>
+            !unequippedItems.some(
+              (droppedItem) => droppedItem.item == item.item
+            )
+        );
         setData("itemsByAdventurerQuery", {
-          items: [...(filteredDrops ?? [])],
+          items: [
+            ...(filteredUnequips ?? []),
+            ...equippedItems,
+            ...unequippedItems,
+          ],
         });
 
         stopLoading(`You have slain all idle adventurers!`);
@@ -1538,7 +1717,12 @@ export function syscalls({
           });
           setAdventurer(upgradeEvent.data);
           // If there are any equip or drops, do them first
-          handleEquip(events, setData, setAdventurer, queryData);
+          const { equippedItems, unequippedItems } = handleEquip(
+            events,
+            setData,
+            setAdventurer,
+            queryData
+          );
           const droppedItems = handleDrop(events, setData, setAdventurer);
 
           // Add purchased items
@@ -1582,8 +1766,36 @@ export function syscalls({
           const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
             (item: Item) => !droppedItems.includes(item.item ?? "")
           );
+          const filteredEquips = filteredDrops.filter(
+            (item: any) =>
+              !equippedItems.some(
+                (equippedItem) => equippedItem.item == item.item
+              )
+          );
+          const filteredUnequips = filteredEquips.filter(
+            (item: any) =>
+              !unequippedItems.some(
+                (droppedItem) => droppedItem.item == item.item
+              )
+          );
+          const filteredEquips = filteredDrops.filter(
+            (item: any) =>
+              !equippedItems.some(
+                (equippedItem) => equippedItem.item == item.item
+              )
+          );
+          const filteredUnequips = filteredEquips.filter(
+            (item: any) =>
+              !unequippedItems.some(
+                (droppedItem) => droppedItem.item == item.item
+              )
+          );
           setData("itemsByAdventurerQuery", {
-            items: [...(filteredDrops ?? []), ...purchasedItems],
+            items: [
+              ...(filteredUnequips ?? []),
+              ...equippedItems,
+              ...unequippedItems,
+            ],
           });
           for (let i = 0; i < unequipIndexes.length; i++) {
             setData(
