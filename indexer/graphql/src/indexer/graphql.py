@@ -1611,14 +1611,6 @@ async def run_graphql_api(mongo=None, port="8080"):
             ),
         },
     )
-    cors.add(
-        resource.add_route("GET", view),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
 
     ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     ssl_context.load_cert_chain(
