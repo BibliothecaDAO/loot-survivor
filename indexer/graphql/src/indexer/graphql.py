@@ -1600,18 +1600,6 @@ async def run_graphql_api(mongo=None, port="8080"):
     app = web.Application()
     app.router.add_route("*", "/graphql", view)
 
-    cors = aiohttp_cors.setup(app)
-    resource = cors.add(app.router.add_resource("/graphql"))
-
-    cors.add(
-        resource.add_route("POST", view),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
-
     ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     ssl_context.load_cert_chain(
         "/etc/letsencrypt/live/survivor-goerli-indexer.realms.world/fullchain.pem",
