@@ -128,8 +128,7 @@ function Home({ updateConnectors }: HomeProps) {
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
-  // const arcadeIntro = useUIStore((state) => state.arcadeIntro);
-  const arcadeIntro = false;
+  const arcadeIntro = useUIStore((state) => state.arcadeIntro);
   const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
   const topUpDialog = useUIStore((state) => state.topUpDialog);
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);

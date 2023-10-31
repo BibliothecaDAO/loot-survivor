@@ -10,7 +10,7 @@ import Logo from "public/icons/logo.svg";
 import Lords from "public/icons/lords.svg";
 import { PenaltyCountDown } from "@/app/components/CountDown";
 import { Button } from "@/app/components/buttons/Button";
-import { formatNumber, displayAddress } from "@/app/lib/utils";
+import { formatNumber, displayAddress, indexAddress } from "@/app/lib/utils";
 import {
   ArcadeIcon,
   SoundOffIcon,
@@ -101,9 +101,14 @@ export default function Header({
           size={"xs"}
           variant={"outline"}
           className="self-center xl:px-5 hover:bg-terminal-green"
-          onClick={() =>
-            window.open("https://app.jediswap.xyz/#/swap", "_blank")
-          }
+          onClick={() => {
+            const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
+              process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+            )}&tokenTo=${indexAddress(
+              process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+            )}&amount=0.001`;
+            window.open(avnuLords, "_blank");
+          }}
           onMouseEnter={() => setShowLordsBuy(true)}
           onMouseLeave={() => setShowLordsBuy(false)}
         >

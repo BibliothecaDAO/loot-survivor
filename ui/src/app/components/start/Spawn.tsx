@@ -13,6 +13,7 @@ import { FormData, GameToken } from "@/app/types";
 import { Button } from "@/app/components/buttons/Button";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import Lords from "public/icons/lords.svg";
+import { indexAddress } from "@/app/lib/utils";
 
 export interface SpawnProps {
   formData: FormData;
@@ -236,9 +237,14 @@ export const Spawn = ({
               </div>
               {!checkEnoughLords && (
                 <Button
-                  onClick={() =>
-                    window.open("https://app.jediswap.xyz/#/swap", "_blank")
-                  }
+                  onClick={() => {
+                    const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
+                      process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+                    )}&tokenTo=${indexAddress(
+                      process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+                    )}&amount=0.001`;
+                    window.open(avnuLords, "_blank");
+                  }}
                 >
                   Buy Lords
                 </Button>

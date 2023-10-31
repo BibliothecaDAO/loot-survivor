@@ -12,6 +12,7 @@ import { getWalletConnectors } from "@/app/lib/connectors";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import Lords from "public/icons/lords.svg";
 import QuantityButtons from "../buttons/QuantityButtons";
+import { indexAddress } from "@/app/lib/utils";
 
 interface ArcadeIntroProps {
   ethBalance: bigint;
@@ -65,7 +66,7 @@ export const ArcadeIntro = ({
     }
   }, [account, checkNotEnoughPrefundLords, readDisclaimer]);
 
-  console.log(lordsBalance);
+  const maxGames = Math.min(Math.floor(lords / 25), 100);
 
   return (
     <>
@@ -146,9 +147,14 @@ export const ArcadeIntro = ({
             <div className="flex flex-col gap-10 items-center justify-center w-full">
               <Lords className="w-24 h-24 sm:w-40 sm:h-40 fill-current" />
               <Button
-                onClick={() =>
-                  window.open("https://app.jediswap.xyz/#/swap", "_blank")
-                }
+                onClick={() => {
+                  const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
+                    process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+                  )}&tokenTo=${indexAddress(
+                    process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+                  )}&amount=0.001`;
+                  window.open(avnuLords, "_blank");
+                }}
                 disabled={
                   isWrongNetwork || !checkNotEnoughPrefundLords || !account
                 }
@@ -208,7 +214,7 @@ export const ArcadeIntro = ({
                       <QuantityButtons
                         amount={gamesPrefundAmount}
                         min={0}
-                        max={100}
+                        max={Math.min(Math.floor(lords / 25), 100)}
                         setAmount={(value) => {
                           setGamesPrefundAmount(value);
                         }}
@@ -227,6 +233,7 @@ export const ArcadeIntro = ({
                         checkNotEnoughPrefundLords ||
                         !account ||
                         gamesPrefundAmount === 0 ||
+                        gamesPrefundAmount > maxGames ||
                         true
                       }
                       className="w-1/2 h-1/4"
