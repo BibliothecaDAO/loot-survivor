@@ -1,4 +1,5 @@
 GAME="0x07bece3541ac11d53d470910f2d2c19be2dbc856ae0624c9df27936c2ed16a54"
 START=889376
 MONGO_CONNECTION_STRING="mongodb://mongo:mongo@mongo:27017"
+MONGO_DB="mongo"
 STREAM_URL="https://goerli.starknet.a5a.ch"
