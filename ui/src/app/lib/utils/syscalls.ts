@@ -264,6 +264,11 @@ export function syscalls({
       interfaceCamel = providerInterfaceCamel(connector!.id);
     }
 
+    // const mintLords: Call = {
+    //   contractAddress: lordsContract?.address ?? "",
+    //   entrypoint: "mint",
+    //   calldata: [account?.address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+    // };
     const approveLordsSpendingTx = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "approve",
@@ -319,6 +324,7 @@ export function syscalls({
             retryInterval: 2000,
           }
         );
+        console.log(receipt);
         // Handle if the tx was reverted
         if (
           (receipt as RevertedTransactionReceiptResponse).execution_status ===
