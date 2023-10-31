@@ -29,7 +29,6 @@ export interface HeaderProps {
     loadingMessage: string[],
     notification: string[]
   ) => Promise<void>;
-  mintLords: () => Promise<void>;
   lordsBalance: bigint;
   arcadeConnectors: Connector[];
   gameContract: Contract;
@@ -37,7 +36,6 @@ export interface HeaderProps {
 
 export default function Header({
   multicall,
-  mintLords,
   lordsBalance,
   arcadeConnectors,
   gameContract,
@@ -70,7 +68,7 @@ export default function Header({
   const displayCartButtonRef = useRef<HTMLButtonElement>(null);
   const displayHistoryButtonRef = useRef<HTMLButtonElement>(null);
 
-  const [showLordsMint, setShowLordsMint] = useState(false);
+  const [showLordsBuy, setShowLordsBuy] = useState(false);
 
   const checkArcade = arcadeConnectors.some(
     (connector) => connector.name == address
@@ -103,12 +101,14 @@ export default function Header({
           size={"xs"}
           variant={"outline"}
           className="self-center xl:px-5 hover:bg-terminal-green"
-          onClick={mintLords}
-          onMouseEnter={() => setShowLordsMint(true)}
-          onMouseLeave={() => setShowLordsMint(false)}
+          onClick={() =>
+            window.open("https://app.jediswap.xyz/#/swap", "_blank")
+          }
+          onMouseEnter={() => setShowLordsBuy(true)}
+          onMouseLeave={() => setShowLordsBuy(false)}
         >
           <span className="flex flex-row items-center justify-between w-full">
-            {!showLordsMint ? (
+            {!showLordsBuy ? (
               <>
                 <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
                 <p>
@@ -116,7 +116,7 @@ export default function Header({
                 </p>
               </>
             ) : (
-              <p className="text-black">Mint Lords</p>
+              <p className="text-black">Buy Lords</p>
             )}
           </span>
         </Button>

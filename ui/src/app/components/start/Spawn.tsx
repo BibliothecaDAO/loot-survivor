@@ -19,7 +19,6 @@ export interface SpawnProps {
   spawn: (formData: FormData, goldenTokenId: string) => Promise<void>;
   handleBack: () => void;
   lordsBalance?: bigint;
-  mintLords: () => Promise<void>;
   goldenTokenData: any;
   gameContract: Contract;
 }
@@ -29,7 +28,6 @@ export const Spawn = ({
   spawn,
   handleBack,
   lordsBalance,
-  mintLords,
   goldenTokenData,
   gameContract,
 }: SpawnProps) => {
@@ -237,7 +235,13 @@ export const Spawn = ({
                 </div>
               </div>
               {!checkEnoughLords && (
-                <Button onClick={mintLords}>Mint Lords</Button>
+                <Button
+                  onClick={() =>
+                    window.open("https://app.jediswap.xyz/#/swap", "_blank")
+                  }
+                >
+                  Buy Lords
+                </Button>
               )}
             </>
           )}

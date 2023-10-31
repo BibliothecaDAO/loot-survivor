@@ -2,12 +2,9 @@
 import {
   useAccount,
   useConnect,
-  useNetwork,
-  useProvider,
   useContract,
   Connector,
 } from "@starknet-react/core";
-import { constants } from "starknet";
 import { useState, useEffect, useMemo } from "react";
 import ActionsScreen from "@/app/containers/ActionsScreen";
 import AdventurerScreen from "@/app/containers/AdventurerScreen";
@@ -25,7 +22,7 @@ import useUIStore from "@/app/hooks/useUIStore";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { NotificationDisplay } from "@/app/components/notifications/NotificationDisplay";
 import { useMusic } from "@/app/hooks/useMusic";
-import { Menu, Call, ZeroUpgrade, BurnerStorage } from "@/app/types";
+import { Menu, ZeroUpgrade, BurnerStorage } from "@/app/types";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import Profile from "@/app/containers/ProfileScreen";
 import { DeathDialog } from "@/app/components/adventurer/DeathDialog";
@@ -59,7 +56,6 @@ import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
 import ScreenMenu from "@/app/components/menu/ScreenMenu";
 import { getArcadeConnectors } from "@/app/lib/connectors";
 import Header from "@/app/components/navigation/Header";
-import { checkArcadeBalance } from "@/app/lib/utils";
 import { fetchBalances } from "@/app/lib/balances";
 import useTransactionManager from "@/app/hooks/useTransactionManager";
 import { StarknetProvider } from "@/app//provider";
@@ -67,7 +63,6 @@ import { SpecialBeast } from "@/app/components/notifications/SpecialBeast";
 import { useBurner } from "@/app/lib/burner";
 import { connectors } from "@/app/lib/connectors";
 import Storage from "@/app/lib/storage";
-import { MainnetDialog } from "./components/MainnetDialog";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -114,8 +109,6 @@ interface HomeProps {
 
 function Home({ updateConnectors }: HomeProps) {
   const { connector, connectors } = useConnect();
-  const { chain } = useNetwork();
-  const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
   const setDisconnected = useUIStore((state) => state.setDisconnected);
   const { account, address, status, isConnected } = useAccount();
@@ -133,10 +126,10 @@ function Home({ updateConnectors }: HomeProps) {
   );
   const owner = account?.address ? padAddress(account.address) : "";
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
-  const arcadeIntro = useUIStore((state) => state.arcadeIntro);
+  // const arcadeIntro = useUIStore((state) => state.arcadeIntro);
+  const arcadeIntro = false;
   const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
   const topUpDialog = useUIStore((state) => state.topUpDialog);
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
@@ -387,12 +380,6 @@ function Home({ updateConnectors }: HomeProps) {
     };
   }, [play, stop]);
 
-  useEffect(() => {
-    const isWrongNetwork =
-      chain?.id !== BigInt(constants.StarknetChainId.SN_GOERLI);
-    setIsWrongNetwork(isWrongNetwork);
-  }, [chain, provider, isConnected]);
-
   // Initialize adventurers from owner
   useEffect(() => {
     if (adventurersData) {
@@ -451,48 +438,10 @@ function Home({ updateConnectors }: HomeProps) {
     (pendingMessage === "Spawning Adventurer" ||
       pendingMessage.includes("Spawning Adventurer"));
 
-  // TEMPORARY FOR TESTING
-  const mintLords = async () => {
-    // Mint 250 LORDS
-    const mintLords: Call = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "mint",
-      calldata: [address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
-    };
-    const balanceEmpty = await checkArcadeBalance(
-      [...calls, mintLords],
-      ethBalance,
-      showTopUpDialog,
-      setTopUpAccount,
-      setEstimatingFee,
-      account
-    );
-    if (!balanceEmpty) {
-      try {
-        addToCalls(mintLords);
-        const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
-        const result = await account?.waitForTransaction(tx?.transaction_hash, {
-          retryInterval: 2000,
-        });
-
-        if (!result) {
-          throw new Error("Lords Mint did not complete successfully.");
-        }
-
-        getBalances();
-      } catch (e) {
-        console.log(e);
-      }
-    } else {
-      resetCalls();
-    }
-  };
-
   return (
     <main
       className={`min-h-screen container mx-auto flex flex-col sm:pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
     >
-      <MainnetDialog />
       {introComplete ? (
         <>
           <div className="flex flex-col w-full">
@@ -505,7 +454,6 @@ function Home({ updateConnectors }: HomeProps) {
             )}
             <Header
               multicall={multicall}
-              mintLords={async () => await mintLords()}
               lordsBalance={lordsBalance}
               arcadeConnectors={arcadeConnectors}
               gameContract={gameContract!}
@@ -525,7 +473,6 @@ function Home({ updateConnectors }: HomeProps) {
             <ArcadeIntro
               ethBalance={ethBalance}
               lordsBalance={lordsBalance}
-              getBalances={getBalances}
               gameContract={gameContract!}
               lordsContract={lordsContract!}
               ethContract={ethContract!}
@@ -575,7 +522,6 @@ function Home({ updateConnectors }: HomeProps) {
                       spawn={spawn}
                       handleSwitchAdventurer={handleSwitchAdventurer}
                       lordsBalance={lordsBalance}
-                      mintLords={async () => await mintLords()}
                       gameContract={gameContract!}
                       goldenTokenData={goldenTokenData}
                     />

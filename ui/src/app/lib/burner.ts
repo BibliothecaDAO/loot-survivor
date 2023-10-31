@@ -18,7 +18,7 @@ import { BurnerStorage } from "@/app/types";
 import { padAddress } from "@/app/lib/utils";
 
 export const ETH_PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
-export const LORDS_PREFUND_AMOUNT = "0x0d8d726b7177a80000"; // 250LORDS
+export const LORDS_PREFUND_AMOUNT = "0x15AF1D78B58C40000"; // 25LORDS
 
 const rpc_addr = process.env.NEXT_PUBLIC_RPC_URL;
 const provider = new Provider({
