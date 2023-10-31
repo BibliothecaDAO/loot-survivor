@@ -52,7 +52,7 @@ const TopupInput = ({
 
   const handleSubmitDefault = async () => {
     if (balanceType === "lords") {
-      await topup(account, master, 260, lordsGameAllowance);
+      await topup(account, master, 25);
     } else {
       await topup(account, master);
     }
@@ -62,7 +62,7 @@ const TopupInput = ({
 
   const handleSubmitCustom = async () => {
     if (balanceType === "lords") {
-      await topup(account, master, inputValue, lordsGameAllowance);
+      await topup(account, master, inputValue);
     } else {
       await topup(account, master, inputValue);
     }
@@ -126,7 +126,7 @@ const TopupInput = ({
             onClick={() => handleSubmitDefault()}
             disabled={disabled}
           >
-            {balanceType === "eth" ? "Add 0.001 ETH" : "Add 250 LORDS"}
+            {balanceType === "eth" ? "Add 0.01 ETH" : "Add 25 LORDS"}
           </Button>
           <Button
             size="xxxs"

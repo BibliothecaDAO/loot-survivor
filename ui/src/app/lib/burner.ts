@@ -342,8 +342,7 @@ export const useBurner = ({
   const topUpLords = async (
     address: string,
     account: AccountInterface,
-    lordsAmount: number,
-    lordsGameAllowance: number
+    lordsAmount: number
   ) => {
     try {
       setIsToppingUpLords(true);
@@ -356,21 +355,7 @@ export const useBurner = ({
           "0x0",
         ]),
       };
-      const increasedAllowance =
-        Math.round(lordsAmount * 10 ** 18) + lordsGameAllowance;
-      const lordsGameApprovalTx = {
-        contractAddress: lordsContract?.address ?? "",
-        entrypoint: "approve",
-        calldata: CallData.compile([
-          gameContract?.address ?? "",
-          increasedAllowance,
-          "0x0",
-        ]),
-      };
-      const { transaction_hash } = await account.execute([
-        lordsTransferTx,
-        lordsGameApprovalTx,
-      ]);
+      const { transaction_hash } = await account.execute([lordsTransferTx]);
 
       const result = await account.waitForTransaction(transaction_hash, {
         retryInterval: 2000,

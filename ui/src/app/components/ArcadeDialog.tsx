@@ -229,7 +229,7 @@ export const ArcadeDialog = ({
               <div className="flex justify-center mb-1">
                 <div className="flex flex-col">
                   <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                    Note: Creating an account will initiate a transfer of 0.001
+                    Note: Creating an account will initiate a transfer of 0.01
                     ETH & 25 LORDS from your connected wallet to the arcade
                     account to cover your transaction costs from gameplay.
                   </p>
@@ -399,7 +399,7 @@ export const ArcadeAccountCard = ({
                 <div className="hidden sm:block">
                   <TopupInput
                     balanceType="eth"
-                    increment={0.0001}
+                    increment={0.001}
                     disabled={isArcade}
                     topup={topUpEth}
                     account={account.name}
@@ -424,7 +424,7 @@ export const ArcadeAccountCard = ({
                 <div className="hidden sm:block">
                   <TopupInput
                     balanceType="lords"
-                    increment={50}
+                    increment={5}
                     disabled={isArcade}
                     topup={topUpLords}
                     account={account.name}
@@ -462,7 +462,7 @@ export const ArcadeAccountCard = ({
         {selectedTopup && (
           <TopupInput
             balanceType={selectedTopup!}
-            increment={selectedTopup === "eth" ? 0.0001 : 50}
+            increment={selectedTopup === "eth" ? 0.001 : 5}
             disabled={isArcade}
             topup={selectedTopup === "eth" ? topUpEth : topUpLords}
             account={account.name}
