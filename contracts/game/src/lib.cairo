@@ -14,13 +14,14 @@ mod Game {
     const TEST_ENTROPY: u64 = 12303548;
     const MAINNET_CHAIN_ID: felt252 = 0x534e5f4d41494e;
     const GOERLI_CHAIN_ID: felt252 = 0x534e5f474f45524c49;
-    const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 100;
+    const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 200;
     const LOOT_NAME_STORAGE_INDEX_1: u8 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u8 = 1;
+    const SECONDS_IN_HOUR: u32 = 3600;
     const SECONDS_IN_DAY: u32 = 86400;
     const SECONDS_IN_WEEK: u32 = 604800;
-    const PHASE2_START_WEEKS: u8 = 12;
-    const PHASE3_START_WEEKS: u8 = 24;
+    const PHASE2_START: u8 = 12;
+    const PHASE3_START: u8 = 24;
 
     use core::{
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
@@ -57,7 +58,7 @@ mod Game {
     use super::game::{
         interfaces::{IGame},
         constants::{
-            messages, Week, REWARD_DISTRIBUTIONS_PHASE1_BP, REWARD_DISTRIBUTIONS_PHASE2_BP,
+            messages, Rewards, REWARD_DISTRIBUTIONS_PHASE1_BP, REWARD_DISTRIBUTIONS_PHASE2_BP,
             REWARD_DISTRIBUTIONS_PHASE3_BP, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
             STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS,
             STARTING_GAME_ENTROPY_ROTATION_INTERVAL, MINIMUM_DAMAGE_FROM_BEASTS
@@ -1240,6 +1241,85 @@ mod Game {
         (current_timestamp - genesis_timestamp) / SECONDS_IN_WEEK.into()
     }
 
+    fn _age_of_game_hours(contract: @ContractState) -> u64 {
+        let genesis_timestamp = contract._genesis_timestamp.read();
+        let current_timestamp = starknet::get_block_info().unbox().block_timestamp;
+        (current_timestamp - genesis_timestamp) / SECONDS_IN_HOUR.into()
+    }
+
+    fn _get_reward_distribution(self: @ContractState) -> Rewards {
+        let cost_to_play = self._cost_to_play.read();
+        let third_place_score = self._leaderboard.read().third.xp;
+
+        // use hours for distribution phases on testnet and weeks for mainnet
+        let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
+        let age_of_game = if chain_id == MAINNET_CHAIN_ID {
+            _age_of_game_weeks(self)
+        } else {
+            _age_of_game_hours(self)
+        };
+
+        // distribute all rewards to DAO until we get a reasonable third place score
+        if (third_place_score < MINIMUM_SCORE_FOR_PAYOUTS) {
+            Rewards {
+                DAO: cost_to_play.into(),
+                INTERFACE: 0,
+                FIRST_PLACE: 0,
+                SECOND_PLACE: 0,
+                THIRD_PLACE: 0
+            }
+        } else if age_of_game > PHASE3_START.into() {
+            // use phase 3 distribution
+            Rewards {
+                DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3_BP::DAO, cost_to_play),
+                INTERFACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE3_BP::INTERFACE, cost_to_play
+                ),
+                FIRST_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE3_BP::FIRST_PLACE, cost_to_play
+                ),
+                SECOND_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE3_BP::SECOND_PLACE, cost_to_play
+                ),
+                THIRD_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE3_BP::THIRD_PLACE, cost_to_play
+                )
+            }
+        } else if age_of_game > PHASE2_START.into() {
+            Rewards {
+                DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE2_BP::DAO, cost_to_play),
+                INTERFACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE2_BP::INTERFACE, cost_to_play
+                ),
+                FIRST_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE2_BP::FIRST_PLACE, cost_to_play
+                ),
+                SECOND_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE2_BP::SECOND_PLACE, cost_to_play
+                ),
+                THIRD_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE2_BP::THIRD_PLACE, cost_to_play
+                )
+            }
+        } else {
+            Rewards {
+                DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, cost_to_play),
+                INTERFACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, cost_to_play
+                ),
+                FIRST_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, cost_to_play
+                ),
+                SECOND_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE1_BP::SECOND_PLACE, cost_to_play
+                ),
+                THIRD_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_PHASE1_BP::THIRD_PLACE, cost_to_play
+                )
+            }
+        }
+    }
+
     fn _process_payment_and_distribute_rewards(
         ref self: ContractState, client_address: ContractAddress
     ) {
@@ -1249,137 +1329,55 @@ mod Game {
         let first_place_address = self._owner.read(leaderboard.first.adventurer_id.into());
         let second_place_address = self._owner.read(leaderboard.second.adventurer_id.into());
         let third_place_address = self._owner.read(leaderboard.third.adventurer_id.into());
-        let current_cost_to_play = self._cost_to_play.read();
 
-        // if third place score is less than minimum score for payouts
-        if (leaderboard.third.xp < MINIMUM_SCORE_FOR_PAYOUTS) {
-            // all rewards go to the DAO
-            // the purpose of this is to let a decent set of top scores get set before payouts begin
-            // without this, there would be an incentive to start and die immediately after contract is deployed
-            // to capture the rewards from the launch hype
-            _lords_dispatcher(ref self).transferFrom(caller, dao_address, COST_TO_PLAY.into());
+        let rewards = _get_reward_distribution(@self);
 
-            __event_RewardDistribution(
-                ref self,
-                RewardDistribution {
-                    first_place: PlayerReward {
-                        adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
-                    },
-                    second_place: PlayerReward {
-                        adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
-                    },
-                    third_place: PlayerReward {
-                        adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
-                    },
-                    client: ClientReward { amount: 0, address: dao_address },
-                    dao: current_cost_to_play.into()
-                }
-            );
-            return;
+        if (rewards.DAO != 0) {
+            _lords_dispatcher(ref self).transferFrom(caller, dao_address, rewards.DAO);
         }
 
-        // First phase all rewards go to players
-        let mut week = Week {
-            DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, current_cost_to_play),
-            INTERFACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, current_cost_to_play
-            ),
-            FIRST_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, current_cost_to_play
-            ),
-            SECOND_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::SECOND_PLACE, current_cost_to_play
-            ),
-            THIRD_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::THIRD_PLACE, current_cost_to_play
-            )
-        };
-
-        let age_of_game_weeks = _age_of_game_weeks(@self);
-        if age_of_game_weeks > PHASE2_START_WEEKS.into() {
-            week =
-                Week {
-                    DAO: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE2_BP::DAO, current_cost_to_play
-                    ),
-                    INTERFACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE2_BP::INTERFACE, current_cost_to_play
-                    ),
-                    FIRST_PLACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE2_BP::FIRST_PLACE, current_cost_to_play
-                    ),
-                    SECOND_PLACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE2_BP::SECOND_PLACE, current_cost_to_play
-                    ),
-                    THIRD_PLACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE2_BP::THIRD_PLACE, current_cost_to_play
-                    )
-                };
-        }
-        if age_of_game_weeks > PHASE3_START_WEEKS.into() {
-            week =
-                Week {
-                    DAO: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE3_BP::DAO, current_cost_to_play
-                    ),
-                    INTERFACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE3_BP::INTERFACE, current_cost_to_play
-                    ),
-                    FIRST_PLACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE3_BP::FIRST_PLACE, current_cost_to_play
-                    ),
-                    SECOND_PLACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE3_BP::SECOND_PLACE, current_cost_to_play
-                    ),
-                    THIRD_PLACE: _calculate_payout(
-                        REWARD_DISTRIBUTIONS_PHASE3_BP::THIRD_PLACE, current_cost_to_play
-                    )
-                }
+        if (rewards.INTERFACE != 0) {
+            _lords_dispatcher(ref self).transferFrom(caller, client_address, rewards.INTERFACE);
         }
 
-        // DAO
-        if (week.DAO != 0) {
-            _lords_dispatcher(ref self).transferFrom(caller, dao_address, week.DAO);
+        if (rewards.FIRST_PLACE != 0) {
+            _lords_dispatcher(ref self)
+                .transferFrom(caller, first_place_address, rewards.FIRST_PLACE);
         }
 
-        // interface
-        if (week.INTERFACE != 0) {
-            _lords_dispatcher(ref self).transferFrom(caller, client_address, week.INTERFACE);
+        if (rewards.SECOND_PLACE != 0) {
+            _lords_dispatcher(ref self)
+                .transferFrom(caller, second_place_address, rewards.SECOND_PLACE);
         }
 
-        // first place
-        _lords_dispatcher(ref self).transferFrom(caller, first_place_address, week.FIRST_PLACE);
+        if (rewards.THIRD_PLACE != 0) {
+            _lords_dispatcher(ref self)
+                .transferFrom(caller, third_place_address, rewards.THIRD_PLACE);
+        }
 
-        // second place
-        _lords_dispatcher(ref self).transferFrom(caller, second_place_address, week.SECOND_PLACE);
-
-        // third place
-        _lords_dispatcher(ref self).transferFrom(caller, third_place_address, week.THIRD_PLACE);
-
-        // emit reward distribution event
         __event_RewardDistribution(
             ref self,
             RewardDistribution {
                 first_place: PlayerReward {
                     adventurer_id: leaderboard.first.adventurer_id.into(),
                     rank: 1,
-                    amount: week.FIRST_PLACE,
+                    amount: rewards.FIRST_PLACE,
                     address: first_place_address
                 },
                 second_place: PlayerReward {
                     adventurer_id: leaderboard.second.adventurer_id.into(),
                     rank: 2,
-                    amount: week.SECOND_PLACE,
+                    amount: rewards.SECOND_PLACE,
                     address: second_place_address
                 },
                 third_place: PlayerReward {
                     adventurer_id: leaderboard.third.adventurer_id.into(),
                     rank: 3,
-                    amount: week.THIRD_PLACE,
+                    amount: rewards.THIRD_PLACE,
                     address: third_place_address
                 },
-                client: ClientReward { amount: week.INTERFACE, address: client_address },
-                dao: week.DAO
+                client: ClientReward { amount: rewards.INTERFACE, address: client_address },
+                dao: rewards.DAO
             }
         );
     }

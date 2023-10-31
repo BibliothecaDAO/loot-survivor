@@ -44,7 +44,7 @@ const U64_MAX: u64 = 18446744073709551615;
 const U128_MAX: u128 = 340282366920938463463374607431768211455;
 
 #[derive(Drop, Copy)]
-struct Week {
+struct Rewards {
     DAO: u256,
     INTERFACE: u256,
     FIRST_PLACE: u256,
