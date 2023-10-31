@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { CallData, Contract } from "starknet";
 import { useAccount, useConnect } from "@starknet-react/core";
+import Image from "next/image";
 import { TypeAnimation } from "react-type-animation";
 import { MdClose } from "react-icons/md";
 import { WalletTutorial } from "@/app/components/intro/WalletTutorial";
@@ -10,16 +11,15 @@ import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { battle } from "@/app/lib/constants";
 import { FormData, GameToken } from "@/app/types";
 import { Button } from "@/app/components/buttons/Button";
-import Image from "next/image";
-import Lords from "../../../../public/icons/lords.svg";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
+import Lords from "public/icons/lords.svg";
 
 export interface SpawnProps {
   formData: FormData;
-  spawn: (...args: any[]) => any;
+  spawn: (formData: FormData, goldenTokenId: string) => Promise<void>;
   handleBack: () => void;
   lordsBalance?: bigint;
-  mintLords: (...args: any[]) => any;
+  mintLords: () => Promise<void>;
   goldenTokenData: any;
   gameContract: Contract;
 }

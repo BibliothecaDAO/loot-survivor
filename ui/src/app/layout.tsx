@@ -1,8 +1,8 @@
 "use client";
 
 import { ApolloProvider } from "@apollo/client";
-import { gameClient, goldenTokenClient } from "./lib/clients";
-import "./globals.css";
+import { gameClient, goldenTokenClient } from "@/app/lib/clients";
+import "@/app/globals.css";
 
 export default function RootLayout({
   children,

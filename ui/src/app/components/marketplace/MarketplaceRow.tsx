@@ -22,7 +22,7 @@ interface MarketplaceRowProps {
   upgradeHandler: (
     upgrades?: UpgradeStats,
     potions?: number,
-    purchases?: any[]
+    purchases?: ItemPurchase[]
   ) => void;
   totalCharisma: number;
 }

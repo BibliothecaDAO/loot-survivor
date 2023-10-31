@@ -108,7 +108,7 @@ type Loot = {
   slot: Slot;
 };
 
-type ContractAddress = any; // This needs to be defined or imported from its source.
+type ContractAddress = string;
 
 export type AdventurerState = {
   owner: ContractAddress;

@@ -54,11 +54,6 @@ export const BeastDisplay = ({
       <div className="flex flex-col w-full sm:p-3 uppercase">
         <div className="flex justify-between items-center py-1 sm:py-3 text-2xl sm:text-4xl border-b border-terminal-green px-2 ">
           <p className="w-1/4">{beastName}</p>
-          {!isMinted && namedBeast && (
-            <p className="sm:text-lg animate-pulseFast text-terminal-yellow self-center w-1/2 text-center">
-              Collectible
-            </p>
-          )}
           <div
             className={`text-4xl flex ${
               beastData?.health === 0 ? "text-red-600" : "text-terminal-green"
@@ -72,6 +67,11 @@ export const BeastDisplay = ({
         </div>
         <div className="flex justify-between w-full p-2 text-lg sm:text-3xl text-terminal-yellow">
           <p>Level {beastData?.level}</p>
+          {!isMinted && namedBeast && (
+            <p className="sm:text-lg animate-pulseFast text-terminal-yellow self-center w-1/2 text-center">
+              Collectible
+            </p>
+          )}
           <p>Tier {tier}</p>
         </div>
         <div className="flex flex-row justify-center gap-4 items-center w-full py-1 sm:py-4 space-x-2">

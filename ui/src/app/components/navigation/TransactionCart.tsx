@@ -29,7 +29,10 @@ import { UpgradeStats } from "@/app/types";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
-  multicall: (...args: any[]) => any;
+  multicall: (
+    loadingMessage: string[],
+    notification: string[]
+  ) => Promise<void>;
   gameContract: Contract;
 }
 

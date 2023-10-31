@@ -1,6 +1,6 @@
+import { ReactElement } from "react";
 import { RawArgs } from "starknet";
 import { ScreenPage } from "@/app/hooks/useUIStore";
-import { ReactElement } from "react";
 
 export interface Adventurer {
   [key: string]: number | string | Date | undefined;
@@ -96,6 +96,7 @@ export interface Battle {
   txHash?: string; // Transaction hash
   blockTime?: Date; // Block time of the battle
   timestamp?: Date; // Indexer timestamp of event process
+  discoveryTime?: Date; // Datetime of beast discovery
 }
 
 export interface Discovery {
@@ -149,10 +150,35 @@ export interface Score {
   timestamp?: Date; // Indexer timestamp of event process
 }
 
+export interface ProcessedItemLeveledUp {
+  item: string;
+  suffixUnlocked: boolean;
+  prefixesUnlocked: boolean;
+  special1: string;
+  special2: string;
+  special3: string;
+}
+
+export interface AdventurerDied {
+  killedByBeast: number; // Beast ID that killed adventurer
+  killedByObstacle: number; // Obstacle ID that killed adventurer
+  callerAddress: string; // Address of the caller that killed adventurer
+}
+
+export interface SpecialBeast {
+  data: Beast;
+  tokenId: number;
+}
+
 export interface Metadata {
   method?: string; // Method of the transaction
   description?: string; // Description of the transaction
   items?: string[]; // Items in the transaction
+}
+
+export interface TransactionParams {
+  hash: string;
+  metadata?: Metadata;
 }
 
 export type Menu = {
@@ -209,8 +235,8 @@ export interface UpgradeSummary {
   Stats: {
     [key: string]: number;
   };
-  Items: any;
-  Potions: any;
+  Items: ItemPurchase[];
+  Potions: number;
 }
 
 export interface Notification {

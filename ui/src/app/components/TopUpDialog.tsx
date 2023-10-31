@@ -7,7 +7,7 @@ import Storage from "@/app/lib/storage";
 import { BurnerStorage } from "@/app/types";
 import { useBurner } from "@/app/lib/burner";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
-import TokenLoader from "./animations/TokenLoader";
+import TokenLoader from "@/app/components/animations/TokenLoader";
 
 interface TopUpDialogProps {
   ethContract: Contract;

@@ -9,10 +9,10 @@ import {
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import { getWalletConnectors } from "@/app/lib/connectors";
-import Lords from "public/icons/lords.svg";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Call } from "@/app/types";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
+import Lords from "public/icons/lords.svg";
 
 interface ArcadeIntroProps {
   ethBalance: bigint;

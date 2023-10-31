@@ -5,8 +5,8 @@ import {
   CoinIcon,
   QuestionMarkIcon,
 } from "@/app/components/icons/Icons";
-import { ItemDisplay } from "./ItemDisplay";
-import LevelBar from "./LevelBar";
+import { ItemDisplay } from "@/app/components/adventurer/ItemDisplay";
+import LevelBar from "@/app/components/adventurer/LevelBar";
 import { getKeyFromValue } from "@/app/lib/utils";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";

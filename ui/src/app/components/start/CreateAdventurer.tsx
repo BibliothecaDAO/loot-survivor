@@ -10,7 +10,7 @@ export interface CreateAdventurerProps {
   onEscape: () => void;
   spawn: (...args: any[]) => any;
   lordsBalance?: bigint;
-  mintLords: (...args: any[]) => any;
+  mintLords: () => Promise<void>;
   goldenTokenData: any;
   gameContract: Contract;
 }

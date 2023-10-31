@@ -20,8 +20,8 @@ import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import TopupInput from "@/app/components/arcade/TopupInput";
 import ArcadeAccount from "@/app/abi/ArcadeAccount.json";
-import Storage from "../lib/storage";
-import { BurnerStorage } from "../types";
+import Storage from "@/app/lib/storage";
+import { BurnerStorage } from "@/app/types";
 
 interface ArcadeDialogProps {
   gameContract: Contract;
@@ -307,7 +307,7 @@ interface ArcadeAccountCardProps {
   walletAccount: AccountInterface;
   connector: Connector;
   masterAccountAddress: string;
-  arcadeConnectors: any[];
+  arcadeConnectors: Connector[];
   genNewKey: (address: string, connector: Connector) => Promise<void>;
   balances: { eth: bigint; lords: bigint; lordsGameAllowance: bigint };
   getAccountBalances: (address: string) => Promise<void>;

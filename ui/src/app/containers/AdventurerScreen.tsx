@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
+import { Contract } from "starknet";
 import { AdventurersList } from "@/app/components/start/AdventurersList";
 import { CreateAdventurer } from "@/app/components/start/CreateAdventurer";
 import ButtonMenu from "@/app/components/menu/ButtonMenu";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import { NullAdventurer } from "@/app/types";
+import { NullAdventurer, FormData } from "@/app/types";
 import useUIStore from "@/app/hooks/useUIStore";
-import { Contract } from "starknet";
 
 interface AdventurerScreenProps {
-  spawn: (...args: any[]) => any;
-  handleSwitchAdventurer: (...args: any[]) => any;
+  spawn: (formData: FormData, goldenTokenId: string) => Promise<void>;
+  handleSwitchAdventurer: (adventurerId: number) => Promise<void>;
   lordsBalance?: bigint;
-  mintLords: (...args: any[]) => any;
+  mintLords: () => Promise<void>;
   gameContract: Contract;
   goldenTokenData: any;
 }

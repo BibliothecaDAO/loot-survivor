@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/app/components/buttons/Button";
 import { TypeAnimation } from "react-type-animation";
-import { prologue, chapter1, chapter2, chapter3 } from "@/app/lib/constants";
 import Image from "next/image";
+import { Button } from "@/app/components/buttons/Button";
+import { prologue, chapter1, chapter2, chapter3 } from "@/app/lib/constants";
 
 interface IntroProps {
   onIntroComplete: () => void;

@@ -26,38 +26,37 @@ export type QueryKey =
   | "latestMarketItemsQuery"
   | "adventurerToSlayQuery";
 
-interface BattlesResult {
+export interface BattlesResult {
   [key: string]: Battle[];
   battles: Battle[];
 }
 
-interface DiscoveriesResult {
+export interface DiscoveriesResult {
   [key: string]: Battle[];
   discoveries: Discovery[];
 }
 
-interface BeastsResult {
+export interface BeastsResult {
   [key: string]: Battle[];
   beasts: Beast[];
 }
 
-interface AdventurersResult {
+export interface AdventurersResult {
   [key: string]: Battle[];
   adventurers: Adventurer[];
 }
 
-interface ItemsResult {
+export interface ItemsResult {
   [key: string]: Battle[];
   items: Item[];
 }
 
-interface ScoresResult {
+export interface ScoresResult {
   [key: string]: Battle[];
   scores: Score[];
 }
 
-interface InitialData {
-  // [key: string]: BattlesResult | DiscoveriesResult | BeastsResult | AdventurersResult | ItemsResult | ScoresResult | null;
+export interface QueryData {
   lastBattleQuery: BattlesResult | null;
   lastBeastBattleQuery: BattlesResult | null;
   battlesByAdventurerQuery: BattlesResult | null;
@@ -83,7 +82,7 @@ interface InitialData {
 }
 
 type QueriesState = {
-  data: InitialData;
+  data: QueryData;
   setData: (
     queryKey: QueryKey,
     data: any,
@@ -99,7 +98,7 @@ type QueriesState = {
   resetData: (queryKey?: QueryKey) => void;
 };
 
-const initialData: InitialData = {
+const initialData: QueryData = {
   lastBattleQuery: null,
   lastBeastBattleQuery: null,
   battlesByAdventurerQuery: null,

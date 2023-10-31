@@ -1,3 +1,4 @@
+import { Contract } from "starknet";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import Info from "@/app/components/adventurer/Info";
@@ -7,12 +8,12 @@ import BeastScreen from "@/app/containers/BeastScreen";
 import MazeLoader from "@/app/components/icons/MazeLoader";
 import useUIStore from "@/app/hooks/useUIStore";
 import ActionMenu from "@/app/components/menu/ActionMenu";
-import { Contract } from "starknet";
+import { Beast } from "@/app/types";
 
 interface ActionsScreenProps {
-  explore: (...args: any[]) => any;
-  attack: (...args: any[]) => any;
-  flee: (...args: any[]) => any;
+  explore: (till_beast: boolean) => Promise<void>;
+  attack: (tillDeath: boolean, beastData: Beast) => Promise<void>;
+  flee: (tillDeath: boolean, beastData: Beast) => Promise<void>;
   gameContract: Contract;
   beastsContract: Contract;
 }

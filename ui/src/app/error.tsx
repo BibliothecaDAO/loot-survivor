@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { Button } from "./components/buttons/Button";
-import { DiscordIcon } from "./components/icons/Icons";
+import { Button } from "@/app/components/buttons/Button";
+import { DiscordIcon } from "@/app/components/icons/Icons";
 
 export default function ErrorPage() {
   return (
