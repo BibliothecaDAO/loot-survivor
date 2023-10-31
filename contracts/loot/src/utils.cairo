@@ -1,9 +1,6 @@
 mod NameUtils {
     use lootitems::constants::{ItemNameSuffix, ItemSuffix, ItemId};
 
-    // name suffixes are the second part of the prefix aka the "Grasp" part of "Demon Grasp"
-    // I realize this is a bit confusing but this is what the
-    // loot contract refers to them as so I'm just being consistent with the contract
     fn is_special3_set1(name: u8) -> bool {
         (name == ItemNameSuffix::Bane
             || name == ItemNameSuffix::Song
