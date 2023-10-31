@@ -8,6 +8,7 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+      - ./scripts/mongo-init:/docker-entrypoint-initdb.d
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
@@ -24,7 +25,7 @@ services:
       - indexer
 
   adventurers_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
     restart: always
@@ -42,7 +43,7 @@ services:
       - indexer
 
   battles_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
     restart: always
@@ -60,7 +61,7 @@ services:
       - indexer
 
   beasts_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
     restart: always
@@ -78,7 +79,7 @@ services:
       - indexer
 
   discoveries_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
     restart: always
@@ -96,7 +97,7 @@ services:
       - indexer
 
   items_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
     restart: always
@@ -114,7 +115,7 @@ services:
       - indexer
 
   scores_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
+    image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
     restart: always
@@ -127,25 +128,6 @@ services:
     environment:
       PERSIST_TO_ETCD: http://etcd:2379
       SINK_ID: scores
-      AUTH_TOKEN: ${AUTH_TOKEN}
-    networks:
-      - indexer
-
-  entropy_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
-    depends_on:
-      - etcd
-      - mongo
-    restart: always
-    command:
-      - run
-      - --allow-env=/data/env-goerli
-      - /data/src/entropy.ts
-    volumes:
-      - ./:/data/
-    environment:
-      PERSIST_TO_ETCD: http://etcd:2379
-      SINK_ID: entropy
       AUTH_TOKEN: ${AUTH_TOKEN}
     networks:
       - indexer

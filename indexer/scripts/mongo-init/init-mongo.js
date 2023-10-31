@@ -1,4 +1,4 @@
-db = db.getSiblingDB('mongo_goerli');
+db = db.getSiblingDB('mongo');
 
 //
 // add indexes
