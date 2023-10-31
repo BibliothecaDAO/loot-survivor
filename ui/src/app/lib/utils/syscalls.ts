@@ -465,26 +465,14 @@ export function syscalls({
         const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
           (item: Item) => !droppedItems.includes(item.item ?? "")
         );
-        const filteredEquips = filteredDrops.filter(
-          (item: any) =>
+        const filteredEquips = filteredDrops?.filter(
+          (item: Item) =>
             !equippedItems.some(
               (equippedItem) => equippedItem.item == item.item
             )
         );
-        const filteredUnequips = filteredEquips.filter(
-          (item: any) =>
-            !unequippedItems.some(
-              (droppedItem) => droppedItem.item == item.item
-            )
-        );
-        const filteredEquips = filteredDrops.filter(
-          (item: any) =>
-            !equippedItems.some(
-              (equippedItem) => equippedItem.item == item.item
-            )
-        );
-        const filteredUnequips = filteredEquips.filter(
-          (item: any) =>
+        const filteredUnequips = filteredEquips?.filter(
+          (item: Item) =>
             !unequippedItems.some(
               (droppedItem) => droppedItem.item == item.item
             )
@@ -769,26 +757,14 @@ export function syscalls({
         const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
           (item: Item) => !droppedItems.includes(item.item ?? "")
         );
-        const filteredEquips = filteredDrops.filter(
-          (item: any) =>
+        const filteredEquips = filteredDrops?.filter(
+          (item: Item) =>
             !equippedItems.some(
               (equippedItem) => equippedItem.item == item.item
             )
         );
-        const filteredUnequips = filteredEquips.filter(
-          (item: any) =>
-            !unequippedItems.some(
-              (droppedItem) => droppedItem.item == item.item
-            )
-        );
-        const filteredEquips = filteredDrops.filter(
-          (item: any) =>
-            !equippedItems.some(
-              (equippedItem) => equippedItem.item == item.item
-            )
-        );
-        const filteredUnequips = filteredEquips.filter(
-          (item: any) =>
+        const filteredUnequips = filteredEquips?.filter(
+          (item: Item) =>
             !unequippedItems.some(
               (droppedItem) => droppedItem.item == item.item
             )
@@ -1058,26 +1034,14 @@ export function syscalls({
         const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
           (item: Item) => !droppedItems.includes(item.item ?? "")
         );
-        const filteredEquips = filteredDrops.filter(
-          (item: any) =>
+        const filteredEquips = filteredDrops?.filter(
+          (item: Item) =>
             !equippedItems.some(
               (equippedItem) => equippedItem.item == item.item
             )
         );
-        const filteredUnequips = filteredEquips.filter(
-          (item: any) =>
-            !unequippedItems.some(
-              (droppedItem) => droppedItem.item == item.item
-            )
-        );
-        const filteredEquips = filteredDrops.filter(
-          (item: any) =>
-            !equippedItems.some(
-              (equippedItem) => equippedItem.item == item.item
-            )
-        );
-        const filteredUnequips = filteredEquips.filter(
-          (item: any) =>
+        const filteredUnequips = filteredEquips?.filter(
+          (item: Item) =>
             !unequippedItems.some(
               (droppedItem) => droppedItem.item == item.item
             )
@@ -1316,43 +1280,17 @@ export function syscalls({
         const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
           (item: Item) => !droppedItems.includes(item.item ?? "")
         );
-        const filteredEquips = filteredDrops.filter(
-          (item: any) =>
+        const filteredEquips = filteredDrops?.filter(
+          (item: Item) =>
             !equippedItems.some(
               (equippedItem) => equippedItem.item == item.item
             )
         );
-        const filteredUnequips = filteredEquips.filter(
-          (item: any) =>
+        const filteredUnequips = filteredEquips?.filter(
+          (item: Item) =>
             !unequippedItems.some(
               (droppedItem) => droppedItem.item == item.item
             )
-        );
-
-        console.log(
-          filteredUnequips,
-          equippedItems,
-          unequippedItems,
-          purchasedItems
-        );
-        const filteredEquips = filteredDrops.filter(
-          (item: any) =>
-            !equippedItems.some(
-              (equippedItem) => equippedItem.item == item.item
-            )
-        );
-        const filteredUnequips = filteredEquips.filter(
-          (item: any) =>
-            !unequippedItems.some(
-              (droppedItem) => droppedItem.item == item.item
-            )
-        );
-
-        console.log(
-          filteredUnequips,
-          equippedItems,
-          unequippedItems,
-          purchasedItems
         );
         setData("itemsByAdventurerQuery", {
           items: [
@@ -1476,26 +1414,14 @@ export function syscalls({
         const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
           (item: Item) => !droppedItems.includes(item.item ?? "")
         );
-        const filteredEquips = filteredDrops.filter(
-          (item: any) =>
+        const filteredEquips = filteredDrops?.filter(
+          (item: Item) =>
             !equippedItems.some(
               (equippedItem) => equippedItem.item == item.item
             )
         );
-        const filteredUnequips = filteredEquips.filter(
-          (item: any) =>
-            !unequippedItems.some(
-              (droppedItem) => droppedItem.item == item.item
-            )
-        );
-        const filteredEquips = filteredDrops.filter(
-          (item: any) =>
-            !equippedItems.some(
-              (equippedItem) => equippedItem.item == item.item
-            )
-        );
-        const filteredUnequips = filteredEquips.filter(
-          (item: any) =>
+        const filteredUnequips = filteredEquips?.filter(
+          (item: Item) =>
             !unequippedItems.some(
               (droppedItem) => droppedItem.item == item.item
             )
@@ -1766,26 +1692,14 @@ export function syscalls({
           const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
             (item: Item) => !droppedItems.includes(item.item ?? "")
           );
-          const filteredEquips = filteredDrops.filter(
-            (item: any) =>
+          const filteredEquips = filteredDrops?.filter(
+            (item: Item) =>
               !equippedItems.some(
                 (equippedItem) => equippedItem.item == item.item
               )
           );
-          const filteredUnequips = filteredEquips.filter(
-            (item: any) =>
-              !unequippedItems.some(
-                (droppedItem) => droppedItem.item == item.item
-              )
-          );
-          const filteredEquips = filteredDrops.filter(
-            (item: any) =>
-              !equippedItems.some(
-                (equippedItem) => equippedItem.item == item.item
-              )
-          );
-          const filteredUnequips = filteredEquips.filter(
-            (item: any) =>
+          const filteredUnequips = filteredEquips?.filter(
+            (item: Item) =>
               !unequippedItems.some(
                 (droppedItem) => droppedItem.item == item.item
               )
