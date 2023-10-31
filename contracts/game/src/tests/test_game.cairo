@@ -1006,7 +1006,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item not in bag', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(26000000)]
+    #[available_gas(26009820)]
     fn test_equip_not_in_bag() {
         // start new game
         let mut game = new_adventurer(1000);

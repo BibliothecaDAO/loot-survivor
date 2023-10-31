@@ -2865,7 +2865,7 @@ mod Game {
     #[inline(always)]
     fn _get_testnet_entropy(adventurer_id: felt252, start_block: u64) -> felt252 {
         ImplAdventurer::get_entropy(
-            adventurer_id, starknet::get_block_hash_syscall(start_block - 9).unwrap_syscall()
+            adventurer_id, starknet::get_block_hash_syscall(start_block - 10).unwrap_syscall()
         )
     }
 
@@ -2880,24 +2880,18 @@ mod Game {
     fn _get_reveal_block(self: @ContractState, adventurer_id: felt252) -> u64 {
         let start_block = _load_adventurer_metadata(self, adventurer_id).start_block;
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
-        // wait a full 11 blocks on mainnet so that we can do the minimum current_block - 10 and still get a future block
         if chain_id == MAINNET_CHAIN_ID {
-            start_block + 11
-        } else if chain_id == GOERLI_CHAIN_ID {
-            // on testnet just wait a single block
-            start_block + 1
+            start_block + _get_reveal_block_delay()
         } else {
-            // devnet/testing, just return the start block
-            start_block
+            start_block + _get_reveal_block_delay()
         }
     }
 
     fn _get_reveal_block_delay() -> u64 {
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
+        // delay 11 blocks on mainnet to ensure we can do current_block - 10 and still get a future block
         if chain_id == MAINNET_CHAIN_ID {
             11
-        } else if chain_id == GOERLI_CHAIN_ID {
-            1
         } else {
             0
         }
