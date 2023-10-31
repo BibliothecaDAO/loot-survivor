@@ -43,7 +43,7 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
   ) => {
     try {
       const tx = await account.execute(calls, undefined, {
-        maxFee: "100000000000000", // currently setting to 0.0001ETH
+        maxFee: "1000000000000000", // currently setting to 0.001ETH
       });
       set({ calls: [], error: false });
       return tx;

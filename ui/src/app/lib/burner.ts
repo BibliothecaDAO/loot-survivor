@@ -17,7 +17,7 @@ import { ArcadeConnector } from "@/app/lib/arcade";
 import { BurnerStorage } from "@/app/types";
 import { padAddress } from "@/app/lib/utils";
 
-export const ETH_PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
+export const ETH_PREFUND_AMOUNT = "0x2386F26FC10000"; // 0.01ETH
 export const LORDS_PREFUND_AMOUNT = "0x15AF1D78B58C40000"; // 25LORDS
 
 const rpc_addr = process.env.NEXT_PUBLIC_RPC_URL;
@@ -160,7 +160,7 @@ export const useBurner = ({
         [transferEthTx, transferLordsTx],
         undefined,
         {
-          maxFee: "100000000000000", // currently setting to 0.0001ETH
+          maxFee: "1000000000000000", // currently setting to 0.001ETH
         }
       );
 
@@ -204,6 +204,7 @@ export const useBurner = ({
       try {
         await prefundAccount(address, walletAccount, lordsAmount);
       } catch (e) {
+        console.log(e);
         setIsDeploying(false);
       }
 
@@ -221,9 +222,11 @@ export const useBurner = ({
           addressSalt: publicKey,
         },
         {
-          maxFee: "100000000000000", // currently setting to 0.0001ETH
+          maxFee: "1000000000000000", // currently setting to 0.001ETH
         }
       );
+
+      console.log("deployed");
 
       await provider.waitForTransaction(deployTx);
 
@@ -231,8 +234,7 @@ export const useBurner = ({
 
       const setPermissionsTx = await setPermissions(
         accountAAFinalAddress,
-        walletAccount,
-        lordsAmount
+        walletAccount
       );
 
       await provider.waitForTransaction(setPermissionsTx);
@@ -264,11 +266,7 @@ export const useBurner = ({
   );
 
   const setPermissions = useCallback(
-    async (
-      accountAAFinalAdress: string,
-      walletAccount: AccountInterface,
-      lordsAmount: number
-    ) => {
+    async (accountAAFinalAdress: string, walletAccount: AccountInterface) => {
       const permissions: Call[] = [
         {
           contractAddress: accountAAFinalAdress,
@@ -297,7 +295,7 @@ export const useBurner = ({
         permissions,
         undefined,
         {
-          maxFee: "100000000000000", // currently setting to 0.0001ETH
+          maxFee: "1000000000000000", // currently setting to 0.001ETH
         }
       );
 
