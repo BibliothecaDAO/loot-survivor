@@ -5,14 +5,14 @@ import { CreateAdventurer } from "@/app/components/start/CreateAdventurer";
 import ButtonMenu from "@/app/components/menu/ButtonMenu";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import { NullAdventurer } from "@/app/types";
+import { NullAdventurer, FormData } from "@/app/types";
 import useUIStore from "@/app/hooks/useUIStore";
 
 interface AdventurerScreenProps {
-  spawn: (...args: any[]) => any;
+  spawn: (formData: FormData, goldenTokenId: string) => Promise<void>;
   handleSwitchAdventurer: (adventurerId: number) => Promise<void>;
   lordsBalance?: bigint;
-  mintLords: (...args: any[]) => any;
+  mintLords: () => Promise<void>;
   gameContract: Contract;
   goldenTokenData: any;
 }

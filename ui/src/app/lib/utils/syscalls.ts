@@ -17,6 +17,7 @@ import {
   ItemPurchase,
   Battle,
   Beast,
+  SpecialBeast,
 } from "@/app/types";
 import {
   getKeyFromValue,
@@ -75,7 +76,7 @@ export interface SyscallsProps {
   account: AccountInterface;
   resetCalls: () => void;
   setSpecialBeastDefeated: (value: boolean) => void;
-  setSpecialBeast: (value: any) => void;
+  setSpecialBeast: (value: SpecialBeast) => void;
   connector?: Connector;
 }
 

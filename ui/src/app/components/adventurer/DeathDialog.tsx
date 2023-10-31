@@ -8,7 +8,7 @@ import { getRankFromList, getOrdinalSuffix } from "@/app/lib/utils";
 import { getAdventurerByXP } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
 import { NullAdventurer, Adventurer } from "@/app/types";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { useQueriesStore, AdventurersResult } from "@/app/hooks/useQueryStore";
 import GlitchEffect from "@/app/components/animations/GlitchEffect";
 import PixelatedImage from "@/app/components/animations/PixelatedImage";
 import { getDeathMessageByRank } from "@/app/lib/utils";
@@ -30,7 +30,7 @@ export const DeathDialog = () => {
 
   useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
 
-  const handleSortXp = (xpData: any) => {
+  const handleSortXp = (xpData: AdventurersResult) => {
     const copiedAdventurersByXpData = xpData?.adventurers.slice();
 
     const sortedAdventurersByXPArray = copiedAdventurersByXpData?.sort(

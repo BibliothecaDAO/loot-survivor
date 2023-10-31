@@ -79,7 +79,7 @@ type State = {
   specialBeastDefeated: boolean;
   setSpecialBeastDefeated: (value: boolean) => void;
   specialBeast: SpecialBeast | null;
-  setSpecialBeast: (value: SpecialBeast) => void;
+  setSpecialBeast: (value: SpecialBeast | null) => void;
 };
 
 const useUIStore = create<State>((set) => ({

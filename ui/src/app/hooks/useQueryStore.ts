@@ -26,32 +26,32 @@ export type QueryKey =
   | "latestMarketItemsQuery"
   | "adventurerToSlayQuery";
 
-interface BattlesResult {
+export interface BattlesResult {
   [key: string]: Battle[];
   battles: Battle[];
 }
 
-interface DiscoveriesResult {
+export interface DiscoveriesResult {
   [key: string]: Battle[];
   discoveries: Discovery[];
 }
 
-interface BeastsResult {
+export interface BeastsResult {
   [key: string]: Battle[];
   beasts: Beast[];
 }
 
-interface AdventurersResult {
+export interface AdventurersResult {
   [key: string]: Battle[];
   adventurers: Adventurer[];
 }
 
-interface ItemsResult {
+export interface ItemsResult {
   [key: string]: Battle[];
   items: Item[];
 }
 
-interface ScoresResult {
+export interface ScoresResult {
   [key: string]: Battle[];
   scores: Score[];
 }

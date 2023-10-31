@@ -22,7 +22,7 @@ export const SpecialBeast = () => {
   const fetchBeast = async () => {
     const image = await fetchBeastImage(
       beastsContract?.address ?? "",
-      specialBeast?.tokenId
+      specialBeast?.tokenId ?? 0
     );
     setBeastImage(image);
   };
@@ -67,7 +67,7 @@ export const SpecialBeast = () => {
                 adventurer?.name
               } just defeated the first ${beastName} and collects the 1:1 Beast #LootSurvivor.\n\nToken: ${
                 process.env.NEXT_PUBLIC_BEASTS_VIEWER_URL +
-                specialBeast?.tokenId.toString()
+                specialBeast?.tokenId?.toString()
               }👹\n\nEnter here and try to survive: ${
                 process.env.NEXT_PUBLIC_APP_URL
               }\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
