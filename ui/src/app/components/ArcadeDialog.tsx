@@ -236,7 +236,7 @@ export const ArcadeDialog = ({
                   <div className="flex flex-row justify-center gap-5">
                     <Button
                       onClick={async () => {
-                        await create(connector!);
+                        await create(connector!, 25);
                         connect({ connector: listConnectors()[0] });
                         updateConnectors();
                       }}

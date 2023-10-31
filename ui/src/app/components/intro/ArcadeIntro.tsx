@@ -216,7 +216,7 @@ export const ArcadeIntro = ({
                     </div>
                     <Button
                       onClick={async () => {
-                        await create(connector!);
+                        await create(connector!, gamesPrefundAmount * 25);
                         disconnect();
                         connect({ connector: listConnectors()[0] });
                         updateConnectors();

@@ -138,7 +138,11 @@ export const useBurner = ({
     [walletAccount]
   );
 
-  const prefundAccount = async (address: string, account: AccountInterface) => {
+  const prefundAccount = async (
+    address: string,
+    account: AccountInterface,
+    lordsAmount: number
+  ) => {
     try {
       const transferEthTx = {
         contractAddress: ethContract?.address ?? "0x0",
@@ -149,7 +153,7 @@ export const useBurner = ({
       const transferLordsTx = {
         contractAddress: lordsContract?.address ?? "0x0",
         entrypoint: "transfer",
-        calldata: CallData.compile([address, LORDS_PREFUND_AMOUNT, "0x0"]),
+        calldata: CallData.compile([address, lordsAmount.toString(), "0x0"]),
       };
 
       const { transaction_hash } = await account.execute(
@@ -176,7 +180,7 @@ export const useBurner = ({
   };
 
   const create = useCallback(
-    async (connector: Connector) => {
+    async (connector: Connector, lordsAmount: number) => {
       setIsDeploying(true);
       const privateKey = stark.randomAddress();
       const publicKey = ec.starkCurve.getStarkKey(privateKey);
@@ -198,7 +202,7 @@ export const useBurner = ({
       );
 
       try {
-        await prefundAccount(address, walletAccount);
+        await prefundAccount(address, walletAccount, lordsAmount);
       } catch (e) {
         setIsDeploying(false);
       }
@@ -227,7 +231,8 @@ export const useBurner = ({
 
       const setPermissionsAndApprovalTx = await setPermissionsAndApproval(
         accountAAFinalAddress,
-        walletAccount
+        walletAccount,
+        lordsAmount
       );
 
       await provider.waitForTransaction(setPermissionsAndApprovalTx);
@@ -259,7 +264,11 @@ export const useBurner = ({
   );
 
   const setPermissionsAndApproval = useCallback(
-    async (accountAAFinalAdress: string, walletAccount: AccountInterface) => {
+    async (
+      accountAAFinalAdress: string,
+      walletAccount: AccountInterface,
+      lordsAmount: number
+    ) => {
       const permissions: Call[] = [
         {
           contractAddress: accountAAFinalAdress,
@@ -288,7 +297,7 @@ export const useBurner = ({
       const approveLordsSpendingTx = {
         contractAddress: lordsContract?.address ?? "",
         entrypoint: "approve",
-        calldata: [gameContract?.address ?? "", LORDS_PREFUND_AMOUNT, "0"],
+        calldata: [gameContract?.address ?? "", lordsAmount.toString(), "0"],
       };
       const { transaction_hash: permissionsTx } = await walletAccount.execute(
         [...permissions, approveLordsSpendingTx],
