@@ -4,6 +4,7 @@ import {
   Contract,
   AccountInterface,
   RevertedTransactionReceiptResponse,
+  TransactionType,
 } from "starknet";
 import { GameData } from "@/app/lib/data/GameData";
 import {
@@ -148,6 +149,13 @@ function handleDrop(
     }
   }
   return droppedItems;
+}
+
+function simulateTransaction(account: AccountInterface, calls: Call[]) {
+  const tx = await account.simulateTransaction({
+    type: TransactionType.INVOKE,
+    payload: calls,
+  });
 }
 
 export function syscalls({
