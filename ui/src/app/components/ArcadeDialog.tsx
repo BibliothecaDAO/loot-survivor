@@ -230,7 +230,7 @@ export const ArcadeDialog = ({
                 <div className="flex flex-col">
                   <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
                     Note: Creating an account will initiate a transfer of 0.001
-                    ETH & 250 LORDS from your connected wallet to the arcade
+                    ETH & 25 LORDS from your connected wallet to the arcade
                     account to cover your transaction costs from gameplay.
                   </p>
                   <div className="flex flex-row justify-center gap-5">

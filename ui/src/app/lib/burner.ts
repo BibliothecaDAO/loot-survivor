@@ -229,13 +229,13 @@ export const useBurner = ({
 
       setIsSettingPermissions(true);
 
-      const setPermissionsAndApprovalTx = await setPermissionsAndApproval(
+      const setPermissionsTx = await setPermissions(
         accountAAFinalAddress,
         walletAccount,
         lordsAmount
       );
 
-      await provider.waitForTransaction(setPermissionsAndApprovalTx);
+      await provider.waitForTransaction(setPermissionsTx);
 
       // save burner
       let storage = Storage.get("burners") || {};
@@ -247,7 +247,7 @@ export const useBurner = ({
         privateKey,
         publicKey,
         deployTx,
-        setPermissionsAndApprovalTx,
+        setPermissionsTx,
         masterAccount: walletAccount.address,
         masterAccountProvider: connector.id,
         gameContract: gameContract?.address,
@@ -263,7 +263,7 @@ export const useBurner = ({
     [walletAccount]
   );
 
-  const setPermissionsAndApproval = useCallback(
+  const setPermissions = useCallback(
     async (
       accountAAFinalAdress: string,
       walletAccount: AccountInterface,
@@ -293,14 +293,8 @@ export const useBurner = ({
         },
       ];
 
-      // Approve 250 LORDS
-      const approveLordsSpendingTx = {
-        contractAddress: lordsContract?.address ?? "",
-        entrypoint: "approve",
-        calldata: [gameContract?.address ?? "", lordsAmount.toString(), "0"],
-      };
       const { transaction_hash: permissionsTx } = await walletAccount.execute(
-        [...permissions, approveLordsSpendingTx],
+        permissions,
         undefined,
         {
           maxFee: "100000000000000", // currently setting to 0.0001ETH

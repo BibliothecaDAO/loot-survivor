@@ -256,18 +256,12 @@ export function syscalls({
       interfaceCamel = providerInterfaceCamel(connector!.id);
     }
 
-    const mintLords: Call = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "mint",
-      calldata: [account?.address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
-    };
     const approveLordsSpendingTx = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", (250 * 10 ** 18).toString(), "0"],
-    };
+      calldata: [gameContract?.address ?? "", (25 * 10 ** 18).toString(), "0"],
+    }; // Approve 25 LORDS to be spent each time spawn is called
 
-    // TODO: pull token id from indexer, right now just set to 0
     const mintAdventurerTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "new_game",
@@ -283,7 +277,7 @@ export function syscalls({
 
     addToCalls(mintAdventurerTx);
     const balanceEmpty = await checkArcadeBalance(
-      [...calls, mintLords, approveLordsSpendingTx, mintAdventurerTx],
+      [...calls, approveLordsSpendingTx, mintAdventurerTx],
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
@@ -301,7 +295,6 @@ export function syscalls({
       try {
         const tx = await handleSubmitCalls(account, [
           ...calls,
-          mintLords,
           approveLordsSpendingTx,
           mintAdventurerTx,
         ]);
