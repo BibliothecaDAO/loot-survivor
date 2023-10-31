@@ -42,7 +42,7 @@ import { useQueriesStore } from "@/app/hooks/useQueryStore";
 interface UpgradeScreenProps {
   upgrade: (
     upgrades: UpgradeStats,
-    purchaseItems: string[],
+    purchaseItems: ItemPurchase[],
     potionAmount: number
   ) => Promise<void>;
   gameContract: Contract;

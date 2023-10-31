@@ -214,7 +214,7 @@ export interface UpgradeSummary {
   Stats: {
     [key: string]: number;
   };
-  Items: string[];
+  Items: ItemPurchase[];
   Potions: number;
 }
 
