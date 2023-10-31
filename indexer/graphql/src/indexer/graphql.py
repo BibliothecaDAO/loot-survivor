@@ -1597,8 +1597,19 @@ async def run_graphql_api(mongo=None, port="8080"):
     schema = strawberry.Schema(query=Query)
     view = IndexerGraphQLView(db, schema=schema)
 
+    async def handle_options(request):
+        return web.Response()
+
     app = web.Application()
-    app.router.add_route("*", "/graphql", view)
+
+    # Add OPTIONS handler for preflight requests
+    app.router.add_route("OPTIONS", "/graphql", handle_options)
+
+    # Add your existing GraphQL route for GET requests
+    app.router.add_route("GET", "/graphql", view)
+
+    # Add your existing GraphQL route for POST requests
+    app.router.add_route("POST", "/graphql", view)
 
     ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     ssl_context.load_cert_chain(
