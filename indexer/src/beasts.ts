@@ -5,7 +5,6 @@ import type { Console } from "https://esm.sh/@apibara/indexer/sink/console";
 import {
   AMBUSHED_BY_BEAST,
   ATTACKED_BEAST,
-  ATTACKED_BY_BEAST,
   DISCOVERED_BEAST,
   parseAmbushedByBeast,
   parseAttackedBeast,
@@ -18,6 +17,7 @@ import { MONGO_CONNECTION_STRING } from "./utils/constants.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
+const STREAM_URL = Deno.env.get("STREAM_URL");
 
 const filter = {
   header: { weak: true },
