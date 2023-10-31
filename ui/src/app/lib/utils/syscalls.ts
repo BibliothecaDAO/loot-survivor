@@ -78,15 +78,19 @@ function handleEquip(
       const ownedItem = queryData.itemsByAdventurerQuery?.items.find(
         (item: any) => item.item == equippedItem
       );
-      ownedItem.equipped = true;
-      equippedItems.push(ownedItem);
+      if (ownedItem) {
+        ownedItem.equipped = true;
+        equippedItems.push(ownedItem);
+      }
     }
     for (let unequippedItem of equippedItemsEvent.data[2]) {
       const ownedItem = queryData.itemsByAdventurerQuery?.items.find(
         (item: any) => item.item == unequippedItem
       );
-      ownedItem.equipped = false;
-      unequippedItem.push(ownedItem);
+      if (ownedItem) {
+        ownedItem.equipped = false;
+        unequippedItem.push(ownedItem);
+      }
     }
   }
   return { equippedItems, unequippedItems };
