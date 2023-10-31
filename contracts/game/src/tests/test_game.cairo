@@ -30,7 +30,7 @@ mod tests {
         game::{
             interfaces::{IGameDispatcherTrait, IGameDispatcher},
             constants::{
-                COST_TO_PLAY, BLOCKS_IN_A_WEEK, Week, REWARD_DISTRIBUTIONS_PHASE1_BP,
+                COST_TO_PLAY, BLOCKS_IN_A_WEEK, Rewards, REWARD_DISTRIBUTIONS_PHASE1_BP,
                 REWARD_DISTRIBUTIONS_PHASE2_BP, REWARD_DISTRIBUTIONS_PHASE3_BP,
                 messages::{STAT_UPGRADES_AVAILABLE}, STARTER_BEAST_ATTACK_DAMAGE
             }
@@ -1006,7 +1006,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item not in bag', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(26000000)]
+    #[available_gas(26009820)]
     fn test_equip_not_in_bag() {
         // start new game
         let mut game = new_adventurer(1000);
@@ -2028,7 +2028,7 @@ mod tests {
         // DAO doesn't get anything more until stage 2
         assert(lords.balanceOf(DAO()) == COST_TO_PLAY.into(), 'wrong stage 1 balance');
 
-        let mut week = Week {
+        let mut rewards = Rewards {
             DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, COST_TO_PLAY),
             INTERFACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, COST_TO_PLAY),
             FIRST_PLACE: _calculate_payout(
