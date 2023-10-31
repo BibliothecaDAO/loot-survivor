@@ -226,7 +226,8 @@ export const ArcadeIntro = ({
                         isWrongNetwork ||
                         checkNotEnoughPrefundLords ||
                         !account ||
-                        gamesPrefundAmount === 0
+                        gamesPrefundAmount === 0 ||
+                        true
                       }
                       className="w-1/2 h-1/4"
                     >
