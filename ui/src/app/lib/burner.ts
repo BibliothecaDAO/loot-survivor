@@ -271,20 +271,20 @@ export const useBurner = ({
         {
           contractAddress: accountAAFinalAdress,
           entrypoint: "update_whitelisted_contracts",
-          calldata: [
-            "2",
-            gameContract?.address ?? "",
-            "1",
-            lordsContract?.address ?? "",
-            "1",
-          ],
+          calldata: ["1", gameContract?.address ?? "", "1"],
         },
         {
           contractAddress: accountAAFinalAdress,
           entrypoint: "update_whitelisted_calls",
           calldata: [
-            "1",
+            "3",
             ethContract?.address ?? "",
+            selector.getSelectorFromName("transfer"),
+            "1",
+            lordsContract?.address ?? "",
+            selector.getSelectorFromName("approve"),
+            "1",
+            lordsContract?.address ?? "",
             selector.getSelectorFromName("transfer"),
             "1",
           ],
