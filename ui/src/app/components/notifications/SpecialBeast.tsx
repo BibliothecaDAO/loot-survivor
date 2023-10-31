@@ -66,16 +66,16 @@ export const SpecialBeast = () => {
               text={`${
                 adventurer?.name
               } just defeated the first ${beastName} and collects the 1:1 Beast #LootSurvivor.\n\nToken: ${
-                process.env.NEXT_PUBLIC_BEASTS_VIEWER_URL +
-                specialBeast?.tokenId?.toString()
+                process.env.NEXT_PUBLIC_BEASTS_VIEWER_URL ??
+                "" + specialBeast?.tokenId?.toString()
               }👹\n\nEnter here and try to survive: ${
                 process.env.NEXT_PUBLIC_APP_URL
               }\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
             />
             <a
               href={
-                process.env.NEXT_PUBLIC_BEASTS_VIEWER_URL +
-                specialBeast?.tokenId.toString()
+                process.env.NEXT_PUBLIC_BEASTS_VIEWER_URL ??
+                "" + specialBeast?.tokenId.toString()
               }
               target="_blank"
             >
