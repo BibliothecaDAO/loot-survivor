@@ -89,7 +89,7 @@ function handleEquip(
       );
       if (ownedItem) {
         ownedItem.equipped = false;
-        unequippedItem.push(ownedItem);
+        unequippedItems.push(ownedItem);
       }
     }
   }
