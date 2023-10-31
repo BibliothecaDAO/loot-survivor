@@ -233,8 +233,7 @@ export const ArcadeIntro = ({
                         checkNotEnoughPrefundLords ||
                         !account ||
                         gamesPrefundAmount === 0 ||
-                        gamesPrefundAmount > maxGames ||
-                        true
+                        gamesPrefundAmount > maxGames
                       }
                       className="w-1/2 h-1/4"
                     >
