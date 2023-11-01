@@ -12,14 +12,16 @@ import { useBurner } from "@/app/lib/burner";
 import { MIN_BALANCE } from "@/app/lib/constants";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import { fetchBalances } from "@/app/lib/balances";
-import { indexAddress } from "../lib/utils";
+import { indexAddress } from "@/app/lib/utils";
 import Lords from "public/icons/lords.svg";
 import Eth from "public/icons/eth-2.svg";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import TopupInput from "@/app/components/arcade/TopupInput";
-import RecoverUndeployed from "./arcade/RecoverUndeployed";
-import RecoverArcade from "./arcade/RecoverArcade";
+import RecoverUndeployed from "@/app/components/arcade/RecoverUndeployed";
+import RecoverArcade from "@/app/components//arcade/RecoverArcade";
+import Storage from "@/app/lib/storage";
+import { BurnerStorage } from "@/app/types";
 
 interface ArcadeDialogProps {
   gameContract: Contract;
@@ -329,6 +331,10 @@ export const ArcadeAccountCard = ({
     (conn) => conn.name == walletAccount?.address
   );
 
+  const storage: BurnerStorage = Storage.get("burners");
+  const currentGamePermissions =
+    storage[account.name].gameContract == process.env.NEXT_PUBLIC_GAME_ADDRESS;
+
   return (
     <div className="border border-terminal-green p-3 items-center">
       <div className="text-left flex flex-col gap-2 text-sm sm:text-xl mb-0 sm:mb-4 items-center">
@@ -427,6 +433,7 @@ export const ArcadeAccountCard = ({
               ? connect({ connector: masterConnector! })
               : connect({ connector: account });
           }}
+          disabled={!currentGamePermissions}
         >
           {connected ? "Connect to Master" : "Connect"}
         </Button>
@@ -443,6 +450,7 @@ export const ArcadeAccountCard = ({
               onClick={async () =>
                 await setPermissions(account.name, walletAccount)
               }
+              className={`${currentGamePermissions ? "" : "animate-pulse"}`}
             >
               Set Permissions
             </Button>
