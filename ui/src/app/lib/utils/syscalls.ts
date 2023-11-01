@@ -283,6 +283,17 @@ export function syscalls({
       account
     );
 
+    const payWithLordsCalls = [
+      ...calls,
+      approveLordsSpendingTx,
+      mintAdventurerTx,
+    ];
+
+    const payWithGoldenTokenCalls = [...calls, mintAdventurerTx];
+
+    const spawnCalls =
+      goldenTokenId === "0" ? payWithLordsCalls : payWithGoldenTokenCalls;
+
     if (!balanceEmpty) {
       startLoading(
         "Create",
@@ -291,11 +302,7 @@ export function syscalls({
         undefined
       );
       try {
-        const tx = await handleSubmitCalls(account, [
-          ...calls,
-          approveLordsSpendingTx,
-          mintAdventurerTx,
-        ]);
+        const tx = await handleSubmitCalls(account, spawnCalls);
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
