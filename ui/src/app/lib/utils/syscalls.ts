@@ -18,6 +18,7 @@ import {
   Battle,
   Beast,
   SpecialBeast,
+  Discovery,
 } from "@/app/types";
 import {
   getKeyFromValue,
@@ -482,7 +483,7 @@ export function syscalls({
           ],
         });
 
-        const discoveries = [];
+        const discoveries: Discovery[] = [];
 
         const filteredDiscoveries = events.filter(
           (event) =>
