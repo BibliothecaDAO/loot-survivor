@@ -61,7 +61,7 @@ mod Game {
             messages, Rewards, REWARD_DISTRIBUTIONS_PHASE1_BP, REWARD_DISTRIBUTIONS_PHASE2_BP,
             REWARD_DISTRIBUTIONS_PHASE3_BP, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
             STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS,
-            STARTING_GAME_ENTROPY_ROTATION_INTERVAL, MINIMUM_DAMAGE_FROM_BEASTS
+            STARTING_GAME_ENTROPY_ROTATION_INTERVAL, MINIMUM_DAMAGE_FROM_BEASTS, MAINNET_REVEAL_DELAY_BLOCKS
         }
     };
     use lootitems::{
@@ -263,7 +263,9 @@ mod Game {
             adventurer.update_actions_per_block(block_number);
 
             // get number of blocks between actions
-            let (idle, num_blocks) = _is_idle(immutable_adventurer, game_entropy);
+            let (idle, num_blocks) = _is_idle(
+                @self, immutable_adventurer, adventurer_id, game_entropy
+            );
 
             // update players last action block number to reset idle counter
             adventurer.set_last_action_block(block_number);
@@ -328,7 +330,9 @@ mod Game {
             }
 
             // get number of blocks between actions
-            let (idle, num_blocks) = _is_idle(immutable_adventurer, game_entropy);
+            let (idle, num_blocks) = _is_idle(
+                @self, immutable_adventurer, adventurer_id, game_entropy
+            );
 
             // update players last action block
             adventurer.set_last_action_block(block_number);
@@ -409,7 +413,9 @@ mod Game {
             }
 
             // get number of blocks between actions
-            let (idle, num_blocks) = _is_idle(immutable_adventurer, game_entropy);
+            let (idle, num_blocks) = _is_idle(
+                @self, immutable_adventurer, adventurer_id, game_entropy
+            );
 
             // update players last action block number
             adventurer.set_last_action_block(block_number);
@@ -580,7 +586,9 @@ mod Game {
             }
 
             // get number of blocks between actions
-            let (idle, num_blocks) = _is_idle(immutable_adventurer, game_entropy);
+            let (idle, num_blocks) = _is_idle(
+                @self, immutable_adventurer, adventurer_id, game_entropy
+            );
 
             // if adventurer exceeded idle penalty threshold, apply penalty and return
             if idle {
@@ -1063,7 +1071,7 @@ mod Game {
         _assert_not_dead(adventurer);
 
         // assert adventurer is idle
-        _assert_is_idle(@self, adventurer);
+        _assert_is_idle(@self, adventurer, adventurer_id);
 
         // slay adventurer by setting health to 0
         adventurer.health = 0;
@@ -2675,16 +2683,33 @@ mod Game {
         assert(actions_per_block.into() < rate_limit, messages::RATE_LIMIT_EXCEEDED);
     }
 
-    fn _assert_is_idle(self: @ContractState, adventurer: Adventurer) {
+    fn _assert_is_idle(self: @ContractState, adventurer: Adventurer, adventurer_id: felt252) {
         let game_entropy = _load_game_entropy(self);
-        let (is_idle, _) = _is_idle(adventurer, game_entropy);
+        let (is_idle, _) = _is_idle(self, adventurer, adventurer_id, game_entropy);
         assert(is_idle, messages::ADVENTURER_NOT_IDLE);
     }
-    fn _is_idle(self: Adventurer, game_entropy: GameEntropy) -> (bool, u16) {
-        // get number of blocks since the players last turn
-        let idle_blocks = self.get_idle_blocks(starknet::get_block_info().unbox().block_number);
+    fn _is_idle(
+        self: @ContractState,
+        adventurer: Adventurer,
+        adventurer_id: felt252,
+        game_entropy: GameEntropy
+    ) -> (bool, u16) {
+        let current_block = starknet::get_block_info().unbox().block_number;
+        let player_start_block = _load_adventurer_metadata(self, adventurer_id).start_block;
+        let idle_penalty_blocks = _load_game_entropy(self).get_idle_penalty_blocks();
+
+        // Adventurer cannot be idle before:
+        // start block + the reveal delay + the standard idle penalty blocks
+        let idle_penalty_start_block = player_start_block
+            + MAINNET_REVEAL_DELAY_BLOCKS.into()
+            + idle_penalty_blocks.into();
+
+        if current_block < idle_penalty_start_block {
+            return (false, 0);
+        }
 
         // return if player is idle along with number of blocks
+        let idle_blocks = adventurer.get_idle_blocks(current_block);
         (game_entropy.is_adventurer_idle(idle_blocks.into()), idle_blocks)
     }
 
