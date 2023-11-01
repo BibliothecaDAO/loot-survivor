@@ -188,38 +188,44 @@ export default function BeastScreen({
       <div className="flex flex-col gap-1 sm:gap-5 items-center sm:w-1/2 order-1 text-lg h-1/4 sm:h-full">
         {isAlive && (
           <>
-            <div className="sm:hidden flex flex-row sm:flex-col gap-5 items-center justify-center sm:justify-start w-full h-3/4 sm:h-1/4">
-              <div className="flex flex-col items-center w-1/2 sm:w-full h-1/2 sm:h-full">
-                <ActionMenu
-                  buttonsData={attackButtonsData}
-                  size={"fill"}
-                  title="Attack"
-                />
-              </div>
-              <div className="flex flex-col items-center w-1/2 sm:w-full h-1/2 sm:h-full">
-                <ActionMenu
-                  buttonsData={fleeButtonsData}
-                  size={"fill"}
-                  title={buttonText}
-                />
-              </div>
-            </div>
-            <div className="hidden sm:flex flex-row gap-2 sm:flex-col items-center justify-center h-1/3 w-3/4">
-              <div className="flex flex-col items-center justify-center h-1/2 w-full">
-                <ActionMenu
-                  buttonsData={attackButtonsData}
-                  size={"fill"}
-                  title="Attack"
-                />
-              </div>
-              <div className="flex flex-col items-center justify-center h-1/2 w-full">
-                <ActionMenu
-                  buttonsData={fleeButtonsData}
-                  size={"fill"}
-                  title="Flee"
-                />
-              </div>
-            </div>
+            {revealBlockReached ? (
+              <>
+                <div className="sm:hidden flex flex-row sm:flex-col gap-5 items-center justify-center sm:justify-start w-full h-3/4 sm:h-1/4">
+                  <div className="flex flex-col items-center w-1/2 sm:w-full h-1/2 sm:h-full">
+                    <ActionMenu
+                      buttonsData={attackButtonsData}
+                      size={"fill"}
+                      title="Attack"
+                    />
+                  </div>
+                  <div className="flex flex-col items-center w-1/2 sm:w-full h-1/2 sm:h-full">
+                    <ActionMenu
+                      buttonsData={fleeButtonsData}
+                      size={"fill"}
+                      title={buttonText}
+                    />
+                  </div>
+                </div>
+                <div className="hidden sm:flex flex-row gap-2 sm:flex-col items-center justify-center h-1/3 w-3/4">
+                  <div className="flex flex-col items-center justify-center h-1/2 w-full">
+                    <ActionMenu
+                      buttonsData={attackButtonsData}
+                      size={"fill"}
+                      title="Attack"
+                    />
+                  </div>
+                  <div className="flex flex-col items-center justify-center h-1/2 w-full">
+                    <ActionMenu
+                      buttonsData={fleeButtonsData}
+                      size={"fill"}
+                      title="Flee"
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="text-2xl loading-ellipsis">Waiting for Reveal</p>
+            )}
           </>
         )}
 
