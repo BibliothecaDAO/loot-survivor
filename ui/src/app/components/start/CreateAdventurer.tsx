@@ -12,6 +12,7 @@ export interface CreateAdventurerProps {
   lordsBalance?: bigint;
   goldenTokenData: any;
   gameContract: Contract;
+  getBalances: () => Promise<void>;
 }
 
 export const CreateAdventurer = ({
@@ -21,6 +22,7 @@ export const CreateAdventurer = ({
   lordsBalance,
   goldenTokenData,
   gameContract,
+  getBalances,
 }: CreateAdventurerProps) => {
   const [formData, setFormData] = useState<FormData>({
     startingWeapon: "",
@@ -114,6 +116,7 @@ export const CreateAdventurer = ({
               lordsBalance={lordsBalance}
               goldenTokenData={goldenTokenData}
               gameContract={gameContract}
+              getBalances={getBalances}
             />
           </div>
           <div className="sm:hidden">
@@ -136,6 +139,7 @@ export const CreateAdventurer = ({
             lordsBalance={lordsBalance}
             goldenTokenData={goldenTokenData}
             gameContract={gameContract}
+            getBalances={getBalances}
           />
         </div>
       )}

@@ -523,6 +523,7 @@ function Home({ updateConnectors }: HomeProps) {
                       lordsBalance={lordsBalance}
                       gameContract={gameContract!}
                       goldenTokenData={goldenTokenData}
+                      getBalances={getBalances}
                     />
                   )}
                   {screen === "play" && (
