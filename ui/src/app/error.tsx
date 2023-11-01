@@ -21,7 +21,7 @@ export default function ErrorPage() {
           May the code be with you, brave adventurer!
         </p>
         <a
-          href="https://discord.gg/bibliothecadao"
+          href="https://discord.gg/realmsworld"
           target="_blank"
           rel="noopener noreferrer"
         >
