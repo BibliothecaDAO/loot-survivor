@@ -415,7 +415,7 @@ function Home({ updateConnectors }: HomeProps) {
     if (arcadeConnectors.length === 0) {
       showArcadeIntro(true);
     } else {
-      showArcadeIntro(true);
+      showArcadeIntro(false);
     }
   }, []);
 
