@@ -2,7 +2,7 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 import { z } from "zod";
-import { Call, AccountInterface } from "starknet";
+import { AccountInterface } from "starknet";
 import { Adventurer, Item, ItemPurchase } from "@/app/types";
 import { GameData } from "@/app/lib/data/GameData";
 import {
