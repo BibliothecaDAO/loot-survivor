@@ -524,6 +524,7 @@ export const useBurner = ({
     topUpLords,
     withdraw,
     genNewKey,
+    setPermissions,
     account,
     isDeploying,
     isSettingPermissions,

@@ -52,6 +52,7 @@ export const ArcadeDialog = ({
     getMasterAccount,
     create,
     isDeploying,
+    setPermissions,
     isSettingPermissions,
     genNewKey,
     isGeneratingNewKey,
@@ -265,6 +266,7 @@ export const ArcadeDialog = ({
                     masterAccountAddress={masterAccount}
                     arcadeConnectors={arcadeConnectors()}
                     genNewKey={genNewKey}
+                    setPermissions={setPermissions}
                     balances={arcadebalances[account.name]}
                     getAccountBalances={getAccountBalances}
                     topUpEth={topUpEth}
@@ -309,6 +311,10 @@ interface ArcadeAccountCardProps {
   masterAccountAddress: string;
   arcadeConnectors: Connector[];
   genNewKey: (address: string, connector: Connector) => Promise<void>;
+  setPermissions: (
+    accountAAFinalAdress: string,
+    walletAccount: AccountInterface
+  ) => Promise<string>;
   balances: { eth: bigint; lords: bigint; lordsGameAllowance: bigint };
   getAccountBalances: (address: string) => Promise<void>;
   topUpEth: (address: string, account: AccountInterface) => Promise<any>;
@@ -336,6 +342,7 @@ export const ArcadeAccountCard = ({
   masterAccountAddress,
   arcadeConnectors,
   genNewKey,
+  setPermissions,
   balances,
   getAccountBalances,
   topUpEth,
@@ -443,19 +450,6 @@ export const ArcadeAccountCard = ({
                   Add
                 </Button>
               </span>
-              {/* <span className="flex flex-col items-center w-1/3">
-                <div className="relative w-6 h-6 sm:w-8 sm:h-8">
-                  <Image
-                    src={"/golden-token.png"}
-                    alt="Golden Token"
-                    fill={true}
-                  />
-                </div>
-                <p className="sm:text-xl">0</p>
-                <Button size={"xxxs"} className="text-black" disabled={true}>
-                  Buy
-                </Button>
-              </span> */}
             </span>
           )}
         </span>
@@ -487,12 +481,22 @@ export const ArcadeAccountCard = ({
           {connected ? "Connect to Master" : "Connect"}
         </Button>
         {masterAccountAddress == walletAccount?.address && (
-          <Button
-            variant={"ghost"}
-            onClick={async () => await genNewKey(account.name, connector!)}
-          >
-            Create New Keys
-          </Button>
+          <>
+            <Button
+              variant={"ghost"}
+              onClick={async () => await genNewKey(account.name, connector!)}
+            >
+              Create New Keys
+            </Button>
+            <Button
+              variant={"ghost"}
+              onClick={async () =>
+                await setPermissions(account.name, walletAccount)
+              }
+            >
+              Set Permissions
+            </Button>
+          </>
         )}
         {connected && (
           <Button
