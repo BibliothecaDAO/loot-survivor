@@ -38,7 +38,11 @@ export const ArcadeDialog = ({
 }: ArcadeDialogProps) => {
   const [fetchedBalances, setFetchedBalances] = useState(false);
   const [recoverArcade, setRecoverArcade] = useState(false);
+  const [recoverUndeployed, setRecoverUndeployed] = useState(false);
   const [recoveryAddress, setRecoveryAddress] = useState<string | undefined>();
+  const [recoveryUndeployedAddress, setRecoveryUndeployedAddress] = useState<
+    string | undefined
+  >();
   const [recoveryMasterAddress, setRecoveryMasterAddress] = useState<
     string | undefined
   >();
@@ -63,6 +67,7 @@ export const ArcadeDialog = ({
     withdraw,
     isWithdrawing,
     listConnectors,
+    deployAccountFromHash,
   } = useBurner({ walletAccount, gameContract, lordsContract, ethContract });
   const [arcadebalances, setArcadeBalances] = useState<
     Record<string, { eth: bigint; lords: bigint; lordsGameAllowance: bigint }>
@@ -80,6 +85,10 @@ export const ArcadeDialog = ({
 
   const formattedRecoveryAddress = padAddress(
     padAddress(recoveryAddress ?? "")
+  );
+
+  const formattedRecoveryUndeployedAddress = padAddress(
+    padAddress(recoveryUndeployedAddress ?? "")
   );
 
   const { contract: arcadeContract } = useContract({
@@ -137,6 +146,13 @@ export const ArcadeDialog = ({
   ) => {
     const { value } = e.target;
     setRecoveryAddress(value);
+  };
+
+  const handleUndeployedChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { value } = e.target;
+    setRecoveryUndeployedAddress(indexAddress(value));
   };
 
   const handleGetMaster = async () => {
@@ -219,6 +235,36 @@ export const ArcadeDialog = ({
                 : "Recover Account"}
             </Button>
           </div>
+        ) : recoverUndeployed ? (
+          <div className="flex flex-col items-center gap-5 h-3/4 w-full">
+            <p className="text-3xl uppercase">Recover Undeployed</p>
+            <p className="text-lg">
+              Enter address of the undeployed Arcade Account.
+            </p>
+            <input
+              type="text"
+              name="address"
+              onChange={handleUndeployedChange}
+              className="p-1 m-2 bg-terminal-black border border-terminal-green animate-pulse transform w-1/2 2xl:h-16 2xl:text-4xl"
+              maxLength={66}
+            />
+            <Button
+              onClick={async () => {
+                await deployAccountFromHash(
+                  connector!,
+                  formattedRecoveryUndeployedAddress,
+                  walletAccount!
+                );
+                updateConnectors();
+                setRecoverUndeployed(false);
+              }}
+              className="w-1/4"
+            >
+              {recoveryAccountExists()
+                ? "Account Already Stored"
+                : "Recover Account"}
+            </Button>
+          </div>
         ) : (
           <>
             <div className="flex flex-col">
@@ -247,6 +293,9 @@ export const ArcadeDialog = ({
                     </Button>
                     <Button onClick={() => setRecoverArcade(true)}>
                       Recover Account
+                    </Button>
+                    <Button onClick={() => setRecoverUndeployed(true)}>
+                      Recover Undeployed
                     </Button>
                   </div>
                 </div>
@@ -315,7 +364,12 @@ interface ArcadeAccountCardProps {
     accountAAFinalAdress: string,
     walletAccount: AccountInterface
   ) => Promise<string>;
-  balances: { eth: bigint; lords: bigint; lordsGameAllowance: bigint };
+  balances: {
+    [key: string]: bigint;
+    eth: bigint;
+    lords: bigint;
+    lordsGameAllowance: bigint;
+  };
   getAccountBalances: (address: string) => Promise<void>;
   topUpEth: (address: string, account: AccountInterface) => Promise<any>;
   topUpLords: (
@@ -415,6 +469,7 @@ export const ArcadeAccountCard = ({
                     getBalances={async () =>
                       await getAccountBalances(account.name)
                     }
+                    balances={balances}
                   />
                 </div>
                 <Button
@@ -440,6 +495,7 @@ export const ArcadeAccountCard = ({
                     getBalances={async () =>
                       await getAccountBalances(account.name)
                     }
+                    balances={balances}
                   />
                 </div>
                 <Button
@@ -465,6 +521,7 @@ export const ArcadeAccountCard = ({
               selectedTopup === "eth" ? 0 : Number(balances?.lordsGameAllowance)
             }
             getBalances={async () => await getAccountBalances(account.name)}
+            balances={balances}
           />
         )}
       </div>

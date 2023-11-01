@@ -420,8 +420,6 @@ function Home({ updateConnectors }: HomeProps) {
     }
   }, [arcadeConnectors]);
 
-  console.log(arcadeConnectors);
-
   useEffect(() => {
     resetCalls();
     setDropItems([]);

@@ -226,8 +226,6 @@ export const useBurner = ({
         }
       );
 
-      console.log("deployed");
-
       await provider.waitForTransaction(deployTx);
 
       setIsSettingPermissions(true);
@@ -499,6 +497,72 @@ export const useBurner = ({
     [walletAccount]
   );
 
+  const deployAccountFromHash = useCallback(
+    async (
+      connector: Connector,
+      address: string,
+      walletAccount: AccountInterface
+    ) => {
+      setIsDeploying(true);
+      const privateKey = stark.randomAddress();
+      const publicKey = ec.starkCurve.getStarkKey(privateKey);
+
+      if (!walletAccount) {
+        throw new Error("wallet account not found");
+      }
+
+      const constructorAACalldata = CallData.compile({
+        _public_key: publicKey,
+        _master_account:
+          "0x01AC519950FE43b010547c9Ee01aa5D20E304e86244E18eab45605D4CfB0fb2E",
+      });
+
+      // deploy burner
+      const burner = new Account(
+        provider,
+        "0x038ee8047118cb4559c9c5f6654b959a9109d4e2ab009804b5c6f06f92e5ac54",
+        privateKey,
+        "1"
+      );
+
+      const {
+        transaction_hash: deployTx,
+        contract_address: accountAAFinalAddress,
+      } = await burner.deployAccount(
+        {
+          classHash: arcadeClassHash!,
+          constructorCalldata: constructorAACalldata,
+          contractAddress:
+            "0x038ee8047118cb4559c9c5f6654b959a9109d4e2ab009804b5c6f06f92e5ac54",
+        },
+        {
+          maxFee: "1000000000000000", // currently setting to 0.001ETH
+        }
+      );
+
+      await provider.waitForTransaction(deployTx);
+
+      // save burner
+      let storage = Storage.get("burners") || {};
+      for (let address in storage) {
+        storage[address].active = false;
+      }
+
+      storage[padAddress(accountAAFinalAddress)] = {
+        privateKey,
+        publicKey,
+        deployTx,
+        masterAccount: walletAccount.address,
+        masterAccountProvider: connector.id,
+        gameContract: gameContract?.address,
+        active: true,
+      };
+      Storage.set("burners", storage);
+      setIsDeploying(false);
+    },
+    []
+  );
+
   const listConnectors = useCallback(() => {
     const arcadeAccounts = [];
     const burners = list();
@@ -533,5 +597,6 @@ export const useBurner = ({
     isToppingUpLords,
     isWithdrawing,
     listConnectors,
+    deployAccountFromHash,
   };
 };

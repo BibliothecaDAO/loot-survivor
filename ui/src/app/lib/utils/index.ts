@@ -373,35 +373,6 @@ export async function checkArcadeBalance(
   account?: AccountInterface
 ) {
   if (ethBalance < FEE_CHECK_BALANCE) {
-    // const storage: BurnerStorage = Storage.get("burners");
-    // if (account && (account?.address ?? "0x0") in storage) {
-    //   try {
-    //     setEstimatingFee(true);
-    //     const newAccount = new Account(
-    //       account,
-    //       account?.address,
-    //       storage[account?.address]["privateKey"],
-    //       "1"
-    //     );
-    //     const { suggestedMaxFee: estimatedFee } = await newAccount.estimateFee(
-    //       calls
-    //     );
-    //     // Add 10% to fee for safety
-    //     const formattedFee = estimatedFee * (BigInt(11) / BigInt(10));
-    //     setEstimatingFee(false);
-    //     if (ethBalance < formattedFee) {
-    // showTopUpDialog(true);
-    // setTopUpAccount(account?.address);
-    //       return true;
-    //     } else {
-    //       return false;
-    //     }
-    //   } catch (e) {
-    //     console.log(e);
-    //     setEstimatingFee(false);
-    //     return false;
-    //   }
-    // }
     showTopUpDialog(true);
     setTopUpAccount(account?.address ?? "");
     return true;
