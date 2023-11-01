@@ -3,111 +3,111 @@ import { Button } from "@/app/components/buttons/Button";
 import { DiscordIcon } from "@/app/components/icons/Icons";
 
 export default function GuideScreen() {
-  const efficacyData = [
-    { weapon: "Blade", metal: "Weak", hide: "Fair", cloth: "Strong" },
-    { weapon: "Bludgeon", metal: "Fair", hide: "Strong", cloth: "Weak" },
-    { weapon: "Magic", metal: "Strong", hide: "Weak", cloth: "Fair" },
-  ];
+  // const efficacyData = [
+  //   { weapon: "Blade", metal: "Weak", hide: "Fair", cloth: "Strong" },
+  //   { weapon: "Bludgeon", metal: "Fair", hide: "Strong", cloth: "Weak" },
+  //   { weapon: "Magic", metal: "Strong", hide: "Weak", cloth: "Fair" },
+  // ];
 
-  const itemData = [
-    { weapon: "Blade", item: "Katana", rank: 1 },
-    { weapon: "Blade", item: "Falchion", rank: 2 },
-    { weapon: "Blade", item: "Scimitar", rank: 3 },
-    { weapon: "Blade", item: "Long Sword", rank: 4 },
-    { weapon: "Blade", item: "Short Sword", rank: 5 },
-    { weapon: "Bludgeon", item: "Warhammer", rank: 1 },
-    { weapon: "Bludgeon", item: "Quarterstaff", rank: 2 },
-    { weapon: "Bludgeon", item: "Maul", rank: 3 },
-    { weapon: "Bludgeon", item: "Mace", rank: 4 },
-    { weapon: "Bludgeon", item: "Club", rank: 5 },
-    { weapon: "Magic", item: "Ghost Wand", rank: 1 },
-    { weapon: "Magic", item: "Grave Wand", rank: 2 },
-    { weapon: "Magic", item: "Bone Wand", rank: 3 },
-    { weapon: "Magic", item: "Wand", rank: 4 },
-    { weapon: "Magic", item: "Grimoire", rank: 1 },
-    { weapon: "Magic", item: "Chronicle", rank: 2 },
-    { weapon: "Magic", item: "Tome", rank: 3 },
-    { weapon: "Magic", item: "Book", rank: 4 },
-  ];
+  // const itemData = [
+  //   { weapon: "Blade", item: "Katana", rank: 1 },
+  //   { weapon: "Blade", item: "Falchion", rank: 2 },
+  //   { weapon: "Blade", item: "Scimitar", rank: 3 },
+  //   { weapon: "Blade", item: "Long Sword", rank: 4 },
+  //   { weapon: "Blade", item: "Short Sword", rank: 5 },
+  //   { weapon: "Bludgeon", item: "Warhammer", rank: 1 },
+  //   { weapon: "Bludgeon", item: "Quarterstaff", rank: 2 },
+  //   { weapon: "Bludgeon", item: "Maul", rank: 3 },
+  //   { weapon: "Bludgeon", item: "Mace", rank: 4 },
+  //   { weapon: "Bludgeon", item: "Club", rank: 5 },
+  //   { weapon: "Magic", item: "Ghost Wand", rank: 1 },
+  //   { weapon: "Magic", item: "Grave Wand", rank: 2 },
+  //   { weapon: "Magic", item: "Bone Wand", rank: 3 },
+  //   { weapon: "Magic", item: "Wand", rank: 4 },
+  //   { weapon: "Magic", item: "Grimoire", rank: 1 },
+  //   { weapon: "Magic", item: "Chronicle", rank: 2 },
+  //   { weapon: "Magic", item: "Tome", rank: 3 },
+  //   { weapon: "Magic", item: "Book", rank: 4 },
+  // ];
 
-  const suffixData = [
-    { suffix: "of Power", attribute: "Strength +3" },
-    { suffix: "of Giant", attribute: "Vitality +3" },
-    { suffix: "of Titans", attribute: "Strength +2 Charisma +1" },
-    { suffix: "of Skill", attribute: "Dexterity +3" },
-    {
-      suffix: "of Perfection",
-      attribute: "Strength +1 Dexterity +1 Vitality +1",
-    },
-    { suffix: "of Brilliance", attribute: "Intelligence +3" },
-    { suffix: "of Enlightenment", attribute: "Wisdom +3" },
-    { suffix: "of Protection", attribute: "Vitality +2 Dexterity +1" },
-    { suffix: "of Anger", attribute: "Strength +2 Dexterity +1" },
-    { suffix: "of Rage", attribute: "Wisdom +1 Strength +1 Charisma +1" },
-    {
-      suffix: "of Fury",
-      attribute: "Vitality +1 Charisma +1 Intelligence +1",
-    },
-    { suffix: "of Vitriol", attribute: "Intelligence +2 Wisdom +1" },
-    { suffix: "of the Fox", attribute: "Dexterity +2 Charisma +1" },
-    { suffix: "of Detection", attribute: "Wisdom +2 Dexterity +1" },
-    { suffix: "of Reflection", attribute: "Wisdom +2 Intelligence +1" },
-    { suffix: "of the Twins", attribute: "Charisma +3" },
-  ];
+  // const suffixData = [
+  //   { suffix: "of Power", attribute: "Strength +3" },
+  //   { suffix: "of Giant", attribute: "Vitality +3" },
+  //   { suffix: "of Titans", attribute: "Strength +2 Charisma +1" },
+  //   { suffix: "of Skill", attribute: "Dexterity +3" },
+  //   {
+  //     suffix: "of Perfection",
+  //     attribute: "Strength +1 Dexterity +1 Vitality +1",
+  //   },
+  //   { suffix: "of Brilliance", attribute: "Intelligence +3" },
+  //   { suffix: "of Enlightenment", attribute: "Wisdom +3" },
+  //   { suffix: "of Protection", attribute: "Vitality +2 Dexterity +1" },
+  //   { suffix: "of Anger", attribute: "Strength +2 Dexterity +1" },
+  //   { suffix: "of Rage", attribute: "Wisdom +1 Strength +1 Charisma +1" },
+  //   {
+  //     suffix: "of Fury",
+  //     attribute: "Vitality +1 Charisma +1 Intelligence +1",
+  //   },
+  //   { suffix: "of Vitriol", attribute: "Intelligence +2 Wisdom +1" },
+  //   { suffix: "of the Fox", attribute: "Dexterity +2 Charisma +1" },
+  //   { suffix: "of Detection", attribute: "Wisdom +2 Dexterity +1" },
+  //   { suffix: "of Reflection", attribute: "Wisdom +2 Intelligence +1" },
+  //   { suffix: "of the Twins", attribute: "Charisma +3" },
+  // ];
 
-  const jewelryData = [
-    {
-      category: "Necklace Abilities",
-      items: [
-        {
-          name: "(T2) Necklace",
-          ability:
-            "Bonus stat at G20 (+2 instead of normal +1) and 3% increase per greatness metal armor defense",
-        },
-        {
-          name: "(T1) Amulet",
-          ability:
-            "2x health from health discoveries and 3% increase per greatness cloth armor defense",
-        },
-        {
-          name: "(T1) Pendant",
-          ability:
-            "2x gold from gold discoveries and 3% increase per greatness hide armor defense",
-        },
-      ],
-    },
-    {
-      category: "Ring Abilities",
-      items: [
-        {
-          name: "Bronze Ring (T3)",
-          ability: "Contributes to luck even when bagged ",
-        },
-        {
-          name: "Silver Ring (T2)",
-          ability:
-            "+20 luck (total of +40 luck at G20) and +1 bonus luck per greatness when equipped",
-        },
-        {
-          name: "Gold Ring (T1)",
-          ability:
-            "2x gold when defeating beasts and 3% per greatness increase in gold rewards from beasts",
-        },
+  // const jewelryData = [
+  //   {
+  //     category: "Necklace Abilities",
+  //     items: [
+  //       {
+  //         name: "(T2) Necklace",
+  //         ability:
+  //           "Bonus stat at G20 (+2 instead of normal +1) and 3% increase per greatness metal armor defense",
+  //       },
+  //       {
+  //         name: "(T1) Amulet",
+  //         ability:
+  //           "2x health from health discoveries and 3% increase per greatness cloth armor defense",
+  //       },
+  //       {
+  //         name: "(T1) Pendant",
+  //         ability:
+  //           "2x gold from gold discoveries and 3% increase per greatness hide armor defense",
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     category: "Ring Abilities",
+  //     items: [
+  //       {
+  //         name: "Bronze Ring (T3)",
+  //         ability: "Contributes to luck even when bagged ",
+  //       },
+  //       {
+  //         name: "Silver Ring (T2)",
+  //         ability:
+  //           "+20 luck (total of +40 luck at G20) and +1 bonus luck per greatness when equipped",
+  //       },
+  //       {
+  //         name: "Gold Ring (T1)",
+  //         ability:
+  //           "2x gold when defeating beasts and 3% per greatness increase in gold rewards from beasts",
+  //       },
 
-        {
-          name: "Platinum Ring (T1)",
-          ability:
-            "2x discovery rewards and then 4x at G20 and 3% per greatness increase in name match damage bonus",
-        },
+  //       {
+  //         name: "Platinum Ring (T1)",
+  //         ability:
+  //           "2x discovery rewards and then 4x at G20 and 3% per greatness increase in name match damage bonus",
+  //       },
 
-        {
-          name: "Titanium Ring (T1)",
-          ability:
-            "2x special name damage (when weapon name prefix matches beast) and 3% per greatness increase in critical hit damage bonus",
-        },
-      ],
-    },
-  ];
+  //       {
+  //         name: "Titanium Ring (T1)",
+  //         ability:
+  //           "2x special name damage (when weapon name prefix matches beast) and 3% per greatness increase in critical hit damage bonus",
+  //       },
+  //     ],
+  //   },
+  // ];
 
   return (
     <div className="overflow-y-auto p-2 table-scroll text-xs sm:text-base sm:text-left h-full">
