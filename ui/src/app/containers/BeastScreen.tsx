@@ -43,7 +43,7 @@ export default function BeastScreen({
   );
 
   const { data: blockData } = useBlock({
-    refetchInterval: false,
+    refetchInterval: 30000,
   });
 
   const [buttonText, setButtonText] = useState("Flee");
@@ -163,15 +163,16 @@ export default function BeastScreen({
     </div>
   );
 
+  const revealBlockReached =
+    blockData && blockData.block_number >= (adventurer?.revealBlock ?? 0);
+
   if (showBattleLog) {
     return <BattleLog />;
   }
 
   return (
     <div className="sm:w-2/3 flex flex-col sm:flex-row h-full">
-      {blockData && blockData.block_number < (adventurer?.revealBlock ?? 0) && (
-        <InterludeScreen />
-      )}
+      {!revealBlockReached && <InterludeScreen />}
       <div className="sm:w-1/2 order-1 sm:order-2 h-3/4 sm:h-full">
         {hasBeast ? (
           <BeastDisplay beastData={beastData} beastsContract={beastsContract} />
