@@ -111,21 +111,24 @@ export default function GuideScreen() {
 
   return (
     <div className="overflow-y-auto p-2 table-scroll text-xs sm:text-base sm:text-left h-full">
-      <div className="flex justify-center items-center mb-4">
-        <a
+      <div className="flex justify-center items-center mb-4 self-center flex-col">
+        <Button size={"lg"} href="https://survivor-docs.realms.world/">
+          Survivor Docs
+        </Button>
+        <Button
           href="https://discord.gg/bibliothecadao"
           target="_blank"
           rel="noopener noreferrer"
+          className="py-2 px-4 animate-pulse hidden sm:flex flex-row gap-2 mt-8"
         >
-          <Button className="py-2 px-4 animate-pulse hidden sm:flex flex-row gap-2">
-            Join the Discord <DiscordIcon className="w-5" />
-          </Button>
-        </a>
+          Join the Discord <DiscordIcon className="w-5" />
+        </Button>
       </div>
-      <div className="">
+      {/* <div className="">
         <h3 className="text-center text-l mb-2">
           Efficacy Chart of Weapon and Armor Interactions
         </h3>
+
         <table className="w-1/2 m-auto uppercase whitespace-nowrap border border-terminal-green">
           <thead>
             <tr className="text-l tracking-wide text-center border-b border-terminal-green ">
@@ -367,7 +370,7 @@ export default function GuideScreen() {
         battle, you will be open to an attack! You will be hit once for swapping
         multiple items. You can easily quick swap and drop on your items on your
         card.
-      </p>
+      </p> */}
     </div>
   );
 }
