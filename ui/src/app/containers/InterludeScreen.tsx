@@ -4,6 +4,7 @@ import { EntropyCountDown } from "@/app/components/CountDown";
 import Hints from "@/app/components/interlude/Hints";
 import { fetchAverageBlockTime } from "@/app/lib/utils";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import useUIStore from "../hooks/useUIStore";
 
 export default function InterludeScreen() {
   const { adventurer } = useAdventurerStore();
@@ -11,6 +12,7 @@ export default function InterludeScreen() {
   const [averageBlockTime, setAverageBlockTime] = useState(0);
   const [nextEntropyTime, setNextEntropyTime] = useState<number | null>(null);
   const [countDownExpired, setCountDownExpired] = useState(false);
+  const setStartDelay = useUIStore((state) => state.setStartDelay);
 
   const { data: blockData } = useBlock({
     refetchInterval: false,
@@ -31,6 +33,8 @@ export default function InterludeScreen() {
     const nextEntropyTime =
       adventurerCreatedTime + secondsUntilNextEntropy * 1000;
     setNextEntropyTime(nextEntropyTime);
+    const currentTime = new Date().getTime();
+    setStartDelay(nextEntropyTime - currentTime);
   };
 
   useEffect(() => {

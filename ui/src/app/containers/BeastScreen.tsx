@@ -31,6 +31,7 @@ export default function BeastScreen({
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
+  const setStartDelay = useUIStore((state) => state.setStartDelay);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const [showBattleLog, setShowBattleLog] = useState(false);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
@@ -63,6 +64,9 @@ export default function BeastScreen({
       action: async () => {
         resetNotification();
         await attack(false, beastData);
+        if (adventurer?.level === 1) {
+          setStartDelay(null);
+        }
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -79,6 +83,9 @@ export default function BeastScreen({
       action: async () => {
         resetNotification();
         await attack(true, beastData);
+        if (adventurer?.level === 1) {
+          setStartDelay(null);
+        }
       },
       disabled:
         adventurer?.beastHealth == undefined ||

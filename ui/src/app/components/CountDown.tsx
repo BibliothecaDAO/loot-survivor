@@ -40,12 +40,14 @@ export interface PenaltyCountDownProps {
   lastDiscoveryTime?: Date;
   lastBattleTime?: Date;
   dataLoading: boolean;
+  startDelay: number | null;
 }
 
 export const PenaltyCountDown = ({
   lastDiscoveryTime,
   lastBattleTime,
   dataLoading,
+  startDelay,
 }: PenaltyCountDownProps) => {
   const [seconds, setSeconds] = useState(0);
 
@@ -61,7 +63,7 @@ export const PenaltyCountDown = ({
       ? formatDiscoveryTime
       : formatBattleTime;
 
-  const formatLastAction = lastAction;
+  const formatLastAction = startDelay ? lastAction + startDelay : lastAction;
   const targetTime = formatLastAction + penaltyTime * 1000;
 
   useEffect(() => {
