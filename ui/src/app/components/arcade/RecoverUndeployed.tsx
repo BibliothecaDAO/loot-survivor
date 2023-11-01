@@ -1,8 +1,9 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { AccountInterface } from "starknet";
-import { Connector } from "@starknet-react/core";
+import { Connector, useContract } from "@starknet-react/core";
 import { Button } from "@/app/components/buttons/Button";
-import { indexAddress, padAddress } from "@/app/lib/utils";
+import { indexAddress, padAddress, isChecksumAddress } from "@/app/lib/utils";
+import ArcadeAccount from "@/app/abi/ArcadeAccount.json";
 
 interface RecoverUndeployedProps {
   setRecoverUndeployed: (recoverUndeployed: boolean) => void;
@@ -23,6 +24,7 @@ const RecoverUndeployed = ({
   walletAccount,
   updateConnectors,
 }: RecoverUndeployedProps) => {
+  const [accountExists, setAccountExists] = useState(false);
   const [recoveryUndeployedAddress, setRecoveryUndeployedAddress] = useState<
     string | undefined
   >();
@@ -36,6 +38,26 @@ const RecoverUndeployed = ({
   const formattedRecoveryUndeployedAddress = padAddress(
     padAddress(recoveryUndeployedAddress ?? "")
   );
+
+  const { contract: arcadeContract } = useContract({
+    address: formattedRecoveryUndeployedAddress,
+    abi: ArcadeAccount,
+  });
+
+  const handleGetMaster = async () => {
+    try {
+      await arcadeContract?.call("get_master_account");
+      setAccountExists(true);
+    } catch (error) {
+      setAccountExists(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isChecksumAddress(formattedRecoveryUndeployedAddress)) {
+      handleGetMaster();
+    }
+  }, [recoveryUndeployedAddress]);
 
   return (
     <div className="flex flex-col items-center gap-5 h-3/4 w-full">
@@ -59,8 +81,9 @@ const RecoverUndeployed = ({
           setRecoverUndeployed(false);
         }}
         className="w-1/4"
+        disabled={accountExists}
       >
-        {"Recover Account"}
+        {accountExists ? "Account Already Deployed" : "Recover Account"}
       </Button>
     </div>
   );
