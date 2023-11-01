@@ -130,6 +130,7 @@ function Home({ updateConnectors }: HomeProps) {
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const arcadeIntro = useUIStore((state) => state.arcadeIntro);
   const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
+  const closedArcadeIntro = useUIStore((state) => state.closedArcadeIntro);
   const topUpDialog = useUIStore((state) => state.topUpDialog);
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
@@ -412,12 +413,14 @@ function Home({ updateConnectors }: HomeProps) {
   }, [isConnected]);
 
   useEffect(() => {
-    if (arcadeConnectors.length === 0) {
+    if (arcadeConnectors.length === 0 && !closedArcadeIntro) {
       showArcadeIntro(true);
     } else {
       showArcadeIntro(false);
     }
-  }, []);
+  }, [arcadeConnectors]);
+
+  console.log(arcadeConnectors);
 
   useEffect(() => {
     resetCalls();

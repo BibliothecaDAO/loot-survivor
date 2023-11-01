@@ -40,6 +40,9 @@ export const ArcadeIntro = ({
   const [readDisclaimer, setReadDisclaimer] = useState(false);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
+  const setClosedArcadeIntro = useUIStore(
+    (state) => state.setClosedArcadeIntro
+  );
   const { create, isDeploying, isSettingPermissions, listConnectors } =
     useBurner({
       walletAccount: account,
@@ -75,7 +78,10 @@ export const ArcadeIntro = ({
       <div className="fixed flex flex-col justify-between text-center sm:top-1/8 sm:left-1/8 sm:left-1/4 sm:w-3/4 sm:w-1/2 h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4 overflow-y-auto">
         <button
           className="absolute top-2 right-2 cursor-pointer text-red-500"
-          onClick={() => showArcadeIntro(false)}
+          onClick={() => {
+            showArcadeIntro(false);
+            setClosedArcadeIntro(true);
+          }}
         >
           <MdClose size={50} />
         </button>

@@ -68,6 +68,8 @@ type State = {
   showArcadeDialog: (value: boolean) => void;
   arcadeIntro: boolean;
   showArcadeIntro: (value: boolean) => void;
+  closedArcadeIntro: boolean;
+  setClosedArcadeIntro: (value: boolean) => void;
   topUpDialog: boolean;
   showTopUpDialog: (value: boolean) => void;
   topUpAccount: string;
@@ -131,6 +133,8 @@ const useUIStore = create<State>((set) => ({
   showArcadeDialog: (value) => set({ arcadeDialog: value }),
   arcadeIntro: false,
   showArcadeIntro: (value) => set({ arcadeIntro: value }),
+  closedArcadeIntro: false,
+  setClosedArcadeIntro: (value) => set({ closedArcadeIntro: value }),
   topUpDialog: false,
   showTopUpDialog: (value) => set({ topUpDialog: value }),
   topUpAccount: "",
