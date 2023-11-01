@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Contract } from "starknet";
 import { useAccount, useDisconnect, Connector } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
@@ -23,6 +23,8 @@ import TransactionCart from "@/app/components/navigation/TransactionCart";
 import TransactionHistory from "@/app/components/navigation/TransactionHistory";
 import { NullAdventurer } from "@/app/types";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { getApibaraStatus } from "@/app/api/api";
+import ApibaraStatus from "./ApibaraStatus";
 
 export interface HeaderProps {
   multicall: (
@@ -42,6 +44,7 @@ export default function Header({
 }: HeaderProps) {
   const { account, address } = useAccount();
   const { disconnect } = useDisconnect();
+  const [apibaraStatus, setApibaraStatus] = useState();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const data = useQueriesStore((state) => state.data);
@@ -75,12 +78,22 @@ export default function Header({
     (connector) => connector.name == address
   );
 
+  const handleApibaraStatus = async () => {
+    const data = await getApibaraStatus();
+    setApibaraStatus(data.status.indicator);
+  };
+
+  useEffect(() => {
+    handleApibaraStatus();
+  }, []);
+
   return (
     <div className="flex flex-row justify-between px-1  ">
       <div className="flex flex-row items-center gap-2 sm:gap-5">
         <Logo className="fill-current w-24 md:w-32 xl:w-40 2xl:w-64" />
       </div>
       <div className="flex flex-row items-center self-end sm:gap-1 self-center">
+        <ApibaraStatus status={apibaraStatus} />
         {adventurer?.id && (
           <PenaltyCountDown
             lastDiscoveryTime={
@@ -95,9 +108,11 @@ export default function Header({
           size={"xs"}
           variant={"outline"}
           className="hidden sm:block self-center xl:px-5"
-          disabled={true}
+          onClick={() =>
+            window.open("https://goerli-survivor.realms.world/", "_blank")
+          }
         >
-          Play For Real
+          Play on Testnet
         </Button>
         <Button
           size={"xs"}
