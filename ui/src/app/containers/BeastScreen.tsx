@@ -43,7 +43,7 @@ export default function BeastScreen({
   );
 
   const { data: blockData } = useBlock({
-    refetchInterval: 30000,
+    refetchInterval: adventurer?.level === 1 ? 30000 : false,
   });
 
   const [buttonText, setButtonText] = useState("Flee");
