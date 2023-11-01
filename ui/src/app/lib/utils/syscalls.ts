@@ -276,12 +276,10 @@ export function syscalls({
     };
 
     addToCalls(mintAdventurerTx);
-    const balanceEmpty = await checkArcadeBalance(
-      [...calls, approveLordsSpendingTx, mintAdventurerTx],
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
 
@@ -402,12 +400,10 @@ export function syscalls({
     };
     addToCalls(exploreTx);
 
-    const balanceEmpty = await checkArcadeBalance(
-      [...calls, exploreTx],
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
 
@@ -689,12 +685,10 @@ export function syscalls({
     };
     addToCalls(attackTx);
 
-    const balanceEmpty = await checkArcadeBalance(
-      [...calls, attackTx],
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
 
@@ -975,12 +969,10 @@ export function syscalls({
     };
     addToCalls(fleeTx);
 
-    const balanceEmpty = await checkArcadeBalance(
-      [...calls, fleeTx],
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
 
@@ -1182,12 +1174,10 @@ export function syscalls({
     purchaseItems: ItemPurchase[],
     potionAmount: number
   ) => {
-    const balanceEmpty = await checkArcadeBalance(
-      calls,
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
 
@@ -1353,12 +1343,10 @@ export function syscalls({
     };
     addToCalls(slayIdleAdventurersTx);
 
-    const balanceEmpty = await checkArcadeBalance(
-      [...calls, slayIdleAdventurersTx],
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
 
@@ -1442,12 +1430,10 @@ export function syscalls({
     loadingMessage: string[],
     notification: string[]
   ) => {
-    const balanceEmpty = await checkArcadeBalance(
-      calls,
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
 

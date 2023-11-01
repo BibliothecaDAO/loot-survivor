@@ -364,12 +364,10 @@ export function getDeathMessageByRank(rank: number): string {
   return message || "Better luck next time - You can improve!";
 }
 
-export async function checkArcadeBalance(
-  calls: Call[],
+export function checkArcadeBalance(
   ethBalance: bigint,
   showTopUpDialog: (value: boolean) => void,
   setTopUpAccount: (value: string) => void,
-  setEstimatingFee: (value: boolean) => void,
   account?: AccountInterface
 ) {
   if (ethBalance < FEE_CHECK_BALANCE) {
