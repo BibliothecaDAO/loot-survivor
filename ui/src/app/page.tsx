@@ -415,9 +415,9 @@ function Home({ updateConnectors }: HomeProps) {
     if (arcadeConnectors.length === 0) {
       showArcadeIntro(true);
     } else {
-      showArcadeIntro(false);
+      showArcadeIntro(true);
     }
-  }, [arcadeConnectors]);
+  }, []);
 
   useEffect(() => {
     resetCalls();

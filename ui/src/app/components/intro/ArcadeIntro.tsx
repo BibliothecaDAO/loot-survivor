@@ -73,12 +73,12 @@ export const ArcadeIntro = ({
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
       <div className="fixed flex flex-col justify-between text-center sm:top-1/8 sm:left-1/8 sm:left-1/4 sm:w-3/4 sm:w-1/2 h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4 overflow-y-auto">
-        <div
+        <button
           className="absolute top-2 right-2 cursor-pointer text-red-500"
           onClick={() => showArcadeIntro(false)}
         >
           <MdClose size={50} />
-        </div>
+        </button>
         {step == 1 && (
           <div className="flex flex-col gap-5 items-center">
             <h3 className="mt-4 uppercase">Create Arcade Account</h3>
