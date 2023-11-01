@@ -40,6 +40,7 @@ export const useBurner = ({
   ethContract,
 }: UseBurnerProps) => {
   const [account, setAccount] = useState<Account>();
+  const [isPrefunding, setIsPrefunding] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
   const [isGeneratingNewKey, setIsGeneratingNewKey] = useState(false);
   const [isSettingPermissions, setIsSettingPermissions] = useState(false);
@@ -181,7 +182,7 @@ export const useBurner = ({
 
   const create = useCallback(
     async (connector: Connector, lordsAmount: number) => {
-      setIsDeploying(true);
+      setIsPrefunding(true);
       const privateKey = stark.randomAddress();
       const publicKey = ec.starkCurve.getStarkKey(privateKey);
 
@@ -201,64 +202,84 @@ export const useBurner = ({
         0
       );
 
-      try {
-        await prefundAccount(address, walletAccount, lordsAmount);
-      } catch (e) {
-        console.log(e);
-        setIsDeploying(false);
-      }
-
-      // deploy burner
-      const burner = new Account(provider, address, privateKey, "1");
-
-      const {
-        transaction_hash: deployTx,
-        contract_address: accountAAFinalAddress,
-      } = await burner.deployAccount(
-        {
-          classHash: arcadeClassHash!,
-          constructorCalldata: constructorAACalldata,
-          contractAddress: address,
-          addressSalt: publicKey,
-        },
-        {
-          maxFee: "1000000000000000", // currently setting to 0.001ETH
-        }
-      );
-
-      await provider.waitForTransaction(deployTx);
-
-      setIsSettingPermissions(true);
-
-      const setPermissionsTx = await setPermissions(
-        accountAAFinalAddress,
-        walletAccount
-      );
-
-      await provider.waitForTransaction(setPermissionsTx);
-
-      // save burner
-      let storage = Storage.get("burners") || {};
-      for (let address in storage) {
-        storage[address].active = false;
-      }
-
-      storage[padAddress(accountAAFinalAddress)] = {
+      // save keys
+      let storageKeys = Storage.get("keys") || {};
+      storageKeys[padAddress(address)] = {
         privateKey,
         publicKey,
-        deployTx,
-        setPermissionsTx,
         masterAccount: walletAccount.address,
         masterAccountProvider: connector.id,
         gameContract: gameContract?.address,
         active: true,
       };
 
-      setAccount(burner);
-      Storage.set("burners", storage);
-      setIsSettingPermissions(false);
-      setIsDeploying(false);
-      return burner;
+      Storage.set("keys", storageKeys);
+
+      try {
+        await prefundAccount(address, walletAccount, lordsAmount);
+
+        setIsPrefunding(false);
+        setIsDeploying(true);
+        console.log("here");
+
+        // deploy burner
+        const burner = new Account(provider, address, privateKey, "1");
+
+        const {
+          transaction_hash: deployTx,
+          contract_address: accountAAFinalAddress,
+        } = await burner.deployAccount(
+          {
+            classHash: arcadeClassHash!,
+            constructorCalldata: constructorAACalldata,
+            contractAddress: address,
+            addressSalt: publicKey,
+          },
+          {
+            maxFee: "1000000000000000", // currently setting to 0.001ETH
+          }
+        );
+
+        await provider.waitForTransaction(deployTx);
+
+        setIsDeploying(false);
+        setIsSettingPermissions(true);
+
+        const setPermissionsTx = await setPermissions(
+          accountAAFinalAddress,
+          walletAccount
+        );
+
+        await provider.waitForTransaction(setPermissionsTx);
+
+        // save burner
+        let storage = Storage.get("burners") || {};
+        for (let address in storage) {
+          storage[address].active = false;
+        }
+
+        storage[padAddress(accountAAFinalAddress)] = {
+          privateKey,
+          publicKey,
+          deployTx,
+          setPermissionsTx,
+          masterAccount: walletAccount.address,
+          masterAccountProvider: connector.id,
+          gameContract: gameContract?.address,
+          active: true,
+        };
+
+        setAccount(burner);
+        Storage.set("burners", storage);
+        setIsSettingPermissions(false);
+        setIsDeploying(false);
+        return burner;
+      } catch (e) {
+        console.log(e);
+        setIsPrefunding(false);
+        setIsDeploying(false);
+        setIsSettingPermissions(false);
+      }
     },
     [walletAccount]
   );
@@ -504,8 +525,12 @@ export const useBurner = ({
       walletAccount: AccountInterface
     ) => {
       setIsDeploying(true);
-      const privateKey = stark.randomAddress();
-      const publicKey = ec.starkCurve.getStarkKey(privateKey);
+
+      // get keys
+      let storageKeys = Storage.get("keys") || {};
+
+      const privateKey = storageKeys[address].privateKey;
+      const publicKey = storageKeys[address].publicKey;
 
       if (!walletAccount) {
         throw new Error("wallet account not found");
@@ -513,52 +538,51 @@ export const useBurner = ({
 
       const constructorAACalldata = CallData.compile({
         _public_key: publicKey,
-        _master_account:
-          "0x01AC519950FE43b010547c9Ee01aa5D20E304e86244E18eab45605D4CfB0fb2E",
+        _master_account: walletAccount.address,
       });
 
-      // deploy burner
-      const burner = new Account(
-        provider,
-        "0x038ee8047118cb4559c9c5f6654b959a9109d4e2ab009804b5c6f06f92e5ac54",
-        privateKey,
-        "1"
-      );
+      try {
+        // deploy burner
+        const burner = new Account(provider, address, privateKey, "1");
 
-      const {
-        transaction_hash: deployTx,
-        contract_address: accountAAFinalAddress,
-      } = await burner.deployAccount(
-        {
-          classHash: arcadeClassHash!,
-          constructorCalldata: constructorAACalldata,
-          contractAddress:
-            "0x038ee8047118cb4559c9c5f6654b959a9109d4e2ab009804b5c6f06f92e5ac54",
-        },
-        {
-          maxFee: "1000000000000000", // currently setting to 0.001ETH
+        const {
+          transaction_hash: deployTx,
+          contract_address: accountAAFinalAddress,
+        } = await burner.deployAccount(
+          {
+            classHash: arcadeClassHash!,
+            constructorCalldata: constructorAACalldata,
+            contractAddress: address,
+            addressSalt: publicKey,
+          },
+          {
+            maxFee: "1000000000000000", // currently setting to 0.001ETH
+          }
+        );
+
+        await provider.waitForTransaction(deployTx);
+
+        // save burner
+        let storage = Storage.get("burners") || {};
+        for (let address in storage) {
+          storage[address].active = false;
         }
-      );
 
-      await provider.waitForTransaction(deployTx);
-
-      // save burner
-      let storage = Storage.get("burners") || {};
-      for (let address in storage) {
-        storage[address].active = false;
+        storage[padAddress(accountAAFinalAddress)] = {
+          privateKey,
+          publicKey,
+          deployTx,
+          masterAccount: walletAccount.address,
+          masterAccountProvider: connector.id,
+          gameContract: gameContract?.address,
+          active: true,
+        };
+        Storage.set("burners", storage);
+        setIsDeploying(false);
+      } catch (e) {
+        setIsDeploying(false);
+        console.log(e);
       }
-
-      storage[padAddress(accountAAFinalAddress)] = {
-        privateKey,
-        publicKey,
-        deployTx,
-        masterAccount: walletAccount.address,
-        masterAccountProvider: connector.id,
-        gameContract: gameContract?.address,
-        active: true,
-      };
-      Storage.set("burners", storage);
-      setIsDeploying(false);
     },
     []
   );
@@ -590,6 +614,7 @@ export const useBurner = ({
     genNewKey,
     setPermissions,
     account,
+    isPrefunding,
     isDeploying,
     isSettingPermissions,
     isGeneratingNewKey,

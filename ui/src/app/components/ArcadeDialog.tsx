@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useCallback, ChangeEvent } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { AccountInterface, Contract } from "starknet";
 import {
   Connector,
   useAccount,
   useConnect,
   useDisconnect,
-  useContract,
 } from "@starknet-react/core";
 import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "@/app/components/buttons/Button";
@@ -13,15 +12,14 @@ import { useBurner } from "@/app/lib/burner";
 import { MIN_BALANCE } from "@/app/lib/constants";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import { fetchBalances } from "@/app/lib/balances";
-import { isChecksumAddress, padAddress, indexAddress } from "../lib/utils";
+import { indexAddress } from "../lib/utils";
 import Lords from "public/icons/lords.svg";
 import Eth from "public/icons/eth-2.svg";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import TopupInput from "@/app/components/arcade/TopupInput";
-import ArcadeAccount from "@/app/abi/ArcadeAccount.json";
-import Storage from "@/app/lib/storage";
-import { BurnerStorage } from "@/app/types";
+import RecoverUndeployed from "./arcade/RecoverUndeployed";
+import RecoverArcade from "./arcade/RecoverArcade";
 
 interface ArcadeDialogProps {
   gameContract: Contract;
@@ -39,13 +37,7 @@ export const ArcadeDialog = ({
   const [fetchedBalances, setFetchedBalances] = useState(false);
   const [recoverArcade, setRecoverArcade] = useState(false);
   const [recoverUndeployed, setRecoverUndeployed] = useState(false);
-  const [recoveryAddress, setRecoveryAddress] = useState<string | undefined>();
-  const [recoveryUndeployedAddress, setRecoveryUndeployedAddress] = useState<
-    string | undefined
-  >();
-  const [recoveryMasterAddress, setRecoveryMasterAddress] = useState<
-    string | undefined
-  >();
+  const [fullDeployment, setFullDeployment] = useState(false);
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
@@ -55,6 +47,7 @@ export const ArcadeDialog = ({
   const {
     getMasterAccount,
     create,
+    isPrefunding,
     isDeploying,
     setPermissions,
     isSettingPermissions,
@@ -82,19 +75,6 @@ export const ArcadeDialog = ({
   const walletConnected = walletConnectors.some(
     (walletConnector) => walletConnector == connector
   );
-
-  const formattedRecoveryAddress = padAddress(
-    padAddress(recoveryAddress ?? "")
-  );
-
-  const formattedRecoveryUndeployedAddress = padAddress(
-    padAddress(recoveryUndeployedAddress ?? "")
-  );
-
-  const { contract: arcadeContract } = useContract({
-    address: formattedRecoveryAddress,
-    abi: ArcadeAccount,
-  });
 
   const getBalances = async () => {
     const localBalances: Record<
@@ -141,45 +121,9 @@ export const ArcadeDialog = ({
     });
   };
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { value } = e.target;
-    setRecoveryAddress(value);
-  };
-
-  const handleUndeployedChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { value } = e.target;
-    setRecoveryUndeployedAddress(indexAddress(value));
-  };
-
-  const handleGetMaster = async () => {
-    const masterAccount = await arcadeContract?.call("get_master_account");
-    setRecoveryMasterAddress("0x" + masterAccount?.toString(16));
-  };
-
   useEffect(() => {
     getBalances();
   }, [arcadeConnectors, fetchedBalances]);
-
-  useEffect(() => {
-    if (isChecksumAddress(formattedRecoveryAddress)) {
-      handleGetMaster();
-    }
-  }, [recoveryAddress]);
-
-  const isMasterAccount =
-    padAddress(address ?? "") === padAddress(recoveryMasterAddress ?? "");
-  const recoveryAccountExists = () => {
-    const storage: BurnerStorage = Storage.get("burners");
-    if (storage) {
-      return Object.keys(storage).includes(formattedRecoveryAddress ?? "");
-    } else {
-      return false;
-    }
-  };
 
   if (!connectors) return <div></div>;
 
@@ -189,82 +133,24 @@ export const ArcadeDialog = ({
       <div className="fixed flex flex-col text-center items-center justify-between sm:top-1/8 sm:left-1/8 sm:left-1/4 sm:w-3/4 sm:w-1/2 h-full sm:h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4">
         <h3 className="mt-4">Arcade Accounts</h3>
         {recoverArcade ? (
-          <div className="flex flex-col items-center gap-5 h-3/4 w-full">
-            <p className="text-3xl uppercase">Recover Arcade</p>
-            <p className="text-lg">Enter address of the Arcade Account.</p>
-            <input
-              type="text"
-              name="address"
-              onChange={handleChange}
-              className="p-1 m-2 bg-terminal-black border border-terminal-green animate-pulse transform w-1/2 2xl:h-16 2xl:text-4xl"
-              maxLength={66}
-            />
-            {recoveryAddress && !isMasterAccount && (
-              <>
-                <p className="text-lg">Connect Master Account</p>
-                {walletConnectors.map((connector, index) => (
-                  <Button
-                    disabled={
-                      !isChecksumAddress(formattedRecoveryAddress) ||
-                      isMasterAccount
-                    }
-                    onClick={() => {
-                      disconnect();
-                      connect({ connector });
-                    }}
-                    key={index}
-                  >
-                    {connector.id === "braavos" || connector.id === "argentX"
-                      ? `Connect ${connector.id}`
-                      : "Login With Email"}
-                  </Button>
-                ))}
-              </>
-            )}
-            <Button
-              onClick={async () => {
-                await genNewKey(formattedRecoveryAddress, connector!);
-                updateConnectors();
-                setRecoverArcade(false);
-              }}
-              disabled={!isMasterAccount || recoveryAccountExists()}
-              className="w-1/4"
-            >
-              {recoveryAccountExists()
-                ? "Account Already Stored"
-                : "Recover Account"}
-            </Button>
-          </div>
+          <RecoverArcade
+            setRecoverArcade={setRecoverArcade}
+            walletAddress={address!}
+            walletConnectors={walletConnectors}
+            connect={connect}
+            disconnect={disconnect}
+            genNewKey={genNewKey}
+            connector={connector!}
+            updateConnectors={updateConnectors}
+          />
         ) : recoverUndeployed ? (
-          <div className="flex flex-col items-center gap-5 h-3/4 w-full">
-            <p className="text-3xl uppercase">Recover Undeployed</p>
-            <p className="text-lg">
-              Enter address of the undeployed Arcade Account.
-            </p>
-            <input
-              type="text"
-              name="address"
-              onChange={handleUndeployedChange}
-              className="p-1 m-2 bg-terminal-black border border-terminal-green animate-pulse transform w-1/2 2xl:h-16 2xl:text-4xl"
-              maxLength={66}
-            />
-            <Button
-              onClick={async () => {
-                await deployAccountFromHash(
-                  connector!,
-                  formattedRecoveryUndeployedAddress,
-                  walletAccount!
-                );
-                updateConnectors();
-                setRecoverUndeployed(false);
-              }}
-              className="w-1/4"
-            >
-              {recoveryAccountExists()
-                ? "Account Already Stored"
-                : "Recover Account"}
-            </Button>
-          </div>
+          <RecoverUndeployed
+            setRecoverUndeployed={setRecoverUndeployed}
+            connector={connector!}
+            deployAccountFromHash={deployAccountFromHash}
+            walletAccount={walletAccount!}
+            updateConnectors={updateConnectors}
+          />
         ) : (
           <>
             <div className="flex flex-col">
@@ -283,9 +169,15 @@ export const ArcadeDialog = ({
                   <div className="flex flex-row justify-center gap-5">
                     <Button
                       onClick={async () => {
-                        await create(connector!, 25 * 10 ** 18);
-                        connect({ connector: listConnectors()[0] });
-                        updateConnectors();
+                        try {
+                          setFullDeployment(true);
+                          await create(connector!, 25 * 10 ** 18);
+                          connect({ connector: listConnectors()[0] });
+                          updateConnectors();
+                          setFullDeployment(false);
+                        } catch (e) {
+                          console.log(e);
+                        }
                       }}
                       disabled={isWrongNetwork || !walletConnected}
                     >
@@ -335,12 +227,13 @@ export const ArcadeDialog = ({
           close
         </Button>
       </div>
-      {(isDeploying || isGeneratingNewKey) && (
-        <ArcadeLoader
-          isSettingPermissions={isSettingPermissions}
-          isGeneratingNewKey={isGeneratingNewKey}
-        />
-      )}
+      <ArcadeLoader
+        isPrefunding={isPrefunding}
+        isDeploying={isDeploying}
+        isSettingPermissions={isSettingPermissions}
+        isGeneratingNewKey={isGeneratingNewKey}
+        fullDeployment={fullDeployment}
+      />
       {(isToppingUpEth || isToppingUpLords || isWithdrawing) && (
         <TokenLoader
           isToppingUpEth={isToppingUpEth}

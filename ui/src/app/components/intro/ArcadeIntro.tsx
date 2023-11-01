@@ -36,6 +36,7 @@ export const ArcadeIntro = ({
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const [step, setStep] = useState(1);
+  const [fullDeployment, setFullDeployment] = useState(false);
   const [gamesPrefundAmount, setGamesPrefundAmount] = useState(1);
   const [readDisclaimer, setReadDisclaimer] = useState(false);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
@@ -43,13 +44,18 @@ export const ArcadeIntro = ({
   const setClosedArcadeIntro = useUIStore(
     (state) => state.setClosedArcadeIntro
   );
-  const { create, isDeploying, isSettingPermissions, listConnectors } =
-    useBurner({
-      walletAccount: account,
-      gameContract,
-      lordsContract,
-      ethContract,
-    });
+  const {
+    create,
+    isPrefunding,
+    isDeploying,
+    isSettingPermissions,
+    listConnectors,
+  } = useBurner({
+    walletAccount: account,
+    gameContract,
+    lordsContract,
+    ethContract,
+  });
   const walletConnectors = getWalletConnectors(connectors);
   const setScreen = useUIStore((state) => state.setScreen);
   const lords = Number(lordsBalance);
@@ -235,6 +241,7 @@ export const ArcadeIntro = ({
                     </div>
                     <Button
                       onClick={async () => {
+                        setFullDeployment(true);
                         await create(
                           connector!,
                           gamesPrefundAmount * (25 * 10 ** 18)
@@ -243,6 +250,7 @@ export const ArcadeIntro = ({
                         connect({ connector: listConnectors()[0] });
                         updateConnectors();
                         showArcadeIntro(false);
+                        setFullDeployment(false);
                       }}
                       disabled={
                         isWrongNetwork ||
@@ -285,9 +293,12 @@ export const ArcadeIntro = ({
             />
           </div>
         </div>
-        {isDeploying && (
-          <ArcadeLoader isSettingPermissions={isSettingPermissions} />
-        )}
+        <ArcadeLoader
+          isPrefunding={isPrefunding}
+          isDeploying={isDeploying}
+          isSettingPermissions={isSettingPermissions}
+          fullDeployment={fullDeployment}
+        />
       </div>
     </>
   );
