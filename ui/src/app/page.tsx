@@ -4,7 +4,9 @@ import {
   useConnect,
   useContract,
   Connector,
+  useNetwork,
 } from "@starknet-react/core";
+import { constants } from "starknet";
 import { useState, useEffect, useMemo } from "react";
 import ActionsScreen from "@/app/containers/ActionsScreen";
 import AdventurerScreen from "@/app/containers/AdventurerScreen";
@@ -109,6 +111,7 @@ interface HomeProps {
 
 function Home({ updateConnectors }: HomeProps) {
   const { connector, connectors } = useConnect();
+  const { chain } = useNetwork();
   const disconnected = useUIStore((state) => state.disconnected);
   const setDisconnected = useUIStore((state) => state.setDisconnected);
   const { account, address, status, isConnected } = useAccount();
@@ -126,7 +129,7 @@ function Home({ updateConnectors }: HomeProps) {
   );
   const owner = account?.address ? padAddress(account.address) : "";
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-
+  const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const arcadeIntro = useUIStore((state) => state.arcadeIntro);
   const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
@@ -411,6 +414,12 @@ function Home({ updateConnectors }: HomeProps) {
       setDisconnected(false);
     }
   }, [isConnected]);
+
+  useEffect(() => {
+    const isWrongNetwork =
+      chain?.id !== BigInt(constants.StarknetChainId.SN_MAIN);
+    setIsWrongNetwork(isWrongNetwork);
+  }, [chain, isConnected]);
 
   useEffect(() => {
     if (arcadeConnectors.length === 0 && !closedArcadeIntro) {
