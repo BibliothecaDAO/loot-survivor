@@ -16,6 +16,7 @@ import Storage from "@/app/lib/storage";
 import { ArcadeConnector } from "@/app/lib/arcade";
 import { BurnerStorage } from "@/app/types";
 import { padAddress } from "@/app/lib/utils";
+import { MAX_FEE } from "@/app/lib/constants";
 
 export const ETH_PREFUND_AMOUNT = "0x2386F26FC10000"; // 0.01ETH
 export const LORDS_PREFUND_AMOUNT = "0x15AF1D78B58C40000"; // 25LORDS
@@ -162,7 +163,7 @@ export const useBurner = ({
         [transferEthTx, transferLordsTx],
         undefined,
         {
-          maxFee: "1000000000000000", // currently setting to 0.001ETH
+          maxFee: MAX_FEE,
         }
       );
 
@@ -237,7 +238,7 @@ export const useBurner = ({
             addressSalt: publicKey,
           },
           {
-            maxFee: "1000000000000000", // currently setting to 0.001ETH
+            maxFee: MAX_FEE,
           }
         );
 
@@ -316,7 +317,7 @@ export const useBurner = ({
         permissions,
         undefined,
         {
-          maxFee: "1000000000000000", // currently setting to 0.001ETH
+          maxFee: MAX_FEE,
         }
       );
 
@@ -561,7 +562,7 @@ export const useBurner = ({
             addressSalt: publicKey,
           },
           {
-            maxFee: "1000000000000000", // currently setting to 0.001ETH
+            maxFee: MAX_FEE,
           }
         );
 
