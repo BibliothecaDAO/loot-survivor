@@ -51,7 +51,7 @@ export default function Settings() {
       id: 4,
       label: "Discord",
       icon: <DiscordIcon className="fill-current" />,
-      action: () => window.open("https://discord.gg/bibliothecadao", "_blank"),
+      action: () => window.open("https://discord.gg/realmsworld", "_blank"),
     },
     {
       id: 5,

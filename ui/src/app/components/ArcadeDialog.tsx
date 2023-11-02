@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useCallback, ChangeEvent } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { AccountInterface, Contract } from "starknet";
 import {
   Connector,
   useAccount,
   useConnect,
   useDisconnect,
-  useContract,
 } from "@starknet-react/core";
 import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "@/app/components/buttons/Button";
@@ -13,13 +12,14 @@ import { useBurner } from "@/app/lib/burner";
 import { MIN_BALANCE } from "@/app/lib/constants";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import { fetchBalances } from "@/app/lib/balances";
-import { isChecksumAddress, padAddress, indexAddress } from "../lib/utils";
+import { indexAddress } from "@/app/lib/utils";
 import Lords from "public/icons/lords.svg";
 import Eth from "public/icons/eth-2.svg";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import TopupInput from "@/app/components/arcade/TopupInput";
-import ArcadeAccount from "@/app/abi/ArcadeAccount.json";
+import RecoverUndeployed from "@/app/components/arcade/RecoverUndeployed";
+import RecoverArcade from "@/app/components//arcade/RecoverArcade";
 import Storage from "@/app/lib/storage";
 import { BurnerStorage } from "@/app/types";
 
@@ -38,10 +38,8 @@ export const ArcadeDialog = ({
 }: ArcadeDialogProps) => {
   const [fetchedBalances, setFetchedBalances] = useState(false);
   const [recoverArcade, setRecoverArcade] = useState(false);
-  const [recoveryAddress, setRecoveryAddress] = useState<string | undefined>();
-  const [recoveryMasterAddress, setRecoveryMasterAddress] = useState<
-    string | undefined
-  >();
+  const [recoverUndeployed, setRecoverUndeployed] = useState(false);
+  const [fullDeployment, setFullDeployment] = useState(false);
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
@@ -51,7 +49,9 @@ export const ArcadeDialog = ({
   const {
     getMasterAccount,
     create,
+    isPrefunding,
     isDeploying,
+    setPermissions,
     isSettingPermissions,
     genNewKey,
     isGeneratingNewKey,
@@ -62,6 +62,7 @@ export const ArcadeDialog = ({
     withdraw,
     isWithdrawing,
     listConnectors,
+    deployAccountFromHash,
   } = useBurner({ walletAccount, gameContract, lordsContract, ethContract });
   const [arcadebalances, setArcadeBalances] = useState<
     Record<string, { eth: bigint; lords: bigint; lordsGameAllowance: bigint }>
@@ -76,15 +77,6 @@ export const ArcadeDialog = ({
   const walletConnected = walletConnectors.some(
     (walletConnector) => walletConnector == connector
   );
-
-  const formattedRecoveryAddress = padAddress(
-    padAddress(recoveryAddress ?? "")
-  );
-
-  const { contract: arcadeContract } = useContract({
-    address: formattedRecoveryAddress,
-    abi: ArcadeAccount,
-  });
 
   const getBalances = async () => {
     const localBalances: Record<
@@ -131,38 +123,9 @@ export const ArcadeDialog = ({
     });
   };
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { value } = e.target;
-    setRecoveryAddress(value);
-  };
-
-  const handleGetMaster = async () => {
-    const masterAccount = await arcadeContract?.call("get_master_account");
-    setRecoveryMasterAddress("0x" + masterAccount?.toString(16));
-  };
-
   useEffect(() => {
     getBalances();
   }, [arcadeConnectors, fetchedBalances]);
-
-  useEffect(() => {
-    if (isChecksumAddress(formattedRecoveryAddress)) {
-      handleGetMaster();
-    }
-  }, [recoveryAddress]);
-
-  const isMasterAccount =
-    padAddress(address ?? "") === padAddress(recoveryMasterAddress ?? "");
-  const recoveryAccountExists = () => {
-    const storage: BurnerStorage = Storage.get("burners");
-    if (storage) {
-      return Object.keys(storage).includes(formattedRecoveryAddress ?? "");
-    } else {
-      return false;
-    }
-  };
 
   if (!connectors) return <div></div>;
 
@@ -172,52 +135,24 @@ export const ArcadeDialog = ({
       <div className="fixed flex flex-col text-center items-center justify-between sm:top-1/8 sm:left-1/8 sm:left-1/4 sm:w-3/4 sm:w-1/2 h-full sm:h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4">
         <h3 className="mt-4">Arcade Accounts</h3>
         {recoverArcade ? (
-          <div className="flex flex-col items-center gap-5 h-3/4 w-full">
-            <p className="text-3xl uppercase">Recover Arcade</p>
-            <p className="text-lg">Enter address of the Arcade Account.</p>
-            <input
-              type="text"
-              name="address"
-              onChange={handleChange}
-              className="p-1 m-2 bg-terminal-black border border-terminal-green animate-pulse transform w-1/2 2xl:h-16 2xl:text-4xl"
-              maxLength={66}
-            />
-            {recoveryAddress && !isMasterAccount && (
-              <>
-                <p className="text-lg">Connect Master Account</p>
-                {walletConnectors.map((connector, index) => (
-                  <Button
-                    disabled={
-                      !isChecksumAddress(formattedRecoveryAddress) ||
-                      isMasterAccount
-                    }
-                    onClick={() => {
-                      disconnect();
-                      connect({ connector });
-                    }}
-                    key={index}
-                  >
-                    {connector.id === "braavos" || connector.id === "argentX"
-                      ? `Connect ${connector.id}`
-                      : "Login With Email"}
-                  </Button>
-                ))}
-              </>
-            )}
-            <Button
-              onClick={async () => {
-                await genNewKey(formattedRecoveryAddress, connector!);
-                updateConnectors();
-                setRecoverArcade(false);
-              }}
-              disabled={!isMasterAccount || recoveryAccountExists()}
-              className="w-1/4"
-            >
-              {recoveryAccountExists()
-                ? "Account Already Stored"
-                : "Recover Account"}
-            </Button>
-          </div>
+          <RecoverArcade
+            setRecoverArcade={setRecoverArcade}
+            walletAddress={address!}
+            walletConnectors={walletConnectors}
+            connect={connect}
+            disconnect={disconnect}
+            genNewKey={genNewKey}
+            connector={connector!}
+            updateConnectors={updateConnectors}
+          />
+        ) : recoverUndeployed ? (
+          <RecoverUndeployed
+            setRecoverUndeployed={setRecoverUndeployed}
+            connector={connector!}
+            deployAccountFromHash={deployAccountFromHash}
+            walletAccount={walletAccount!}
+            updateConnectors={updateConnectors}
+          />
         ) : (
           <>
             <div className="flex flex-col">
@@ -229,16 +164,22 @@ export const ArcadeDialog = ({
               <div className="flex justify-center mb-1">
                 <div className="flex flex-col">
                   <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                    Note: Creating an account will initiate a transfer of 0.001
-                    ETH & 250 LORDS from your connected wallet to the arcade
+                    Note: Creating an account will initiate a transfer of 0.01
+                    ETH & 25 LORDS from your connected wallet to the arcade
                     account to cover your transaction costs from gameplay.
                   </p>
                   <div className="flex flex-row justify-center gap-5">
                     <Button
                       onClick={async () => {
-                        await create(connector!);
-                        connect({ connector: listConnectors()[0] });
-                        updateConnectors();
+                        try {
+                          setFullDeployment(true);
+                          await create(connector!, 25 * 10 ** 18);
+                          connect({ connector: listConnectors()[0] });
+                          updateConnectors();
+                          setFullDeployment(false);
+                        } catch (e) {
+                          console.log(e);
+                        }
                       }}
                       disabled={isWrongNetwork || !walletConnected}
                     >
@@ -246,6 +187,9 @@ export const ArcadeDialog = ({
                     </Button>
                     <Button onClick={() => setRecoverArcade(true)}>
                       Recover Account
+                    </Button>
+                    <Button onClick={() => setRecoverUndeployed(true)}>
+                      Recover Undeployed
                     </Button>
                   </div>
                 </div>
@@ -265,6 +209,7 @@ export const ArcadeDialog = ({
                     masterAccountAddress={masterAccount}
                     arcadeConnectors={arcadeConnectors()}
                     genNewKey={genNewKey}
+                    setPermissions={setPermissions}
                     balances={arcadebalances[account.name]}
                     getAccountBalances={getAccountBalances}
                     topUpEth={topUpEth}
@@ -284,12 +229,13 @@ export const ArcadeDialog = ({
           close
         </Button>
       </div>
-      {(isDeploying || isGeneratingNewKey) && (
-        <ArcadeLoader
-          isSettingPermissions={isSettingPermissions}
-          isGeneratingNewKey={isGeneratingNewKey}
-        />
-      )}
+      <ArcadeLoader
+        isPrefunding={isPrefunding}
+        isDeploying={isDeploying}
+        isSettingPermissions={isSettingPermissions}
+        isGeneratingNewKey={isGeneratingNewKey}
+        fullDeployment={fullDeployment}
+      />
       {(isToppingUpEth || isToppingUpLords || isWithdrawing) && (
         <TokenLoader
           isToppingUpEth={isToppingUpEth}
@@ -309,7 +255,16 @@ interface ArcadeAccountCardProps {
   masterAccountAddress: string;
   arcadeConnectors: Connector[];
   genNewKey: (address: string, connector: Connector) => Promise<void>;
-  balances: { eth: bigint; lords: bigint; lordsGameAllowance: bigint };
+  setPermissions: (
+    accountAAFinalAdress: string,
+    walletAccount: AccountInterface
+  ) => Promise<string>;
+  balances: {
+    [key: string]: bigint;
+    eth: bigint;
+    lords: bigint;
+    lordsGameAllowance: bigint;
+  };
   getAccountBalances: (address: string) => Promise<void>;
   topUpEth: (address: string, account: AccountInterface) => Promise<any>;
   topUpLords: (
@@ -336,6 +291,7 @@ export const ArcadeAccountCard = ({
   masterAccountAddress,
   arcadeConnectors,
   genNewKey,
+  setPermissions,
   balances,
   getAccountBalances,
   topUpEth,
@@ -375,6 +331,10 @@ export const ArcadeAccountCard = ({
     (conn) => conn.name == walletAccount?.address
   );
 
+  const storage: BurnerStorage = Storage.get("burners");
+  const currentGamePermissions =
+    storage[account.name].gameContract == process.env.NEXT_PUBLIC_GAME_ADDRESS;
+
   return (
     <div className="border border-terminal-green p-3 items-center">
       <div className="text-left flex flex-col gap-2 text-sm sm:text-xl mb-0 sm:mb-4 items-center">
@@ -399,7 +359,7 @@ export const ArcadeAccountCard = ({
                 <div className="hidden sm:block">
                   <TopupInput
                     balanceType="eth"
-                    increment={0.0001}
+                    increment={0.001}
                     disabled={isArcade}
                     topup={topUpEth}
                     account={account.name}
@@ -408,6 +368,7 @@ export const ArcadeAccountCard = ({
                     getBalances={async () =>
                       await getAccountBalances(account.name)
                     }
+                    balances={balances}
                   />
                 </div>
                 <Button
@@ -424,7 +385,7 @@ export const ArcadeAccountCard = ({
                 <div className="hidden sm:block">
                   <TopupInput
                     balanceType="lords"
-                    increment={50}
+                    increment={5}
                     disabled={isArcade}
                     topup={topUpLords}
                     account={account.name}
@@ -433,6 +394,7 @@ export const ArcadeAccountCard = ({
                     getBalances={async () =>
                       await getAccountBalances(account.name)
                     }
+                    balances={balances}
                   />
                 </div>
                 <Button
@@ -443,26 +405,13 @@ export const ArcadeAccountCard = ({
                   Add
                 </Button>
               </span>
-              {/* <span className="flex flex-col items-center w-1/3">
-                <div className="relative w-6 h-6 sm:w-8 sm:h-8">
-                  <Image
-                    src={"/golden-token.png"}
-                    alt="Golden Token"
-                    fill={true}
-                  />
-                </div>
-                <p className="sm:text-xl">0</p>
-                <Button size={"xxxs"} className="text-black" disabled={true}>
-                  Buy
-                </Button>
-              </span> */}
             </span>
           )}
         </span>
         {selectedTopup && (
           <TopupInput
             balanceType={selectedTopup!}
-            increment={selectedTopup === "eth" ? 0.0001 : 50}
+            increment={selectedTopup === "eth" ? 0.001 : 5}
             disabled={isArcade}
             topup={selectedTopup === "eth" ? topUpEth : topUpLords}
             account={account.name}
@@ -471,6 +420,7 @@ export const ArcadeAccountCard = ({
               selectedTopup === "eth" ? 0 : Number(balances?.lordsGameAllowance)
             }
             getBalances={async () => await getAccountBalances(account.name)}
+            balances={balances}
           />
         )}
       </div>
@@ -483,16 +433,28 @@ export const ArcadeAccountCard = ({
               ? connect({ connector: masterConnector! })
               : connect({ connector: account });
           }}
+          disabled={!currentGamePermissions}
         >
           {connected ? "Connect to Master" : "Connect"}
         </Button>
         {masterAccountAddress == walletAccount?.address && (
-          <Button
-            variant={"ghost"}
-            onClick={async () => await genNewKey(account.name, connector!)}
-          >
-            Create New Keys
-          </Button>
+          <>
+            <Button
+              variant={"ghost"}
+              onClick={async () => await genNewKey(account.name, connector!)}
+            >
+              Create New Keys
+            </Button>
+            <Button
+              variant={"ghost"}
+              onClick={async () =>
+                await setPermissions(account.name, walletAccount)
+              }
+              className={`${currentGamePermissions ? "" : "animate-pulse"}`}
+            >
+              Set Permissions
+            </Button>
+          </>
         )}
         {connected && (
           <Button

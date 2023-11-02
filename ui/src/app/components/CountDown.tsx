@@ -40,12 +40,14 @@ export interface PenaltyCountDownProps {
   lastDiscoveryTime?: Date;
   lastBattleTime?: Date;
   dataLoading: boolean;
+  startCountdown: boolean;
 }
 
 export const PenaltyCountDown = ({
   lastDiscoveryTime,
   lastBattleTime,
   dataLoading,
+  startCountdown,
 }: PenaltyCountDownProps) => {
   const [seconds, setSeconds] = useState(0);
 
@@ -83,17 +85,21 @@ export const PenaltyCountDown = ({
 
   return (
     <div className="text-xxs sm:text-lg self-center border px-1 border border-terminal-green">
-      {!dataLoading ? (
-        seconds > 0 ? (
-          <span className="flex flex-row gap-1 items-center">
-            <p className="hidden sm:block">{countingMessage}</p>
-            <p className="animate-pulse">{formatTime(seconds)}</p>
-          </span>
+      {startCountdown ? (
+        !dataLoading ? (
+          seconds > 0 ? (
+            <span className="flex flex-row gap-1 items-center">
+              <p className="hidden sm:block">{countingMessage}</p>
+              <p className="animate-pulse">{formatTime(seconds)}</p>
+            </span>
+          ) : (
+            <p>{finishedMessage}</p>
+          )
         ) : (
-          <p>{finishedMessage}</p>
+          <p className="loading-ellipsis">Loading</p>
         )
       ) : (
-        <p className="loading-ellipsis">Loading</p>
+        <p>Not Started</p>
       )}
     </div>
   );

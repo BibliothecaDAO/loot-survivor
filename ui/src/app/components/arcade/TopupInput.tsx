@@ -11,7 +11,12 @@ interface TopupInputProps {
   master: AccountInterface;
   lordsGameAllowance: number;
   getBalances: () => Promise<void>;
-
+  balances: {
+    [key: string]: bigint;
+    eth: bigint;
+    lords: bigint;
+    lordsGameAllowance: bigint;
+  };
   className?: string;
 }
 
@@ -24,6 +29,7 @@ const TopupInput = ({
   master,
   lordsGameAllowance,
   getBalances,
+  balances,
   className,
 }: TopupInputProps) => {
   const [showInput, setShowInput] = useState(false);
@@ -52,7 +58,7 @@ const TopupInput = ({
 
   const handleSubmitDefault = async () => {
     if (balanceType === "lords") {
-      await topup(account, master, 260, lordsGameAllowance);
+      await topup(account, master, 25);
     } else {
       await topup(account, master);
     }
@@ -62,13 +68,15 @@ const TopupInput = ({
 
   const handleSubmitCustom = async () => {
     if (balanceType === "lords") {
-      await topup(account, master, inputValue, lordsGameAllowance);
+      await topup(account, master, inputValue);
     } else {
       await topup(account, master, inputValue);
     }
     getBalances();
     setShowInput(false);
   };
+
+  const inputTopupInvalid = inputValue > Number(balances[balanceType]);
 
   return (
     <>
@@ -112,7 +120,7 @@ const TopupInput = ({
               size="xxxs"
               className="text-black"
               onClick={() => handleSubmitCustom()}
-              disabled={inputValue === 0}
+              disabled={inputValue === 0 || inputTopupInvalid}
             >
               Add
             </Button>
@@ -126,7 +134,7 @@ const TopupInput = ({
             onClick={() => handleSubmitDefault()}
             disabled={disabled}
           >
-            {balanceType === "eth" ? "Add 0.001 ETH" : "Add 250 LORDS"}
+            {balanceType === "eth" ? "Add 0.01 ETH" : "Add 25 LORDS"}
           </Button>
           <Button
             size="xxxs"

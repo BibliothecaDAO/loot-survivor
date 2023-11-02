@@ -18,6 +18,7 @@ import {
   Battle,
   Beast,
   SpecialBeast,
+  Discovery,
 } from "@/app/types";
 import {
   getKeyFromValue,
@@ -58,7 +59,11 @@ export interface SyscallsProps {
     data: any,
     adventurer: number | undefined
   ) => void;
-  stopLoading: (notificationData: any, error?: boolean | undefined) => void;
+  stopLoading: (
+    notificationData: any,
+    error?: boolean | undefined,
+    type?: string
+  ) => void;
   setTxHash: (hash: string) => void;
   setEquipItems: (value: string[]) => void;
   setDropItems: (value: string[]) => void;
@@ -256,18 +261,12 @@ export function syscalls({
       interfaceCamel = providerInterfaceCamel(connector!.id);
     }
 
-    const mintLords: Call = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "mint",
-      calldata: [account?.address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
-    };
     const approveLordsSpendingTx = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", (250 * 10 ** 18).toString(), "0"],
-    };
+      calldata: [gameContract?.address ?? "", (25 * 10 ** 18).toString(), "0"],
+    }; // Approve 25 LORDS to be spent each time spawn is called
 
-    // TODO: pull token id from indexer, right now just set to 0
     const mintAdventurerTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "new_game",
@@ -282,14 +281,23 @@ export function syscalls({
     };
 
     addToCalls(mintAdventurerTx);
-    const balanceEmpty = await checkArcadeBalance(
-      [...calls, mintLords, approveLordsSpendingTx, mintAdventurerTx],
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
+
+    const payWithLordsCalls = [
+      ...calls,
+      approveLordsSpendingTx,
+      mintAdventurerTx,
+    ];
+
+    const payWithGoldenTokenCalls = [...calls, mintAdventurerTx];
+
+    const spawnCalls =
+      goldenTokenId === "0" ? payWithLordsCalls : payWithGoldenTokenCalls;
 
     if (!balanceEmpty) {
       startLoading(
@@ -299,12 +307,7 @@ export function syscalls({
         undefined
       );
       try {
-        const tx = await handleSubmitCalls(account, [
-          ...calls,
-          mintLords,
-          approveLordsSpendingTx,
-          mintAdventurerTx,
-        ]);
+        const tx = await handleSubmitCalls(account, spawnCalls);
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
@@ -389,7 +392,7 @@ export function syscalls({
             },
           ],
         });
-        stopLoading(`You have spawned ${formData.name}!`);
+        stopLoading(`You have spawned ${formData.name}!`, false, "Create");
         setAdventurer(adventurerState);
         setScreen("play");
       } catch (e) {
@@ -409,12 +412,10 @@ export function syscalls({
     };
     addToCalls(exploreTx);
 
-    const balanceEmpty = await checkArcadeBalance(
-      [...calls, exploreTx],
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
 
@@ -486,7 +487,7 @@ export function syscalls({
           ],
         });
 
-        const discoveries = [];
+        const discoveries: Discovery[] = [];
 
         const filteredDiscoveries = events.filter(
           (event) =>
@@ -677,7 +678,7 @@ export function syscalls({
 
         setEquipItems([]);
         setDropItems([]);
-        stopLoading(reversedDiscoveries);
+        stopLoading(reversedDiscoveries, false, "Explore");
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -696,12 +697,10 @@ export function syscalls({
     };
     addToCalls(attackTx);
 
-    const balanceEmpty = await checkArcadeBalance(
-      [...calls, attackTx],
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
 
@@ -962,7 +961,7 @@ export function syscalls({
           battles: reversedBattles,
         });
 
-        stopLoading(reversedBattles);
+        stopLoading(reversedBattles, false, "Attack");
         setEquipItems([]);
         setDropItems([]);
       } catch (e) {
@@ -982,12 +981,10 @@ export function syscalls({
     };
     addToCalls(fleeTx);
 
-    const balanceEmpty = await checkArcadeBalance(
-      [...calls, fleeTx],
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
 
@@ -1172,7 +1169,7 @@ export function syscalls({
         setData("battlesByTxHashQuery", {
           battles: reversedBattles,
         });
-        stopLoading(reversedBattles);
+        stopLoading(reversedBattles, false, "Flee");
         setEquipItems([]);
         setDropItems([]);
       } catch (e) {
@@ -1189,12 +1186,10 @@ export function syscalls({
     purchaseItems: ItemPurchase[],
     potionAmount: number
   ) => {
-    const balanceEmpty = await checkArcadeBalance(
-      calls,
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
 
@@ -1335,11 +1330,15 @@ export function syscalls({
           setStartOption("create adventurer");
           stopLoading("Death Penalty");
         } else {
-          stopLoading({
-            Stats: upgrades,
-            Items: purchaseItems,
-            Potions: potionAmount,
-          });
+          stopLoading(
+            {
+              Stats: upgrades,
+              Items: purchaseItems,
+              Potions: potionAmount,
+            },
+            false,
+            "Upgrade"
+          );
           setScreen("play");
         }
       } catch (e) {
@@ -1360,12 +1359,10 @@ export function syscalls({
     };
     addToCalls(slayIdleAdventurersTx);
 
-    const balanceEmpty = await checkArcadeBalance(
-      [...calls, slayIdleAdventurersTx],
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
 
@@ -1449,12 +1446,10 @@ export function syscalls({
     loadingMessage: string[],
     notification: string[]
   ) => {
-    const balanceEmpty = await checkArcadeBalance(
-      calls,
+    const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee,
       account
     );
 
@@ -1725,7 +1720,7 @@ export function syscalls({
           setScreen("play");
         }
 
-        stopLoading(notification);
+        stopLoading(notification, false, "Multicall");
       } catch (e) {
         console.log(e);
         stopLoading(e, true);

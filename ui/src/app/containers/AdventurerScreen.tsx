@@ -12,9 +12,9 @@ interface AdventurerScreenProps {
   spawn: (formData: FormData, goldenTokenId: string) => Promise<void>;
   handleSwitchAdventurer: (adventurerId: number) => Promise<void>;
   lordsBalance?: bigint;
-  mintLords: () => Promise<void>;
   gameContract: Contract;
   goldenTokenData: any;
+  getBalances: () => Promise<void>;
 }
 
 /**
@@ -25,9 +25,9 @@ export default function AdventurerScreen({
   spawn,
   handleSwitchAdventurer,
   lordsBalance,
-  mintLords,
   gameContract,
   goldenTokenData,
+  getBalances,
 }: AdventurerScreenProps) {
   const [activeMenu, setActiveMenu] = useState(0);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
@@ -87,9 +87,9 @@ export default function AdventurerScreen({
             onEscape={() => setActiveMenu(0)}
             spawn={spawn}
             lordsBalance={lordsBalance}
-            mintLords={mintLords}
             goldenTokenData={goldenTokenData}
             gameContract={gameContract}
+            getBalances={getBalances}
           />
         </div>
       )}

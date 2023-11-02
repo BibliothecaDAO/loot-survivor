@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { Contract } from "starknet";
+import { useBlock } from "@starknet-react/core";
 import {
   getAdventurerByXP,
   getAdventurerById,
@@ -8,14 +10,12 @@ import { Button } from "@/app/components/buttons/Button";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
-import { Adventurer } from "@/app/types";
+import { Adventurer, GameEntropy } from "@/app/types";
 import ScoreTable from "@/app/components/leaderboard/ScoreTable";
 import LiveTable from "@/app/components/leaderboard/LiveTable";
 import { RefreshIcon } from "@/app/components/icons/Icons";
-// import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
 import LootIconLoader from "@/app/components/icons/Loader";
 import { ProfileIcon, SkullIcon } from "@/app/components/icons/Icons";
-import { Contract } from "starknet";
 
 interface LeaderboardScreenProps {
   slayAllIdles: (slayAdventurers: number[]) => Promise<void>;
@@ -32,6 +32,15 @@ export default function LeaderboardScreen({
 }: LeaderboardScreenProps) {
   const itemsPerPage = 10;
   const [showScores, setShowScores] = useState(false);
+  const [gameEntropyUpdateTime, setGameEntropyUpdateTime] = useState<
+    number | null
+  >();
+
+  const { data: blockData } = useBlock({
+    refetchInterval: false,
+  });
+
+  const currentBlock = blockData?.block_number;
 
   const { data, refetch, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
@@ -95,28 +104,18 @@ export default function LeaderboardScreen({
     }
   }, [adventurersByXPdata]);
 
-  // const getIdleAdventurers = useCallback(() => {
-  //   const slayAdventurers: number[] = [];
-  //   adventurers.map((adventurer) => {
-  //     const formatLastActionBlock = (adventurer?.lastAction ?? 0) % 512;
-  //     const idleTime =
-  //       formatCurrentBlock >= formatLastActionBlock
-  //         ? formatCurrentBlock - formatLastActionBlock
-  //         : 512 - formatLastActionBlock + formatCurrentBlock;
-  //     if (
-  //       idleTime > idleDeathPenaltyBlocks &&
-  //       adventurer?.health !== 0 &&
-  //       adventurer.id
-  //     ) {
-  //       return slayAdventurers.push(adventurer.id);
-  //     }
-  //   });
-  //   return slayAdventurers;
-  // }, [adventurers, formatCurrentBlock]);
+  const getGameEntropy = async () => {
+    const gameEntropy = await gameContract.call("get_game_entropy");
+    const formattedEntropy = gameEntropy as GameEntropy;
+    const gameEntropyUpdateTime =
+      Number(formattedEntropy.next_update_block) -
+      Number(formattedEntropy.last_updated_block);
+    setGameEntropyUpdateTime(gameEntropyUpdateTime);
+  };
 
-  // const handleSlayAdventurers = async () => {
-  //   await slayAllIdles(getIdleAdventurers());
-  // };
+  useEffect(() => {
+    getGameEntropy();
+  }, []);
 
   return (
     <div className="flex flex-col items-center h-full xl:overflow-y-auto 2xl:overflow-hidden mt-5 sm:mt-0">
@@ -131,12 +130,6 @@ export default function LeaderboardScreen({
               <ProfileIcon className="fill-current w-4 h-4 sm:w-8 sm:h-8" />
               <p className="sm:text-2xl">{aliveAdventurers.length}</p>
             </div>
-            {/* <Button
-              onClick={() => handleSlayAdventurers()}
-              disabled={getIdleAdventurers().length === 0}
-            >
-              Slay Idle Adventurers
-            </Button> */}
             <Button
               onClick={async () => {
                 const adventurersByXPdata = await refetch(
@@ -165,6 +158,8 @@ export default function LeaderboardScreen({
                 handleFetchProfileData={handlefetchProfileData}
                 adventurers={aliveAdventurers}
                 gameContract={gameContract}
+                gameEntropyUpdateTime={gameEntropyUpdateTime!}
+                currentBlock={currentBlock!}
               />
             </div>
             <div

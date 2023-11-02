@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Contract } from "starknet";
 import { useAccount, useDisconnect, Connector } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
@@ -10,7 +10,7 @@ import Logo from "public/icons/logo.svg";
 import Lords from "public/icons/lords.svg";
 import { PenaltyCountDown } from "@/app/components/CountDown";
 import { Button } from "@/app/components/buttons/Button";
-import { formatNumber, displayAddress } from "@/app/lib/utils";
+import { formatNumber, displayAddress, indexAddress } from "@/app/lib/utils";
 import {
   ArcadeIcon,
   SoundOffIcon,
@@ -23,13 +23,14 @@ import TransactionCart from "@/app/components/navigation/TransactionCart";
 import TransactionHistory from "@/app/components/navigation/TransactionHistory";
 import { NullAdventurer } from "@/app/types";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { getApibaraStatus } from "@/app/api/api";
+import ApibaraStatus from "./ApibaraStatus";
 
 export interface HeaderProps {
   multicall: (
     loadingMessage: string[],
     notification: string[]
   ) => Promise<void>;
-  mintLords: () => Promise<void>;
   lordsBalance: bigint;
   arcadeConnectors: Connector[];
   gameContract: Contract;
@@ -37,13 +38,13 @@ export interface HeaderProps {
 
 export default function Header({
   multicall,
-  mintLords,
   lordsBalance,
   arcadeConnectors,
   gameContract,
 }: HeaderProps) {
   const { account, address } = useAccount();
   const { disconnect } = useDisconnect();
+  const [apibaraStatus, setApibaraStatus] = useState();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const data = useQueriesStore((state) => state.data);
@@ -70,11 +71,20 @@ export default function Header({
   const displayCartButtonRef = useRef<HTMLButtonElement>(null);
   const displayHistoryButtonRef = useRef<HTMLButtonElement>(null);
 
-  const [showLordsMint, setShowLordsMint] = useState(false);
+  const [showLordsBuy, setShowLordsBuy] = useState(false);
 
   const checkArcade = arcadeConnectors.some(
     (connector) => connector.name == address
   );
+
+  const handleApibaraStatus = async () => {
+    const data = await getApibaraStatus();
+    setApibaraStatus(data.status.indicator);
+  };
+
+  useEffect(() => {
+    handleApibaraStatus();
+  }, []);
 
   return (
     <div className="flex flex-row justify-between px-1  ">
@@ -82,6 +92,7 @@ export default function Header({
         <Logo className="fill-current w-24 md:w-32 xl:w-40 2xl:w-64" />
       </div>
       <div className="flex flex-row items-center self-end sm:gap-1 self-center">
+        <ApibaraStatus status={apibaraStatus} />
         {adventurer?.id && (
           <PenaltyCountDown
             lastDiscoveryTime={
@@ -89,26 +100,36 @@ export default function Header({
             }
             lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
             dataLoading={isLoading.global}
+            startCountdown={(adventurer?.level ?? 0) > 1}
           />
         )}
         <Button
           size={"xs"}
           variant={"outline"}
           className="hidden sm:block self-center xl:px-5"
-          disabled={true}
+          onClick={() =>
+            window.open("https://goerli-survivor.realms.world/", "_blank")
+          }
         >
-          Play For Real
+          Play on Testnet
         </Button>
         <Button
           size={"xs"}
           variant={"outline"}
           className="self-center xl:px-5 hover:bg-terminal-green"
-          onClick={mintLords}
-          onMouseEnter={() => setShowLordsMint(true)}
-          onMouseLeave={() => setShowLordsMint(false)}
+          onClick={() => {
+            const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
+              process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+            )}&tokenTo=${indexAddress(
+              process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+            )}&amount=0.001`;
+            window.open(avnuLords, "_blank");
+          }}
+          onMouseEnter={() => setShowLordsBuy(true)}
+          onMouseLeave={() => setShowLordsBuy(false)}
         >
           <span className="flex flex-row items-center justify-between w-full">
-            {!showLordsMint ? (
+            {!showLordsBuy ? (
               <>
                 <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
                 <p>
@@ -116,7 +137,7 @@ export default function Header({
                 </p>
               </>
             ) : (
-              <p className="text-black">Mint Lords</p>
+              <p className="text-black">Buy Lords</p>
             )}
           </span>
         </Button>

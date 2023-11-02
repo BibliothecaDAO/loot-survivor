@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MdClose } from "react-icons/md";
 import { Contract } from "starknet";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
 import {
@@ -9,15 +10,14 @@ import {
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import { getWalletConnectors } from "@/app/lib/connectors";
-import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
-import { Call } from "@/app/types";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import Lords from "public/icons/lords.svg";
+import QuantityButtons from "../buttons/QuantityButtons";
+import { indexAddress } from "@/app/lib/utils";
 
 interface ArcadeIntroProps {
   ethBalance: bigint;
   lordsBalance: bigint;
-  getBalances: () => void;
   gameContract: Contract;
   lordsContract: Contract;
   ethContract: Contract;
@@ -27,7 +27,6 @@ interface ArcadeIntroProps {
 export const ArcadeIntro = ({
   ethBalance,
   lordsBalance,
-  getBalances,
   gameContract,
   lordsContract,
   ethContract,
@@ -37,57 +36,33 @@ export const ArcadeIntro = ({
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const [step, setStep] = useState(1);
+  const [fullDeployment, setFullDeployment] = useState(false);
+  const [gamesPrefundAmount, setGamesPrefundAmount] = useState(1);
   const [readDisclaimer, setReadDisclaimer] = useState(false);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
-  const { create, isDeploying, isSettingPermissions, listConnectors } =
-    useBurner({
-      walletAccount: account,
-      gameContract,
-      lordsContract,
-      ethContract,
-    });
-  const walletConnectors = getWalletConnectors(connectors);
-  const calls = useTransactionCartStore((state) => state.calls);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
+  const setClosedArcadeIntro = useUIStore(
+    (state) => state.setClosedArcadeIntro
   );
+  const {
+    create,
+    isPrefunding,
+    isDeploying,
+    isSettingPermissions,
+    listConnectors,
+  } = useBurner({
+    walletAccount: account,
+    gameContract,
+    lordsContract,
+    ethContract,
+  });
+  const walletConnectors = getWalletConnectors(connectors);
   const setScreen = useUIStore((state) => state.setScreen);
   const lords = Number(lordsBalance);
   const eth = Number(ethBalance);
-  const [isMintingLords, setIsMintingLords] = useState(false);
-
-  const mintLords = async () => {
-    try {
-      setIsMintingLords(true);
-      // Mint 250 LORDS
-      const mintLords: Call = {
-        contractAddress: lordsContract?.address ?? "",
-        entrypoint: "mint",
-        calldata: [address ?? "0x0", (260 * 10 ** 18).toString(), "0"],
-      };
-      addToCalls(mintLords);
-      const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
-      const result = await account?.waitForTransaction(tx?.transaction_hash, {
-        retryInterval: 2000,
-      });
-
-      if (!result) {
-        throw new Error("Lords Mint did not complete successfully.");
-      }
-
-      setIsMintingLords(false);
-      getBalances();
-    } catch (e) {
-      setIsMintingLords(false);
-      console.log(e);
-    }
-  };
 
   const checkNotEnoughPrefundEth = eth < parseInt(ETH_PREFUND_AMOUNT);
   const checkNotEnoughPrefundLords = lords < parseInt(LORDS_PREFUND_AMOUNT);
-  const checkAnyETh = eth === 0;
 
   useEffect(() => {
     if (account && !checkNotEnoughPrefundLords && readDisclaimer) {
@@ -101,10 +76,21 @@ export const ArcadeIntro = ({
     }
   }, [account, checkNotEnoughPrefundLords, readDisclaimer]);
 
+  const maxGames = Math.min(Math.floor(lords / 25), 100);
+
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
       <div className="fixed flex flex-col justify-between text-center sm:top-1/8 sm:left-1/8 sm:left-1/4 sm:w-3/4 sm:w-1/2 h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4 overflow-y-auto">
+        <button
+          className="absolute top-2 right-2 cursor-pointer text-red-500"
+          onClick={() => {
+            showArcadeIntro(false);
+            setClosedArcadeIntro(true);
+          }}
+        >
+          <MdClose size={50} />
+        </button>
         {step == 1 && (
           <div className="flex flex-col gap-5 items-center">
             <h3 className="mt-4 uppercase">Create Arcade Account</h3>
@@ -163,41 +149,38 @@ export const ArcadeIntro = ({
         )}
         {step == 3 && (
           <div className="flex flex-col gap-10 items-center">
-            <h3 className="mt-4 uppercase">Mint Lords</h3>
+            <h3 className="mt-4 uppercase">Buy Lords</h3>
             <div className="flex flex-col gap-2">
               <p className="m-2 text-sm xl:text-xl 2xl:text-2xl">
-                In order to play Loot Survivor you must insert 25 Lords.
+                In order to play Loot Survivor you must insert at least 25
+                Lords.
               </p>
               <p className="text-sm xl:text-xl 2xl:text-2xl">
-                Since you are on Goerli, you can mint and fund your Arcade
-                Account with 250 Lords below to get started!
+                If you do not have any LORDS please select the button below to
+                buy from a DEX.
+              </p>
+              <p className="text-sm xl:text-xl 2xl:text-2xl">
+                Please ensure that your Account is deployed!
               </p>
             </div>
             <div className="flex flex-col gap-10 items-center justify-center w-full">
               <Lords className="w-24 h-24 sm:w-40 sm:h-40 fill-current" />
               <Button
-                onClick={() =>
-                  checkAnyETh
-                    ? window.open(
-                        "https://faucet.goerli.starknet.io/",
-                        "_blank"
-                      )
-                    : mintLords()
-                }
+                onClick={() => {
+                  const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
+                    process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+                  )}&tokenTo=${indexAddress(
+                    process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+                  )}&amount=0.001`;
+                  window.open(avnuLords, "_blank");
+                }}
                 disabled={
-                  isWrongNetwork ||
-                  isMintingLords ||
-                  !checkNotEnoughPrefundLords ||
-                  !account
+                  isWrongNetwork || !checkNotEnoughPrefundLords || !account
                 }
                 className="flex flex-row w-1/4"
               >
-                {isMintingLords ? (
-                  <p className="loading-ellipsis">Minting Lords</p>
-                ) : checkAnyETh ? (
-                  "GET GOERLI ETH"
-                ) : lordsBalance ? (
-                  "Mint 250 Lords"
+                {lordsBalance || lords == 0 ? (
+                  "Buy Lords"
                 ) : (
                   <p className="loading-ellipsis">Getting Balance</p>
                 )}
@@ -214,7 +197,7 @@ export const ArcadeIntro = ({
                 asked to sign 2 transactions:
               </p>
               <ul className="text-sm xl:text-xl 2xl:text-2xl list-disc w-2/3">
-                <li>Pre-fund the AA with Eth and Lords</li>
+                <li>Pre-fund the AA with ETH and LORDS</li>
                 <li>
                   Set Permissions on the AA to play Loot Survivor and transfer
                   back
@@ -226,25 +209,63 @@ export const ArcadeIntro = ({
               </p>
             </div>
             <div className="flex flex-col items-center justify-between h-1/2 w-full">
-              <Button
-                onClick={async () => {
-                  if (checkNotEnoughPrefundEth) {
-                    window.open("https://faucet.goerli.starknet.io/", "_blank");
-                  } else {
-                    await create(connector!);
-                    disconnect();
-                    connect({ connector: listConnectors()[0] });
-                    updateConnectors();
-                    showArcadeIntro(false);
+              {checkNotEnoughPrefundEth ? (
+                <Button
+                  onClick={() =>
+                    window.open("https://starkgate.starknet.io//", "_blank")
                   }
-                }}
-                disabled={
-                  isWrongNetwork || checkNotEnoughPrefundLords || !account
-                }
-                className="w-1/4 h-1/4"
-              >
-                {checkNotEnoughPrefundEth ? "GET GOERLI ETH" : "CREATE"}
-              </Button>
+                  className="w-1/4"
+                  disabled={!ethBalance}
+                >
+                  {ethBalance ? (
+                    "GET ETH"
+                  ) : (
+                    <p className="loading-ellipsis">Getting Balance</p>
+                  )}
+                </Button>
+              ) : (
+                <div className="flex flex-col gap-5 items-center w-3/4">
+                  <p className="text-sm xl:text-xl 2xl:text-2xl">
+                    How many games would you like to fund?
+                  </p>
+                  <div className="flex flex-row gap-5 w-1/2">
+                    <div className="w-1/2">
+                      <QuantityButtons
+                        amount={gamesPrefundAmount}
+                        min={0}
+                        max={Math.min(Math.floor(lords / 25), 100)}
+                        setAmount={(value) => {
+                          setGamesPrefundAmount(value);
+                        }}
+                      />
+                    </div>
+                    <Button
+                      onClick={async () => {
+                        setFullDeployment(true);
+                        await create(
+                          connector!,
+                          gamesPrefundAmount * (25 * 10 ** 18)
+                        );
+                        disconnect();
+                        connect({ connector: listConnectors()[0] });
+                        updateConnectors();
+                        showArcadeIntro(false);
+                        setFullDeployment(false);
+                      }}
+                      disabled={
+                        isWrongNetwork ||
+                        checkNotEnoughPrefundLords ||
+                        !account ||
+                        gamesPrefundAmount === 0 ||
+                        gamesPrefundAmount > maxGames
+                      }
+                      className="w-1/2 h-1/4"
+                    >
+                      Create Account
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -272,9 +293,12 @@ export const ArcadeIntro = ({
             />
           </div>
         </div>
-        {isDeploying && (
-          <ArcadeLoader isSettingPermissions={isSettingPermissions} />
-        )}
+        <ArcadeLoader
+          isPrefunding={isPrefunding}
+          isDeploying={isDeploying}
+          isSettingPermissions={isSettingPermissions}
+          fullDeployment={fullDeployment}
+        />
       </div>
     </>
   );

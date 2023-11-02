@@ -1,14 +1,21 @@
 import { useEffect, useState } from "react";
 import PixelatedImage from "@/app/components/animations/PixelatedImage";
+import { ArcadeNav } from "./ArcadeNav";
 
 interface ArcadeLoaderProps {
+  isPrefunding?: boolean;
+  isDeploying?: boolean;
   isSettingPermissions?: boolean;
   isGeneratingNewKey?: boolean;
+  fullDeployment?: boolean;
 }
 
 export default function ArcadeLoader({
+  isPrefunding,
+  isDeploying,
   isSettingPermissions,
   isGeneratingNewKey,
+  fullDeployment,
 }: ArcadeLoaderProps) {
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
 
@@ -16,7 +23,9 @@ export default function ArcadeLoader({
     const timer = setInterval(() => {
       setLoadingMessage((prev) =>
         prev === "Please Wait" || !prev
-          ? isSettingPermissions
+          ? isPrefunding
+            ? "Prefunding Arcade"
+            : isSettingPermissions
             ? "Setting Permissions"
             : isGeneratingNewKey
             ? "Generating New Key"
@@ -28,20 +37,34 @@ export default function ArcadeLoader({
     return () => {
       clearInterval(timer); // Cleanup timer on component unmount
     };
-  }, [isSettingPermissions]);
+  }, [isPrefunding, isSettingPermissions, isGeneratingNewKey]);
 
   return (
-    <div className="fixed flex flex-col items-center sm:flex-row inset-0 bg-black z-50 sm:m-2 w-full h-full">
-      <div className="flex items-center justify-center w-full sm:w-1/2 h-3/4 sm:h-full">
-        <PixelatedImage
-          src={"/scenes/intro/arcade-account.png"}
-          pixelSize={5}
-          pulsate={true}
-        />
-      </div>
-      <h3 className="text-lg sm:text-3xl loading-ellipsis flex items-start sm:items-center justify-center sm:justify-start w-full sm:w-1/2 h-1/2">
-        {loadingMessage}
-      </h3>
-    </div>
+    <>
+      {(isPrefunding ||
+        isDeploying ||
+        isSettingPermissions ||
+        isGeneratingNewKey) && (
+        <div className="fixed flex flex-col items-center sm:flex-row inset-0 bg-black z-50 sm:m-2 w-full h-full">
+          <div className="flex items-center justify-center w-full sm:w-1/2 h-3/4 sm:h-full">
+            <PixelatedImage
+              src={"/scenes/intro/arcade-account.png"}
+              pixelSize={5}
+              pulsate={true}
+            />
+          </div>
+          <div className="flex flex-col gap-10 h-full sm:w-1/2">
+            <h3 className="text-lg sm:text-3xl loading-ellipsis flex items-start sm:items-center justify-center sm:justify-start w-full h-1/2">
+              {loadingMessage}
+            </h3>
+            {fullDeployment && (
+              <ArcadeNav
+                activeSection={isPrefunding ? 1 : isDeploying ? 2 : 3}
+              />
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

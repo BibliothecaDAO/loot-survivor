@@ -24,7 +24,7 @@ type LoadingState = {
   resetNotification: () => void;
   setTxHash: (hash: string) => void;
   setTxAccepted: (txAccepted: boolean) => void;
-  stopLoading: (notificationData: any, error?: boolean) => void;
+  stopLoading: (notificationData: any, error?: boolean, type?: string) => void;
   deathMessage: ReactElement<any, string | JSXElementConstructor<any>> | null;
   setDeathMessage: (
     deathMessage: ReactElement<any, string | JSXElementConstructor<any>> | null
@@ -54,7 +54,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
   },
   setTxHash: (hash) => set({ hash }),
   setTxAccepted: (txAccepted) => set({ txAccepted }),
-  stopLoading: (notificationData, error) => {
+  stopLoading: (notificationData, error, type) => {
     set({
       showNotification: notificationData ? true : false,
       notificationData: notificationData || undefined,
@@ -75,6 +75,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
       hash: "",
       adventurer: undefined,
       txAccepted: false,
+      type: type ? type : "",
     });
   },
   resetNotification: () =>

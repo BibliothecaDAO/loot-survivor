@@ -62,7 +62,7 @@ export const TopUpDialog = ({ ethContract, getBalances }: TopUpDialogProps) => {
             </Button>
           ))}
           <p className="m-2 text-sm xl:text-xl 2xl:text-2xl">
-            Top Up (0.001ETH)
+            Top Up (0.01ETH)
           </p>
           <Button
             disabled={!masterConnected || isToppingUpEth}

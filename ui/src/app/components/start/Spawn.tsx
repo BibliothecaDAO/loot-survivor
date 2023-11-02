@@ -13,15 +13,16 @@ import { FormData, GameToken } from "@/app/types";
 import { Button } from "@/app/components/buttons/Button";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import Lords from "public/icons/lords.svg";
+import { indexAddress } from "@/app/lib/utils";
 
 export interface SpawnProps {
   formData: FormData;
   spawn: (formData: FormData, goldenTokenId: string) => Promise<void>;
   handleBack: () => void;
   lordsBalance?: bigint;
-  mintLords: () => Promise<void>;
   goldenTokenData: any;
   gameContract: Contract;
+  getBalances: () => Promise<void>;
 }
 
 export const Spawn = ({
@@ -29,9 +30,9 @@ export const Spawn = ({
   spawn,
   handleBack,
   lordsBalance,
-  mintLords,
   goldenTokenData,
   gameContract,
+  getBalances,
 }: SpawnProps) => {
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
   const [formFilled, setFormFilled] = useState(false);
@@ -62,11 +63,13 @@ export const Spawn = ({
   const handleSubmitLords = async () => {
     resetNotification();
     await spawn(formData, "0");
+    await getBalances();
   };
 
   const handleSubmitGoldenToken = async () => {
     resetNotification();
     await spawn(formData, usableToken);
+    await getBalances();
   };
 
   const checkEnoughLords = lordsBalance! >= BigInt(25000000000000000000);
@@ -110,6 +113,9 @@ export const Spawn = ({
           <WalletTutorial />
         </div>
       )}
+      <span className="sm:hidden absolute top-0 h-20 w-full">
+        <TxActivity />
+      </span>
       <div className="flex flex-col h-full p-2">
         <Image
           className="mx-auto absolute object-cover sm:py-4 sm:px-8"
@@ -237,7 +243,18 @@ export const Spawn = ({
                 </div>
               </div>
               {!checkEnoughLords && (
-                <Button onClick={mintLords}>Mint Lords</Button>
+                <Button
+                  onClick={() => {
+                    const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
+                      process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+                    )}&tokenTo=${indexAddress(
+                      process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+                    )}&amount=0.001`;
+                    window.open(avnuLords, "_blank");
+                  }}
+                >
+                  Buy Lords
+                </Button>
               )}
             </>
           )}

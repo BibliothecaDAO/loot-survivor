@@ -2,7 +2,7 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 import { z } from "zod";
-import { Call, AccountInterface } from "starknet";
+import { AccountInterface } from "starknet";
 import { Adventurer, Item, ItemPurchase } from "@/app/types";
 import { GameData } from "@/app/lib/data/GameData";
 import {
@@ -364,44 +364,13 @@ export function getDeathMessageByRank(rank: number): string {
   return message || "Better luck next time - You can improve!";
 }
 
-export async function checkArcadeBalance(
-  calls: Call[],
+export function checkArcadeBalance(
   ethBalance: bigint,
   showTopUpDialog: (value: boolean) => void,
   setTopUpAccount: (value: string) => void,
-  setEstimatingFee: (value: boolean) => void,
   account?: AccountInterface
 ) {
   if (ethBalance < FEE_CHECK_BALANCE) {
-    // const storage: BurnerStorage = Storage.get("burners");
-    // if (account && (account?.address ?? "0x0") in storage) {
-    //   try {
-    //     setEstimatingFee(true);
-    //     const newAccount = new Account(
-    //       account,
-    //       account?.address,
-    //       storage[account?.address]["privateKey"],
-    //       "1"
-    //     );
-    //     const { suggestedMaxFee: estimatedFee } = await newAccount.estimateFee(
-    //       calls
-    //     );
-    //     // Add 10% to fee for safety
-    //     const formattedFee = estimatedFee * (BigInt(11) / BigInt(10));
-    //     setEstimatingFee(false);
-    //     if (ethBalance < formattedFee) {
-    // showTopUpDialog(true);
-    // setTopUpAccount(account?.address);
-    //       return true;
-    //     } else {
-    //       return false;
-    //     }
-    //   } catch (e) {
-    //     console.log(e);
-    //     setEstimatingFee(false);
-    //     return false;
-    //   }
-    // }
     showTopUpDialog(true);
     setTopUpAccount(account?.address ?? "");
     return true;

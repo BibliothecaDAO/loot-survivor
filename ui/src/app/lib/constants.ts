@@ -32,11 +32,10 @@ export const itemBasePrice = 4;
 export const itemMinimumPrice = 1;
 export const potionCharismaDiscount = 2;
 export const potionBasePrice = 2;
-export const idleDeathPenaltyBlocks = 300;
 
 // UI PARAMS
 export const MIN_BALANCE = 10000000000000; // 0.00001ETH or $0.015
-export const FEE_CHECK_BALANCE = 200000000000000; // 0.00025ETH or $0.45
+export const FEE_CHECK_BALANCE = 1000000000000000; // 0.001ETH or $1.80
 
 export const deathMessages = [
   {

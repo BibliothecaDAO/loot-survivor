@@ -10,9 +10,9 @@ export interface CreateAdventurerProps {
   onEscape: () => void;
   spawn: (...args: any[]) => any;
   lordsBalance?: bigint;
-  mintLords: () => Promise<void>;
   goldenTokenData: any;
   gameContract: Contract;
+  getBalances: () => Promise<void>;
 }
 
 export const CreateAdventurer = ({
@@ -20,9 +20,9 @@ export const CreateAdventurer = ({
   onEscape,
   spawn,
   lordsBalance,
-  mintLords,
   goldenTokenData,
   gameContract,
+  getBalances,
 }: CreateAdventurerProps) => {
   const [formData, setFormData] = useState<FormData>({
     startingWeapon: "",
@@ -114,9 +114,9 @@ export const CreateAdventurer = ({
               spawn={spawn}
               handleBack={handleBack}
               lordsBalance={lordsBalance}
-              mintLords={mintLords}
               goldenTokenData={goldenTokenData}
               gameContract={gameContract}
+              getBalances={getBalances}
             />
           </div>
           <div className="sm:hidden">
@@ -137,9 +137,9 @@ export const CreateAdventurer = ({
             spawn={spawn}
             handleBack={handleBack}
             lordsBalance={lordsBalance}
-            mintLords={mintLords}
             goldenTokenData={goldenTokenData}
             gameContract={gameContract}
+            getBalances={getBalances}
           />
         </div>
       )}

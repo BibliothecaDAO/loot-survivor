@@ -22,6 +22,7 @@ import { MONGO_CONNECTION_STRING } from "./utils/constants.ts";
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
 const STREAM_URL = Deno.env.get("STREAM_URL");
+const MONGO_DB = Deno.env.get("MONGO_DB");
 
 const filter = {
   header: { weak: true },
@@ -44,7 +45,7 @@ export const config: Config<Starknet, Mongo | Console> = {
   sinkType: "mongo",
   sinkOptions: {
     connectionString: MONGO_CONNECTION_STRING,
-    database: "mongo_goerli",
+    database: MONGO_DB,
     collectionName: "battles",
     // @ts-ignore - indexer package not updated
     entityMode: true,

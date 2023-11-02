@@ -4,6 +4,8 @@ import { Button } from "@/app/components/buttons/Button";
 import { useConnect } from "@starknet-react/core";
 import useUIStore from "@/app/hooks/useUIStore";
 import { WalletTutorial } from "@/app/components/intro/WalletTutorial";
+import Storage from "@/app/lib/storage";
+import { BurnerStorage } from "@/app/types";
 
 interface WalletSelectProps {}
 
@@ -24,6 +26,8 @@ const WalletSelect = ({}: WalletSelectProps) => {
       (connector) =>
         typeof connector.id !== "string" || !connector.id.includes("0x")
     );
+
+  const storage: BurnerStorage = Storage.get("burners");
 
   return (
     <div className="min-h-screen container flex justify-center items-center m-auto p-4 pt-8 sm:w-1/2 sm:p-8 lg:p-10 2xl:p-20">
@@ -64,15 +68,21 @@ const WalletSelect = ({}: WalletSelectProps) => {
                 <>
                   <h5 className="text-center">Arcade Accounts</h5>
                   <div className="flex flex-col sm:flex-row gap-2 overflow-auto h-[300px] sm:h-full w-full sm:w-[400px]">
-                    {arcadeConnectors().map((connector, index) => (
-                      <Button
-                        onClick={() => connect({ connector })}
-                        key={index}
-                        className="w-full"
-                      >
-                        Connect {connector.id}
-                      </Button>
-                    ))}
+                    {arcadeConnectors().map((connector, index) => {
+                      const currentGamePermissions =
+                        storage[connector.name].gameContract ==
+                        process.env.NEXT_PUBLIC_GAME_ADDRESS;
+                      return (
+                        <Button
+                          onClick={() => connect({ connector })}
+                          key={index}
+                          className="w-full"
+                          disabled={!currentGamePermissions}
+                        >
+                          Connect {connector.id}
+                        </Button>
+                      );
+                    })}
                   </div>
                 </>
               ) : (
