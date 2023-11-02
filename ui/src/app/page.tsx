@@ -201,7 +201,7 @@ function Home({ updateConnectors }: HomeProps) {
 
   useEffect(() => {
     getBalances();
-  }, [account]);
+  }, [account, adventurer]);
 
   const { data, refetch, resetData, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
