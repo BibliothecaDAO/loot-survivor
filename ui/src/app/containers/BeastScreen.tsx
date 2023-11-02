@@ -241,7 +241,9 @@ export default function BeastScreen({
                     </div>
                   </div>
                 </div>
-                <p className="text-2xl loading-ellipsis">Waiting for Reveal</p>
+                <p className="text-2xl loading-ellipsis">
+                  Waiting for Block Reveal
+                </p>
               </div>
             )}
           </>
