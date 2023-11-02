@@ -426,7 +426,7 @@ function Home({ updateConnectors }: HomeProps) {
   useEffect(() => {
     const isWrongNetwork =
       (provider as any)?.chainId !== constants.StarknetChainId.SN_MAIN;
-    setIsWrongNetwork(false);
+    setIsWrongNetwork(isWrongNetwork);
   }, [chain, provider, isConnected]);
 
   useEffect(() => {

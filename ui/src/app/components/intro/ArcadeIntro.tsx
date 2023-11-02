@@ -22,7 +22,6 @@ interface ArcadeIntroProps {
   lordsContract: Contract;
   ethContract: Contract;
   updateConnectors: () => void;
-  showLoader: boolean;
 }
 
 export const ArcadeIntro = ({
@@ -32,7 +31,6 @@ export const ArcadeIntro = ({
   lordsContract,
   ethContract,
   updateConnectors,
-  showLoader,
 }: ArcadeIntroProps) => {
   const { account, address, connector } = useAccount();
   const { connect, connectors } = useConnect();
@@ -52,6 +50,7 @@ export const ArcadeIntro = ({
     isDeploying,
     isSettingPermissions,
     listConnectors,
+    showLoader,
   } = useBurner({
     walletAccount: account,
     gameContract,
