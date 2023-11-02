@@ -31,7 +31,6 @@ export default function BeastScreen({
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
-  const setStartDelay = useUIStore((state) => state.setStartDelay);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const [showBattleLog, setShowBattleLog] = useState(false);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
@@ -64,9 +63,6 @@ export default function BeastScreen({
       action: async () => {
         resetNotification();
         await attack(false, beastData);
-        if (adventurer?.level === 1) {
-          setStartDelay(null);
-        }
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -83,9 +79,6 @@ export default function BeastScreen({
       action: async () => {
         resetNotification();
         await attack(true, beastData);
-        if (adventurer?.level === 1) {
-          setStartDelay(null);
-        }
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -171,7 +164,9 @@ export default function BeastScreen({
   );
 
   const revealBlockReached =
-    (blockData?.block_number ?? 0) >= (adventurer?.revealBlock ?? 0);
+    (blockData?.block_number ?? 0) >= (adventurer?.revealBlock ?? 0) + 10;
+
+  console.log(revealBlockReached, blockData, blockData?.block_number);
 
   if (showBattleLog) {
     return <BattleLog />;
@@ -231,13 +226,19 @@ export default function BeastScreen({
                 </div>
               </>
             ) : (
-              <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-5 items-center">
                 <div className="flex flex-row gap-5">
-                  <div className="border border-terminal-green">
-                    <p className="animate-pulse">{blockData?.block_number}</p>
+                  <div className="flex flex-row items-center gap-2">
+                    Start:
+                    <div className="border border-terminal-green p-2">
+                      <p className="animate-pulse">{blockData?.block_number}</p>
+                    </div>
                   </div>
-                  <div className="border border-terminal-green">
-                    {adventurer?.revealBlock}
+                  <div className="flex flex-row items-center gap-2">
+                    Reveal:
+                    <div className="border border-terminal-green p-2">
+                      {adventurer?.revealBlock}
+                    </div>
                   </div>
                 </div>
                 <p className="text-2xl loading-ellipsis">Waiting for Reveal</p>

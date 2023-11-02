@@ -40,14 +40,14 @@ export interface PenaltyCountDownProps {
   lastDiscoveryTime?: Date;
   lastBattleTime?: Date;
   dataLoading: boolean;
-  startDelay: number | null;
+  startCountdown: boolean;
 }
 
 export const PenaltyCountDown = ({
   lastDiscoveryTime,
   lastBattleTime,
   dataLoading,
-  startDelay,
+  startCountdown,
 }: PenaltyCountDownProps) => {
   const [seconds, setSeconds] = useState(0);
 
@@ -63,7 +63,7 @@ export const PenaltyCountDown = ({
       ? formatDiscoveryTime
       : formatBattleTime;
 
-  const formatLastAction = startDelay ? lastAction + startDelay : lastAction;
+  const formatLastAction = lastAction;
   const targetTime = formatLastAction + penaltyTime * 1000;
 
   useEffect(() => {
@@ -85,17 +85,21 @@ export const PenaltyCountDown = ({
 
   return (
     <div className="text-xxs sm:text-lg self-center border px-1 border border-terminal-green">
-      {!dataLoading ? (
-        seconds > 0 ? (
-          <span className="flex flex-row gap-1 items-center">
-            <p className="hidden sm:block">{countingMessage}</p>
-            <p className="animate-pulse">{formatTime(seconds)}</p>
-          </span>
+      {startCountdown ? (
+        !dataLoading ? (
+          seconds > 0 ? (
+            <span className="flex flex-row gap-1 items-center">
+              <p className="hidden sm:block">{countingMessage}</p>
+              <p className="animate-pulse">{formatTime(seconds)}</p>
+            </span>
+          ) : (
+            <p>{finishedMessage}</p>
+          )
         ) : (
-          <p>{finishedMessage}</p>
+          <p className="loading-ellipsis">Loading</p>
         )
       ) : (
-        <p className="loading-ellipsis">Loading</p>
+        <p>Not Started</p>
       )}
     </div>
   );
@@ -116,6 +120,7 @@ export const EntropyCountDown = ({
       const updateCountdown = () => {
         const currentTime = new Date().getTime();
         const timeRemaining = targetTime - currentTime;
+        console.group(timeRemaining);
         setSeconds(Math.floor(timeRemaining / 1000));
 
         if (timeRemaining <= 0) {

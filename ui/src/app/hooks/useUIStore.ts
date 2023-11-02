@@ -82,8 +82,6 @@ type State = {
   setSpecialBeastDefeated: (value: boolean) => void;
   specialBeast: SpecialBeast | null;
   setSpecialBeast: (value: SpecialBeast | null) => void;
-  startDelay: number | null;
-  setStartDelay: (value: number | null) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -147,8 +145,6 @@ const useUIStore = create<State>((set) => ({
   setSpecialBeastDefeated: (value) => set({ specialBeastDefeated: value }),
   specialBeast: null,
   setSpecialBeast: (value) => set({ specialBeast: value }),
-  startDelay: null,
-  setStartDelay: (value) => set({ startDelay: value }),
 }));
 
 export default useUIStore;

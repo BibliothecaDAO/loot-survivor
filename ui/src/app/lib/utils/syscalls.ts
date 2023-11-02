@@ -59,7 +59,11 @@ export interface SyscallsProps {
     data: any,
     adventurer: number | undefined
   ) => void;
-  stopLoading: (notificationData: any, error?: boolean | undefined) => void;
+  stopLoading: (
+    notificationData: any,
+    error?: boolean | undefined,
+    type?: string
+  ) => void;
   setTxHash: (hash: string) => void;
   setEquipItems: (value: string[]) => void;
   setDropItems: (value: string[]) => void;
@@ -388,7 +392,7 @@ export function syscalls({
             },
           ],
         });
-        stopLoading(`You have spawned ${formData.name}!`);
+        stopLoading(`You have spawned ${formData.name}!`, false, "Create");
         setAdventurer(adventurerState);
         setScreen("play");
       } catch (e) {
@@ -674,7 +678,7 @@ export function syscalls({
 
         setEquipItems([]);
         setDropItems([]);
-        stopLoading(reversedDiscoveries);
+        stopLoading(reversedDiscoveries, false, "Explore");
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -957,7 +961,7 @@ export function syscalls({
           battles: reversedBattles,
         });
 
-        stopLoading(reversedBattles);
+        stopLoading(reversedBattles, false, "Attack");
         setEquipItems([]);
         setDropItems([]);
       } catch (e) {
@@ -1165,7 +1169,7 @@ export function syscalls({
         setData("battlesByTxHashQuery", {
           battles: reversedBattles,
         });
-        stopLoading(reversedBattles);
+        stopLoading(reversedBattles, false, "Flee");
         setEquipItems([]);
         setDropItems([]);
       } catch (e) {
@@ -1326,11 +1330,15 @@ export function syscalls({
           setStartOption("create adventurer");
           stopLoading("Death Penalty");
         } else {
-          stopLoading({
-            Stats: upgrades,
-            Items: purchaseItems,
-            Potions: potionAmount,
-          });
+          stopLoading(
+            {
+              Stats: upgrades,
+              Items: purchaseItems,
+              Potions: potionAmount,
+            },
+            false,
+            "Upgrade"
+          );
           setScreen("play");
         }
       } catch (e) {
@@ -1712,7 +1720,7 @@ export function syscalls({
           setScreen("play");
         }
 
-        stopLoading(notification);
+        stopLoading(notification, false, "Multicall");
       } catch (e) {
         console.log(e);
         stopLoading(e, true);

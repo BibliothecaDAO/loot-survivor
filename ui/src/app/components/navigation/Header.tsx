@@ -62,7 +62,6 @@ export default function Header({
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const setScreen = useUIStore((state) => state.setScreen);
-  const startDelay = useUIStore((state) => state.startDelay);
 
   const calls = useTransactionCartStore((state) => state.calls);
   const txInCart = calls.length > 0;
@@ -101,7 +100,7 @@ export default function Header({
             }
             lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
             dataLoading={isLoading.global}
-            startDelay={startDelay}
+            startCountdown={(adventurer?.level ?? 0) > 1}
           />
         )}
         <Button
