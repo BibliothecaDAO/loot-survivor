@@ -83,6 +83,7 @@ export interface SyscallsProps {
   setSpecialBeastDefeated: (value: boolean) => void;
   setSpecialBeast: (value: SpecialBeast) => void;
   connector?: Connector;
+  getEthBalance: () => Promise<void>;
 }
 
 function handleEquip(
@@ -186,6 +187,7 @@ export function syscalls({
   setSpecialBeastDefeated,
   setSpecialBeast,
   connector,
+  getEthBalance,
 }: SyscallsProps) {
   const gameData = new GameData();
 
@@ -395,6 +397,7 @@ export function syscalls({
         stopLoading(`You have spawned ${formData.name}!`, false, "Create");
         setAdventurer(adventurerState);
         setScreen("play");
+        getEthBalance();
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -679,6 +682,7 @@ export function syscalls({
         setEquipItems([]);
         setDropItems([]);
         stopLoading(reversedDiscoveries, false, "Explore");
+        getEthBalance();
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -964,6 +968,7 @@ export function syscalls({
         stopLoading(reversedBattles, false, "Attack");
         setEquipItems([]);
         setDropItems([]);
+        getEthBalance();
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -1172,6 +1177,7 @@ export function syscalls({
         stopLoading(reversedBattles, false, "Flee");
         setEquipItems([]);
         setDropItems([]);
+        getEthBalance();
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -1341,6 +1347,7 @@ export function syscalls({
           );
           setScreen("play");
         }
+        getEthBalance();
       } catch (e) {
         console.log(e);
         stopLoading(e, true);
@@ -1433,6 +1440,7 @@ export function syscalls({
         });
 
         stopLoading(`You have slain all idle adventurers!`);
+        getEthBalance();
       } catch (e) {
         console.log(e);
         stopLoading(`You have slain all idle adventurers!`);
@@ -1721,6 +1729,7 @@ export function syscalls({
         }
 
         stopLoading(notification, false, "Multicall");
+        getEthBalance();
       } catch (e) {
         console.log(e);
         stopLoading(e, true);

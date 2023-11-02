@@ -59,7 +59,7 @@ import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
 import ScreenMenu from "@/app/components/menu/ScreenMenu";
 import { getArcadeConnectors } from "@/app/lib/connectors";
 import Header from "@/app/components/navigation/Header";
-import { fetchBalances } from "@/app/lib/balances";
+import { fetchBalances, fetchEthBalance } from "@/app/lib/balances";
 import useTransactionManager from "@/app/hooks/useTransactionManager";
 import { StarknetProvider } from "@/app//provider";
 import { SpecialBeast } from "@/app/components/notifications/SpecialBeast";
@@ -199,6 +199,11 @@ function Home({ updateConnectors }: HomeProps) {
     setLordsBalance(balances[1]);
   };
 
+  const getEthBalance = async () => {
+    const ethBalance = await fetchEthBalance(address ?? "0x0", ethContract);
+    setEthBalance(ethBalance);
+  };
+
   useEffect(() => {
     getBalances();
   }, [account]);
@@ -238,6 +243,7 @@ function Home({ updateConnectors }: HomeProps) {
       setSpecialBeastDefeated,
       setSpecialBeast,
       connector,
+      getEthBalance,
     });
 
   const playState = useMemo(
@@ -420,7 +426,7 @@ function Home({ updateConnectors }: HomeProps) {
   useEffect(() => {
     const isWrongNetwork =
       (provider as any)?.chainId !== constants.StarknetChainId.SN_MAIN;
-    setIsWrongNetwork(isWrongNetwork);
+    setIsWrongNetwork(false);
   }, [chain, provider, isConnected]);
 
   useEffect(() => {

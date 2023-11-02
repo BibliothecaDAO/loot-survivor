@@ -1,6 +1,19 @@
 import { CallData, uint256, Contract } from "starknet";
 import { balanceSchema } from "@/app/lib/utils";
 
+export const fetchEthBalance = async (
+  accountName: string,
+  ethContract?: Contract
+) => {
+  const ethResult = await ethContract?.call(
+    "balanceOf",
+    CallData.compile({ account: accountName })
+  );
+  return ethResult
+    ? uint256.uint256ToBN(balanceSchema.parse(ethResult).balance)
+    : BigInt(0);
+};
+
 export const fetchBalances = async (
   accountName: string,
   ethContract?: Contract,
