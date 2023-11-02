@@ -231,7 +231,17 @@ export default function BeastScreen({
                 </div>
               </>
             ) : (
-              <p className="text-2xl loading-ellipsis">Waiting for Reveal</p>
+              <div className="flex flex-col gap-5">
+                <div className="flex flex-row gap-5">
+                  <div className="border border-terminal-green">
+                    <p className="animate-pulse">{blockData?.block_number}</p>
+                  </div>
+                  <div className="border border-terminal-green">
+                    {adventurer?.revealBlock}
+                  </div>
+                </div>
+                <p className="text-2xl loading-ellipsis">Waiting for Reveal</p>
+              </div>
             )}
           </>
         )}
