@@ -216,7 +216,6 @@ export const useBurner = ({
 
         setIsPrefunding(false);
         setIsDeploying(true);
-        console.log("here");
 
         // deploy burner
         const burner = new Account(provider, address, privateKey, "1");

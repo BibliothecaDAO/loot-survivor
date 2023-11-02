@@ -171,7 +171,7 @@ export default function BeastScreen({
   );
 
   const revealBlockReached =
-    blockData && blockData.block_number >= (adventurer?.revealBlock ?? 0);
+    (blockData?.block_number ?? 0) >= (adventurer?.revealBlock ?? 0);
 
   if (showBattleLog) {
     return <BattleLog />;

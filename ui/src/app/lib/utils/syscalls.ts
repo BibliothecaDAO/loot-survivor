@@ -450,7 +450,6 @@ export function syscalls({
           receipt as InvokeTransactionReceiptResponse,
           queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
         );
-        console.log(events);
 
         // If there are any equip or drops, do them first
         const { equippedItems, unequippedItems } = handleEquip(
@@ -672,8 +671,6 @@ export function syscalls({
         setData("discoveryByTxHashQuery", {
           discoveries: [...discoveries.reverse()],
         });
-
-        console.log(reversedDiscoveries);
 
         setEquipItems([]);
         setDropItems([]);

@@ -14,7 +14,6 @@ const arcadeNav: NavItem[] = [
 ];
 
 export const ArcadeNav = ({ activeSection }: ArcadeNavProps) => {
-  console.log(activeSection);
   return (
     <div className="flex flex-row w-full text-shadow-none">
       {arcadeNav.map((item: NavItem, index: number) => (

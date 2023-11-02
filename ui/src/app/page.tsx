@@ -359,8 +359,6 @@ function Home({ updateConnectors }: HomeProps) {
       beast: newLastBeastData.discoveries[0]?.entity,
       seed: newLastBeastData.discoveries[0]?.seed,
     });
-    console.log(adventurerId);
-    console.log(newLastBeastData);
     const newBattlesByBeastData = await refetch("battlesByBeastQuery", {
       adventurerId: adventurerId,
       beast: newLastBeastData.discoveries[0]?.entity,
