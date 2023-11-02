@@ -120,7 +120,6 @@ export const EntropyCountDown = ({
       const updateCountdown = () => {
         const currentTime = new Date().getTime();
         const timeRemaining = targetTime - currentTime;
-        console.group(timeRemaining);
         setSeconds(Math.floor(timeRemaining / 1000));
 
         if (timeRemaining <= 0) {

@@ -1,28 +1,29 @@
 import { useState, useEffect } from "react";
-import { useBlock } from "@starknet-react/core";
 import { EntropyCountDown } from "@/app/components/CountDown";
 import Hints from "@/app/components/interlude/Hints";
 import { fetchAverageBlockTime } from "@/app/lib/utils";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
-export default function InterludeScreen() {
+interface InterludeScreenProps {
+  currentBlockNumber: number;
+}
+
+export default function InterludeScreen({
+  currentBlockNumber,
+}: InterludeScreenProps) {
   const { adventurer } = useAdventurerStore();
   const [fetchedAverageBlockTime, setFetchedAverageBlockTime] = useState(false);
   const [averageBlockTime, setAverageBlockTime] = useState(0);
   const [nextEntropyTime, setNextEntropyTime] = useState<number | null>(null);
   const [countDownExpired, setCountDownExpired] = useState(false);
 
-  const { data: blockData } = useBlock({
-    refetchInterval: false,
-  });
-
   const fetchData = async () => {
-    const result = await fetchAverageBlockTime(blockData?.block_number!, 20);
+    const result = await fetchAverageBlockTime(currentBlockNumber, 20);
     setAverageBlockTime(result!);
     setFetchedAverageBlockTime(true);
   };
 
-  const getNextEntropyTime = async () => {
+  const getNextEntropyTime = () => {
     const nextBlockHashBlock = adventurer?.revealBlock!;
     const adventurerStartBlock = adventurer?.startBlock!;
     const blockDifference = nextBlockHashBlock - adventurerStartBlock;
@@ -36,10 +37,10 @@ export default function InterludeScreen() {
   useEffect(() => {
     if (fetchedAverageBlockTime) {
       getNextEntropyTime();
-    } else {
+    } else if (currentBlockNumber > 0) {
       fetchData();
     }
-  }, [fetchedAverageBlockTime]);
+  }, [fetchedAverageBlockTime, currentBlockNumber]);
 
   return (
     <>

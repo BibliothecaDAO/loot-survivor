@@ -163,10 +163,10 @@ export default function BeastScreen({
     </div>
   );
 
-  const revealBlockReached =
-    (blockData?.block_number ?? 0) >= (adventurer?.revealBlock ?? 0) + 10;
+  const currentBlockNumber = blockData?.block_number ?? 0;
 
-  console.log(revealBlockReached, blockData, blockData?.block_number);
+  const revealBlockReached =
+    currentBlockNumber >= (adventurer?.revealBlock ?? 0);
 
   if (showBattleLog) {
     return <BattleLog />;
@@ -174,7 +174,9 @@ export default function BeastScreen({
 
   return (
     <div className="sm:w-2/3 flex flex-col sm:flex-row h-full">
-      {!revealBlockReached && <InterludeScreen />}
+      {!revealBlockReached && (
+        <InterludeScreen currentBlockNumber={currentBlockNumber} />
+      )}
       <div className="sm:w-1/2 order-1 sm:order-2 h-3/4 sm:h-full">
         {hasBeast ? (
           <BeastDisplay beastData={beastData} beastsContract={beastsContract} />
@@ -229,9 +231,9 @@ export default function BeastScreen({
               <div className="flex flex-col gap-5 items-center">
                 <div className="flex flex-row gap-5">
                   <div className="flex flex-row items-center gap-2">
-                    Start:
+                    Current:
                     <div className="border border-terminal-green p-2">
-                      <p className="animate-pulse">{blockData?.block_number}</p>
+                      <p className="animate-pulse">{currentBlockNumber}</p>
                     </div>
                   </div>
                   <div className="flex flex-row items-center gap-2">
