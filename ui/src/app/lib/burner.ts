@@ -40,6 +40,7 @@ export const useBurner = ({
   ethContract,
 }: UseBurnerProps) => {
   const [account, setAccount] = useState<Account>();
+  const [showLoader, setShowLoader] = useState(false);
   const [isPrefunding, setIsPrefunding] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
   const [isGeneratingNewKey, setIsGeneratingNewKey] = useState(false);
@@ -182,6 +183,7 @@ export const useBurner = ({
 
   const create = useCallback(
     async (connector: Connector, lordsAmount: number) => {
+      setShowLoader(true);
       setIsPrefunding(true);
       const privateKey = stark.randomAddress();
       const publicKey = ec.starkCurve.getStarkKey(privateKey);
@@ -272,6 +274,7 @@ export const useBurner = ({
         Storage.set("burners", storage);
         setIsSettingPermissions(false);
         setIsDeploying(false);
+        setShowLoader(false);
         return burner;
       } catch (e) {
         console.log(e);
@@ -476,6 +479,7 @@ export const useBurner = ({
   const genNewKey = useCallback(
     async (burnerAddress: string, connector: Connector) => {
       try {
+        setShowLoader(true);
         setIsGeneratingNewKey(true);
         const privateKey = stark.randomAddress();
         const publicKey = ec.starkCurve.getStarkKey(privateKey);
@@ -509,6 +513,7 @@ export const useBurner = ({
 
         Storage.set("burners", storage);
         setIsGeneratingNewKey(false);
+        setShowLoader(false);
       } catch (e) {
         setIsGeneratingNewKey(false);
         console.log(e);
@@ -523,6 +528,7 @@ export const useBurner = ({
       address: string,
       walletAccount: AccountInterface
     ) => {
+      setShowLoader(true);
       setIsDeploying(true);
 
       // get keys
@@ -578,6 +584,7 @@ export const useBurner = ({
         };
         Storage.set("burners", storage);
         setIsDeploying(false);
+        setShowLoader(false);
       } catch (e) {
         setIsDeploying(false);
         console.log(e);
@@ -620,6 +627,7 @@ export const useBurner = ({
     isToppingUpEth,
     isToppingUpLords,
     isWithdrawing,
+    showLoader,
     listConnectors,
     deployAccountFromHash,
   };

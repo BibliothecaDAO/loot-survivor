@@ -8,6 +8,7 @@ interface ArcadeLoaderProps {
   isSettingPermissions?: boolean;
   isGeneratingNewKey?: boolean;
   fullDeployment?: boolean;
+  showLoader?: boolean;
 }
 
 export default function ArcadeLoader({
@@ -16,6 +17,7 @@ export default function ArcadeLoader({
   isSettingPermissions,
   isGeneratingNewKey,
   fullDeployment,
+  showLoader,
 }: ArcadeLoaderProps) {
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
 
@@ -41,10 +43,7 @@ export default function ArcadeLoader({
 
   return (
     <>
-      {(isPrefunding ||
-        isDeploying ||
-        isSettingPermissions ||
-        isGeneratingNewKey) && (
+      {showLoader && (
         <div className="fixed flex flex-col items-center sm:flex-row inset-0 bg-black z-50 sm:m-2 w-full h-full">
           <div className="flex items-center justify-center w-full sm:w-1/2 h-3/4 sm:h-full">
             <PixelatedImage

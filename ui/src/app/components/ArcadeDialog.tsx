@@ -63,6 +63,7 @@ export const ArcadeDialog = ({
     isWithdrawing,
     listConnectors,
     deployAccountFromHash,
+    showLoader,
   } = useBurner({ walletAccount, gameContract, lordsContract, ethContract });
   const [arcadebalances, setArcadeBalances] = useState<
     Record<string, { eth: bigint; lords: bigint; lordsGameAllowance: bigint }>
@@ -235,6 +236,7 @@ export const ArcadeDialog = ({
         isSettingPermissions={isSettingPermissions}
         isGeneratingNewKey={isGeneratingNewKey}
         fullDeployment={fullDeployment}
+        showLoader={showLoader}
       />
       {(isToppingUpEth || isToppingUpLords || isWithdrawing) && (
         <TokenLoader
