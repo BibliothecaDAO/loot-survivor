@@ -5,6 +5,7 @@ import {
   useContract,
   Connector,
   useNetwork,
+  useProvider,
 } from "@starknet-react/core";
 import { constants } from "starknet";
 import { useState, useEffect, useMemo } from "react";
@@ -111,6 +112,7 @@ interface HomeProps {
 
 function Home({ updateConnectors }: HomeProps) {
   const { connector, connectors } = useConnect();
+  const { provider } = useProvider();
   const { chain } = useNetwork();
   const disconnected = useUIStore((state) => state.disconnected);
   const setDisconnected = useUIStore((state) => state.setDisconnected);
@@ -417,9 +419,9 @@ function Home({ updateConnectors }: HomeProps) {
 
   useEffect(() => {
     const isWrongNetwork =
-      chain?.id !== BigInt(constants.StarknetChainId.SN_MAIN);
+      (provider as any)?.chainId !== constants.StarknetChainId.SN_MAIN;
     setIsWrongNetwork(isWrongNetwork);
-  }, [chain, isConnected]);
+  }, [chain, provider, isConnected]);
 
   useEffect(() => {
     if (arcadeConnectors.length === 0 && !closedArcadeIntro) {
