@@ -687,11 +687,6 @@ class AdventurersFilter:
 @strawberry.input
 class ScoresFilter:
     adventurerId: Optional[FeltValueFilter] = None
-    owner: Optional[HexValueFilter] = None
-    rank: Optional[FeltValueFilter] = None
-    xp: Optional[FeltValueFilter] = None
-    txHash: Optional[HexValueFilter] = None
-    scoreTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
     totalPayout: Optional[U256ValueFilter] = None
 
@@ -818,11 +813,6 @@ class AdventurersOrderByInput:
 @strawberry.input
 class ScoresOrderByInput:
     adventurerId: Optional[OrderByInput] = None
-    owner: Optional[OrderByInput] = None
-    rank: Optional[OrderByInput] = None
-    xp: Optional[OrderByInput] = None
-    txHash: Optional[OrderByInput] = None
-    scoreTime: Optional[OrderByInput] = None
     timestamp: Optional[OrderByInput] = None
     totalPayout: Optional[OrderByInput] = None
 
@@ -984,11 +974,6 @@ class Adventurer:
 @strawberry.type
 class Score:
     adventurerId: Optional[FeltValue]
-    owner: Optional[HexValue]
-    rank: Optional[FeltValue]
-    xp: Optional[FeltValue]
-    txHash: Optional[HexValue]
-    scoreTime: Optional[str]
     timestamp: Optional[str]
     totalPayout: Optional[U256Value]
 
@@ -996,11 +981,6 @@ class Score:
     def from_mongo(cls, data):
         return cls(
             adventurerId=data["adventurerId"],
-            owner=data["owner"],
-            rank=data["rank"],
-            xp=data["xp"],
-            txHash=data["txHash"],
-            scoreTime=data["scoreTime"],
             timestamp=data["timestamp"],
             totalPayout=data["totalPayout"],
         )

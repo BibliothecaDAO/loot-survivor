@@ -514,19 +514,9 @@ export function updateItemSpecials({
   };
 }
 
-export function insertHighScore({
-  adventurerId,
-  owner,
-  rank,
-  xp,
-  txHash,
-  scoreTime,
-  timestamp,
-  totalPayout,
-}: any) {
+export function insertHighScore({ adventurerId, timestamp, totalPayout }: any) {
   const entity = {
     adventurerId: checkExistsInt(BigInt(adventurerId)),
-    owner: checkExistsInt(BigInt(owner)),
   };
 
   return {
@@ -534,10 +524,6 @@ export function insertHighScore({
     update: {
       $set: {
         ...entity,
-        rank: checkExistsInt(BigInt(rank)),
-        xp: encodeIntAsBytes(BigInt(xp)),
-        txHash: checkExistsInt(BigInt(txHash)),
-        scoreTime,
         timestamp,
         totalPayout: totalPayout,
       },
@@ -545,15 +531,9 @@ export function insertHighScore({
   };
 }
 
-export function updateTotalPayout({
-  adventurerId,
-  owner,
-  timestamp,
-  newPayout,
-}: any) {
+export function updateTotalPayout({ adventurerId, timestamp, newPayout }: any) {
   const entity = {
     adventurerId: checkExistsInt(BigInt(adventurerId)),
-    owner: checkExistsInt(BigInt(owner)),
   };
 
   return {
