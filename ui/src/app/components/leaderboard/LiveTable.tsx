@@ -10,6 +10,8 @@ export interface LiveLeaderboardTableProps {
   handleFetchProfileData: (adventurerId: number) => void;
   adventurers: Adventurer[];
   gameContract: Contract;
+  gameEntropyUpdateTime: number;
+  currentBlock: number;
 }
 
 const LiveLeaderboardTable = ({
@@ -17,6 +19,8 @@ const LiveLeaderboardTable = ({
   handleFetchProfileData,
   adventurers,
   gameContract,
+  gameEntropyUpdateTime,
+  currentBlock,
 }: LiveLeaderboardTableProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const setScreen = useUIStore((state) => state.setScreen);
@@ -55,7 +59,7 @@ const LiveLeaderboardTable = ({
               <th className="p-1">XP</th>
               <th className="p-1">Gold</th>
               <th className="p-1">Health</th>
-              <th className="p-1">Idle</th>
+              {/* <th className="p-1">Idle</th> */}
             </tr>
           </thead>
           <tbody>
@@ -66,6 +70,8 @@ const LiveLeaderboardTable = ({
                   adventurer={adventurer}
                   handleRowSelected={handleRowSelected}
                   gameContract={gameContract}
+                  gameEntropyUpdateTime={gameEntropyUpdateTime}
+                  currentBlock={currentBlock}
                 />
               )
             )}

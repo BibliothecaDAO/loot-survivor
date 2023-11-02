@@ -475,3 +475,10 @@ export type GameToken = {
   owner: string;
   token_id: number;
 };
+
+export type GameEntropy = {
+  hash: bigint;
+  last_updated_block: bigint;
+  last_updated_time: bigint;
+  next_update_block: bigint;
+};

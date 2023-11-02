@@ -1,39 +1,39 @@
 import { Contract } from "starknet";
-import { useBlock } from "@starknet-react/core";
+// import { useBlock } from "@starknet-react/core";
 import { Adventurer } from "@/app/types";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
-import { CoinIcon, SkullIcon } from "@/app/components/icons/Icons";
-import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
-import { Button } from "@/app/components/buttons/Button";
-import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
+import { CoinIcon } from "@/app/components/icons/Icons";
+// import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+// import { Button } from "@/app/components/buttons/Button";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import useUIStore from "@/app/hooks/useUIStore";
+// import useUIStore from "@/app/hooks/useUIStore";
 import { calculateLevel } from "@/app/lib/utils";
 
 interface LiveLeaderboardRowProps {
   adventurer: Adventurer;
   handleRowSelected: (id: number) => void;
   gameContract: Contract;
+  gameEntropyUpdateTime: number;
+  currentBlock: number;
 }
 
 const LiveLeaderboardRow = ({
   adventurer,
   handleRowSelected,
   gameContract,
+  gameEntropyUpdateTime,
+  currentBlock,
 }: LiveLeaderboardRowProps) => {
   const { play: clickPlay } = useUiSounds(soundSelector.click);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const removeEntrypointFromCalls = useTransactionCartStore(
-    (state) => state.removeEntrypointFromCalls
-  );
-  const { data: blockData } = useBlock({
-    refetchInterval: false,
-  });
+  // const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  // const removeEntrypointFromCalls = useTransactionCartStore(
+  //   (state) => state.removeEntrypointFromCalls
+  // );
   const adventurersByOwner = useQueriesStore(
     (state) => state.data.adventurersByOwnerQuery?.adventurers ?? []
   );
-  const slayAdventurers = useUIStore((state) => state.slayAdventurers);
-  const setSlayAdventurers = useUIStore((state) => state.setSlayAdventurers);
+  // const slayAdventurers = useUIStore((state) => state.slayAdventurers);
+  // const setSlayAdventurers = useUIStore((state) => state.setSlayAdventurers);
 
   const ownedAdventurer = adventurersByOwner.some(
     (a) => a.id === adventurer.id
@@ -43,34 +43,41 @@ const LiveLeaderboardRow = ({
     (a, b) => (b.xp ?? 0) - (a.xp ?? 0)
   );
   const topScoreAdventurer = topScores[0]?.id === adventurer.id;
-  const handleSlayAdventurer = async () => {
-    removeEntrypointFromCalls("slay_idle_adventurers");
-    setSlayAdventurers([...slayAdventurers, adventurer?.id?.toString() ?? "0"]);
-    const formattedSlayedAdventurers = [
-      ...slayAdventurers,
-      adventurer?.id?.toString() ?? "0",
-    ];
-    const slayIdleAdventurerTx = {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "slay_idle_adventurers",
-      calldata: [
-        formattedSlayedAdventurers.length.toString(),
-        ...formattedSlayedAdventurers,
-      ],
-      metadata: `Slaying ${adventurer.name}`,
-    };
-    if (gameContract) {
-      addToCalls(slayIdleAdventurerTx);
-    }
-  };
+  // const handleSlayAdventurer = async () => {
+  //   removeEntrypointFromCalls("slay_idle_adventurers");
+  //   setSlayAdventurers([...slayAdventurers, adventurer?.id?.toString() ?? "0"]);
+  //   const formattedSlayedAdventurers = [
+  //     ...slayAdventurers,
+  //     adventurer?.id?.toString() ?? "0",
+  //   ];
+  //   const slayIdleAdventurerTx = {
+  //     contractAddress: gameContract?.address ?? "",
+  //     entrypoint: "slay_idle_adventurers",
+  //     calldata: [
+  //       formattedSlayedAdventurers.length.toString(),
+  //       ...formattedSlayedAdventurers,
+  //     ],
+  //     metadata: `Slaying ${adventurer.name}`,
+  //   };
+  //   if (gameContract) {
+  //     addToCalls(slayIdleAdventurerTx);
+  //   }
+  // };
 
-  const formatLastActionBlock = (adventurer?.lastAction ?? 0) % 512;
-  const formatCurrentBlock = (blockData?.block_number ?? 0) % 512;
+  // const formatLastActionBlock = adventurer?.lastAction ?? 0;
+  // const formatCurrentBlock = currentBlock % 512;
+  // const isBeyondWaitPeriod =
+  //   currentBlock < adventurer?.revealBlock! + gameEntropyUpdateTime - 1;
+  // const lastActionOrWaitPeriod = isBeyondWaitPeriod
+  //   ? formatLastActionBlock
+  //   : (adventurer?.revealBlock! + gameEntropyUpdateTime - 1) % 512;
 
-  const idleTime =
-    formatCurrentBlock >= formatLastActionBlock
-      ? formatCurrentBlock - formatLastActionBlock
-      : 512 - formatLastActionBlock + formatCurrentBlock;
+  // const idleTime =
+  //   formatCurrentBlock >= lastActionOrWaitPeriod
+  //     ? formatCurrentBlock - lastActionOrWaitPeriod
+  //     : 512 - lastActionOrWaitPeriod + formatCurrentBlock;
+
+  // const isIdle = idleTime >= gameEntropyUpdateTime - 1;
 
   return (
     <tr
@@ -100,7 +107,7 @@ const LiveLeaderboardRow = ({
       <td>
         <span className="flex justify-center">{adventurer.health}</span>
       </td>
-      <td>
+      {/* <td>
         {" "}
         <Button
           onClick={(e) => {
@@ -111,14 +118,14 @@ const LiveLeaderboardRow = ({
           className="xl:h-2 2xl:h-full"
           disabled={
             slayAdventurers.includes(adventurer?.id?.toString() ?? "0") ||
-            idleTime < idleDeathPenaltyBlocks ||
             adventurer?.health === 0 ||
-            !adventurer?.id
+            !adventurer?.id ||
+            !isIdle
           }
         >
           <SkullIcon className="w-3" />
         </Button>
-      </td>
+      </td> */}
     </tr>
   );
 };
