@@ -145,11 +145,6 @@ const BEASTS_FRAGMENT = `
 
 const SCORE_FIELDS = `
   adventurerId
-  owner
-  rank
-  xp
-  txHash
-  scoreTime
   timestamp
   totalPayout
 `;
@@ -465,7 +460,7 @@ const getItemsByOwner = gql`
 const getTopScores = gql`
   ${SCORES_FRAGMENT}
   query get_top_scores {
-    scores(orderBy: { xp: { desc: true } }, limit: 10000000) {
+    scores(limit: 10000000) {
       ...ScoreFields
     }
   }
@@ -474,11 +469,7 @@ const getTopScores = gql`
 const getScoresInList = gql`
   ${SCORES_FRAGMENT}
   query get_top_scores($ids: [FeltValue!]) {
-    scores(
-      where: { adventurerId: { In: $ids } }
-      orderBy: { xp: { desc: true } }
-      limit: 10000000
-    ) {
+    scores(where: { adventurerId: { In: $ids } }, limit: 10000000) {
       ...ScoreFields
     }
   }
