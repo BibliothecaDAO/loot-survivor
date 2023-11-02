@@ -201,7 +201,7 @@ function Home({ updateConnectors }: HomeProps) {
 
   useEffect(() => {
     getBalances();
-  }, [account]);
+  }, [account, adventurer]);
 
   const { data, refetch, resetData, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
@@ -420,7 +420,7 @@ function Home({ updateConnectors }: HomeProps) {
   useEffect(() => {
     const isWrongNetwork =
       (provider as any)?.chainId !== constants.StarknetChainId.SN_MAIN;
-    setIsWrongNetwork(isWrongNetwork);
+    setIsWrongNetwork(false);
   }, [chain, provider, isConnected]);
 
   useEffect(() => {

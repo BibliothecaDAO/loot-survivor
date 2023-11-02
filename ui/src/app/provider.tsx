@@ -5,7 +5,7 @@ import {
   StarknetConfig,
   infuraProvider,
 } from "@starknet-react/core";
-import { mainnet } from "@starknet-react/chains";
+import { goerli } from "@starknet-react/chains";
 
 export function StarknetProvider({
   connectors,
@@ -21,7 +21,7 @@ export function StarknetProvider({
       connectors={connectors}
       autoConnect
       providers={providers}
-      chains={[mainnet]}
+      chains={[goerli]}
     >
       {children}
     </StarknetConfig>

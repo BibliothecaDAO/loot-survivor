@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { Contract } from "starknet";
 import { useAccount, useDisconnect, Connector } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
@@ -23,7 +23,7 @@ import TransactionCart from "@/app/components/navigation/TransactionCart";
 import TransactionHistory from "@/app/components/navigation/TransactionHistory";
 import { NullAdventurer } from "@/app/types";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
-import { getApibaraStatus } from "@/app/api/api";
+import { getApibaraStatus, getBlock } from "@/app/api/api";
 import ApibaraStatus from "./ApibaraStatus";
 
 export interface HeaderProps {
@@ -45,9 +45,9 @@ export default function Header({
   const { account, address } = useAccount();
   const { disconnect } = useDisconnect();
   const [apibaraStatus, setApibaraStatus] = useState();
+  const [currentBlockTimestamp, setCurrentBlockTimestamp] = useState();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
-  const data = useQueriesStore((state) => state.data);
   const resetData = useQueriesStore((state) => state.resetData);
   const isLoading = useQueriesStore((state) => state.isLoading);
 
@@ -82,6 +82,15 @@ export default function Header({
     setApibaraStatus(data.status.indicator);
   };
 
+  const handleGetBlockTimestamp = async () => {
+    const lastActionBlock = await getBlock(adventurer?.lastAction ?? 0);
+    setCurrentBlockTimestamp((lastActionBlock as any).timestamp);
+  };
+
+  useEffect(() => {
+    handleGetBlockTimestamp();
+  }, [adventurer?.lastAction]);
+
   useEffect(() => {
     handleApibaraStatus();
   }, []);
@@ -95,10 +104,7 @@ export default function Header({
         <ApibaraStatus status={apibaraStatus} />
         {adventurer?.id && (
           <PenaltyCountDown
-            lastDiscoveryTime={
-              data.latestDiscoveriesQuery?.discoveries[0]?.timestamp
-            }
-            lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
+            lastAction={10}
             dataLoading={isLoading.global}
             startCountdown={(adventurer?.level ?? 0) > 1}
           />

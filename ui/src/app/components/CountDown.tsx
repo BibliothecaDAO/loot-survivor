@@ -37,15 +37,13 @@ export const HealthCountDown = ({ health }: any) => {
 };
 
 export interface PenaltyCountDownProps {
-  lastDiscoveryTime?: Date;
-  lastBattleTime?: Date;
+  lastAction: number;
   dataLoading: boolean;
   startCountdown: boolean;
 }
 
 export const PenaltyCountDown = ({
-  lastDiscoveryTime,
-  lastBattleTime,
+  lastAction,
   dataLoading,
   startCountdown,
 }: PenaltyCountDownProps) => {
@@ -53,15 +51,6 @@ export const PenaltyCountDown = ({
 
   const finishedMessage = "Penalty Reached!";
   const countingMessage = "Penalty:";
-
-  const formatDiscoveryTime = new Date(lastDiscoveryTime ?? 0).getTime();
-  const formatBattleTime = new Date(lastBattleTime ?? 0).getTime();
-
-  // Need to adjust this time from UTC to timezone
-  const lastAction =
-    formatDiscoveryTime > formatBattleTime
-      ? formatDiscoveryTime
-      : formatBattleTime;
 
   const formatLastAction = lastAction;
   const targetTime = formatLastAction + penaltyTime * 1000;
