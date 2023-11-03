@@ -31,10 +31,11 @@ import { processNotifications } from "@/app/components/notifications/Notificatio
 import Storage from "@/app/lib/storage";
 import { BurnerStorage } from "@/app/types";
 import { Connector } from "@starknet-react/core";
-import { providerInterfaceCamel } from "../connectors";
+import { providerInterfaceCamel } from "@/app/lib/connectors";
 import { QueryData, QueryKey } from "@/app/hooks/useQueryStore";
 import { AdventurerClass } from "@/app/lib/classes";
 import { ScreenPage } from "@/app/hooks/useUIStore";
+import { TRANSACTION_WAIT_RETRY_INTERVAL } from "../constants";
 
 export interface SyscallsProps {
   gameContract: Contract;
@@ -320,7 +321,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 2000,
+            retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
           }
         );
         // Handle if the tx was reverted
@@ -441,7 +442,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 2000,
+            retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
           }
         );
         // Handle if the tx was reverted
@@ -727,7 +728,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 2000,
+            retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
           }
         );
         // Handle if the tx was reverted
@@ -1007,7 +1008,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 2000,
+            retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
           }
         );
         // Handle if the tx was reverted
@@ -1190,7 +1191,8 @@ export function syscalls({
   const upgrade = async (
     upgrades: UpgradeStats,
     purchaseItems: ItemPurchase[],
-    potionAmount: number
+    potionAmount: number,
+    upgradeTx?: any
   ) => {
     const balanceEmpty = checkArcadeBalance(
       ethBalance,
@@ -1207,7 +1209,19 @@ export function syscalls({
         adventurer?.id
       );
       try {
-        const tx = await handleSubmitCalls(account, calls);
+        let upgradeCalls = [];
+        if (upgradeTx && Object.keys(upgradeTx).length === 0) {
+          upgradeCalls = calls.map((call) => {
+            if (call.entrypoint === "upgrade") {
+              return upgradeTx;
+            }
+            return call; // keep the original object if no replacement is needed
+          });
+        } else {
+          upgradeCalls = calls;
+        }
+        console.log(upgradeCalls);
+        const tx = await handleSubmitCalls(account, upgradeCalls);
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
@@ -1218,7 +1232,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 2000,
+            retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
           }
         );
         // Handle if the tx was reverted
@@ -1390,7 +1404,7 @@ export function syscalls({
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 100,
+            retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
           }
         );
         // Handle if the tx was reverted
@@ -1452,7 +1466,8 @@ export function syscalls({
 
   const multicall = async (
     loadingMessage: string[],
-    notification: string[]
+    notification: string[],
+    upgradeTx?: any
   ) => {
     const balanceEmpty = checkArcadeBalance(
       ethBalance,
@@ -1482,11 +1497,22 @@ export function syscalls({
       }
       startLoading("Multicall", loadingMessage, undefined, adventurer?.id);
       try {
-        const tx = await handleSubmitCalls(account, calls);
+        let upgradeCalls = [];
+        if (upgradeTx && Object.keys(upgradeTx).length === 0) {
+          upgradeCalls = calls.map((call) => {
+            if (call.entrypoint === "upgrade") {
+              return upgradeTx;
+            }
+            return call; // keep the original object if no replacement is needed
+          });
+        } else {
+          upgradeCalls = calls;
+        }
+        const tx = await handleSubmitCalls(account, upgradeCalls);
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
-            retryInterval: 2000,
+            retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
           }
         );
         // Handle if the tx was reverted

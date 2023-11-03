@@ -53,9 +53,12 @@ export default function ArcadeLoader({
             />
           </div>
           <div className="flex flex-col gap-10 h-full sm:w-1/2">
-            <h3 className="text-lg sm:text-3xl loading-ellipsis flex items-start sm:items-center justify-center sm:justify-start w-full h-1/2">
+            <p className="text-lg sm:text-3xl flex items-start sm:items-center justify-center sm:justify-start w-full h-1/4 uppercase">
+              Don&apos;t refresh!
+            </p>
+            <p className="text-lg sm:text-3xl loading-ellipsis flex items-start sm:items-center justify-center sm:justify-start w-full h-1/4">
               {loadingMessage}
-            </h3>
+            </p>
             {fullDeployment && (
               <ArcadeNav
                 activeSection={isPrefunding ? 1 : isDeploying ? 2 : 3}

@@ -43,7 +43,8 @@ interface UpgradeScreenProps {
   upgrade: (
     upgrades: UpgradeStats,
     purchaseItems: ItemPurchase[],
-    potionAmount: number
+    potionAmount: number,
+    upgradeTx?: any
   ) => Promise<void>;
   gameContract: Contract;
 }
@@ -247,7 +248,7 @@ export default function UpgradeScreen({
       entrypoint: "upgrade",
       calldata: [
         adventurer?.id?.toString() ?? "",
-        potions ? potions.toString() : potionAmount.toString(),
+        potions !== undefined ? potions.toString() : potionAmount.toString(),
         currentUpgrades
           ? currentUpgrades["Strength"].toString()
           : upgrades["Strength"].toString(),
@@ -274,6 +275,7 @@ export default function UpgradeScreen({
       ],
     };
     addToCalls(upgradeTx);
+    return upgradeTx;
   };
 
   const handleSubmitUpgradeTx = async () => {
@@ -285,24 +287,32 @@ export default function UpgradeScreen({
       adventurer!,
       adventurerItems
     );
+    let upgradeTx: any;
     if (potionAmount > 0) {
       // Check whether health + pots is within vitBoostRemoved of the maxHealth
-      const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
-      const healthPlusPots = 100 + potionAmount * 10;
-      const checkInRange = maxHealth - healthPlusPots < vitBoostRemoved * 10;
-      if (checkInRange) {
-        handleAddUpgradeTx(
+      const maxHealth = 100 + totalVitality * 10;
+      const newMaxHealth = 100 + (totalVitality - vitBoostRemoved) * 10;
+      const currentHealth = adventurer?.health! + selectedVitality * 10;
+      const healthPlusPots = Math.min(
+        currentHealth! + potionAmount * 10,
+        maxHealth
+      );
+      const healthOverflow = healthPlusPots > newMaxHealth;
+      if (healthOverflow) {
+        const newUpgradeTx = handleAddUpgradeTx(
           undefined,
           Math.max(potionAmount - vitBoostRemoved, 0),
           undefined
         );
+        upgradeTx = newUpgradeTx;
       }
     }
     try {
       await upgrade(
         upgrades,
         purchaseItems,
-        Math.max(potionAmount - vitBoostRemoved, 0)
+        Math.max(potionAmount - vitBoostRemoved, 0),
+        upgradeTx
       );
       setPotionAmount(0);
       setPurchaseItems([]);
