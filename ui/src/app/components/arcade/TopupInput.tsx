@@ -9,15 +9,10 @@ interface TopupInputProps {
   topup: any;
   account: string;
   master: AccountInterface;
-  lordsGameAllowance: number;
   getBalances: () => Promise<void>;
-  balances: {
-    [key: string]: bigint;
-    eth: bigint;
-    lords: bigint;
-    lordsGameAllowance: bigint;
-  };
   className?: string;
+  lordsBalance: number;
+  ethBalance: number;
 }
 
 const TopupInput = ({
@@ -27,10 +22,10 @@ const TopupInput = ({
   topup,
   account,
   master,
-  lordsGameAllowance,
   getBalances,
-  balances,
   className,
+  lordsBalance,
+  ethBalance,
 }: TopupInputProps) => {
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState(0);
@@ -76,7 +71,8 @@ const TopupInput = ({
     setShowInput(false);
   };
 
-  const inputTopupInvalid = inputValue > Number(balances[balanceType]);
+  const inputTopupInvalid =
+    inputValue > (balanceType === "eth" ? ethBalance : lordsBalance);
 
   return (
     <>

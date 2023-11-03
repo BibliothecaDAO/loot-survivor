@@ -28,6 +28,8 @@ interface ArcadeDialogProps {
   lordsContract: Contract;
   ethContract: Contract;
   updateConnectors: () => void;
+  lordsBalance: number;
+  ethBalance: number;
 }
 
 export const ArcadeDialog = ({
@@ -35,6 +37,8 @@ export const ArcadeDialog = ({
   lordsContract,
   ethContract,
   updateConnectors,
+  lordsBalance,
+  ethBalance,
 }: ArcadeDialogProps) => {
   const [fetchedBalances, setFetchedBalances] = useState(false);
   const [recoverArcade, setRecoverArcade] = useState(false);
@@ -217,6 +221,8 @@ export const ArcadeDialog = ({
                     topUpLords={topUpLords}
                     withdraw={withdraw}
                     isWithdrawing={isWithdrawing}
+                    lordsBalance={lordsBalance}
+                    ethBalance={ethBalance}
                   />
                 );
               })}
@@ -282,6 +288,8 @@ interface ArcadeAccountCardProps {
     lordsBalance: bigint
   ) => Promise<any>;
   isWithdrawing: boolean;
+  lordsBalance: number;
+  ethBalance: number;
 }
 
 export const ArcadeAccountCard = ({
@@ -300,6 +308,8 @@ export const ArcadeAccountCard = ({
   topUpLords,
   withdraw,
   isWithdrawing,
+  lordsBalance,
+  ethBalance,
 }: ArcadeAccountCardProps) => {
   const { connect, connectors } = useConnect();
   const [isCopied, setIsCopied] = useState(false);
@@ -366,11 +376,11 @@ export const ArcadeAccountCard = ({
                     topup={topUpEth}
                     account={account.name}
                     master={walletAccount}
-                    lordsGameAllowance={0}
                     getBalances={async () =>
                       await getAccountBalances(account.name)
                     }
-                    balances={balances}
+                    lordsBalance={lordsBalance}
+                    ethBalance={ethBalance}
                   />
                 </div>
                 <Button
@@ -392,11 +402,11 @@ export const ArcadeAccountCard = ({
                     topup={topUpLords}
                     account={account.name}
                     master={walletAccount}
-                    lordsGameAllowance={Number(balances?.lordsGameAllowance)}
                     getBalances={async () =>
                       await getAccountBalances(account.name)
                     }
-                    balances={balances}
+                    lordsBalance={lordsBalance}
+                    ethBalance={ethBalance}
                   />
                 </div>
                 <Button
@@ -418,11 +428,9 @@ export const ArcadeAccountCard = ({
             topup={selectedTopup === "eth" ? topUpEth : topUpLords}
             account={account.name}
             master={walletAccount}
-            lordsGameAllowance={
-              selectedTopup === "eth" ? 0 : Number(balances?.lordsGameAllowance)
-            }
             getBalances={async () => await getAccountBalances(account.name)}
-            balances={balances}
+            lordsBalance={lordsBalance}
+            ethBalance={ethBalance}
           />
         )}
       </div>
