@@ -1210,7 +1210,7 @@ export function syscalls({
       );
       try {
         let upgradeCalls = [];
-        if (upgradeTx && Object.keys(upgradeTx).length === 0) {
+        if (upgradeTx && Object.keys(upgradeTx).length !== 0) {
           upgradeCalls = calls.map((call) => {
             if (call.entrypoint === "upgrade") {
               return upgradeTx;
@@ -1220,7 +1220,6 @@ export function syscalls({
         } else {
           upgradeCalls = calls;
         }
-        console.log(upgradeCalls);
         const tx = await handleSubmitCalls(account, upgradeCalls);
         setTxHash(tx?.transaction_hash);
         addTransaction({
@@ -1498,7 +1497,7 @@ export function syscalls({
       startLoading("Multicall", loadingMessage, undefined, adventurer?.id);
       try {
         let upgradeCalls = [];
-        if (upgradeTx && Object.keys(upgradeTx).length === 0) {
+        if (upgradeTx && Object.keys(upgradeTx).length !== 0) {
           upgradeCalls = calls.map((call) => {
             if (call.entrypoint === "upgrade") {
               return upgradeTx;
