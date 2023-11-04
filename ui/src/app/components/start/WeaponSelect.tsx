@@ -58,7 +58,7 @@ export const WeaponSelect = ({
 
   return (
     <div className="w-full p-4 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:h-1/2">
-      <h3 className="uppercase text-center 2xl:text-5xl h-1/6 m-0">
+      <h3 className="uppercase text-center 2xl:text-5xl h-1/6 m-0 sm:mb-3">
         Choose your weapon
       </h3>
       <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:justify-between gap-2 md:gap-5 h-5/6">
@@ -76,7 +76,8 @@ export const WeaponSelect = ({
                 src={weapon.image}
                 fill={true}
                 alt={weapon.name}
-                className="object-cotains"
+                className="object-contains"
+                sizes="100%"
               />
             </div>
             <div className="flex items-center pb-2 sm:pb-2 md:pb-4 text-base sm:text-md">
@@ -84,14 +85,14 @@ export const WeaponSelect = ({
               <p className="ml-2">{weapon.description}</p>
             </div>
             <Button
-              className="sm:hidden w-full"
+              className="sm:hidden w-full mt-auto"
               disabled={formData.startingWeapon == weapon.name}
               onClick={() => handleWeaponSelectionMobile(weapon.name)}
             >
               {weapon.name}
             </Button>
             <Button
-              className={`hidden sm:block w-full`}
+              className={`hidden sm:block w-full  mt-auto`}
               disabled={formData.startingWeapon == weapon.name}
               onClick={() => handleWeaponSelectionDesktop(weapon.name)}
             >
