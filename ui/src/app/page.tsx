@@ -141,6 +141,7 @@ function Home({ updateConnectors }: HomeProps) {
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
   const setEstimatingFee = useUIStore((state) => state.setEstimatingFee);
   const setSpecialBeast = useUIStore((state) => state.setSpecialBeast);
+  const hash = useLoadingStore((state) => state.hash);
   const specialBeastDefeated = useUIStore(
     (state) => state.specialBeastDefeated
   );
@@ -464,7 +465,7 @@ function Home({ updateConnectors }: HomeProps) {
           <div className="flex flex-col w-full">
             <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
             {specialBeastDefeated && <SpecialBeast />}
-            {!spawnLoader && (
+            {!spawnLoader && hash && (
               <div className="sm:hidden">
                 <TxActivity />
               </div>
@@ -477,7 +478,7 @@ function Home({ updateConnectors }: HomeProps) {
             />
           </div>
           <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
-            {!spawnLoader && (
+            {!spawnLoader && hash && (
               <div className="hidden sm:block">
                 <TxActivity />
               </div>
