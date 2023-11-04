@@ -42,7 +42,9 @@ const MarketplaceRow = ({
   const [selectedButton, setSelectedButton] = useState<number>(0);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const { hashes, transactions } = useTransactionManager();
-  const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
+  const { data: txData } = useWaitForTransaction({
+    hash: hashes ? hashes[0] : "0x0",
+  });
 
   const transactingMarketIds = (transactions[0]?.metadata as Metadata)?.items;
 

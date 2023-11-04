@@ -39,7 +39,9 @@ export default function InventoryScreen({
     (state) => state.setInventorySelected
   );
   const { hashes, transactions } = useTransactionManager();
-  const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
+  const { data: txData } = useWaitForTransaction({
+    hash: hashes ? hashes[0] : "0x0",
+  });
   const transactingItemIds = (transactions[0]?.metadata as Metadata)?.items;
   const equipItems = useUIStore((state) => state.equipItems);
   const setEquipItems = useUIStore((state) => state.setEquipItems);

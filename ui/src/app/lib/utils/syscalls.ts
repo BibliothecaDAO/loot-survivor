@@ -311,13 +311,14 @@ export function syscalls({
       );
       try {
         const tx = await handleSubmitCalls(account, spawnCalls);
-        setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
           metadata: {
             method: `Spawn ${formData.name}`,
           },
         });
+
+        console.log(tx);
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {

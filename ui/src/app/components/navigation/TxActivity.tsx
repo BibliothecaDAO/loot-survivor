@@ -14,8 +14,10 @@ export const TxActivity = () => {
   const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
   const error = useTransactionCartStore((state) => state.error);
   const setError = useTransactionCartStore((state) => state.setError);
+
+  console.log(hash);
   const { data } = useWaitForTransaction({
-    hash,
+    hash: hash ? hash : "0x0",
   }) as { data: InvokeTransactionReceiptResponse };
 
   if (data?.status === "ACCEPTED_ON_L2") {

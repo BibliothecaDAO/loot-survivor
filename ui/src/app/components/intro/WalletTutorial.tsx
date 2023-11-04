@@ -10,7 +10,7 @@ export const WalletTutorial = () => {
     <div className="flex flex-col h-[550px] sm:h-full items-center text-center p-10 overflow-y-auto">
       <h2 className="mt-0">Welcome to Loot Survivor!</h2>
 
-      <p className="text-sm sm:text-lg">
+      {/* <p className="text-sm sm:text-lg">
         To get started and immerse yourself in this on-chain gaming adventure,
         you will need to create a Starknet wallet first. Don&apos;t worry, it is
         a simple process!
@@ -18,7 +18,7 @@ export const WalletTutorial = () => {
         allowing you to interact with the game fully on the blockchain.
         It&apos;s like your digital pocket for storing the in-game assets,
         rewards, and more!
-      </p>
+      </p> */}
       <h3>Choose a Wallet Provider</h3>
       <p className="text-sm sm:text-lg">
         The following wallets are available for use with the Loot Survivor.
@@ -37,28 +37,6 @@ export const WalletTutorial = () => {
           Get ArgentX
         </Button>
       </div>
-      <p className="text-sm sm:text-lg">
-        After you have created your wallet you will need testnet ETH to play.
-        Request testnet ETH from the faucet. Your address can be found in your
-        wallet.
-      </p>
-      <Button
-        onClick={() => openInNewTab("https://faucet.goerli.starknet.io/")}
-        className="m-2"
-      >
-        Get testnet ETH
-      </Button>
-
-      <h3>Switch to the Goerli Network</h3>
-      <p className="text-sm sm:text-lg">
-        In your wallet switch the network to Goerli. Goerli is a testnet that is
-        currently under development. It is a version of the mainnet that is used
-        for testing purposes.
-      </p>
-      <p className="text-sm sm:text-lg">
-        Now, you are ready to spawn your adventurer! Connect your wallet to
-        start!
-      </p>
     </div>
   );
 };

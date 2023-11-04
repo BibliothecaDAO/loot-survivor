@@ -3,7 +3,7 @@ import React from "react";
 import {
   Connector,
   StarknetConfig,
-  infuraProvider,
+  alchemyProvider,
 } from "@starknet-react/core";
 import { mainnet } from "@starknet-react/chains";
 
@@ -15,7 +15,7 @@ export function StarknetProvider({
   children: React.ReactNode;
 }) {
   const apiKey = process.env.NEXT_PUBLIC_RPC_API_KEY!;
-  const providers = [infuraProvider({ apiKey })];
+  const providers = [alchemyProvider({ apiKey })];
   return (
     <StarknetConfig
       connectors={connectors}

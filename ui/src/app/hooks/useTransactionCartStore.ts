@@ -43,12 +43,17 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
     calls: Call[]
   ) => {
     try {
+      console.log("handleSubmitCalls", account, calls);
       const tx = await account.execute(calls, undefined, {
         maxFee: MAX_FEE,
       });
       set({ calls: [], error: false });
+
+      console.log("handleSubmitCalls", tx);
+
       return tx;
     } catch (error) {
+      console.log(error);
       setError(true);
       resetCalls();
     }
