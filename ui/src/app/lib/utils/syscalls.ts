@@ -274,7 +274,7 @@ export function syscalls({
       contractAddress: gameContract?.address ?? "",
       entrypoint: "new_game",
       calldata: [
-        "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
+        process.env.NEXT_PUBLIC_DAO_ADDRESS ?? "",
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         stringToFelt(formData.name).toString(),
         goldenTokenId,
