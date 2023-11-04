@@ -22,6 +22,7 @@ interface ArcadeIntroProps {
   lordsContract: Contract;
   ethContract: Contract;
   updateConnectors: () => void;
+  mintLords: () => Promise<void>;
 }
 
 export const ArcadeIntro = ({
@@ -31,6 +32,7 @@ export const ArcadeIntro = ({
   lordsContract,
   ethContract,
   updateConnectors,
+  mintLords,
 }: ArcadeIntroProps) => {
   const { account, address, connector } = useAccount();
   const { connect, connectors } = useConnect();
@@ -78,6 +80,8 @@ export const ArcadeIntro = ({
   }, [account, checkNotEnoughPrefundLords, readDisclaimer]);
 
   const maxGames = Math.min(Math.floor(lords / 25), 100);
+
+  const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
 
   return (
     <>
@@ -150,15 +154,18 @@ export const ArcadeIntro = ({
         )}
         {step == 3 && (
           <div className="flex flex-col gap-10 items-center">
-            <h3 className="mt-4 uppercase">Buy Lords</h3>
+            <h3 className="mt-4 uppercase">
+              {onMainnet ? "Buy Lords" : "Mint Lords"}
+            </h3>
             <div className="flex flex-col gap-2">
               <p className="m-2 text-sm xl:text-xl 2xl:text-2xl">
                 In order to play Loot Survivor you must insert at least 25
                 Lords.
               </p>
               <p className="text-sm xl:text-xl 2xl:text-2xl">
-                If you do not have any LORDS please select the button below to
-                buy from a DEX.
+                {onMainnet
+                  ? "If you do not have any LORDS please select the button below to buy from a DEX."
+                  : "Mint 250 (10 games worth) with the button below"}
               </p>
               <p className="text-sm xl:text-xl 2xl:text-2xl">
                 Please ensure that your Account is deployed!
@@ -167,13 +174,17 @@ export const ArcadeIntro = ({
             <div className="flex flex-col gap-10 items-center justify-center w-full">
               <Lords className="w-24 h-24 sm:w-40 sm:h-40 fill-current" />
               <Button
-                onClick={() => {
-                  const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
-                    process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
-                  )}&tokenTo=${indexAddress(
-                    process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
-                  )}&amount=0.001`;
-                  window.open(avnuLords, "_blank");
+                onClick={async () => {
+                  if (onMainnet) {
+                    const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
+                      process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+                    )}&tokenTo=${indexAddress(
+                      process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+                    )}&amount=0.001`;
+                    window.open(avnuLords, "_blank");
+                  } else {
+                    await mintLords();
+                  }
                 }}
                 disabled={
                   isWrongNetwork || !checkNotEnoughPrefundLords || !account
@@ -181,7 +192,11 @@ export const ArcadeIntro = ({
                 className="flex flex-row w-1/4"
               >
                 {lordsBalance || lords == 0 ? (
-                  "Buy Lords"
+                  onMainnet ? (
+                    "Buy Lords"
+                  ) : (
+                    "Mint Lords"
+                  )
                 ) : (
                   <p className="loading-ellipsis">Getting Balance</p>
                 )}
@@ -213,7 +228,12 @@ export const ArcadeIntro = ({
               {checkNotEnoughPrefundEth ? (
                 <Button
                   onClick={() =>
-                    window.open("https://starkgate.starknet.io//", "_blank")
+                    onMainnet
+                      ? window.open("https://starkgate.starknet.io//", "_blank")
+                      : window.open(
+                          "https://faucet.goerli.starknet.io/",
+                          "_blank"
+                        )
                   }
                   className="w-1/4"
                   disabled={!ethBalance}

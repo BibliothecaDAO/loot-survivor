@@ -35,7 +35,7 @@ import { providerInterfaceCamel } from "@/app/lib/connectors";
 import { QueryData, QueryKey } from "@/app/hooks/useQueryStore";
 import { AdventurerClass } from "@/app/lib/classes";
 import { ScreenPage } from "@/app/hooks/useUIStore";
-import { TRANSACTION_WAIT_RETRY_INTERVAL } from "../constants";
+import { TRANSACTION_WAIT_RETRY_INTERVAL } from "@/app/lib/constants";
 
 export interface SyscallsProps {
   gameContract: Contract;
@@ -85,6 +85,8 @@ export interface SyscallsProps {
   setSpecialBeast: (value: SpecialBeast) => void;
   connector?: Connector;
   getEthBalance: () => Promise<void>;
+  getBalances: () => Promise<void>;
+  setIsMintingLords: (value: boolean) => void;
 }
 
 function handleEquip(
@@ -189,6 +191,8 @@ export function syscalls({
   setSpecialBeast,
   connector,
   getEthBalance,
+  getBalances,
+  setIsMintingLords,
 }: SyscallsProps) {
   const gameData = new GameData();
 
@@ -318,14 +322,12 @@ export function syscalls({
           },
         });
 
-        console.log(tx);
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
             retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
           }
         );
-        console.log(receipt);
         // Handle if the tx was reverted
         if (
           (receipt as RevertedTransactionReceiptResponse).execution_status ===
@@ -447,6 +449,7 @@ export function syscalls({
             retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
           }
         );
+        console.log(receipt);
         // Handle if the tx was reverted
         if (
           (receipt as RevertedTransactionReceiptResponse).execution_status ===
@@ -1766,5 +1769,50 @@ export function syscalls({
     }
   };
 
-  return { spawn, explore, attack, flee, upgrade, slayAllIdles, multicall };
+  const mintLords = async () => {
+    const mintLords: Call = {
+      contractAddress: lordsContract?.address ?? "",
+      entrypoint: "mint",
+      calldata: [account?.address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+    };
+
+    const balanceEmpty = checkArcadeBalance(
+      ethBalance,
+      showTopUpDialog,
+      setTopUpAccount,
+      account
+    );
+    if (!balanceEmpty) {
+      try {
+        setIsMintingLords(true);
+        const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
+        const result = await account?.waitForTransaction(tx?.transaction_hash, {
+          retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
+        });
+
+        if (!result) {
+          throw new Error("Lords Mint did not complete successfully.");
+        }
+
+        setIsMintingLords(false);
+        getBalances();
+      } catch (e) {
+        setIsMintingLords(false);
+        console.log(e);
+      }
+    } else {
+      resetCalls();
+    }
+  };
+
+  return {
+    spawn,
+    explore,
+    attack,
+    flee,
+    upgrade,
+    slayAllIdles,
+    multicall,
+    mintLords,
+  };
 }

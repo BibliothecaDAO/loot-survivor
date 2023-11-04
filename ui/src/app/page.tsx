@@ -4,7 +4,6 @@ import {
   useConnect,
   useContract,
   Connector,
-  useNetwork,
   useProvider,
 } from "@starknet-react/core";
 import { constants } from "starknet";
@@ -113,7 +112,6 @@ interface HomeProps {
 function Home({ updateConnectors }: HomeProps) {
   const { connector, connectors } = useConnect();
   const { provider } = useProvider();
-  const { chain } = useNetwork();
   const disconnected = useUIStore((state) => state.disconnected);
   const setDisconnected = useUIStore((state) => state.setDisconnected);
   const { account, address, status, isConnected } = useAccount();
@@ -141,6 +139,7 @@ function Home({ updateConnectors }: HomeProps) {
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
   const setEstimatingFee = useUIStore((state) => state.setEstimatingFee);
   const setSpecialBeast = useUIStore((state) => state.setSpecialBeast);
+  const setIsMintingLords = useUIStore((state) => state.setIsMintingLords);
   const hash = useLoadingStore((state) => state.hash);
   const specialBeastDefeated = useUIStore(
     (state) => state.specialBeastDefeated
@@ -212,40 +211,50 @@ function Home({ updateConnectors }: HomeProps) {
   const { data, refetch, resetData, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
 
-  const { spawn, explore, attack, flee, upgrade, slayAllIdles, multicall } =
-    syscalls({
-      gameContract: gameContract!,
-      lordsContract: lordsContract!,
-      beastsContract: beastsContract!,
-      addTransaction,
-      queryData: data,
-      resetData,
-      setData,
-      adventurer: adventurer!,
-      addToCalls,
-      calls,
-      handleSubmitCalls,
-      startLoading,
-      stopLoading,
-      setTxHash,
-      setEquipItems,
-      setDropItems,
-      setDeathMessage,
-      showDeathDialog,
-      setScreen,
-      setAdventurer,
-      setStartOption,
-      ethBalance: ethBalance,
-      showTopUpDialog,
-      setTopUpAccount,
-      setEstimatingFee,
-      account: account!,
-      resetCalls,
-      setSpecialBeastDefeated,
-      setSpecialBeast,
-      connector,
-      getEthBalance,
-    });
+  const {
+    spawn,
+    explore,
+    attack,
+    flee,
+    upgrade,
+    slayAllIdles,
+    multicall,
+    mintLords,
+  } = syscalls({
+    gameContract: gameContract!,
+    lordsContract: lordsContract!,
+    beastsContract: beastsContract!,
+    addTransaction,
+    queryData: data,
+    resetData,
+    setData,
+    adventurer: adventurer!,
+    addToCalls,
+    calls,
+    handleSubmitCalls,
+    startLoading,
+    stopLoading,
+    setTxHash,
+    setEquipItems,
+    setDropItems,
+    setDeathMessage,
+    showDeathDialog,
+    setScreen,
+    setAdventurer,
+    setStartOption,
+    ethBalance: ethBalance,
+    showTopUpDialog,
+    setTopUpAccount,
+    setEstimatingFee,
+    account: account!,
+    resetCalls,
+    setSpecialBeastDefeated,
+    setSpecialBeast,
+    connector,
+    getEthBalance,
+    getBalances,
+    setIsMintingLords,
+  });
 
   const playState = useMemo(
     () => ({
@@ -426,9 +435,12 @@ function Home({ updateConnectors }: HomeProps) {
 
   useEffect(() => {
     const isWrongNetwork =
-      (provider as any)?.chainId !== constants.StarknetChainId.SN_MAIN;
+      (provider as any)?.chainId !==
+      (process.env.NEXT_PUBLIC_NETWORK === "mainnet"
+        ? constants.StarknetChainId.SN_MAIN
+        : constants.StarknetChainId.SN_GOERLI);
     setIsWrongNetwork(isWrongNetwork);
-  }, [chain, provider, isConnected]);
+  }, [(provider as any)?.chainId, isConnected]);
 
   useEffect(() => {
     if (arcadeConnectors.length === 0 && !closedArcadeIntro) {
@@ -472,6 +484,7 @@ function Home({ updateConnectors }: HomeProps) {
             )}
             <Header
               multicall={multicall}
+              mintLords={mintLords}
               lordsBalance={lordsBalance}
               arcadeConnectors={arcadeConnectors}
               gameContract={gameContract!}
@@ -495,6 +508,7 @@ function Home({ updateConnectors }: HomeProps) {
               lordsContract={lordsContract!}
               ethContract={ethContract!}
               updateConnectors={updateConnectors}
+              mintLords={mintLords}
             />
           )}
           {status == "connected" && arcadeDialog && (
