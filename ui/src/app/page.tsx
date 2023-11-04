@@ -328,7 +328,7 @@ function Home({ updateConnectors }: HomeProps) {
   const goldenTokenVariables = useMemo(() => {
     const storage: BurnerStorage = Storage.get("burners");
     if (typeof connector?.id === "string" && connector.id.includes("0x")) {
-      const masterAccount = storage[account?.address!].masterAccount;
+      const masterAccount = storage[address!].masterAccount;
       return {
         contractAddress:
           process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS?.toLowerCase(),

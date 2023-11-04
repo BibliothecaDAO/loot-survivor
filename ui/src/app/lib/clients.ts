@@ -2,7 +2,25 @@ import { ApolloClient, InMemoryCache } from "@apollo/client";
 
 export const goldenTokenClient = new ApolloClient({
   uri: process.env.NEXT_PUBLIC_TOKENS_GQL_URL,
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          getERC721Tokens: {
+            merge(existing = [], incoming) {
+              const incomingTokenIds = new Set(
+                incoming.map((i: any) => i.token_id)
+              );
+              const filteredExisting = existing.filter(
+                (e: any) => !incomingTokenIds.has(e.token_id)
+              );
+              return [...filteredExisting, ...incoming];
+            },
+          },
+        },
+      },
+    },
+  }),
 });
 
 export const gameClient = new ApolloClient({
