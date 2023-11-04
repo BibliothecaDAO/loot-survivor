@@ -15,8 +15,8 @@ import { Connector } from "@starknet-react/core";
 import Storage from "@/app/lib/storage";
 import { ArcadeConnector } from "@/app/lib/arcade";
 import { BurnerStorage } from "@/app/types";
-import { padAddress } from "@/app/lib/utils";
-import { MAX_FEE } from "@/app/lib/constants";
+import { padAddress, wait } from "@/app/lib/utils";
+import { MAX_FEE, TRANSACTION_WAIT_RETRY_INTERVAL } from "@/app/lib/constants";
 
 export const ETH_PREFUND_AMOUNT = "0x2386F26FC10000"; // 0.01ETH
 export const LORDS_PREFUND_AMOUNT = "0x15AF1D78B58C40000"; // 25LORDS
@@ -168,7 +168,7 @@ export const useBurner = ({
       );
 
       const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 2000,
+        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
       if (!result) {
@@ -227,10 +227,12 @@ export const useBurner = ({
         // deploy burner
         const burner = new Account(provider, address, privateKey, "1");
 
+        const burnerInterface: AccountInterface = burner;
+
         const {
           transaction_hash: deployTx,
           contract_address: accountAAFinalAddress,
-        } = await burner.deployAccount(
+        } = await burnerInterface.deployAccount(
           {
             classHash: arcadeClassHash!,
             constructorCalldata: constructorAACalldata,
@@ -242,7 +244,12 @@ export const useBurner = ({
           }
         );
 
-        await provider.waitForTransaction(deployTx);
+        await Promise.race([
+          burnerInterface.waitForTransaction(deployTx, {
+            retryInterval: 10000, // This is a long tx
+          }),
+          wait(30000),
+        ]);
 
         setIsDeploying(false);
         setIsSettingPermissions(true);
@@ -252,7 +259,9 @@ export const useBurner = ({
           walletAccount
         );
 
-        await provider.waitForTransaction(setPermissionsTx);
+        await walletAccount.waitForTransaction(setPermissionsTx, {
+          retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
+        });
 
         // save burner
         let storage = Storage.get("burners") || {};
@@ -274,7 +283,6 @@ export const useBurner = ({
         setAccount(burner);
         Storage.set("burners", storage);
         setIsSettingPermissions(false);
-        setIsDeploying(false);
         setShowLoader(false);
         return burner;
       } catch (e) {
@@ -346,7 +354,7 @@ export const useBurner = ({
       });
 
       const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 2000,
+        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
       if (!result) {
@@ -380,7 +388,7 @@ export const useBurner = ({
       const { transaction_hash } = await account.execute([lordsTransferTx]);
 
       const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 2000,
+        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
       if (!result) {
@@ -462,8 +470,15 @@ export const useBurner = ({
       const { transaction_hash } = await account.execute(calls);
 
       const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 2000,
+        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
+
+      await Promise.race([
+        account.waitForTransaction(transaction_hash, {
+          retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
+        }),
+        wait(30000),
+      ]);
 
       if (!result) {
         throw new Error("Transaction did not complete successfully.");
@@ -551,10 +566,12 @@ export const useBurner = ({
         // deploy burner
         const burner = new Account(provider, address, privateKey, "1");
 
+        const burnerInterface: AccountInterface = burner;
+
         const {
           transaction_hash: deployTx,
           contract_address: accountAAFinalAddress,
-        } = await burner.deployAccount(
+        } = await burnerInterface.deployAccount(
           {
             classHash: arcadeClassHash!,
             constructorCalldata: constructorAACalldata,
@@ -566,7 +583,9 @@ export const useBurner = ({
           }
         );
 
-        await provider.waitForTransaction(deployTx);
+        await burnerInterface.waitForTransaction(deployTx, {
+          retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
+        });
 
         // save burner
         let storage = Storage.get("burners") || {};

@@ -554,3 +554,9 @@ function findAndSumVitValues(arr: string[]): number {
 
   return total;
 }
+
+export function wait(timeout: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, timeout);
+  });
+}
