@@ -3,3 +3,4 @@ START=368800
 MONGO_CONNECTION_STRING="mongodb://mongo:mongo@mongo:27017"
 MONGO_DB="mongo"
 STREAM_URL="https://mainnet.starknet.a5a.ch"
+MONGO_DB="mongo"

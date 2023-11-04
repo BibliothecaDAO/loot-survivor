@@ -325,6 +325,7 @@ export function syscalls({
             retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
           }
         );
+        console.log(receipt);
         // Handle if the tx was reverted
         if (
           (receipt as RevertedTransactionReceiptResponse).execution_status ===

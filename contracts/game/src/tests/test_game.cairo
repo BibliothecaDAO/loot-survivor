@@ -32,8 +32,9 @@ mod tests {
             constants::{
                 COST_TO_PLAY, BLOCKS_IN_A_WEEK, Rewards, REWARD_DISTRIBUTIONS_PHASE1_BP,
                 REWARD_DISTRIBUTIONS_PHASE2_BP, REWARD_DISTRIBUTIONS_PHASE3_BP,
-                messages::{STAT_UPGRADES_AVAILABLE}, STARTER_BEAST_ATTACK_DAMAGE
-            }
+                messages::{STAT_UPGRADES_AVAILABLE}, STARTER_BEAST_ATTACK_DAMAGE,
+                MAINNET_REVEAL_DELAY_BLOCKS
+            },
         }
     };
     use openzeppelin::utils::serde::SerializedAppend;
@@ -1270,10 +1271,10 @@ mod tests {
     #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
     #[available_gas(300000000)]
     fn test_cant_slay_non_idle_adventurer_no_rollover() {
-        let starting_block_number = 513;
+        let STARTING_BLOCK_NUMBER = 513;
 
         // deploy and start new game
-        let mut game = new_adventurer(starting_block_number);
+        let mut game = new_adventurer(STARTING_BLOCK_NUMBER);
 
         // get game entropy
         let game_entropy = game.get_game_entropy();
@@ -1283,7 +1284,10 @@ mod tests {
 
         // roll forward block chain but not enough to qualify for idle death penalty
         testing::set_block_number(
-            starting_block_number + game_entropy.get_idle_penalty_blocks() - 1
+            STARTING_BLOCK_NUMBER
+                + MAINNET_REVEAL_DELAY_BLOCKS.into()
+                + game_entropy.get_idle_penalty_blocks()
+                - 1
         );
 
         // try to slay adventurer for being idle
@@ -1298,8 +1302,8 @@ mod tests {
     #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
     #[available_gas(300000000)]
     fn test_cant_slay_non_idle_adventurer_with_rollover() {
-        let starting_block_number = 510;
-        let mut game = new_adventurer(starting_block_number);
+        let STARTING_BLOCK_NUMBER = 510;
+        let mut game = new_adventurer(STARTING_BLOCK_NUMBER);
 
         let game_entropy = game.get_game_entropy();
 
@@ -1308,7 +1312,10 @@ mod tests {
 
         // roll forward block chain but not enough to qualify for idle death penalty
         testing::set_block_number(
-            starting_block_number + game_entropy.get_idle_penalty_blocks() - 1
+            STARTING_BLOCK_NUMBER
+                + MAINNET_REVEAL_DELAY_BLOCKS.into()
+                + game_entropy.get_idle_penalty_blocks()
+                - 1
         );
 
         // try to slay adventurer for being idle
@@ -1347,7 +1354,10 @@ mod tests {
 
         // roll forward blockchain to make adventurer idle
         testing::set_block_number(
-            adventurer.last_action_block.into() + game_entropy.get_idle_penalty_blocks() + 1
+            STARTING_BLOCK_NUMBER
+                + MAINNET_REVEAL_DELAY_BLOCKS.into()
+                + game_entropy.get_idle_penalty_blocks()
+                + 1
         );
 
         // get current block number
@@ -1397,7 +1407,10 @@ mod tests {
 
         // roll forward blockchain to make adventurer idle
         testing::set_block_number(
-            adventurer.last_action_block.into() + game_entropy.get_idle_penalty_blocks() + 1
+            STARTING_BLOCK_NUMBER
+                + MAINNET_REVEAL_DELAY_BLOCKS.into()
+                + game_entropy.get_idle_penalty_blocks()
+                + 1
         );
 
         // get current block number
@@ -1420,6 +1433,25 @@ mod tests {
 
         // assert adventurer is dead
         assert(adventurer.health == 0, 'adventurer should be dead');
+    }
+
+    #[test]
+    #[available_gas(142346872)]
+    #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
+    fn test_slay_idle_adventurer_before_reveal_block() {
+        let STARTING_BLOCK_NUMBER = 100;
+
+        // deploy and start new game
+        let mut game = new_adventurer(STARTING_BLOCK_NUMBER);
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // roll the blockchain back 1 block to simulate mainnet start_game scenario
+        // where the adventurers last_action will be set to 11 blocks in the future
+        // to account for the commit-and-reveal delay
+        testing::set_block_number(STARTING_BLOCK_NUMBER - 1);
+        game.slay_idle_adventurers(array![ADVENTURER_ID]);
     }
 
     #[test]
@@ -1449,7 +1481,10 @@ mod tests {
 
         // roll forward blockchain to make adventurer idle
         testing::set_block_number(
-            adventurer.last_action_block.into() + game_entropy.get_idle_penalty_blocks() + 1
+            STARTING_BLOCK_NUMBER
+                + MAINNET_REVEAL_DELAY_BLOCKS.into()
+                + game_entropy.get_idle_penalty_blocks()
+                + 1
         );
 
         // get current block number
