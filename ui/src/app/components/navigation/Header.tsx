@@ -31,6 +31,7 @@ export interface HeaderProps {
     loadingMessage: string[],
     notification: string[]
   ) => Promise<void>;
+  mintLords: () => Promise<void>;
   lordsBalance: bigint;
   arcadeConnectors: Connector[];
   gameContract: Contract;
@@ -38,6 +39,7 @@ export interface HeaderProps {
 
 export default function Header({
   multicall,
+  mintLords,
   lordsBalance,
   arcadeConnectors,
   gameContract,
@@ -108,22 +110,30 @@ export default function Header({
           variant={"outline"}
           className="hidden sm:block self-center xl:px-5"
           onClick={() =>
-            window.open("https://goerli-survivor.realms.world/", "_blank")
+            process.env.NEXT_PUBLIC_NETWORK === "mainnet"
+              ? window.open("https://survivor.realms.world/", "_blank")
+              : window.open("https://goerli-survivor.realms.world/", "_blank")
           }
         >
-          Play on Testnet
+          {process.env.NEXT_PUBLIC_NETWORK === "mainnet"
+            ? "Play on Testnet"
+            : "Play on Mainnet"}
         </Button>
         <Button
           size={"xs"}
           variant={"outline"}
           className="self-center xl:px-5 hover:bg-terminal-green"
-          onClick={() => {
-            const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
-              process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
-            )}&tokenTo=${indexAddress(
-              process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
-            )}&amount=0.001`;
-            window.open(avnuLords, "_blank");
+          onClick={async () => {
+            if (process.env.NEXT_PUBLIC_NETWORK === "mainnet") {
+              const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
+                process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+              )}&tokenTo=${indexAddress(
+                process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+              )}&amount=0.001`;
+              window.open(avnuLords, "_blank");
+            } else {
+              await mintLords();
+            }
           }}
           onMouseEnter={() => setShowLordsBuy(true)}
           onMouseLeave={() => setShowLordsBuy(false)}

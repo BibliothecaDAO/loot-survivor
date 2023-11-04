@@ -5,7 +5,7 @@ import {
   StarknetConfig,
   alchemyProvider,
 } from "@starknet-react/core";
-import { mainnet } from "@starknet-react/chains";
+import { goerli, mainnet } from "@starknet-react/chains";
 
 export function StarknetProvider({
   connectors,
@@ -16,12 +16,14 @@ export function StarknetProvider({
 }) {
   const apiKey = process.env.NEXT_PUBLIC_RPC_API_KEY!;
   const providers = [alchemyProvider({ apiKey })];
+  const chains =
+    process.env.NEXT_PUBLIC_NETWORK === "mainnet" ? [mainnet] : [goerli];
   return (
     <StarknetConfig
       connectors={connectors}
       autoConnect
       providers={providers}
-      chains={[mainnet]}
+      chains={chains}
     >
       {children}
     </StarknetConfig>
