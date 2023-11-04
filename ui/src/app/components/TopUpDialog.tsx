@@ -69,8 +69,8 @@ export const TopUpDialog = ({ ethContract, getBalances }: TopUpDialogProps) => {
             onClick={async () => {
               await topUpEth(topUpAccount, walletAccount!);
               setTopUpAccount("");
+              disconnect();
               connect({ connector: arcadeConnector! });
-              getBalances();
               showTopUpDialog(false);
             }}
           >

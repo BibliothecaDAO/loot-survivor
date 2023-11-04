@@ -111,8 +111,8 @@ export default function Header({
           className="hidden sm:block self-center xl:px-5"
           onClick={() =>
             process.env.NEXT_PUBLIC_NETWORK === "mainnet"
-              ? window.open("https://survivor.realms.world/", "_blank")
-              : window.open("https://goerli-survivor.realms.world/", "_blank")
+              ? window.open("https://goerli-survivor.realms.world/", "_blank")
+              : window.open("https://survivor.realms.world/", "_blank")
           }
         >
           {process.env.NEXT_PUBLIC_NETWORK === "mainnet"
