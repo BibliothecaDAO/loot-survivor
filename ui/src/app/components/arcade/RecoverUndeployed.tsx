@@ -1,9 +1,11 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { AccountInterface } from "starknet";
+import { AccountInterface, CallData, hash } from "starknet";
 import { Connector, useContract } from "@starknet-react/core";
 import { Button } from "@/app/components/buttons/Button";
 import { indexAddress, padAddress, isChecksumAddress } from "@/app/lib/utils";
 import ArcadeAccount from "@/app/abi/ArcadeAccount.json";
+import Storage from "@/app/lib/storage";
+import { KeyStorage } from "@/app/types";
 
 interface RecoverUndeployedProps {
   setRecoverUndeployed: (recoverUndeployed: boolean) => void;
@@ -25,6 +27,7 @@ const RecoverUndeployed = ({
   updateConnectors,
 }: RecoverUndeployedProps) => {
   const [accountExists, setAccountExists] = useState(false);
+  const [correctKeys, setCorrectKeys] = useState(false);
   const [recoveryUndeployedAddress, setRecoveryUndeployedAddress] = useState<
     string | undefined
   >();
@@ -53,9 +56,34 @@ const RecoverUndeployed = ({
     }
   };
 
+  const handleCheckKeys = async () => {
+    let storageKeys: KeyStorage = Storage.get("keys") || {};
+
+    const publicKey = storageKeys[formattedRecoveryUndeployedAddress].publicKey;
+
+    if (!walletAccount) {
+      throw new Error("wallet account not found");
+    }
+
+    const constructorAACalldata = CallData.compile({
+      _public_key: publicKey,
+      _master_account: walletAccount.address,
+    });
+
+    const address = hash.calculateContractAddressFromHash(
+      publicKey,
+      process.env.NEXT_PUBLIC_ARCADE_ACCOUNT_CLASS_HASH!,
+      constructorAACalldata,
+      0
+    );
+
+    setCorrectKeys(padAddress(address) == formattedRecoveryUndeployedAddress);
+  };
+
   useEffect(() => {
     if (isChecksumAddress(formattedRecoveryUndeployedAddress)) {
       handleGetMaster();
+      handleCheckKeys();
     }
   }, [recoveryUndeployedAddress]);
 
@@ -81,9 +109,13 @@ const RecoverUndeployed = ({
           setRecoverUndeployed(false);
         }}
         className="w-1/4"
-        disabled={accountExists}
+        disabled={accountExists || !correctKeys}
       >
-        {accountExists ? "Account Already Deployed" : "Recover Account"}
+        {accountExists
+          ? "Account Already Deployed"
+          : !correctKeys
+          ? "Keys don't match address"
+          : "Recover Account"}
       </Button>
     </div>
   );
