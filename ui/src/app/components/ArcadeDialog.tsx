@@ -57,6 +57,7 @@ export const ArcadeDialog = ({
     isDeploying,
     setPermissions,
     isSettingPermissions,
+    setIsSettingPermissions,
     genNewKey,
     isGeneratingNewKey,
     topUpEth,
@@ -68,6 +69,7 @@ export const ArcadeDialog = ({
     listConnectors,
     deployAccountFromHash,
     showLoader,
+    setShowLoader,
   } = useBurner({ walletAccount, gameContract, lordsContract, ethContract });
   const [arcadebalances, setArcadeBalances] = useState<
     Record<string, { eth: bigint; lords: bigint; lordsGameAllowance: bigint }>
@@ -224,6 +226,8 @@ export const ArcadeDialog = ({
                     arcadeConnectors={arcadeConnectors()}
                     genNewKey={genNewKey}
                     setPermissions={setPermissions}
+                    setIsSettingPermissions={setIsSettingPermissions}
+                    setShowLoader={setShowLoader}
                     balances={arcadebalances[account.name]}
                     getAccountBalances={getAccountBalances}
                     topUpEth={topUpEth}
@@ -270,6 +274,8 @@ interface ArcadeAccountCardProps {
     accountAAFinalAdress: string,
     walletAccount: AccountInterface
   ) => Promise<string>;
+  setIsSettingPermissions: (isSettingPermissions: boolean) => void;
+  setShowLoader: (showLoader: boolean) => void;
   balances: {
     [key: string]: bigint;
     eth: bigint;
@@ -305,6 +311,8 @@ export const ArcadeAccountCard = ({
   arcadeConnectors,
   genNewKey,
   setPermissions,
+  setIsSettingPermissions,
+  setShowLoader,
   balances,
   getAccountBalances,
   topUpEth,
@@ -471,9 +479,13 @@ export const ArcadeAccountCard = ({
               </Button>
               <Button
                 variant={"ghost"}
-                onClick={async () =>
-                  await setPermissions(account.name, walletAccount)
-                }
+                onClick={async () => {
+                  setShowLoader(true);
+                  setIsSettingPermissions(true);
+                  await setPermissions(account.name, walletAccount);
+                  setIsSettingPermissions(false);
+                  setShowLoader(false);
+                }}
                 className={`${currentGamePermissions ? "" : "animate-pulse"}`}
               >
                 Set Permissions

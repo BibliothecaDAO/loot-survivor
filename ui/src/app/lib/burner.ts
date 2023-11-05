@@ -282,6 +282,7 @@ export const useBurner = ({
         setIsPrefunding(false);
         setIsDeploying(false);
         setIsSettingPermissions(false);
+        setShowLoader(false);
       }
     },
     [walletAccount]
@@ -289,39 +290,45 @@ export const useBurner = ({
 
   const setPermissions = useCallback(
     async (accountAAFinalAdress: string, walletAccount: AccountInterface) => {
-      const permissions: Call[] = [
-        {
-          contractAddress: accountAAFinalAdress,
-          entrypoint: "update_whitelisted_contracts",
-          calldata: ["1", gameContract?.address ?? "", "1"],
-        },
-        {
-          contractAddress: accountAAFinalAdress,
-          entrypoint: "update_whitelisted_calls",
-          calldata: [
-            "3",
-            ethContract?.address ?? "",
-            selector.getSelectorFromName("transfer"),
-            "1",
-            lordsContract?.address ?? "",
-            selector.getSelectorFromName("approve"),
-            "1",
-            lordsContract?.address ?? "",
-            selector.getSelectorFromName("transfer"),
-            "1",
-          ],
-        },
-      ];
+      try {
+        const permissions: Call[] = [
+          {
+            contractAddress: accountAAFinalAdress,
+            entrypoint: "update_whitelisted_contracts",
+            calldata: ["1", gameContract?.address ?? "", "1"],
+          },
+          {
+            contractAddress: accountAAFinalAdress,
+            entrypoint: "update_whitelisted_calls",
+            calldata: [
+              "3",
+              ethContract?.address ?? "",
+              selector.getSelectorFromName("transfer"),
+              "1",
+              lordsContract?.address ?? "",
+              selector.getSelectorFromName("approve"),
+              "1",
+              lordsContract?.address ?? "",
+              selector.getSelectorFromName("transfer"),
+              "1",
+            ],
+          },
+        ];
 
-      const { transaction_hash: permissionsTx } = await walletAccount.execute(
-        permissions,
-        undefined,
-        {
-          maxFee: MAX_FEE,
-        }
-      );
+        const { transaction_hash: permissionsTx } = await walletAccount.execute(
+          permissions,
+          undefined,
+          {
+            maxFee: MAX_FEE,
+          }
+        );
 
-      return permissionsTx;
+        return permissionsTx;
+      } catch (e) {
+        setIsSettingPermissions(false);
+        setShowLoader(false);
+        throw new Error("Error setting permissions.");
+      }
     },
     []
   );
@@ -620,6 +627,7 @@ export const useBurner = ({
     withdraw,
     genNewKey,
     setPermissions,
+    setIsSettingPermissions,
     account,
     isPrefunding,
     isDeploying,
@@ -629,6 +637,7 @@ export const useBurner = ({
     isToppingUpLords,
     isWithdrawing,
     showLoader,
+    setShowLoader,
     listConnectors,
     deployAccountFromHash,
   };
