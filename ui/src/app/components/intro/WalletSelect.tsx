@@ -6,6 +6,7 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { WalletTutorial } from "@/app/components/intro/WalletTutorial";
 import Storage from "@/app/lib/storage";
 import { BurnerStorage } from "@/app/types";
+import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 
 interface WalletSelectProps {}
 
@@ -16,16 +17,8 @@ const WalletSelect = ({}: WalletSelectProps) => {
 
   if (!connectors) return <div></div>;
 
-  const arcadeConnectors = () =>
-    connectors.filter(
-      (connector) =>
-        typeof connector.id === "string" && connector.id.includes("0x")
-    );
-  const walletConnectors = () =>
-    connectors.filter(
-      (connector) =>
-        typeof connector.id !== "string" || !connector.id.includes("0x")
-    );
+  const arcadeConnectors = getArcadeConnectors(connectors);
+  const walletConnectors = getWalletConnectors(connectors);
 
   const storage: BurnerStorage = Storage.get("burners");
 
@@ -52,7 +45,7 @@ const WalletSelect = ({}: WalletSelectProps) => {
                 <Button onClick={() => setScreen("tutorial")}>
                   I don&apos;t have a wallet
                 </Button>
-                {walletConnectors().map((connector, index) => (
+                {walletConnectors.map((connector, index) => (
                   <Button
                     onClick={() => connect({ connector })}
                     key={index}
@@ -64,11 +57,11 @@ const WalletSelect = ({}: WalletSelectProps) => {
                   </Button>
                 ))}
               </div>
-              {arcadeConnectors().length ? (
+              {arcadeConnectors.length ? (
                 <>
                   <h5 className="text-center">Arcade Accounts</h5>
                   <div className="flex flex-col sm:flex-row gap-2 overflow-auto h-[300px] sm:h-full w-full sm:w-[400px]">
-                    {arcadeConnectors().map((connector, index) => {
+                    {arcadeConnectors.map((connector, index) => {
                       const currentGamePermissions =
                         storage[connector.name].gameContract ==
                         process.env.NEXT_PUBLIC_GAME_ADDRESS;

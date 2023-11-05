@@ -31,7 +31,10 @@ import { processNotifications } from "@/app/components/notifications/Notificatio
 import Storage from "@/app/lib/storage";
 import { BurnerStorage } from "@/app/types";
 import { Connector } from "@starknet-react/core";
-import { providerInterfaceCamel } from "@/app/lib/connectors";
+import {
+  checkArcadeConnector,
+  providerInterfaceCamel,
+} from "@/app/lib/connectors";
 import { QueryData, QueryKey } from "@/app/hooks/useQueryStore";
 import { AdventurerClass } from "@/app/lib/classes";
 import { ScreenPage } from "@/app/hooks/useUIStore";
@@ -53,7 +56,11 @@ export interface SyscallsProps {
   adventurer: AdventurerClass;
   addToCalls: (value: Call) => void;
   calls: Call[];
-  handleSubmitCalls: (account: AccountInterface, calls: Call[]) => Promise<any>;
+  handleSubmitCalls: (
+    account: AccountInterface,
+    calls: Call[],
+    isArcade: boolean
+  ) => Promise<any>;
   startLoading: (
     type: string,
     pendingMessage: string | string[],
@@ -261,7 +268,8 @@ export function syscalls({
   const spawn = async (formData: FormData, goldenTokenId: string) => {
     const storage: BurnerStorage = Storage.get("burners");
     let interfaceCamel = "";
-    if (typeof connector?.id === "string" && connector.id.includes("0x")) {
+    const isArcade = checkArcadeConnector(connector!);
+    if (isArcade) {
       const walletProvider = storage[account?.address!].masterAccountProvider;
       interfaceCamel = providerInterfaceCamel(walletProvider);
     } else {
@@ -292,6 +300,7 @@ export function syscalls({
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
+      isArcade,
       account
     );
 
@@ -314,7 +323,7 @@ export function syscalls({
         undefined
       );
       try {
-        const tx = await handleSubmitCalls(account, spawnCalls);
+        const tx = await handleSubmitCalls(account, spawnCalls, isArcade);
         addTransaction({
           hash: tx?.transaction_hash,
           metadata: {
@@ -420,10 +429,12 @@ export function syscalls({
     };
     addToCalls(exploreTx);
 
+    const isArcade = checkArcadeConnector(connector!);
     const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
+      isArcade,
       account
     );
 
@@ -435,7 +446,11 @@ export function syscalls({
         adventurer?.id
       );
       try {
-        const tx = await handleSubmitCalls(account, [...calls, exploreTx]);
+        const tx = await handleSubmitCalls(
+          account,
+          [...calls, exploreTx],
+          isArcade
+        );
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
@@ -707,10 +722,12 @@ export function syscalls({
     };
     addToCalls(attackTx);
 
+    const isArcade = checkArcadeConnector(connector!);
     const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
+      isArcade,
       account
     );
 
@@ -722,7 +739,11 @@ export function syscalls({
         adventurer?.id
       );
       try {
-        const tx = await handleSubmitCalls(account, [...calls, attackTx]);
+        const tx = await handleSubmitCalls(
+          account,
+          [...calls, attackTx],
+          isArcade
+        );
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
@@ -992,17 +1013,23 @@ export function syscalls({
     };
     addToCalls(fleeTx);
 
+    const isArcade = checkArcadeConnector(connector!);
     const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
+      isArcade,
       account
     );
 
     if (!balanceEmpty) {
       startLoading("Flee", "Fleeing", "battlesByTxHashQuery", adventurer?.id);
       try {
-        const tx = await handleSubmitCalls(account, [...calls, fleeTx]);
+        const tx = await handleSubmitCalls(
+          account,
+          [...calls, fleeTx],
+          isArcade
+        );
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
@@ -1199,10 +1226,12 @@ export function syscalls({
     potionAmount: number,
     upgradeTx?: any
   ) => {
+    const isArcade = checkArcadeConnector(connector!);
     const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
+      isArcade,
       account
     );
 
@@ -1225,7 +1254,7 @@ export function syscalls({
         } else {
           upgradeCalls = calls;
         }
-        const tx = await handleSubmitCalls(account, upgradeCalls);
+        const tx = await handleSubmitCalls(account, upgradeCalls, isArcade);
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
@@ -1384,20 +1413,23 @@ export function syscalls({
     };
     addToCalls(slayIdleAdventurersTx);
 
+    const isArcade = checkArcadeConnector(connector!);
     const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
+      isArcade,
       account
     );
 
     if (!balanceEmpty) {
       startLoading("Slay All Idles", "Slaying All Idles", undefined, undefined);
       try {
-        const tx = await handleSubmitCalls(account, [
-          ...calls,
-          slayIdleAdventurersTx,
-        ]);
+        const tx = await handleSubmitCalls(
+          account,
+          [...calls, slayIdleAdventurersTx],
+          isArcade
+        );
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
@@ -1473,10 +1505,12 @@ export function syscalls({
     notification: string[],
     upgradeTx?: any
   ) => {
+    const isArcade = checkArcadeConnector(connector!);
     const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
+      isArcade,
       account
     );
 
@@ -1512,7 +1546,7 @@ export function syscalls({
         } else {
           upgradeCalls = calls;
         }
-        const tx = await handleSubmitCalls(account, upgradeCalls);
+        const tx = await handleSubmitCalls(account, upgradeCalls, isArcade);
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
@@ -1775,17 +1809,22 @@ export function syscalls({
       entrypoint: "mint",
       calldata: [account?.address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
     };
-
+    const isArcade = checkArcadeConnector(connector!);
     const balanceEmpty = checkArcadeBalance(
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
+      isArcade,
       account
     );
     if (!balanceEmpty) {
       try {
         setIsMintingLords(true);
-        const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
+        const tx = await handleSubmitCalls(
+          account!,
+          [...calls, mintLords],
+          isArcade
+        );
         const result = await account?.waitForTransaction(tx?.transaction_hash, {
           retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
         });

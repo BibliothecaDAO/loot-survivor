@@ -36,7 +36,6 @@ export const potionBasePrice = 2;
 // UI PARAMS
 export const MIN_BALANCE = 10000000000000; // 0.00001ETH or $0.015
 export const FEE_CHECK_BALANCE = 3000000000000000; // 0.003ETH or $5.40
-export const MAX_FEE = 3000000000000000; // 0.003ETH or $5.40
 export const TRANSACTION_WAIT_RETRY_INTERVAL = 4000; // 4 seconds
 
 export const deathMessages = [

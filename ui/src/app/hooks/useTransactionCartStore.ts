@@ -1,12 +1,15 @@
 import { create } from "zustand";
 import { Call } from "@/app/types";
 import { AccountInterface } from "starknet";
-import { MAX_FEE } from "../lib/constants";
 
 type TransactionCartState = {
   error: boolean;
   setError: (error: boolean) => void;
-  handleSubmitCalls: (account: AccountInterface, calls: Call[]) => Promise<any>;
+  handleSubmitCalls: (
+    account: AccountInterface,
+    calls: Call[],
+    isArcade: boolean
+  ) => Promise<any>;
   calls: Call[];
   addToCalls: (value: Call) => void;
   removeFromCalls: (value: Call) => void;
@@ -40,12 +43,21 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
 
   const handleSubmitCalls = async (
     account: AccountInterface,
-    calls: Call[]
+    calls: Call[],
+    isArcade: boolean
   ) => {
     try {
-      const tx = await account.execute(calls, undefined, {
-        maxFee: MAX_FEE,
-      });
+      let tx;
+      if (isArcade) {
+        // If they have an arcade account, estimate the max fee
+        const feeEstimateResult = await account.estimateInvokeFee(calls);
+        tx = await account.execute(calls, undefined, {
+          maxFee: feeEstimateResult.suggestedMaxFee,
+        });
+      } else {
+        tx = await account.execute(calls);
+      }
+
       set({ calls: [], error: false });
 
       return tx;

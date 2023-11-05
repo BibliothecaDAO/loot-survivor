@@ -368,9 +368,10 @@ export function checkArcadeBalance(
   ethBalance: bigint,
   showTopUpDialog: (value: boolean) => void,
   setTopUpAccount: (value: string) => void,
+  isArcade: boolean,
   account?: AccountInterface
 ) {
-  if (ethBalance < FEE_CHECK_BALANCE) {
+  if (isArcade && ethBalance < FEE_CHECK_BALANCE) {
     showTopUpDialog(true);
     setTopUpAccount(account?.address ?? "");
     return true;
