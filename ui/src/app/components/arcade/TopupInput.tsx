@@ -72,7 +72,7 @@ const TopupInput = ({
   };
 
   const inputTopupInvalid =
-    inputValue > (balanceType === "eth" ? ethBalance : lordsBalance);
+    inputValue * 10 ** 18 > (balanceType === "eth" ? ethBalance : lordsBalance);
 
   return (
     <>

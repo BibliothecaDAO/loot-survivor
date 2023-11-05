@@ -9,7 +9,11 @@ import {
 import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "@/app/components/buttons/Button";
 import { useBurner } from "@/app/lib/burner";
-import { MIN_BALANCE } from "@/app/lib/constants";
+import {
+  MIN_BALANCE,
+  ETH_INCREMENT,
+  LORDS_INCREMENT,
+} from "@/app/lib/constants";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import { fetchBalances } from "@/app/lib/balances";
 import { indexAddress } from "@/app/lib/utils";
@@ -389,7 +393,7 @@ export const ArcadeAccountCard = ({
                 <div className="hidden sm:block">
                   <TopupInput
                     balanceType="eth"
-                    increment={0.001}
+                    increment={ETH_INCREMENT}
                     disabled={isArcade}
                     topup={topUpEth}
                     account={account.name}
@@ -418,7 +422,7 @@ export const ArcadeAccountCard = ({
                 <div className="hidden sm:block">
                   <TopupInput
                     balanceType="lords"
-                    increment={5}
+                    increment={LORDS_INCREMENT}
                     disabled={isArcade}
                     topup={topUpLords}
                     account={account.name}
