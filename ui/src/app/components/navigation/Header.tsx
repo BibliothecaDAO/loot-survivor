@@ -155,7 +155,11 @@ export default function Header({
           size={"xs"}
           variant={checkArcade ? "outline" : "default"}
           onClick={() => showArcadeDialog(!arcadeDialog)}
-          disabled={isWrongNetwork || !account}
+          disabled={
+            isWrongNetwork ||
+            !account ||
+            process.env.NEXT_PUBLIC_NETWORK === "goerli"
+          } // temporarily disabled
           className={`xl:px-5 ${checkArcade ? "" : "animate-pulse"}`}
         >
           <ArcadeIcon className="sm:w-5 sm:h-5  h-3 w-3 justify-center fill-current mr-2" />

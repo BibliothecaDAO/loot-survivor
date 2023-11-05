@@ -466,6 +466,16 @@ export type BurnerStorage = {
     gameContract: string;
   };
 };
+export type KeyStorage = {
+  [address: string]: {
+    privateKey: string;
+    publicKey: string;
+    masterAccount: string;
+    masterAccountProvider: string;
+    gameContract: string;
+    active: boolean;
+  };
+};
 
 export type GameToken = {
   contract_address: string;
