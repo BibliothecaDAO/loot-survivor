@@ -56,7 +56,10 @@ import EthBalanceFragment from "@/app/abi/EthBalanceFragment.json";
 import Beasts from "@/app/abi/Beasts.json";
 import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
 import ScreenMenu from "@/app/components/menu/ScreenMenu";
-import { getArcadeConnectors } from "@/app/lib/connectors";
+import {
+  getArcadeConnectors,
+  checkArcadeConnector,
+} from "@/app/lib/connectors";
 import Header from "@/app/components/navigation/Header";
 import { fetchBalances, fetchEthBalance } from "@/app/lib/balances";
 import useTransactionManager from "@/app/hooks/useTransactionManager";
@@ -338,7 +341,8 @@ function Home({ updateConnectors }: HomeProps) {
 
   const goldenTokenVariables = useMemo(() => {
     const storage: BurnerStorage = Storage.get("burners");
-    if (typeof connector?.id === "string" && connector.id.includes("0x")) {
+    const isArcade = checkArcadeConnector(connector);
+    if (isArcade) {
       const masterAccount = storage[address!].masterAccount;
       return {
         contractAddress:

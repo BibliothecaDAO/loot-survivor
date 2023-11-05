@@ -16,7 +16,6 @@ import Storage from "@/app/lib/storage";
 import { ArcadeConnector } from "@/app/lib/arcade";
 import { BurnerStorage } from "@/app/types";
 import { padAddress } from "@/app/lib/utils";
-import { MAX_FEE } from "@/app/lib/constants";
 
 export const ETH_PREFUND_AMOUNT = "0x2386F26FC10000"; // 0.01ETH
 export const LORDS_PREFUND_AMOUNT = "0x15AF1D78B58C40000"; // 25LORDS
@@ -159,13 +158,10 @@ export const useBurner = ({
         calldata: CallData.compile([address, lordsAmount.toString(), "0x0"]),
       };
 
-      const { transaction_hash } = await account.execute(
-        [transferEthTx, transferLordsTx],
-        undefined,
-        {
-          maxFee: MAX_FEE,
-        }
-      );
+      const { transaction_hash } = await account.execute([
+        transferEthTx,
+        transferLordsTx,
+      ]);
 
       const result = await account.waitForTransaction(transaction_hash, {
         retryInterval: 2000,
@@ -227,6 +223,13 @@ export const useBurner = ({
         // deploy burner
         const burner = new Account(provider, address, privateKey, "1");
 
+        const feeEstimateResult = await burner.estimateAccountDeployFee({
+          classHash: arcadeClassHash!,
+          constructorCalldata: constructorAACalldata,
+          contractAddress: address,
+          addressSalt: publicKey,
+        });
+
         const {
           transaction_hash: deployTx,
           contract_address: accountAAFinalAddress,
@@ -238,7 +241,7 @@ export const useBurner = ({
             addressSalt: publicKey,
           },
           {
-            maxFee: MAX_FEE,
+            maxFee: feeEstimateResult.suggestedMaxFee,
           }
         );
 
@@ -316,11 +319,7 @@ export const useBurner = ({
         ];
 
         const { transaction_hash: permissionsTx } = await walletAccount.execute(
-          permissions,
-          undefined,
-          {
-            maxFee: MAX_FEE,
-          }
+          permissions
         );
 
         return permissionsTx;
@@ -558,6 +557,13 @@ export const useBurner = ({
         // deploy burner
         const burner = new Account(provider, address, privateKey, "1");
 
+        const feeEstimateResult = await burner.estimateAccountDeployFee({
+          classHash: arcadeClassHash!,
+          constructorCalldata: constructorAACalldata,
+          contractAddress: address,
+          addressSalt: publicKey,
+        });
+
         const {
           transaction_hash: deployTx,
           contract_address: accountAAFinalAddress,
@@ -569,7 +575,7 @@ export const useBurner = ({
             addressSalt: publicKey,
           },
           {
-            maxFee: MAX_FEE,
+            maxFee: feeEstimateResult.suggestedMaxFee,
           }
         );
 
