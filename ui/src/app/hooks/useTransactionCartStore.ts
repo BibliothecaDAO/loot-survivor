@@ -43,19 +43,22 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
     calls: Call[]
   ) => {
     try {
-      console.log("handleSubmitCalls", account, calls);
       const tx = await account.execute(calls, undefined, {
         maxFee: MAX_FEE,
       });
       set({ calls: [], error: false });
 
-      console.log("handleSubmitCalls", tx);
-
       return tx;
     } catch (error) {
-      console.log(error);
       setError(true);
       resetCalls();
+      if (error instanceof Error) {
+        console.log(error);
+        throw new Error(error.message);
+      } else {
+        // Handle non-Error types
+        console.log("An error occurred:", error);
+      }
     }
   };
 
