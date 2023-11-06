@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useMemo } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Contract } from "starknet";
 import { useAccount, useDisconnect, Connector } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
@@ -47,7 +47,7 @@ export default function Header({
   const { account, address } = useAccount();
   const { disconnect } = useDisconnect();
   const [apibaraStatus, setApibaraStatus] = useState();
-  const [currentBlockTimestamp, setCurrentBlockTimestamp] = useState();
+  const [lastActionTimestamp, setLastActionTimestamp] = useState(0);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const resetData = useQueriesStore((state) => state.resetData);
@@ -84,13 +84,13 @@ export default function Header({
     setApibaraStatus(data.status.indicator);
   };
 
-  const handleGetBlockTimestamp = async () => {
+  const handleLastActionTimestamp = async () => {
     const lastActionBlock = await getBlock(adventurer?.lastAction ?? 0);
-    setCurrentBlockTimestamp((lastActionBlock as any).timestamp);
+    setLastActionTimestamp((lastActionBlock as any).timestamp);
   };
 
   useEffect(() => {
-    handleGetBlockTimestamp();
+    handleLastActionTimestamp();
   }, [adventurer?.lastAction]);
 
   useEffect(() => {
@@ -106,7 +106,7 @@ export default function Header({
         <ApibaraStatus status={apibaraStatus} />
         {adventurer?.id && (
           <PenaltyCountDown
-            lastAction={10}
+            lastAction={lastActionTimestamp}
             dataLoading={isLoading.global}
             startCountdown={(adventurer?.level ?? 0) > 1}
           />

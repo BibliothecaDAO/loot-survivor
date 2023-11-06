@@ -52,13 +52,13 @@ export const PenaltyCountDown = ({
   const finishedMessage = "Penalty Reached!";
   const countingMessage = "Penalty:";
 
-  const formatLastAction = lastAction;
-  const targetTime = formatLastAction + penaltyTime * 1000;
+  const targetTime = (lastAction + penaltyTime) * 1000;
 
   useEffect(() => {
     if (targetTime) {
       const updateCountdown = () => {
         const currentTime = new Date().getTime();
+        console.log(currentTime, targetTime, lastAction);
         const timeRemaining = targetTime - currentTime;
         setSeconds(Math.floor(timeRemaining / 1000));
       };
