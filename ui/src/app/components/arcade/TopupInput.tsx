@@ -9,7 +9,7 @@ interface TopupInputProps {
   topup: any;
   account: string;
   master: AccountInterface;
-  getBalances: () => Promise<void>;
+  getBalances: any;
   className?: string;
   lordsBalance: number;
   ethBalance: number;
@@ -57,7 +57,7 @@ const TopupInput = ({
     } else {
       await topup(account, master);
     }
-    getBalances();
+    await getBalances(account);
     setShowInput(false);
   };
 
@@ -67,7 +67,7 @@ const TopupInput = ({
     } else {
       await topup(account, master, inputValue);
     }
-    getBalances();
+    await getBalances(account);
     setShowInput(false);
   };
 

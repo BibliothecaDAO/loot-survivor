@@ -158,10 +158,10 @@ export const useBurner = ({
         calldata: CallData.compile([address, lordsAmount.toString(), "0x0"]),
       };
 
-      const { transaction_hash } = await account.execute([
-        transferEthTx,
-        transferLordsTx,
-      ]);
+      const prefundCalls =
+        lordsAmount > 0 ? [transferEthTx, transferLordsTx] : [transferEthTx];
+
+      const { transaction_hash } = await account.execute(prefundCalls);
 
       const result = await account.waitForTransaction(transaction_hash, {
         retryInterval: 2000,

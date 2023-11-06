@@ -193,7 +193,7 @@ export const ArcadeDialog = ({
                       onClick={async () => {
                         try {
                           setFullDeployment(true);
-                          await create(connector!, 25 * 10 ** 18);
+                          await create(connector!, 0);
                           connect({ connector: listConnectors()[0] });
                           updateConnectors();
                           setFullDeployment(false);
@@ -345,8 +345,7 @@ export const ArcadeAccountCard = ({
     }
   };
 
-  const minimalBalance =
-    balances?.eth < BigInt(MIN_BALANCE) && balances?.eth < BigInt(MIN_BALANCE);
+  const minimalBalance = balances?.eth < BigInt(MIN_BALANCE);
 
   const walletConnectors = getWalletConnectors(connectors);
 
@@ -398,9 +397,7 @@ export const ArcadeAccountCard = ({
                     topup={topUpEth}
                     account={account.name}
                     master={walletAccount}
-                    getBalances={async () =>
-                      await getAccountBalances(account.name)
-                    }
+                    getBalances={getAccountBalances}
                     lordsBalance={lordsBalance}
                     ethBalance={ethBalance}
                   />
@@ -427,9 +424,7 @@ export const ArcadeAccountCard = ({
                     topup={topUpLords}
                     account={account.name}
                     master={walletAccount}
-                    getBalances={async () =>
-                      await getAccountBalances(account.name)
-                    }
+                    getBalances={getAccountBalances}
                     lordsBalance={lordsBalance}
                     ethBalance={ethBalance}
                   />
