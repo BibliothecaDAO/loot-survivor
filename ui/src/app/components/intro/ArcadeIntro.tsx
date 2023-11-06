@@ -41,6 +41,7 @@ export const ArcadeIntro = ({
   const [fullDeployment, setFullDeployment] = useState(false);
   const [gamesPrefundAmount, setGamesPrefundAmount] = useState(1);
   const [readDisclaimer, setReadDisclaimer] = useState(false);
+  const [buyLordsLater, setBuyLordsLater] = useState(false);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
   const setClosedArcadeIntro = useUIStore(
@@ -68,7 +69,11 @@ export const ArcadeIntro = ({
   const checkNotEnoughPrefundLords = lords < parseInt(LORDS_PREFUND_AMOUNT);
 
   useEffect(() => {
-    if (account && !checkNotEnoughPrefundLords && readDisclaimer) {
+    if (
+      account &&
+      (!checkNotEnoughPrefundLords || buyLordsLater) &&
+      readDisclaimer
+    ) {
       setStep(4);
     } else if (account && readDisclaimer) {
       setStep(3);
@@ -77,7 +82,7 @@ export const ArcadeIntro = ({
     } else {
       setStep(1);
     }
-  }, [account, checkNotEnoughPrefundLords, readDisclaimer]);
+  }, [account, checkNotEnoughPrefundLords, readDisclaimer, buyLordsLater]);
 
   const formattedLords = lords / 10 ** 18;
 
@@ -175,34 +180,39 @@ export const ArcadeIntro = ({
             </div>
             <div className="flex flex-col gap-10 items-center justify-center w-full">
               <Lords className="w-24 h-24 sm:w-40 sm:h-40 fill-current" />
-              <Button
-                onClick={async () => {
-                  if (onMainnet) {
-                    const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
-                      process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
-                    )}&tokenTo=${indexAddress(
-                      process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
-                    )}&amount=0.001`;
-                    window.open(avnuLords, "_blank");
-                  } else {
-                    await mintLords();
+              <div className="flex flex-col gap-2 w-1/4">
+                <Button
+                  onClick={async () => {
+                    if (onMainnet) {
+                      const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
+                        process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+                      )}&tokenTo=${indexAddress(
+                        process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+                      )}&amount=0.001`;
+                      window.open(avnuLords, "_blank");
+                    } else {
+                      await mintLords();
+                    }
+                  }}
+                  disabled={
+                    isWrongNetwork || !checkNotEnoughPrefundLords || !account
                   }
-                }}
-                disabled={
-                  isWrongNetwork || !checkNotEnoughPrefundLords || !account
-                }
-                className="flex flex-row w-1/4"
-              >
-                {lordsBalance || lords == 0 ? (
-                  onMainnet ? (
-                    "Buy Lords"
+                  className="flex flex-row"
+                >
+                  {lordsBalance || lords == 0 ? (
+                    onMainnet ? (
+                      "Buy Lords"
+                    ) : (
+                      "Mint Lords"
+                    )
                   ) : (
-                    "Mint Lords"
-                  )
-                ) : (
-                  <p className="loading-ellipsis">Getting Balance</p>
-                )}
-              </Button>
+                    <p className="loading-ellipsis">Getting Balance</p>
+                  )}
+                </Button>
+                <Button onClick={() => setBuyLordsLater(true)}>
+                  I have a Golden Token
+                </Button>
+              </div>
             </div>
           </div>
         )}
