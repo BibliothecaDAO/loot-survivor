@@ -134,8 +134,7 @@ function Home({ updateConnectors }: HomeProps) {
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
-  // const arcadeIntro = useUIStore((state) => state.arcadeIntro);
-  const arcadeIntro = false;
+  const arcadeIntro = useUIStore((state) => state.arcadeIntro);
   const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
   const closedArcadeIntro = useUIStore((state) => state.closedArcadeIntro);
   const topUpDialog = useUIStore((state) => state.topUpDialog);
@@ -527,7 +526,11 @@ function Home({ updateConnectors }: HomeProps) {
             />
           )}
           {status == "connected" && topUpDialog && (
-            <TopUpDialog ethContract={ethContract!} getBalances={getBalances} />
+            <TopUpDialog
+              ethContract={ethContract!}
+              getBalances={getBalances}
+              ethBalance={Number(ethBalance)}
+            />
           )}
 
           {introComplete ? (

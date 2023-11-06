@@ -2,7 +2,6 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 import { z } from "zod";
-import { AccountInterface } from "starknet";
 import { Adventurer, Item, ItemPurchase } from "@/app/types";
 import { GameData } from "@/app/lib/data/GameData";
 import {
@@ -11,7 +10,7 @@ import {
   itemMinimumPrice,
   potionBasePrice,
 } from "@/app/lib/constants";
-import { deathMessages, FEE_CHECK_BALANCE } from "@/app/lib/constants";
+import { deathMessages } from "@/app/lib/constants";
 import { getBlock } from "@/app/api/api";
 
 export function cn(...inputs: ClassValue[]) {
@@ -362,22 +361,6 @@ export function getDeathMessageByRank(rank: number): string {
   const { message } = deathMessages.find((item) => rank <= item.rank) || {};
 
   return message || "Better luck next time - You can improve!";
-}
-
-export function checkArcadeBalance(
-  ethBalance: bigint,
-  showTopUpDialog: (value: boolean) => void,
-  setTopUpAccount: (value: string) => void,
-  isArcade: boolean,
-  account?: AccountInterface
-) {
-  if (isArcade && ethBalance < FEE_CHECK_BALANCE) {
-    showTopUpDialog(true);
-    setTopUpAccount(account?.address ?? "");
-    return true;
-  } else {
-    return false;
-  }
 }
 
 export const fetchAverageBlockTime = async (
