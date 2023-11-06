@@ -1,3 +1,4 @@
+import { useState, ChangeEvent } from "react";
 import { useAccount } from "@starknet-react/core";
 import { Contract } from "starknet";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -8,13 +9,19 @@ import { BurnerStorage } from "@/app/types";
 import { useBurner } from "@/app/lib/burner";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import TokenLoader from "@/app/components/animations/TokenLoader";
+import { ETH_INCREMENT } from "../lib/constants";
 
 interface TopUpDialogProps {
   ethContract: Contract;
   getBalances: () => void;
+  ethBalance: number;
 }
 
-export const TopUpDialog = ({ ethContract, getBalances }: TopUpDialogProps) => {
+export const TopUpDialog = ({
+  ethContract,
+  getBalances,
+  ethBalance,
+}: TopUpDialogProps) => {
   const { account: walletAccount, address } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
@@ -25,6 +32,28 @@ export const TopUpDialog = ({ ethContract, getBalances }: TopUpDialogProps) => {
     walletAccount,
     ethContract,
   });
+  const [inputValue, setInputValue] = useState(0);
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { value } = e.target;
+    setInputValue(parseInt(value));
+  };
+
+  const handleIncrement = () => {
+    const newInputValue = inputValue + ETH_INCREMENT;
+    if (newInputValue >= 0) {
+      setInputValue(newInputValue);
+    }
+  };
+
+  const handleDecrement = () => {
+    const newInputValue = inputValue - ETH_INCREMENT;
+    if (newInputValue >= 0) {
+      setInputValue(newInputValue);
+    }
+  };
 
   const arcadeConnectors = getArcadeConnectors(connectors);
   const walletConnectors = getWalletConnectors(connectors);
@@ -35,6 +64,11 @@ export const TopUpDialog = ({ ethContract, getBalances }: TopUpDialogProps) => {
   const arcadeConnector = arcadeConnectors.find(
     (connector) => connector.name === topUpAccount
   );
+
+  const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+
+  const notEnoughDefaultBalance = ethBalance < 0.01 * 10 ** 18;
+  const notEnoughCustomBalance = ethBalance < inputValue * 10 ** 18;
 
   return (
     <>
@@ -67,14 +101,78 @@ export const TopUpDialog = ({ ethContract, getBalances }: TopUpDialogProps) => {
           <Button
             disabled={!masterConnected || isToppingUpEth}
             onClick={async () => {
-              await topUpEth(topUpAccount, walletAccount!);
-              setTopUpAccount("");
-              connect({ connector: arcadeConnector! });
-              getBalances();
-              showTopUpDialog(false);
+              if (!notEnoughDefaultBalance) {
+                await topUpEth(topUpAccount, walletAccount!);
+                setTopUpAccount("");
+                disconnect();
+                connect({ connector: arcadeConnector! });
+                showTopUpDialog(false);
+              } else {
+                onMainnet
+                  ? window.open("https://starkgate.starknet.io//", "_blank")
+                  : window.open("https://faucet.goerli.starknet.io/", "_blank");
+              }
             }}
           >
-            {masterConnected ? "Top Up" : "Connect Master"}
+            {masterConnected
+              ? notEnoughDefaultBalance
+                ? "Get ETH"
+                : "Top Up"
+              : "Connect Master"}
+          </Button>
+          <p className="m-2 text-sm xl:text-xl 2xl:text-2xl">
+            Top Up Custom Amount
+          </p>
+          <div className="flex flex-row items-center justify-center gap-1">
+            <input
+              type="number"
+              min={0}
+              value={inputValue}
+              onChange={handleChange}
+              className="p-1 w-12 bg-terminal-black border border-terminal-green"
+              onWheel={(e) => e.preventDefault()} // Disable mouse wheel for the input
+              disabled={!masterConnected}
+            />
+            <div className="flex flex-col">
+              <Button
+                size="xxxs"
+                className="text-black"
+                onClick={handleIncrement}
+                disabled={!masterConnected}
+              >
+                +
+              </Button>
+              <Button
+                size="xxxs"
+                className="text-black"
+                onClick={handleDecrement}
+                disabled={!masterConnected}
+              >
+                -
+              </Button>
+            </div>
+          </div>
+          <Button
+            disabled={!masterConnected || isToppingUpEth}
+            onClick={async () => {
+              if (!notEnoughCustomBalance) {
+                await topUpEth(topUpAccount, walletAccount!, inputValue);
+                setTopUpAccount("");
+                disconnect();
+                connect({ connector: arcadeConnector! });
+                showTopUpDialog(false);
+              } else {
+                onMainnet
+                  ? window.open("https://starkgate.starknet.io//", "_blank")
+                  : window.open("https://faucet.goerli.starknet.io/", "_blank");
+              }
+            }}
+          >
+            {masterConnected
+              ? notEnoughCustomBalance
+                ? "Get ETH"
+                : "Top Up"
+              : "Connect Master"}
           </Button>
           <Button onClick={() => showTopUpDialog(false)}>Close</Button>
         </div>

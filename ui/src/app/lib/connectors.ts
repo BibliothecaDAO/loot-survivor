@@ -1,6 +1,10 @@
 import { Connector, argent, braavos } from "@starknet-react/core";
 import { WebWalletConnector } from "@argent/starknet-react-webwallet-connector";
 
+export const checkArcadeConnector = (connector?: Connector) => {
+  return typeof connector?.id === "string" && connector?.id.includes("0x");
+};
+
 export const getArcadeConnectors = (connectors: Connector[]) => {
   return connectors.filter(
     (connector) =>

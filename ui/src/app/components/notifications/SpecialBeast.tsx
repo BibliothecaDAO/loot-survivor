@@ -29,7 +29,7 @@ export const SpecialBeast = () => {
 
   useEffect(() => {
     fetchBeast();
-  }, []);
+  }, [specialBeast]);
 
   const beastName = processBeastName(
     specialBeast?.data?.beast ?? "Ent",

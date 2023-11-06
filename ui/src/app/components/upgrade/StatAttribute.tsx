@@ -70,28 +70,28 @@ export const StatAttribute = ({
   return (
     <div className="flex flex-col gap-1 sm:gap-3 items-center">
       <span className="hidden sm:block w-10 h-10">{icon}</span>
-      {maxNonBoosted ? (
-        <p className="sm:text-4xl text-center">Base Stat Maxed Out</p>
-      ) : (
-        <>
+      <>
+        {maxNonBoosted ? (
+          <p className="sm:text-4xl text-center">Base Stat Maxed Out</p>
+        ) : (
           <p className="sm:text-[28px] xl:text-2xl text-center h-2/3">
             {description}
           </p>
-          <span className="flex flex-row items-center">
-            <QuantityButtons
-              amount={amount}
-              min={0}
-              max={newUpgradeTotal}
-              setAmount={(value) => {
-                upgrades[name] = value;
-                setUpgrades(upgrades);
-                setButtonClicked(true);
-              }}
-              size="default"
-            />
-          </span>
-        </>
-      )}
+        )}
+        <span className="flex flex-row items-center">
+          <QuantityButtons
+            amount={amount}
+            min={0}
+            max={maxNonBoosted ? amount : newUpgradeTotal}
+            setAmount={(value) => {
+              upgrades[name] = value;
+              setUpgrades(upgrades);
+              setButtonClicked(true);
+            }}
+            size="default"
+          />
+        </span>
+      </>
     </div>
   );
 };

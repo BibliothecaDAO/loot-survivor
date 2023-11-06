@@ -31,7 +31,8 @@ export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
   multicall: (
     loadingMessage: string[],
-    notification: string[]
+    notification: string[],
+    upgradeTx?: any
   ) => Promise<void>;
   gameContract: Contract;
 }
@@ -223,6 +224,9 @@ const TransactionCart = ({
     };
     addToCalls(upgradeTx);
   };
+
+  const selectedVitality = upgrades["Vitality"] ?? 0;
+  const totalVitality = (adventurer?.vitality ?? 0) + selectedVitality;
 
   const filteredStats = Object.entries(upgrades).filter(
     (stat: any) => stat[1] !== 0
@@ -449,26 +453,34 @@ const TransactionCart = ({
               onClick={async () => {
                 resetNotification();
                 // Handle for vitBoostRemoval
+                const vitBoostRemoved = calculateVitBoostRemoved(
+                  purchaseItems,
+                  adventurer!,
+                  data.itemsByAdventurerQuery?.items ?? []
+                );
+                let upgradeTx: any;
                 if (potionAmount > 0) {
                   // Check whether health + pots is within vitBoostRemoved of the maxHealth
-                  const vitBoostRemoved = calculateVitBoostRemoved(
-                    purchaseItems,
-                    adventurer!,
-                    data.itemsByAdventurerQuery?.items ?? []
+                  const maxHealth = 100 + totalVitality * 10;
+                  const newMaxHealth =
+                    100 + (totalVitality - vitBoostRemoved) * 10;
+                  const currentHealth =
+                    adventurer?.health! + selectedVitality * 10;
+                  const healthPlusPots = Math.min(
+                    currentHealth! + potionAmount * 10,
+                    maxHealth
                   );
-                  const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
-                  const healthPlusPots = 100 + potionAmount * 10;
-                  const checkInRange =
-                    maxHealth - healthPlusPots < vitBoostRemoved * 10;
-                  if (checkInRange) {
-                    handleAddUpgradeTx(
+                  const healthOverflow = healthPlusPots > newMaxHealth;
+                  if (healthOverflow) {
+                    const newUpgradeTx = handleAddUpgradeTx(
                       undefined,
                       Math.max(potionAmount - vitBoostRemoved, 0),
                       undefined
                     );
+                    upgradeTx = newUpgradeTx;
                   }
                 }
-                await multicall(loadingMessage, notification);
+                await multicall(loadingMessage, notification, upgradeTx);
                 handleResetCalls();
               }}
             >

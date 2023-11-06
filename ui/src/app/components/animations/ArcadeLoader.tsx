@@ -8,6 +8,7 @@ interface ArcadeLoaderProps {
   isSettingPermissions?: boolean;
   isGeneratingNewKey?: boolean;
   fullDeployment?: boolean;
+  showLoader?: boolean;
 }
 
 export default function ArcadeLoader({
@@ -16,6 +17,7 @@ export default function ArcadeLoader({
   isSettingPermissions,
   isGeneratingNewKey,
   fullDeployment,
+  showLoader,
 }: ArcadeLoaderProps) {
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
 
@@ -41,10 +43,7 @@ export default function ArcadeLoader({
 
   return (
     <>
-      {(isPrefunding ||
-        isDeploying ||
-        isSettingPermissions ||
-        isGeneratingNewKey) && (
+      {showLoader && (
         <div className="fixed flex flex-col items-center sm:flex-row inset-0 bg-black z-50 sm:m-2 w-full h-full">
           <div className="flex items-center justify-center w-full sm:w-1/2 h-3/4 sm:h-full">
             <PixelatedImage
@@ -54,9 +53,12 @@ export default function ArcadeLoader({
             />
           </div>
           <div className="flex flex-col gap-10 h-full sm:w-1/2">
-            <h3 className="text-lg sm:text-3xl loading-ellipsis flex items-start sm:items-center justify-center sm:justify-start w-full h-1/2">
+            <p className="text-lg sm:text-3xl flex items-start sm:items-center justify-center sm:justify-start w-full h-1/4 uppercase">
+              Don&apos;t refresh!
+            </p>
+            <p className="text-lg sm:text-3xl loading-ellipsis flex items-start sm:items-center justify-center sm:justify-start w-full h-1/4">
               {loadingMessage}
-            </h3>
+            </p>
             {fullDeployment && (
               <ArcadeNav
                 activeSection={isPrefunding ? 1 : isDeploying ? 2 : 3}

@@ -64,6 +64,7 @@ const Intro: React.FC<IntroProps> = ({ onIntroComplete }) => {
         src={src}
         alt={alt}
         fill
+        priority
       />
 
       <div className="w-full z-10 pt-20">

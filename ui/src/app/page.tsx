@@ -4,7 +4,6 @@ import {
   useConnect,
   useContract,
   Connector,
-  useNetwork,
   useProvider,
 } from "@starknet-react/core";
 import { constants } from "starknet";
@@ -57,9 +56,12 @@ import EthBalanceFragment from "@/app/abi/EthBalanceFragment.json";
 import Beasts from "@/app/abi/Beasts.json";
 import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
 import ScreenMenu from "@/app/components/menu/ScreenMenu";
-import { getArcadeConnectors } from "@/app/lib/connectors";
+import {
+  getArcadeConnectors,
+  checkArcadeConnector,
+} from "@/app/lib/connectors";
 import Header from "@/app/components/navigation/Header";
-import { fetchBalances } from "@/app/lib/balances";
+import { fetchBalances, fetchEthBalance } from "@/app/lib/balances";
 import useTransactionManager from "@/app/hooks/useTransactionManager";
 import { StarknetProvider } from "@/app//provider";
 import { SpecialBeast } from "@/app/components/notifications/SpecialBeast";
@@ -113,7 +115,6 @@ interface HomeProps {
 function Home({ updateConnectors }: HomeProps) {
   const { connector, connectors } = useConnect();
   const { provider } = useProvider();
-  const { chain } = useNetwork();
   const disconnected = useUIStore((state) => state.disconnected);
   const setDisconnected = useUIStore((state) => state.setDisconnected);
   const { account, address, status, isConnected } = useAccount();
@@ -141,6 +142,8 @@ function Home({ updateConnectors }: HomeProps) {
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
   const setEstimatingFee = useUIStore((state) => state.setEstimatingFee);
   const setSpecialBeast = useUIStore((state) => state.setSpecialBeast);
+  const setIsMintingLords = useUIStore((state) => state.setIsMintingLords);
+  const hash = useLoadingStore((state) => state.hash);
   const specialBeastDefeated = useUIStore(
     (state) => state.specialBeastDefeated
   );
@@ -199,6 +202,11 @@ function Home({ updateConnectors }: HomeProps) {
     setLordsBalance(balances[1]);
   };
 
+  const getEthBalance = async () => {
+    const ethBalance = await fetchEthBalance(address ?? "0x0", ethContract);
+    setEthBalance(ethBalance);
+  };
+
   useEffect(() => {
     getBalances();
   }, [account, adventurer]);
@@ -206,39 +214,50 @@ function Home({ updateConnectors }: HomeProps) {
   const { data, refetch, resetData, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
 
-  const { spawn, explore, attack, flee, upgrade, slayAllIdles, multicall } =
-    syscalls({
-      gameContract: gameContract!,
-      lordsContract: lordsContract!,
-      beastsContract: beastsContract!,
-      addTransaction,
-      queryData: data,
-      resetData,
-      setData,
-      adventurer: adventurer!,
-      addToCalls,
-      calls,
-      handleSubmitCalls,
-      startLoading,
-      stopLoading,
-      setTxHash,
-      setEquipItems,
-      setDropItems,
-      setDeathMessage,
-      showDeathDialog,
-      setScreen,
-      setAdventurer,
-      setStartOption,
-      ethBalance: ethBalance,
-      showTopUpDialog,
-      setTopUpAccount,
-      setEstimatingFee,
-      account: account!,
-      resetCalls,
-      setSpecialBeastDefeated,
-      setSpecialBeast,
-      connector,
-    });
+  const {
+    spawn,
+    explore,
+    attack,
+    flee,
+    upgrade,
+    slayAllIdles,
+    multicall,
+    mintLords,
+  } = syscalls({
+    gameContract: gameContract!,
+    lordsContract: lordsContract!,
+    beastsContract: beastsContract!,
+    addTransaction,
+    queryData: data,
+    resetData,
+    setData,
+    adventurer: adventurer!,
+    addToCalls,
+    calls,
+    handleSubmitCalls,
+    startLoading,
+    stopLoading,
+    setTxHash,
+    setEquipItems,
+    setDropItems,
+    setDeathMessage,
+    showDeathDialog,
+    setScreen,
+    setAdventurer,
+    setStartOption,
+    ethBalance: ethBalance,
+    showTopUpDialog,
+    setTopUpAccount,
+    setEstimatingFee,
+    account: account!,
+    resetCalls,
+    setSpecialBeastDefeated,
+    setSpecialBeast,
+    connector,
+    getEthBalance,
+    getBalances,
+    setIsMintingLords,
+  });
 
   const playState = useMemo(
     () => ({
@@ -321,8 +340,9 @@ function Home({ updateConnectors }: HomeProps) {
 
   const goldenTokenVariables = useMemo(() => {
     const storage: BurnerStorage = Storage.get("burners");
-    if (typeof connector?.id === "string" && connector.id.includes("0x")) {
-      const masterAccount = storage[account?.address!].masterAccount;
+    const isArcade = checkArcadeConnector(connector);
+    if (isArcade) {
+      const masterAccount = storage[address!].masterAccount;
       return {
         contractAddress:
           process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS?.toLowerCase(),
@@ -419,9 +439,12 @@ function Home({ updateConnectors }: HomeProps) {
 
   useEffect(() => {
     const isWrongNetwork =
-      (provider as any)?.chainId !== constants.StarknetChainId.SN_MAIN;
-    setIsWrongNetwork(false);
-  }, [chain, provider, isConnected]);
+      (provider as any)?.chainId !==
+      (process.env.NEXT_PUBLIC_NETWORK === "mainnet"
+        ? constants.StarknetChainId.SN_MAIN
+        : constants.StarknetChainId.SN_GOERLI);
+    setIsWrongNetwork(isWrongNetwork);
+  }, [(provider as any)?.chainId, isConnected]);
 
   useEffect(() => {
     if (arcadeConnectors.length === 0 && !closedArcadeIntro) {
@@ -458,20 +481,21 @@ function Home({ updateConnectors }: HomeProps) {
           <div className="flex flex-col w-full">
             <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
             {specialBeastDefeated && <SpecialBeast />}
-            {!spawnLoader && (
+            {!spawnLoader && hash && (
               <div className="sm:hidden">
                 <TxActivity />
               </div>
             )}
             <Header
               multicall={multicall}
+              mintLords={mintLords}
               lordsBalance={lordsBalance}
               arcadeConnectors={arcadeConnectors}
               gameContract={gameContract!}
             />
           </div>
           <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
-            {!spawnLoader && (
+            {!spawnLoader && hash && (
               <div className="hidden sm:block">
                 <TxActivity />
               </div>
@@ -488,6 +512,7 @@ function Home({ updateConnectors }: HomeProps) {
               lordsContract={lordsContract!}
               ethContract={ethContract!}
               updateConnectors={updateConnectors}
+              mintLords={mintLords}
             />
           )}
           {status == "connected" && arcadeDialog && (
@@ -496,10 +521,16 @@ function Home({ updateConnectors }: HomeProps) {
               lordsContract={lordsContract!}
               ethContract={ethContract!}
               updateConnectors={updateConnectors}
+              lordsBalance={Number(lordsBalance)}
+              ethBalance={Number(ethBalance)}
             />
           )}
           {status == "connected" && topUpDialog && (
-            <TopUpDialog ethContract={ethContract!} getBalances={getBalances} />
+            <TopUpDialog
+              ethContract={ethContract!}
+              getBalances={getBalances}
+              ethBalance={Number(ethBalance)}
+            />
           )}
 
           {introComplete ? (

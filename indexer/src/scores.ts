@@ -50,11 +50,6 @@ export default function transform({ header, events }: Block) {
         return [
           insertHighScore({
             adventurerId: as.adventurerId,
-            owner: as.owner,
-            rank: value.rank,
-            xp: as.adventurer.xp,
-            txHash: receipt.transactionHash,
-            scoreTime: new Date().toISOString(),
             timestamp: new Date().toISOString(),
             totalPayout: 0,
           }),
@@ -71,7 +66,6 @@ export default function transform({ header, events }: Block) {
           updates.push(
             updateTotalPayout({
               adventurerId: fp.adventurerId,
-              owner: fp.address,
               timestamp: new Date().toISOString(),
               newPayout: fp.amount,
             })
@@ -81,7 +75,6 @@ export default function transform({ header, events }: Block) {
           updates.push(
             updateTotalPayout({
               adventurerId: sp.adventurerId,
-              owner: sp.address,
               timestamp: new Date().toISOString(),
               newPayout: sp.amount,
             })
@@ -91,7 +84,6 @@ export default function transform({ header, events }: Block) {
           updates.push(
             updateTotalPayout({
               adventurerId: tp.adventurerId,
-              owner: tp.address,
               timestamp: new Date().toISOString(),
               newPayout: tp.amount,
             })
