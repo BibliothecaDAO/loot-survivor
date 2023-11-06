@@ -241,7 +241,7 @@ export const useBurner = ({
             addressSalt: publicKey,
           },
           {
-            maxFee: feeEstimateResult.suggestedMaxFee,
+            maxFee: feeEstimateResult.suggestedMaxFee * BigInt(2),
           }
         );
 
@@ -575,7 +575,7 @@ export const useBurner = ({
             addressSalt: publicKey,
           },
           {
-            maxFee: feeEstimateResult.suggestedMaxFee,
+            maxFee: feeEstimateResult.suggestedMaxFee * BigInt(2),
           }
         );
 
