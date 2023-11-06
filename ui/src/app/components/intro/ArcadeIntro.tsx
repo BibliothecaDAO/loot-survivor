@@ -79,7 +79,9 @@ export const ArcadeIntro = ({
     }
   }, [account, checkNotEnoughPrefundLords, readDisclaimer]);
 
-  const maxGames = Math.min(Math.floor(lords / 25), 100);
+  const formattedLords = lords / 10 ** 18;
+
+  const maxGames = Math.min(Math.floor(formattedLords / 25), 100);
 
   const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
 
@@ -254,7 +256,7 @@ export const ArcadeIntro = ({
                       <QuantityButtons
                         amount={gamesPrefundAmount}
                         min={0}
-                        max={Math.min(Math.floor(lords / 25), 100)}
+                        max={maxGames}
                         setAmount={(value) => {
                           setGamesPrefundAmount(value);
                         }}
@@ -285,6 +287,19 @@ export const ArcadeIntro = ({
                       Create Account
                     </Button>
                   </div>
+                  <Button
+                    onClick={async () => {
+                      setFullDeployment(true);
+                      await create(connector!, 0);
+                      disconnect();
+                      connect({ connector: listConnectors()[0] });
+                      updateConnectors();
+                      showArcadeIntro(false);
+                      setFullDeployment(false);
+                    }}
+                  >
+                    Create without Lords
+                  </Button>
                 </div>
               )}
             </div>
