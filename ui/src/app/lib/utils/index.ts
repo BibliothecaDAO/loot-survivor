@@ -135,6 +135,15 @@ export const formatTime = (date: Date) => {
   );
 };
 
+export const formatTimeSeconds = (totalSeconds: number) => {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds - hours * 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes.toString().padStart(2, "0")}:${seconds
+    .toString()
+    .padStart(2, "0")}`;
+};
+
 export function shortenHex(hexString: string, numDigits = 6) {
   if (hexString?.length <= numDigits) {
     return hexString;

@@ -463,14 +463,14 @@ function Home({ updateConnectors }: HomeProps) {
     setUpgrades({ ...ZeroUpgrade });
   }, [adventurer]);
 
-  if (!isConnected && introComplete && disconnected) {
-    return <WalletSelect />;
-  }
-
   const spawnLoader =
     pendingMessage &&
     (pendingMessage === "Spawning Adventurer" ||
       pendingMessage.includes("Spawning Adventurer"));
+
+  if (!isConnected && introComplete && disconnected) {
+    return <WalletSelect />;
+  }
 
   return (
     <main
@@ -528,7 +528,7 @@ function Home({ updateConnectors }: HomeProps) {
           {status == "connected" && topUpDialog && (
             <TopUpDialog
               ethContract={ethContract!}
-              getBalances={getBalances}
+              getEthBalance={getEthBalance}
               ethBalance={Number(ethBalance)}
             />
           )}

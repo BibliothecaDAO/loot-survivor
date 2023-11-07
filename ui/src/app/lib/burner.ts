@@ -16,6 +16,7 @@ import Storage from "@/app/lib/storage";
 import { ArcadeConnector } from "@/app/lib/arcade";
 import { BurnerStorage } from "@/app/types";
 import { padAddress } from "@/app/lib/utils";
+import { TRANSACTION_WAIT_RETRY_INTERVAL } from "@/app/lib/constants";
 
 export const ETH_PREFUND_AMOUNT = "0x2386F26FC10000"; // 0.01ETH
 export const LORDS_PREFUND_AMOUNT = "0x15AF1D78B58C40000"; // 25LORDS
@@ -164,7 +165,7 @@ export const useBurner = ({
       const { transaction_hash } = await account.execute(prefundCalls);
 
       const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 2000,
+        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
       if (!result) {
@@ -241,7 +242,7 @@ export const useBurner = ({
             addressSalt: publicKey,
           },
           {
-            maxFee: feeEstimateResult.suggestedMaxFee,
+            maxFee: feeEstimateResult.suggestedMaxFee * BigInt(2),
           }
         );
 
@@ -352,12 +353,15 @@ export const useBurner = ({
       });
 
       const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 2000,
+        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
       if (!result) {
         throw new Error("Transaction did not complete successfully.");
       }
+
+      // Wait for 5 seconds for balance to change
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       setIsToppingUpEth(false);
       return result;
@@ -386,12 +390,15 @@ export const useBurner = ({
       const { transaction_hash } = await account.execute([lordsTransferTx]);
 
       const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 2000,
+        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
       if (!result) {
         throw new Error("Transaction did not complete successfully.");
       }
+
+      // Wait for 5 seconds for balance to change
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       setIsToppingUpLords(false);
       return result;
@@ -468,7 +475,7 @@ export const useBurner = ({
       const { transaction_hash } = await account.execute(calls);
 
       const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 2000,
+        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
       if (!result) {
@@ -575,7 +582,7 @@ export const useBurner = ({
             addressSalt: publicKey,
           },
           {
-            maxFee: feeEstimateResult.suggestedMaxFee,
+            maxFee: feeEstimateResult.suggestedMaxFee * BigInt(2),
           }
         );
 

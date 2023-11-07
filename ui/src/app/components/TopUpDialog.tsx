@@ -13,13 +13,13 @@ import { ETH_INCREMENT } from "../lib/constants";
 
 interface TopUpDialogProps {
   ethContract: Contract;
-  getBalances: () => void;
+  getEthBalance: () => Promise<void>;
   ethBalance: number;
 }
 
 export const TopUpDialog = ({
   ethContract,
-  getBalances,
+  getEthBalance,
   ethBalance,
 }: TopUpDialogProps) => {
   const { account: walletAccount, address } = useAccount();
@@ -103,6 +103,7 @@ export const TopUpDialog = ({
             onClick={async () => {
               if (!notEnoughDefaultBalance) {
                 await topUpEth(topUpAccount, walletAccount!);
+                await getEthBalance();
                 setTopUpAccount("");
                 disconnect();
                 connect({ connector: arcadeConnector! });
@@ -157,6 +158,7 @@ export const TopUpDialog = ({
             onClick={async () => {
               if (!notEnoughCustomBalance) {
                 await topUpEth(topUpAccount, walletAccount!, inputValue);
+                await getEthBalance();
                 setTopUpAccount("");
                 disconnect();
                 connect({ connector: arcadeConnector! });

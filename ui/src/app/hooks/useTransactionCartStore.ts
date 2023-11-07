@@ -57,13 +57,13 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
       if (isArcade) {
         // If they have an arcade account, estimate the max fee
         const feeEstimateResult = await account.estimateInvokeFee(calls);
-        if (ethBalance < feeEstimateResult.suggestedMaxFee!) {
+        if (ethBalance < feeEstimateResult.suggestedMaxFee! * BigInt(2)) {
           showTopUpDialog(true);
           setTopUpAccount(account?.address ?? "");
           throw new Error("Not enough eth for gas.");
         } else {
           tx = await account.execute(calls, undefined, {
-            maxFee: feeEstimateResult.suggestedMaxFee,
+            maxFee: feeEstimateResult.suggestedMaxFee! * BigInt(2),
           });
         }
       } else {

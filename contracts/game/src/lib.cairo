@@ -61,7 +61,8 @@ mod Game {
             messages, Rewards, REWARD_DISTRIBUTIONS_PHASE1_BP, REWARD_DISTRIBUTIONS_PHASE2_BP,
             REWARD_DISTRIBUTIONS_PHASE3_BP, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
             STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS,
-            STARTING_GAME_ENTROPY_ROTATION_INTERVAL, MINIMUM_DAMAGE_FROM_BEASTS, MAINNET_REVEAL_DELAY_BLOCKS
+            STARTING_GAME_ENTROPY_ROTATION_INTERVAL, MINIMUM_DAMAGE_FROM_BEASTS,
+            MAINNET_REVEAL_DELAY_BLOCKS
         }
     };
     use lootitems::{
@@ -843,6 +844,11 @@ mod Game {
         fn get_reveal_block(self: @ContractState, adventurer_id: felt252) -> u64 {
             _get_reveal_block(self, adventurer_id)
         }
+        fn is_idle(self: @ContractState, adventurer_id: felt252) -> (bool, u16) {
+            let adventurer = _load_adventurer(self, adventurer_id);
+            let game_entropy = _load_game_entropy(self);
+            _is_idle(self, adventurer, adventurer_id, game_entropy)
+        }
         fn get_equipped_items(
             self: @ContractState, adventurer_id: felt252
         ) -> Array<ItemPrimitive> {
@@ -967,6 +973,9 @@ mod Game {
         }
         fn get_game_entropy(self: @ContractState) -> GameEntropy {
             _load_game_entropy(self)
+        }
+        fn get_idle_penalty_blocks(self: @ContractState) -> u64 {
+            _load_game_entropy(self).get_idle_penalty_blocks()
         }
         fn get_leaderboard(self: @ContractState) -> Leaderboard {
             self._leaderboard.read()
@@ -1198,7 +1207,8 @@ mod Game {
                     beast.id,
                     beast.combat_spec.specials.special2,
                     beast.combat_spec.specials.special3,
-                    beast.combat_spec.level.into()
+                    beast.combat_spec.level,
+                    beast.starting_health
                 );
         }
     }
@@ -1404,9 +1414,15 @@ mod Game {
         // generate a new adventurer using the provided started weapon
         let mut adventurer = ImplAdventurer::new(weapon);
 
-        // set the adventurer last action block to the current block + the reveal delay so the idle
-        // timer doesn't start until after the reveal delay
-        adventurer.set_last_action_block(current_block + _get_reveal_block_delay());
+        // set the adventurer last action block to the current block + reveal delay + one idle penalty so that the player
+        // isn't considered idle until 2xidle penalty periods after the reveal block. This doesn't compromise integrity
+        // of starting stats or opening market as that won't change with game entropy rotations. 
+        adventurer
+            .set_last_action_block(
+                current_block
+                    + _get_reveal_block_delay()
+                    + _load_game_entropy(@self).get_idle_penalty_blocks()
+            );
 
         // create meta data for the adventurer
         let adventurer_meta = ImplAdventurerMetadata::new(name, current_block, interface_camel);
@@ -3523,8 +3539,13 @@ mod Game {
     fn __event_NewHighScore(
         ref self: ContractState, adventurer_id: felt252, adventurer: Adventurer, rank: u8
     ) {
+        // intentionally read storage for owner instead of using get_caller_address()
+        // because non-owner can trigger this function via `slay_idle_adventurer` and
+        // if player gets highscore with Arcade Account, we will update owner of their adventurer
+        // to their Primary Account as part of the highscore update. Getting owner here
+        // ensure the event uses their Primary Account instead of their Arcade Account.
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer
         };
         self.emit(NewHighScore { adventurer_state, rank });
     }
@@ -3600,7 +3621,13 @@ mod Game {
     #[starknet::interface]
     trait ILeetLoot<T> {
         fn mint(
-            ref self: T, to: ContractAddress, beast: u8, prefix: u8, suffix: u8, level: felt252
+            ref self: T,
+            to: ContractAddress,
+            beast: u8,
+            prefix: u8,
+            suffix: u8,
+            level: u16,
+            health: u16
         );
         fn isMinted(self: @T, beast: u8, prefix: u8, suffix: u8) -> bool;
         fn getMinter(self: @T) -> ContractAddress;
