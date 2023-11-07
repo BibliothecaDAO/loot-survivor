@@ -47,6 +47,7 @@ trait IGame<TContractState> {
     fn get_last_action_block(self: @TContractState, adventurer_id: felt252) -> u16;
     fn get_actions_per_block(self: @TContractState, adventurer_id: felt252) -> u8;
     fn get_reveal_block(self: @TContractState, adventurer_id: felt252) -> u64;
+    fn is_idle(self: @TContractState, adventurer_id: felt252) -> (bool, u16);
 
     // adventurer stats (includes boost)
     fn get_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
@@ -148,6 +149,7 @@ trait IGame<TContractState> {
     fn get_dao_address(self: @TContractState) -> ContractAddress;
     fn get_lords_address(self: @TContractState) -> ContractAddress;
     fn get_game_entropy(self: @TContractState) -> GameEntropy;
+    fn get_idle_penalty_blocks(self: @TContractState) -> u64;
     fn get_leaderboard(self: @TContractState) -> Leaderboard;
     fn get_cost_to_play(self: @TContractState) -> u128;
     fn get_games_played_snapshot(self: @TContractState) -> GamesPlayedSnapshot;
