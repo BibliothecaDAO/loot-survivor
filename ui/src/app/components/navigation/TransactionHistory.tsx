@@ -89,9 +89,9 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                             <div className="flex flex-row gap-1 text-xs sm:text-lg">
                               <span className="hidden sm:block">Hash:</span>
                               <a
-                                href={`https://goerli.voyager.online/tx/${padAddress(
-                                  tx.hash
-                                )}`}
+                                href={`${
+                                  process.env.NEXT_PUBLIC_BLOCK_EXPLORER_URL
+                                }tx/${padAddress(tx.hash)}`}
                                 target="_blank"
                               >
                                 {shortenHex(tx.hash)}
