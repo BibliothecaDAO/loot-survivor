@@ -56,7 +56,9 @@ export const TxActivity = () => {
             <div className="flex flex-row gap-2">
               <span className="hidden sm:block">Hash:</span>
               <a
-                href={`https://goerli.voyager.online/tx/${padAddress(hash)}`}
+                href={`${
+                  process.env.NEXT_PUBLIC_BLOCK_EXPLORER_URL
+                }tx/${padAddress(hash)}`}
                 target="_blank"
                 className="animate-pulse"
               >
