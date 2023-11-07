@@ -528,7 +528,7 @@ function Home({ updateConnectors }: HomeProps) {
           {status == "connected" && topUpDialog && (
             <TopUpDialog
               ethContract={ethContract!}
-              getBalances={getBalances}
+              getEthBalance={getEthBalance}
               ethBalance={Number(ethBalance)}
             />
           )}
