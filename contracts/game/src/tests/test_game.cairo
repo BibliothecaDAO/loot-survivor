@@ -2010,9 +2010,11 @@ mod tests {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
 
+
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
         game.explore(ADVENTURER_ID, false);
         game.explore(ADVENTURER_ID, false);
+        game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
