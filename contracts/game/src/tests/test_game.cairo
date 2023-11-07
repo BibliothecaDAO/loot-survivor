@@ -2010,9 +2010,11 @@ mod tests {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
 
+
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
         game.explore(ADVENTURER_ID, false);
         game.explore(ADVENTURER_ID, false);
+        game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
@@ -2298,5 +2300,30 @@ mod tests {
 
         // try to play again with golden token which should cause panic
         add_adventurer_to_game(ref game, golden_token_id);
+    }
+
+    #[test]
+    #[available_gas(60000000)]
+    fn test_is_idle_view_function() {
+        let STARTING_BLOCK_NUMBER = 510;
+        let mut game = new_adventurer(STARTING_BLOCK_NUMBER);
+        game.attack(ADVENTURER_ID, false);
+
+        // verify adventurer is not idle
+        let (is_idle, _) = game.is_idle(ADVENTURER_ID);
+        assert(!is_idle, 'should not be idle');
+
+        // roll forward blockchain to make adventurer idle
+        let game_entropy = game.get_game_entropy();
+        testing::set_block_number(
+            STARTING_BLOCK_NUMBER
+                + MAINNET_REVEAL_DELAY_BLOCKS.into()
+                + game_entropy.get_idle_penalty_blocks()
+                + 1
+        );
+
+        // verify adventurer is now idle
+        let (is_idle, _) = game.is_idle(ADVENTURER_ID);
+        assert(is_idle, 'should be idle');
     }
 }
