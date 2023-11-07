@@ -3532,8 +3532,13 @@ mod Game {
     fn __event_NewHighScore(
         ref self: ContractState, adventurer_id: felt252, adventurer: Adventurer, rank: u8
     ) {
+        // intentionally read storage for owner instead of using get_caller_address()
+        // because non-owner can trigger this function via `slay_idle_adventurer` and
+        // if player gets highscore with Arcade Account, we will update owner of their adventurer
+        // to their Primary Account as part of the highscore update. Getting owner here
+        // ensure the event uses their Primary Account instead of their Arcade Account.
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer
         };
         self.emit(NewHighScore { adventurer_state, rank });
     }
