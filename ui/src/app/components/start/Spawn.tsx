@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { CallData, Contract } from "starknet";
-import { useAccount, useConnect } from "@starknet-react/core";
+import { useAccount, useConnect, useBlock } from "@starknet-react/core";
 import Image from "next/image";
 import { TypeAnimation } from "react-type-animation";
 import { MdClose } from "react-icons/md";
@@ -13,7 +13,11 @@ import { FormData, GameToken } from "@/app/types";
 import { Button } from "@/app/components/buttons/Button";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import Lords from "public/icons/lords.svg";
-import { indexAddress } from "@/app/lib/utils";
+import {
+  indexAddress,
+  formatTimeSeconds,
+  fetchAverageBlockTime,
+} from "@/app/lib/utils";
 
 export interface SpawnProps {
   formData: FormData;
@@ -40,6 +44,8 @@ export const Spawn = ({
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
+  const averageBlockTime = useUIStore((state) => state.averageBlockTime);
+  const setAverageBlockTime = useUIStore((state) => state.setAverageBlockTime);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
 
   useEffect(() => {
@@ -95,6 +101,30 @@ export const Spawn = ({
     }
   };
 
+  const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+
+  const waitEstimate = 12 * averageBlockTime; // add one for closer estimate
+
+  const { data: blockData } = useBlock({
+    refetchInterval: false,
+  });
+
+  const currentBlockNumber = blockData?.block_number ?? 0;
+
+  const [fetchedAverageBlockTime, setFetchedAverageBlockTime] = useState(false);
+
+  const fetchData = async () => {
+    const result = await fetchAverageBlockTime(currentBlockNumber, 20);
+    setAverageBlockTime(result!);
+    setFetchedAverageBlockTime(true);
+  };
+
+  useEffect(() => {
+    if (onMainnet && !fetchedAverageBlockTime && currentBlockNumber > 0) {
+      fetchData();
+    }
+  }, [currentBlockNumber]);
+
   useEffect(() => {
     getUsableGoldenToken(goldenTokens);
   }, []);
@@ -123,6 +153,21 @@ export const Spawn = ({
           alt="adventurer facing beast"
           fill
         />
+
+        {onMainnet && (
+          <div className="absolute top-1/6 left-0 right-0 flex flex-col items-center text-center">
+            <p className="text-2xl">Estimated wait time:</p>
+            {averageBlockTime > 0 ? (
+              <p className="text-4xl text-terminal-yellow">
+                {formatTimeSeconds(Math.floor(waitEstimate))}
+              </p>
+            ) : (
+              <p className="text-2xl loading-ellipsis text-terminal-yellow">
+                Loading
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="absolute top-1/3 left-0 right-0 flex flex-col items-center text-center gap-4 z-10">
           <TypeAnimation
@@ -181,7 +226,8 @@ export const Spawn = ({
                     isWrongNetwork ||
                     loading ||
                     estimatingFee ||
-                    !checkEnoughLords
+                    !checkEnoughLords ||
+                    (!fetchedAverageBlockTime && onMainnet)
                   }
                   onClick={() => handleSubmitLords()}
                   className="relative"
@@ -209,7 +255,8 @@ export const Spawn = ({
                       loading ||
                       estimatingFee ||
                       !goldenTokenExists ||
-                      usableToken === "0"
+                      usableToken === "0" ||
+                      (!fetchedAverageBlockTime && onMainnet)
                     }
                     className="relative w-full"
                   >

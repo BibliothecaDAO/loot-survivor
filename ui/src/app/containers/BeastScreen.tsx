@@ -31,6 +31,7 @@ export default function BeastScreen({
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
+  const averageBlockTime = useUIStore((state) => state.averageBlockTime);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const [showBattleLog, setShowBattleLog] = useState(false);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
@@ -178,7 +179,10 @@ export default function BeastScreen({
   return (
     <div className="sm:w-2/3 flex flex-col sm:flex-row h-full">
       {!revealBlockReached && mainnetBotProtection && (
-        <InterludeScreen currentBlockNumber={currentBlockNumber} />
+        <InterludeScreen
+          currentBlockNumber={currentBlockNumber}
+          averageBlockTime={averageBlockTime}
+        />
       )}
       <div className="sm:w-1/2 order-1 sm:order-2 h-3/4 sm:h-full">
         {hasBeast ? (
