@@ -61,7 +61,8 @@ mod Game {
             messages, Rewards, REWARD_DISTRIBUTIONS_PHASE1_BP, REWARD_DISTRIBUTIONS_PHASE2_BP,
             REWARD_DISTRIBUTIONS_PHASE3_BP, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
             STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS,
-            STARTING_GAME_ENTROPY_ROTATION_INTERVAL, MINIMUM_DAMAGE_FROM_BEASTS, MAINNET_REVEAL_DELAY_BLOCKS
+            STARTING_GAME_ENTROPY_ROTATION_INTERVAL, MINIMUM_DAMAGE_FROM_BEASTS,
+            MAINNET_REVEAL_DELAY_BLOCKS
         }
     };
     use lootitems::{
@@ -843,6 +844,11 @@ mod Game {
         fn get_reveal_block(self: @ContractState, adventurer_id: felt252) -> u64 {
             _get_reveal_block(self, adventurer_id)
         }
+        fn is_idle(self: @ContractState, adventurer_id: felt252) -> (bool, u16) {
+            let adventurer = _load_adventurer(self, adventurer_id);
+            let game_entropy = _load_game_entropy(self);
+            _is_idle(self, adventurer, adventurer_id, game_entropy)
+        }
         fn get_equipped_items(
             self: @ContractState, adventurer_id: felt252
         ) -> Array<ItemPrimitive> {
@@ -967,6 +973,9 @@ mod Game {
         }
         fn get_game_entropy(self: @ContractState) -> GameEntropy {
             _load_game_entropy(self)
+        }
+        fn get_idle_penalty_blocks(self: @ContractState) -> u64 {
+            _load_game_entropy(self).get_idle_penalty_blocks()
         }
         fn get_leaderboard(self: @ContractState) -> Leaderboard {
             self._leaderboard.read()
