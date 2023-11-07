@@ -1413,9 +1413,15 @@ mod Game {
         // generate a new adventurer using the provided started weapon
         let mut adventurer = ImplAdventurer::new(weapon);
 
-        // set the adventurer last action block to the current block + the reveal delay so the idle
-        // timer doesn't start until after the reveal delay
-        adventurer.set_last_action_block(current_block + _get_reveal_block_delay());
+        // set the adventurer last action block to the current block + reveal delay + one idle penalty so that the player
+        // isn't considered idle until 2xidle penalty periods after the reveal block. This doesn't compromise integrity
+        // of starting stats or opening market as that won't change with game entropy rotations. 
+        adventurer
+            .set_last_action_block(
+                current_block
+                    + _get_reveal_block_delay()
+                    + _load_game_entropy(@self).get_idle_penalty_blocks()
+            );
 
         // create meta data for the adventurer
         let adventurer_meta = ImplAdventurerMetadata::new(name, current_block, interface_camel);
