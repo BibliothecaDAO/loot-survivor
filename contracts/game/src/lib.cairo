@@ -1207,7 +1207,8 @@ mod Game {
                     beast.id,
                     beast.combat_spec.specials.special2,
                     beast.combat_spec.specials.special3,
-                    beast.combat_spec.level.into()
+                    beast.combat_spec.level,
+                    beast.starting_health
                 );
         }
     }
@@ -3620,7 +3621,13 @@ mod Game {
     #[starknet::interface]
     trait ILeetLoot<T> {
         fn mint(
-            ref self: T, to: ContractAddress, beast: u8, prefix: u8, suffix: u8, level: felt252
+            ref self: T,
+            to: ContractAddress,
+            beast: u8,
+            prefix: u8,
+            suffix: u8,
+            level: u16,
+            health: u16
         );
         fn isMinted(self: @T, beast: u8, prefix: u8, suffix: u8) -> bool;
         fn getMinter(self: @T) -> ContractAddress;
