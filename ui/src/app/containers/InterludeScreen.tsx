@@ -1,33 +1,26 @@
 import { useState, useEffect } from "react";
 import { EntropyCountDown } from "@/app/components/CountDown";
 import Hints from "@/app/components/interlude/Hints";
-import { fetchAverageBlockTime } from "@/app/lib/utils";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
 interface InterludeScreenProps {
   currentBlockNumber: number;
+  averageBlockTime: number;
 }
 
 export default function InterludeScreen({
   currentBlockNumber,
+  averageBlockTime,
 }: InterludeScreenProps) {
   const { adventurer } = useAdventurerStore();
-  const [fetchedAverageBlockTime, setFetchedAverageBlockTime] = useState(false);
-  const [averageBlockTime, setAverageBlockTime] = useState(0);
   const [nextEntropyTime, setNextEntropyTime] = useState<number | null>(null);
   const [countDownExpired, setCountDownExpired] = useState(false);
-
-  const fetchData = async () => {
-    const result = await fetchAverageBlockTime(currentBlockNumber, 20);
-    setAverageBlockTime(result!);
-    setFetchedAverageBlockTime(true);
-  };
 
   const getNextEntropyTime = () => {
     const nextBlockHashBlock = adventurer?.revealBlock!;
     const adventurerStartBlock = adventurer?.startBlock!;
     const blockDifference = nextBlockHashBlock - adventurerStartBlock;
-    const secondsUntilNextEntropy = blockDifference * averageBlockTime;
+    const secondsUntilNextEntropy = (blockDifference + 1) * averageBlockTime; // add one for closer estimate
     const adventurerCreatedTime = new Date(adventurer?.createdTime!).getTime();
     const nextEntropyTime =
       adventurerCreatedTime + secondsUntilNextEntropy * 1000;
@@ -35,12 +28,8 @@ export default function InterludeScreen({
   };
 
   useEffect(() => {
-    if (fetchedAverageBlockTime) {
-      getNextEntropyTime();
-    } else if (currentBlockNumber > 0) {
-      fetchData();
-    }
-  }, [fetchedAverageBlockTime, currentBlockNumber]);
+    getNextEntropyTime();
+  }, []);
 
   return (
     <>

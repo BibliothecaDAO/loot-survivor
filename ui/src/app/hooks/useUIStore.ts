@@ -84,6 +84,8 @@ type State = {
   setSpecialBeast: (value: SpecialBeast | null) => void;
   isMintingLords: boolean;
   setIsMintingLords: (value: boolean) => void;
+  averageBlockTime: number;
+  setAverageBlockTime: (value: number) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -149,6 +151,8 @@ const useUIStore = create<State>((set) => ({
   setSpecialBeast: (value) => set({ specialBeast: value }),
   isMintingLords: false,
   setIsMintingLords: (value) => set({ isMintingLords: value }),
+  averageBlockTime: 0,
+  setAverageBlockTime: (value) => set({ averageBlockTime: value }),
 }));
 
 export default useUIStore;
