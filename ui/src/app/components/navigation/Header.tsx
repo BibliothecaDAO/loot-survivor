@@ -23,7 +23,7 @@ import TransactionCart from "@/app/components/navigation/TransactionCart";
 import TransactionHistory from "@/app/components/navigation/TransactionHistory";
 import { NullAdventurer } from "@/app/types";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
-import { getApibaraStatus, getBlock } from "@/app/api/api";
+import { getApibaraStatus } from "@/app/api/api";
 import ApibaraStatus from "./ApibaraStatus";
 
 export interface HeaderProps {
@@ -47,7 +47,6 @@ export default function Header({
   const { account, address } = useAccount();
   const { disconnect } = useDisconnect();
   const [apibaraStatus, setApibaraStatus] = useState();
-  const [lastActionTimestamp, setLastActionTimestamp] = useState(0);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const resetData = useQueriesStore((state) => state.resetData);
@@ -64,6 +63,10 @@ export default function Header({
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const setScreen = useUIStore((state) => state.setScreen);
+  const updateDeathPenalty = useUIStore((state) => state.updateDeathPenalty);
+  const setUpdateDeathPenalty = useUIStore(
+    (state) => state.setUpdateDeathPenalty
+  );
 
   const calls = useTransactionCartStore((state) => state.calls);
   const txInCart = calls.length > 0;
@@ -84,15 +87,6 @@ export default function Header({
     setApibaraStatus(data.status.indicator);
   };
 
-  const handleLastActionTimestamp = async () => {
-    const lastActionBlock = await getBlock(adventurer?.lastAction ?? 0);
-    setLastActionTimestamp((lastActionBlock as any).timestamp);
-  };
-
-  useEffect(() => {
-    handleLastActionTimestamp();
-  }, [adventurer?.lastAction]);
-
   useEffect(() => {
     handleApibaraStatus();
   }, []);
@@ -106,9 +100,10 @@ export default function Header({
         <ApibaraStatus status={apibaraStatus} />
         {adventurer?.id && (
           <PenaltyCountDown
-            lastAction={lastActionTimestamp}
             dataLoading={isLoading.global}
             startCountdown={(adventurer?.level ?? 0) > 1}
+            updateDeathPenalty={updateDeathPenalty}
+            setUpdateDeathPenalty={setUpdateDeathPenalty}
           />
         )}
         <Button

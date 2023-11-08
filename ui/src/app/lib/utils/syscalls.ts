@@ -92,6 +92,7 @@ export interface SyscallsProps {
   getEthBalance: () => Promise<void>;
   getBalances: () => Promise<void>;
   setIsMintingLords: (value: boolean) => void;
+  setUpdateDeathPenalty: (value: boolean) => void;
 }
 
 function handleEquip(
@@ -198,6 +199,7 @@ export function syscalls({
   getEthBalance,
   getBalances,
   setIsMintingLords,
+  setUpdateDeathPenalty,
 }: SyscallsProps) {
   const gameData = new GameData();
 
@@ -682,6 +684,7 @@ export function syscalls({
       setDropItems([]);
       stopLoading(reversedDiscoveries, false, "Explore");
       getEthBalance();
+      setUpdateDeathPenalty(true);
     } catch (e) {
       console.log(e);
       stopLoading(e, true);
@@ -952,6 +955,7 @@ export function syscalls({
       setEquipItems([]);
       setDropItems([]);
       getEthBalance();
+      setUpdateDeathPenalty(true);
     } catch (e) {
       console.log(e);
       stopLoading(e, true);
@@ -1150,6 +1154,7 @@ export function syscalls({
       setEquipItems([]);
       setDropItems([]);
       getEthBalance();
+      setUpdateDeathPenalty(true);
     } catch (e) {
       console.log(e);
       stopLoading(e, true);
@@ -1672,6 +1677,7 @@ export function syscalls({
         // Reset items to no availability
         setData("latestMarketItemsQuery", null);
         setScreen("play");
+        setUpdateDeathPenalty(true);
       }
 
       stopLoading(notification, false, "Multicall");

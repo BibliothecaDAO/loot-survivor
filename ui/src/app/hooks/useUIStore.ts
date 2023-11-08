@@ -86,6 +86,8 @@ type State = {
   setIsMintingLords: (value: boolean) => void;
   averageBlockTime: number;
   setAverageBlockTime: (value: number) => void;
+  updateDeathPenalty: boolean;
+  setUpdateDeathPenalty: (value: boolean) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -153,6 +155,8 @@ const useUIStore = create<State>((set) => ({
   setIsMintingLords: (value) => set({ isMintingLords: value }),
   averageBlockTime: 0,
   setAverageBlockTime: (value) => set({ averageBlockTime: value }),
+  updateDeathPenalty: false,
+  setUpdateDeathPenalty: (value) => set({ updateDeathPenalty: value }),
 }));
 
 export default useUIStore;
