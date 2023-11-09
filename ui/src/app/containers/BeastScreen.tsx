@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useBlock } from "@starknet-react/core";
 import { Contract } from "starknet";
 import { BattleDisplay } from "@/app/components/beast/BattleDisplay";
@@ -32,6 +32,10 @@ export default function BeastScreen({
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
   const averageBlockTime = useUIStore((state) => state.averageBlockTime);
+  const setUpdateDeathPenalty = useUIStore(
+    (state) => state.setUpdateDeathPenalty
+  );
+  const setStartPenalty = useUIStore((state) => state.setStartPenalty);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const [showBattleLog, setShowBattleLog] = useState(false);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
@@ -171,6 +175,13 @@ export default function BeastScreen({
 
   const revealBlockReached =
     currentBlockNumber >= (adventurer?.revealBlock ?? 0);
+
+  useEffect(() => {
+    if (revealBlockReached) {
+      setStartPenalty(true);
+      setUpdateDeathPenalty(true);
+    }
+  }, [currentBlockNumber]);
 
   if (showBattleLog) {
     return <BattleLog />;

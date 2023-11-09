@@ -185,6 +185,9 @@ function Home({ updateConnectors }: HomeProps) {
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const setStartOption = useUIStore((state) => state.setStartOption);
+  const setUpdateDeathPenalty = useUIStore(
+    (state) => state.setUpdateDeathPenalty
+  );
 
   const arcadeConnectors = getArcadeConnectors(connectors);
 
@@ -257,6 +260,7 @@ function Home({ updateConnectors }: HomeProps) {
     getEthBalance,
     getBalances,
     setIsMintingLords,
+    setUpdateDeathPenalty,
   });
 
   const playState = useMemo(
