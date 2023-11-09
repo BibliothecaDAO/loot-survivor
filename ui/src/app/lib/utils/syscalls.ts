@@ -1315,6 +1315,7 @@ export function syscalls({
         setScreen("play");
       }
       getEthBalance();
+      setUpdateDeathPenalty(true);
     } catch (e) {
       console.log(e);
       stopLoading(e, true);

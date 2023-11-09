@@ -67,6 +67,8 @@ export default function Header({
   const setUpdateDeathPenalty = useUIStore(
     (state) => state.setUpdateDeathPenalty
   );
+  const startPenalty = useUIStore((state) => state.startPenalty);
+  const setStartPenalty = useUIStore((state) => state.setStartPenalty);
 
   const calls = useTransactionCartStore((state) => state.calls);
   const txInCart = calls.length > 0;
@@ -91,6 +93,12 @@ export default function Header({
     handleApibaraStatus();
   }, []);
 
+  useEffect(() => {
+    if (startPenalty) {
+      setStartPenalty(false);
+    }
+  }, [adventurer]);
+
   return (
     <div className="flex flex-row justify-between px-1  ">
       <div className="flex flex-row items-center gap-2 sm:gap-5">
@@ -101,7 +109,7 @@ export default function Header({
         {adventurer?.id && (
           <PenaltyCountDown
             dataLoading={isLoading.global}
-            startCountdown={(adventurer?.level ?? 0) > 1}
+            startCountdown={startPenalty || (adventurer?.level ?? 0) > 1}
             updateDeathPenalty={updateDeathPenalty}
             setUpdateDeathPenalty={setUpdateDeathPenalty}
           />

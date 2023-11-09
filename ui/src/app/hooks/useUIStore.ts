@@ -88,6 +88,8 @@ type State = {
   setAverageBlockTime: (value: number) => void;
   updateDeathPenalty: boolean;
   setUpdateDeathPenalty: (value: boolean) => void;
+  startPenalty: boolean;
+  setStartPenalty: (value: boolean) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -157,6 +159,8 @@ const useUIStore = create<State>((set) => ({
   setAverageBlockTime: (value) => set({ averageBlockTime: value }),
   updateDeathPenalty: false,
   setUpdateDeathPenalty: (value) => set({ updateDeathPenalty: value }),
+  startPenalty: false,
+  setStartPenalty: (value) => set({ startPenalty: value }),
 }));
 
 export default useUIStore;

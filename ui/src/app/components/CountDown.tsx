@@ -44,43 +44,41 @@ export interface PenaltyCountDownProps {
 }
 
 export const PenaltyCountDown: React.FC<PenaltyCountDownProps> = ({
+  dataLoading,
   startCountdown,
   updateDeathPenalty,
+  setUpdateDeathPenalty,
 }) => {
   const [seconds, setSeconds] = useState(penaltyTime);
-  const countdownIntervalRef = useRef<NodeJS.Timeout>();
+  const [intervalId, setIntervalId] = useState<number | null>(null);
 
   useEffect(() => {
-    if (updateDeathPenalty) {
-      setSeconds(penaltyTime); // Reset the timer with the penalty time
-      if (countdownIntervalRef.current) {
-        clearInterval(countdownIntervalRef.current);
+    const startTimer = () => {
+      setSeconds(penaltyTime);
+      const targetTime = new Date().getTime() + penaltyTime * 1000;
+
+      // Clear previous interval if it exists
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
       }
 
-      const targetTime = new Date().getTime() + penaltyTime * 1000;
-      countdownIntervalRef.current = setInterval(() => {
+      const newIntervalId = window.setInterval(() => {
         const currentTime = new Date().getTime();
         const timeRemaining = Math.max(
           0,
           Math.floor((targetTime - currentTime) / 1000)
         );
         setSeconds(timeRemaining);
-
-        if (timeRemaining <= 0) {
-          clearInterval(countdownIntervalRef.current);
-        }
       }, 1000);
-    } else {
-      if (countdownIntervalRef.current) {
-        clearInterval(countdownIntervalRef.current);
-      }
-    }
 
-    return () => {
-      if (countdownIntervalRef.current) {
-        clearInterval(countdownIntervalRef.current);
-      }
+      // Store the new interval ID
+      setIntervalId(newIntervalId);
     };
+
+    if (updateDeathPenalty) {
+      startTimer();
+      setUpdateDeathPenalty(false);
+    }
   }, [updateDeathPenalty]);
 
   return (
