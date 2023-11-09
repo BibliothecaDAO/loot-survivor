@@ -91,8 +91,7 @@ impl ImplGameEntropy of IGameEntropy {
     /// @return The number of blocks produced per hour.
     #[inline(always)]
     fn current_blocks_per_hour(self: GameEntropy) -> u64 {
-        let blocks_per_ten_minutes = self.next_update_block - self.last_updated_block;
-        blocks_per_ten_minutes * 6
+        (self.next_update_block - self.last_updated_block) * 2
     }
 
     /// @notice Calculate the next scheduled update block based on the current block and block production rate.
@@ -101,8 +100,7 @@ impl ImplGameEntropy of IGameEntropy {
     /// @return The block number for the next update.
     #[inline(always)]
     fn calculate_next_update_block(current_block: u64, blocks_per_hour: u64) -> u64 {
-        let blocks_per_ten_mins = blocks_per_hour / 6;
-        current_block + blocks_per_ten_mins
+        current_block + (blocks_per_hour / 2)
     }
 
     /// @notice Get the rate limit based on the current block production rate.
@@ -131,7 +129,7 @@ impl ImplGameEntropy of IGameEntropy {
     /// @return The number of penalty blocks.
     #[inline(always)]
     fn get_idle_penalty_blocks(self: GameEntropy) -> u64 {
-        self.next_update_block - self.last_updated_block - 1
+        (self.next_update_block - self.last_updated_block) / 3 - 1
     }
 }
 
