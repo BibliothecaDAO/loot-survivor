@@ -84,7 +84,10 @@ export const useBurner = ({
     let storage = Storage.get("burners") || {};
     return Object.keys(storage).map((address) => {
       if (
-        storage[address].gameContract === process.env.NEXT_PUBLIC_GAME_ADDRESS
+        storage[address].gameContract ===
+          process.env.NEXT_PUBLIC_GAME_ADDRESS ||
+        storage[address].gameContract ===
+          process.env.NEXT_PUBLIC_OLD_GAME_ADDRESS
       ) {
         return {
           address,
