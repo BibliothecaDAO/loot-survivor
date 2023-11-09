@@ -288,14 +288,15 @@ export default function UpgradeScreen({
     adventurerItems
   );
 
-  const maxHealth = 100 + totalVitality * 10;
+  const maxHealth = Math.min(100 + totalVitality * 10, 511);
   const newMaxHealth = 100 + (totalVitality - vitBoostRemoved) * 10;
   const currentHealth = adventurer?.health! + selectedVitality * 10;
   const healthPlusPots = Math.min(
     currentHealth! + potionAmount * 10,
     maxHealth
   );
-  const healthOverflow = healthPlusPots > newMaxHealth;
+  // const healthOverflow = healthPlusPots > newMaxHealth;
+  const healthOverflow = true;
 
   const handleSubmitUpgradeTx = async () => {
     renderSummary();
@@ -534,6 +535,7 @@ export default function UpgradeScreen({
                         totalCharisma={totalCharisma}
                         upgradeHandler={handleAddUpgradeTx}
                         totalVitality={totalVitality}
+                        vitBoostRemoved={vitBoostRemoved}
                       />
                     </div>
                   )}

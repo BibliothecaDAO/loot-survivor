@@ -17,6 +17,7 @@ interface PurchaseHealthProps {
     items?: any[]
   ) => void;
   totalVitality: number;
+  vitBoostRemoved: number;
 }
 
 const PurchaseHealth = ({
@@ -25,6 +26,7 @@ const PurchaseHealth = ({
   setPotionAmount,
   totalCharisma,
   upgradeHandler,
+  vitBoostRemoved,
 }: PurchaseHealthProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const prevAmountRef = useRef<number | undefined>(0);
@@ -37,7 +39,7 @@ const PurchaseHealth = ({
   const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
 
   const max = Math.min(
-    Math.ceil((maxHealth - (adventurer?.health ?? 0)) / 10),
+    Math.ceil((maxHealth - (adventurer?.health ?? 0) - vitBoostRemoved) / 10),
     Math.floor(
       (adventurer?.gold! - (upgradeTotalCost - potionAmount * potionCost)) /
         potionCost
@@ -109,9 +111,15 @@ const PurchaseHealth = ({
         Fill to Max
       </Button>
       <div className="flex flex-col gap-2 sm:flex-row items-center p-4">
-        <p className="text-center">
-          You can only buy up to Max Health! 1 Potion = 10 Health
-        </p>
+        {!vitBoostRemoved ? (
+          <p className="text-center">
+            You can only buy up to Max Health! 1 Potion = 10 Health
+          </p>
+        ) : (
+          <p className="text-center">
+            You are removing VIT boost so max potions are lower than usual!
+          </p>
+        )}
       </div>
     </div>
   );
