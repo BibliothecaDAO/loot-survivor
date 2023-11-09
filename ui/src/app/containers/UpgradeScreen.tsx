@@ -295,8 +295,7 @@ export default function UpgradeScreen({
     currentHealth! + potionAmount * 10,
     maxHealth
   );
-  // const healthOverflow = healthPlusPots > newMaxHealth;
-  const healthOverflow = true;
+  const healthOverflow = healthPlusPots > newMaxHealth;
 
   const handleSubmitUpgradeTx = async () => {
     renderSummary();
