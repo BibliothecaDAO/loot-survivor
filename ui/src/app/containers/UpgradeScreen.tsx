@@ -371,6 +371,12 @@ export default function UpgradeScreen({
     getNoBoostedStats();
   }, []);
 
+  useEffect(() => {
+    if (healthOverflow) {
+      setPotionAmount(Math.max(potionAmount - vitBoostRemoved, 0));
+    }
+  }, [newMaxHealth]);
+
   return (
     <>
       {hasStatUpgrades ? (
