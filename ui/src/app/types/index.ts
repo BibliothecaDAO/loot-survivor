@@ -492,3 +492,13 @@ export type GameEntropy = {
   last_updated_time: bigint;
   next_update_block: bigint;
 };
+
+export type BlockData = {
+  block_hash: string;
+  block_number: number;
+  new_root: string;
+  parent_hash: string;
+  sequencer_address: string;
+  status: string;
+  timestamp: number;
+};

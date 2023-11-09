@@ -7,7 +7,6 @@ import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { NullAdventurer, FormData } from "@/app/types";
 import useUIStore from "@/app/hooks/useUIStore";
-import { TournamentEnd } from "@/app/components/archived/TournamentEnd";
 
 interface AdventurerScreenProps {
   spawn: (formData: FormData, goldenTokenId: string) => Promise<void>;
@@ -68,8 +67,6 @@ export default function AdventurerScreen({
     }
   }, []);
 
-  const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
-
   return (
     <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap h-full">
       <div className="w-full sm:w-2/12">
@@ -85,19 +82,15 @@ export default function AdventurerScreen({
 
       {startOption === "create adventurer" && (
         <div className="flex flex-col sm:mx-auto sm:justify-center sm:flex-row gap-2 sm:w-8/12 md:w-10/12">
-          {!onMainnet ? (
-            <CreateAdventurer
-              isActive={activeMenu == 1}
-              onEscape={() => setActiveMenu(0)}
-              spawn={spawn}
-              lordsBalance={lordsBalance}
-              goldenTokenData={goldenTokenData}
-              gameContract={gameContract}
-              getBalances={getBalances}
-            />
-          ) : (
-            <TournamentEnd />
-          )}
+          <CreateAdventurer
+            isActive={activeMenu == 1}
+            onEscape={() => setActiveMenu(0)}
+            spawn={spawn}
+            lordsBalance={lordsBalance}
+            goldenTokenData={goldenTokenData}
+            gameContract={gameContract}
+            getBalances={getBalances}
+          />
         </div>
       )}
 

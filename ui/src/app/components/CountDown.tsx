@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useCountUp } from "react-countup";
 import { useState } from "react";
-import { penaltyTime } from "@/app/lib/constants";
+import { penaltyTime } from "../lib/constants";
 
 const formatTime = (totalSeconds: number) => {
   const hours = Math.floor(totalSeconds / 3600);
@@ -37,66 +37,60 @@ export const HealthCountDown = ({ health }: any) => {
 };
 
 export interface PenaltyCountDownProps {
-  lastDiscoveryTime?: Date;
-  lastBattleTime?: Date;
   dataLoading: boolean;
   startCountdown: boolean;
+  updateDeathPenalty: boolean;
+  setUpdateDeathPenalty: (value: boolean) => void;
 }
 
-export const PenaltyCountDown = ({
-  lastDiscoveryTime,
-  lastBattleTime,
+export const PenaltyCountDown: React.FC<PenaltyCountDownProps> = ({
   dataLoading,
   startCountdown,
-}: PenaltyCountDownProps) => {
-  const [seconds, setSeconds] = useState(0);
-
-  const finishedMessage = "Penalty Reached!";
-  const countingMessage = "Penalty:";
-
-  const formatDiscoveryTime = new Date(lastDiscoveryTime ?? 0).getTime();
-  const formatBattleTime = new Date(lastBattleTime ?? 0).getTime();
-
-  // Need to adjust this time from UTC to timezone
-  const lastAction =
-    formatDiscoveryTime > formatBattleTime
-      ? formatDiscoveryTime
-      : formatBattleTime;
-
-  const formatLastAction = lastAction;
-  const targetTime = formatLastAction + penaltyTime * 1000;
+  updateDeathPenalty,
+  setUpdateDeathPenalty,
+}) => {
+  const [seconds, setSeconds] = useState(penaltyTime);
+  const [intervalId, setIntervalId] = useState<number | null>(null);
 
   useEffect(() => {
-    if (targetTime) {
-      const updateCountdown = () => {
+    const startTimer = () => {
+      setSeconds(penaltyTime);
+      const targetTime = new Date().getTime() + penaltyTime * 1000;
+
+      // Clear previous interval if it exists
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
+      }
+
+      const newIntervalId = window.setInterval(() => {
         const currentTime = new Date().getTime();
-        const timeRemaining = targetTime - currentTime;
-        setSeconds(Math.floor(timeRemaining / 1000));
-      };
+        const timeRemaining = Math.max(
+          0,
+          Math.floor((targetTime - currentTime) / 1000)
+        );
+        setSeconds(timeRemaining);
+      }, 1000);
 
-      updateCountdown();
-      const interval = setInterval(updateCountdown, 1000);
+      // Store the new interval ID
+      setIntervalId(newIntervalId);
+    };
 
-      return () => {
-        clearInterval(interval);
-      };
+    if (updateDeathPenalty) {
+      startTimer();
+      setUpdateDeathPenalty(false);
     }
-  }, [targetTime]);
+  }, [updateDeathPenalty]);
 
   return (
     <div className="text-xxs sm:text-lg self-center border px-1 border border-terminal-green">
       {startCountdown ? (
-        !dataLoading ? (
-          seconds > 0 ? (
-            <span className="flex flex-row gap-1 items-center">
-              <p className="hidden sm:block">{countingMessage}</p>
-              <p className="animate-pulse">{formatTime(seconds)}</p>
-            </span>
-          ) : (
-            <p>{finishedMessage}</p>
-          )
+        seconds > 0 ? (
+          <span className="flex flex-row gap-1 items-center">
+            <p className="hidden sm:block">Penalty:</p>
+            <p className="animate-pulse">{formatTime(seconds)}</p>
+          </span>
         ) : (
-          <p className="loading-ellipsis">Loading</p>
+          <p>Penalty Reached!</p>
         )
       ) : (
         <p>Not Started</p>
