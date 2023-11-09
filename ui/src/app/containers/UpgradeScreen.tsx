@@ -302,14 +302,13 @@ export default function UpgradeScreen({
     resetNotification();
     // Handle for vitBoostRemoval
     let upgradeTx: any;
-      if (healthOverflow) {
-        const newUpgradeTx = handleAddUpgradeTx(
-          undefined,
-          Math.max(potionAmount - vitBoostRemoved, 0),
-          undefined
-        );
-        upgradeTx = newUpgradeTx;
-      }
+    if (healthOverflow) {
+      const newUpgradeTx = handleAddUpgradeTx(
+        undefined,
+        Math.max(potionAmount - vitBoostRemoved, 0),
+        undefined
+      );
+      upgradeTx = newUpgradeTx;
     }
     try {
       await upgrade(
