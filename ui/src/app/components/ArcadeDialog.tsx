@@ -276,7 +276,8 @@ interface ArcadeAccountCardProps {
   genNewKey: (address: string, connector: Connector) => Promise<void>;
   setPermissions: (
     accountAAFinalAdress: string,
-    walletAccount: AccountInterface
+    walletAccount: AccountInterface,
+    alreadyDeployed: boolean
   ) => Promise<string>;
   setIsSettingPermissions: (isSettingPermissions: boolean) => void;
   setShowLoader: (showLoader: boolean) => void;
@@ -481,7 +482,7 @@ export const ArcadeAccountCard = ({
                 onClick={async () => {
                   setShowLoader(true);
                   setIsSettingPermissions(true);
-                  await setPermissions(account.name, walletAccount);
+                  await setPermissions(account.name, walletAccount, true);
                   setIsSettingPermissions(false);
                   setShowLoader(false);
                 }}
