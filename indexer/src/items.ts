@@ -199,7 +199,7 @@ export default function transform({ header, events }: Block) {
         const as = value.adventurerState;
         console.log("ITEMS_LEVELED_UP", "->", "ITEMS UPDATES");
         const result = value.items.map((item) => {
-          if (item.prefixesUnlocked || item.suffixUnlocked) {
+          if (item.prefixesUnlocked && item.suffixUnlocked) {
             return {
               entity: {
                 item: checkExistsInt(BigInt(item.itemId)),
@@ -212,6 +212,35 @@ export default function transform({ header, events }: Block) {
                   special1: checkExistsInt(BigInt(item.specials.special1)),
                   special2: checkExistsInt(BigInt(item.specials.special2)),
                   special3: checkExistsInt(BigInt(item.specials.special3)),
+                },
+              },
+            };
+          } else if (item.prefixesUnlocked) {
+            return {
+              entity: {
+                item: checkExistsInt(BigInt(item.itemId)),
+                adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+              },
+              update: {
+                $set: {
+                  item: checkExistsInt(BigInt(item.itemId)),
+                  adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+                  special2: checkExistsInt(BigInt(item.specials.special2)),
+                  special3: checkExistsInt(BigInt(item.specials.special3)),
+                },
+              },
+            };
+          } else if (item.suffixUnlocked) {
+            return {
+              entity: {
+                item: checkExistsInt(BigInt(item.itemId)),
+                adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+              },
+              update: {
+                $set: {
+                  item: checkExistsInt(BigInt(item.itemId)),
+                  adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+                  special1: checkExistsInt(BigInt(item.specials.special1)),
                 },
               },
             };
