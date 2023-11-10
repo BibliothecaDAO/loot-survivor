@@ -15,7 +15,6 @@ export const TxActivity = () => {
   const error = useTransactionCartStore((state) => state.error);
   const setError = useTransactionCartStore((state) => state.setError);
 
-  console.log(hash);
   const { data } = useWaitForTransaction({
     hash: hash ? hash : "0x0",
   }) as { data: InvokeTransactionReceiptResponse };

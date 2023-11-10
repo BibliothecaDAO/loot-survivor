@@ -448,7 +448,6 @@ export function syscalls({
       const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
-      console.log(receipt);
       // Handle if the tx was reverted
       if (
         (receipt as RevertedTransactionReceiptResponse).execution_status ===

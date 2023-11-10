@@ -252,14 +252,11 @@ export const useBurner = ({
         await provider.waitForTransaction(deployTx);
 
         setIsDeploying(false);
-        setIsSettingPermissions(true);
 
         const setPermissionsTx = await setPermissions(
           accountAAFinalAddress,
           walletAccount
         );
-
-        await provider.waitForTransaction(setPermissionsTx);
 
         // save burner
         let storage = Storage.get("burners") || {};
@@ -280,8 +277,6 @@ export const useBurner = ({
 
         setAccount(burner);
         Storage.set("burners", storage);
-        setIsSettingPermissions(false);
-        setIsDeploying(false);
         setShowLoader(false);
         return burner;
       } catch (e) {
@@ -302,6 +297,8 @@ export const useBurner = ({
       alreadyDeployed?: boolean
     ) => {
       try {
+        setShowLoader(true);
+        setIsSettingPermissions(true);
         const permissions: Call[] = [
           {
             contractAddress: accountAAFinalAdress,
@@ -330,6 +327,8 @@ export const useBurner = ({
           permissions
         );
 
+        await provider.waitForTransaction(permissionsTx);
+
         if (alreadyDeployed) {
           // save burner
           let storage = Storage.get("burners") || {};
@@ -338,8 +337,12 @@ export const useBurner = ({
           }
           storage[padAddress(accountAAFinalAdress)].gameContract =
             gameContract?.address ?? "";
+
+          Storage.set("burners", storage);
+          setShowLoader(false); // close loader for set permissions called from deployed arcade
         }
 
+        setIsSettingPermissions(false);
         return permissionsTx;
       } catch (e) {
         setIsSettingPermissions(false);
