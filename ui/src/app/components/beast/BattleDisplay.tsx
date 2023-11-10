@@ -319,7 +319,7 @@ export const NotificationBattleDisplay = ({
             <GiBattleGearIcon />
           </span>
           <TwitterShareButton
-            text={`${adventurer?.name} just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${process.env.NEXT_PUBLIC_APP_URL}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+            text={`${adventurer?.name} just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${process.env.NEXT_PUBLIC_APP_URL}\n\n@lootrealms #Starknet #Play2Die #🪦`}
             className="animate-pulse"
           />
         </div>

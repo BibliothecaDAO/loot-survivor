@@ -125,7 +125,7 @@ export const DeathDialog = () => {
                   adventurer?.xp
                 } XP.\n\nGravestone bears the inscription:\n\n"${twitterDeathMessage}"🪦\n\nEnter here and try to survive: ${
                   process.env.NEXT_PUBLIC_APP_URL
-                }\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+                }\n\n@lootrealms #Starknet #Play2Die #🪦`}
                 className="animate-pulse"
               />
               <Button

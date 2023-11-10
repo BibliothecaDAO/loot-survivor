@@ -1409,24 +1409,6 @@ export function syscalls({
   ) => {
     const isArcade = checkArcadeConnector(connector!);
 
-    const items: string[] = [];
-
-    for (const dict of calls) {
-      if (
-        dict.hasOwnProperty("entrypoint") &&
-        (dict["entrypoint"] === "bid_on_item" ||
-          dict["entrypoint"] === "claim_item")
-      ) {
-        if (Array.isArray(dict.calldata)) {
-          items.unshift(dict.calldata[0]?.toString() ?? "");
-        }
-      }
-      if (dict["entrypoint"] === "equip") {
-        if (Array.isArray(dict.calldata)) {
-          items.unshift(dict.calldata[2]?.toString() ?? "");
-        }
-      }
-    }
     startLoading("Multicall", loadingMessage, undefined, adventurer?.id);
     try {
       let upgradeCalls = [];
@@ -1465,7 +1447,6 @@ export function syscalls({
         hash: tx?.transaction_hash,
         metadata: {
           method: "Multicall",
-          items: items,
         },
       });
       const events = await parseEvents(
@@ -1593,11 +1574,6 @@ export function syscalls({
         (event) => event.name === "AdventurerUpgraded"
       );
       for (let upgradeEvent of upgradeEvents) {
-        // Update adventurer
-        setData("adventurerByIdQuery", {
-          adventurers: [upgradeEvent.data],
-        });
-        setAdventurer(upgradeEvent.data);
         // If there are any equip or drops, do them first
         const { equippedItems, unequippedItems } = handleEquip(
           events,
@@ -1605,6 +1581,11 @@ export function syscalls({
           setAdventurer,
           queryData
         );
+        // Update adventurer
+        setData("adventurerByIdQuery", {
+          adventurers: [upgradeEvent.data],
+        });
+        setAdventurer(upgradeEvent.data);
         const droppedItems = handleDrop(events, setData, setAdventurer);
 
         // Add purchased items
@@ -1665,6 +1646,7 @@ export function syscalls({
             ...(filteredUnequips ?? []),
             ...equippedItems,
             ...unequippedItems,
+            ...purchasedItems,
           ],
         });
         for (let i = 0; i < unequipIndexes.length; i++) {
