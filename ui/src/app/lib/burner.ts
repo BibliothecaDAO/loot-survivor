@@ -296,7 +296,11 @@ export const useBurner = ({
   );
 
   const setPermissions = useCallback(
-    async (accountAAFinalAdress: string, walletAccount: AccountInterface) => {
+    async (
+      accountAAFinalAdress: string,
+      walletAccount: AccountInterface,
+      alreadyDeployed?: boolean
+    ) => {
       try {
         const permissions: Call[] = [
           {
@@ -325,6 +329,16 @@ export const useBurner = ({
         const { transaction_hash: permissionsTx } = await walletAccount.execute(
           permissions
         );
+
+        if (alreadyDeployed) {
+          // save burner
+          let storage = Storage.get("burners") || {};
+          for (let address in storage) {
+            storage[address].active = false;
+          }
+          storage[padAddress(accountAAFinalAdress)].gameContract =
+            gameContract?.address ?? "";
+        }
 
         return permissionsTx;
       } catch (e) {
