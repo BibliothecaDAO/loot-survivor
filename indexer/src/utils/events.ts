@@ -1,4 +1,4 @@
-import { hash } from "https://esm.sh/starknet";
+import { hash } from "https://esm.sh/starknet@5.19.5";
 
 import {
   combineParsers,
