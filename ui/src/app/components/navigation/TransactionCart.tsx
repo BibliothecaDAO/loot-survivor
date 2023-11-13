@@ -138,6 +138,7 @@ const TransactionCart = ({
       } Adventurers`,
     ]);
     setLoadingMessage((messages) => [...messages, "Slaying Adventurer"]);
+    console.log("here");
   }, []);
 
   const handleLoadData = useCallback(() => {

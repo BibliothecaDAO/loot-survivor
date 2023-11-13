@@ -19,7 +19,7 @@ import { ProfileIcon, SkullIcon } from "@/app/components/icons/Icons";
 import { IsIdleResult } from "@/app/types";
 
 interface LeaderboardScreenProps {
-  slayAllIdles: (slayAdventurers: string[]) => Promise<void>;
+  slayIdles: (slayAdventurers: string[]) => Promise<void>;
   gameContract: Contract;
 }
 
@@ -28,7 +28,7 @@ interface LeaderboardScreenProps {
  * @description Provides the leaderboard screen for the adventurer.
  */
 export default function LeaderboardScreen({
-  slayAllIdles,
+  slayIdles,
   gameContract,
 }: LeaderboardScreenProps) {
   const itemsPerPage = 10;
@@ -126,7 +126,6 @@ export default function LeaderboardScreen({
         adventurer?.id ?? "0",
       ]);
       const isIdle = (isIdleResult as IsIdleResult)["0"];
-      console.log(isIdle);
       if (isIdle) {
         idleAdventurers.push(adventurer?.id?.toString() ?? "0");
       }
@@ -160,10 +159,16 @@ export default function LeaderboardScreen({
               <p className="sm:text-2xl">{aliveAdventurers.length}</p>
             </div>
             <Button
-              onClick={async () => await slayAllIdles(idleAdventurers!)}
-              disabled={loadingIdles}
+              onClick={async () => await slayIdles(idleAdventurers!)}
+              disabled={loadingIdles || idleAdventurers?.length === 0}
             >
-              Slay Idle Adventurers
+              {loadingIdles ? (
+                <p className="loading-ellipsis">Loading Idles</p>
+              ) : idleAdventurers?.length === 0 ? (
+                "No Idle Adventurers"
+              ) : (
+                "Slay Idle Adventurers"
+              )}
             </Button>
             <Button
               onClick={async () => {
@@ -195,6 +200,7 @@ export default function LeaderboardScreen({
                 gameContract={gameContract}
                 gameEntropyUpdateTime={gameEntropyUpdateTime!}
                 currentBlock={currentBlock!}
+                idleAdventurers={idleAdventurers}
               />
             </div>
             <div

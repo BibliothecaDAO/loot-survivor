@@ -223,7 +223,7 @@ function Home({ updateConnectors }: HomeProps) {
     attack,
     flee,
     upgrade,
-    slayAllIdles,
+    slayIdles,
     multicall,
     mintLords,
   } = syscalls({
@@ -587,7 +587,7 @@ function Home({ updateConnectors }: HomeProps) {
                   )}
                   {screen === "leaderboard" && (
                     <LeaderboardScreen
-                      slayAllIdles={slayAllIdles}
+                      slayIdles={slayIdles}
                       gameContract={gameContract!}
                     />
                   )}
