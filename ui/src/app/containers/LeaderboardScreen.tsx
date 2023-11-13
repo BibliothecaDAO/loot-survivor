@@ -16,9 +16,10 @@ import LiveTable from "@/app/components/leaderboard/LiveTable";
 import { RefreshIcon } from "@/app/components/icons/Icons";
 import LootIconLoader from "@/app/components/icons/Loader";
 import { ProfileIcon, SkullIcon } from "@/app/components/icons/Icons";
+import { IsIdleResult } from "@/app/types";
 
 interface LeaderboardScreenProps {
-  slayAllIdles: (slayAdventurers: number[]) => Promise<void>;
+  slayAllIdles: (slayAdventurers: string[]) => Promise<void>;
   gameContract: Contract;
 }
 
@@ -35,6 +36,10 @@ export default function LeaderboardScreen({
   const [gameEntropyUpdateTime, setGameEntropyUpdateTime] = useState<
     number | null
   >();
+  const [idleAdventurers, setIdleAdventurers] = useState<
+    string[] | undefined
+  >();
+  const [loadingIdles, setLoadingIdles] = useState(false);
 
   const { data: blockData } = useBlock({
     refetchInterval: false,
@@ -113,9 +118,33 @@ export default function LeaderboardScreen({
     setGameEntropyUpdateTime(gameEntropyUpdateTime);
   };
 
+  const getIdleAdventurers = async (adventurers: Adventurer[]) => {
+    setLoadingIdles(true);
+    const idleAdventurers = [];
+    for (let adventurer of adventurers) {
+      const isIdleResult = await gameContract.call("is_idle", [
+        adventurer?.id ?? "0",
+      ]);
+      const isIdle = (isIdleResult as IsIdleResult)["0"];
+      console.log(isIdle);
+      if (isIdle) {
+        idleAdventurers.push(adventurer?.id?.toString() ?? "0");
+      }
+    }
+    console.log(idleAdventurers);
+    setIdleAdventurers(idleAdventurers);
+    setLoadingIdles(false);
+  };
+
   useEffect(() => {
     getGameEntropy();
   }, []);
+
+  useEffect(() => {
+    if (data.adventurersByXPQuery?.adventurers) {
+      getIdleAdventurers(aliveAdventurers);
+    }
+  }, [adventurers]);
 
   return (
     <div className="flex flex-col items-center h-full xl:overflow-y-auto 2xl:overflow-hidden mt-5 sm:mt-0">
@@ -130,6 +159,12 @@ export default function LeaderboardScreen({
               <ProfileIcon className="fill-current w-4 h-4 sm:w-8 sm:h-8" />
               <p className="sm:text-2xl">{aliveAdventurers.length}</p>
             </div>
+            <Button
+              onClick={async () => await slayAllIdles(idleAdventurers!)}
+              disabled={loadingIdles}
+            >
+              Slay Idle Adventurers
+            </Button>
             <Button
               onClick={async () => {
                 const adventurersByXPdata = await refetch(

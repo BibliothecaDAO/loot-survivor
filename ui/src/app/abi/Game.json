@@ -857,6 +857,22 @@
       },
       {
         "type": "function",
+        "name": "is_idle",
+        "inputs": [
+          {
+            "name": "adventurer_id",
+            "type": "core::felt252"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "(core::bool, core::integer::u16)"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
         "name": "get_stats",
         "inputs": [
           {
@@ -1947,6 +1963,17 @@
         "outputs": [
           {
             "type": "game_entropy::game_entropy::GameEntropy"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "get_idle_penalty_blocks",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u64"
           }
         ],
         "state_mutability": "view"

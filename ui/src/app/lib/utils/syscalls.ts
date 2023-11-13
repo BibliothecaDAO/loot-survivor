@@ -1321,7 +1321,7 @@ export function syscalls({
     }
   };
 
-  const slayAllIdles = async (slayAdventurers: number[]) => {
+  const slayAllIdles = async (slayAdventurers: string[]) => {
     const slayIdleAdventurersTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "slay_idle_adventurers",
