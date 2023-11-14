@@ -1,12 +1,11 @@
 import { Contract } from "starknet";
-// import { useBlock } from "@starknet-react/core";
 import { Adventurer } from "@/app/types";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
-import { CoinIcon } from "@/app/components/icons/Icons";
-// import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
-// import { Button } from "@/app/components/buttons/Button";
+import { CoinIcon, SkullIcon } from "@/app/components/icons/Icons";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { Button } from "@/app/components/buttons/Button";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
-// import useUIStore from "@/app/hooks/useUIStore";
+import useUIStore from "@/app/hooks/useUIStore";
 import { calculateLevel } from "@/app/lib/utils";
 
 interface LiveLeaderboardRowProps {
@@ -15,6 +14,7 @@ interface LiveLeaderboardRowProps {
   gameContract: Contract;
   gameEntropyUpdateTime: number;
   currentBlock: number;
+  idleAdventurers?: string[];
 }
 
 const LiveLeaderboardRow = ({
@@ -23,17 +23,18 @@ const LiveLeaderboardRow = ({
   gameContract,
   gameEntropyUpdateTime,
   currentBlock,
+  idleAdventurers,
 }: LiveLeaderboardRowProps) => {
   const { play: clickPlay } = useUiSounds(soundSelector.click);
-  // const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  // const removeEntrypointFromCalls = useTransactionCartStore(
-  //   (state) => state.removeEntrypointFromCalls
-  // );
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const removeEntrypointFromCalls = useTransactionCartStore(
+    (state) => state.removeEntrypointFromCalls
+  );
   const adventurersByOwner = useQueriesStore(
     (state) => state.data.adventurersByOwnerQuery?.adventurers ?? []
   );
-  // const slayAdventurers = useUIStore((state) => state.slayAdventurers);
-  // const setSlayAdventurers = useUIStore((state) => state.setSlayAdventurers);
+  const slayAdventurers = useUIStore((state) => state.slayAdventurers);
+  const setSlayAdventurers = useUIStore((state) => state.setSlayAdventurers);
 
   const ownedAdventurer = adventurersByOwner.some(
     (a) => a.id === adventurer.id
@@ -43,41 +44,26 @@ const LiveLeaderboardRow = ({
     (a, b) => (b.xp ?? 0) - (a.xp ?? 0)
   );
   const topScoreAdventurer = topScores[0]?.id === adventurer.id;
-  // const handleSlayAdventurer = async () => {
-  //   removeEntrypointFromCalls("slay_idle_adventurers");
-  //   setSlayAdventurers([...slayAdventurers, adventurer?.id?.toString() ?? "0"]);
-  //   const formattedSlayedAdventurers = [
-  //     ...slayAdventurers,
-  //     adventurer?.id?.toString() ?? "0",
-  //   ];
-  //   const slayIdleAdventurerTx = {
-  //     contractAddress: gameContract?.address ?? "",
-  //     entrypoint: "slay_idle_adventurers",
-  //     calldata: [
-  //       formattedSlayedAdventurers.length.toString(),
-  //       ...formattedSlayedAdventurers,
-  //     ],
-  //     metadata: `Slaying ${adventurer.name}`,
-  //   };
-  //   if (gameContract) {
-  //     addToCalls(slayIdleAdventurerTx);
-  //   }
-  // };
-
-  // const formatLastActionBlock = adventurer?.lastAction ?? 0;
-  // const formatCurrentBlock = currentBlock % 512;
-  // const isBeyondWaitPeriod =
-  //   currentBlock < adventurer?.revealBlock! + gameEntropyUpdateTime - 1;
-  // const lastActionOrWaitPeriod = isBeyondWaitPeriod
-  //   ? formatLastActionBlock
-  //   : (adventurer?.revealBlock! + gameEntropyUpdateTime - 1) % 512;
-
-  // const idleTime =
-  //   formatCurrentBlock >= lastActionOrWaitPeriod
-  //     ? formatCurrentBlock - lastActionOrWaitPeriod
-  //     : 512 - lastActionOrWaitPeriod + formatCurrentBlock;
-
-  // const isIdle = idleTime >= gameEntropyUpdateTime - 1;
+  const handleSlayAdventurer = async () => {
+    removeEntrypointFromCalls("slay_idle_adventurers");
+    setSlayAdventurers([...slayAdventurers, adventurer?.id?.toString() ?? "0"]);
+    const formattedSlayedAdventurers = [
+      ...slayAdventurers,
+      adventurer?.id?.toString() ?? "0",
+    ];
+    const slayIdleAdventurerTx = {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "slay_idle_adventurers",
+      calldata: [
+        formattedSlayedAdventurers.length.toString(),
+        ...formattedSlayedAdventurers,
+      ],
+      metadata: `Slaying ${adventurer.name}`,
+    };
+    if (gameContract) {
+      addToCalls(slayIdleAdventurerTx);
+    }
+  };
 
   return (
     <tr
@@ -107,7 +93,7 @@ const LiveLeaderboardRow = ({
       <td>
         <span className="flex justify-center">{adventurer.health}</span>
       </td>
-      {/* <td>
+      <td>
         {" "}
         <Button
           onClick={(e) => {
@@ -120,12 +106,12 @@ const LiveLeaderboardRow = ({
             slayAdventurers.includes(adventurer?.id?.toString() ?? "0") ||
             adventurer?.health === 0 ||
             !adventurer?.id ||
-            !isIdle
+            !(idleAdventurers ?? []).includes(adventurer?.id.toString())
           }
         >
           <SkullIcon className="w-3" />
         </Button>
-      </td> */}
+      </td>
     </tr>
   );
 };

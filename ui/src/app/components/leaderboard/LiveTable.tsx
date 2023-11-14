@@ -12,6 +12,7 @@ export interface LiveLeaderboardTableProps {
   gameContract: Contract;
   gameEntropyUpdateTime: number;
   currentBlock: number;
+  idleAdventurers?: string[];
 }
 
 const LiveLeaderboardTable = ({
@@ -21,6 +22,7 @@ const LiveLeaderboardTable = ({
   gameContract,
   gameEntropyUpdateTime,
   currentBlock,
+  idleAdventurers,
 }: LiveLeaderboardTableProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const setScreen = useUIStore((state) => state.setScreen);
@@ -72,6 +74,7 @@ const LiveLeaderboardTable = ({
                   gameContract={gameContract}
                   gameEntropyUpdateTime={gameEntropyUpdateTime}
                   currentBlock={currentBlock}
+                  idleAdventurers={idleAdventurers}
                 />
               )
             )}

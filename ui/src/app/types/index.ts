@@ -502,3 +502,8 @@ export type BlockData = {
   status: string;
   timestamp: number;
 };
+
+export type IsIdleResult = {
+  0: boolean;
+  1: bigint;
+};
