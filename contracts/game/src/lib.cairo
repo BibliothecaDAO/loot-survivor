@@ -1150,8 +1150,11 @@ mod Game {
         // if beast beast level is above collectible threshold
         if beast.combat_spec.level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK {
             // mint beast to the players Primary Account address instead of Arcade Account
+            let owner_address = self._owner.read(adventurer_id);
             let primary_address = _get_primary_account_address(
-                @self, _load_adventurer_metadata(@self, adventurer_id).interface_camel
+                @self,
+                owner_address,
+                _load_adventurer_metadata(@self, adventurer_id).interface_camel
             );
             // adventurers gets the beast
             _mint_beast(@self, beast, primary_address);
@@ -2958,7 +2961,8 @@ mod Game {
 
     fn _update_owner_to_primary_account(ref self: ContractState, adventurer_id: felt252) {
         let interface_camel = _load_adventurer_metadata(@self, adventurer_id).interface_camel;
-        let primary_address = _get_primary_account_address(@self, interface_camel);
+        let owner_address = self._owner.read(adventurer_id);
+        let primary_address = _get_primary_account_address(@self, owner_address, interface_camel);
         if primary_address != self._owner.read(adventurer_id) {
             self._owner.write(adventurer_id, primary_address)
         }
@@ -3638,22 +3642,21 @@ mod Game {
     }
 
     fn _get_primary_account_address(
-        self: @ContractState, interface_camel: bool
+        self: @ContractState, address: ContractAddress, interface_camel: bool
     ) -> ContractAddress {
-        let caller = get_caller_address();
         if interface_camel {
-            let account_camel = ISRC5CamelDispatcher { contract_address: caller };
+            let account_camel = ISRC5CamelDispatcher { contract_address: address };
             if account_camel.supportsInterface(ARCADE_ACCOUNT_ID) {
-                IMasterControlDispatcher { contract_address: caller }.get_master_account()
+                IMasterControlDispatcher { contract_address: address }.get_master_account()
             } else {
-                caller
+                address
             }
         } else {
-            let account_snake = ISRC5Dispatcher { contract_address: caller };
+            let account_snake = ISRC5Dispatcher { contract_address: address };
             if account_snake.supports_interface(ARCADE_ACCOUNT_ID) {
-                IMasterControlDispatcher { contract_address: caller }.get_master_account()
+                IMasterControlDispatcher { contract_address: address }.get_master_account()
             } else {
-                caller
+                address
             }
         }
     }
@@ -3662,7 +3665,10 @@ mod Game {
         assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
 
         let golden_token = _golden_token_dispatcher(ref self);
-        let player = _get_primary_account_address(@self, interface_camel);
+
+        // we use caller address here because we don't have an adventurer id yet
+        let address = get_caller_address();
+        let player = _get_primary_account_address(@self, address, interface_camel);
         assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
 
         self
