@@ -1407,7 +1407,6 @@ export function syscalls({
     upgradeTx?: any
   ) => {
     const isArcade = checkArcadeConnector(connector!);
-    console.log(loadingMessage);
     startLoading("Multicall", loadingMessage, undefined, adventurer?.id);
     try {
       let upgradeCalls = [];
