@@ -1321,7 +1321,7 @@ export function syscalls({
     }
   };
 
-  const slayAllIdles = async (slayAdventurers: number[]) => {
+  const slayIdles = async (slayAdventurers: string[]) => {
     const slayIdleAdventurersTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "slay_idle_adventurers",
@@ -1407,7 +1407,6 @@ export function syscalls({
     upgradeTx?: any
   ) => {
     const isArcade = checkArcadeConnector(connector!);
-
     startLoading("Multicall", loadingMessage, undefined, adventurer?.id);
     try {
       let upgradeCalls = [];
@@ -1709,7 +1708,7 @@ export function syscalls({
     attack,
     flee,
     upgrade,
-    slayAllIdles,
+    slayIdles,
     multicall,
     mintLords,
   };
