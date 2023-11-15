@@ -18,7 +18,10 @@ import { BurnerStorage } from "@/app/types";
 import { padAddress } from "@/app/lib/utils";
 import { TRANSACTION_WAIT_RETRY_INTERVAL } from "@/app/lib/constants";
 
-export const ETH_PREFUND_AMOUNT = "0x2386F26FC10000"; // 0.01ETH
+const isMainnet = process.env.NEXT_PUBLIC_NETWORK == "mainnet";
+export const ETH_PREFUND_AMOUNT = isMainnet
+  ? "0x2386F26FC10000"
+  : "0x38D7EA4C68000"; // 0.01ETH on Mainnet, 0.001ETH on Testnet
 export const LORDS_PREFUND_AMOUNT = "0x15AF1D78B58C40000"; // 25LORDS
 
 const rpc_addr = process.env.NEXT_PUBLIC_RPC_URL;
