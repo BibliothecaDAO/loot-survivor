@@ -1,5 +1,4 @@
 import { useAccount } from "@starknet-react/core";
-import { Button } from "../buttons/Button";
 
 export interface NetworkSwitchErrorProps {
   isWrongNetwork: boolean;
