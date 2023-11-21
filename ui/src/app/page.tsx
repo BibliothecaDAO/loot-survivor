@@ -443,12 +443,12 @@ function Home({ updateConnectors }: HomeProps) {
 
   useEffect(() => {
     const isWrongNetwork =
-      (provider as any)?.chainId !==
+      (account as any)?.provider.chainId !==
       (process.env.NEXT_PUBLIC_NETWORK === "mainnet"
         ? constants.StarknetChainId.SN_MAIN
         : constants.StarknetChainId.SN_GOERLI);
     setIsWrongNetwork(isWrongNetwork);
-  }, [(provider as any)?.chainId, isConnected]);
+  }, [account, isConnected]);
 
   useEffect(() => {
     if (arcadeConnectors.length === 0 && !closedArcadeIntro) {
@@ -482,8 +482,8 @@ function Home({ updateConnectors }: HomeProps) {
     >
       {introComplete ? (
         <>
+          <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
           <div className="flex flex-col w-full">
-            <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
             {specialBeastDefeated && <SpecialBeast />}
             {!spawnLoader && hash && (
               <div className="sm:hidden">
