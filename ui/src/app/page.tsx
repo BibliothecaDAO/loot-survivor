@@ -4,7 +4,6 @@ import {
   useConnect,
   useContract,
   Connector,
-  useProvider,
 } from "@starknet-react/core";
 import { constants } from "starknet";
 import { useState, useEffect, useMemo } from "react";
@@ -114,7 +113,6 @@ interface HomeProps {
 
 function Home({ updateConnectors }: HomeProps) {
   const { connector, connectors } = useConnect();
-  const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
   const setDisconnected = useUIStore((state) => state.setDisconnected);
   const { account, address, status, isConnected } = useAccount();
@@ -443,12 +441,12 @@ function Home({ updateConnectors }: HomeProps) {
 
   useEffect(() => {
     const isWrongNetwork =
-      (provider as any)?.chainId !==
+      (account as any)?.provider.chainId !==
       (process.env.NEXT_PUBLIC_NETWORK === "mainnet"
         ? constants.StarknetChainId.SN_MAIN
         : constants.StarknetChainId.SN_GOERLI);
     setIsWrongNetwork(isWrongNetwork);
-  }, [(provider as any)?.chainId, isConnected]);
+  }, [account, isConnected]);
 
   useEffect(() => {
     if (arcadeConnectors.length === 0 && !closedArcadeIntro) {
@@ -482,8 +480,8 @@ function Home({ updateConnectors }: HomeProps) {
     >
       {introComplete ? (
         <>
+          <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
           <div className="flex flex-col w-full">
-            <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
             {specialBeastDefeated && <SpecialBeast />}
             {!spawnLoader && hash && (
               <div className="sm:hidden">
