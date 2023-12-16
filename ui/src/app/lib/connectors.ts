@@ -1,5 +1,7 @@
-import { Connector, argent, braavos } from "@starknet-react/core";
-import { WebWalletConnector } from "@argent/starknet-react-webwallet-connector";
+import { Connector } from "@starknet-react/core";
+import { InjectedConnector } from "starknetkit/injected";
+import { ArgentMobileConnector } from "starknetkit/argentMobile";
+import { WebWalletConnector } from "starknetkit/webwallet";
 
 export const checkArcadeConnector = (connector?: Connector) => {
   return typeof connector?.id === "string" && connector?.id.includes("0x");
@@ -27,7 +29,7 @@ export const providerInterfaceCamel = (provider: string) => {
   }
 };
 
-function argentWebWalletUrl() {
+export function argentWebWalletUrl() {
   switch (process.env.NEXT_PUBLIC_NETWORK) {
     case "goerli":
       return "https://web.hydrogen.argent47.net";
@@ -42,4 +44,9 @@ export const argentWebWalletConnector = new WebWalletConnector({
   url: argentWebWalletUrl(),
 });
 
-export const connectors = [argent(), braavos(), argentWebWalletConnector];
+export const connectors = [
+  new InjectedConnector({ options: { id: "braavos", name: "Braavos" } }),
+  new InjectedConnector({ options: { id: "argentX", name: "Argent X" } }),
+  argentWebWalletConnector,
+  new ArgentMobileConnector(),
+];
