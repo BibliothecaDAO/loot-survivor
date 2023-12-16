@@ -2,11 +2,12 @@ import { AccountChangeEventHandler } from "get-starknet-core";
 import { AccountInterface, Account } from "starknet";
 import { Connector } from "@starknet-react/core";
 import { shortenHex } from "@/app/lib/utils";
+import { ConnectorData } from "starknetkit/dist/connectors/connector";
 
 export class ArcadeConnector extends Connector {
-  private _account: AccountInterface | Account | null;
+  private _account: AccountInterface | Account;
 
-  constructor(account: AccountInterface | Account | null) {
+  constructor(account: AccountInterface | Account) {
     super();
     this._account = account;
   }
@@ -21,11 +22,18 @@ export class ArcadeConnector extends Connector {
     return true;
   }
 
-  async connect(): Promise<AccountInterface> {
+  async chainId(): Promise<bigint> {
+    return BigInt(0);
+  }
+
+  async connect(): Promise<ConnectorData> {
     if (!this._account) {
       throw new Error("account not found");
     }
-    return Promise.resolve(this._account);
+    return {
+      account: this._account.address,
+      chainId: await this.chainId(),
+    };
   }
 
   async disconnect(): Promise<void> {
@@ -44,7 +52,7 @@ export class ArcadeConnector extends Connector {
     return Promise.resolve();
   }
 
-  async account(): Promise<AccountInterface | null> {
+  async account(): Promise<AccountInterface> {
     return Promise.resolve(this._account);
   }
 
