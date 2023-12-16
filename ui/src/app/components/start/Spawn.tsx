@@ -27,6 +27,7 @@ export interface SpawnProps {
   goldenTokenData: any;
   gameContract: Contract;
   getBalances: () => Promise<void>;
+  mintLords: () => Promise<void>;
 }
 
 export const Spawn = ({
@@ -37,6 +38,7 @@ export const Spawn = ({
   goldenTokenData,
   gameContract,
   getBalances,
+  mintLords,
 }: SpawnProps) => {
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
   const [formFilled, setFormFilled] = useState(false);
@@ -293,13 +295,17 @@ export const Spawn = ({
               </div>
               {!checkEnoughLords && (
                 <Button
-                  onClick={() => {
-                    const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
-                      process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
-                    )}&tokenTo=${indexAddress(
-                      process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
-                    )}&amount=0.001`;
-                    window.open(avnuLords, "_blank");
+                  onClick={async () => {
+                    if (onMainnet) {
+                      const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
+                        process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+                      )}&tokenTo=${indexAddress(
+                        process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+                      )}&amount=0.001`;
+                      window.open(avnuLords, "_blank");
+                    } else {
+                      await mintLords();
+                    }
                   }}
                 >
                   Buy Lords
