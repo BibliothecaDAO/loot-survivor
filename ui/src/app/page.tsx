@@ -186,6 +186,9 @@ function Home({ updateConnectors }: HomeProps) {
   const setUpdateDeathPenalty = useUIStore(
     (state) => state.setUpdateDeathPenalty
   );
+  const [accountChainId, setAccountChainId] = useState<
+    constants.StarknetChainId | undefined
+  >();
 
   const arcadeConnectors = getArcadeConnectors(connectors);
 
@@ -439,14 +442,22 @@ function Home({ updateConnectors }: HomeProps) {
     }
   }, [isConnected]);
 
+  const getAccountChainId = async () => {
+    if (account) {
+      const chainId = await account!.getChainId();
+      setAccountChainId(chainId);
+    }
+  };
+
   useEffect(() => {
+    getAccountChainId();
     const isWrongNetwork =
-      (account as any)?.provider.chainId !==
+      accountChainId !==
       (process.env.NEXT_PUBLIC_NETWORK === "mainnet"
         ? constants.StarknetChainId.SN_MAIN
         : constants.StarknetChainId.SN_GOERLI);
     setIsWrongNetwork(isWrongNetwork);
-  }, [account, isConnected]);
+  }, [account, accountChainId, isConnected]);
 
   useEffect(() => {
     if (arcadeConnectors.length === 0 && !closedArcadeIntro) {
