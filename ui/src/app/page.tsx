@@ -5,6 +5,9 @@ import {
   useContract,
   Connector,
 } from "@starknet-react/core";
+import { InjectedConnector } from "starknetkit/injected";
+import { ArgentMobileConnector } from "starknetkit/argentMobile";
+import { WebWalletConnector } from "starknetkit/webwallet";
 import { constants } from "starknet";
 import { useState, useEffect, useMemo } from "react";
 import ActionsScreen from "@/app/containers/ActionsScreen";
@@ -88,7 +91,14 @@ const mobileMenuItems: Menu[] = [
 ];
 
 export default function Main() {
-  const [appConnectors, setAppConnectors] = useState<Connector[]>([]);
+  const [appConnectors, setAppConnectors] = useState<
+    (
+      | Connector
+      | WebWalletConnector
+      | InjectedConnector
+      | ArgentMobileConnector
+    )[]
+  >([]);
 
   const { listConnectors } = useBurner({});
 
@@ -346,8 +356,8 @@ function Home({ updateConnectors }: HomeProps) {
   const goldenTokenVariables = useMemo(() => {
     const storage: BurnerStorage = Storage.get("burners");
     const isArcade = checkArcadeConnector(connector);
-    if (isArcade) {
-      const masterAccount = storage[address!].masterAccount;
+    if (isArcade && address) {
+      const masterAccount = storage[address].masterAccount;
       return {
         contractAddress:
           process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS?.toLowerCase(),
@@ -580,6 +590,7 @@ function Home({ updateConnectors }: HomeProps) {
                       gameContract={gameContract!}
                       goldenTokenData={goldenTokenData}
                       getBalances={getBalances}
+                      mintLords={mintLords}
                     />
                   )}
                   {screen === "play" && (
