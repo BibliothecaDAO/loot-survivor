@@ -193,7 +193,9 @@ export const Spawn = ({
                     >
                       {connector.id === "braavos" || connector.id === "argentX"
                         ? `Connect ${connector.id}`
-                        : "Login With Email"}
+                        : connector.id === "argentWebWallet"
+                        ? "Login With Email"
+                        : "Login with Argent Mobile"}
                     </Button>
                   ))}
                   <Button onClick={handleButtonClick}>
