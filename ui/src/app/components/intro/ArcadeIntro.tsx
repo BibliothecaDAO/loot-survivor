@@ -93,7 +93,7 @@ export const ArcadeIntro = ({
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
-      <div className="fixed flex flex-col justify-between text-center sm:top-1/8 sm:left-1/8 sm:left-1/4 sm:w-3/4 sm:w-1/2 h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4 overflow-y-auto">
+      <div className="fixed flex flex-col justify-between text-center sm:top-1/8 sm:left-1/8 sm:left-1/4 sm:w-3/4 sm:w-1/2 h-full sm:h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4 overflow-y-auto">
         <button
           className="absolute top-2 right-2 cursor-pointer text-red-500"
           onClick={() => {
@@ -263,7 +263,7 @@ export const ArcadeIntro = ({
                   <p className="text-sm xl:text-xl 2xl:text-2xl">
                     How many games would you like to fund?
                   </p>
-                  <div className="flex flex-row gap-5 w-1/2">
+                  <div className="flex flex-row gap-5 items-center w-full sm:w-1/2">
                     <div className="w-1/2">
                       <QuantityButtons
                         amount={gamesPrefundAmount}
@@ -294,7 +294,7 @@ export const ArcadeIntro = ({
                         gamesPrefundAmount === 0 ||
                         gamesPrefundAmount > maxGames
                       }
-                      className="w-1/2 h-1/4"
+                      className="sm:w-1/2"
                     >
                       Create Account
                     </Button>
