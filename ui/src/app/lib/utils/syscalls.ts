@@ -4,6 +4,7 @@ import {
   Contract,
   AccountInterface,
   RevertedTransactionReceiptResponse,
+  Provider,
 } from "starknet";
 import { GameData } from "@/app/lib/data/GameData";
 import {
@@ -34,6 +35,12 @@ import { QueryData, QueryKey } from "@/app/hooks/useQueryStore";
 import { AdventurerClass } from "@/app/lib/classes";
 import { ScreenPage } from "@/app/hooks/useUIStore";
 import { TRANSACTION_WAIT_RETRY_INTERVAL } from "@/app/lib/constants";
+
+const rpc_addr = process.env.NEXT_PUBLIC_RPC_URL;
+const provider = new Provider({
+  rpc: { nodeUrl: rpc_addr! },
+  sequencer: { baseUrl: rpc_addr! },
+});
 
 export interface SyscallsProps {
   gameContract: Contract;
@@ -330,7 +337,7 @@ export function syscalls({
         },
       });
 
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
       // Handle if the tx was reverted
@@ -445,7 +452,7 @@ export function syscalls({
           method: `Explore with ${adventurer?.name}`,
         },
       });
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
       // Handle if the tx was reverted
@@ -717,7 +724,7 @@ export function syscalls({
           method: `Attack ${beastData.beast}`,
         },
       });
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
       // Handle if the tx was reverted
@@ -987,7 +994,7 @@ export function syscalls({
           method: `Flee ${beastData.beast}`,
         },
       });
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
       // Handle if the tx was reverted
@@ -1195,7 +1202,7 @@ export function syscalls({
           method: `Upgrade`,
         },
       });
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
       // Handle if the tx was reverted
@@ -1348,7 +1355,7 @@ export function syscalls({
           method: `Upgrade`,
         },
       });
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
       // Handle if the tx was reverted
@@ -1428,7 +1435,7 @@ export function syscalls({
         showTopUpDialog,
         setTopUpAccount
       );
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
       // Handle if the tx was reverted
@@ -1686,7 +1693,7 @@ export function syscalls({
         showTopUpDialog,
         setTopUpAccount
       );
-      const result = await account?.waitForTransaction(tx?.transaction_hash, {
+      const result = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 

@@ -170,7 +170,7 @@ export const useBurner = ({
 
       const { transaction_hash } = await account.execute(prefundCalls);
 
-      const result = await account.waitForTransaction(transaction_hash, {
+      const result = await provider.waitForTransaction(transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
@@ -375,7 +375,7 @@ export const useBurner = ({
         ]),
       });
 
-      const result = await account.waitForTransaction(transaction_hash, {
+      const result = await provider.waitForTransaction(transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
@@ -412,7 +412,7 @@ export const useBurner = ({
       };
       const { transaction_hash } = await account.execute([lordsTransferTx]);
 
-      const result = await account.waitForTransaction(transaction_hash, {
+      const result = await provider.waitForTransaction(transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
@@ -497,7 +497,7 @@ export const useBurner = ({
 
       const { transaction_hash } = await account.execute(calls);
 
-      const result = await account.waitForTransaction(transaction_hash, {
+      const result = await provider.waitForTransaction(transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
