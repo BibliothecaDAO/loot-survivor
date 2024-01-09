@@ -81,7 +81,7 @@ export const Spawn = ({
 
   const handleSubmitGoldenToken = async () => {
     resetNotification();
-    await spawn(formData, usableToken);
+    await spawn(formData, usableToken, costToPlay);
     await getBalances();
   };
 

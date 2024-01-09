@@ -290,11 +290,7 @@ export function syscalls({
     const approveLordsSpendingTx = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "approve",
-      calldata: [
-        gameContract?.address ?? "",
-        costToPlay ? costToPlay.toString() : "0",
-        "0",
-      ],
+      calldata: [gameContract?.address ?? "", costToPlay!.toString(), "0"],
     }; // Approve dynamic LORDS to be spent each time spawn is called based on the get_cost_to_play
 
     const mintAdventurerTx = {
