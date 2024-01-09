@@ -21,7 +21,11 @@ import {
 
 export interface SpawnProps {
   formData: FormData;
-  spawn: (formData: FormData, goldenTokenId: string) => Promise<void>;
+  spawn: (
+    formData: FormData,
+    goldenTokenId: string,
+    costToPlay?: number
+  ) => Promise<void>;
   handleBack: () => void;
   lordsBalance?: bigint;
   goldenTokenData: any;
@@ -43,6 +47,7 @@ export const Spawn = ({
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
   const [formFilled, setFormFilled] = useState(false);
   const [usableToken, setUsableToken] = useState<string>("0");
+  const [costToPlay, setCostToPlay] = useState<number | undefined>();
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
@@ -70,7 +75,7 @@ export const Spawn = ({
 
   const handleSubmitLords = async () => {
     resetNotification();
-    await spawn(formData, "0");
+    await spawn(formData, "0", costToPlay!);
     await getBalances();
   };
 
@@ -121,6 +126,11 @@ export const Spawn = ({
     setFetchedAverageBlockTime(true);
   };
 
+  const getCostToPlay = async () => {
+    const cost = await gameContract.call("get_cost_to_play", []);
+    setCostToPlay(parseInt(cost.toString()));
+  };
+
   useEffect(() => {
     if (onMainnet && !fetchedAverageBlockTime && currentBlockNumber > 0) {
       fetchData();
@@ -129,6 +139,7 @@ export const Spawn = ({
 
   useEffect(() => {
     getUsableGoldenToken(goldenTokens);
+    getCostToPlay();
   }, []);
 
   return (
