@@ -280,11 +280,11 @@ const Onboarding = ({
       </Button>
       <div className="flex flex-col items-center gap-5">
         <h1 className="m-0 uppercase">Welcome to Loot Survivor</h1>
-        <p className="text-lg">
+        <p className="hidden sm:block text-lg">
           A fully on-chain arcade game on Starknet. Follow the steps below to
           get setup smoothly:
         </p>
-        <div className="flex flex-row h-5/6 gap-5">
+        <div className="hidden sm:flex flex-row h-5/6 gap-5">
           <div className="flex flex-col items-center w-1/4">
             <h2 className="m-0">1</h2>
             <div className="relative z-1">
@@ -501,6 +501,13 @@ const Onboarding = ({
                       lordsGameCost={lordsGameCost}
                       prefundGames={prefundGames}
                       setPrefundGames={setPrefundGames}
+                      games={0}
+                    />
+                    <PrefundGamesSelection
+                      lords={lords}
+                      lordsGameCost={lordsGameCost}
+                      prefundGames={prefundGames}
+                      setPrefundGames={setPrefundGames}
                       games={1}
                     />
                     <PrefundGamesSelection
@@ -557,13 +564,37 @@ const Onboarding = ({
             </div>
           </div>
         </div>
-        <div className="flex flex-row items-center gap-10">
+        <div className="hidden sm:flex flex-row items-center gap-10">
           <p className="uppercase text-xl">
             We recommend you read the docs before using funds
           </p>
           <span className="w-20 h-10">
             <Button size={"fill"}>Docs</Button>
           </span>
+        </div>
+        <div className="sm:hidden flex items-center justify-center w-full h-1/5">
+          <div className="flex flex-row justify-between items-center w-1/2 h-full">
+            <div
+              className={`w-8 h-8 sm:w-12 sm:h-12 ${
+                step >= 1 ? "bg-terminal-green" : "border border-terminal-green"
+              }`}
+            />
+            <div
+              className={`w-8 h-8 sm:w-12 sm:h-12  ${
+                step >= 2 ? "bg-terminal-green" : "border border-terminal-green"
+              }`}
+            />
+            <div
+              className={`w-8 h-8 sm:w-12 sm:h-12  ${
+                step >= 3 ? "bg-terminal-green" : "border border-terminal-green"
+              }`}
+            />
+            <div
+              className={`w-8 h-8 sm:w-12 sm:h-12  ${
+                step == 4 ? "bg-terminal-green" : "border border-terminal-green"
+              }`}
+            />
+          </div>
         </div>
       </div>
     </div>
