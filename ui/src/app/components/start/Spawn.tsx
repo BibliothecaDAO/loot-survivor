@@ -47,7 +47,6 @@ export const Spawn = ({
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
   const [formFilled, setFormFilled] = useState(false);
   const [usableToken, setUsableToken] = useState<string>("0");
-  const [costToPlay, setCostToPlay] = useState<number | undefined>();
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
@@ -126,11 +125,6 @@ export const Spawn = ({
     setFetchedAverageBlockTime(true);
   };
 
-  const getCostToPlay = async () => {
-    const cost = await gameContract.call("get_cost_to_play", []);
-    setCostToPlay(parseInt(cost.toString()));
-  };
-
   useEffect(() => {
     if (onMainnet && !fetchedAverageBlockTime && currentBlockNumber > 0) {
       fetchData();
@@ -138,7 +132,7 @@ export const Spawn = ({
   }, [currentBlockNumber]);
 
   useEffect(() => {
-    getUsableGoldenToken(goldenTokens);
+    getUsableGoldenToken(goldenTokens ?? []);
     getCostToPlay();
   }, []);
 

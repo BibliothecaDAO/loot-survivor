@@ -21,6 +21,7 @@ export type ScreenPage =
   | "player"
   | "wallet"
   | "tutorial"
+  | "onboarding"
   | "create adventurer";
 
 type State = {

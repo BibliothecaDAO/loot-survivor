@@ -101,9 +101,6 @@ const WalletSelect = ({}: WalletSelectProps) => {
               <Button size={"sm"} onClick={() => setScreen("wallet")}>
                 Back
               </Button>
-              <Button size={"sm"} onClick={() => setDisconnected(false)}>
-                Continue Anyway
-              </Button>
             </div>
           </div>
         )}
