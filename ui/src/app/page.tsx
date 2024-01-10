@@ -56,7 +56,7 @@ import Game from "@/app/abi/Game.json";
 import Lords from "@/app/abi/Lords.json";
 import EthBalanceFragment from "@/app/abi/EthBalanceFragment.json";
 import Beasts from "@/app/abi/Beasts.json";
-import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
+// import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
 import ScreenMenu from "@/app/components/menu/ScreenMenu";
 import {
   getArcadeConnectors,
@@ -526,6 +526,7 @@ function Home({ updateConnectors }: HomeProps) {
               ethBalance={ethBalance}
               lordsBalance={lordsBalance}
               costToPlay={costToPlay!}
+              mintLords={mintLords}
             />
           ) : (
             <>
@@ -608,6 +609,7 @@ function Home({ updateConnectors }: HomeProps) {
                           goldenTokenData={goldenTokenData}
                           getBalances={getBalances}
                           mintLords={mintLords}
+                          costToPlay={costToPlay!}
                         />
                       )}
                       {screen === "play" && (

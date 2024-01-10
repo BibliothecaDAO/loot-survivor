@@ -32,6 +32,7 @@ export interface SpawnProps {
   gameContract: Contract;
   getBalances: () => Promise<void>;
   mintLords: () => Promise<void>;
+  costToPlay: bigint;
 }
 
 export const Spawn = ({
@@ -43,6 +44,7 @@ export const Spawn = ({
   gameContract,
   getBalances,
   mintLords,
+  costToPlay,
 }: SpawnProps) => {
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
   const [formFilled, setFormFilled] = useState(false);
@@ -72,15 +74,17 @@ export const Spawn = ({
     setShowWalletTutorial(true);
   };
 
+  const lordsGameCost = Number(costToPlay);
+
   const handleSubmitLords = async () => {
     resetNotification();
-    await spawn(formData, "0", costToPlay!);
+    await spawn(formData, "0", lordsGameCost);
     await getBalances();
   };
 
   const handleSubmitGoldenToken = async () => {
     resetNotification();
-    await spawn(formData, usableToken, costToPlay);
+    await spawn(formData, usableToken, lordsGameCost);
     await getBalances();
   };
 
@@ -133,7 +137,6 @@ export const Spawn = ({
 
   useEffect(() => {
     getUsableGoldenToken(goldenTokens ?? []);
-    getCostToPlay();
   }, []);
 
   return (

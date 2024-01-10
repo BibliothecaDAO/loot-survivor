@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { MdClose } from "react-icons/md";
 import { CompleteIcon, InfoIcon } from "@/app/components/icons/Icons";
 import { Button } from "@/app/components/buttons/Button";
 import { getWalletConnectors } from "@/app/lib/connectors";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import useUIStore from "@/app/hooks/useUIStore";
 import { ETH_PREFUND_AMOUNT } from "../lib/burner";
 import Eth from "public/icons/eth-2.svg";
 import Lords from "public/icons/lords.svg";
@@ -130,7 +128,7 @@ const Onboarding = ({
   costToPlay,
   mintLords,
 }: OnboardingProps) => {
-  const { account, address, connector } = useAccount();
+  const { account, address } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const walletConnectors = getWalletConnectors(connectors);
@@ -139,7 +137,7 @@ const Onboarding = ({
 
   const [step, setStep] = useState(1);
 
-  const setScreen = useUIStore((state) => state.setScreen);
+  // const setScreen = useUIStore((state) => state.setScreen);
 
   const eth = Number(ethBalance);
   const lords = Number(lordsBalance);

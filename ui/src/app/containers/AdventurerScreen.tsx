@@ -16,6 +16,7 @@ interface AdventurerScreenProps {
   goldenTokenData: any;
   getBalances: () => Promise<void>;
   mintLords: () => Promise<void>;
+  costToPlay: bigint;
 }
 
 /**
@@ -30,6 +31,7 @@ export default function AdventurerScreen({
   goldenTokenData,
   getBalances,
   mintLords,
+  costToPlay,
 }: AdventurerScreenProps) {
   const [activeMenu, setActiveMenu] = useState(0);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
@@ -93,6 +95,7 @@ export default function AdventurerScreen({
             gameContract={gameContract}
             getBalances={getBalances}
             mintLords={mintLords}
+            costToPlay={costToPlay}
           />
         </div>
       )}
