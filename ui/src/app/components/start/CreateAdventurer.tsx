@@ -13,7 +13,7 @@ export interface CreateAdventurerProps {
   goldenTokenData: any;
   gameContract: Contract;
   getBalances: () => Promise<void>;
-  mintLords: () => Promise<void>;
+  mintLords: (lordsAmount: number) => Promise<void>;
   costToPlay: bigint;
 }
 

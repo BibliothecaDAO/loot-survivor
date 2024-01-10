@@ -475,7 +475,7 @@ function Home({ updateConnectors }: HomeProps) {
     } else {
       setScreen("start");
     }
-  }, [arcadeConnectors]);
+  }, [onboarded]);
 
   useEffect(() => {
     resetCalls();
@@ -504,8 +504,6 @@ function Home({ updateConnectors }: HomeProps) {
     return <WalletSelect />;
   }
 
-  console.log(screen);
-
   return (
     <main
       className={`min-h-screen container mx-auto flex flex-col sm:pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
@@ -527,6 +525,10 @@ function Home({ updateConnectors }: HomeProps) {
               lordsBalance={lordsBalance}
               costToPlay={costToPlay!}
               mintLords={mintLords}
+              gameContract={gameContract!}
+              lordsContract={lordsContract!}
+              ethContract={ethContract!}
+              updateConnectors={updateConnectors}
             />
           ) : (
             <>
@@ -544,6 +546,7 @@ function Home({ updateConnectors }: HomeProps) {
                   lordsBalance={lordsBalance}
                   arcadeConnectors={arcadeConnectors}
                   gameContract={gameContract!}
+                  costToPlay={costToPlay!}
                 />
               </div>
               <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">

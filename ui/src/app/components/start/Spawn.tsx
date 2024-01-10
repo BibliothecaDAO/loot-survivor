@@ -31,7 +31,7 @@ export interface SpawnProps {
   goldenTokenData: any;
   gameContract: Contract;
   getBalances: () => Promise<void>;
-  mintLords: () => Promise<void>;
+  mintLords: (lordsAmount: number) => Promise<void>;
   costToPlay: bigint;
 }
 
@@ -312,7 +312,7 @@ export const Spawn = ({
                       )}&amount=0.001`;
                       window.open(avnuLords, "_blank");
                     } else {
-                      await mintLords();
+                      await mintLords(lordsGameCost);
                     }
                   }}
                 >

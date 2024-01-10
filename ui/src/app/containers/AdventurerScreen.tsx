@@ -15,7 +15,7 @@ interface AdventurerScreenProps {
   gameContract: Contract;
   goldenTokenData: any;
   getBalances: () => Promise<void>;
-  mintLords: () => Promise<void>;
+  mintLords: (lordsAmount: number) => Promise<void>;
   costToPlay: bigint;
 }
 

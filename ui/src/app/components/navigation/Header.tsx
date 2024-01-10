@@ -31,10 +31,11 @@ export interface HeaderProps {
     loadingMessage: string[],
     notification: string[]
   ) => Promise<void>;
-  mintLords: () => Promise<void>;
+  mintLords: (lordsAmount: number) => Promise<void>;
   lordsBalance: bigint;
   arcadeConnectors: Connector[];
   gameContract: Contract;
+  costToPlay: bigint;
 }
 
 export default function Header({
@@ -43,6 +44,7 @@ export default function Header({
   lordsBalance,
   arcadeConnectors,
   gameContract,
+  costToPlay,
 }: HeaderProps) {
   const { account, address } = useAccount();
   const { disconnect } = useDisconnect();
@@ -83,6 +85,8 @@ export default function Header({
   const checkArcade = arcadeConnectors.some(
     (connector) => connector.name == address
   );
+
+  const lordsGameCost = Number(costToPlay);
 
   const handleApibaraStatus = async () => {
     const data = await getApibaraStatus();
@@ -141,7 +145,7 @@ export default function Header({
               )}&amount=0.001`;
               window.open(avnuLords, "_blank");
             } else {
-              await mintLords();
+              await mintLords(lordsGameCost);
             }
           }}
           onMouseEnter={() => setShowLordsBuy(true)}
