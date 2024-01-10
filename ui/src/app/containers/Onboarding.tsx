@@ -8,8 +8,14 @@ import {
 } from "@/app/components/icons/Icons";
 import { Button } from "@/app/components/buttons/Button";
 import { getWalletConnectors } from "@/app/lib/connectors";
-import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import { Contract } from "starknet";
+import {
+  useAccount,
+  useConnect,
+  useDisconnect,
+  Connector,
+  ConnectVariables,
+} from "@starknet-react/core";
+import { Account, Contract } from "starknet";
 import { ETH_PREFUND_AMOUNT } from "@/app/lib/burner";
 import Eth from "public/icons/eth-2.svg";
 import Lords from "public/icons/lords.svg";
@@ -27,7 +33,337 @@ const openInNewTab = (url: string) => {
   if (newWindow) newWindow.opener = null;
 };
 
-const sectionContent = (section: Section, lordsGameCost: number) => {
+interface SectionContentProps {
+  section: Section;
+  setSection: (section: Section) => void;
+  step: number;
+  address: string | undefined;
+  walletConnectors: Connector[];
+  disconnect: () => void;
+  connect: (args?: ConnectVariables | undefined) => void;
+  eth: number;
+  lords: number;
+  lordsGameCost: number;
+  onMainnet: boolean;
+  network: string;
+  mintLords: (lordsAmount: number) => Promise<void>;
+  prefundGames: number;
+  setPrefundGames: (games: number) => void;
+  setFullDeployment: (value: boolean) => void;
+  connector: Connector | undefined;
+  create: (
+    connector: Connector,
+    lordsAmount: number
+  ) => Promise<Account | undefined>;
+  listConnectors: () => any[];
+  updateConnectors: () => void;
+  handleOnboarded: () => void;
+}
+
+const SectionContent = ({
+  section,
+  setSection,
+  step,
+  address,
+  walletConnectors,
+  disconnect,
+  connect,
+  eth,
+  lords,
+  lordsGameCost,
+  onMainnet,
+  network,
+  mintLords,
+  prefundGames,
+  setPrefundGames,
+  setFullDeployment,
+  connector,
+  create,
+  listConnectors,
+  updateConnectors,
+  handleOnboarded,
+}: SectionContentProps) => {
+  switch (section) {
+    case "connect":
+      return (
+        <div className="relative z-1">
+          {step !== 1 && (
+            <>
+              <div className="absolute top-0 left-0 right-0 bottom-0 h-full w-full bg-black opacity-50 z-10" />
+              {step > 1 && (
+                <div className="absolute flex flex-col w-1/2 top-1/4 right-1/4 z-20 items-center">
+                  <p>Connected {displayAddress(address!)}</p>
+                  <CompleteIcon />
+                </div>
+              )}
+            </>
+          )}
+          <div className="flex flex-col items-center justify-between border border-terminal-green p-5 text-center gap-10 z-1 h-[600px] sm:h-[425px] 2xl:h-[500px]">
+            <h4 className="m-0 uppercase">Connect Starknet Wallet</h4>
+            <p className="sm:hidden 2xl:block">
+              In order to play LOOT SURVIVOR you are required to connect a
+              Starknet wallet.
+            </p>
+            <span
+              className="flex items-center justify-center border border-terminal-green w-1/2 p-2 cursor-pointer"
+              onClick={() => setSection("connect")}
+            >
+              <span className="flex flex-row items-center gap-2">
+                <p className="uppercase">No Wallet</p>
+                <span className="w-8">
+                  <InfoIcon />
+                </span>
+              </span>
+            </span>
+            <div className="flex flex-col">
+              {walletConnectors.map((connector, index) => (
+                <Button
+                  disabled={address !== undefined}
+                  onClick={() => {
+                    disconnect();
+                    connect({ connector });
+                  }}
+                  key={index}
+                >
+                  {connector.id === "braavos" || connector.id === "argentX"
+                    ? `Connect ${connector.id}`
+                    : connector.id === "argentWebWallet"
+                    ? "Login With Email"
+                    : "Login with Argent Mobile"}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    case "eth":
+      return (
+        <div className="relative z-1">
+          {step !== 2 && (
+            <>
+              <div className="absolute top-0 left-0 right-0 bottom-0 h-full w-full bg-black opacity-50 z-10" />
+              {step > 2 ? (
+                <div className="absolute flex flex-col w-1/2 top-1/4 right-1/4 z-20 items-center">
+                  <span className="flex flex-row text-center">
+                    You have {formatCurrency(eth)} ETH
+                  </span>
+                  <CompleteIcon />
+                </div>
+              ) : (
+                <div className="absolute w-1/2 top-1/4 right-1/4 z-20 text-center text-2xl uppercase">
+                  Complete {step}
+                </div>
+              )}
+            </>
+          )}
+          <div className="flex flex-col items-center justify-between border border-terminal-green p-5 text-center gap-5 sm:h-[425px] 2xl:h-[500px]">
+            <h4 className="m-0 uppercase">Get ETH</h4>
+            <Eth className="hidden 2xl:block h-5 sm:h-16" />
+            {onMainnet ? (
+              <p>
+                We are on <span className="uppercase">{network}</span> so you
+                are required to bridge from Ethereum or directly purchase
+                through one of the wallets.
+              </p>
+            ) : (
+              <p>
+                We are on <span className="uppercase">{network}</span> so you
+                are able to get some test ETH from the faucet.
+              </p>
+            )}
+            <span
+              className="flex items-center justify-center border border-terminal-green w-1/2 p-2 cursor-pointer"
+              onClick={() => setSection("eth")}
+            >
+              <span className="flex flex-row items-center gap-2">
+                <p className="uppercase">More Info</p>
+                <span className="w-8">
+                  <InfoIcon />
+                </span>
+              </span>
+            </span>
+            <span className="w-3/4 h-10">
+              <Button
+                size={"fill"}
+                onClick={() =>
+                  onMainnet
+                    ? window.open("https://starkgate.starknet.io//", "_blank")
+                    : window.open(
+                        "https://faucet.goerli.starknet.io/",
+                        "_blank"
+                      )
+                }
+              >
+                {onMainnet ? "Bridge Eth" : "Get ETH"}
+              </Button>
+            </span>
+          </div>
+        </div>
+      );
+    case "lords":
+      return (
+        <div className="relative z-1">
+          {step !== 3 && (
+            <>
+              <div className="absolute top-0 left-0 right-0 bottom-0 h-full w-full bg-black opacity-50 z-10" />
+              {step > 3 ? (
+                <div className="absolute flex flex-col w-1/2 top-1/4 right-1/4 z-20 items-center">
+                  <span className="flex flex-row text-center">
+                    You have {formatCurrency(lords)} LORDS
+                  </span>
+                  <CompleteIcon />
+                </div>
+              ) : (
+                <div className="absolute w-1/2 top-1/4 right-1/4 z-20 text-center text-2xl uppercase">
+                  Complete {step}
+                </div>
+              )}
+            </>
+          )}
+          <div className="flex flex-col items-center justify-between border border-terminal-green p-5 text-center gap-5 sm:h-[425px] 2xl:h-[500px]">
+            <h4 className="m-0 uppercase">Get Lords</h4>
+            <Lords className="hidden 2xl:block fill-current h-5 sm:h-16" />
+            <p>
+              We are on <span className="uppercase">{network}</span> so you are
+              required to purchase LORDS from an exchange.
+            </p>
+            <span
+              className="flex items-center justify-center border border-terminal-green w-1/2 p-2 cursor-pointer"
+              onClick={() => setSection("lords")}
+            >
+              <span className="flex flex-row items-center gap-2">
+                <p className="uppercase">More Info</p>
+                <span className="w-8">
+                  <InfoIcon />
+                </span>
+              </span>
+            </span>
+            <span className="w-3/4 h-10">
+              <Button
+                size={"fill"}
+                onClick={async () => {
+                  if (onMainnet) {
+                    const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
+                      process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+                    )}&tokenTo=${indexAddress(
+                      process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+                    )}&amount=0.001`;
+                    window.open(avnuLords, "_blank");
+                  } else {
+                    await mintLords(lordsGameCost * 25);
+                  }
+                }}
+              >
+                {onMainnet ? "Buy LORDS" : "Mint LORDS"}
+              </Button>
+            </span>
+          </div>
+        </div>
+      );
+    case "arcade":
+      return (
+        <div className="relative z-1">
+          {step !== 4 && (
+            <>
+              <div className="absolute top-0 left-0 right-0 bottom-0 h-full w-full bg-black opacity-50 z-10" />
+              <div className="absolute w-1/2 top-1/4 right-1/4 z-20 text-center text-2xl uppercase">
+                Complete {step}
+              </div>
+            </>
+          )}
+          <div className="flex flex-col items-center justify-between border border-terminal-green p-5 text-center sm:gap-2 2xl:gap-5 sm:h-[425px] 2xl:h-[500px]">
+            <h4 className="m-0 uppercase">Signerless Txs</h4>
+            <Arcade className="hidden 2xl:block fill-current h-5 sm:h-16" />
+            <p>
+              Arcade Accounts offer signature free gameplay rather than needing
+              to sign each tx.
+            </p>
+            <span
+              className="flex items-center justify-center border border-terminal-green w-1/2 p-2 cursor-pointer"
+              onClick={() => setSection("arcade")}
+            >
+              <span className="flex flex-row items-center gap-2">
+                <p className="uppercase">More Info</p>
+                <span className="w-8">
+                  <InfoIcon />
+                </span>
+              </span>
+            </span>
+            <span className="flex flex-col gap-2">
+              <p className="uppercase text-xl">Games</p>
+              <span className="flex flex-row gap-2 text-xl">
+                <PrefundGamesSelection
+                  lords={lords}
+                  lordsGameCost={lordsGameCost}
+                  prefundGames={prefundGames}
+                  setPrefundGames={setPrefundGames}
+                  games={0}
+                />
+                <PrefundGamesSelection
+                  lords={lords}
+                  lordsGameCost={lordsGameCost}
+                  prefundGames={prefundGames}
+                  setPrefundGames={setPrefundGames}
+                  games={1}
+                />
+                <PrefundGamesSelection
+                  lords={lords}
+                  lordsGameCost={lordsGameCost}
+                  prefundGames={prefundGames}
+                  setPrefundGames={setPrefundGames}
+                  games={5}
+                />
+                <PrefundGamesSelection
+                  lords={lords}
+                  lordsGameCost={lordsGameCost}
+                  prefundGames={prefundGames}
+                  setPrefundGames={setPrefundGames}
+                  games={10}
+                />
+                <PrefundGamesSelection
+                  lords={lords}
+                  lordsGameCost={lordsGameCost}
+                  prefundGames={prefundGames}
+                  setPrefundGames={setPrefundGames}
+                  games={25}
+                />
+              </span>
+            </span>
+            <div className="flex flex-col w-full items-center">
+              <span className="flex flex-row gap-2">
+                <Eth className="w-2" />
+                0.001 ETH Required
+              </span>
+              <span className="flex flex-row gap-2">
+                <Lords className="fill-current w-2" />
+                {formatCurrency(lordsGameCost * prefundGames)} LORDS Required
+              </span>
+              <span className="w-3/4 h-10">
+                <Button
+                  size={"fill"}
+                  onClick={async () => {
+                    setFullDeployment(true);
+                    await create(connector!, prefundGames * lordsGameCost);
+                    disconnect();
+                    connect({ connector: listConnectors()[0] });
+                    updateConnectors();
+                    setFullDeployment(false);
+                    handleOnboarded();
+                  }}
+                >
+                  Deploy
+                </Button>
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    default:
+      return <></>;
+  }
+};
+
+const sectionInfo = (section: Section, lordsGameCost: number) => {
   switch (section) {
     case "connect":
       return (
@@ -161,7 +497,7 @@ const InfoBox = ({ section, setSection, lordsGameCost }: InfoBoxProps) => {
       <span className="w-10">
         <InfoIcon />
       </span>
-      {sectionContent(section!, lordsGameCost)}
+      {sectionInfo(section!, lordsGameCost)}
     </div>
   );
 };
@@ -287,281 +623,107 @@ const Onboarding = ({
         <div className="hidden sm:flex flex-row h-5/6 gap-5">
           <div className="flex flex-col items-center w-1/4">
             <h2 className="m-0">1</h2>
-            <div className="relative z-1">
-              {step !== 1 && (
-                <>
-                  <div className="absolute top-0 left-0 right-0 bottom-0 h-full w-full bg-black opacity-50 z-10" />
-                  {step > 1 && (
-                    <div className="absolute flex flex-col w-1/2 top-1/4 right-1/4 z-20 items-center">
-                      <p>Connected {displayAddress(address!)}</p>
-                      <CompleteIcon />
-                    </div>
-                  )}
-                </>
-              )}
-              <div className="flex flex-col items-center justify-between border border-terminal-green p-5 text-center gap-10 z-1 sm:h-[425px] 2xl:h-[500px]">
-                <h4 className="m-0 uppercase">Connect Starknet Wallet</h4>
-                <p className="hidden 2xl:block">
-                  In order to play LOOT SURVIVOR you are required to connect a
-                  Starknet wallet.
-                </p>
-                <span
-                  className="flex items-center justify-center border border-terminal-green w-1/2 p-2 cursor-pointer"
-                  onClick={() => setSection("connect")}
-                >
-                  <span className="flex flex-row items-center gap-2">
-                    <p className="uppercase">No Wallet</p>
-                    <span className="w-8">
-                      <InfoIcon />
-                    </span>
-                  </span>
-                </span>
-                <div className="flex flex-col">
-                  {walletConnectors.map((connector, index) => (
-                    <Button
-                      disabled={address !== undefined}
-                      onClick={() => {
-                        disconnect();
-                        connect({ connector });
-                      }}
-                      key={index}
-                    >
-                      {connector.id === "braavos" || connector.id === "argentX"
-                        ? `Connect ${connector.id}`
-                        : connector.id === "argentWebWallet"
-                        ? "Login With Email"
-                        : "Login with Argent Mobile"}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <SectionContent
+              section={"connect"}
+              setSection={setSection}
+              step={step}
+              address={address}
+              walletConnectors={walletConnectors}
+              disconnect={disconnect}
+              connect={connect}
+              eth={eth}
+              lords={lords}
+              lordsGameCost={lordsGameCost}
+              onMainnet={onMainnet}
+              network={network!}
+              mintLords={mintLords}
+              prefundGames={prefundGames}
+              setPrefundGames={setPrefundGames}
+              setFullDeployment={setFullDeployment}
+              connector={connector}
+              create={create}
+              listConnectors={listConnectors}
+              updateConnectors={updateConnectors}
+              handleOnboarded={handleOnboarded}
+            />
           </div>
           <div className="flex flex-col items-center w-1/4">
             <h2 className="m-0">2</h2>
-            <div className="relative z-1">
-              {step !== 2 && (
-                <>
-                  <div className="absolute top-0 left-0 right-0 bottom-0 h-full w-full bg-black opacity-50 z-10" />
-                  {step > 2 ? (
-                    <div className="absolute flex flex-col w-1/2 top-1/4 right-1/4 z-20 items-center">
-                      <span className="flex flex-row text-center">
-                        You have {formatCurrency(eth)} ETH
-                      </span>
-                      <CompleteIcon />
-                    </div>
-                  ) : (
-                    <div className="absolute w-1/2 top-1/4 right-1/4 z-20 text-center text-2xl uppercase">
-                      Complete {step}
-                    </div>
-                  )}
-                </>
-              )}
-              <div className="flex flex-col items-center justify-between border border-terminal-green p-5 text-center gap-5 sm:h-[425px] 2xl:h-[500px]">
-                <h4 className="m-0 uppercase">Get ETH</h4>
-                <Eth className="hidden 2xl:block h-5 sm:h-16" />
-                {onMainnet ? (
-                  <p>
-                    We are on <span className="uppercase">{network}</span> so
-                    you are required to bridge from Ethereum or directly
-                    purchase through one of the wallets.
-                  </p>
-                ) : (
-                  <p>
-                    We are on <span className="uppercase">{network}</span> so
-                    you are able to get some test ETH from the faucet.
-                  </p>
-                )}
-                <span
-                  className="flex items-center justify-center border border-terminal-green w-1/2 p-2 cursor-pointer"
-                  onClick={() => setSection("eth")}
-                >
-                  <span className="flex flex-row items-center gap-2">
-                    <p className="uppercase">More Info</p>
-                    <span className="w-8">
-                      <InfoIcon />
-                    </span>
-                  </span>
-                </span>
-                <span className="w-3/4 h-10">
-                  <Button
-                    size={"fill"}
-                    onClick={() =>
-                      onMainnet
-                        ? window.open(
-                            "https://starkgate.starknet.io//",
-                            "_blank"
-                          )
-                        : window.open(
-                            "https://faucet.goerli.starknet.io/",
-                            "_blank"
-                          )
-                    }
-                  >
-                    {onMainnet ? "Bridge Eth" : "Get ETH"}
-                  </Button>
-                </span>
-              </div>
-            </div>
+            <SectionContent
+              section={"eth"}
+              setSection={setSection}
+              step={step}
+              address={address}
+              walletConnectors={walletConnectors}
+              disconnect={disconnect}
+              connect={connect}
+              eth={eth}
+              lords={lords}
+              lordsGameCost={lordsGameCost}
+              onMainnet={onMainnet}
+              network={network!}
+              mintLords={mintLords}
+              prefundGames={prefundGames}
+              setPrefundGames={setPrefundGames}
+              setFullDeployment={setFullDeployment}
+              connector={connector}
+              create={create}
+              listConnectors={listConnectors}
+              updateConnectors={updateConnectors}
+              handleOnboarded={handleOnboarded}
+            />
           </div>
           <div className="flex flex-col items-center w-1/4">
             <h2 className="m-0">3</h2>
-            <div className="relative z-1">
-              {step !== 3 && (
-                <>
-                  <div className="absolute top-0 left-0 right-0 bottom-0 h-full w-full bg-black opacity-50 z-10" />
-                  {step > 3 ? (
-                    <div className="absolute flex flex-col w-1/2 top-1/4 right-1/4 z-20 items-center">
-                      <span className="flex flex-row text-center">
-                        You have {formatCurrency(lords)} LORDS
-                      </span>
-                      <CompleteIcon />
-                    </div>
-                  ) : (
-                    <div className="absolute w-1/2 top-1/4 right-1/4 z-20 text-center text-2xl uppercase">
-                      Complete {step}
-                    </div>
-                  )}
-                </>
-              )}
-              <div className="flex flex-col items-center justify-between border border-terminal-green p-5 text-center gap-5 sm:h-[425px] 2xl:h-[500px]">
-                <h4 className="m-0 uppercase">Get Lords</h4>
-                <Lords className="hidden 2xl:block fill-current h-5 sm:h-16" />
-                <p>
-                  We are on <span className="uppercase">{network}</span> so you
-                  are required to purchase LORDS from an exchange.
-                </p>
-                <span
-                  className="flex items-center justify-center border border-terminal-green w-1/2 p-2 cursor-pointer"
-                  onClick={() => setSection("lords")}
-                >
-                  <span className="flex flex-row items-center gap-2">
-                    <p className="uppercase">More Info</p>
-                    <span className="w-8">
-                      <InfoIcon />
-                    </span>
-                  </span>
-                </span>
-                <span className="w-3/4 h-10">
-                  <Button
-                    size={"fill"}
-                    onClick={async () => {
-                      if (onMainnet) {
-                        const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
-                          process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
-                        )}&tokenTo=${indexAddress(
-                          process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
-                        )}&amount=0.001`;
-                        window.open(avnuLords, "_blank");
-                      } else {
-                        await mintLords(lordsGameCost * 25);
-                      }
-                    }}
-                  >
-                    {onMainnet ? "Buy LORDS" : "Mint LORDS"}
-                  </Button>
-                </span>
-              </div>
-            </div>
+            <SectionContent
+              section={"lords"}
+              setSection={setSection}
+              step={step}
+              address={address}
+              walletConnectors={walletConnectors}
+              disconnect={disconnect}
+              connect={connect}
+              eth={eth}
+              lords={lords}
+              lordsGameCost={lordsGameCost}
+              onMainnet={onMainnet}
+              network={network!}
+              mintLords={mintLords}
+              prefundGames={prefundGames}
+              setPrefundGames={setPrefundGames}
+              setFullDeployment={setFullDeployment}
+              connector={connector}
+              create={create}
+              listConnectors={listConnectors}
+              updateConnectors={updateConnectors}
+              handleOnboarded={handleOnboarded}
+            />
           </div>
           <div className="flex flex-col items-center w-1/4">
             <h2 className="m-0">4</h2>
-            <div className="relative z-1">
-              {step !== 4 && (
-                <>
-                  <div className="absolute top-0 left-0 right-0 bottom-0 h-full w-full bg-black opacity-50 z-10" />
-                  <div className="absolute w-1/2 top-1/4 right-1/4 z-20 text-center text-2xl uppercase">
-                    Complete {step}
-                  </div>
-                </>
-              )}
-              <div className="flex flex-col items-center justify-between border border-terminal-green p-5 text-center sm:gap-2 2xl:gap-5 sm:h-[425px] 2xl:h-[500px]">
-                <h4 className="m-0 uppercase">Signerless Txs</h4>
-                <Arcade className="hidden 2xl:block fill-current h-5 sm:h-16" />
-                <p>
-                  Arcade Accounts offer signature free gameplay rather than
-                  needing to sign each tx.
-                </p>
-                <span
-                  className="flex items-center justify-center border border-terminal-green w-1/2 p-2 cursor-pointer"
-                  onClick={() => setSection("arcade")}
-                >
-                  <span className="flex flex-row items-center gap-2">
-                    <p className="uppercase">More Info</p>
-                    <span className="w-8">
-                      <InfoIcon />
-                    </span>
-                  </span>
-                </span>
-                <span className="flex flex-col gap-2">
-                  <p className="uppercase text-xl">Games</p>
-                  <span className="flex flex-row gap-2 text-xl">
-                    <PrefundGamesSelection
-                      lords={lords}
-                      lordsGameCost={lordsGameCost}
-                      prefundGames={prefundGames}
-                      setPrefundGames={setPrefundGames}
-                      games={0}
-                    />
-                    <PrefundGamesSelection
-                      lords={lords}
-                      lordsGameCost={lordsGameCost}
-                      prefundGames={prefundGames}
-                      setPrefundGames={setPrefundGames}
-                      games={1}
-                    />
-                    <PrefundGamesSelection
-                      lords={lords}
-                      lordsGameCost={lordsGameCost}
-                      prefundGames={prefundGames}
-                      setPrefundGames={setPrefundGames}
-                      games={5}
-                    />
-                    <PrefundGamesSelection
-                      lords={lords}
-                      lordsGameCost={lordsGameCost}
-                      prefundGames={prefundGames}
-                      setPrefundGames={setPrefundGames}
-                      games={10}
-                    />
-                    <PrefundGamesSelection
-                      lords={lords}
-                      lordsGameCost={lordsGameCost}
-                      prefundGames={prefundGames}
-                      setPrefundGames={setPrefundGames}
-                      games={25}
-                    />
-                  </span>
-                </span>
-                <div className="flex flex-col w-full items-center">
-                  <span className="flex flex-row gap-2">
-                    <Eth className="w-2" />
-                    0.001 ETH Required
-                  </span>
-                  <span className="flex flex-row gap-2">
-                    <Lords className="fill-current w-2" />
-                    {formatCurrency(lordsGameCost * prefundGames)} LORDS
-                    Required
-                  </span>
-                  <span className="w-3/4 h-10">
-                    <Button
-                      size={"fill"}
-                      onClick={async () => {
-                        setFullDeployment(true);
-                        await create(connector!, prefundGames * lordsGameCost);
-                        disconnect();
-                        connect({ connector: listConnectors()[0] });
-                        updateConnectors();
-                        setFullDeployment(false);
-                        handleOnboarded();
-                      }}
-                    >
-                      Deploy
-                    </Button>
-                  </span>
-                </div>
-              </div>
-            </div>
+            <SectionContent
+              section={"arcade"}
+              setSection={setSection}
+              step={step}
+              address={address}
+              walletConnectors={walletConnectors}
+              disconnect={disconnect}
+              connect={connect}
+              eth={eth}
+              lords={lords}
+              lordsGameCost={lordsGameCost}
+              onMainnet={onMainnet}
+              network={network!}
+              mintLords={mintLords}
+              prefundGames={prefundGames}
+              setPrefundGames={setPrefundGames}
+              setFullDeployment={setFullDeployment}
+              connector={connector}
+              create={create}
+              listConnectors={listConnectors}
+              updateConnectors={updateConnectors}
+              handleOnboarded={handleOnboarded}
+            />
           </div>
         </div>
         <div className="hidden sm:flex flex-row items-center gap-10">
@@ -571,6 +733,31 @@ const Onboarding = ({
           <span className="w-20 h-10">
             <Button size={"fill"}>Docs</Button>
           </span>
+        </div>
+        <div className="sm:hidden">
+          <SectionContent
+            section={"connect"}
+            setSection={setSection}
+            step={step}
+            address={address}
+            walletConnectors={walletConnectors}
+            disconnect={disconnect}
+            connect={connect}
+            eth={eth}
+            lords={lords}
+            lordsGameCost={lordsGameCost}
+            onMainnet={onMainnet}
+            network={network!}
+            mintLords={mintLords}
+            prefundGames={prefundGames}
+            setPrefundGames={setPrefundGames}
+            setFullDeployment={setFullDeployment}
+            connector={connector}
+            create={create}
+            listConnectors={listConnectors}
+            updateConnectors={updateConnectors}
+            handleOnboarded={handleOnboarded}
+          />
         </div>
         <div className="sm:hidden flex items-center justify-center w-full h-1/5">
           <div className="flex flex-row justify-between items-center w-1/2 h-full">
