@@ -134,6 +134,7 @@ function Home({ updateConnectors }: HomeProps) {
   const calls = useTransactionCartStore((state) => state.calls);
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
+  const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const deathDialog = useUIStore((state) => state.deathDialog);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const hasStatUpgrades = useAdventurerStore(
@@ -470,12 +471,14 @@ function Home({ updateConnectors }: HomeProps) {
   }, [account, accountChainId, isConnected]);
 
   useEffect(() => {
+    console.log(arcadeConnectors.length, onboarded);
     if (arcadeConnectors.length === 0 && !onboarded) {
       setScreen("onboarding");
-    } else {
+    } else if (!onboarded) {
+      handleOnboarded();
       setScreen("start");
     }
-  }, [arcadeConnectors, onboarded]);
+  }, [arcadeConnectors]);
 
   useEffect(() => {
     resetCalls();
