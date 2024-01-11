@@ -14,7 +14,7 @@ export default function ApibaraStatus({ status }: ApibaraStatusProps) {
 
   return (
     <div
-      className={`w-2 h-2 sm:w-4 sm:h-4 rounded-lg ${color} cursor-pointer`}
+      className={`w-2 h-2 mx-2 sm:w-4 sm:h-4 rounded-lg ${color} cursor-pointer`}
       onClick={() => window.open("https://apibara.statuspage.io/", "_blank")}
     />
   );
