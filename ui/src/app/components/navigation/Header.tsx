@@ -145,7 +145,7 @@ export default function Header({
               )}&amount=0.001`;
               window.open(avnuLords, "_blank");
             } else {
-              await mintLords(lordsGameCost);
+              await mintLords(lordsGameCost * 25);
             }
           }}
           onMouseEnter={() => setShowLordsBuy(true)}

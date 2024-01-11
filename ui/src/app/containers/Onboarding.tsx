@@ -83,6 +83,7 @@ const SectionContent = ({
   updateConnectors,
   handleOnboarded,
 }: SectionContentProps) => {
+  console.log(lordsGameCost * 25);
   switch (section) {
     case "connect":
       return (
