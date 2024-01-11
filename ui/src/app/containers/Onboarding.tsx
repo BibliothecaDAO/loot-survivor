@@ -98,9 +98,9 @@ const SectionContent = ({
               )}
             </>
           )}
-          <div className="flex flex-col items-center justify-between border border-terminal-green p-5 text-center gap-10 z-1 h-[600px] sm:h-[425px] 2xl:h-[500px]">
-            <h4 className="m-0 uppercase">Connect Starknet Wallet</h4>
-            <p className="sm:hidden 2xl:block">
+          <div className="flex flex-col items-center justify-between sm:border sm:border-terminal-green p-5 text-center gap-10 z-1 h-[600px] sm:h-[425px] 2xl:h-[500px]">
+            <h4 className="m-0 uppercase text-3xl">Connect Starknet Wallet</h4>
+            <p className="sm:hidden 2xl:block text-xl sm:text-base">
               In order to play LOOT SURVIVOR you are required to connect a
               Starknet wallet.
             </p>
@@ -156,7 +156,7 @@ const SectionContent = ({
               )}
             </>
           )}
-          <div className="flex flex-col items-center justify-between border border-terminal-green p-5 text-center gap-5 sm:h-[425px] 2xl:h-[500px]">
+          <div className="flex flex-col items-center justify-between sm:border sm:border-terminal-green p-5 text-center gap-5 h-[600px] sm:h-[425px] 2xl:h-[500px]">
             <h4 className="m-0 uppercase">Get ETH</h4>
             <Eth className="hidden 2xl:block h-5 sm:h-16" />
             {onMainnet ? (
@@ -220,7 +220,7 @@ const SectionContent = ({
               )}
             </>
           )}
-          <div className="flex flex-col items-center justify-between border border-terminal-green p-5 text-center gap-5 sm:h-[425px] 2xl:h-[500px]">
+          <div className="flex flex-col items-center justify-between sm:border sm:border-terminal-green p-5 text-center gap-5 h-[600px] sm:h-[425px] 2xl:h-[500px]">
             <h4 className="m-0 uppercase">Get Lords</h4>
             <Lords className="hidden 2xl:block fill-current h-5 sm:h-16" />
             <p>
@@ -271,7 +271,7 @@ const SectionContent = ({
               </div>
             </>
           )}
-          <div className="flex flex-col items-center justify-between border border-terminal-green p-5 text-center sm:gap-2 2xl:gap-5 sm:h-[425px] 2xl:h-[500px]">
+          <div className="flex flex-col items-center justify-between sm:border sm:border-terminal-green p-5 text-center sm:gap-2 2xl:gap-5 h-[600px] sm:h-[425px] 2xl:h-[500px]">
             <h4 className="m-0 uppercase">Signerless Txs</h4>
             <Arcade className="hidden 2xl:block fill-current h-5 sm:h-16" />
             <p>
@@ -594,28 +594,29 @@ const Onboarding = ({
         />
       )}
       <Button
-        size={"xl"}
         variant={"outline"}
         onClick={() => {
           setIsMuted(!isMuted);
           clickPlay();
         }}
-        className="fixed top-20 left-20 xl:px-5"
+        className="fixed top-1 left-1 sm:top-20 sm:left-20 xl:px-5"
       >
         {isMuted ? (
-          <SoundOffIcon className="sm:w-10 sm:h-10 h-3 w-3 justify-center fill-current" />
+          <SoundOffIcon className="w-10 h-10 justify-center fill-current" />
         ) : (
-          <SoundOnIcon className="sm:w-10 sm:h-10 h-3 w-3 justify-center fill-current" />
+          <SoundOnIcon className="w-10 h-10 justify-center fill-current" />
         )}
       </Button>
       <Button
-        className="fixed top-20 right-20"
+        className="fixed top-2 right-2 sm:top-20 sm:right-20"
         onClick={() => handleOnboarded()}
       >
         Skip to game
       </Button>
-      <div className="flex flex-col items-center gap-5">
-        <h1 className="m-0 uppercase">Welcome to Loot Survivor</h1>
+      <div className="flex flex-col items-center gap-5 py-20 sm:p-0">
+        <h1 className="m-0 uppercase text-6xl text-center">
+          Welcome to Loot Survivor
+        </h1>
         <p className="hidden sm:block text-lg">
           A fully on-chain arcade game on Starknet. Follow the steps below to
           get setup smoothly:
@@ -735,52 +736,145 @@ const Onboarding = ({
           </span>
         </div>
         <div className="sm:hidden">
-          <SectionContent
-            section={"connect"}
-            setSection={setSection}
-            step={step}
-            address={address}
-            walletConnectors={walletConnectors}
-            disconnect={disconnect}
-            connect={connect}
-            eth={eth}
-            lords={lords}
-            lordsGameCost={lordsGameCost}
-            onMainnet={onMainnet}
-            network={network!}
-            mintLords={mintLords}
-            prefundGames={prefundGames}
-            setPrefundGames={setPrefundGames}
-            setFullDeployment={setFullDeployment}
-            connector={connector}
-            create={create}
-            listConnectors={listConnectors}
-            updateConnectors={updateConnectors}
-            handleOnboarded={handleOnboarded}
-          />
+          {step == 1 && (
+            <SectionContent
+              section={"connect"}
+              setSection={setSection}
+              step={step}
+              address={address}
+              walletConnectors={walletConnectors}
+              disconnect={disconnect}
+              connect={connect}
+              eth={eth}
+              lords={lords}
+              lordsGameCost={lordsGameCost}
+              onMainnet={onMainnet}
+              network={network!}
+              mintLords={mintLords}
+              prefundGames={prefundGames}
+              setPrefundGames={setPrefundGames}
+              setFullDeployment={setFullDeployment}
+              connector={connector}
+              create={create}
+              listConnectors={listConnectors}
+              updateConnectors={updateConnectors}
+              handleOnboarded={handleOnboarded}
+            />
+          )}
+          {step == 2 && (
+            <SectionContent
+              section={"eth"}
+              setSection={setSection}
+              step={step}
+              address={address}
+              walletConnectors={walletConnectors}
+              disconnect={disconnect}
+              connect={connect}
+              eth={eth}
+              lords={lords}
+              lordsGameCost={lordsGameCost}
+              onMainnet={onMainnet}
+              network={network!}
+              mintLords={mintLords}
+              prefundGames={prefundGames}
+              setPrefundGames={setPrefundGames}
+              setFullDeployment={setFullDeployment}
+              connector={connector}
+              create={create}
+              listConnectors={listConnectors}
+              updateConnectors={updateConnectors}
+              handleOnboarded={handleOnboarded}
+            />
+          )}
+          {step == 3 && (
+            <SectionContent
+              section={"lords"}
+              setSection={setSection}
+              step={step}
+              address={address}
+              walletConnectors={walletConnectors}
+              disconnect={disconnect}
+              connect={connect}
+              eth={eth}
+              lords={lords}
+              lordsGameCost={lordsGameCost}
+              onMainnet={onMainnet}
+              network={network!}
+              mintLords={mintLords}
+              prefundGames={prefundGames}
+              setPrefundGames={setPrefundGames}
+              setFullDeployment={setFullDeployment}
+              connector={connector}
+              create={create}
+              listConnectors={listConnectors}
+              updateConnectors={updateConnectors}
+              handleOnboarded={handleOnboarded}
+            />
+          )}
+          {step == 4 && (
+            <SectionContent
+              section={"arcade"}
+              setSection={setSection}
+              step={step}
+              address={address}
+              walletConnectors={walletConnectors}
+              disconnect={disconnect}
+              connect={connect}
+              eth={eth}
+              lords={lords}
+              lordsGameCost={lordsGameCost}
+              onMainnet={onMainnet}
+              network={network!}
+              mintLords={mintLords}
+              prefundGames={prefundGames}
+              setPrefundGames={setPrefundGames}
+              setFullDeployment={setFullDeployment}
+              connector={connector}
+              create={create}
+              listConnectors={listConnectors}
+              updateConnectors={updateConnectors}
+              handleOnboarded={handleOnboarded}
+            />
+          )}
         </div>
         <div className="sm:hidden flex items-center justify-center w-full h-1/5">
           <div className="flex flex-row justify-between items-center w-1/2 h-full">
             <div
-              className={`w-8 h-8 sm:w-12 sm:h-12 ${
-                step >= 1 ? "bg-terminal-green" : "border border-terminal-green"
+              className={`flex justify-center items-center w-8 h-8 sm:w-12 sm:h-12 ${
+                step >= 1
+                  ? "bg-terminal-green text-terminal-black"
+                  : "border border-terminal-green"
               }`}
-            />
+            >
+              {step > 1 ? <CompleteIcon /> : 1}
+            </div>
             <div
-              className={`w-8 h-8 sm:w-12 sm:h-12  ${
-                step >= 2 ? "bg-terminal-green" : "border border-terminal-green"
+              className={`flex justify-center items-center w-8 h-8 sm:w-12 sm:h-12  ${
+                step >= 2
+                  ? "bg-terminal-green text-terminal-black"
+                  : "border border-terminal-green"
               }`}
-            />
+            >
+              {step > 2 ? <CompleteIcon /> : 2}
+            </div>
             <div
-              className={`w-8 h-8 sm:w-12 sm:h-12  ${
-                step >= 3 ? "bg-terminal-green" : "border border-terminal-green"
+              className={`flex justify-center items-center w-8 h-8 sm:w-12 sm:h-12  ${
+                step >= 3
+                  ? "bg-terminal-green text-terminal-black"
+                  : "border border-terminal-green"
               }`}
-            />
+            >
+              {step > 3 ? <CompleteIcon /> : 3}
+            </div>
             <div
-              className={`w-8 h-8 sm:w-12 sm:h-12  ${
-                step == 4 ? "bg-terminal-green" : "border border-terminal-green"
+              className={`flex justify-center items-center w-8 h-8 sm:w-12 sm:h-12  ${
+                step == 4
+                  ? "bg-terminal-green text-terminal-black"
+                  : "border border-terminal-green"
               }`}
-            />
+            >
+              4
+            </div>
           </div>
         </div>
       </div>
