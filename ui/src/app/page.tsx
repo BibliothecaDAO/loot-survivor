@@ -475,7 +475,7 @@ function Home({ updateConnectors }: HomeProps) {
     } else {
       setScreen("start");
     }
-  }, [onboarded]);
+  }, [arcadeConnectors, onboarded]);
 
   useEffect(() => {
     resetCalls();

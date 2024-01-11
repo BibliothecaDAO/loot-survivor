@@ -17,6 +17,7 @@ import {
   indexAddress,
   formatTimeSeconds,
   fetchAverageBlockTime,
+  formatCurrency,
 } from "@/app/lib/utils";
 
 export interface SpawnProps {
@@ -252,6 +253,7 @@ export const Spawn = ({
                           : "Fill details"
                         : "Not enough Lords"}
                     </p>
+                    {formatCurrency(lordsGameCost)}
                     <Lords className="absolute self-center sm:w-5 sm:h-5  h-3 w-3 fill-current right-5" />
                   </div>
                 </Button>
