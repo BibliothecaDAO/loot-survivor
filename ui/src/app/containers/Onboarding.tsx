@@ -98,7 +98,7 @@ const SectionContent = ({
               )}
             </>
           )}
-          <div className="flex flex-col items-center justify-between sm:border sm:border-terminal-green p-5 text-center gap-10 z-1 h-[600px] sm:h-[425px] 2xl:h-[500px]">
+          <div className="flex flex-col items-center justify-between sm:border sm:border-terminal-green p-5 text-center gap-10 z-1 h-[500px] sm:h-[425px] 2xl:h-[500px]">
             <h4 className="m-0 uppercase text-3xl">Connect Starknet Wallet</h4>
             <p className="sm:hidden 2xl:block text-xl sm:text-base">
               In order to play LOOT SURVIVOR you are required to connect a
@@ -115,9 +115,28 @@ const SectionContent = ({
                 </span>
               </span>
             </span>
-            <div className="flex flex-col">
+            <div className="hidden sm:flex flex-col">
               {walletConnectors.map((connector, index) => (
                 <Button
+                  disabled={address !== undefined}
+                  onClick={() => {
+                    disconnect();
+                    connect({ connector });
+                  }}
+                  key={index}
+                >
+                  {connector.id === "braavos" || connector.id === "argentX"
+                    ? `Connect ${connector.id}`
+                    : connector.id === "argentWebWallet"
+                    ? "Login With Email"
+                    : "Login with Argent Mobile"}
+                </Button>
+              ))}
+            </div>
+            <div className="sm:hidden flex flex-col gap-2">
+              {walletConnectors.map((connector, index) => (
+                <Button
+                  size={"lg"}
                   disabled={address !== undefined}
                   onClick={() => {
                     disconnect();
@@ -156,17 +175,17 @@ const SectionContent = ({
               )}
             </>
           )}
-          <div className="flex flex-col items-center justify-between sm:border sm:border-terminal-green p-5 text-center gap-5 h-[600px] sm:h-[425px] 2xl:h-[500px]">
-            <h4 className="m-0 uppercase">Get ETH</h4>
-            <Eth className="hidden 2xl:block h-5 sm:h-16" />
+          <div className="flex flex-col items-center justify-between sm:border sm:border-terminal-green p-5 text-center gap-5 h-[500px] sm:h-[425px] 2xl:h-[500px]">
+            <h4 className="m-0 uppercase text-3xl">Get ETH</h4>
+            <Eth className="sm:hidden 2xl:block h-16" />
             {onMainnet ? (
-              <p>
+              <p className="text-xl sm:text-base">
                 We are on <span className="uppercase">{network}</span> so you
                 are required to bridge from Ethereum or directly purchase
                 through one of the wallets.
               </p>
             ) : (
-              <p>
+              <p className="text-xl sm:text-base">
                 We are on <span className="uppercase">{network}</span> so you
                 are able to get some test ETH from the faucet.
               </p>
@@ -220,13 +239,20 @@ const SectionContent = ({
               )}
             </>
           )}
-          <div className="flex flex-col items-center justify-between sm:border sm:border-terminal-green p-5 text-center gap-5 h-[600px] sm:h-[425px] 2xl:h-[500px]">
-            <h4 className="m-0 uppercase">Get Lords</h4>
-            <Lords className="hidden 2xl:block fill-current h-5 sm:h-16" />
-            <p>
-              We are on <span className="uppercase">{network}</span> so you are
-              required to purchase LORDS from an exchange.
-            </p>
+          <div className="flex flex-col items-center justify-between sm:border sm:border-terminal-green p-5 text-center gap-5 h-[500px] sm:h-[425px] 2xl:h-[500px]">
+            <h4 className="m-0 uppercase text-3xl">Get Lords</h4>
+            <Lords className="sm:hidden 2xl:block fill-current h-16" />
+            {onMainnet ? (
+              <p className="text-xl sm:text-base">
+                We are on <span className="uppercase">{network}</span> so you
+                are required to purchase LORDS from an exchange.
+              </p>
+            ) : (
+              <p className="text-xl sm:text-base">
+                We are on <span className="uppercase">{network}</span> so you
+                can mint LORDS by clicking below.
+              </p>
+            )}
             <span
               className="flex items-center justify-center border border-terminal-green w-1/2 p-2 cursor-pointer"
               onClick={() => setSection("lords")}
@@ -271,9 +297,9 @@ const SectionContent = ({
               </div>
             </>
           )}
-          <div className="flex flex-col items-center justify-between sm:border sm:border-terminal-green p-5 text-center sm:gap-2 2xl:gap-5 h-[600px] sm:h-[425px] 2xl:h-[500px]">
-            <h4 className="m-0 uppercase">Signerless Txs</h4>
-            <Arcade className="hidden 2xl:block fill-current h-5 sm:h-16" />
+          <div className="flex flex-col items-center justify-between sm:border sm:border-terminal-green p-5 text-center sm:gap-2 2xl:gap-5 h-[500px] sm:h-[425px] 2xl:h-[500px]">
+            <h4 className="m-0 uppercase text-3xl">Signerless Txs</h4>
+            <Arcade className="sm:hidden 2xl:block fill-current h-16" />
             <p>
               Arcade Accounts offer signature free gameplay rather than needing
               to sign each tx.
@@ -342,13 +368,17 @@ const SectionContent = ({
                 <Button
                   size={"fill"}
                   onClick={async () => {
-                    setFullDeployment(true);
-                    await create(connector!, prefundGames * lordsGameCost);
-                    disconnect();
-                    connect({ connector: listConnectors()[0] });
-                    updateConnectors();
-                    setFullDeployment(false);
-                    handleOnboarded();
+                    try {
+                      setFullDeployment(true);
+                      await create(connector!, prefundGames * lordsGameCost);
+                      disconnect();
+                      connect({ connector: listConnectors()[0] });
+                      updateConnectors();
+                      setFullDeployment(false);
+                      handleOnboarded();
+                    } catch (e) {
+                      console.log("Arcade deployment cancelled");
+                    }
                   }}
                 >
                   Deploy
@@ -367,19 +397,21 @@ const sectionInfo = (section: Section, lordsGameCost: number) => {
   switch (section) {
     case "connect":
       return (
-        <div className="flex flex-col gap-10 items-center text-center text-lg">
+        <div className="flex flex-col gap-10 items-center text-center text-xl">
           <p>
             Starknet is an non-EVM Ethereum L2 that supports seperate wallets.
           </p>
           <p>Please install a wallet from the list below:</p>
           <div className="flex flex-row my-2">
             <Button
+              size={"lg"}
               onClick={() => openInNewTab("https://braavos.app/")}
               className="m-2"
             >
               Get Braavos
             </Button>
             <Button
+              size={"lg"}
               onClick={() => openInNewTab("https://www.argent.xyz/argent-x/")}
               className="m-2"
             >
@@ -399,7 +431,7 @@ const sectionInfo = (section: Section, lordsGameCost: number) => {
       );
     case "lords":
       return (
-        <div className="flex flex-col items-center justify-between text-center text-lg">
+        <div className="flex flex-col items-center gap-5 justify-between text-center text-lg">
           <p>LORDS is the native token of LOOT SURVIVOR & Realms.World.</p>
           <p>
             You will be required to enter LORDS to play at the price calculated
@@ -485,7 +517,7 @@ interface InfoBoxProps {
 
 const InfoBox = ({ section, setSection, lordsGameCost }: InfoBoxProps) => {
   return (
-    <div className="fixed w-1/2 h-1/2 top-1/4 bg-terminal-black border border-terminal-green flex flex-col items-center p-10 z-30">
+    <div className="fixed w-full sm:w-1/2 h-1/2 top-1/4 bg-terminal-black border border-terminal-green flex flex-col items-center p-10 z-30">
       <button
         className="absolute top-2 right-2 cursor-pointer text-terminal-green"
         onClick={() => {

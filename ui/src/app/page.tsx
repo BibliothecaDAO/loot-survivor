@@ -510,6 +510,7 @@ function Home({ updateConnectors }: HomeProps) {
     >
       {introComplete ? (
         <>
+          <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
           {screen === "onboarding" ? (
             // <ArcadeIntro
             //   ethBalance={ethBalance}
@@ -532,7 +533,6 @@ function Home({ updateConnectors }: HomeProps) {
             />
           ) : (
             <>
-              <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
               <div className="flex flex-col w-full">
                 {specialBeastDefeated && <SpecialBeast />}
                 {!spawnLoader && hash && (
