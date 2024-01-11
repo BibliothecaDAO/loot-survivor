@@ -91,7 +91,7 @@ const SectionContent = ({
             <>
               <div className="absolute top-0 left-0 right-0 bottom-0 h-full w-full bg-black opacity-50 z-10" />
               {step > 1 && (
-                <div className="absolute flex flex-col w-1/2 top-1/4 right-1/4 z-20 items-center">
+                <div className="absolute flex flex-col w-1/2 top-1/4 right-1/4 z-20 items-center text-xl text-center">
                   <p>Connected {displayAddress(address!)}</p>
                   <CompleteIcon />
                 </div>
@@ -163,7 +163,7 @@ const SectionContent = ({
               <div className="absolute top-0 left-0 right-0 bottom-0 h-full w-full bg-black opacity-50 z-10" />
               {step > 2 ? (
                 <div className="absolute flex flex-col w-1/2 top-1/4 right-1/4 z-20 items-center">
-                  <span className="flex flex-row text-center">
+                  <span className="flex flex-row text-center text-xl">
                     You have {formatCurrency(eth)} ETH
                   </span>
                   <CompleteIcon />
@@ -227,7 +227,7 @@ const SectionContent = ({
               <div className="absolute top-0 left-0 right-0 bottom-0 h-full w-full bg-black opacity-50 z-10" />
               {step > 3 ? (
                 <div className="absolute flex flex-col w-1/2 top-1/4 right-1/4 z-20 items-center">
-                  <span className="flex flex-row text-center">
+                  <span className="flex flex-row text-center text-xl">
                     You have {formatCurrency(lords)} LORDS
                   </span>
                   <CompleteIcon />
@@ -764,7 +764,13 @@ const Onboarding = ({
             We recommend you read the docs before using funds
           </p>
           <span className="w-20 h-10">
-            <Button size={"fill"}>Docs</Button>
+            <a
+              href="https://survivor-docs.realms.world/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button size={"fill"}>Docs</Button>
+            </a>
           </span>
         </div>
         <div className="sm:hidden">
