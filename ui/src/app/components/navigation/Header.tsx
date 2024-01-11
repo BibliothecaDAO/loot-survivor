@@ -103,6 +103,8 @@ export default function Header({
     }
   }, [adventurer]);
 
+  const isOnMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+
   return (
     <div className="flex flex-row justify-between px-1 h-10 ">
       <div className="flex flex-row items-center gap-2 sm:gap-5">
@@ -128,16 +130,14 @@ export default function Header({
               : window.open("https://survivor.realms.world/", "_blank")
           }
         >
-          {process.env.NEXT_PUBLIC_NETWORK === "mainnet"
-            ? "Play on Testnet"
-            : "Play on Mainnet"}
+          {isOnMainnet ? "Play on Testnet" : "Play on Mainnet"}
         </Button>
         <Button
           size={"xs"}
           variant={"outline"}
           className="self-center xl:px-5 hover:bg-terminal-green"
           onClick={async () => {
-            if (process.env.NEXT_PUBLIC_NETWORK === "mainnet") {
+            if (isOnMainnet) {
               const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
                 process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
               )}&tokenTo=${indexAddress(
@@ -160,7 +160,9 @@ export default function Header({
                 </p>
               </>
             ) : (
-              <p className="text-black">Buy Lords</p>
+              <p className="text-black">
+                {isOnMainnet ? "Buy Lords" : "Mint Lords"}
+              </p>
             )}
           </span>
         </Button>
