@@ -23,7 +23,7 @@ import Arcade from "public/icons/arcade.svg";
 import { indexAddress, formatCurrency, displayAddress } from "@/app/lib/utils";
 import { useBurner } from "@/app/lib/burner";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
-import useUIStore from "@/app/hooks/useUIStore";
+import useUIStore, { ScreenPage } from "@/app/hooks/useUIStore";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
 
 type Section = "connect" | "eth" | "lords" | "arcade";
@@ -58,6 +58,7 @@ interface SectionContentProps {
   listConnectors: () => any[];
   updateConnectors: () => void;
   handleOnboarded: () => void;
+  setScreen: (value: ScreenPage) => void;
 }
 
 const SectionContent = ({
@@ -82,6 +83,7 @@ const SectionContent = ({
   listConnectors,
   updateConnectors,
   handleOnboarded,
+  setScreen,
 }: SectionContentProps) => {
   console.log(lordsGameCost * 25);
   switch (section) {
@@ -377,6 +379,7 @@ const SectionContent = ({
                       updateConnectors();
                       setFullDeployment(false);
                       handleOnboarded();
+                      setScreen("start");
                     } catch (e) {
                       console.log("Arcade deployment cancelled");
                     }
@@ -586,6 +589,7 @@ const Onboarding = ({
   const [step, setStep] = useState(1);
 
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
+  const setScreen = useUIStore((state) => state.setScreen);
 
   const eth = Number(ethBalance);
   const lords = Number(lordsBalance);
@@ -642,7 +646,10 @@ const Onboarding = ({
       </Button>
       <Button
         className="fixed top-2 right-2 sm:top-20 sm:right-20"
-        onClick={() => handleOnboarded()}
+        onClick={() => {
+          setScreen("start");
+          handleOnboarded();
+        }}
       >
         Skip to game
       </Button>
@@ -679,6 +686,7 @@ const Onboarding = ({
               listConnectors={listConnectors}
               updateConnectors={updateConnectors}
               handleOnboarded={handleOnboarded}
+              setScreen={setScreen}
             />
           </div>
           <div className="flex flex-col items-center w-1/4">
@@ -705,6 +713,7 @@ const Onboarding = ({
               listConnectors={listConnectors}
               updateConnectors={updateConnectors}
               handleOnboarded={handleOnboarded}
+              setScreen={setScreen}
             />
           </div>
           <div className="flex flex-col items-center w-1/4">
@@ -731,6 +740,7 @@ const Onboarding = ({
               listConnectors={listConnectors}
               updateConnectors={updateConnectors}
               handleOnboarded={handleOnboarded}
+              setScreen={setScreen}
             />
           </div>
           <div className="flex flex-col items-center w-1/4">
@@ -757,6 +767,7 @@ const Onboarding = ({
               listConnectors={listConnectors}
               updateConnectors={updateConnectors}
               handleOnboarded={handleOnboarded}
+              setScreen={setScreen}
             />
           </div>
         </div>
@@ -798,6 +809,7 @@ const Onboarding = ({
               listConnectors={listConnectors}
               updateConnectors={updateConnectors}
               handleOnboarded={handleOnboarded}
+              setScreen={setScreen}
             />
           )}
           {step == 2 && (
@@ -823,6 +835,7 @@ const Onboarding = ({
               listConnectors={listConnectors}
               updateConnectors={updateConnectors}
               handleOnboarded={handleOnboarded}
+              setScreen={setScreen}
             />
           )}
           {step == 3 && (
@@ -848,6 +861,7 @@ const Onboarding = ({
               listConnectors={listConnectors}
               updateConnectors={updateConnectors}
               handleOnboarded={handleOnboarded}
+              setScreen={setScreen}
             />
           )}
           {step == 4 && (
@@ -873,6 +887,7 @@ const Onboarding = ({
               listConnectors={listConnectors}
               updateConnectors={updateConnectors}
               handleOnboarded={handleOnboarded}
+              setScreen={setScreen}
             />
           )}
         </div>
