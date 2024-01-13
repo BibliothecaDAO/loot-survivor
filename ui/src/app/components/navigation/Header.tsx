@@ -229,7 +229,9 @@ export default function Header({
                 setDisplayCart(!displayCart);
                 clickPlay();
               }}
-              className={`hidden xl:px-5 ${txInCart ? "animate-pulse" : ""}`}
+              className={`hidden sm:block xl:px-5 ${
+                txInCart ? "animate-pulse" : ""
+              }`}
             >
               <CartIcon className="w-5 h-5 fill-current" />
             </Button>

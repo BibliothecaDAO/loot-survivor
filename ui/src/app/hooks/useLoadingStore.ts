@@ -55,6 +55,11 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
   setTxHash: (hash) => set({ hash }),
   setTxAccepted: (txAccepted) => set({ txAccepted }),
   stopLoading: (notificationData, error, type) => {
+    console.log({
+      hash: get().hash,
+      type: get().type,
+      notificationData: notificationData,
+    });
     set({
       showNotification: notificationData ? true : false,
       notificationData: notificationData || undefined,
@@ -67,7 +72,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
             ...get().history,
             {
               hash: get().hash,
-              type: get().type,
+              type: type,
               notificationData: notificationData,
             },
           ]

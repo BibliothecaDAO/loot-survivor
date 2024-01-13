@@ -570,6 +570,7 @@ function Home({ updateConnectors }: HomeProps) {
                   updateConnectors={updateConnectors}
                   lordsBalance={Number(lordsBalance)}
                   ethBalance={Number(ethBalance)}
+                  costToPlay={costToPlay!}
                 />
               )}
               {status == "connected" && topUpDialog && (

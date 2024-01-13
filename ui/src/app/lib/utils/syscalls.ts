@@ -692,6 +692,7 @@ export function syscalls({
 
       setEquipItems([]);
       setDropItems([]);
+      console.log(reversedDiscoveries);
       stopLoading(reversedDiscoveries, false, "Explore");
       getEthBalance();
       setUpdateDeathPenalty(true);
