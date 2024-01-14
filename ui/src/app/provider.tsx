@@ -1,11 +1,6 @@
 "use client";
 import React from "react";
-import {
-  Connector,
-  StarknetConfig,
-  alchemyProvider,
-  infuraProvider,
-} from "@starknet-react/core";
+import { Connector, StarknetConfig, blastProvider } from "@starknet-react/core";
 import { goerli, mainnet } from "@starknet-react/chains";
 
 export function StarknetProvider({
@@ -18,8 +13,8 @@ export function StarknetProvider({
   const apiKey = process.env.NEXT_PUBLIC_RPC_API_KEY!;
   const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
   const provider = onMainnet
-    ? alchemyProvider({ apiKey })
-    : infuraProvider({ apiKey });
+    ? blastProvider({ apiKey })
+    : blastProvider({ apiKey });
   const chains = onMainnet ? [mainnet] : [goerli];
   return (
     <StarknetConfig
