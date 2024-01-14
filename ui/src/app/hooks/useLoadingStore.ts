@@ -67,7 +67,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
             ...get().history,
             {
               hash: get().hash,
-              type: get().type,
+              type: type,
               notificationData: notificationData,
             },
           ]

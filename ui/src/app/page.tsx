@@ -471,7 +471,6 @@ function Home({ updateConnectors }: HomeProps) {
   }, [account, accountChainId, isConnected]);
 
   useEffect(() => {
-    console.log(arcadeConnectors.length, onboarded);
     if (arcadeConnectors.length === 0 && !onboarded) {
       setScreen("onboarding");
     } else if (!onboarded) {
@@ -570,6 +569,7 @@ function Home({ updateConnectors }: HomeProps) {
                   updateConnectors={updateConnectors}
                   lordsBalance={Number(lordsBalance)}
                   ethBalance={Number(ethBalance)}
+                  costToPlay={costToPlay!}
                 />
               )}
               {status == "connected" && topUpDialog && (

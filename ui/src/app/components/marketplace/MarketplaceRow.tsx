@@ -4,7 +4,13 @@ import { getItemData, getItemPrice, getKeyFromValue } from "@/app/lib/utils";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import LootIcon from "@/app/components/icons/LootIcon";
 import { useWaitForTransaction } from "@starknet-react/core";
-import { Metadata, Item, ItemPurchase, UpgradeStats } from "@/app/types";
+import {
+  Metadata,
+  Item,
+  ItemPurchase,
+  UpgradeStats,
+  NullAdventurer,
+} from "@/app/types";
 import { CoinIcon } from "@/app/components/icons/Icons";
 import EfficacyDisplay from "@/app/components/icons/EfficacyIcon";
 import { GameData } from "@/app/lib/data/GameData";
@@ -25,6 +31,7 @@ interface MarketplaceRowProps {
     purchases?: ItemPurchase[]
   ) => void;
   totalCharisma: number;
+  dropItems: string[];
 }
 
 const MarketplaceRow = ({
@@ -38,6 +45,7 @@ const MarketplaceRow = ({
   setPurchaseItems,
   upgradeHandler,
   totalCharisma,
+  dropItems,
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -106,6 +114,24 @@ const MarketplaceRow = ({
   );
 
   const isActive = activeMenu == index;
+
+  const equippedItems = ownedItems.filter((obj) => obj.equipped).length;
+  const baggedItems = ownedItems.filter((obj) => !obj.equipped).length;
+
+  // Check whether an equipped slot is free, if it is free then even if the bag is full the slot can be bought and equipped.
+  const formatAdventurer = adventurer ?? NullAdventurer;
+  const equppedItem = formatAdventurer[slot.toLowerCase()];
+  const emptySlot = equppedItem === null;
+
+  const purchaseNoEquipItems = purchaseItems.filter(
+    (item) => item.equip === "0"
+  ).length;
+  const purchaseEquipItems = purchaseItems.filter(
+    (item) => item.equip === "1"
+  ).length;
+
+  const equipFull = equippedItems + purchaseEquipItems === 8;
+  const bagFull = baggedItems + purchaseNoEquipItems === 11;
 
   useEffect(() => {
     if (isActive) {
@@ -189,6 +215,7 @@ const MarketplaceRow = ({
                   upgradeHandler(undefined, undefined, newPurchases);
                   setActiveMenu(null);
                 }}
+                disabled={bagFull}
               >
                 No
               </Button>
@@ -214,7 +241,9 @@ const MarketplaceRow = ({
               singlePurchaseExists(item.item ?? "") ||
               item.owner ||
               checkOwned(item.item ?? "") ||
-              checkPurchased(item.item ?? "")
+              checkPurchased(item.item ?? "") ||
+              (equipFull && bagFull) ||
+              (bagFull && !emptySlot)
             }
             className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
           >
@@ -226,6 +255,8 @@ const MarketplaceRow = ({
               ? "In Cart"
               : checkOwned(item.item ?? "")
               ? "Owned"
+              : (equipFull && bagFull) || (bagFull && !emptySlot)
+              ? "Inventory Full"
               : "Purchase"}
           </Button>
         )}

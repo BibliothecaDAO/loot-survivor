@@ -18,6 +18,7 @@ export interface MarketplaceTableProps {
   totalCharisma: number;
   calculatedNewGold: number;
   adventurerItems: Item[];
+  dropItems: string[];
 }
 
 const MarketplaceTable = ({
@@ -27,6 +28,7 @@ const MarketplaceTable = ({
   totalCharisma,
   calculatedNewGold,
   adventurerItems,
+  dropItems,
 }: MarketplaceTableProps) => {
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -133,6 +135,7 @@ const MarketplaceTable = ({
                 setPurchaseItems={setPurchaseItems}
                 upgradeHandler={upgradeHandler}
                 totalCharisma={totalCharisma}
+                dropItems={dropItems}
                 key={index}
               />
             ))
@@ -148,6 +151,9 @@ const MarketplaceTable = ({
         <div className="sm:hidden h-full">
           {(() => {
             const item = sortedMarketLatestItems[showEquipQ ?? 0];
+            const bagFull =
+              adventurerItems.filter((obj) => !obj.equipped).length == 11;
+
             return (
               <div
                 className={`${
@@ -188,6 +194,7 @@ const MarketplaceTable = ({
                     upgradeHandler(undefined, undefined, newPurchases);
                     setShowEquipQ(null);
                   }}
+                  disabled={bagFull}
                 >
                   No
                 </Button>
