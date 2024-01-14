@@ -209,7 +209,7 @@ export const ArcadeDialog = ({
                       Create Account
                     </Button>
                     <Button onClick={() => setRecoverArcade(true)}>
-                      Recover Account
+                      Recover Deployed
                     </Button>
                     <Button onClick={() => setRecoverUndeployed(true)}>
                       Recover Undeployed
