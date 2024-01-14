@@ -65,8 +65,6 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                     const battles = queryData.battlesByBeastQuery
                       ? queryData.battlesByBeastQuery.battles
                       : [];
-                    console.log(battles);
-                    console.log(response);
                     if (response) {
                       notifications = processNotifications(
                         response.type,
@@ -76,8 +74,6 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                         battles
                       );
                     }
-                    console.log(notifications);
-                    console.log(method);
                     return (
                       <li
                         key={i}
@@ -103,7 +99,6 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                           </div>
                           {response &&
                             notifications.map((notification, i) => {
-                              console.log(notification);
                               return (
                                 <span key={i}>{notification.message}</span>
                               );

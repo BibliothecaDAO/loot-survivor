@@ -385,8 +385,6 @@ export const processNotifications = (
       handleUpgrade(notificationData, notifications);
     }
   } else {
-    console.log(type);
-    console.log(notificationData);
     const animation = handleAnimation(notificationData as string);
     notifications.push({
       message: <p>{notificationData as string}</p>,

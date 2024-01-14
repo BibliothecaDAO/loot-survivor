@@ -85,7 +85,6 @@ const SectionContent = ({
   handleOnboarded,
   setScreen,
 }: SectionContentProps) => {
-  console.log(lordsGameCost * 25);
   switch (section) {
     case "connect":
       return (
