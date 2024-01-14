@@ -166,7 +166,7 @@ export default function Header({
             )}
           </span>
         </Button>
-        <span className="sm:hidden w-5 h-5 mx-2">
+        <span className="sm:hidden w-5 h-5">
           <Button
             size={"fill"}
             variant={checkArcade ? "outline" : "default"}
@@ -244,7 +244,27 @@ export default function Header({
             gameContract={gameContract}
           />
         )}
-        <span className="sm:hidden w-5 h-5 mx-2">
+        <span className="sm:hidden flex flex-row gap-2 items-center">
+          <div className="relative">
+            <Button
+              variant={"outline"}
+              size={"sm"}
+              onClick={() => {
+                disconnect();
+                resetData();
+                setAdventurer(NullAdventurer);
+                setDisconnected(true);
+              }}
+              className="xl:px-5 p-0"
+            >
+              {account ? displayAddress(account.address) : "Connect"}
+            </Button>
+            {checkArcade && (
+              <div className="absolute top-0 right-0">
+                <ArcadeIcon className="fill-current w-2 sm:w-4" />
+              </div>
+            )}
+          </div>
           <Button
             size={"fill"}
             variant={"outline"}
