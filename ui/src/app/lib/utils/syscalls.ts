@@ -272,7 +272,11 @@ export function syscalls({
     showDeathDialog(true);
   };
 
-  const spawn = async (formData: FormData, goldenTokenId: string) => {
+  const spawn = async (
+    formData: FormData,
+    goldenTokenId: string,
+    costToPlay?: number
+  ) => {
     const storage: BurnerStorage = Storage.get("burners");
     let interfaceCamel = "";
     const isArcade = checkArcadeConnector(connector!);
@@ -286,8 +290,8 @@ export function syscalls({
     const approveLordsSpendingTx = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", (25 * 10 ** 18).toString(), "0"],
-    }; // Approve 25 LORDS to be spent each time spawn is called
+      calldata: [gameContract?.address ?? "", costToPlay!.toString(), "0"],
+    }; // Approve dynamic LORDS to be spent each time spawn is called based on the get_cost_to_play
 
     const mintAdventurerTx = {
       contractAddress: gameContract?.address ?? "",
@@ -1676,11 +1680,11 @@ export function syscalls({
     }
   };
 
-  const mintLords = async () => {
+  const mintLords = async (lordsAmount: number) => {
     const mintLords: Call = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "mint",
-      calldata: [account?.address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+      calldata: [account?.address ?? "0x0", lordsAmount.toString(), "0"],
     };
     const isArcade = checkArcadeConnector(connector!);
     try {

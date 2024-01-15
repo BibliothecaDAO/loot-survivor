@@ -81,11 +81,10 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                       >
                         <div className="flex flex-col">
                           <div className="flex flex-row justify-between border-b border-terminal-green">
-                            {/* <div className="flex flex-wrap gap-1"> */}
                             <p className="text-xs sm:text-lg text-terminal-yellow">
                               {method}
                             </p>
-                            {/* </div> */}
+
                             <div className="flex flex-row gap-1 text-xs sm:text-lg">
                               <span className="hidden sm:block">Hash:</span>
                               <a
@@ -99,9 +98,11 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                             </div>
                           </div>
                           {response &&
-                            notifications.map(
-                              (notification) => notification.message
-                            )}
+                            notifications.map((notification, i) => {
+                              return (
+                                <span key={i}>{notification.message}</span>
+                              );
+                            })}
                         </div>
                       </li>
                     );

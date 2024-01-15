@@ -2,7 +2,6 @@ import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/app/components/buttons/Button";
 import { useConnect } from "@starknet-react/core";
-import useUIStore from "@/app/hooks/useUIStore";
 import { WalletTutorial } from "@/app/components/intro/WalletTutorial";
 import Storage from "@/app/lib/storage";
 import { BurnerStorage } from "@/app/types";
@@ -12,7 +11,6 @@ interface WalletSelectProps {}
 
 const WalletSelect = ({}: WalletSelectProps) => {
   const { connectors, connect } = useConnect();
-  const setDisconnected = useUIStore((state) => state.setDisconnected);
   const [screen, setScreen] = useState("wallet");
 
   if (!connectors) return <div></div>;
@@ -100,9 +98,6 @@ const WalletSelect = ({}: WalletSelectProps) => {
             <div className="flex flex-row gap-5 justify-center">
               <Button size={"sm"} onClick={() => setScreen("wallet")}>
                 Back
-              </Button>
-              <Button size={"sm"} onClick={() => setDisconnected(false)}>
-                Continue Anyway
               </Button>
             </div>
           </div>

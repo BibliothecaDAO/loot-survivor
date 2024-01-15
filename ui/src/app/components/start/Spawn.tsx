@@ -17,17 +17,23 @@ import {
   indexAddress,
   formatTimeSeconds,
   fetchAverageBlockTime,
+  formatCurrency,
 } from "@/app/lib/utils";
 
 export interface SpawnProps {
   formData: FormData;
-  spawn: (formData: FormData, goldenTokenId: string) => Promise<void>;
+  spawn: (
+    formData: FormData,
+    goldenTokenId: string,
+    costToPlay?: number
+  ) => Promise<void>;
   handleBack: () => void;
   lordsBalance?: bigint;
   goldenTokenData: any;
   gameContract: Contract;
   getBalances: () => Promise<void>;
-  mintLords: () => Promise<void>;
+  mintLords: (lordsAmount: number) => Promise<void>;
+  costToPlay: bigint;
 }
 
 export const Spawn = ({
@@ -39,6 +45,7 @@ export const Spawn = ({
   gameContract,
   getBalances,
   mintLords,
+  costToPlay,
 }: SpawnProps) => {
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
   const [formFilled, setFormFilled] = useState(false);
@@ -68,15 +75,17 @@ export const Spawn = ({
     setShowWalletTutorial(true);
   };
 
+  const lordsGameCost = Number(costToPlay);
+
   const handleSubmitLords = async () => {
     resetNotification();
-    await spawn(formData, "0");
+    await spawn(formData, "0", lordsGameCost);
     await getBalances();
   };
 
   const handleSubmitGoldenToken = async () => {
     resetNotification();
-    await spawn(formData, usableToken);
+    await spawn(formData, usableToken, lordsGameCost);
     await getBalances();
   };
 
@@ -128,7 +137,7 @@ export const Spawn = ({
   }, [currentBlockNumber]);
 
   useEffect(() => {
-    getUsableGoldenToken(goldenTokens);
+    getUsableGoldenToken(goldenTokens ?? []);
   }, []);
 
   return (
@@ -244,6 +253,7 @@ export const Spawn = ({
                           : "Fill details"
                         : "Not enough Lords"}
                     </p>
+                    {formatCurrency(lordsGameCost)}
                     <Lords className="absolute self-center sm:w-5 sm:h-5  h-3 w-3 fill-current right-5" />
                   </div>
                 </Button>
@@ -304,7 +314,7 @@ export const Spawn = ({
                       )}&amount=0.001`;
                       window.open(avnuLords, "_blank");
                     } else {
-                      await mintLords();
+                      await mintLords(lordsGameCost);
                     }
                   }}
                 >

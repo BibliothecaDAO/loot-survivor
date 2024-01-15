@@ -6,6 +6,7 @@ import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { CSSTransition } from "react-transition-group";
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
+import { MdClose } from "react-icons/md";
 
 export interface NotificationComponentProps {
   notifications: any[];
@@ -112,6 +113,12 @@ const NotificationComponent = ({
         }`}
       >
         <div className="relative flex flex-row w-full gap-5 sm:p-2 items-center justify-center h-full">
+          <div
+            className="absolute top-0 right-0 cursor-pointer"
+            onClick={() => resetNotification()}
+          >
+            <MdClose className="w-10 h-10" />
+          </div>
           {flash && <div className="notification-flash" />}
           <div className="sm:hidden w-1/6 sm:w-1/4">
             <SpriteAnimation
