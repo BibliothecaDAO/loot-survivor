@@ -36,7 +36,7 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
         transactions ? (
           <div
             ref={wrapperRef}
-            className="absolute m-auto z-10 right-[50px] w-[300px] h-[400px] sm:right-16 top-20 sm:top-32 w-1/4 sm:w-[650px] h-3/4 p-4 bg-terminal-black border border-terminal-green overflow-y-auto"
+            className="absolute m-auto z-10 right-[50px] w-[300px] h-[400px] sm:right-16 top-20 sm:top-32 w-1/4 sm:w-[650px] h-3/4 p-4 bg-terminal-black border border-terminal-green overflow-hidden"
           >
             <div className="flex flex-row justify-between">
               <p className="text-2xl">Ledger</p>
@@ -45,13 +45,13 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                   setDisplayHistory(false);
                   play();
                 }}
-                className="text-red-500 hover:text-red-700"
+                className="text-terminal-green"
               >
                 <MdClose size={40} />
               </button>
             </div>
             <div className="w-full border border-terminal-green" />
-            <div className="overflow-y-auto">
+            <div className="h-5/6 overflow-y-auto table-scroll">
               <ul>
                 {transactions
                   .slice()
