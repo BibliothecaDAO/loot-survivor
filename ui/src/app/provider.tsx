@@ -4,7 +4,7 @@ import {
   Connector,
   StarknetConfig,
   alchemyProvider,
-  infuraProvider,
+  blastProvider,
 } from "@starknet-react/core";
 import { goerli, mainnet } from "@starknet-react/chains";
 
@@ -19,7 +19,7 @@ export function StarknetProvider({
   const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
   const provider = onMainnet
     ? alchemyProvider({ apiKey })
-    : infuraProvider({ apiKey });
+    : blastProvider({ apiKey });
   const chains = onMainnet ? [mainnet] : [goerli];
   return (
     <StarknetConfig
