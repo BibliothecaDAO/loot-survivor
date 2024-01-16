@@ -16,7 +16,7 @@ import {
 } from "@/app/lib/constants";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import { fetchBalances } from "@/app/lib/balances";
-import { indexAddress } from "@/app/lib/utils";
+import { formatCurrency, indexAddress } from "@/app/lib/utils";
 import Lords from "public/icons/lords.svg";
 import Eth from "public/icons/eth-2.svg";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
@@ -34,6 +34,7 @@ interface ArcadeDialogProps {
   updateConnectors: () => void;
   lordsBalance: number;
   ethBalance: number;
+  costToPlay: bigint;
 }
 
 export const ArcadeDialog = ({
@@ -43,6 +44,7 @@ export const ArcadeDialog = ({
   updateConnectors,
   lordsBalance,
   ethBalance,
+  costToPlay,
 }: ArcadeDialogProps) => {
   const [fetchedBalances, setFetchedBalances] = useState(false);
   const [recoverArcade, setRecoverArcade] = useState(false);
@@ -61,7 +63,6 @@ export const ArcadeDialog = ({
     isDeploying,
     setPermissions,
     isSettingPermissions,
-    setIsSettingPermissions,
     genNewKey,
     isGeneratingNewKey,
     topUpEth,
@@ -73,7 +74,6 @@ export const ArcadeDialog = ({
     listConnectors,
     deployAccountFromHash,
     showLoader,
-    setShowLoader,
   } = useBurner({ walletAccount, gameContract, lordsContract, ethContract });
   const [arcadebalances, setArcadeBalances] = useState<
     Record<string, { eth: bigint; lords: bigint; lordsGameAllowance: bigint }>
@@ -134,6 +134,8 @@ export const ArcadeDialog = ({
     });
   };
 
+  const lordsGameCost = Number(costToPlay);
+
   useEffect(() => {
     getBalances();
   }, [arcadeConnectors, fetchedBalances]);
@@ -185,8 +187,9 @@ export const ArcadeDialog = ({
                 <div className="flex flex-col">
                   <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow sm:w-1/2 mx-auto">
                     Note: Creating an account will initiate a transfer of 0.01
-                    ETH & 25 LORDS from your connected wallet to the arcade
-                    account to cover your transaction costs from gameplay.
+                    ETH & {formatCurrency(lordsGameCost)} LORDS from your
+                    connected wallet to the arcade account to cover your
+                    transaction costs from gameplay.
                   </p>
                   <div className="flex flex-row justify-center gap-5">
                     <Button
@@ -206,7 +209,7 @@ export const ArcadeDialog = ({
                       Create Account
                     </Button>
                     <Button onClick={() => setRecoverArcade(true)}>
-                      Recover Account
+                      Recover Deployed
                     </Button>
                     <Button onClick={() => setRecoverUndeployed(true)}>
                       Recover Undeployed
@@ -230,8 +233,6 @@ export const ArcadeDialog = ({
                     arcadeConnectors={arcadeConnectors()}
                     genNewKey={genNewKey}
                     setPermissions={setPermissions}
-                    setIsSettingPermissions={setIsSettingPermissions}
-                    setShowLoader={setShowLoader}
                     balances={arcadebalances[account.name]}
                     getAccountBalances={getAccountBalances}
                     topUpEth={topUpEth}
@@ -240,6 +241,7 @@ export const ArcadeDialog = ({
                     isWithdrawing={isWithdrawing}
                     lordsBalance={lordsBalance}
                     ethBalance={ethBalance}
+                    lordsGameCost={lordsGameCost}
                   />
                 );
               })}
@@ -276,10 +278,9 @@ interface ArcadeAccountCardProps {
   genNewKey: (address: string, connector: Connector) => Promise<void>;
   setPermissions: (
     accountAAFinalAdress: string,
-    walletAccount: AccountInterface
+    walletAccount: AccountInterface,
+    alreadyDeployed: boolean
   ) => Promise<string>;
-  setIsSettingPermissions: (isSettingPermissions: boolean) => void;
-  setShowLoader: (showLoader: boolean) => void;
   balances: {
     [key: string]: bigint;
     eth: bigint;
@@ -303,6 +304,7 @@ interface ArcadeAccountCardProps {
   isWithdrawing: boolean;
   lordsBalance: number;
   ethBalance: number;
+  lordsGameCost: number;
 }
 
 export const ArcadeAccountCard = ({
@@ -315,8 +317,6 @@ export const ArcadeAccountCard = ({
   arcadeConnectors,
   genNewKey,
   setPermissions,
-  setIsSettingPermissions,
-  setShowLoader,
   balances,
   getAccountBalances,
   topUpEth,
@@ -325,6 +325,7 @@ export const ArcadeAccountCard = ({
   isWithdrawing,
   lordsBalance,
   ethBalance,
+  lordsGameCost,
 }: ArcadeAccountCardProps) => {
   const { connect, connectors } = useConnect();
   const [isCopied, setIsCopied] = useState(false);
@@ -400,6 +401,7 @@ export const ArcadeAccountCard = ({
                     getBalances={getAccountBalances}
                     lordsBalance={lordsBalance}
                     ethBalance={ethBalance}
+                    lordsGameCost={lordsGameCost}
                   />
                 </div>
                 <Button
@@ -427,6 +429,7 @@ export const ArcadeAccountCard = ({
                     getBalances={getAccountBalances}
                     lordsBalance={lordsBalance}
                     ethBalance={ethBalance}
+                    lordsGameCost={lordsGameCost}
                   />
                 </div>
                 <Button
@@ -451,6 +454,7 @@ export const ArcadeAccountCard = ({
             getBalances={async () => await getAccountBalances(account.name)}
             lordsBalance={lordsBalance}
             ethBalance={ethBalance}
+            lordsGameCost={lordsGameCost}
           />
         )}
       </div>
@@ -479,11 +483,7 @@ export const ArcadeAccountCard = ({
               <Button
                 variant={"ghost"}
                 onClick={async () => {
-                  setShowLoader(true);
-                  setIsSettingPermissions(true);
-                  await setPermissions(account.name, walletAccount);
-                  setIsSettingPermissions(false);
-                  setShowLoader(false);
+                  await setPermissions(account.name, walletAccount, true);
                 }}
                 className={`${currentGamePermissions ? "" : "animate-pulse"}`}
               >

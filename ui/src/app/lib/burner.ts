@@ -18,8 +18,10 @@ import { BurnerStorage } from "@/app/types";
 import { padAddress } from "@/app/lib/utils";
 import { TRANSACTION_WAIT_RETRY_INTERVAL } from "@/app/lib/constants";
 
-export const ETH_PREFUND_AMOUNT = "0x2386F26FC10000"; // 0.01ETH
-export const LORDS_PREFUND_AMOUNT = "0x15AF1D78B58C40000"; // 25LORDS
+const isMainnet = process.env.NEXT_PUBLIC_NETWORK == "mainnet";
+export const ETH_PREFUND_AMOUNT = isMainnet
+  ? "0x2386F26FC10000"
+  : "0x38D7EA4C68000"; // 0.01ETH on Mainnet, 0.001ETH on Testnet
 
 const rpc_addr = process.env.NEXT_PUBLIC_RPC_URL;
 const provider = new Provider({
@@ -84,7 +86,10 @@ export const useBurner = ({
     let storage = Storage.get("burners") || {};
     return Object.keys(storage).map((address) => {
       if (
-        storage[address].gameContract === process.env.NEXT_PUBLIC_GAME_ADDRESS
+        storage[address].gameContract ===
+          process.env.NEXT_PUBLIC_GAME_ADDRESS ||
+        storage[address].gameContract ===
+          process.env.NEXT_PUBLIC_OLD_GAME_ADDRESS
       ) {
         return {
           address,
@@ -164,7 +169,7 @@ export const useBurner = ({
 
       const { transaction_hash } = await account.execute(prefundCalls);
 
-      const result = await account.waitForTransaction(transaction_hash, {
+      const result = await provider.waitForTransaction(transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
@@ -249,14 +254,11 @@ export const useBurner = ({
         await provider.waitForTransaction(deployTx);
 
         setIsDeploying(false);
-        setIsSettingPermissions(true);
 
         const setPermissionsTx = await setPermissions(
           accountAAFinalAddress,
           walletAccount
         );
-
-        await provider.waitForTransaction(setPermissionsTx);
 
         // save burner
         let storage = Storage.get("burners") || {};
@@ -277,8 +279,6 @@ export const useBurner = ({
 
         setAccount(burner);
         Storage.set("burners", storage);
-        setIsSettingPermissions(false);
-        setIsDeploying(false);
         setShowLoader(false);
         return burner;
       } catch (e) {
@@ -293,8 +293,14 @@ export const useBurner = ({
   );
 
   const setPermissions = useCallback(
-    async (accountAAFinalAdress: string, walletAccount: AccountInterface) => {
+    async (
+      accountAAFinalAdress: string,
+      walletAccount: AccountInterface,
+      alreadyDeployed?: boolean
+    ) => {
       try {
+        setShowLoader(true);
+        setIsSettingPermissions(true);
         const permissions: Call[] = [
           {
             contractAddress: accountAAFinalAdress,
@@ -323,6 +329,22 @@ export const useBurner = ({
           permissions
         );
 
+        await provider.waitForTransaction(permissionsTx);
+
+        if (alreadyDeployed) {
+          // save burner
+          let storage = Storage.get("burners") || {};
+          for (let address in storage) {
+            storage[address].active = false;
+          }
+          storage[padAddress(accountAAFinalAdress)].gameContract =
+            gameContract?.address ?? "";
+
+          Storage.set("burners", storage);
+          setShowLoader(false); // close loader for set permissions called from deployed arcade
+        }
+
+        setIsSettingPermissions(false);
         return permissionsTx;
       } catch (e) {
         setIsSettingPermissions(false);
@@ -352,7 +374,7 @@ export const useBurner = ({
         ]),
       });
 
-      const result = await account.waitForTransaction(transaction_hash, {
+      const result = await provider.waitForTransaction(transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
@@ -389,7 +411,7 @@ export const useBurner = ({
       };
       const { transaction_hash } = await account.execute([lordsTransferTx]);
 
-      const result = await account.waitForTransaction(transaction_hash, {
+      const result = await provider.waitForTransaction(transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
@@ -474,7 +496,7 @@ export const useBurner = ({
 
       const { transaction_hash } = await account.execute(calls);
 
-      const result = await account.waitForTransaction(transaction_hash, {
+      const result = await provider.waitForTransaction(transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 

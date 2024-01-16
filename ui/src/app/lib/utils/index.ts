@@ -547,3 +547,7 @@ function findAndSumVitValues(arr: string[]): number {
 
   return total;
 }
+
+export function formatCurrency(value: number): string {
+  return (value / 10 ** 18).toFixed(4);
+}

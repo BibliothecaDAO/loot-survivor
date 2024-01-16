@@ -78,6 +78,7 @@ export default function UpgradeScreen({
   const setUpgrades = useUIStore((state) => state.setUpgrades);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
+  const dropItems = useUIStore((state) => state.dropItems);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const [summary, setSummary] = useState<UpgradeSummary>({
     Stats: { ...ZeroUpgrade },
@@ -554,6 +555,7 @@ export default function UpgradeScreen({
                         upgradeHandler={handleAddUpgradeTx}
                         totalCharisma={totalCharisma}
                         adventurerItems={adventurerItems}
+                        dropItems={dropItems}
                       />
                     </div>
                   )}
@@ -566,6 +568,7 @@ export default function UpgradeScreen({
                         upgradeHandler={handleAddUpgradeTx}
                         totalCharisma={totalCharisma}
                         adventurerItems={adventurerItems}
+                        dropItems={dropItems}
                       />
                     </div>
                   )}

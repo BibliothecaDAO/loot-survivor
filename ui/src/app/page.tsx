@@ -4,8 +4,10 @@ import {
   useConnect,
   useContract,
   Connector,
-  useProvider,
 } from "@starknet-react/core";
+import { InjectedConnector } from "starknetkit/injected";
+import { ArgentMobileConnector } from "starknetkit/argentMobile";
+import { WebWalletConnector } from "starknetkit/webwallet";
 import { constants } from "starknet";
 import { useState, useEffect, useMemo } from "react";
 import ActionsScreen from "@/app/containers/ActionsScreen";
@@ -54,7 +56,7 @@ import Game from "@/app/abi/Game.json";
 import Lords from "@/app/abi/Lords.json";
 import EthBalanceFragment from "@/app/abi/EthBalanceFragment.json";
 import Beasts from "@/app/abi/Beasts.json";
-import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
+// import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
 import ScreenMenu from "@/app/components/menu/ScreenMenu";
 import {
   getArcadeConnectors,
@@ -68,6 +70,7 @@ import { SpecialBeast } from "@/app/components/notifications/SpecialBeast";
 import { useBurner } from "@/app/lib/burner";
 import { connectors } from "@/app/lib/connectors";
 import Storage from "@/app/lib/storage";
+import Onboarding from "./containers/Onboarding";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -89,7 +92,14 @@ const mobileMenuItems: Menu[] = [
 ];
 
 export default function Main() {
-  const [appConnectors, setAppConnectors] = useState<Connector[]>([]);
+  const [appConnectors, setAppConnectors] = useState<
+    (
+      | Connector
+      | WebWalletConnector
+      | InjectedConnector
+      | ArgentMobileConnector
+    )[]
+  >([]);
 
   const { listConnectors } = useBurner({});
 
@@ -114,7 +124,6 @@ interface HomeProps {
 
 function Home({ updateConnectors }: HomeProps) {
   const { connector, connectors } = useConnect();
-  const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
   const setDisconnected = useUIStore((state) => state.setDisconnected);
   const { account, address, status, isConnected } = useAccount();
@@ -125,6 +134,7 @@ function Home({ updateConnectors }: HomeProps) {
   const calls = useTransactionCartStore((state) => state.calls);
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
+  const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const deathDialog = useUIStore((state) => state.deathDialog);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const hasStatUpgrades = useAdventurerStore(
@@ -134,9 +144,7 @@ function Home({ updateConnectors }: HomeProps) {
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
-  const arcadeIntro = useUIStore((state) => state.arcadeIntro);
-  const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
-  const closedArcadeIntro = useUIStore((state) => state.closedArcadeIntro);
+  const onboarded = useUIStore((state) => state.onboarded);
   const topUpDialog = useUIStore((state) => state.topUpDialog);
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
@@ -188,11 +196,15 @@ function Home({ updateConnectors }: HomeProps) {
   const setUpdateDeathPenalty = useUIStore(
     (state) => state.setUpdateDeathPenalty
   );
+  const [accountChainId, setAccountChainId] = useState<
+    constants.StarknetChainId | undefined
+  >();
 
   const arcadeConnectors = getArcadeConnectors(connectors);
 
   const [ethBalance, setEthBalance] = useState<bigint>(BigInt(0));
   const [lordsBalance, setLordsBalance] = useState<bigint>(BigInt(0));
+  const [costToPlay, setCostToPlay] = useState<bigint | undefined>();
 
   const getBalances = async () => {
     const balances = await fetchBalances(
@@ -223,7 +235,7 @@ function Home({ updateConnectors }: HomeProps) {
     attack,
     flee,
     upgrade,
-    slayAllIdles,
+    slayIdles,
     multicall,
     mintLords,
   } = syscalls({
@@ -345,8 +357,8 @@ function Home({ updateConnectors }: HomeProps) {
   const goldenTokenVariables = useMemo(() => {
     const storage: BurnerStorage = Storage.get("burners");
     const isArcade = checkArcadeConnector(connector);
-    if (isArcade) {
-      const masterAccount = storage[address!].masterAccount;
+    if (isArcade && address) {
+      const masterAccount = storage[address].masterAccount;
       return {
         contractAddress:
           process.env.NEXT_PUBLIC_GOLDEN_TOKEN_ADDRESS?.toLowerCase(),
@@ -441,20 +453,29 @@ function Home({ updateConnectors }: HomeProps) {
     }
   }, [isConnected]);
 
+  const getAccountChainId = async () => {
+    if (account) {
+      const chainId = await account!.getChainId();
+      setAccountChainId(chainId);
+    }
+  };
+
   useEffect(() => {
+    getAccountChainId();
     const isWrongNetwork =
-      (provider as any)?.chainId !==
+      accountChainId !==
       (process.env.NEXT_PUBLIC_NETWORK === "mainnet"
         ? constants.StarknetChainId.SN_MAIN
         : constants.StarknetChainId.SN_GOERLI);
     setIsWrongNetwork(isWrongNetwork);
-  }, [(provider as any)?.chainId, isConnected]);
+  }, [account, accountChainId, isConnected]);
 
   useEffect(() => {
-    if (arcadeConnectors.length === 0 && !closedArcadeIntro) {
-      showArcadeIntro(true);
-    } else {
-      showArcadeIntro(false);
+    if (arcadeConnectors.length === 0 && !onboarded) {
+      setScreen("onboarding");
+    } else if (!onboarded) {
+      handleOnboarded();
+      setScreen("start");
     }
   }, [arcadeConnectors]);
 
@@ -472,6 +493,15 @@ function Home({ updateConnectors }: HomeProps) {
     (pendingMessage === "Spawning Adventurer" ||
       pendingMessage.includes("Spawning Adventurer"));
 
+  const getCostToPlay = async () => {
+    const cost = await gameContract!.call("get_cost_to_play", []);
+    setCostToPlay(cost as bigint);
+  };
+
+  useEffect(() => {
+    getCostToPlay();
+  }, []);
+
   if (!isConnected && introComplete && disconnected) {
     return <WalletSelect />;
   }
@@ -482,135 +512,152 @@ function Home({ updateConnectors }: HomeProps) {
     >
       {introComplete ? (
         <>
-          <div className="flex flex-col w-full">
-            <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
-            {specialBeastDefeated && <SpecialBeast />}
-            {!spawnLoader && hash && (
-              <div className="sm:hidden">
-                <TxActivity />
-              </div>
-            )}
-            <Header
-              multicall={multicall}
-              mintLords={mintLords}
-              lordsBalance={lordsBalance}
-              arcadeConnectors={arcadeConnectors}
-              gameContract={gameContract!}
-            />
-          </div>
-          <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
-            {!spawnLoader && hash && (
-              <div className="hidden sm:block">
-                <TxActivity />
-              </div>
-            )}
-          </div>
-          <NotificationDisplay />
-
-          {deathDialog && <DeathDialog />}
-          {arcadeIntro && (
-            <ArcadeIntro
+          <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
+          {screen === "onboarding" ? (
+            // <ArcadeIntro
+            //   ethBalance={ethBalance}
+            //   lordsBalance={lordsBalance}
+            //   gameContract={gameContract!}
+            //   lordsContract={lordsContract!}
+            //   ethContract={ethContract!}
+            //   updateConnectors={updateConnectors}
+            //   mintLords={mintLords}
+            // />
+            <Onboarding
               ethBalance={ethBalance}
               lordsBalance={lordsBalance}
-              gameContract={gameContract!}
-              lordsContract={lordsContract!}
-              ethContract={ethContract!}
-              updateConnectors={updateConnectors}
+              costToPlay={costToPlay!}
               mintLords={mintLords}
-            />
-          )}
-          {status == "connected" && arcadeDialog && (
-            <ArcadeDialog
               gameContract={gameContract!}
               lordsContract={lordsContract!}
               ethContract={ethContract!}
               updateConnectors={updateConnectors}
-              lordsBalance={Number(lordsBalance)}
-              ethBalance={Number(ethBalance)}
             />
-          )}
-          {status == "connected" && topUpDialog && (
-            <TopUpDialog
-              ethContract={ethContract!}
-              getEthBalance={getEthBalance}
-              ethBalance={Number(ethBalance)}
-            />
-          )}
+          ) : (
+            <>
+              <div className="flex flex-col w-full">
+                {specialBeastDefeated && <SpecialBeast />}
+                {!spawnLoader && hash && (
+                  <div className="sm:hidden">
+                    <TxActivity />
+                  </div>
+                )}
+                <Header
+                  multicall={multicall}
+                  mintLords={mintLords}
+                  lordsBalance={lordsBalance}
+                  arcadeConnectors={arcadeConnectors}
+                  gameContract={gameContract!}
+                  costToPlay={costToPlay!}
+                />
+              </div>
+              <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
+                {!spawnLoader && hash && (
+                  <div className="hidden sm:block">
+                    <TxActivity />
+                  </div>
+                )}
+              </div>
+              <NotificationDisplay />
 
-          {introComplete ? (
-            <div className="flex flex-col w-full h-[600px] sm:h-[625px]">
-              <>
-                <div className="sm:hidden flex  sm:justify-normal sm:pb-2">
-                  <ScreenMenu
-                    buttonsData={mobileMenuItems}
-                    onButtonClick={(value) => {
-                      setScreen(value);
-                    }}
-                    disabled={mobileMenuDisabled}
-                  />
-                </div>
-                <div className="hidden sm:block flex justify-center sm:justify-normal sm:pb-2">
-                  <ScreenMenu
-                    buttonsData={allMenuItems}
-                    onButtonClick={(value) => {
-                      setScreen(value);
-                    }}
-                    disabled={allMenuDisabled}
-                  />
-                </div>
+              {deathDialog && <DeathDialog />}
+              {status == "connected" && arcadeDialog && (
+                <ArcadeDialog
+                  gameContract={gameContract!}
+                  lordsContract={lordsContract!}
+                  ethContract={ethContract!}
+                  updateConnectors={updateConnectors}
+                  lordsBalance={Number(lordsBalance)}
+                  ethBalance={Number(ethBalance)}
+                  costToPlay={costToPlay!}
+                />
+              )}
+              {status == "connected" && topUpDialog && (
+                <TopUpDialog
+                  ethContract={ethContract!}
+                  getEthBalance={getEthBalance}
+                  ethBalance={Number(ethBalance)}
+                />
+              )}
 
-                <div className="sm:hidden">
-                  <MobileHeader />
+              {introComplete ? (
+                <div className="flex flex-col w-full h-[600px] sm:h-[625px]">
+                  <>
+                    <div className="sm:hidden flex  sm:justify-normal sm:pb-2">
+                      <ScreenMenu
+                        buttonsData={mobileMenuItems}
+                        onButtonClick={(value) => {
+                          setScreen(value);
+                        }}
+                        disabled={mobileMenuDisabled}
+                      />
+                    </div>
+                    <div className="hidden sm:block flex justify-center sm:justify-normal sm:pb-2">
+                      <ScreenMenu
+                        buttonsData={allMenuItems}
+                        onButtonClick={(value) => {
+                          setScreen(value);
+                        }}
+                        disabled={allMenuDisabled}
+                      />
+                    </div>
+
+                    <div className="sm:hidden">
+                      <MobileHeader />
+                    </div>
+                    <div className="h-[550px] xl:h-[500px] 2xl:h-[580px]">
+                      {screen === "start" && (
+                        <AdventurerScreen
+                          spawn={spawn}
+                          handleSwitchAdventurer={handleSwitchAdventurer}
+                          lordsBalance={lordsBalance}
+                          gameContract={gameContract!}
+                          goldenTokenData={goldenTokenData}
+                          getBalances={getBalances}
+                          mintLords={mintLords}
+                          costToPlay={costToPlay!}
+                        />
+                      )}
+                      {screen === "play" && (
+                        <ActionsScreen
+                          explore={explore}
+                          attack={attack}
+                          flee={flee}
+                          gameContract={gameContract!}
+                          beastsContract={beastsContract!}
+                        />
+                      )}
+                      {screen === "inventory" && (
+                        <InventoryScreen gameContract={gameContract!} />
+                      )}
+                      {screen === "leaderboard" && (
+                        <LeaderboardScreen
+                          slayIdles={slayIdles}
+                          gameContract={gameContract!}
+                        />
+                      )}
+                      {screen === "upgrade" && (
+                        <UpgradeScreen
+                          upgrade={upgrade}
+                          gameContract={gameContract!}
+                        />
+                      )}
+                      {screen === "profile" && (
+                        <Profile gameContract={gameContract!} />
+                      )}
+                      {screen === "encounters" && <EncountersScreen />}
+                      {screen === "guide" && <GuideScreen />}
+                      {screen === "settings" && <Settings />}
+                      {screen === "player" && (
+                        <Player gameContract={gameContract!} />
+                      )}
+                      {screen === "wallet" && <WalletSelect />}
+                    </div>
+                  </>
                 </div>
-                <div className="h-[550px] xl:h-[500px] 2xl:h-[580px]">
-                  {screen === "start" && (
-                    <AdventurerScreen
-                      spawn={spawn}
-                      handleSwitchAdventurer={handleSwitchAdventurer}
-                      lordsBalance={lordsBalance}
-                      gameContract={gameContract!}
-                      goldenTokenData={goldenTokenData}
-                      getBalances={getBalances}
-                    />
-                  )}
-                  {screen === "play" && (
-                    <ActionsScreen
-                      explore={explore}
-                      attack={attack}
-                      flee={flee}
-                      gameContract={gameContract!}
-                      beastsContract={beastsContract!}
-                    />
-                  )}
-                  {screen === "inventory" && (
-                    <InventoryScreen gameContract={gameContract!} />
-                  )}
-                  {screen === "leaderboard" && (
-                    <LeaderboardScreen
-                      slayAllIdles={slayAllIdles}
-                      gameContract={gameContract!}
-                    />
-                  )}
-                  {screen === "upgrade" && (
-                    <UpgradeScreen
-                      upgrade={upgrade}
-                      gameContract={gameContract!}
-                    />
-                  )}
-                  {screen === "profile" && (
-                    <Profile gameContract={gameContract!} />
-                  )}
-                  {screen === "encounters" && <EncountersScreen />}
-                  {screen === "guide" && <GuideScreen />}
-                  {screen === "settings" && <Settings />}
-                  {screen === "player" && (
-                    <Player gameContract={gameContract!} />
-                  )}
-                  {screen === "wallet" && <WalletSelect />}
-                </div>
-              </>
-            </div>
-          ) : null}
+              ) : null}
+            </>
+          )}
         </>
       ) : (
         <Intro onIntroComplete={handleIntroComplete} />

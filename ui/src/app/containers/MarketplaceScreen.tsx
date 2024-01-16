@@ -15,6 +15,7 @@ export interface MarketplaceScreenProps {
   ) => void;
   totalCharisma: number;
   adventurerItems: Item[];
+  dropItems: string[];
 }
 /**
  * @container
@@ -28,6 +29,7 @@ export default function MarketplaceScreen({
   upgradeHandler,
   totalCharisma,
   adventurerItems,
+  dropItems,
 }: MarketplaceScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const { isLoading } = useQueriesStore();
@@ -54,6 +56,7 @@ export default function MarketplaceScreen({
             totalCharisma={totalCharisma}
             calculatedNewGold={calculatedNewGold}
             adventurerItems={adventurerItems}
+            dropItems={dropItems}
           />
         </div>
       ) : (

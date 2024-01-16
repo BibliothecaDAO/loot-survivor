@@ -2,11 +2,7 @@ import { useEffect, useState } from "react";
 import { MdClose } from "react-icons/md";
 import { Contract } from "starknet";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import {
-  ETH_PREFUND_AMOUNT,
-  LORDS_PREFUND_AMOUNT,
-  useBurner,
-} from "@/app/lib/burner";
+import { ETH_PREFUND_AMOUNT, useBurner } from "@/app/lib/burner";
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import { getWalletConnectors } from "@/app/lib/connectors";
@@ -66,7 +62,7 @@ export const ArcadeIntro = ({
   const eth = Number(ethBalance);
 
   const checkNotEnoughPrefundEth = eth < parseInt(ETH_PREFUND_AMOUNT);
-  const checkNotEnoughPrefundLords = lords < parseInt(LORDS_PREFUND_AMOUNT);
+  const checkNotEnoughPrefundLords = lords < parseInt("1000000000000");
 
   useEffect(() => {
     if (
@@ -93,7 +89,7 @@ export const ArcadeIntro = ({
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
-      <div className="fixed flex flex-col justify-between text-center sm:top-1/8 sm:left-1/8 sm:left-1/4 sm:w-3/4 sm:w-1/2 h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4 overflow-y-auto">
+      <div className="fixed flex flex-col justify-between text-center sm:top-1/8 sm:left-1/8 sm:left-1/4 sm:w-3/4 sm:w-1/2 h-full sm:h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4 overflow-y-auto">
         <button
           className="absolute top-2 right-2 cursor-pointer text-red-500"
           onClick={() => {
@@ -133,7 +129,9 @@ export const ArcadeIntro = ({
                 >
                   {connector.id === "braavos" || connector.id === "argentX"
                     ? `Connect ${connector.id}`
-                    : "Login With Email"}
+                    : connector.id === "argentWebWallet"
+                    ? "Login With Email"
+                    : "Login with Argent Mobile"}
                 </Button>
               ))}
             </div>
@@ -261,7 +259,7 @@ export const ArcadeIntro = ({
                   <p className="text-sm xl:text-xl 2xl:text-2xl">
                     How many games would you like to fund?
                   </p>
-                  <div className="flex flex-row gap-5 w-1/2">
+                  <div className="flex flex-row gap-5 items-center w-full sm:w-1/2">
                     <div className="w-1/2">
                       <QuantityButtons
                         amount={gamesPrefundAmount}
@@ -292,7 +290,7 @@ export const ArcadeIntro = ({
                         gamesPrefundAmount === 0 ||
                         gamesPrefundAmount > maxGames
                       }
-                      className="w-1/2 h-1/4"
+                      className="sm:w-1/2"
                     >
                       Create Account
                     </Button>

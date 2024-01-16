@@ -4,6 +4,7 @@ import {
   Contract,
   AccountInterface,
   RevertedTransactionReceiptResponse,
+  Provider,
 } from "starknet";
 import { GameData } from "@/app/lib/data/GameData";
 import {
@@ -34,6 +35,12 @@ import { QueryData, QueryKey } from "@/app/hooks/useQueryStore";
 import { AdventurerClass } from "@/app/lib/classes";
 import { ScreenPage } from "@/app/hooks/useUIStore";
 import { TRANSACTION_WAIT_RETRY_INTERVAL } from "@/app/lib/constants";
+
+const rpc_addr = process.env.NEXT_PUBLIC_RPC_URL;
+const provider = new Provider({
+  rpc: { nodeUrl: rpc_addr! },
+  sequencer: { baseUrl: rpc_addr! },
+});
 
 export interface SyscallsProps {
   gameContract: Contract;
@@ -265,7 +272,11 @@ export function syscalls({
     showDeathDialog(true);
   };
 
-  const spawn = async (formData: FormData, goldenTokenId: string) => {
+  const spawn = async (
+    formData: FormData,
+    goldenTokenId: string,
+    costToPlay?: number
+  ) => {
     const storage: BurnerStorage = Storage.get("burners");
     let interfaceCamel = "";
     const isArcade = checkArcadeConnector(connector!);
@@ -279,8 +290,8 @@ export function syscalls({
     const approveLordsSpendingTx = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", (25 * 10 ** 18).toString(), "0"],
-    }; // Approve 25 LORDS to be spent each time spawn is called
+      calldata: [gameContract?.address ?? "", costToPlay!.toString(), "0"],
+    }; // Approve dynamic LORDS to be spent each time spawn is called based on the get_cost_to_play
 
     const mintAdventurerTx = {
       contractAddress: gameContract?.address ?? "",
@@ -330,7 +341,7 @@ export function syscalls({
         },
       });
 
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
       // Handle if the tx was reverted
@@ -445,10 +456,9 @@ export function syscalls({
           method: `Explore with ${adventurer?.name}`,
         },
       });
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
-      console.log(receipt);
       // Handle if the tx was reverted
       if (
         (receipt as RevertedTransactionReceiptResponse).execution_status ===
@@ -718,7 +728,7 @@ export function syscalls({
           method: `Attack ${beastData.beast}`,
         },
       });
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
       // Handle if the tx was reverted
@@ -988,7 +998,7 @@ export function syscalls({
           method: `Flee ${beastData.beast}`,
         },
       });
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
       // Handle if the tx was reverted
@@ -1196,7 +1206,7 @@ export function syscalls({
           method: `Upgrade`,
         },
       });
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
       // Handle if the tx was reverted
@@ -1322,7 +1332,7 @@ export function syscalls({
     }
   };
 
-  const slayAllIdles = async (slayAdventurers: number[]) => {
+  const slayIdles = async (slayAdventurers: string[]) => {
     const slayIdleAdventurersTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "slay_idle_adventurers",
@@ -1349,7 +1359,7 @@ export function syscalls({
           method: `Upgrade`,
         },
       });
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
       // Handle if the tx was reverted
@@ -1408,25 +1418,6 @@ export function syscalls({
     upgradeTx?: any
   ) => {
     const isArcade = checkArcadeConnector(connector!);
-
-    const items: string[] = [];
-
-    for (const dict of calls) {
-      if (
-        dict.hasOwnProperty("entrypoint") &&
-        (dict["entrypoint"] === "bid_on_item" ||
-          dict["entrypoint"] === "claim_item")
-      ) {
-        if (Array.isArray(dict.calldata)) {
-          items.unshift(dict.calldata[0]?.toString() ?? "");
-        }
-      }
-      if (dict["entrypoint"] === "equip") {
-        if (Array.isArray(dict.calldata)) {
-          items.unshift(dict.calldata[2]?.toString() ?? "");
-        }
-      }
-    }
     startLoading("Multicall", loadingMessage, undefined, adventurer?.id);
     try {
       let upgradeCalls = [];
@@ -1448,7 +1439,7 @@ export function syscalls({
         showTopUpDialog,
         setTopUpAccount
       );
-      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
+      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
       // Handle if the tx was reverted
@@ -1465,7 +1456,6 @@ export function syscalls({
         hash: tx?.transaction_hash,
         metadata: {
           method: "Multicall",
-          items: items,
         },
       });
       const events = await parseEvents(
@@ -1593,11 +1583,6 @@ export function syscalls({
         (event) => event.name === "AdventurerUpgraded"
       );
       for (let upgradeEvent of upgradeEvents) {
-        // Update adventurer
-        setData("adventurerByIdQuery", {
-          adventurers: [upgradeEvent.data],
-        });
-        setAdventurer(upgradeEvent.data);
         // If there are any equip or drops, do them first
         const { equippedItems, unequippedItems } = handleEquip(
           events,
@@ -1605,6 +1590,11 @@ export function syscalls({
           setAdventurer,
           queryData
         );
+        // Update adventurer
+        setData("adventurerByIdQuery", {
+          adventurers: [upgradeEvent.data],
+        });
+        setAdventurer(upgradeEvent.data);
         const droppedItems = handleDrop(events, setData, setAdventurer);
 
         // Add purchased items
@@ -1665,6 +1655,7 @@ export function syscalls({
             ...(filteredUnequips ?? []),
             ...equippedItems,
             ...unequippedItems,
+            ...purchasedItems,
           ],
         });
         for (let i = 0; i < unequipIndexes.length; i++) {
@@ -1689,11 +1680,11 @@ export function syscalls({
     }
   };
 
-  const mintLords = async () => {
+  const mintLords = async (lordsAmount: number) => {
     const mintLords: Call = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "mint",
-      calldata: [account?.address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+      calldata: [account?.address ?? "0x0", lordsAmount.toString(), "0"],
     };
     const isArcade = checkArcadeConnector(connector!);
     try {
@@ -1706,7 +1697,7 @@ export function syscalls({
         showTopUpDialog,
         setTopUpAccount
       );
-      const result = await account?.waitForTransaction(tx?.transaction_hash, {
+      const result = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
 
@@ -1728,7 +1719,7 @@ export function syscalls({
     attack,
     flee,
     upgrade,
-    slayAllIdles,
+    slayIdles,
     multicall,
     mintLords,
   };
