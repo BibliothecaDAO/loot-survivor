@@ -279,34 +279,37 @@ export default function UpgradeScreen({
     return upgradeTx;
   };
 
+  const adventurerItems = useQueriesStore(
+    (state) => state.data.itemsByAdventurerQuery?.items || []
+  );
+
+  const vitBoostRemoved = calculateVitBoostRemoved(
+    purchaseItems,
+    adventurer!,
+    adventurerItems
+  );
+
+  const maxHealth = Math.min(100 + totalVitality * 10, 511);
+  const newMaxHealth = 100 + (totalVitality - vitBoostRemoved) * 10;
+  const currentHealth = adventurer?.health! + selectedVitality * 10;
+  const healthPlusPots = Math.min(
+    currentHealth! + potionAmount * 10,
+    maxHealth
+  );
+  const healthOverflow = healthPlusPots > newMaxHealth;
+
   const handleSubmitUpgradeTx = async () => {
     renderSummary();
     resetNotification();
     // Handle for vitBoostRemoval
-    const vitBoostRemoved = calculateVitBoostRemoved(
-      purchaseItems,
-      adventurer!,
-      adventurerItems
-    );
     let upgradeTx: any;
-    if (potionAmount > 0) {
-      // Check whether health + pots is within vitBoostRemoved of the maxHealth
-      const maxHealth = 100 + totalVitality * 10;
-      const newMaxHealth = 100 + (totalVitality - vitBoostRemoved) * 10;
-      const currentHealth = adventurer?.health! + selectedVitality * 10;
-      const healthPlusPots = Math.min(
-        currentHealth! + potionAmount * 10,
-        maxHealth
+    if (healthOverflow) {
+      const newUpgradeTx = handleAddUpgradeTx(
+        undefined,
+        Math.max(potionAmount - vitBoostRemoved, 0),
+        undefined
       );
-      const healthOverflow = healthPlusPots > newMaxHealth;
-      if (healthOverflow) {
-        const newUpgradeTx = handleAddUpgradeTx(
-          undefined,
-          Math.max(potionAmount - vitBoostRemoved, 0),
-          undefined
-        );
-        upgradeTx = newUpgradeTx;
-      }
+      upgradeTx = newUpgradeTx;
     }
     try {
       await upgrade(
@@ -345,8 +348,6 @@ export default function UpgradeScreen({
 
   const totalStatUpgrades = (adventurer?.statUpgrades ?? 0) - upgradesTotal;
 
-  const maxHealth = Math.min(100 + totalVitality * 10, 720);
-
   const healthPlus = Math.min(
     (selectedVitality + potionAmount) * 10,
     maxHealth - (adventurer?.health ?? 0)
@@ -371,9 +372,11 @@ export default function UpgradeScreen({
     getNoBoostedStats();
   }, []);
 
-  const adventurerItems = useQueriesStore(
-    (state) => state.data.itemsByAdventurerQuery?.items || []
-  );
+  useEffect(() => {
+    if (healthOverflow) {
+      setPotionAmount(Math.max(potionAmount - vitBoostRemoved, 0));
+    }
+  }, [newMaxHealth]);
 
   return (
     <>
@@ -538,6 +541,7 @@ export default function UpgradeScreen({
                         totalCharisma={totalCharisma}
                         upgradeHandler={handleAddUpgradeTx}
                         totalVitality={totalVitality}
+                        vitBoostRemoved={vitBoostRemoved}
                       />
                     </div>
                   )}
