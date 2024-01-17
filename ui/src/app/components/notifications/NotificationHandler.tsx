@@ -4,7 +4,6 @@ import { GameData } from "@/app/lib/data/GameData";
 import {
   processBeastName,
   getRandomElement,
-  chunkArray,
   isObject,
   getItemData,
   getValueFromKey,
