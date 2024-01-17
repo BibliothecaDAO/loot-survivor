@@ -201,6 +201,12 @@ export const NotificationBattleDisplay = ({
     isArray &&
     battleData.some(
       (data) => data.attacker === "Beast" && (data.adventurerHealth ?? 0) > 0
+    ) &&
+    battleData.some((data) => data.attacker === "Adventurer");
+  const AttackedFromEquipping =
+    isArray &&
+    battleData.some(
+      (data) => data.attacker === "Beast" && (data.adventurerHealth ?? 0) > 0
     );
   const Slayed =
     isArray &&
@@ -280,6 +286,18 @@ export const NotificationBattleDisplay = ({
               {battleData[1]?.criticalHit && ", a critical hit"}!
             </p>
           </span>
+          <GiBattleGearIcon />
+        </span>
+      );
+    } else if (AttackedFromEquipping) {
+      return (
+        <span className="flex flex-row items-center justify-between w-full">
+          <p>
+            {beastName || ""} attacked for {battleData[0]?.damageTaken} damage
+            to {battleData[0]?.damageLocation} from swapping item
+            {battleData[0]?.criticalHit && ", a critical hit"}!
+          </p>
+          ;
           <GiBattleGearIcon />
         </span>
       );
