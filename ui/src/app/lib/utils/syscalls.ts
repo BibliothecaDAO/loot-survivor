@@ -129,8 +129,9 @@ function handleEquip(
         (item: Item) => item.item == equippedItem
       );
       if (ownedItem) {
-        ownedItem.equipped = true;
-        equippedItems.push(ownedItem);
+        const modifiedItem = { ...ownedItem };
+        modifiedItem.equipped = true;
+        equippedItems.push(modifiedItem);
       }
     }
     for (let unequippedItem of equippedItemsEvent.data[2]) {
@@ -138,8 +139,9 @@ function handleEquip(
         (item: Item) => item.item == unequippedItem
       );
       if (ownedItem) {
-        ownedItem.equipped = false;
-        unequippedItems.push(ownedItem);
+        const modifiedItem = { ...ownedItem };
+        modifiedItem.equipped = false;
+        unequippedItems.push(modifiedItem);
       }
     }
   }
