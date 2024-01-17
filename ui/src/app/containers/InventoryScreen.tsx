@@ -9,7 +9,7 @@ import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import LootIcon from "@/app/components/icons/LootIcon";
-import { InfoIcon } from "@/app/components/icons/Icons";
+import { InfoIcon, ProfileIcon } from "@/app/components/icons/Icons";
 import { Item, Metadata } from "@/app/types";
 import { GameData } from "@/app/lib/data/GameData";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -162,6 +162,8 @@ export default function InventoryScreen({
   const selected = getValueByIndex(Menu, inventorySelected ?? 0);
 
   const selectedItems = groupedItems[selected || "Weapon"] || [];
+  const equippedItems = items.filter((item) => item.equipped);
+  const bagItems = items.filter((item) => !item.equipped);
 
   return (
     <div className="flex flex-row sm:gap-5 h-full">
@@ -301,9 +303,15 @@ export default function InventoryScreen({
           <div className="flex flex-col sm:gap-5 h-full">
             <span className="flex flex-row justify-between">
               <h4 className="m-0">{selected} Loot</h4>{" "}
-              <span className="flex flex-row gap-1 text-lg items-center sm:text-3xl">
-                <LootIcon type="bag" size="w-5" />
-                {`${items.length}/${19}`}
+              <span className="flex flex-row gap-5">
+                <span className="flex flex-row gap-1 text-lg items-center sm:text-3xl">
+                  <ProfileIcon className="w-6 h-6 fill-current" />
+                  {`${equippedItems.length}/${8}`}
+                </span>
+                <span className="flex flex-row gap-1 text-lg items-center sm:text-3xl">
+                  <LootIcon type="bag" size="w-5" />
+                  {`${bagItems.length}/${11}`}
+                </span>
               </span>
             </span>
             <div className="flex-row items-center gap-5 p-2 border border-terminal-green hidden sm:flex">

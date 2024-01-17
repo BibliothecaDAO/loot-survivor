@@ -6,12 +6,7 @@ import {
 } from "@/app/components/icons/Icons";
 import { DiscordIcon } from "@/app/components/icons/Icons";
 import useUIStore from "@/app/hooks/useUIStore";
-import { displayAddress } from "@/app/lib/utils";
-import { useDisconnect } from "@starknet-react/core";
-import { useAccount } from "@starknet-react/core";
-import { ButtonData, NullAdventurer } from "@/app/types";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import { ButtonData } from "@/app/types";
 
 export default function Settings() {
   const isMuted = useUIStore((state) => state.isMuted);
@@ -19,10 +14,6 @@ export default function Settings() {
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const setDisconnected = useUIStore((state) => state.setDisconnected);
-  const { disconnect } = useDisconnect();
-  const { account, isConnected } = useAccount();
-  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
-  const { resetData } = useQueriesStore();
 
   const buttonsData: ButtonData[] = [
     {
@@ -52,17 +43,6 @@ export default function Settings() {
       label: "Discord",
       icon: <DiscordIcon className="fill-current" />,
       action: () => window.open("https://discord.gg/realmsworld", "_blank"),
-    },
-    {
-      id: 5,
-      label: isConnected ? displayAddress(account?.address ?? "") : "Connect",
-      action: () => {
-        disconnect();
-        resetData();
-        setAdventurer(NullAdventurer);
-        setDisconnected(true);
-      },
-      variant: "default",
     },
   ];
 

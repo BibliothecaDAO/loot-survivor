@@ -2,11 +2,7 @@ import { useEffect, useState } from "react";
 import { MdClose } from "react-icons/md";
 import { Contract } from "starknet";
 import { useAccount, useConnect, useDisconnect } from "@starknet-react/core";
-import {
-  ETH_PREFUND_AMOUNT,
-  LORDS_PREFUND_AMOUNT,
-  useBurner,
-} from "@/app/lib/burner";
+import { ETH_PREFUND_AMOUNT, useBurner } from "@/app/lib/burner";
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import { getWalletConnectors } from "@/app/lib/connectors";
@@ -66,7 +62,7 @@ export const ArcadeIntro = ({
   const eth = Number(ethBalance);
 
   const checkNotEnoughPrefundEth = eth < parseInt(ETH_PREFUND_AMOUNT);
-  const checkNotEnoughPrefundLords = lords < parseInt(LORDS_PREFUND_AMOUNT);
+  const checkNotEnoughPrefundLords = lords < parseInt("1000000000000");
 
   useEffect(() => {
     if (

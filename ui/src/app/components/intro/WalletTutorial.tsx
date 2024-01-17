@@ -8,8 +8,6 @@ export const WalletTutorial = () => {
 
   return (
     <div className="flex flex-col h-[550px] sm:h-full items-center text-center p-10 overflow-y-auto">
-      <h2 className="mt-0">Welcome to Loot Survivor!</h2>
-
       {/* <p className="text-sm sm:text-lg">
         To get started and immerse yourself in this on-chain gaming adventure,
         you will need to create a Starknet wallet first. Don&apos;t worry, it is

@@ -1680,11 +1680,11 @@ export function syscalls({
     }
   };
 
-  const mintLords = async () => {
+  const mintLords = async (lordsAmount: number) => {
     const mintLords: Call = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "mint",
-      calldata: [account?.address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+      calldata: [account?.address ?? "0x0", lordsAmount.toString(), "0"],
     };
     const isArcade = checkArcadeConnector(connector!);
     try {

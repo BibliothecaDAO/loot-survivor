@@ -54,6 +54,7 @@ import Discord from "public/icons/discord.svg";
 import Refresh from "public/icons/refresh.svg";
 import Settings from "public/icons/settings.svg";
 import Drop from "public/icons/drop.svg";
+import Complete from "public/icons/complete.svg";
 
 const ClothIcon = Cloth;
 const HideIcon = Hide;
@@ -112,6 +113,8 @@ const ArcadeIcon = Arcade;
 const QuestionMarkIcon = QuestionMark;
 const SettingsIcon = Settings;
 
+const CompleteIcon = Complete;
+
 export {
   ClothIcon,
   HideIcon,
@@ -168,4 +171,5 @@ export {
   DiscordIcon,
   ArcadeIcon,
   QuestionMarkIcon,
+  CompleteIcon,
 };
