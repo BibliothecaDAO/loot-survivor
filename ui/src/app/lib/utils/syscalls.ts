@@ -1441,6 +1441,13 @@ export function syscalls({
         showTopUpDialog,
         setTopUpAccount
       );
+      setTxHash(tx?.transaction_hash);
+      addTransaction({
+        hash: tx?.transaction_hash,
+        metadata: {
+          method: "Multicall",
+        },
+      });
       const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
       });
@@ -1453,13 +1460,6 @@ export function syscalls({
           (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
-      setTxHash(tx?.transaction_hash);
-      addTransaction({
-        hash: tx?.transaction_hash,
-        metadata: {
-          method: "Multicall",
-        },
-      });
       const events = await parseEvents(
         receipt as InvokeTransactionReceiptResponse,
         queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
