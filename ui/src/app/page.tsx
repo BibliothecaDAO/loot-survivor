@@ -26,7 +26,7 @@ import useUIStore from "@/app/hooks/useUIStore";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { NotificationDisplay } from "@/app/components/notifications/NotificationDisplay";
 import { useMusic } from "@/app/hooks/useMusic";
-import { Menu, ZeroUpgrade, BurnerStorage } from "@/app/types";
+import { Menu, ZeroUpgrade, BurnerStorage, Adventurer } from "@/app/types";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import Profile from "@/app/containers/ProfileScreen";
 import { DeathDialog } from "@/app/components/adventurer/DeathDialog";
@@ -122,7 +122,7 @@ interface HomeProps {
 }
 
 function Home({ updateConnectors }: HomeProps) {
-  const { connector, connectors } = useConnect();
+  const { connect, connector, connectors } = useConnect();
   const disconnected = useUIStore((state) => state.disconnected);
   const setDisconnected = useUIStore((state) => state.setDisconnected);
   const { account, address, status, isConnected } = useAccount();
@@ -451,6 +451,34 @@ function Home({ updateConnectors }: HomeProps) {
       setDisconnected(false);
     }
   }, [isConnected]);
+
+  const adventurers = adventurersData?.adventurers;
+
+  useEffect(() => {
+    if (!address && arcadeConnectors.length > 0) {
+      connect({ connector: arcadeConnectors[0] });
+    }
+  }, [screen]);
+
+  useEffect(() => {
+    if (adventurers) {
+      const latestAdventurer: Adventurer = adventurers[adventurers.length - 1];
+      if (latestAdventurer.health !== 0) {
+        setAdventurer(latestAdventurer);
+        handleSwitchAdventurer(latestAdventurer.id!);
+      }
+    }
+  }, [introComplete, adventurers]);
+
+  useEffect(() => {
+    if (adventurer?.id && adventurer.health !== 0) {
+      if (!hasStatUpgrades) {
+        setScreen("play");
+      } else {
+        setScreen("upgrade");
+      }
+    }
+  }, [introComplete, adventurer]);
 
   const getAccountChainId = async () => {
     if (account) {

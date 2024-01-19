@@ -13,7 +13,7 @@ export interface AdventurerListProps {
   isActive: boolean;
   onEscape: () => void;
   adventurers: Adventurer[];
-  handleSwitchAdventurer: (...args: any[]) => any;
+  handleSwitchAdventurer: (adventurerId: number) => Promise<void>;
   gameContract: Contract;
 }
 
@@ -95,9 +95,9 @@ export const AdventurersList = ({
                 variant={
                   selectedIndex === index && isActive ? "default" : "ghost"
                 }
-                onClick={() => {
+                onClick={async () => {
                   setAdventurer(adventurer);
-                  handleSwitchAdventurer(adventurer.id);
+                  await handleSwitchAdventurer(adventurer.id!);
                   setSelectedIndex(index);
                 }}
                 disabled={adventurer?.health === 0}
