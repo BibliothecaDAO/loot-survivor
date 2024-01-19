@@ -572,6 +572,7 @@ function Home({ updateConnectors }: HomeProps) {
                   lordsBalance={Number(lordsBalance)}
                   ethBalance={Number(ethBalance)}
                   costToPlay={costToPlay!}
+                  getAccountBalances={getBalances}
                 />
               )}
 

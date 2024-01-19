@@ -35,6 +35,7 @@ interface ArcadeDialogProps {
   lordsBalance: number;
   ethBalance: number;
   costToPlay: bigint;
+  getAccountBalances: () => Promise<void>;
 }
 
 export const ArcadeDialog = ({
@@ -45,6 +46,7 @@ export const ArcadeDialog = ({
   lordsBalance,
   ethBalance,
   costToPlay,
+  getAccountBalances,
 }: ArcadeDialogProps) => {
   const [fetchedBalances, setFetchedBalances] = useState(false);
   const [recoverArcade, setRecoverArcade] = useState(false);
@@ -117,7 +119,7 @@ export const ArcadeDialog = ({
     setFetchedBalances(true);
   };
 
-  const getAccountBalances = async (account: string) => {
+  const getArcadeBalances = async (account: string) => {
     const balances = await fetchBalances(
       account,
       ethContract!,
@@ -234,7 +236,7 @@ export const ArcadeDialog = ({
                     genNewKey={genNewKey}
                     setPermissions={setPermissions}
                     balances={arcadebalances[account.name]}
-                    getAccountBalances={getAccountBalances}
+                    getAccountBalances={getArcadeBalances}
                     topUpEth={topUpEth}
                     topUpLords={topUpLords}
                     withdraw={withdraw}
@@ -242,6 +244,7 @@ export const ArcadeDialog = ({
                     lordsBalance={lordsBalance}
                     ethBalance={ethBalance}
                     lordsGameCost={lordsGameCost}
+                    getBalances={getAccountBalances}
                   />
                 );
               })}
@@ -305,6 +308,7 @@ interface ArcadeAccountCardProps {
   lordsBalance: number;
   ethBalance: number;
   lordsGameCost: number;
+  getBalances: () => Promise<void>;
 }
 
 export const ArcadeAccountCard = ({
@@ -326,6 +330,7 @@ export const ArcadeAccountCard = ({
   lordsBalance,
   ethBalance,
   lordsGameCost,
+  getBalances,
 }: ArcadeAccountCardProps) => {
   const { connect, connectors } = useConnect();
   const [isCopied, setIsCopied] = useState(false);
@@ -502,6 +507,7 @@ export const ArcadeAccountCard = ({
                   balances?.lords
                 );
                 await getAccountBalances(account.name);
+                await getBalances();
               }}
               disabled={isWithdrawing || minimalBalance}
             >

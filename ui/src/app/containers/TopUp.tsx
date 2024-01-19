@@ -30,10 +30,12 @@ import { formatCurrency, displayAddress } from "@/app/lib/utils";
 import { useBurner } from "@/app/lib/burner";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import useUIStore, { ScreenPage } from "@/app/hooks/useUIStore";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
 import { ETH_INCREMENT } from "@/app/lib/constants";
 import Storage from "@/app/lib/storage";
 import { BurnerStorage } from "@/app/types";
+import TokenLoader from "@/app/components/animations/TokenLoader";
 
 type Section = "connect" | "eth" | "lords" | "arcade";
 
@@ -85,6 +87,7 @@ interface SectionContentProps {
   walletAccount: AccountInterface;
   arcadeConnector: Connector;
   showTopUpDialog: (value: boolean) => void;
+  resetNotification: () => void;
 }
 
 const SectionContent = ({
@@ -118,6 +121,7 @@ const SectionContent = ({
   walletAccount,
   arcadeConnector,
   showTopUpDialog,
+  resetNotification,
 }: SectionContentProps) => {
   const [inputValue, setInputValue] = useState(0);
 
@@ -373,6 +377,7 @@ const SectionContent = ({
                       disconnect();
                       connect({ connector: arcadeConnector! });
                       showTopUpDialog(false);
+                      resetNotification();
                     } else {
                       onMainnet
                         ? window.open(
@@ -526,6 +531,8 @@ const TopUp = ({
   const topUpAccount = useUIStore((state) => state.topUpAccount);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
 
+  const resetNotification = useLoadingStore((state) => state.resetNotification);
+
   const { play: clickPlay } = useUiSounds(soundSelector.click);
 
   const {
@@ -581,294 +588,305 @@ const TopUp = ({
   }, [account, checkEnoughEth, checkEnoughLords]);
 
   return (
-    <div className="min-h-screen container flex flex-col items-center">
-      <ArcadeLoader
-        isPrefunding={isPrefunding}
-        isDeploying={isDeploying}
-        isSettingPermissions={isSettingPermissions}
-        fullDeployment={fullDeployment}
-        showLoader={showLoader}
-      />
-      {section && (
-        <InfoBox
-          section={section}
-          setSection={setSection}
-          lordsGameCost={lordsGameCost}
+    <>
+      {isToppingUpEth && <TokenLoader isToppingUpEth={isToppingUpEth} />}
+      <div className="min-h-screen container flex flex-col items-center">
+        <ArcadeLoader
+          isPrefunding={isPrefunding}
+          isDeploying={isDeploying}
+          isSettingPermissions={isSettingPermissions}
+          fullDeployment={fullDeployment}
+          showLoader={showLoader}
         />
-      )}
-      <Button
-        variant={"outline"}
-        onClick={() => {
-          setIsMuted(!isMuted);
-          clickPlay();
-        }}
-        className="fixed top-1 left-1 sm:top-20 sm:left-20 xl:px-5"
-      >
-        {isMuted ? (
-          <SoundOffIcon className="w-10 h-10 justify-center fill-current" />
-        ) : (
-          <SoundOnIcon className="w-10 h-10 justify-center fill-current" />
+        {section && (
+          <InfoBox
+            section={section}
+            setSection={setSection}
+            lordsGameCost={lordsGameCost}
+          />
         )}
-      </Button>
-      <Button
-        className="fixed top-2 right-2 sm:top-20 sm:right-20"
-        onClick={() => {
-          setScreen("start");
-          showTopUpDialog(false);
-        }}
-      >
-        Take me back
-      </Button>
-      <div className="flex flex-col items-center gap-5 py-20 sm:p-0">
-        <h1 className="m-0 uppercase text-6xl text-center">Top Up Required</h1>
-        <p className="hidden sm:block text-lg">
-          You have run out of ETH for gas on your Arcade Account, follow the
-          steps below to top up:
-        </p>
-        <div className="hidden sm:flex flex-row justify-center h-5/6 gap-5">
-          <div className="flex flex-col items-center w-1/4">
-            <h2 className="m-0">1</h2>
-            <SectionContent
-              section={"connect"}
-              setSection={setSection}
-              step={step}
-              address={address}
-              walletConnectors={walletConnectors}
-              disconnect={disconnect}
-              connect={connect}
-              eth={eth}
-              lords={lords}
-              lordsGameCost={lordsGameCost}
-              onMainnet={onMainnet}
-              network={network!}
-              mintLords={mintLords}
-              prefundGames={prefundGames}
-              setPrefundGames={setPrefundGames}
-              setFullDeployment={setFullDeployment}
-              connector={connector}
-              create={create}
-              listConnectors={listConnectors}
-              updateConnectors={updateConnectors}
-              handleOnboarded={handleOnboarded}
-              setScreen={setScreen}
-              masterConnected={masterConnected}
-              topUpEth={topUpEth}
-              isToppingUpEth={isToppingUpEth}
-              topUpAccount={topUpAccount}
-              setTopUpAccount={setTopUpAccount}
-              walletAccount={account!}
-              arcadeConnector={arcadeConnector!}
-              showTopUpDialog={showTopUpDialog}
-            />
-          </div>
-          <div className="flex flex-col items-center w-1/4">
-            <h2 className="m-0">2</h2>
-            <SectionContent
-              section={"eth"}
-              setSection={setSection}
-              step={step}
-              address={address}
-              walletConnectors={walletConnectors}
-              disconnect={disconnect}
-              connect={connect}
-              eth={eth}
-              lords={lords}
-              lordsGameCost={lordsGameCost}
-              onMainnet={onMainnet}
-              network={network!}
-              mintLords={mintLords}
-              prefundGames={prefundGames}
-              setPrefundGames={setPrefundGames}
-              setFullDeployment={setFullDeployment}
-              connector={connector}
-              create={create}
-              listConnectors={listConnectors}
-              updateConnectors={updateConnectors}
-              handleOnboarded={handleOnboarded}
-              setScreen={setScreen}
-              masterConnected={masterConnected}
-              topUpEth={topUpEth}
-              isToppingUpEth={isToppingUpEth}
-              topUpAccount={topUpAccount}
-              setTopUpAccount={setTopUpAccount}
-              walletAccount={account!}
-              arcadeConnector={arcadeConnector!}
-              showTopUpDialog={showTopUpDialog}
-            />
-          </div>
-          <div className="flex flex-col items-center w-1/4">
-            <h2 className="m-0">3</h2>
-            <SectionContent
-              section={"arcade"}
-              setSection={setSection}
-              step={step}
-              address={address}
-              walletConnectors={walletConnectors}
-              disconnect={disconnect}
-              connect={connect}
-              eth={eth}
-              lords={lords}
-              lordsGameCost={lordsGameCost}
-              onMainnet={onMainnet}
-              network={network!}
-              mintLords={mintLords}
-              prefundGames={prefundGames}
-              setPrefundGames={setPrefundGames}
-              setFullDeployment={setFullDeployment}
-              connector={connector}
-              create={create}
-              listConnectors={listConnectors}
-              updateConnectors={updateConnectors}
-              handleOnboarded={handleOnboarded}
-              setScreen={setScreen}
-              masterConnected={masterConnected}
-              topUpEth={topUpEth}
-              isToppingUpEth={isToppingUpEth}
-              topUpAccount={topUpAccount}
-              setTopUpAccount={setTopUpAccount}
-              walletAccount={account!}
-              arcadeConnector={arcadeConnector!}
-              showTopUpDialog={showTopUpDialog}
-            />
-          </div>
-        </div>
-        <div className="sm:hidden">
-          {step == 1 && (
-            <SectionContent
-              section={"connect"}
-              setSection={setSection}
-              step={step}
-              address={address}
-              walletConnectors={walletConnectors}
-              disconnect={disconnect}
-              connect={connect}
-              eth={eth}
-              lords={lords}
-              lordsGameCost={lordsGameCost}
-              onMainnet={onMainnet}
-              network={network!}
-              mintLords={mintLords}
-              prefundGames={prefundGames}
-              setPrefundGames={setPrefundGames}
-              setFullDeployment={setFullDeployment}
-              connector={connector}
-              create={create}
-              listConnectors={listConnectors}
-              updateConnectors={updateConnectors}
-              handleOnboarded={handleOnboarded}
-              setScreen={setScreen}
-              masterConnected={masterConnected}
-              topUpEth={topUpEth}
-              isToppingUpEth={isToppingUpEth}
-              topUpAccount={topUpAccount}
-              setTopUpAccount={setTopUpAccount}
-              walletAccount={account!}
-              arcadeConnector={arcadeConnector!}
-              showTopUpDialog={showTopUpDialog}
-            />
+        <Button
+          variant={"outline"}
+          onClick={() => {
+            setIsMuted(!isMuted);
+            clickPlay();
+          }}
+          className="fixed top-1 left-1 sm:top-20 sm:left-20 xl:px-5"
+        >
+          {isMuted ? (
+            <SoundOffIcon className="w-10 h-10 justify-center fill-current" />
+          ) : (
+            <SoundOnIcon className="w-10 h-10 justify-center fill-current" />
           )}
-          {step == 2 && (
-            <SectionContent
-              section={"eth"}
-              setSection={setSection}
-              step={step}
-              address={address}
-              walletConnectors={walletConnectors}
-              disconnect={disconnect}
-              connect={connect}
-              eth={eth}
-              lords={lords}
-              lordsGameCost={lordsGameCost}
-              onMainnet={onMainnet}
-              network={network!}
-              mintLords={mintLords}
-              prefundGames={prefundGames}
-              setPrefundGames={setPrefundGames}
-              setFullDeployment={setFullDeployment}
-              connector={connector}
-              create={create}
-              listConnectors={listConnectors}
-              updateConnectors={updateConnectors}
-              handleOnboarded={handleOnboarded}
-              setScreen={setScreen}
-              masterConnected={masterConnected}
-              topUpEth={topUpEth}
-              isToppingUpEth={isToppingUpEth}
-              topUpAccount={topUpAccount}
-              setTopUpAccount={setTopUpAccount}
-              walletAccount={account!}
-              arcadeConnector={arcadeConnector!}
-              showTopUpDialog={showTopUpDialog}
-            />
-          )}
-          {step == 3 && (
-            <SectionContent
-              section={"arcade"}
-              setSection={setSection}
-              step={step}
-              address={address}
-              walletConnectors={walletConnectors}
-              disconnect={disconnect}
-              connect={connect}
-              eth={eth}
-              lords={lords}
-              lordsGameCost={lordsGameCost}
-              onMainnet={onMainnet}
-              network={network!}
-              mintLords={mintLords}
-              prefundGames={prefundGames}
-              setPrefundGames={setPrefundGames}
-              setFullDeployment={setFullDeployment}
-              connector={connector}
-              create={create}
-              listConnectors={listConnectors}
-              updateConnectors={updateConnectors}
-              handleOnboarded={handleOnboarded}
-              setScreen={setScreen}
-              masterConnected={masterConnected}
-              topUpEth={topUpEth}
-              isToppingUpEth={isToppingUpEth}
-              topUpAccount={topUpAccount}
-              setTopUpAccount={setTopUpAccount}
-              walletAccount={account!}
-              arcadeConnector={arcadeConnector!}
-              showTopUpDialog={showTopUpDialog}
-            />
-          )}
-        </div>
-        <div className="sm:hidden flex items-center justify-center w-full h-1/5">
-          <div className="flex flex-row justify-between items-center w-1/2 h-full">
-            <div
-              className={`flex justify-center items-center w-8 h-8 sm:w-12 sm:h-12 ${
-                step >= 1
-                  ? "bg-terminal-green text-terminal-black"
-                  : "border border-terminal-green"
-              }`}
-            >
-              {step > 1 ? <CompleteIcon /> : 1}
+        </Button>
+        <Button
+          className="fixed top-2 right-2 sm:top-20 sm:right-20"
+          onClick={() => {
+            setScreen("start");
+            showTopUpDialog(false);
+          }}
+        >
+          Take me back
+        </Button>
+        <div className="flex flex-col items-center gap-5 py-20 sm:p-0">
+          <h1 className="m-0 uppercase text-6xl text-center">
+            Top Up Required
+          </h1>
+          <p className="hidden sm:block text-lg">
+            You have run out of ETH for gas on your Arcade Account, follow the
+            steps below to top up:
+          </p>
+          <div className="hidden sm:flex flex-row justify-center h-5/6 gap-5">
+            <div className="flex flex-col items-center w-1/4">
+              <h2 className="m-0">1</h2>
+              <SectionContent
+                section={"connect"}
+                setSection={setSection}
+                step={step}
+                address={address}
+                walletConnectors={walletConnectors}
+                disconnect={disconnect}
+                connect={connect}
+                eth={eth}
+                lords={lords}
+                lordsGameCost={lordsGameCost}
+                onMainnet={onMainnet}
+                network={network!}
+                mintLords={mintLords}
+                prefundGames={prefundGames}
+                setPrefundGames={setPrefundGames}
+                setFullDeployment={setFullDeployment}
+                connector={connector}
+                create={create}
+                listConnectors={listConnectors}
+                updateConnectors={updateConnectors}
+                handleOnboarded={handleOnboarded}
+                setScreen={setScreen}
+                masterConnected={masterConnected}
+                topUpEth={topUpEth}
+                isToppingUpEth={isToppingUpEth}
+                topUpAccount={topUpAccount}
+                setTopUpAccount={setTopUpAccount}
+                walletAccount={account!}
+                arcadeConnector={arcadeConnector!}
+                showTopUpDialog={showTopUpDialog}
+                resetNotification={resetNotification}
+              />
             </div>
-            <div
-              className={`flex justify-center items-center w-8 h-8 sm:w-12 sm:h-12  ${
-                step >= 2
-                  ? "bg-terminal-green text-terminal-black"
-                  : "border border-terminal-green"
-              }`}
-            >
-              {step > 2 ? <CompleteIcon /> : 2}
+            <div className="flex flex-col items-center w-1/4">
+              <h2 className="m-0">2</h2>
+              <SectionContent
+                section={"eth"}
+                setSection={setSection}
+                step={step}
+                address={address}
+                walletConnectors={walletConnectors}
+                disconnect={disconnect}
+                connect={connect}
+                eth={eth}
+                lords={lords}
+                lordsGameCost={lordsGameCost}
+                onMainnet={onMainnet}
+                network={network!}
+                mintLords={mintLords}
+                prefundGames={prefundGames}
+                setPrefundGames={setPrefundGames}
+                setFullDeployment={setFullDeployment}
+                connector={connector}
+                create={create}
+                listConnectors={listConnectors}
+                updateConnectors={updateConnectors}
+                handleOnboarded={handleOnboarded}
+                setScreen={setScreen}
+                masterConnected={masterConnected}
+                topUpEth={topUpEth}
+                isToppingUpEth={isToppingUpEth}
+                topUpAccount={topUpAccount}
+                setTopUpAccount={setTopUpAccount}
+                walletAccount={account!}
+                arcadeConnector={arcadeConnector!}
+                showTopUpDialog={showTopUpDialog}
+                resetNotification={resetNotification}
+              />
             </div>
-            <div
-              className={`flex justify-center items-center w-8 h-8 sm:w-12 sm:h-12  ${
-                step >= 3
-                  ? "bg-terminal-green text-terminal-black"
-                  : "border border-terminal-green"
-              }`}
-            >
-              3
+            <div className="flex flex-col items-center w-1/4">
+              <h2 className="m-0">3</h2>
+              <SectionContent
+                section={"arcade"}
+                setSection={setSection}
+                step={step}
+                address={address}
+                walletConnectors={walletConnectors}
+                disconnect={disconnect}
+                connect={connect}
+                eth={eth}
+                lords={lords}
+                lordsGameCost={lordsGameCost}
+                onMainnet={onMainnet}
+                network={network!}
+                mintLords={mintLords}
+                prefundGames={prefundGames}
+                setPrefundGames={setPrefundGames}
+                setFullDeployment={setFullDeployment}
+                connector={connector}
+                create={create}
+                listConnectors={listConnectors}
+                updateConnectors={updateConnectors}
+                handleOnboarded={handleOnboarded}
+                setScreen={setScreen}
+                masterConnected={masterConnected}
+                topUpEth={topUpEth}
+                isToppingUpEth={isToppingUpEth}
+                topUpAccount={topUpAccount}
+                setTopUpAccount={setTopUpAccount}
+                walletAccount={account!}
+                arcadeConnector={arcadeConnector!}
+                showTopUpDialog={showTopUpDialog}
+                resetNotification={resetNotification}
+              />
+            </div>
+          </div>
+          <div className="sm:hidden">
+            {step == 1 && (
+              <SectionContent
+                section={"connect"}
+                setSection={setSection}
+                step={step}
+                address={address}
+                walletConnectors={walletConnectors}
+                disconnect={disconnect}
+                connect={connect}
+                eth={eth}
+                lords={lords}
+                lordsGameCost={lordsGameCost}
+                onMainnet={onMainnet}
+                network={network!}
+                mintLords={mintLords}
+                prefundGames={prefundGames}
+                setPrefundGames={setPrefundGames}
+                setFullDeployment={setFullDeployment}
+                connector={connector}
+                create={create}
+                listConnectors={listConnectors}
+                updateConnectors={updateConnectors}
+                handleOnboarded={handleOnboarded}
+                setScreen={setScreen}
+                masterConnected={masterConnected}
+                topUpEth={topUpEth}
+                isToppingUpEth={isToppingUpEth}
+                topUpAccount={topUpAccount}
+                setTopUpAccount={setTopUpAccount}
+                walletAccount={account!}
+                arcadeConnector={arcadeConnector!}
+                showTopUpDialog={showTopUpDialog}
+                resetNotification={resetNotification}
+              />
+            )}
+            {step == 2 && (
+              <SectionContent
+                section={"eth"}
+                setSection={setSection}
+                step={step}
+                address={address}
+                walletConnectors={walletConnectors}
+                disconnect={disconnect}
+                connect={connect}
+                eth={eth}
+                lords={lords}
+                lordsGameCost={lordsGameCost}
+                onMainnet={onMainnet}
+                network={network!}
+                mintLords={mintLords}
+                prefundGames={prefundGames}
+                setPrefundGames={setPrefundGames}
+                setFullDeployment={setFullDeployment}
+                connector={connector}
+                create={create}
+                listConnectors={listConnectors}
+                updateConnectors={updateConnectors}
+                handleOnboarded={handleOnboarded}
+                setScreen={setScreen}
+                masterConnected={masterConnected}
+                topUpEth={topUpEth}
+                isToppingUpEth={isToppingUpEth}
+                topUpAccount={topUpAccount}
+                setTopUpAccount={setTopUpAccount}
+                walletAccount={account!}
+                arcadeConnector={arcadeConnector!}
+                showTopUpDialog={showTopUpDialog}
+                resetNotification={resetNotification}
+              />
+            )}
+            {step == 3 && (
+              <SectionContent
+                section={"arcade"}
+                setSection={setSection}
+                step={step}
+                address={address}
+                walletConnectors={walletConnectors}
+                disconnect={disconnect}
+                connect={connect}
+                eth={eth}
+                lords={lords}
+                lordsGameCost={lordsGameCost}
+                onMainnet={onMainnet}
+                network={network!}
+                mintLords={mintLords}
+                prefundGames={prefundGames}
+                setPrefundGames={setPrefundGames}
+                setFullDeployment={setFullDeployment}
+                connector={connector}
+                create={create}
+                listConnectors={listConnectors}
+                updateConnectors={updateConnectors}
+                handleOnboarded={handleOnboarded}
+                setScreen={setScreen}
+                masterConnected={masterConnected}
+                topUpEth={topUpEth}
+                isToppingUpEth={isToppingUpEth}
+                topUpAccount={topUpAccount}
+                setTopUpAccount={setTopUpAccount}
+                walletAccount={account!}
+                arcadeConnector={arcadeConnector!}
+                showTopUpDialog={showTopUpDialog}
+                resetNotification={resetNotification}
+              />
+            )}
+          </div>
+          <div className="sm:hidden flex items-center justify-center w-full h-1/5">
+            <div className="flex flex-row justify-between items-center w-1/2 h-full">
+              <div
+                className={`flex justify-center items-center w-8 h-8 sm:w-12 sm:h-12 ${
+                  step >= 1
+                    ? "bg-terminal-green text-terminal-black"
+                    : "border border-terminal-green"
+                }`}
+              >
+                {step > 1 ? <CompleteIcon /> : 1}
+              </div>
+              <div
+                className={`flex justify-center items-center w-8 h-8 sm:w-12 sm:h-12  ${
+                  step >= 2
+                    ? "bg-terminal-green text-terminal-black"
+                    : "border border-terminal-green"
+                }`}
+              >
+                {step > 2 ? <CompleteIcon /> : 2}
+              </div>
+              <div
+                className={`flex justify-center items-center w-8 h-8 sm:w-12 sm:h-12  ${
+                  step >= 3
+                    ? "bg-terminal-green text-terminal-black"
+                    : "border border-terminal-green"
+                }`}
+              >
+                3
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
