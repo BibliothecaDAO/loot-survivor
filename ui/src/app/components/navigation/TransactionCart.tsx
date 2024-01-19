@@ -480,6 +480,7 @@ const TransactionCart = ({
                     upgradeTx = newUpgradeTx;
                   }
                 }
+                setDisplayCart(false);
                 await multicall(loadingMessage, notification, upgradeTx);
                 handleResetCalls();
               }}

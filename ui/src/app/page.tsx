@@ -49,14 +49,12 @@ import {
   getGoldenTokensByOwner,
 } from "@/app/hooks/graphql/queries";
 import { ArcadeDialog } from "@/app/components/ArcadeDialog";
-import { TopUpDialog } from "@/app/components/TopUpDialog";
 import NetworkSwitchError from "@/app/components/navigation/NetworkSwitchError";
 import { syscalls } from "@/app/lib/utils/syscalls";
 import Game from "@/app/abi/Game.json";
 import Lords from "@/app/abi/Lords.json";
 import EthBalanceFragment from "@/app/abi/EthBalanceFragment.json";
 import Beasts from "@/app/abi/Beasts.json";
-// import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
 import ScreenMenu from "@/app/components/menu/ScreenMenu";
 import {
   getArcadeConnectors,
@@ -71,6 +69,7 @@ import { useBurner } from "@/app/lib/burner";
 import { connectors } from "@/app/lib/connectors";
 import Storage from "@/app/lib/storage";
 import Onboarding from "./containers/Onboarding";
+import TopUp from "./containers/TopUp";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -514,15 +513,6 @@ function Home({ updateConnectors }: HomeProps) {
         <>
           <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
           {screen === "onboarding" ? (
-            // <ArcadeIntro
-            //   ethBalance={ethBalance}
-            //   lordsBalance={lordsBalance}
-            //   gameContract={gameContract!}
-            //   lordsContract={lordsContract!}
-            //   ethContract={ethContract!}
-            //   updateConnectors={updateConnectors}
-            //   mintLords={mintLords}
-            // />
             <Onboarding
               ethBalance={ethBalance}
               lordsBalance={lordsBalance}
@@ -532,6 +522,18 @@ function Home({ updateConnectors }: HomeProps) {
               lordsContract={lordsContract!}
               ethContract={ethContract!}
               updateConnectors={updateConnectors}
+            />
+          ) : status == "connected" && topUpDialog ? (
+            <TopUp
+              ethBalance={ethBalance}
+              lordsBalance={lordsBalance}
+              costToPlay={costToPlay!}
+              mintLords={mintLords}
+              gameContract={gameContract!}
+              lordsContract={lordsContract!}
+              ethContract={ethContract!}
+              updateConnectors={updateConnectors}
+              showTopUpDialog={showTopUpDialog}
             />
           ) : (
             <>
@@ -570,13 +572,6 @@ function Home({ updateConnectors }: HomeProps) {
                   lordsBalance={Number(lordsBalance)}
                   ethBalance={Number(ethBalance)}
                   costToPlay={costToPlay!}
-                />
-              )}
-              {status == "connected" && topUpDialog && (
-                <TopUpDialog
-                  ethContract={ethContract!}
-                  getEthBalance={getEthBalance}
-                  ethBalance={Number(ethBalance)}
                 />
               )}
 
