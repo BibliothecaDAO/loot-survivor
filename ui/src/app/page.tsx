@@ -461,7 +461,7 @@ function Home({ updateConnectors }: HomeProps) {
   }, [screen]);
 
   useEffect(() => {
-    if (adventurers) {
+    if (adventurers && adventurers.length > 0) {
       const latestAdventurer: Adventurer = adventurers[adventurers.length - 1];
       if (latestAdventurer.health !== 0) {
         setAdventurer(latestAdventurer);
