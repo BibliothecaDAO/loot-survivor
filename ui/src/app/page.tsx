@@ -603,7 +603,6 @@ function Home({ updateConnectors }: HomeProps) {
                   getAccountBalances={getBalances}
                 />
               )}
-
               {introComplete ? (
                 <div className="flex flex-col w-full h-[600px] sm:h-[625px]">
                   <>
