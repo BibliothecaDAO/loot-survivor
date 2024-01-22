@@ -26,7 +26,7 @@ import useUIStore from "@/app/hooks/useUIStore";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { NotificationDisplay } from "@/app/components/notifications/NotificationDisplay";
 import { useMusic } from "@/app/hooks/useMusic";
-import { Menu, ZeroUpgrade, BurnerStorage } from "@/app/types";
+import { Menu, ZeroUpgrade, BurnerStorage, Adventurer } from "@/app/types";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import Profile from "@/app/containers/ProfileScreen";
 import { DeathDialog } from "@/app/components/adventurer/DeathDialog";
@@ -49,14 +49,12 @@ import {
   getGoldenTokensByOwner,
 } from "@/app/hooks/graphql/queries";
 import { ArcadeDialog } from "@/app/components/ArcadeDialog";
-import { TopUpDialog } from "@/app/components/TopUpDialog";
 import NetworkSwitchError from "@/app/components/navigation/NetworkSwitchError";
 import { syscalls } from "@/app/lib/utils/syscalls";
 import Game from "@/app/abi/Game.json";
 import Lords from "@/app/abi/Lords.json";
 import EthBalanceFragment from "@/app/abi/EthBalanceFragment.json";
 import Beasts from "@/app/abi/Beasts.json";
-// import { ArcadeIntro } from "@/app/components/intro/ArcadeIntro";
 import ScreenMenu from "@/app/components/menu/ScreenMenu";
 import {
   getArcadeConnectors,
@@ -71,6 +69,7 @@ import { useBurner } from "@/app/lib/burner";
 import { connectors } from "@/app/lib/connectors";
 import Storage from "@/app/lib/storage";
 import Onboarding from "./containers/Onboarding";
+import TopUp from "./containers/TopUp";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -123,7 +122,7 @@ interface HomeProps {
 }
 
 function Home({ updateConnectors }: HomeProps) {
-  const { connector, connectors } = useConnect();
+  const { connect, connector, connectors } = useConnect();
   const disconnected = useUIStore((state) => state.disconnected);
   const setDisconnected = useUIStore((state) => state.setDisconnected);
   const { account, address, status, isConnected } = useAccount();
@@ -453,6 +452,34 @@ function Home({ updateConnectors }: HomeProps) {
     }
   }, [isConnected]);
 
+  const adventurers = adventurersData?.adventurers;
+
+  useEffect(() => {
+    if (!address && arcadeConnectors.length > 0) {
+      connect({ connector: arcadeConnectors[0] });
+    }
+  }, [screen]);
+
+  useEffect(() => {
+    if (adventurers && adventurers.length > 0) {
+      const latestAdventurer: Adventurer = adventurers[adventurers.length - 1];
+      if (latestAdventurer.health !== 0) {
+        setAdventurer(latestAdventurer);
+        handleSwitchAdventurer(latestAdventurer.id!);
+      }
+    }
+  }, [introComplete, adventurers]);
+
+  useEffect(() => {
+    if (adventurer?.id && adventurer.health !== 0) {
+      if (!hasStatUpgrades) {
+        setScreen("play");
+      } else {
+        setScreen("upgrade");
+      }
+    }
+  }, [introComplete, adventurer]);
+
   const getAccountChainId = async () => {
     if (account) {
       const chainId = await account!.getChainId();
@@ -514,15 +541,6 @@ function Home({ updateConnectors }: HomeProps) {
         <>
           <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
           {screen === "onboarding" ? (
-            // <ArcadeIntro
-            //   ethBalance={ethBalance}
-            //   lordsBalance={lordsBalance}
-            //   gameContract={gameContract!}
-            //   lordsContract={lordsContract!}
-            //   ethContract={ethContract!}
-            //   updateConnectors={updateConnectors}
-            //   mintLords={mintLords}
-            // />
             <Onboarding
               ethBalance={ethBalance}
               lordsBalance={lordsBalance}
@@ -532,6 +550,18 @@ function Home({ updateConnectors }: HomeProps) {
               lordsContract={lordsContract!}
               ethContract={ethContract!}
               updateConnectors={updateConnectors}
+            />
+          ) : status == "connected" && topUpDialog ? (
+            <TopUp
+              ethBalance={ethBalance}
+              lordsBalance={lordsBalance}
+              costToPlay={costToPlay!}
+              mintLords={mintLords}
+              gameContract={gameContract!}
+              lordsContract={lordsContract!}
+              ethContract={ethContract!}
+              updateConnectors={updateConnectors}
+              showTopUpDialog={showTopUpDialog}
             />
           ) : (
             <>
@@ -570,16 +600,9 @@ function Home({ updateConnectors }: HomeProps) {
                   lordsBalance={Number(lordsBalance)}
                   ethBalance={Number(ethBalance)}
                   costToPlay={costToPlay!}
+                  getAccountBalances={getBalances}
                 />
               )}
-              {status == "connected" && topUpDialog && (
-                <TopUpDialog
-                  ethContract={ethContract!}
-                  getEthBalance={getEthBalance}
-                  ethBalance={Number(ethBalance)}
-                />
-              )}
-
               {introComplete ? (
                 <div className="flex flex-col w-full h-[600px] sm:h-[625px]">
                   <>
