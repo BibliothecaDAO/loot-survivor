@@ -7,6 +7,8 @@ import EfficacyIcon from "@/app/components/icons/EfficacyIcon";
 import { processBeastName } from "@/app/lib/utils";
 import { Beast } from "@/app/types";
 import { HealthCountDown } from "@/app/components/CountDown";
+import { getKeyFromValue } from "@/app/lib/utils";
+import { GameData } from "@/app/lib/data/GameData";
 
 interface BeastDisplayProps {
   beastData: Beast;
@@ -27,13 +29,21 @@ export const BeastDisplay = ({
 
   const namedBeast = beastData?.special2 ? true : false;
 
+  const gameData = new GameData();
+
   const handleIsMinted = async () => {
     const minted = await beastsContract.call(
       "isMinted",
       CallData.compile({
-        beast: beastData?.beast ?? "",
-        prefix: beastData?.special2 ?? "",
-        suffix: beastData?.special3 ?? "",
+        beast: getKeyFromValue(gameData.BEASTS, beastData?.beast ?? "")!,
+        prefix: getKeyFromValue(
+          gameData.ITEM_NAME_PREFIXES,
+          beastData?.special2 ?? ""
+        )!,
+        suffix: getKeyFromValue(
+          gameData.ITEM_NAME_SUFFIXES,
+          beastData?.special3 ?? ""
+        )!,
       })
     );
     if (minted == "1") {

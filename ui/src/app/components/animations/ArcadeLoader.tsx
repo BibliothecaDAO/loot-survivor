@@ -45,7 +45,7 @@ export default function ArcadeLoader({
     <>
       {showLoader && (
         <div className="fixed flex flex-col items-center sm:flex-row inset-0 bg-black z-50 sm:m-2 w-full h-full">
-          <div className="flex items-center justify-center w-full sm:w-1/2 h-3/4 sm:h-full">
+          <div className="flex items-center justify-center w-full sm:w-1/2 h-3/4 sm:h-full ml-16 sm:m-0">
             <PixelatedImage
               src={"/scenes/intro/arcade-account.png"}
               pixelSize={5}
@@ -53,10 +53,10 @@ export default function ArcadeLoader({
             />
           </div>
           <div className="flex flex-col gap-10 h-full sm:w-1/2">
-            <p className="text-lg sm:text-3xl flex items-start sm:items-center justify-center sm:justify-start w-full h-1/4 uppercase">
+            <p className="text-3xl flex items-start sm:items-center justify-center sm:justify-start w-full h-1/4 uppercase">
               Don&apos;t refresh!
             </p>
-            <p className="text-lg sm:text-3xl loading-ellipsis flex items-start sm:items-center justify-center sm:justify-start w-full h-1/4">
+            <p className="text-3xl loading-ellipsis flex items-start sm:items-center justify-center sm:justify-start w-full h-1/4">
               {loadingMessage}
             </p>
             {fullDeployment && (

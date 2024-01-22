@@ -85,7 +85,10 @@ const ButtonMenu: React.FC<ButtonMenuProps> = ({
         <Button
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
-          className="flex flex-row gap-5 w-full"
+          className={`flex flex-row gap-5 w-full ${
+            selectedIndex === index &&
+            "bg-terminal-green text-terminal-black hover:bg-terminal-green hover:text-terminal-black"
+          }`}
           variant="outline"
           size={size}
           onClick={() => {
@@ -94,7 +97,11 @@ const ButtonMenu: React.FC<ButtonMenuProps> = ({
           }}
           disabled={buttonData.disabled}
         >
-          {buttonData.icon && <div className="w-6 h-6">{buttonData.icon}</div>}
+          {buttonData.icon && (
+            <div className="flex items-center justify-center w-6 h-6">
+              {buttonData.icon}
+            </div>
+          )}
           {buttonData.label}
         </Button>
       ))}

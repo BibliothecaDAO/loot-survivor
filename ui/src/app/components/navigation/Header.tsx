@@ -31,10 +31,11 @@ export interface HeaderProps {
     loadingMessage: string[],
     notification: string[]
   ) => Promise<void>;
-  mintLords: () => Promise<void>;
+  mintLords: (lordsAmount: number) => Promise<void>;
   lordsBalance: bigint;
   arcadeConnectors: Connector[];
   gameContract: Contract;
+  costToPlay: bigint;
 }
 
 export default function Header({
@@ -43,6 +44,7 @@ export default function Header({
   lordsBalance,
   arcadeConnectors,
   gameContract,
+  costToPlay,
 }: HeaderProps) {
   const { account, address } = useAccount();
   const { disconnect } = useDisconnect();
@@ -84,6 +86,8 @@ export default function Header({
     (connector) => connector.name == address
   );
 
+  const lordsGameCost = Number(costToPlay);
+
   const handleApibaraStatus = async () => {
     const data = await getApibaraStatus();
     setApibaraStatus(data.status.indicator);
@@ -99,8 +103,10 @@ export default function Header({
     }
   }, [adventurer]);
 
+  const isOnMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+
   return (
-    <div className="flex flex-row justify-between px-1  ">
+    <div className="flex flex-row justify-between px-1 h-10 ">
       <div className="flex flex-row items-center gap-2 sm:gap-5">
         <Logo className="fill-current w-24 md:w-32 xl:w-40 2xl:w-64" />
       </div>
@@ -124,16 +130,14 @@ export default function Header({
               : window.open("https://survivor.realms.world/", "_blank")
           }
         >
-          {process.env.NEXT_PUBLIC_NETWORK === "mainnet"
-            ? "Play on Testnet"
-            : "Play on Mainnet"}
+          {isOnMainnet ? "Play on Testnet" : "Play on Mainnet"}
         </Button>
         <Button
           size={"xs"}
           variant={"outline"}
           className="self-center xl:px-5 hover:bg-terminal-green"
           onClick={async () => {
-            if (process.env.NEXT_PUBLIC_NETWORK === "mainnet") {
+            if (isOnMainnet) {
               const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
                 process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
               )}&tokenTo=${indexAddress(
@@ -141,7 +145,7 @@ export default function Header({
               )}&amount=0.001`;
               window.open(avnuLords, "_blank");
             } else {
-              await mintLords();
+              await mintLords(lordsGameCost * 25);
             }
           }}
           onMouseEnter={() => setShowLordsBuy(true)}
@@ -156,18 +160,34 @@ export default function Header({
                 </p>
               </>
             ) : (
-              <p className="text-black">Buy Lords</p>
+              <p className="text-black">
+                {isOnMainnet ? "Buy Lords" : "Mint Lords"}
+              </p>
             )}
           </span>
         </Button>
+        <span className="sm:hidden w-5 h-5">
+          <Button
+            size={"fill"}
+            variant={checkArcade ? "outline" : "default"}
+            onClick={() => showArcadeDialog(!arcadeDialog)}
+            disabled={isWrongNetwork || !account}
+            className={`xl:px-5 ${checkArcade ? "" : "animate-pulse"}`}
+          >
+            <ArcadeIcon className="w-5 h-5 justify-center fill-current sm:mr-2" />
+            <span className="hidden sm:block">arcade account</span>
+          </Button>
+        </span>
         <Button
           size={"xs"}
           variant={checkArcade ? "outline" : "default"}
           onClick={() => showArcadeDialog(!arcadeDialog)}
           disabled={isWrongNetwork || !account}
-          className={`xl:px-5 ${checkArcade ? "" : "animate-pulse"}`}
+          className={`hidden sm:flex xl:px-5 ${
+            checkArcade ? "" : "animate-pulse"
+          }`}
         >
-          <ArcadeIcon className="sm:w-5 sm:h-5  h-3 w-3 justify-center fill-current mr-2" />
+          <ArcadeIcon className="w-5 h-5 justify-center fill-current mr-2" />
           <span className="hidden sm:block">arcade account</span>
         </Button>
         <Button
@@ -186,18 +206,36 @@ export default function Header({
           )}
         </Button>
         {account && (
-          <Button
-            variant={txInCart ? "default" : "outline"}
-            size={"xs"}
-            ref={displayCartButtonRef}
-            onClick={() => {
-              setDisplayCart(!displayCart);
-              clickPlay();
-            }}
-            className={`xl:px-5 ${txInCart ? "animate-pulse" : ""}`}
-          >
-            <CartIcon className="sm:w-5 sm:h-5 h-3 w-3 fill-current" />
-          </Button>
+          <>
+            <span className="sm:hidden w-5 h-5 mx-2">
+              <Button
+                variant={txInCart ? "default" : "outline"}
+                size={"fill"}
+                ref={displayCartButtonRef}
+                onClick={() => {
+                  setDisplayCart(!displayCart);
+                  clickPlay();
+                }}
+                className={`xl:px-5 ${txInCart ? "animate-pulse" : ""}`}
+              >
+                <CartIcon className="w-5 h-5 fill-current" />
+              </Button>
+            </span>
+            <Button
+              variant={txInCart ? "default" : "outline"}
+              size={"xs"}
+              ref={displayCartButtonRef}
+              onClick={() => {
+                setDisplayCart(!displayCart);
+                clickPlay();
+              }}
+              className={`hidden sm:block xl:px-5 ${
+                txInCart ? "animate-pulse" : ""
+              }`}
+            >
+              <CartIcon className="w-5 h-5 fill-current" />
+            </Button>
+          </>
         )}
         {displayCart && (
           <TransactionCart
@@ -206,9 +244,29 @@ export default function Header({
             gameContract={gameContract}
           />
         )}
-        <div className="flex items-center sm:hidden">
+        <span className="sm:hidden flex flex-row gap-2 items-center">
+          <div className="relative">
+            <Button
+              variant={"outline"}
+              size={"sm"}
+              onClick={() => {
+                disconnect();
+                resetData();
+                setAdventurer(NullAdventurer);
+                setDisconnected(true);
+              }}
+              className="xl:px-5 p-0"
+            >
+              {account ? displayAddress(account.address) : "Connect"}
+            </Button>
+            {checkArcade && (
+              <div className="absolute top-0 right-0">
+                <ArcadeIcon className="fill-current w-2 sm:w-4" />
+              </div>
+            )}
+          </div>
           <Button
-            size={"xs"}
+            size={"fill"}
             variant={"outline"}
             onClick={() => {
               setScreen("settings");
@@ -216,9 +274,9 @@ export default function Header({
             }}
             className="xl:px-5"
           >
-            <SettingsIcon className="fill-current h-3 w-3" />
+            <SettingsIcon className="fill-current h-5 w-5" />
           </Button>
-        </div>
+        </span>
         <div className="hidden sm:block sm:flex sm:flex-row sm:items-center sm:gap-1">
           {account && (
             <>

@@ -4,7 +4,6 @@ import { GameData } from "@/app/lib/data/GameData";
 import {
   processBeastName,
   getRandomElement,
-  chunkArray,
   isObject,
   getItemData,
   getValueFromKey,
@@ -262,7 +261,34 @@ export const processNotifications = (
       ),
     });
   } else if ((type == "Attack" || type == "Flee") && isArray) {
-    const battleScenarios = chunkArray(notificationData as Battle[], 2);
+    // Here we need to check whether there is a single attack (from equip) and chunk that by 1, otherwise chunk it by 2
+    const battleScenarios: Battle[][] = [];
+    let currentChunk: Battle[] = [];
+    let chunkingByOne = true;
+
+    for (let i = 0; i < notificationData.length; i++) {
+      const battle = notificationData[i];
+      if (chunkingByOne) {
+        if (battle.attacker === "Beast") {
+          // Chunk by one
+          battleScenarios.push([battle]);
+        } else if (battle.attacker === "Adventurer") {
+          // Switch to different chunking strategy
+          chunkingByOne = false;
+          currentChunk.push(battle);
+        }
+      } else {
+        currentChunk.push(battle);
+        if (currentChunk.length === 2) {
+          battleScenarios.push(currentChunk);
+          currentChunk = []; // Reset currentChunk after adding it to battleScenarios
+        }
+      }
+    }
+    // Handle any remaining battles in currentChunk
+    if (currentChunk.length > 0) {
+      battleScenarios.push(currentChunk);
+    }
     for (let i = 0; i < battleScenarios.length; i++) {
       const animation = handleAnimation(battleScenarios[i] as Battle[]);
       notifications.push({

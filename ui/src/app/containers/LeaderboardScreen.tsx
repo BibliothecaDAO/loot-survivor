@@ -130,7 +130,6 @@ export default function LeaderboardScreen({
         idleAdventurers.push(adventurer?.id?.toString() ?? "0");
       }
     }
-    console.log(idleAdventurers);
     setIdleAdventurers(idleAdventurers);
     setLoadingIdles(false);
   };

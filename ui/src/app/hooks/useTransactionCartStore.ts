@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { Call } from "@/app/types";
 import { AccountInterface } from "starknet";
+import { MAX_FEE_CHECK } from "../lib/constants";
 
 type TransactionCartState = {
   error: boolean;
@@ -52,18 +53,19 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
     showTopUpDialog: (show: boolean) => void,
     setTopUpAccount: (account: string) => void
   ) => {
+    const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+    const maxFee = onMainnet ? MAX_FEE_CHECK : MAX_FEE_CHECK / 10;
     try {
       let tx;
       if (isArcade) {
         // If they have an arcade account, estimate the max fee
-        const feeEstimateResult = await account.estimateInvokeFee(calls);
-        if (ethBalance < feeEstimateResult.suggestedMaxFee! * BigInt(2)) {
+        if (ethBalance < maxFee) {
           showTopUpDialog(true);
           setTopUpAccount(account?.address ?? "");
           throw new Error("Not enough eth for gas.");
         } else {
           tx = await account.execute(calls, undefined, {
-            maxFee: feeEstimateResult.suggestedMaxFee! * BigInt(2),
+            maxFee: maxFee,
           });
         }
       } else {

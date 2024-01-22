@@ -1,6 +1,7 @@
 import React, { useState, ChangeEvent } from "react";
 import { AccountInterface } from "starknet";
 import { Button } from "@/app/components/buttons/Button";
+import { formatCurrency } from "@/app/lib/utils";
 
 interface TopupInputProps {
   balanceType: string;
@@ -13,6 +14,7 @@ interface TopupInputProps {
   className?: string;
   lordsBalance: number;
   ethBalance: number;
+  lordsGameCost: number;
 }
 
 const TopupInput = ({
@@ -26,9 +28,12 @@ const TopupInput = ({
   className,
   lordsBalance,
   ethBalance,
+  lordsGameCost,
 }: TopupInputProps) => {
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState(0);
+
+  const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -71,6 +76,10 @@ const TopupInput = ({
     setShowInput(false);
   };
 
+  const mainTopupDisabled =
+    balanceType === "eth"
+      ? ethBalance < (onMainnet ? 0.01 : 0.001) * 10 ** 18
+      : lordsBalance < lordsGameCost;
   const inputTopupInvalid =
     inputValue * 10 ** 18 > (balanceType === "eth" ? ethBalance : lordsBalance);
 
@@ -128,9 +137,13 @@ const TopupInput = ({
             size="xxxs"
             className="text-black"
             onClick={() => handleSubmitDefault()}
-            disabled={disabled}
+            disabled={disabled || mainTopupDisabled}
           >
-            {balanceType === "eth" ? "Add 0.01 ETH" : "Add 25 LORDS"}
+            {balanceType === "eth"
+              ? onMainnet
+                ? "Add 0.01 ETH"
+                : "Add 0.001 ETH"
+              : `Add ${formatCurrency(lordsGameCost)} LORDS`}
           </Button>
           <Button
             size="xxxs"
