@@ -29,7 +29,6 @@ export default function InterludeScreen({
   };
 
   const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
   useEffect(() => {
     getNextEntropyTime();
