@@ -45,6 +45,7 @@ interface SectionContentProps {
   lords: number;
   lordsGameCost: number;
   onMainnet: boolean;
+  onSepolia: boolean;
   network: string;
   mintLords: (lordsAmount: number) => Promise<void>;
   prefundGames: number;
@@ -73,6 +74,7 @@ const SectionContent = ({
   lords,
   lordsGameCost,
   onMainnet,
+  onSepolia,
   network,
   mintLords,
   prefundGames,
@@ -360,7 +362,9 @@ const SectionContent = ({
             <div className="flex flex-col w-full items-center">
               <span className="flex flex-row gap-2">
                 <Eth className="w-2" />
-                0.001 ETH Required
+                {onMainnet || onSepolia
+                  ? "0.01 ETH Required"
+                  : "0.001 ETH Required"}
               </span>
               <span className="flex flex-row gap-2">
                 <Lords className="fill-current w-2" />
@@ -600,6 +604,7 @@ const Onboarding = ({
 
   const network = process.env.NEXT_PUBLIC_NETWORK;
   const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+  const onSepolia = process.env.NEXT_PUBLIC_NETWORK === "sepolia";
 
   useEffect(() => {
     if (account && checkEnoughEth && checkEnoughLords) {
@@ -675,6 +680,7 @@ const Onboarding = ({
               lords={lords}
               lordsGameCost={lordsGameCost}
               onMainnet={onMainnet}
+              onSepolia={onSepolia}
               network={network!}
               mintLords={mintLords}
               prefundGames={prefundGames}
@@ -702,6 +708,7 @@ const Onboarding = ({
               lords={lords}
               lordsGameCost={lordsGameCost}
               onMainnet={onMainnet}
+              onSepolia={onSepolia}
               network={network!}
               mintLords={mintLords}
               prefundGames={prefundGames}
@@ -729,6 +736,7 @@ const Onboarding = ({
               lords={lords}
               lordsGameCost={lordsGameCost}
               onMainnet={onMainnet}
+              onSepolia={onSepolia}
               network={network!}
               mintLords={mintLords}
               prefundGames={prefundGames}
@@ -756,6 +764,7 @@ const Onboarding = ({
               lords={lords}
               lordsGameCost={lordsGameCost}
               onMainnet={onMainnet}
+              onSepolia={onSepolia}
               network={network!}
               mintLords={mintLords}
               prefundGames={prefundGames}
@@ -798,6 +807,7 @@ const Onboarding = ({
               lords={lords}
               lordsGameCost={lordsGameCost}
               onMainnet={onMainnet}
+              onSepolia={onSepolia}
               network={network!}
               mintLords={mintLords}
               prefundGames={prefundGames}
@@ -824,6 +834,7 @@ const Onboarding = ({
               lords={lords}
               lordsGameCost={lordsGameCost}
               onMainnet={onMainnet}
+              onSepolia={onSepolia}
               network={network!}
               mintLords={mintLords}
               prefundGames={prefundGames}
@@ -850,6 +861,7 @@ const Onboarding = ({
               lords={lords}
               lordsGameCost={lordsGameCost}
               onMainnet={onMainnet}
+              onSepolia={onSepolia}
               network={network!}
               mintLords={mintLords}
               prefundGames={prefundGames}
@@ -876,6 +888,7 @@ const Onboarding = ({
               lords={lords}
               lordsGameCost={lordsGameCost}
               onMainnet={onMainnet}
+              onSepolia={onSepolia}
               network={network!}
               mintLords={mintLords}
               prefundGames={prefundGames}
