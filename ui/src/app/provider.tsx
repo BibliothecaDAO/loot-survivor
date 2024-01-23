@@ -5,8 +5,9 @@ import {
   StarknetConfig,
   alchemyProvider,
   blastProvider,
+  publicProvider,
 } from "@starknet-react/core";
-import { goerli, mainnet } from "@starknet-react/chains";
+import { goerli, mainnet, sepolia } from "@starknet-react/chains";
 
 export function StarknetProvider({
   connectors,
@@ -17,15 +18,16 @@ export function StarknetProvider({
 }) {
   const apiKey = process.env.NEXT_PUBLIC_RPC_API_KEY!;
   const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+  const onSepolia = process.env.NEXT_PUBLIC_NETWORK === "sepolia";
   const provider = onMainnet
     ? alchemyProvider({ apiKey })
     : blastProvider({ apiKey });
-  const chains = onMainnet ? [mainnet] : [goerli];
+  const chains = onMainnet ? [mainnet] : onSepolia ? [sepolia] : [goerli];
   return (
     <StarknetConfig
       connectors={connectors}
       autoConnect
-      provider={provider}
+      provider={publicProvider()}
       chains={chains}
     >
       {children}
