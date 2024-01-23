@@ -5,7 +5,6 @@ import {
   StarknetConfig,
   alchemyProvider,
   blastProvider,
-  publicProvider,
 } from "@starknet-react/core";
 import { goerli, mainnet, sepolia } from "@starknet-react/chains";
 
@@ -27,7 +26,7 @@ export function StarknetProvider({
     <StarknetConfig
       connectors={connectors}
       autoConnect
-      provider={publicProvider()}
+      provider={provider}
       chains={chains}
     >
       {children}
