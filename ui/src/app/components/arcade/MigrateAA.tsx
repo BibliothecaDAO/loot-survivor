@@ -51,12 +51,9 @@ const MigrateAA = ({
     abi: ArcadeAccount,
   });
 
-  console.log(arcadeContract);
-
   const getMasterAccount = async () => {
     try {
       const masterAccount = await arcadeContract?.call("get_master_account");
-      console.log(masterAccount);
       if (masterAccount) {
         setArcadeExists(true);
         setMasterAccount("0x" + masterAccount?.toString(16));
@@ -86,21 +83,15 @@ const MigrateAA = ({
         0
       );
 
-      console.log(
-        publicKey,
-        process.env.NEXT_PUBLIC_ARCADE_ACCOUNT_CLASS_HASH!,
-        constructorAACalldata
-      );
-
       setArcadeAddress(address);
       setArcadePublicKey(publicKey);
     }
   };
 
   const importBurner = () => {
-    storage[arcadeAddress!] = {
-      arcadePrivateKey,
-      arcadePublicKey,
+    storage[formattedArcadeAddress!] = {
+      privateKey: arcadePrivateKey,
+      publicKey: arcadePublicKey,
       masterAccount: walletAccount.address,
       masterAccountProvider: connector.id,
       gameContract: gameContract?.address,
@@ -112,21 +103,14 @@ const MigrateAA = ({
 
   const arcadeAccountExists = () => {
     if (storage) {
-      console.log(arcadeAddress);
-      console.log(Object.keys(storage));
       return Object.keys(storage).includes(formattedArcadeAddress ?? "");
     } else {
       return false;
     }
   };
 
-  console.log(arcadeAccountExists());
-
   const isMasterAccount =
     padAddress(walletAccount.address) === padAddress(masterAccount ?? "");
-
-  console.log(arcadeAddress, arcadePublicKey, arcadePrivateKey);
-  console.log(masterAccount, arcadeExists);
 
   useEffect(() => {
     if (arcadePrivateKey) {
