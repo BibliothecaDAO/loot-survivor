@@ -125,7 +125,7 @@ const MigrateAA = ({
   }, [arcadeAddress]);
 
   return (
-    <div className="flex flex-col items-center gap-5 h-3/4 w-full">
+    <div className="flex flex-col items-center gap-5 h-3/4 w-full overflow-scroll">
       <p className="text-2xl uppercase">Import Arcade Account</p>
       <p className="text-lg">
         Please enter the private key of the Arcade Account you would like to
