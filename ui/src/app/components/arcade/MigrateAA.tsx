@@ -175,21 +175,6 @@ const MigrateAA = ({
           ? "Arcade Already Stored"
           : "Import Arcade"}
       </Button>
-      {/* <p className="text-2xl">Export</p>
-      <p className="text-lg">
-        Here you can export the private key of the Arcade Account. This can then
-        be imported to other clients that intract with the LS contract.
-      </p> */}
-      {/* <Button
-        onClick={async () => {
-          await genNewKey(formattedRecoveryAddress, connector!);
-          updateConnectors();
-        }}
-        disabled={!isMasterAccount || recoveryAccountExists()}
-        className="w-1/4"
-      >
-        {recoveryAccountExists() ? "Account Already Stored" : "Recover Account"}
-      </Button> */}
     </div>
   );
 };
