@@ -23,7 +23,8 @@ import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import TopupInput from "@/app/components/arcade/TopupInput";
 import RecoverUndeployed from "@/app/components/arcade/RecoverUndeployed";
-import RecoverArcade from "@/app/components//arcade/RecoverArcade";
+import RecoverArcade from "@/app/components/arcade/RecoverArcade";
+import MigrateAA from "@/app/components/arcade/MigrateAA";
 import Storage from "@/app/lib/storage";
 import { BurnerStorage } from "@/app/types";
 
@@ -51,6 +52,7 @@ export const ArcadeDialog = ({
   const [fetchedBalances, setFetchedBalances] = useState(false);
   const [recoverArcade, setRecoverArcade] = useState(false);
   const [recoverUndeployed, setRecoverUndeployed] = useState(false);
+  const [migrateAA, setMigrateAA] = useState(false);
   const [fullDeployment, setFullDeployment] = useState(false);
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
@@ -177,6 +179,17 @@ export const ArcadeDialog = ({
             walletAccount={walletAccount!}
             updateConnectors={updateConnectors}
           />
+        ) : migrateAA ? (
+          <MigrateAA
+            setMigrateAA={setMigrateAA}
+            walletAccount={walletAccount!}
+            walletConnectors={walletConnectors}
+            connector={connector!}
+            gameContract={gameContract}
+            connect={connect}
+            disconnect={disconnect}
+            updateConnectors={updateConnectors}
+          />
         ) : (
           <>
             <div className="flex flex-col">
@@ -215,6 +228,9 @@ export const ArcadeDialog = ({
                     </Button>
                     <Button onClick={() => setRecoverUndeployed(true)}>
                       Recover Undeployed
+                    </Button>
+                    <Button onClick={() => setMigrateAA(true)}>
+                      Import Arcade
                     </Button>
                   </div>
                 </div>
@@ -463,7 +479,7 @@ export const ArcadeAccountCard = ({
           />
         )}
       </div>
-      <div className="flex flex-col gap-2 items-center">
+      <div className="flex flex-col sm:gap-2 items-center">
         <div className="flex">
           <Button
             variant={"ghost"}
@@ -477,25 +493,6 @@ export const ArcadeAccountCard = ({
           >
             {connected ? "Connect to Master" : "Connect"}
           </Button>
-          {masterAccountAddress == walletAccount?.address && (
-            <>
-              <Button
-                variant={"ghost"}
-                onClick={async () => await genNewKey(account.name, connector!)}
-              >
-                Create New Keys
-              </Button>
-              <Button
-                variant={"ghost"}
-                onClick={async () => {
-                  await setPermissions(account.name, walletAccount, true);
-                }}
-                className={`${currentGamePermissions ? "" : "animate-pulse"}`}
-              >
-                Set Permissions
-              </Button>
-            </>
-          )}
           {connected && (
             <Button
               variant={"ghost"}
@@ -514,7 +511,34 @@ export const ArcadeAccountCard = ({
               Withdraw To Master
             </Button>
           )}
+          <Button
+            variant={"ghost"}
+            onClick={() => {
+              copyToClipboard(storage[account.name].privateKey);
+            }}
+          >
+            Export PK
+          </Button>
         </div>
+        {masterAccountAddress == walletAccount?.address && (
+          <div className="flex">
+            <Button
+              variant={"ghost"}
+              onClick={async () => await genNewKey(account.name, connector!)}
+            >
+              Create New Keys
+            </Button>
+            <Button
+              variant={"ghost"}
+              onClick={async () => {
+                await setPermissions(account.name, walletAccount, true);
+              }}
+              className={`${currentGamePermissions ? "" : "animate-pulse"}`}
+            >
+              Set Permissions
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
