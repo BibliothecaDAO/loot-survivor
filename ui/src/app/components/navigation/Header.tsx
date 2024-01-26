@@ -1,6 +1,11 @@
 import { useRef, useState, useEffect } from "react";
 import { Contract } from "starknet";
-import { useAccount, useDisconnect, Connector } from "@starknet-react/core";
+import {
+  useAccount,
+  useDisconnect,
+  Connector,
+  useConnect,
+} from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -24,7 +29,9 @@ import TransactionHistory from "@/app/components/navigation/TransactionHistory";
 import { NullAdventurer } from "@/app/types";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { getApibaraStatus } from "@/app/api/api";
-import ApibaraStatus from "./ApibaraStatus";
+import ApibaraStatus from "@/app/components/navigation/ApibaraStatus";
+import TokenLoader from "@/app/components/animations/TokenLoader";
+import { checkArcadeConnector } from "@/app/lib/connectors";
 
 export interface HeaderProps {
   multicall: (
@@ -46,7 +53,9 @@ export default function Header({
   gameContract,
   costToPlay,
 }: HeaderProps) {
+  const [mintingLords, setMintingLords] = useState(false);
   const { account, address } = useAccount();
+  const { connector } = useConnect();
   const { disconnect } = useDisconnect();
   const [apibaraStatus, setApibaraStatus] = useState();
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -82,16 +91,14 @@ export default function Header({
 
   const [showLordsBuy, setShowLordsBuy] = useState(false);
 
-  const checkArcade = arcadeConnectors.some(
-    (connector) => connector.name == address
-  );
-
   const lordsGameCost = Number(costToPlay);
 
   const handleApibaraStatus = async () => {
     const data = await getApibaraStatus();
     setApibaraStatus(data.status.indicator);
   };
+
+  const checkArcade = checkArcadeConnector(connector);
 
   useEffect(() => {
     handleApibaraStatus();
@@ -137,15 +144,19 @@ export default function Header({
           variant={"outline"}
           className="self-center xl:px-5 hover:bg-terminal-green"
           onClick={async () => {
-            if (isOnMainnet) {
-              const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
-                process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
-              )}&tokenTo=${indexAddress(
-                process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
-              )}&amount=0.001`;
-              window.open(avnuLords, "_blank");
-            } else {
-              await mintLords(lordsGameCost * 25);
+            if (!checkArcade) {
+              if (isOnMainnet) {
+                const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
+                  process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+                )}&tokenTo=${indexAddress(
+                  process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+                )}&amount=0.001`;
+                window.open(avnuLords, "_blank");
+              } else {
+                setMintingLords(true);
+                await mintLords(lordsGameCost * 25);
+                setMintingLords(false);
+              }
             }
           }}
           onMouseEnter={() => setShowLordsBuy(true)}
@@ -161,7 +172,11 @@ export default function Header({
               </>
             ) : (
               <p className="text-black">
-                {isOnMainnet ? "Buy Lords" : "Mint Lords"}
+                {isOnMainnet
+                  ? "Buy Lords"
+                  : checkArcade
+                  ? "Can't Be Arcade"
+                  : "Mint Lords"}
               </p>
             )}
           </span>
@@ -326,6 +341,7 @@ export default function Header({
         {account && displayHistory && (
           <TransactionHistory buttonRef={displayHistoryButtonRef} />
         )}
+        {mintingLords && <TokenLoader isToppingUpLords={mintingLords} />}
       </div>
     </div>
   );

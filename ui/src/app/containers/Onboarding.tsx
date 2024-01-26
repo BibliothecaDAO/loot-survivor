@@ -25,6 +25,7 @@ import { useBurner } from "@/app/lib/burner";
 import ArcadeLoader from "@/app/components/animations/ArcadeLoader";
 import useUIStore, { ScreenPage } from "@/app/hooks/useUIStore";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
+import TokenLoader from "@/app/components/animations/TokenLoader";
 
 type Section = "connect" | "eth" | "lords" | "arcade";
 
@@ -47,6 +48,7 @@ interface SectionContentProps {
   onMainnet: boolean;
   network: string;
   mintLords: (lordsAmount: number) => Promise<void>;
+  setMintingLords: (value: boolean) => void;
   prefundGames: number;
   setPrefundGames: (games: number) => void;
   setFullDeployment: (value: boolean) => void;
@@ -75,6 +77,7 @@ const SectionContent = ({
   onMainnet,
   network,
   mintLords,
+  setMintingLords,
   prefundGames,
   setPrefundGames,
   setFullDeployment,
@@ -278,7 +281,9 @@ const SectionContent = ({
                     )}&amount=0.001`;
                     window.open(avnuLords, "_blank");
                   } else {
+                    setMintingLords(true);
                     await mintLords(lordsGameCost * 25);
+                    setMintingLords(false);
                   }
                 }}
               >
@@ -587,6 +592,8 @@ const Onboarding = ({
 
   const [step, setStep] = useState(1);
 
+  const [mintingLords, setMintingLords] = useState(false);
+
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const setScreen = useUIStore((state) => state.setScreen);
 
@@ -622,6 +629,7 @@ const Onboarding = ({
         fullDeployment={fullDeployment}
         showLoader={showLoader}
       />
+      {mintingLords && <TokenLoader isToppingUpLords={mintingLords} />}
       {section && (
         <InfoBox
           section={section}
@@ -677,6 +685,7 @@ const Onboarding = ({
               onMainnet={onMainnet}
               network={network!}
               mintLords={mintLords}
+              setMintingLords={setMintingLords}
               prefundGames={prefundGames}
               setPrefundGames={setPrefundGames}
               setFullDeployment={setFullDeployment}
@@ -704,6 +713,7 @@ const Onboarding = ({
               onMainnet={onMainnet}
               network={network!}
               mintLords={mintLords}
+              setMintingLords={setMintingLords}
               prefundGames={prefundGames}
               setPrefundGames={setPrefundGames}
               setFullDeployment={setFullDeployment}
@@ -731,6 +741,7 @@ const Onboarding = ({
               onMainnet={onMainnet}
               network={network!}
               mintLords={mintLords}
+              setMintingLords={setMintingLords}
               prefundGames={prefundGames}
               setPrefundGames={setPrefundGames}
               setFullDeployment={setFullDeployment}
@@ -758,6 +769,7 @@ const Onboarding = ({
               onMainnet={onMainnet}
               network={network!}
               mintLords={mintLords}
+              setMintingLords={setMintingLords}
               prefundGames={prefundGames}
               setPrefundGames={setPrefundGames}
               setFullDeployment={setFullDeployment}
@@ -800,6 +812,7 @@ const Onboarding = ({
               onMainnet={onMainnet}
               network={network!}
               mintLords={mintLords}
+              setMintingLords={setMintingLords}
               prefundGames={prefundGames}
               setPrefundGames={setPrefundGames}
               setFullDeployment={setFullDeployment}
@@ -826,6 +839,7 @@ const Onboarding = ({
               onMainnet={onMainnet}
               network={network!}
               mintLords={mintLords}
+              setMintingLords={setMintingLords}
               prefundGames={prefundGames}
               setPrefundGames={setPrefundGames}
               setFullDeployment={setFullDeployment}
@@ -852,6 +866,7 @@ const Onboarding = ({
               onMainnet={onMainnet}
               network={network!}
               mintLords={mintLords}
+              setMintingLords={setMintingLords}
               prefundGames={prefundGames}
               setPrefundGames={setPrefundGames}
               setFullDeployment={setFullDeployment}
@@ -878,6 +893,7 @@ const Onboarding = ({
               onMainnet={onMainnet}
               network={network!}
               mintLords={mintLords}
+              setMintingLords={setMintingLords}
               prefundGames={prefundGames}
               setPrefundGames={setPrefundGames}
               setFullDeployment={setFullDeployment}
