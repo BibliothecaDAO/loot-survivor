@@ -321,6 +321,9 @@ export const useBurner = ({
               lordsContract?.address ?? "",
               selector.getSelectorFromName("transfer"),
               "1",
+              lordsContract?.address ?? "",
+              selector.getSelectorFromName("mint"), // needed for testnet deployment
+              "1",
             ],
           },
         ];

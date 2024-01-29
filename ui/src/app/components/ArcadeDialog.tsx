@@ -182,12 +182,7 @@ export const ArcadeDialog = ({
         ) : migrateAA ? (
           <MigrateAA
             setMigrateAA={setMigrateAA}
-            walletAccount={walletAccount!}
-            walletConnectors={walletConnectors}
-            connector={connector!}
             gameContract={gameContract}
-            connect={connect}
-            disconnect={disconnect}
             updateConnectors={updateConnectors}
           />
         ) : (

@@ -1,11 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Contract } from "starknet";
-import {
-  useAccount,
-  useDisconnect,
-  Connector,
-  useConnect,
-} from "@starknet-react/core";
+import { useAccount, useDisconnect, useConnect } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -40,7 +35,6 @@ export interface HeaderProps {
   ) => Promise<void>;
   mintLords: (lordsAmount: number) => Promise<void>;
   lordsBalance: bigint;
-  arcadeConnectors: Connector[];
   gameContract: Contract;
   costToPlay: bigint;
 }
@@ -49,12 +43,11 @@ export default function Header({
   multicall,
   mintLords,
   lordsBalance,
-  arcadeConnectors,
   gameContract,
   costToPlay,
 }: HeaderProps) {
   const [mintingLords, setMintingLords] = useState(false);
-  const { account, address } = useAccount();
+  const { account } = useAccount();
   const { connector } = useConnect();
   const { disconnect } = useDisconnect();
   const [apibaraStatus, setApibaraStatus] = useState();

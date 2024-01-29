@@ -67,3 +67,40 @@ export const getApibaraStatus = async () => {
   const data = await response.json();
   return data;
 };
+
+export const getInterface = async (
+  masterAddress: string,
+  arcade_interface_id: string
+) => {
+  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL!;
+  const response = await fetch(rpcUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      method: "starknet_call",
+      params: [
+        {
+          contract_address: masterAddress,
+          entry_point_selector:
+            "0xfe80f537b66d12a00b6d3c072b44afbb716e78dde5c3f0ef116ee93d3e3283", // supports_interface
+          calldata: [arcade_interface_id],
+        },
+        "pending",
+      ],
+      id: 0,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (response.ok) {
+    console.log("Interface fetched successfully");
+  } else {
+    console.error("Error in response:", data);
+  }
+
+  return data;
+};

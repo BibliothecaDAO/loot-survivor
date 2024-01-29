@@ -5,26 +5,19 @@ import { padAddress, isChecksumAddress } from "@/app/lib/utils";
 import { Button } from "@/app/components/buttons/Button";
 import Storage from "@/app/lib/storage";
 import ArcadeAccount from "@/app/abi/ArcadeAccount.json";
+import { getInterface } from "@/app/api/api";
+
+const ARCADE_ACCOUNT_ID: string = "0x4152434144455F4143434F554E545F4944";
 
 interface MigrateAAProps {
   setMigrateAA: (migrateAA: boolean) => void;
-  walletAccount: AccountInterface;
-  walletConnectors: Connector[];
-  connector: Connector;
   gameContract: Contract;
-  connect: any;
-  disconnect: any;
   updateConnectors: () => void;
 }
 
 const MigrateAA = ({
   setMigrateAA,
-  walletAccount,
-  walletConnectors,
-  connector,
   gameContract,
-  connect,
-  disconnect,
   updateConnectors,
 }: MigrateAAProps) => {
   const [arcadePrivateKey, setArcadePrivateKey] = useState<
@@ -33,13 +26,26 @@ const MigrateAA = ({
   const [arcadeExists, setArcadeExists] = useState<boolean>(false);
   const [arcadeAddress, setArcadeAddress] = useState<string | undefined>();
   const [arcadePublicKey, setArcadePublicKey] = useState<string | undefined>();
-  const [masterAccount, setMasterAccount] = useState<string | undefined>();
+  const [inputMasterAccount, setInputMasterAccount] = useState<
+    string | undefined
+  >();
+  const [realMasterAccount, setRealMasterAccount] = useState<
+    string | undefined
+  >();
+  const [masterInterface, setMasterInterface] = useState<string | undefined>();
 
   const formattedArcadeAddress = padAddress(padAddress(arcadeAddress ?? ""));
 
   const storage = Storage.get("burners") || {};
 
-  const handleChange = (
+  const handleMasterAccountChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { value } = e.target;
+    setInputMasterAccount(value);
+  };
+
+  const handlePrivateKeyChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { value } = e.target;
@@ -56,7 +62,23 @@ const MigrateAA = ({
       const masterAccount = await arcadeContract?.call("get_master_account");
       if (masterAccount) {
         setArcadeExists(true);
-        setMasterAccount("0x" + masterAccount?.toString(16));
+        setRealMasterAccount("0x" + masterAccount.toString(16));
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const checkInterface = async () => {
+    try {
+      const accountInterface: any = await getInterface(
+        inputMasterAccount!,
+        ARCADE_ACCOUNT_ID
+      );
+      if (accountInterface.error) {
+        setMasterInterface("braavos");
+      } else {
+        setMasterInterface("argentX");
       }
     } catch (e) {
       console.log(e);
@@ -67,13 +89,9 @@ const MigrateAA = ({
     if (isChecksumAddress(arcadePrivateKey!)) {
       const publicKey = ec.starkCurve.getStarkKey(arcadePrivateKey!);
 
-      if (!walletAccount) {
-        throw new Error("wallet account not found");
-      }
-
       const constructorAACalldata = CallData.compile({
         _public_key: publicKey,
-        _master_account: walletAccount.address,
+        _master_account: inputMasterAccount!,
       });
 
       const address = hash.calculateContractAddressFromHash(
@@ -92,8 +110,8 @@ const MigrateAA = ({
     storage[formattedArcadeAddress!] = {
       privateKey: arcadePrivateKey,
       publicKey: arcadePublicKey,
-      masterAccount: walletAccount.address,
-      masterAccountProvider: connector.id,
+      masterAccount: inputMasterAccount,
+      masterAccountProvider: masterInterface,
       gameContract: gameContract?.address,
       active: true,
     };
@@ -110,10 +128,10 @@ const MigrateAA = ({
   };
 
   const isMasterAccount =
-    padAddress(walletAccount.address) === padAddress(masterAccount ?? "");
+    padAddress(inputMasterAccount!) === padAddress(realMasterAccount ?? "");
 
   useEffect(() => {
-    if (arcadePrivateKey) {
+    if (arcadePrivateKey && inputMasterAccount) {
       handleGetArcade();
     }
   }, [arcadePrivateKey]);
@@ -124,38 +142,35 @@ const MigrateAA = ({
     }
   }, [arcadeAddress]);
 
+  useEffect(() => {
+    if (inputMasterAccount) {
+      checkInterface();
+    }
+  }, [inputMasterAccount]);
+
   return (
     <div className="flex flex-col items-center gap-5 h-3/4 w-full overflow-scroll">
       <p className="text-2xl uppercase">Import Arcade Account</p>
       <p className="text-lg">
-        Please enter the private key of the Arcade Account you would like to
-        import to this client.
+        Please enter the master account address and private key of the Arcade
+        Account you would like to import to this client.
       </p>
       <input
         type="text"
         name="address"
-        onChange={handleChange}
-        className="p-1 m-2 bg-terminal-black border border-terminal-green animate-pulse transform w-1/2 2xl:h-16 2xl:text-4xl"
+        onChange={handleMasterAccountChange}
+        className="p-1 m-2 bg-terminal-black border border-terminal-green animate-pulse transform w-1/2 2xl:h-16 2xl:text-4xl placeholder-terminal-green"
+        placeholder="Enter Master Account"
         maxLength={66}
       />
-      {!isMasterAccount && arcadeAddress && (
-        <>
-          <p className="text-lg">Connect Master Account</p>
-          {walletConnectors.map((connector, index) => (
-            <Button
-              onClick={() => {
-                disconnect();
-                connect({ connector });
-              }}
-              key={index}
-            >
-              {connector.id === "braavos" || connector.id === "argentX"
-                ? `Connect ${connector.id}`
-                : "Login With Email"}
-            </Button>
-          ))}
-        </>
-      )}
+      <input
+        type="text"
+        name="address"
+        onChange={handlePrivateKeyChange}
+        className="p-1 m-2 bg-terminal-black border border-terminal-green animate-pulse transform w-1/2 2xl:h-16 2xl:text-4xl placeholder-terminal-green"
+        placeholder="Enter Private Key"
+        maxLength={66}
+      />
       <Button
         disabled={
           !isChecksumAddress(arcadePrivateKey!) ||
@@ -163,9 +178,11 @@ const MigrateAA = ({
           arcadeAccountExists()
         }
         onClick={() => {
-          importBurner();
-          updateConnectors();
-          setMigrateAA(false);
+          if (isMasterAccount) {
+            importBurner();
+            updateConnectors();
+            setMigrateAA(false);
+          }
         }}
         className="w-1/4"
       >
