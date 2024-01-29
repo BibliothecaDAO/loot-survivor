@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Contract } from "starknet";
-import { useAccount, useDisconnect, Connector } from "@starknet-react/core";
+import { useAccount, useDisconnect, useConnect } from "@starknet-react/core";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -24,7 +24,9 @@ import TransactionHistory from "@/app/components/navigation/TransactionHistory";
 import { NullAdventurer } from "@/app/types";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { getApibaraStatus } from "@/app/api/api";
-import ApibaraStatus from "./ApibaraStatus";
+import ApibaraStatus from "@/app/components/navigation/ApibaraStatus";
+import TokenLoader from "@/app/components/animations/TokenLoader";
+import { checkArcadeConnector } from "@/app/lib/connectors";
 
 export interface HeaderProps {
   multicall: (
@@ -33,7 +35,6 @@ export interface HeaderProps {
   ) => Promise<void>;
   mintLords: (lordsAmount: number) => Promise<void>;
   lordsBalance: bigint;
-  arcadeConnectors: Connector[];
   gameContract: Contract;
   costToPlay: bigint;
 }
@@ -42,11 +43,12 @@ export default function Header({
   multicall,
   mintLords,
   lordsBalance,
-  arcadeConnectors,
   gameContract,
   costToPlay,
 }: HeaderProps) {
-  const { account, address } = useAccount();
+  const [mintingLords, setMintingLords] = useState(false);
+  const { account } = useAccount();
+  const { connector } = useConnect();
   const { disconnect } = useDisconnect();
   const [apibaraStatus, setApibaraStatus] = useState();
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -82,16 +84,14 @@ export default function Header({
 
   const [showLordsBuy, setShowLordsBuy] = useState(false);
 
-  const checkArcade = arcadeConnectors.some(
-    (connector) => connector.name == address
-  );
-
   const lordsGameCost = Number(costToPlay);
 
   const handleApibaraStatus = async () => {
     const data = await getApibaraStatus();
     setApibaraStatus(data.status.indicator);
   };
+
+  const checkArcade = checkArcadeConnector(connector);
 
   useEffect(() => {
     handleApibaraStatus();
@@ -145,7 +145,9 @@ export default function Header({
               )}&amount=0.001`;
               window.open(avnuLords, "_blank");
             } else {
+              setMintingLords(true);
               await mintLords(lordsGameCost * 25);
+              setMintingLords(false);
             }
           }}
           onMouseEnter={() => setShowLordsBuy(true)}
@@ -326,6 +328,7 @@ export default function Header({
         {account && displayHistory && (
           <TransactionHistory buttonRef={displayHistoryButtonRef} />
         )}
+        {mintingLords && <TokenLoader isToppingUpLords={mintingLords} />}
       </div>
     </div>
   );

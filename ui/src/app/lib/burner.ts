@@ -311,7 +311,7 @@ export const useBurner = ({
             contractAddress: accountAAFinalAdress,
             entrypoint: "update_whitelisted_calls",
             calldata: [
-              "3",
+              "4",
               ethContract?.address ?? "",
               selector.getSelectorFromName("transfer"),
               "1",
@@ -320,6 +320,9 @@ export const useBurner = ({
               "1",
               lordsContract?.address ?? "",
               selector.getSelectorFromName("transfer"),
+              "1",
+              lordsContract?.address ?? "",
+              selector.getSelectorFromName("mint"), // needed for testnet deployment
               "1",
             ],
           },
