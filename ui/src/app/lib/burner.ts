@@ -311,7 +311,7 @@ export const useBurner = ({
             contractAddress: accountAAFinalAdress,
             entrypoint: "update_whitelisted_calls",
             calldata: [
-              "3",
+              "4",
               ethContract?.address ?? "",
               selector.getSelectorFromName("transfer"),
               "1",

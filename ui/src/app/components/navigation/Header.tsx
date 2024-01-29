@@ -137,19 +137,17 @@ export default function Header({
           variant={"outline"}
           className="self-center xl:px-5 hover:bg-terminal-green"
           onClick={async () => {
-            if (!checkArcade) {
-              if (isOnMainnet) {
-                const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
-                  process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
-                )}&tokenTo=${indexAddress(
-                  process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
-                )}&amount=0.001`;
-                window.open(avnuLords, "_blank");
-              } else {
-                setMintingLords(true);
-                await mintLords(lordsGameCost * 25);
-                setMintingLords(false);
-              }
+            if (isOnMainnet) {
+              const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
+                process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+              )}&tokenTo=${indexAddress(
+                process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+              )}&amount=0.001`;
+              window.open(avnuLords, "_blank");
+            } else {
+              setMintingLords(true);
+              await mintLords(lordsGameCost * 25);
+              setMintingLords(false);
             }
           }}
           onMouseEnter={() => setShowLordsBuy(true)}
@@ -165,11 +163,7 @@ export default function Header({
               </>
             ) : (
               <p className="text-black">
-                {isOnMainnet
-                  ? "Buy Lords"
-                  : checkArcade
-                  ? "Can't Be Arcade"
-                  : "Mint Lords"}
+                {isOnMainnet ? "Buy Lords" : "Mint Lords"}
               </p>
             )}
           </span>
