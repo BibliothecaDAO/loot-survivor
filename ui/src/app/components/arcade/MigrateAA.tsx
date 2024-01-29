@@ -1,6 +1,6 @@
 import { ChangeEvent, useState, useEffect } from "react";
-import { AccountInterface, CallData, Contract, ec, hash } from "starknet";
-import { Connector, useContract } from "@starknet-react/core";
+import { CallData, Contract, ec, hash } from "starknet";
+import { useContract } from "@starknet-react/core";
 import { padAddress, isChecksumAddress } from "@/app/lib/utils";
 import { Button } from "@/app/components/buttons/Button";
 import Storage from "@/app/lib/storage";
