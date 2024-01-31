@@ -2847,7 +2847,7 @@ mod tests {
                 vitality: 15,
                 intelligence: 15,
                 wisdom: 15,
-                charisma: 16,
+                charisma: 15,
                 luck: 15
             },
             gold: 511,
