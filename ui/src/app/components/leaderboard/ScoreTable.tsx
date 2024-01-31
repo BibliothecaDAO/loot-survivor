@@ -68,7 +68,11 @@ const ScoreLeaderboardTable = ({
   const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
   const onSepolia = process.env.NEXT_PUBLIC_NETWORK === "sepolia";
 
-  const totalPages = Math.ceil(adventurers.length / itemsPerPage);
+  const totalPages = Math.ceil(
+    (!onMainnet && !onSepolia && !showAllTime
+      ? campaignAdventurers.length
+      : adventurers.length) / itemsPerPage
+  );
 
   let previousXp = -1;
   let currentRank = 0;
@@ -133,9 +137,9 @@ const ScoreLeaderboardTable = ({
                 </tr>
               </thead>
               <tbody>
-                {(!onMainnet && !onSepolia && showAllTime
-                  ? scoresWithLords
-                  : campaignMergedScores
+                {(!onMainnet && !onSepolia && !showAllTime
+                  ? campaignMergedScores
+                  : scoresWithLords
                 ).map((adventurer: any, index: number) => (
                   <ScoreRow
                     key={index}
@@ -146,7 +150,9 @@ const ScoreLeaderboardTable = ({
                 ))}
               </tbody>
             </table>
-            {adventurers?.length > 10 && (
+            {(!onMainnet && !onSepolia && !showAllTime
+              ? campaignAdventurers.length
+              : adventurers.length) > 10 && (
               <div className="flex justify-center sm:mt-8 xl:mt-2">
                 <Button
                   variant={"outline"}
