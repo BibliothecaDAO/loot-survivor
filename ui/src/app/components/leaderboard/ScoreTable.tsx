@@ -17,10 +17,20 @@ const ScoreLeaderboardTable = ({
   handleFetchProfileData,
   adventurers,
 }: ScoreLeaderboardTableProps) => {
+  const [showAllTime, setShowAllTime] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
+  const campaignAdventurers = adventurers.filter(
+    (score) => score.startBlock! > 942308
+  );
+
   const displayScores = adventurers?.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const campaignDisplayScores = campaignAdventurers?.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -42,7 +52,21 @@ const ScoreLeaderboardTable = ({
     };
   });
 
+  const campaignMergedScores = campaignDisplayScores.map((item1) => {
+    const matchingItem2 = scoresData?.scores.find(
+      (item2: Score) => item2.adventurerId === item1.id
+    );
+
+    return {
+      ...item1,
+      ...matchingItem2,
+    };
+  });
+
   const scoresWithLords = mergedScores;
+
+  const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+  const onSepolia = process.env.NEXT_PUBLIC_NETWORK === "sepolia";
 
   const totalPages = Math.ceil(adventurers.length / itemsPerPage);
 
@@ -84,7 +108,15 @@ const ScoreLeaderboardTable = ({
 
   return (
     <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row justify-between w-full">
-      <div className="flex flex-col w-full sm:mr-4 flex-grow-2 p-2 gap-2">
+      <div className="relative flex flex-col w-full sm:mr-4 flex-grow-2 p-2 gap-2">
+        {!onMainnet && !onSepolia && (
+          <Button
+            className="absolute top-0 right-0"
+            onClick={() => setShowAllTime(!showAllTime)}
+          >
+            {showAllTime ? "Campaign" : "All Time"}
+          </Button>
+        )}
         {adventurers.length > 0 ? (
           <>
             <h4 className="text-2xl text-center sm:text-2xl m-0">
@@ -101,7 +133,10 @@ const ScoreLeaderboardTable = ({
                 </tr>
               </thead>
               <tbody>
-                {scoresWithLords.map((adventurer: any, index: number) => (
+                {(!onMainnet && !onSepolia && showAllTime
+                  ? scoresWithLords
+                  : campaignMergedScores
+                ).map((adventurer: any, index: number) => (
                   <ScoreRow
                     key={index}
                     adventurer={adventurer}
