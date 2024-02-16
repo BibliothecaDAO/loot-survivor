@@ -22,7 +22,7 @@ mod tests {
     use openzeppelin::token::erc20::interface::{
         IERC20Camel, IERC20CamelDispatcher, IERC20CamelDispatcherTrait, IERC20CamelLibraryDispatcher
     };
-    use openzeppelin::token::erc20::erc20::ERC20;
+    use openzeppelin::token::erc20::interface::IERC20;
     use market::market::{ImplMarket, LootWithPrice, ItemPurchase};
     use lootitems::{loot::{Loot, ImplLoot, ILoot}, constants::{ItemId}};
     use game::{
@@ -38,7 +38,7 @@ mod tests {
         }
     };
     use openzeppelin::utils::serde::SerializedAppend;
-    use openzeppelin::tests::mocks::camel20_mock::CamelERC20Mock;
+    use openzeppelin::presets::erc20::ERC20;
     use openzeppelin::tests::utils;
     use combat::{constants::CombatEnums::{Slot, Tier}, combat::ImplCombat};
     use survivor::{
@@ -78,12 +78,13 @@ mod tests {
         contract_address_const::<10>()
     }
 
-    use goldenToken::ERC721::{
-        GoldenToken, GoldenTokenDispatcher, GoldenTokenDispatcherTrait, GoldenTokenLibraryDispatcher
+    use golden_token::GoldenToken::{
+        IGoldenToken, IGoldenTokenDispatcher, IGoldenTokenDispatcherTrait,
+        IGoldenTokenLibraryDispatcher
     };
 
 
-    fn deploy_golden_token(eth: ContractAddress) -> GoldenTokenDispatcher {
+    fn deploy_golden_token(eth: ContractAddress) -> IGoldenTokenDispatcher {
         let mut calldata = ArrayTrait::new();
         calldata.append(NAME);
         calldata.append(SYMBOL);
@@ -92,11 +93,14 @@ mod tests {
         calldata.append(eth.into());
 
         let (golden_token, _) = deploy_syscall(
-            goldenToken::ERC721::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
+            golden_token::GoldenToken::TEST_CLASS_HASH.try_into().unwrap(),
+            0,
+            calldata.span(),
+            false
         )
             .unwrap();
 
-        GoldenTokenDispatcher { contract_address: golden_token }
+        IGoldenTokenDispatcher { contract_address: golden_token }
     }
 
     fn deploy_lords() -> ContractAddress {
@@ -106,7 +110,7 @@ mod tests {
         calldata.append_serde(MAX_LORDS);
         calldata.append_serde(OWNER());
 
-        let lords0 = utils::deploy(CamelERC20Mock::TEST_CLASS_HASH, calldata);
+        let lords0 = utils::deploy(ERC20::TEST_CLASS_HASH, calldata);
 
         lords0
     }
@@ -118,7 +122,7 @@ mod tests {
         calldata.append_serde(SYMBOL);
         calldata.append_serde(MAX_LORDS);
         calldata.append_serde(OWNER());
-        utils::deploy(CamelERC20Mock::TEST_CLASS_HASH, calldata)
+        utils::deploy(ERC20::TEST_CLASS_HASH, calldata)
     }
 
 
@@ -178,7 +182,7 @@ mod tests {
 
     fn setup(
         starting_block: u64, starting_timestamp: u64, terminal_block: u64
-    ) -> (IGameDispatcher, IERC20CamelDispatcher, GoldenTokenDispatcher, ContractAddress) {
+    ) -> (IGameDispatcher, IERC20CamelDispatcher, IGoldenTokenDispatcher, ContractAddress) {
         testing::set_block_number(starting_block);
         testing::set_block_timestamp(starting_timestamp);
 

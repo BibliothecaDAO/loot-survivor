@@ -44,10 +44,6 @@ mod Game {
         IERC721, IERC721Dispatcher, IERC721DispatcherTrait, IERC721LibraryDispatcher
     };
 
-    use goldenToken::ERC721::{
-        GoldenToken, GoldenTokenDispatcher, GoldenTokenDispatcherTrait, GoldenTokenLibraryDispatcher
-    };
-
     use arcade_account::{
         account::interface::{
             IMasterControl, IMasterControlDispatcher, IMasterControlDispatcherTrait
@@ -3353,12 +3349,8 @@ mod Game {
         let discovery = Discovery { adventurer_state, amount };
 
         match discovery_type {
-            DiscoveryType::Gold => {
-                self.emit(DiscoveredGold { discovery });
-            },
-            DiscoveryType::Health => {
-                self.emit(DiscoveredHealth { discovery });
-            }
+            DiscoveryType::Gold => { self.emit(DiscoveredGold { discovery }); },
+            DiscoveryType::Health => { self.emit(DiscoveredHealth { discovery }); }
         }
     }
 

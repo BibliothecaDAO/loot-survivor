@@ -1,0 +1,29 @@
+[workspace]
+members = [
+    "contracts/adventurer",
+    "contracts/beasts",
+    "contracts/combat",
+    "contracts/game",
+    "contracts/game_entropy",
+    "contracts/game_snapshot",
+    "contracts/loot",
+    "contracts/lords",
+    "contracts/market",
+    "contracts/obstacles",
+]
+name = "loot_survivor"
+version = "0.1.0"
+description = "Loot Survivor collection of libraries and contracts for the BibliothecaDAO ecosystem and beyond."
+homepage = "https://github.com/BibliothecaDAO/loot-survivor"
+
+[workspace.dependencies]
+starknet = ">=2.5.3"
+openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v0.9.0" }
+golden_token = { git = "https://github.com/BibliothecaDAO/golden-token", branch = "next" }
+arcade_account = { git = "https://github.com/BibliothecaDAO/arcade-account", branch = "next" }
+
+[workspace.tool.fmt]
+sort-module-level-items = true
+
+[scripts]
+all = "scarb build && scarb test"
