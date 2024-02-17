@@ -22,8 +22,8 @@ jobs:
             market,
             obstacles,
             combat,
-            # game_entropy,
-            # game_snapshot,
+            game_entropy,
+            game_snapshot,
           ]
     steps:
       - uses: actions/checkout@v3
