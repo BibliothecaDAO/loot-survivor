@@ -189,7 +189,7 @@ mod Game {
     // ------------ Impl ------------------------ //
     // ------------------------------------------ //
 
-    #[external(v0)]
+    #[abi(embed_v0)]
     impl Game of IGame<ContractState> {
         /// @title New Game
         ///
@@ -514,9 +514,7 @@ mod Game {
         /// @param items A u8 Array representing the IDs of the items to drop.
         fn drop(ref self: ContractState, adventurer_id: felt252, items: Array<u8>) {
             // load player assets
-            let (mut adventurer, adventurer_entropy, game_entropy, mut bag) = _load_player_assets(
-                @self, adventurer_id
-            );
+            let (mut adventurer, _, _, mut bag) = _load_player_assets(@self, adventurer_id);
 
             // assert action is valid (ownership of item is handled in internal function when we iterate over items)
             _assert_ownership(@self, adventurer_id);
@@ -556,7 +554,7 @@ mod Game {
             items: Array<ItemPurchase>,
         ) {
             // load player assets
-            let (mut adventurer, adventurer_entropy, game_entropy, mut bag) = _load_player_assets(
+            let (mut adventurer, _, game_entropy, mut bag) = _load_player_assets(
                 @self, adventurer_id
             );
 
@@ -1405,7 +1403,6 @@ mod Game {
 
         // use current starknet block number and timestamp as entropy sources
         let current_block = starknet::get_block_info().unbox().block_number;
-        let block_timestamp = starknet::get_block_info().unbox().block_timestamp;
 
         // randomness for starter beast isn't sensitive so we can use basic entropy
         let starter_beast_rnd = _get_basic_entropy(adventurer_id, current_block);
@@ -1600,8 +1597,7 @@ mod Game {
         let armor = adventurer.get_item_at_slot(damage_slot);
 
         // get damage from obstalce
-        let (combat_result, jewlery_armor_bonus) = adventurer
-            .get_obstacle_damage(obstacle, armor, entropy);
+        let (combat_result, _) = adventurer.get_obstacle_damage(obstacle, armor, entropy);
 
         // pull damage taken out of combat result for easy access
         let damage_taken = combat_result.total_damage;
@@ -1915,7 +1911,7 @@ mod Game {
         let armor_specials = _get_item_specials(@self, adventurer_id, armor);
 
         // process beast attack
-        let (combat_result, jewlery_armor_bonus) = adventurer
+        let (combat_result, _jewlery_armor_bonus) = adventurer
             .defend(beast, armor, armor_specials, entropy);
 
         // deduct damage taken from adventurer's health
@@ -2067,7 +2063,7 @@ mod Game {
         let mut unequipped_items = ArrayTrait::<u8>::new();
 
         // get a clone of our items to equip to keep ownership for event
-        let equipped_items = items_to_equip.clone();
+        let _equipped_items = items_to_equip.clone();
 
         // for each item we need to equip
         let mut i: u32 = 0;
@@ -2810,7 +2806,7 @@ mod Game {
         let adventurer_entropy = _get_adventurer_entropy(self, adventurer_id);
 
         // get beast and beast seed
-        let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
+        let (beast, _) = adventurer.get_beast(adventurer_entropy);
 
         // return beast
         beast

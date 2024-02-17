@@ -558,8 +558,8 @@ mod tests {
         let mut holy_chestplate = ItemPrimitive { id: ItemId::HolyChestplate, xp: 1, metadata: 0 };
         let mut holy_greaves = ItemPrimitive { id: ItemId::HolyGreaves, xp: 1, metadata: 0 };
         let mut demonhide_boots = ItemPrimitive { id: ItemId::DemonhideBoots, xp: 1, metadata: 0 };
-        let mut holy_gauntlets = ItemPrimitive { id: ItemId::HolyGauntlets, xp: 1, metadata: 0 };
-        let mut demonhide_belt = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 0 };
+        let mut _holy_gauntlets = ItemPrimitive { id: ItemId::HolyGauntlets, xp: 1, metadata: 0 };
+        let mut _demonhide_belt = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 0 };
 
         // take the common start with T1 Katana
         katana.set_metadata_id(adventurer, bag);
@@ -754,7 +754,7 @@ mod tests {
         let divine_robe = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 14 };
         let holy_chestplate = ItemPrimitive { id: ItemId::HolyChestplate, xp: 1, metadata: 15 };
         let holy_greaves = ItemPrimitive { id: ItemId::HolyGreaves, xp: 1, metadata: 16 };
-        let demonhide_boots = ItemPrimitive { id: ItemId::DemonhideBoots, xp: 1, metadata: 17 };
+        let _demonhide_boots = ItemPrimitive { id: ItemId::DemonhideBoots, xp: 1, metadata: 17 };
         let holy_gauntlets = ItemPrimitive { id: ItemId::HolyGauntlets, xp: 1, metadata: 18 };
         let demonhide_boots = ItemPrimitive { id: ItemId::DemonhideBoots, xp: 1, metadata: 19 };
 
@@ -775,7 +775,7 @@ mod tests {
         let divine_robe_specials = ItemSpecials { special1: 14, special2: 14, special3: 14 };
         let holy_chestplate_specials = ItemSpecials { special1: 15, special2: 15, special3: 15 };
         let holy_greaves_specials = ItemSpecials { special1: 1, special2: 16, special3: 16 };
-        let demonhide_boots_specials = ItemSpecials { special1: 2, special2: 17, special3: 17 };
+        let _demonhide_boots_specials = ItemSpecials { special1: 2, special2: 17, special3: 17 };
         let holy_gauntlets_specials = ItemSpecials { special1: 3, special2: 18, special3: 18 };
         let demonhide_boots_specials = ItemSpecials { special1: 4, special2: 19, special3: 19 };
 
@@ -900,7 +900,7 @@ mod tests {
         // this should throw a panic with the error 'metadata id out of bounds'
         // this test is annotated to expect this error and will fail
         // if it is not thrown
-        let meta_data = name_storage1.get_specials(item_11);
+        let _meta_data = name_storage1.get_specials(item_11);
     }
 
     #[test]
@@ -930,7 +930,7 @@ mod tests {
         // attempt to get specials for this item which has meta data id 0
         // this should throw a panic with the error 'metadata id out of bounds'
         // this test is annotated to expect this error
-        let meta_data = name_storage1.get_specials(item_11);
+        let _meta_data = name_storage1.get_specials(item_11);
     }
 
     #[test]
@@ -1090,7 +1090,7 @@ mod tests {
         // attempt to set specials for an item with meta data id zero
         // since this is not possible, we expect set_specials to panic
         // with 'metadata id out of bounds'
-        let meta_data = name_storage1.set_specials(item_11, item_11_specials);
+        let _meta_data = name_storage1.set_specials(item_11, item_11_specials);
     }
 
     #[test]
@@ -1122,6 +1122,6 @@ mod tests {
         // it's meta data exceeds the max storage slot for the special storage system
         // this should throw a panic with the error 'metadata id out of bounds'
         // this test is annotated to expect this error
-        let meta_data = name_storage1.set_specials(item_11, item_11_specials);
+        let _meta_data = name_storage1.set_specials(item_11, item_11_specials);
     }
 }

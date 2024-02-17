@@ -407,7 +407,7 @@ mod tests {
         assert(beast_id != 0, 'beast should not be zero');
         assert(beast_id <= MAX_ID, 'beast higher than max beastid');
 
-        let above_max_beast_id = MAX_ID + 1;
+        let _above_max_beast_id = MAX_ID + 1;
         let beast_id = ImplBeast::get_beast_id(max_beast_id);
         assert(beast_id != 0, 'beast should not be zero');
         assert(beast_id <= MAX_ID, 'beast higher than max beastid');

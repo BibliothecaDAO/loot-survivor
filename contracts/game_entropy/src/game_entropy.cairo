@@ -168,7 +168,7 @@ mod tests {
         let last_updated_block = 0;
         let last_updated_time = 0;
         let next_update_block = 0;
-        let hash = ImplGameEntropy::get_hash(
+        let _hash = ImplGameEntropy::get_hash(
             last_updated_block, last_updated_time, next_update_block
         );
     }
