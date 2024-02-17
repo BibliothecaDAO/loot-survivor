@@ -15,7 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        contract: [adventurer, game, loot, market, obstacles, combat]
+        contract:
+          [
+            adventurer,
+            game,
+            loot,
+            market,
+            obstacles,
+            combat,
+            game_entropy,
+            game_snapshot,
+          ]
     steps:
       - uses: actions/checkout@v3
 
