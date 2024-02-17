@@ -112,7 +112,7 @@ mod tests {
     fn test_get_base_discovery_amount_gas() {
         let level = 1;
         let entropy = 12345;
-        let discovery_amount = ExploreUtils::get_base_discovery_amount(level, entropy);
+        let _discovery_amount = ExploreUtils::get_base_discovery_amount(level, entropy);
     }
 
     #[test]

@@ -938,7 +938,7 @@ impl ImplAdventurer of IAdventurer {
             hash_span.append(self.xp.into());
             hash_span.append(adventurer_entropy);
             let poseidon = poseidon_hash_span(hash_span.span());
-            let (d, r) = integer::U256DivRem::div_rem(
+            let (_d, r) = integer::U256DivRem::div_rem(
                 poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
             );
             r.try_into().unwrap()
@@ -1596,30 +1596,18 @@ impl ImplAdventurer of IAdventurer {
     fn jewelry_armor_bonus(self: ItemPrimitive, armor_type: Type, base_armor: u16) -> u16 {
         // qualify no bonus outcomes and return 0
         match armor_type {
-            Type::None(()) => {
+            Type::None(()) => { return 0; },
+            Type::Magic_or_Cloth(()) => { if (self.id != ItemId::Amulet) {
                 return 0;
-            },
-            Type::Magic_or_Cloth(()) => {
-                if (self.id != ItemId::Amulet) {
-                    return 0;
-                }
-            },
-            Type::Blade_or_Hide(()) => {
-                if (self.id != ItemId::Pendant) {
-                    return 0;
-                }
-            },
-            Type::Bludgeon_or_Metal(()) => {
-                if (self.id != ItemId::Necklace) {
-                    return 0;
-                }
-            },
-            Type::Necklace(()) => {
+            } },
+            Type::Blade_or_Hide(()) => { if (self.id != ItemId::Pendant) {
                 return 0;
-            },
-            Type::Ring(()) => {
+            } },
+            Type::Bludgeon_or_Metal(()) => { if (self.id != ItemId::Necklace) {
                 return 0;
-            }
+            } },
+            Type::Necklace(()) => { return 0; },
+            Type::Ring(()) => { return 0; }
         }
 
         // if execution reaches here, the necklace provides a bonus for the armor type
@@ -1796,7 +1784,7 @@ mod tests {
         // equip gold ring with G1
         let gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 1 };
         adventurer.ring = gold_ring;
-        let bonus = adventurer.ring.jewelry_gold_bonus(base_gold_amount);
+        let _bonus = adventurer.ring.jewelry_gold_bonus(base_gold_amount);
         assert(adventurer.ring.jewelry_gold_bonus(base_gold_amount) == 3, 'bonus should be 3');
 
         // increase greatness of gold ring to 10
@@ -1821,7 +1809,7 @@ mod tests {
     fn test_get_bonus_luck_gas() {
         // instantiate silver ring
         let silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 1, metadata: 1 };
-        let bonus_luck = silver_ring.jewelry_bonus_luck();
+        let _bonus_luck = silver_ring.jewelry_bonus_luck();
     }
 
     #[test]
@@ -2530,7 +2518,7 @@ mod tests {
 
         let entropy = 1;
         // check new adventurer (level 1) gets a starter beast
-        let (beast, beast_seed) = adventurer.get_beast(entropy);
+        let (beast, _) = adventurer.get_beast(entropy);
         assert(beast.combat_spec.level == 1, 'beast should be lvl1');
         assert(beast.combat_spec.specials.special1 == 0, 'beast should have no special1');
         assert(beast.combat_spec.specials.special2 == 0, 'beast should have no special2');
@@ -2538,7 +2526,7 @@ mod tests {
 
         let entropy = 2;
         // check beast is still starter beast with different entropy source
-        let (beast, beast_seed) = adventurer.get_beast(entropy);
+        let (beast, _) = adventurer.get_beast(entropy);
         assert(beast.combat_spec.level == 1, 'beast should be lvl1');
         assert(beast.combat_spec.specials.special1 == 0, 'beast should have no special1');
         assert(beast.combat_spec.specials.special2 == 0, 'beast should have no special2');
@@ -2547,9 +2535,9 @@ mod tests {
         // advance adventurer to level 2
         adventurer.xp = 4;
         let entropy = 1;
-        let (beast1, beast_seed) = adventurer.get_beast(entropy);
+        let (beast1, _) = adventurer.get_beast(entropy);
         let entropy = 2;
-        let (beast2, beast_seed) = adventurer.get_beast(entropy);
+        let (beast2, _) = adventurer.get_beast(entropy);
 
         // verify beasts are the same since the seed did not change
         assert(beast1.id != beast2.id, 'beasts not unique');
@@ -2558,7 +2546,7 @@ mod tests {
     #[test]
     #[available_gas(70320)]
     fn test_get_greatness_gas() {
-        let greatness = ImplAdventurer::get_greatness(
+        let _greatness = ImplAdventurer::get_greatness(
             ItemPrimitive { id: 1, xp: 400, metadata: 1 }
         );
     }
@@ -4915,7 +4903,7 @@ mod tests {
         // overflow case
         adventurer.ring.xp = 65535;
         adventurer.neck.xp = 65535;
-        let luck = adventurer.calculate_luck(bag);
+        let _luck = adventurer.calculate_luck(bag);
         assert(
             adventurer.calculate_luck(bag) == (ITEM_MAX_GREATNESS * 2) + SILVER_RING_G20_LUCK_BONUS,
             'should be 60 luck'
