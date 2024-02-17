@@ -4,10 +4,10 @@ on:
   push:
     branches:
       - main
-  pull_request:    
+  pull_request:
 
 env:
-  SCARB_VERSION: 0.7.0
+  SCARB_VERSION: 2.5.4
 
 jobs:
   build-contracts:
@@ -78,7 +78,7 @@ jobs:
 
       - name: Scarb build
         run: |
-          cd contracts/obstacles && scarb build && scarb cairo-test         
+          cd contracts/obstacles && scarb build && scarb cairo-test
 
   build-combat:
     name: Build Combat
@@ -92,4 +92,4 @@ jobs:
 
       - name: Scarb build
         run: |
-          cd contracts/combat && scarb build && scarb cairo-test         
+          cd contracts/combat && scarb build && scarb cairo-test
