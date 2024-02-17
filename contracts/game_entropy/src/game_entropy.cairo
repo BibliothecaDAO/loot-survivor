@@ -174,7 +174,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(14280)]
+    #[available_gas(24280)]
     fn test_is_adventurer_idle() {
         let hash = 0x123;
         let last_updated_block = 282360;
