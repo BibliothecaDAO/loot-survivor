@@ -23,11 +23,11 @@ impl StatUtils of IStat {
 impl StatsPacking of StorePacking<Stats, felt252> {
     fn pack(value: Stats) -> felt252 {
         (value.strength.into()
-            + value.dexterity.into() * TWO_POW_4
-            + value.vitality.into() * TWO_POW_8
-            + value.intelligence.into() * TWO_POW_12
-            + value.wisdom.into() * TWO_POW_16
-            + value.charisma.into() * TWO_POW_20)
+            + value.dexterity.into() * TWO_POW_5
+            + value.vitality.into() * TWO_POW_9
+            + value.intelligence.into() * TWO_POW_14
+            + value.wisdom.into() * TWO_POW_18
+            + value.charisma.into() * TWO_POW_22)
             .try_into()
             .unwrap()
     }
@@ -35,13 +35,13 @@ impl StatsPacking of StorePacking<Stats, felt252> {
     fn unpack(value: felt252) -> Stats {
         let packed = value.into();
         let (packed, strength) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_4.try_into().unwrap()
+            packed, TWO_POW_5.try_into().unwrap()
         );
         let (packed, dexterity) = integer::U256DivRem::div_rem(
             packed, TWO_POW_4.try_into().unwrap()
         );
         let (packed, vitality) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_4.try_into().unwrap()
+            packed, TWO_POW_5.try_into().unwrap()
         );
         let (packed, intelligence) = integer::U256DivRem::div_rem(
             packed, TWO_POW_4.try_into().unwrap()
@@ -61,11 +61,15 @@ impl StatsPacking of StorePacking<Stats, felt252> {
     }
 }
 
+const TWO_POW_22: u256 = 0x400000;
+const TWO_POW_9: u256 = 0x200;
+const TWO_POW_10: u256 = 0x400;
+const TWO_POW_5: u256 = 0x20;
 const TWO_POW_4: u256 = 0x10;
 const TWO_POW_8: u256 = 0x100;
 const TWO_POW_12: u256 = 0x1000;
-const TWO_POW_16: u256 = 0x10000;
-const TWO_POW_20: u256 = 0x100000;
+const TWO_POW_14: u256 = 0x4000;
+const TWO_POW_18: u256 = 0x40000;
 const TWO_POW_24: u256 = 0x1000000;
 
 // ---------------------------
@@ -95,9 +99,9 @@ mod tests {
 
         // storage limit test (2^4 - 1 = 15)
         let stats = Stats {
-            strength: 15,
+            strength: 31,
             dexterity: 15,
-            vitality: 15,
+            vitality: 31,
             intelligence: 15,
             wisdom: 15,
             charisma: 15,

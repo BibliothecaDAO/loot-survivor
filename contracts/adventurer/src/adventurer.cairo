@@ -44,7 +44,7 @@ struct Adventurer {
     last_action_block: u16, // 9 bits
     health: u16, // 9 bits
     xp: u16, // 13 bits
-    stats: Stats, // 24 bits
+    stats: Stats, // 27 bits
     gold: u16, // 9 bits
     weapon: ItemPrimitive, // 21 bits
     chest: ItemPrimitive, // 21 bits
@@ -68,18 +68,18 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
             + value.health.into() * TWO_POW_9
             + value.xp.into() * TWO_POW_18
             + StatsPacking::pack(value.stats).into() * TWO_POW_31
-            + value.gold.into() * TWO_POW_55
-            + ItemPrimitivePacking::pack(value.weapon).into() * TWO_POW_64
-            + ItemPrimitivePacking::pack(value.chest).into() * TWO_POW_85
-            + ItemPrimitivePacking::pack(value.head).into() * TWO_POW_106
-            + ItemPrimitivePacking::pack(value.waist).into() * TWO_POW_127
-            + ItemPrimitivePacking::pack(value.foot).into() * TWO_POW_148
-            + ItemPrimitivePacking::pack(value.hand).into() * TWO_POW_169
-            + ItemPrimitivePacking::pack(value.neck).into() * TWO_POW_190
-            + ItemPrimitivePacking::pack(value.ring).into() * TWO_POW_211
-            + value.beast_health.into() * TWO_POW_232
-            + value.stat_points_available.into() * TWO_POW_241
-            + value.actions_per_block.into() * TWO_POW_244)
+            + value.gold.into() * TWO_POW_58
+            + ItemPrimitivePacking::pack(value.weapon).into() * TWO_POW_67
+            + ItemPrimitivePacking::pack(value.chest).into() * TWO_POW_88
+            + ItemPrimitivePacking::pack(value.head).into() * TWO_POW_109
+            + ItemPrimitivePacking::pack(value.waist).into() * TWO_POW_130
+            + ItemPrimitivePacking::pack(value.foot).into() * TWO_POW_151
+            + ItemPrimitivePacking::pack(value.hand).into() * TWO_POW_172
+            + ItemPrimitivePacking::pack(value.neck).into() * TWO_POW_193
+            + ItemPrimitivePacking::pack(value.ring).into() * TWO_POW_214
+            + value.beast_health.into() * TWO_POW_235
+            + value.stat_points_available.into() * TWO_POW_244
+            + value.actions_per_block.into() * TWO_POW_247)
             .try_into()
             .unwrap()
     }
@@ -91,7 +91,7 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
         );
         let (packed, health) = integer::U256DivRem::div_rem(packed, TWO_POW_9.try_into().unwrap());
         let (packed, xp) = integer::U256DivRem::div_rem(packed, TWO_POW_13.try_into().unwrap());
-        let (packed, stats) = integer::U256DivRem::div_rem(packed, TWO_POW_24.try_into().unwrap());
+        let (packed, stats) = integer::U256DivRem::div_rem(packed, TWO_POW_27.try_into().unwrap());
         let (packed, gold) = integer::U256DivRem::div_rem(packed, TWO_POW_9.try_into().unwrap());
         let (packed, weapon) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
         let (packed, chest) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
@@ -128,7 +128,7 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
             beast_health: beast_health.try_into().unwrap(),
             stat_points_available: stat_points_available.try_into().unwrap(),
             actions_per_block: actions_per_block.try_into().unwrap(),
-            mutated: false,
+            mutated: false, // This field is not packed/unpacked
         }
     }
 }
@@ -1702,26 +1702,28 @@ impl ImplAdventurer of IAdventurer {
     }
 }
 
-const TWO_POW_3: u256 = 0x8;
-const TWO_POW_4: u256 = 0x10;
-const TWO_POW_9: u256 = 0x200;
-const TWO_POW_13: u256 = 0x2000;
-const TWO_POW_18: u256 = 0x40000;
-const TWO_POW_21: u256 = 0x200000;
-const TWO_POW_24: u256 = 0x1000000;
-const TWO_POW_31: u256 = 0x80000000;
-const TWO_POW_55: u256 = 0x80000000000000;
-const TWO_POW_64: u256 = 0x10000000000000000;
-const TWO_POW_85: u256 = 0x2000000000000000000000;
-const TWO_POW_106: u256 = 0x400000000000000000000000000;
-const TWO_POW_127: u256 = 0x80000000000000000000000000000000;
-const TWO_POW_148: u256 = 0x10000000000000000000000000000000000000;
-const TWO_POW_169: u256 = 0x2000000000000000000000000000000000000000000;
-const TWO_POW_190: u256 = 0x400000000000000000000000000000000000000000000000;
-const TWO_POW_211: u256 = 0x80000000000000000000000000000000000000000000000000000;
-const TWO_POW_232: u256 = 0x10000000000000000000000000000000000000000000000000000000000;
-const TWO_POW_241: u256 = 0x2000000000000000000000000000000000000000000000000000000000000;
-const TWO_POW_244: u256 = 0x10000000000000000000000000000000000000000000000000000000000000;
+
+const TWO_POW_3: u256 = 0x8; // 2^3
+const TWO_POW_4: u256 = 0x10; // 2^4
+const TWO_POW_9: u256 = 0x200; // 2^9
+const TWO_POW_13: u256 = 0x2000; // 2^13
+const TWO_POW_18: u256 = 0x40000; // 2^18
+const TWO_POW_21: u256 = 0x200000; // 2^21
+const TWO_POW_27: u256 = 0x8000000; // 2^27
+const TWO_POW_31: u256 = 0x80000000; // 2^31
+const TWO_POW_58: u256 = 0x400000000000000; // 2^58
+const TWO_POW_67: u256 = 0x80000000000000000; // 2^67
+const TWO_POW_88: u256 = 0x10000000000000000000000; // 2^88
+const TWO_POW_109: u256 = 0x2000000000000000000000000000; // 2^109
+const TWO_POW_130: u256 = 0x400000000000000000000000000000000; // 2^130
+const TWO_POW_151: u256 = 0x80000000000000000000000000000000000000; // 2^151
+const TWO_POW_172: u256 = 0x10000000000000000000000000000000000000000000; // 2^172
+const TWO_POW_193: u256 = 0x2000000000000000000000000000000000000000000000000; // 2^193
+const TWO_POW_214: u256 = 0x400000000000000000000000000000000000000000000000000000; // 2^214
+const TWO_POW_235: u256 = 0x80000000000000000000000000000000000000000000000000000000000; // 2^235
+const TWO_POW_244: u256 = 0x10000000000000000000000000000000000000000000000000000000000000; // 2^244
+const TWO_POW_247: u256 = 0x80000000000000000000000000000000000000000000000000000000000000; // 2^247
+
 
 // ---------------------------
 // ---------- Tests ----------
