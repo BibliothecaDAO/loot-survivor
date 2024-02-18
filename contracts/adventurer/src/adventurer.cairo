@@ -2933,8 +2933,17 @@ mod tests {
     #[available_gas(3000000)]
     fn test_pack_protection_overflow_strength() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.stats.strength = 32 + 1;
+        adventurer.stats.strength = 32;
         AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[available_gas(3000000)]
+    fn test_pack_protection_strength() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.strength = 31;
+        let unpacked: Adventurer = AdventurerPacking::unpack(AdventurerPacking::pack(adventurer));
+        assert(unpacked.stats.strength == adventurer.stats.strength, 'strength should be same');
     }
 
     #[test]
@@ -2951,8 +2960,17 @@ mod tests {
     #[available_gas(3000000)]
     fn test_pack_protection_overflow_vitality() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.stats.vitality = 32 + 1;
+        adventurer.stats.vitality = 32;
         AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[available_gas(3000000)]
+    fn test_pack_protection_vitality() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.vitality = 31;
+        let unpacked: Adventurer = AdventurerPacking::unpack(AdventurerPacking::pack(adventurer));
+        assert(unpacked.stats.vitality == adventurer.stats.vitality, 'vitality should be same');
     }
 
     #[test]
@@ -3198,7 +3216,7 @@ mod tests {
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(MAX_XP + 10);
         assert(adventurer.xp == MAX_XP, 'xp should stop at max xp');
         assert(previous_level == 2, 'prev level should be 2');
-        // assert(new_level == 180, 'new level should be 90'); @loaf - TODO
+        assert(new_level == 127, 'new level should be max 127');
 
         // u16 overflow case
         adventurer.increase_adventurer_xp(65535);
