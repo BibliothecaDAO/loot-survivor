@@ -2,10 +2,12 @@
 const STARTING_GOLD: u16 = 25;
 const STARTING_HEALTH: u16 = 100;
 
+
 // Adventurer Max Values
 const MAX_ADVENTURER_HEALTH: u16 = 511; // 9 bits
-const MAX_XP: u16 = 8191; // 13 bits
+const MAX_XP: u16 = 16383; // 14 bits
 const MAX_STAT_VALUE: u8 = 15; // 4 bits
+const MAX_STAT_VALUE_5_BITS: u8 = 31; // 5 bits
 const MAX_GOLD: u16 = 511; // 9 bits
 const MAX_PACKABLE_ITEM_XP: u16 = 511; // 9 bits
 const MAX_PACKABLE_BEAST_HEALTH: u16 = 511; // 9 bits
