@@ -1,10 +1,10 @@
 use core::{option::OptionTrait, starknet::{StorePacking}, traits::{TryInto, Into}};
 
 #[derive(Drop, Copy, Serde)]
-struct Stats { // 24 storage bits
-    strength: u8, // 4 bits
+struct Stats { // 26 storage bits
+    strength: u8, // 5 bits
     dexterity: u8, // 4 bits
-    vitality: u8, // 4 bits
+    vitality: u8, // 5 bits
     intelligence: u8, // 4 bits
     wisdom: u8, // 4 bits
     charisma: u8, // 4 bits
