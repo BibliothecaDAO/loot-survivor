@@ -1,0 +1,27 @@
+{
+  "name": "@bibliothecadao/loot-survivor",
+  "version": "0.1.0",
+  "description": "Loot Survivor SDK",
+  "author": "Loaf",
+  "license": "MIT",
+  "source": "src/index.ts",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsup --dts-resolve"
+  },
+  "peerDependencies": {
+    "starknet": "^5.24.3"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "devDependencies": {
+    "tsup": "^8.0.1",
+    "typescript": "^5.0.3",
+    "@types/node": "^18.15.11"
+  }
+}

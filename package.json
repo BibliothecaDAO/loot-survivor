@@ -1,0 +1,20 @@
+{
+  "name": "loot-survivor",
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/loot-survivor",
+    "ui"
+  ],
+  "devDependencies": {
+    "husky": "^8.0.0",
+    "lerna": "^8.0.0",
+    "prettier": "^3.0.3",
+    "tsup": "^8.0.1"
+  },
+  "scripts": {
+    "build-loot": "bun run --cwd packages/loot-survivor build",
+    "prettier-check": "bun x prettier --check .",
+    "prettier": "bun x prettier --write .",
+    "release": "bun run build && bun run prettier && npx lerna publish --no-private --force-publish"
+  }
+}
