@@ -148,127 +148,70 @@ Loot Survivor is an onchain game, designed to be immutable and permanently hoste
 
 ### Deploying
 
-#### Set up env
-
-Follow instructions here: `https://docs.starknet.io/documentation/getting_started/environment_setup/`
-
-
-```
-source ~/cairo_venv/bin/activate
-```
+#### Setup Starkli Account
 
 ```bash
-export STARKNET_NETWORK=alpha-goerli
-export STARKNET_WALLET=starkware.starknet.wallets.open_zeppelin.OpenZeppelinAccount
-export CAIRO_COMPILER_DIR=~/.cairo/target/release/
-export CAIRO_COMPILER_ARGS=--add-pythonic-hints
-
-# you will have an account from the Starknet ENV setup
-export ACCOUNT_NAME=INSERT_YOUR_ACCOUNT_NAME_HERE
-export ADVENTURER_ID=INSERT_YOUR_ADVENTURER_ID_HERE
-export STRENGTH=0
-export DEXTERITY=1
-export VITALITY=2
-export INTELLIGENCE=4
-export CHARISMA=5
-
-export LORDS_ADDRESS=0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47
-export DAO_ADDRESS=0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b
-
-# nav to dir
-cd contracts/game
-
-# build
-scarb build
-
-# declare
-starknet declare --contract target/dev/game_Game.sierra.json --account $ACCOUNT_NAME
-
-# deploy
-# <classhash> will be in the output of the previous command
-starknet deploy --class_hash 0x2958304935054101c0aeab16cf6507adda1c98b4d977af40d59c2ae75f05767 --max_fee 100000000000000000 --input $LORDS_ADDRESS $DAO_ADDRESS --account $ACCOUNT_NAME
+bash scripts/starkli_setup.sh
 ```
 
+#### Deploy Contract
 ```bash
-# set contract address
-export CONTRACT_ADDRESS=0x06ee32da9f22c736c4ef049719c0021380c302e5d449fbc8acf97489e16a9d05
+bash scripts/deploy.sh.sh
 ```
 
-```bash
-starknet invoke --function mint --address $LORDS_ADDRESS --input 0x1feb9c05d31b70a1506decf52a809d57493bfcd5cc85d6a3e9fd54a12d64389 1000000000000000000000 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+### Play
 
-starknet invoke --function approve --address $LORDS_ADDRESS --input $CONTRACT_ADDRESS 1000000000000000000000 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+#### Mint $lords and approve LS to spend
+```bash
+source "/workspaces/loot-survivor/.env"
+starkli invoke $LORDS_ADDRESS mint 0x1feb9c05d31b70a1506decf52a809d57493bfcd5cc85d6a3e9fd54a12d64389 1000000000000000000000 0 --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY
+starkli invoke $LORDS_ADDRESS approve $CONTRACT_ADDRESS 1000000000000000000000 0 --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY
 ```
 
-### Game Actions
-
-#### Start
+#### Start New Game
 ```bash
-starknet invoke --function start --address $CONTRACT_ADDRESS --input 0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b 12 123 0 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+starkli invoke $CONTRACT_ADDRESS new_game 0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b 12 123 0 0 0 --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY
 ```
 
 #### Explore
 ```bash
-starknet invoke --function explore --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+starkli invoke $CONTRACT_ADDRESS explore $ADVENTURER_ID 0 --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY
 ```
 
-#### Attack
+#### Attack Starter Beast
 ```bash
-starknet invoke --function attack --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+starkli invoke $CONTRACT_ADDRESS attack $ADVENTURER_ID 0 --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY
 ```
 
-#### Flee
+#### Upgrade Adventurer
 ```bash
-starknet invoke --function flee --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+starkli invoke $CONTRACT_ADDRESS upgrade $ADVENTURER_ID 0 $CHARISMA 1 --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY
 ```
 
-#### Upgrade Stat (Charisma x 1)
+
+### View Adventurer Details
+
+##### Adventurer State
 ```bash
-starknet invoke --function upgrade_stat --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 $CHARISMA 1 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+starkli call --watch $CONTRACT_ADDRESS get_adventurer $ADVENTURER_ID 0 --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY
 ```
 
-
-### Checking On Your Adventurer
-
-##### Get full adventurer state
+##### Get Adventurer Health
 ```bash
-starknet call --function get_adventurer --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
+starkli call --watch $CONTRACT_ADDRESS get_health $ADVENTURER_ID 0 --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY
 ```
 
-##### Get adventurer health
+##### Get Adventurer Gold
 ```bash
-starknet call --function get_health --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
+starkli call --watch $CONTRACT_ADDRESS get_gold $ADVENTURER_ID 0 --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY
 ```
 
-##### Get adventurer gold
+##### Get Adventurer XP
 ```bash
-starknet call --function get_gold --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
+starkli call --watch $CONTRACT_ADDRESS get_xp $ADVENTURER_ID 0 --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY
 ```
 
-##### Get adventurer xp
+##### Get number of stat upgrades available
 ```bash
-starknet call --function get_xp --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
+starkli call --watch $CONTRACT_ADDRESS get_stat_upgrades_available $ADVENTURER_ID 0 --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY
 ```
-
-##### Get upgradable stat points
-```bash
-starknet call --function get_stat_upgrades_available --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
-```
-
-##### Get base charisma stat (doesn't include boost from items)
-```bash
-starknet call --function get_base_charisma --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
-```
-
-##### Get charisma stat including item boosts
-```bash
-starknet call --function get_charisma --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
-```
-
-
-# Starkli Deploy
-
-
-starkli declare /contracts/game/target/dev/game_Game.sierra.json --account ./account --keystore ./keys --max-fee 0.01
-
-starkli deploy 0x00cccbd15bf27792e7635bd89da237de68b13d29ec01b5cae1da786b276be8a4 $LORDS_ADDRESS $DAO_ADDRESS 0x06fe9215a0f193431f30043e612d921b62331946529ebf5f258949a4b34aa799 --account ./account --keystore ./keys
