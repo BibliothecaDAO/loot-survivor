@@ -13,8 +13,8 @@ echo "DAO_ADDRESS=0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e
 echo "GOLDEN_TOKEN_ADDRESS=0x04f5e296c805126637552cf3930e857f380e7c078e8f00696de4fc8545356b1d" >> $ENV_FILE
 echo "BEASTS_ADDRESS=0x0158160018d590d93528995b340260e65aedd76d28a686e9daa5c4e8fad0c5dd" >> $ENV_FILE
 
+# Useful game constants
 echo "ADVENTURER_ID=1" >> $ENV_FILE
-
 echo "STRENGTH=0" >> $ENV_FILE
 echo "DEXTERITY=1" >> $ENV_FILE
 echo "VITALITY=2" >> $ENV_FILE
@@ -22,6 +22,9 @@ echo "WISDOM=3" >> $ENV_FILE
 echo "INTELLIGENCE=4" >> $ENV_FILE
 echo "CHARISMA=5" >> $ENV_FILE
 
+# default to sepolia testnet
+echo "STARKNET_NETWORK=\"sepolia\"" >> $ENV_FILE
+export STARKNET_NETWORK="sepolia"
 
 # initialize starknet directories
 mkdir -p $HOME/.starknet
