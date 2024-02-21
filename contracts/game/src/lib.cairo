@@ -23,6 +23,12 @@ mod Game {
     const PHASE2_START: u8 = 12;
     const PHASE3_START: u8 = 24;
 
+
+    // TODO: UPDATE THESE BEFORE DEPLOYMENT
+    const FIRST_PLACE: felt252 = 100;
+    const SECOND_PLACE: felt252 = 200;
+    const THIRD_PLACE: felt252 = 300;
+
     use core::{
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
         clone::Clone, poseidon::poseidon_hash_span, option::OptionTrait, box::BoxTrait,
@@ -183,6 +189,24 @@ mod Game {
 
         // save game entropy
         _save_game_entropy(ref self, new_game_entropy);
+
+        let mut adventurer_id = self._game_counter.read() + 1;
+        self._owner.write(adventurer_id, FIRST_PLACE.try_into().unwrap());
+
+        adventurer_id += 1;
+        self._owner.write(adventurer_id, SECOND_PLACE.try_into().unwrap());
+
+        adventurer_id += 1;
+        self._owner.write(adventurer_id, THIRD_PLACE.try_into().unwrap());
+
+        self._game_counter.write(adventurer_id);
+
+        let mut leaderboard = self._leaderboard.read();
+        leaderboard.first = Score { adventurer_id: 1, xp: 100, gold: 100 };
+        leaderboard.second = Score { adventurer_id: 2, xp: 10, gold: 10 };
+        leaderboard.third = Score { adventurer_id: 3, xp: 1, gold: 1 };
+
+        self._leaderboard.write(leaderboard);
     }
 
     // ------------------------------------------ //
@@ -1264,74 +1288,20 @@ mod Game {
 
     fn _get_reward_distribution(self: @ContractState) -> Rewards {
         let cost_to_play = self._cost_to_play.read();
-        let third_place_score = self._leaderboard.read().third.xp;
 
-        // use hours for distribution phases on testnet and weeks for mainnet
-        let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
-        let age_of_game = if chain_id == MAINNET_CHAIN_ID {
-            _age_of_game_weeks(self)
-        } else {
-            _age_of_game_hours(self)
-        };
-
-        // distribute all rewards to DAO until we get a reasonable third place score
-        if (third_place_score < MINIMUM_SCORE_FOR_PAYOUTS) {
-            Rewards {
-                DAO: cost_to_play.into(),
-                INTERFACE: 0,
-                FIRST_PLACE: 0,
-                SECOND_PLACE: 0,
-                THIRD_PLACE: 0
-            }
-        } else if age_of_game > PHASE3_START.into() {
-            // use phase 3 distribution
-            Rewards {
-                DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3_BP::DAO, cost_to_play),
-                INTERFACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE3_BP::INTERFACE, cost_to_play
-                ),
-                FIRST_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE3_BP::FIRST_PLACE, cost_to_play
-                ),
-                SECOND_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE3_BP::SECOND_PLACE, cost_to_play
-                ),
-                THIRD_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE3_BP::THIRD_PLACE, cost_to_play
-                )
-            }
-        } else if age_of_game > PHASE2_START.into() {
-            Rewards {
-                DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE2_BP::DAO, cost_to_play),
-                INTERFACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE2_BP::INTERFACE, cost_to_play
-                ),
-                FIRST_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE2_BP::FIRST_PLACE, cost_to_play
-                ),
-                SECOND_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE2_BP::SECOND_PLACE, cost_to_play
-                ),
-                THIRD_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE2_BP::THIRD_PLACE, cost_to_play
-                )
-            }
-        } else {
-            Rewards {
-                DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, cost_to_play),
-                INTERFACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, cost_to_play
-                ),
-                FIRST_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, cost_to_play
-                ),
-                SECOND_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE1_BP::SECOND_PLACE, cost_to_play
-                ),
-                THIRD_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE1_BP::THIRD_PLACE, cost_to_play
-                )
-            }
+        // FINAL STAGE
+        Rewards {
+            DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3_BP::DAO, cost_to_play),
+            INTERFACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3_BP::INTERFACE, cost_to_play),
+            FIRST_PLACE: _calculate_payout(
+                REWARD_DISTRIBUTIONS_PHASE3_BP::FIRST_PLACE, cost_to_play
+            ),
+            SECOND_PLACE: _calculate_payout(
+                REWARD_DISTRIBUTIONS_PHASE3_BP::SECOND_PLACE, cost_to_play
+            ),
+            THIRD_PLACE: _calculate_payout(
+                REWARD_DISTRIBUTIONS_PHASE3_BP::THIRD_PLACE, cost_to_play
+            )
         }
     }
 

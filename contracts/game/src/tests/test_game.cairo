@@ -56,7 +56,8 @@ mod tests {
         IGoldenTokenLibraryDispatcher
     };
 
-    const ADVENTURER_ID: felt252 = 1;
+    // we start at 4 because we carry over the past 3 scores
+    const ADVENTURER_ID: felt252 = 4;
     const MAX_LORDS: u256 = 10000000000000000000000000000000000000000;
     const APPROVE: u256 = 10000000000000000000000000000000000000000;
     const NAME: felt252 = 111;
@@ -1446,8 +1447,8 @@ mod tests {
     fn test_multi_slay_adventurers() {
         let STARTING_BLOCK_NUMBER = 512;
 
-        let ADVENTURER2_ID = 2;
-        let ADVENTURER3_ID = 3;
+        let ADVENTURER2_ID = 5;
+        let ADVENTURER3_ID = 6;
 
         // deploy and start new game
         let mut game = new_adventurer(STARTING_BLOCK_NUMBER, 1696201757);
@@ -2086,21 +2087,22 @@ mod tests {
         // spawn new
 
         // DAO doesn't get anything more until stage 2
-        assert(lords.balanceOf(DAO()) == COST_TO_PLAY.into(), 'wrong stage 1 balance');
 
         let mut rewards = Rewards {
-            DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, COST_TO_PLAY),
-            INTERFACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, COST_TO_PLAY),
+            DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3_BP::DAO, COST_TO_PLAY),
+            INTERFACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3_BP::INTERFACE, COST_TO_PLAY),
             FIRST_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, COST_TO_PLAY
+                REWARD_DISTRIBUTIONS_PHASE3_BP::FIRST_PLACE, COST_TO_PLAY
             ),
             SECOND_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::SECOND_PLACE, COST_TO_PLAY
+                REWARD_DISTRIBUTIONS_PHASE3_BP::SECOND_PLACE, COST_TO_PLAY
             ),
             THIRD_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::THIRD_PLACE, COST_TO_PLAY
+                REWARD_DISTRIBUTIONS_PHASE3_BP::THIRD_PLACE, COST_TO_PLAY
             )
         };
+
+        assert(lords.balanceOf(DAO()) == rewards.DAO, 'wrong stage 1 balance');
     // week.FIRST_PLACE.print();
 
     // assert(lords.balanceOf(DAO()) == COST_TO_PLAY, 'wrong DAO payout');
