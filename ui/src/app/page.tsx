@@ -237,6 +237,7 @@ function Home({ updateConnectors }: HomeProps) {
     slayIdles,
     multicall,
     mintLords,
+    suicide,
   } = syscalls({
     gameContract: gameContract!,
     lordsContract: lordsContract!,
@@ -575,6 +576,7 @@ function Home({ updateConnectors }: HomeProps) {
                 <Header
                   multicall={multicall}
                   mintLords={mintLords}
+                  suicide={suicide}
                   lordsBalance={lordsBalance}
                   gameContract={gameContract!}
                   costToPlay={costToPlay!}

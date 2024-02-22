@@ -14,7 +14,11 @@ import InterludeScreen from "@/app/containers/InterludeScreen";
 import ActionMenu from "@/app/components/menu/ActionMenu";
 
 interface BeastScreenProps {
-  attack: (tillDeath: boolean, beastData: Beast) => Promise<void>;
+  attack: (
+    tillDeath: boolean,
+    beastData: Beast,
+    blockHash?: string
+  ) => Promise<void>;
   flee: (tillDeath: boolean, beastData: Beast) => Promise<void>;
   beastsContract: Contract;
 }
@@ -70,7 +74,11 @@ export default function BeastScreen({
       label: "ONCE",
       action: async () => {
         resetNotification();
-        await attack(false, beastData);
+        if (adventurer?.level === 1) {
+          await attack(false, beastData, blockData?.block_hash);
+        } else {
+          await attack(false, beastData);
+        }
       },
       disabled:
         adventurer?.beastHealth == undefined ||
