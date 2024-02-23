@@ -70,11 +70,11 @@ mod tests {
     }
 
     fn DAO() -> ContractAddress {
-        contract_address_const::<1>()
+        contract_address_const::<2>()
     }
 
     fn COLLECTIBLE_BEASTS() -> ContractAddress {
-        contract_address_const::<1>()
+        contract_address_const::<3>()
     }
 
     fn OWNER() -> ContractAddress {
@@ -719,7 +719,7 @@ mod tests {
     #[available_gas(13000000000)]
     fn test_flee() {
         // start game on level 2
-        let mut game = new_adventurer_lvl2(1003, 1696201757);
+        let mut game = new_adventurer_lvl2(1004, 1696201757);
 
         // perform upgrade
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
@@ -1519,7 +1519,7 @@ mod tests {
         let adventurer_level = game.get_adventurer(ADVENTURER_ID).get_level();
         assert(potion_price == POTION_PRICE * adventurer_level.into(), 'wrong lvl1 potion price');
 
-        let mut game = new_adventurer_lvl2(1000, 1696201757);
+        let mut game = new_adventurer_lvl2(1000, 1696201750);
         let potion_price = game.get_potion_price(ADVENTURER_ID);
         let adventurer_level = game.get_adventurer(ADVENTURER_ID).get_level();
         assert(potion_price == POTION_PRICE * adventurer_level.into(), 'wrong lvl2 potion price');
@@ -2075,18 +2075,7 @@ mod tests {
     #[test]
     #[available_gas(90000000)]
     fn test_bp_distribution() {
-        let (mut game, lords) = new_adventurer_with_lords(1000);
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-
-        // stage 0
-        assert(lords.balanceOf(DAO()) == COST_TO_PLAY.into(), 'wrong stage 1 balance');
-
-        // stage 1
-        testing::set_block_number(1001 + BLOCKS_IN_A_WEEK * 2);
-
-        // spawn new
-
-        // DAO doesn't get anything more until stage 2
+        let (_, lords) = new_adventurer_with_lords(1000);
 
         let mut rewards = Rewards {
             DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3_BP::DAO, COST_TO_PLAY),
@@ -2102,19 +2091,20 @@ mod tests {
             )
         };
 
-        assert(lords.balanceOf(DAO()) == rewards.DAO, 'wrong stage 1 balance');
-    // week.FIRST_PLACE.print();
+        // stage 1
+        testing::set_block_number(1001 + BLOCKS_IN_A_WEEK * 2);
 
-    // assert(lords.balanceOf(DAO()) == COST_TO_PLAY, 'wrong DAO payout');
-    // assert(week.INTERFACE == 0, 'no payout in stage 1');
-    // assert(week.FIRST_PLACE == _calculate_payout(
-    //         REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, cost_to_play
-    //     ), 'wrong FIRST_PLACE payout 1');
-    // assert(week.SECOND_PLACE == 0x6f05b59d3b200000, 'wrong SECOND_PLACE payout 1');
-    // assert(week.THIRD_PLACE == 0x6f05b59d3b20000, 'wrong THIRD_PLACE payout 1');
-
-    // (COST_TO_PLAY * 11 / 10).print();
-    // (COST_TO_PLAY * 9 / 10).print();
+        assert(lords.balanceOf(DAO()) == rewards.DAO, 'wrong stage balance');
+        assert(lords.balanceOf(INTERFACE_ID()) == rewards.INTERFACE, 'wrong stage balance');
+        assert(
+            lords.balanceOf(100.try_into().unwrap()) == rewards.FIRST_PLACE, 'wrong stage balance'
+        );
+        assert(
+            lords.balanceOf(200.try_into().unwrap()) == rewards.SECOND_PLACE, 'wrong stage balance'
+        );
+        assert(
+            lords.balanceOf(300.try_into().unwrap()) == rewards.THIRD_PLACE, 'wrong stage balance'
+        );
     }
 
     #[test]
