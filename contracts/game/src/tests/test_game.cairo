@@ -387,7 +387,6 @@ mod tests {
 
     fn new_adventurer_lvl6_equipped(stat: u8) -> IGameDispatcher {
         let mut game = new_adventurer_lvl5(stat);
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
 
         let weapon_inventory = @game
             .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Weapon(())));
@@ -451,7 +450,6 @@ mod tests {
 
     fn new_adventurer_lvl7_equipped(stat: u8) -> IGameDispatcher {
         let mut game = new_adventurer_lvl6_equipped(stat);
-        let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
             strength: stat,
@@ -475,7 +473,6 @@ mod tests {
 
     fn new_adventurer_lvl8_equipped(stat: u8) -> IGameDispatcher {
         let mut game = new_adventurer_lvl7_equipped(stat);
-        let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
             strength: stat,
@@ -499,7 +496,6 @@ mod tests {
 
     fn new_adventurer_lvl9_equipped(stat: u8) -> IGameDispatcher {
         let mut game = new_adventurer_lvl8_equipped(stat);
-        let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
             strength: stat,
@@ -523,7 +519,6 @@ mod tests {
 
     fn new_adventurer_lvl10_equipped(stat: u8) -> IGameDispatcher {
         let mut game = new_adventurer_lvl9_equipped(stat);
-        let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
             strength: stat,
@@ -550,7 +545,6 @@ mod tests {
 
     fn new_adventurer_lvl11_equipped(stat: u8) -> IGameDispatcher {
         let mut game = new_adventurer_lvl10_equipped(stat);
-        let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
             strength: stat,
@@ -611,8 +605,8 @@ mod tests {
     #[available_gas(300000000000)]
     fn test_start() {
         let game = new_adventurer(1000, 1696201757);
-        let adventurer_1 = game.get_adventurer(ADVENTURER_ID);
-        let adventurer_meta_1 = game.get_adventurer_meta(ADVENTURER_ID);
+        game.get_adventurer(ADVENTURER_ID);
+        game.get_adventurer_meta(ADVENTURER_ID);
     }
 
     #[test]
@@ -902,8 +896,6 @@ mod tests {
         let mut purchased_waist: u8 = 0;
         let mut purchased_foot: u8 = 0;
         let mut purchased_hand: u8 = 0;
-        let mut purchased_ring: u8 = 0;
-        let mut purchased_necklace: u8 = 0;
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
 
         let mut i: u32 = 0;
@@ -965,7 +957,6 @@ mod tests {
         let mut buy_and_equip_tested = false;
         let mut buy_and_bagged_tested = false;
 
-        let mut items_to_equip = ArrayTrait::<u8>::new();
         // iterate over the items we bought
         let mut i: u32 = 0;
         loop {
@@ -1042,9 +1033,6 @@ mod tests {
 
         // get items from market
         let market_items = @game.get_items_on_market_by_tier(ADVENTURER_ID, 5);
-
-        // get first item on the market
-        let item_id = *market_items.at(0);
 
         let mut purchased_weapon: u8 = 0;
         let mut purchased_chest: u8 = 0;
@@ -1382,9 +1370,6 @@ mod tests {
         // deploy and start new game
         let mut game = new_adventurer(STARTING_BLOCK_NUMBER, 1696201757);
 
-        // get adventurer state
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-
         // attack starter beast, resulting in adventurer last action block number being 1
         game.attack(ADVENTURER_ID, false);
 
@@ -1431,9 +1416,6 @@ mod tests {
         // deploy and start new game
         let mut game = new_adventurer(STARTING_BLOCK_NUMBER, 1696201757);
 
-        // get adventurer state
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-
         // roll the blockchain back 1 block to simulate mainnet start_game scenario
         // where the adventurers last_action will be set to 11 blocks in the future
         // to account for the commit-and-reveal delay
@@ -1452,10 +1434,9 @@ mod tests {
         // deploy and start new game
         let mut game = new_adventurer(STARTING_BLOCK_NUMBER, 1696201757);
 
-        // get adventurer state
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        let adventurer2 = add_adventurer_to_game(ref game, 0);
-        let adventurer3 = add_adventurer_to_game(ref game, 0);
+        // add two adventurers to the game
+        add_adventurer_to_game(ref game, 0);
+        add_adventurer_to_game(ref game, 0);
 
         // attack starter beast, resulting in adventurer last action block number being 1
         game.attack(ADVENTURER_ID, false);
@@ -1876,7 +1857,6 @@ mod tests {
     fn test_upgrade_stats() {
         // deploy and start new game
         let mut game = new_adventurer_lvl2(1000, 1696201757);
-        let CHARISMA_STAT = 5;
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1907,10 +1887,6 @@ mod tests {
         // deploy and start new game
         let mut game = new_adventurer_lvl2(1000, 1696201757);
 
-        // get adventurer state
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        let original_charisma = adventurer.stats.charisma;
-
         // try to upgrade charisma x2 with only 1 stat available
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
@@ -1927,7 +1903,6 @@ mod tests {
 
         // get original adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
-        let game_entropy = game.get_game_entropy();
         let original_charisma = adventurer.stats.charisma;
         let original_health = adventurer.health;
 
@@ -2074,8 +2049,7 @@ mod tests {
     #[test]
     #[available_gas(90000000)]
     fn test_bp_distribution() {
-        let (mut game, lords) = new_adventurer_with_lords(1000);
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let (_, lords) = new_adventurer_with_lords(1000);
 
         // stage 0
         assert(lords.balanceOf(DAO()) == COST_TO_PLAY.into(), 'wrong stage 1 balance');
@@ -2088,7 +2062,7 @@ mod tests {
         // DAO doesn't get anything more until stage 2
         assert(lords.balanceOf(DAO()) == COST_TO_PLAY.into(), 'wrong stage 1 balance');
 
-        let mut rewards = Rewards {
+        let mut _rewards = Rewards {
             DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, COST_TO_PLAY),
             INTERFACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, COST_TO_PLAY),
             FIRST_PLACE: _calculate_payout(
@@ -2119,7 +2093,7 @@ mod tests {
     #[available_gas(90000000)]
     #[should_panic(expected: ('price change already initiated', 'ENTRYPOINT_FAILED'))]
     fn test_initiate_price_change_too_fast() {
-        let (mut game, lords, _, _) = setup(1000, 1, 0);
+        let (mut game, _, _, _) = setup(1000, 1, 0);
         game.initiate_price_change();
         game.initiate_price_change();
     }
@@ -2127,7 +2101,7 @@ mod tests {
     #[test]
     #[available_gas(9000000000)]
     fn test_update_cost_to_play() {
-        let (mut game, lords, _, _) = setup(1000, 1, 0);
+        let (mut game, _, _, _) = setup(1000, 1, 0);
         let original_cost_to_play = game.get_cost_to_play();
 
         // create 10 games during opening week
@@ -2226,7 +2200,7 @@ mod tests {
         let starting_block = 1;
         let starting_timestamp = 1;
         let terminal_timestamp = 100;
-        let (mut game, lords, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
+        let (mut game, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
 
         // add a player to the game
         add_adventurer_to_game(ref game, 0);
@@ -2245,7 +2219,7 @@ mod tests {
         let starting_block = 1;
         let starting_timestamp = 1;
         let terminal_timestamp = 0;
-        let (mut game, lords, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
+        let (mut game, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
 
         // add a player to the game
         add_adventurer_to_game(ref game, 0);
@@ -2264,7 +2238,7 @@ mod tests {
         let starting_block = 364063;
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
-        let (mut game, lords, golden_token, arcade_account_address) = setup(
+        let (mut game, _, _, _) = setup(
             starting_block, starting_timestamp, terminal_timestamp
         );
         add_adventurer_to_game(ref game, 1);
@@ -2279,7 +2253,7 @@ mod tests {
         let starting_block = 364063;
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
-        let (mut game, lords, golden_token, arcade_account_address) = setup(
+        let (mut game, _, _, _) = setup(
             starting_block, starting_timestamp, terminal_timestamp
         );
         assert(game.can_play(1), 'should be able to play');
@@ -2299,7 +2273,7 @@ mod tests {
         let starting_block = 364063;
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
-        let (mut game, lords, golden_token, arcade_account_address) = setup(
+        let (mut game, _, _, _) = setup(
             starting_block, starting_timestamp, terminal_timestamp
         );
         add_adventurer_to_game(ref game, golden_token_id);
@@ -2313,7 +2287,7 @@ mod tests {
         let starting_block = 364063;
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
-        let (mut game, lords, golden_token, arcade_account_address) = setup(
+        let (mut game, _, _, _) = setup(
             starting_block, starting_timestamp, terminal_timestamp
         );
         add_adventurer_to_game(ref game, golden_token_id);
