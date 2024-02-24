@@ -331,9 +331,6 @@ mod Game {
                 @self, immutable_adventurer, adventurer_id, game_entropy
             );
 
-            // update players last action block
-            adventurer.set_last_action_block(block_number);
-
             // process attack or apply idle penalty
             if !idle {
                 // get weapon specials
@@ -1098,6 +1095,9 @@ mod Game {
     ) {
         // zero out beast health
         adventurer.beast_health = 0;
+
+        // update players last action block
+        adventurer.set_last_action_block(starknet::get_block_info().unbox().block_number);
 
         // get gold reward and increase adventurers gold
         let gold_earned = beast.get_gold_reward(beast_seed);
