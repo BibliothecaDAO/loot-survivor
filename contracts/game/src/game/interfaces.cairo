@@ -14,12 +14,7 @@ use game_snapshot::GamesPlayedSnapshot;
 trait IGame<TContractState> {
     // ------ Game Actions ------
     fn new_game(
-        ref self: TContractState,
-        client_reward_address: ContractAddress,
-        weapon: u8,
-        name: u128,
-        golden_token_id: u256,
-        interface_camel: bool
+        ref self: TContractState, client_reward_address: ContractAddress, weapon: u8, name: u128, golden_token_id: u256, interface_camel: bool
     );
     fn explore(ref self: TContractState, adventurer_id: felt252, till_beast: bool);
     fn attack(ref self: TContractState, adventurer_id: felt252, to_the_death: bool);
@@ -37,8 +32,6 @@ trait IGame<TContractState> {
     fn rotate_game_entropy(ref self: TContractState);
     fn update_cost_to_play(ref self: TContractState);
     fn initiate_price_change(ref self: TContractState);
-    fn optimistic_start(ref self: TContractState, adventurer_id: felt252, block_hash: felt252);
-    fn slay_invalid_adventurer(ref self: TContractState, adventurer_id: felt252);
 
     // ------ View Functions ------
 

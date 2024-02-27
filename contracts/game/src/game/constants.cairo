@@ -31,9 +31,6 @@ mod messages {
     const NOT_OWNER_OF_TOKEN: felt252 = 'Not owner of token';
     const MA_PERIOD_LESS_THAN_WEEK: felt252 = 'MA period too small';
     const TERMINAL_TIME_REACHED: felt252 = 'terminal time reached';
-    const STARTING_HASH_NOT_ZERO: felt252 = 'Starting hash must be zero';
-    const NO_OPTIMISTIC_START: felt252 = 'No optimistic start';
-    const NOT_ENOUGH_BLOCKS: felt252 = 'Not enough blocks';
 }
 
 // TODO: Update for mainnet

@@ -117,7 +117,6 @@ mod Game {
         _cost_to_play: u128,
         _games_played_snapshot: GamesPlayedSnapshot,
         _terminal_timestamp: u64,
-        _starting_entropy: LegacyMap::<felt252, felt252>,
     }
 
     #[event]
@@ -225,45 +224,6 @@ mod Game {
             _start_game(ref self, weapon, name, interface_camel);
         }
 
-        fn optimistic_start(ref self: ContractState, adventurer_id: felt252, block_hash: felt252) {
-            // assert the starting entropy has not been set
-            assert(
-                self._starting_entropy.read(adventurer_id) == 0, messages::STARTING_HASH_NOT_ZERO
-            );
-
-            self._starting_entropy.write(adventurer_id, block_hash);
-
-            // then attack the starting beast
-            self.attack(adventurer_id, false);
-        }
-
-
-        fn slay_invalid_adventurer(ref self: ContractState, adventurer_id: felt252) {
-            // get starting blockhash 
-            let optimistic_hash = self._starting_entropy.read(adventurer_id);
-
-            // must be optimistic start
-            assert(optimistic_hash != 0, messages::NO_OPTIMISTIC_START);
-
-            // get adventurer meta data
-            let mut adventurer_meta = _load_adventurer_metadata(@self, adventurer_id);
-
-            // at least 11 blocks must have passed
-            assert(
-                starknet::get_block_info().unbox().block_number > adventurer_meta.start_block + 11,
-                messages::NOT_ENOUGH_BLOCKS
-            );
-
-            // get the blockhash
-            let block_hash = starknet::get_block_hash_syscall(adventurer_meta.start_block + 1)
-                .unwrap_syscall();
-
-            // slay
-            if (optimistic_hash != block_hash) {
-                _slay_invalid_adventurer(ref self, adventurer_id);
-            }
-        }
-
         /// @title Explore Function
         ///
         /// @notice Allows an adventurer to explore
@@ -346,12 +306,7 @@ mod Game {
 
             // ensure player is not exceeding the rate limit
             let block_number = starknet::get_block_info().unbox().block_number;
-
-            // we check if optimistic start and has not started
-            let is_starting = self._starting_entropy.read(adventurer_id) == 0
-                || adventurer.get_level() == 1;
-
-            if !is_starting || !adventurer.block_changed_since_last_action(block_number) {
+            if !adventurer.block_changed_since_last_action(block_number) {
                 _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
             }
 
@@ -365,12 +320,10 @@ mod Game {
 
             // if the adventurer is on level 1, this is their first action of the game
             if adventurer.get_level() == 1 {
+                // so we reveal their starting stats and store them in Adventurer Meta
                 let adventurer_meta = _handle_stat_reveal(@self, ref adventurer, adventurer_id);
                 // update adventurer meta data (this is the last time this storage slot is updated)
                 _save_adventurer_metadata(ref self, adventurer_id, adventurer_meta);
-
-                // at least one block must have passed
-                assert(block_number > adventurer_meta.start_block, 'CANNOT START IN SAME BLOCK');
             }
 
             // get number of blocks between actions
@@ -1130,27 +1083,6 @@ mod Game {
         _save_adventurer_no_boosts(ref self, adventurer, adventurer_id);
     }
 
-    fn _slay_invalid_adventurer(ref self: ContractState, adventurer_id: felt252) {
-        // unpack adventurer from storage (no need for stat boosts)
-        let mut adventurer = _load_adventurer_no_boosts(@self, adventurer_id);
-
-        // assert adventurer is not already dead
-        _assert_not_dead(adventurer);
-
-        // assert adventurer is idle
-        _assert_is_idle(@self, adventurer, adventurer_id);
-
-        // slay adventurer by setting health to 0 and 0 the xp because of invalid start
-        adventurer.health = 0;
-        adventurer.xp = 0;
-
-        // handle adventurer death
-        _process_adventurer_death(ref self, adventurer, adventurer_id, 0, 0,);
-
-        // save adventurer (gg)
-        _save_adventurer_no_boosts(ref self, adventurer, adventurer_id);
-    }
-
     fn _process_beast_death(
         ref self: ContractState,
         ref adventurer: Adventurer,
@@ -1278,31 +1210,6 @@ mod Game {
         }
     }
 
-    fn _check_and_kill_invalid_adventurer(ref self: ContractState, adventurer_id: felt252) {
-        let optimistic_hash = self._starting_entropy.read(adventurer_id);
-
-        if (optimistic_hash != 0) {
-            // get adventurer meta data
-            let mut adventurer_meta = _load_adventurer_metadata(@self, adventurer_id);
-
-            // get the blockhash
-            let block_hash = starknet::get_block_hash_syscall(adventurer_meta.start_block + 1)
-                .unwrap_syscall();
-
-            if (optimistic_hash != block_hash) { // zero out
-                let mut adventurer = _load_adventurer_no_boosts(@self, adventurer_id);
-
-                // zero out adventurer stats
-                adventurer.xp = 0;
-                adventurer.health = 0;
-
-                // save adventurer
-                _save_adventurer_no_boosts(ref self, adventurer, adventurer_id);
-            }
-        }
-    }
-
-
     fn _process_adventurer_death(
         ref self: ContractState,
         adventurer: Adventurer,
@@ -1310,9 +1217,6 @@ mod Game {
         beast_id: u8,
         obstacle_id: u8
     ) {
-        // optimistic check 
-        _check_and_kill_invalid_adventurer(ref self, adventurer_id);
-
         let adventurer_state = AdventurerState {
             owner: _owner_of(@self, adventurer_id), adventurer_id, adventurer
         };
