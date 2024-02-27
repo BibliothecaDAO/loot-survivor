@@ -2335,14 +2335,12 @@ mod tests {
     #[test]
     #[available_gas(2300000000)]
     fn test_optimistic_start() {
-        // start new game
         optimistic_start();
     }
 
     #[test]
     #[available_gas(2300000000)]
     fn test_optimistic_start_slay_invalid() {
-        // start new game
         let mut game = optimistic_start();
     }
 }
