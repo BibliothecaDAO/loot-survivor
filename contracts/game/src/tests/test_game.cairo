@@ -258,6 +258,8 @@ mod tests {
             'wrong starter beast health '
         );
 
+        testing::set_block_number(starting_block + 1);
+
         game
     }
 
@@ -265,7 +267,7 @@ mod tests {
         // start game on block number 1
         let mut game = new_adventurer(1000, 1696201757);
 
-        // fast forward chain to block number 400
+        // fast forward chain to block number 1002
         testing::set_block_number(1002);
 
         // double attack beast
@@ -620,6 +622,7 @@ mod tests {
         // is annotated in the test
         game.explore(ADVENTURER_ID, true);
     }
+
     #[test]
     #[should_panic]
     #[available_gas(90000000)]
@@ -1323,7 +1326,7 @@ mod tests {
 
         // verify last action block number is correct
         assert(
-            adventurer.last_action_block == STARTING_BLOCK_NUMBER.try_into().unwrap(),
+            adventurer.last_action_block == STARTING_BLOCK_NUMBER.try_into().unwrap() + 1,
             'unexpected last action block'
         );
 
@@ -1437,6 +1440,8 @@ mod tests {
         // add two adventurers to the game
         add_adventurer_to_game(ref game, 0);
         add_adventurer_to_game(ref game, 0);
+
+        testing::set_block_number(STARTING_BLOCK_NUMBER + 2);
 
         // attack starter beast, resulting in adventurer last action block number being 1
         game.attack(ADVENTURER_ID, false);
@@ -2238,9 +2243,7 @@ mod tests {
         let starting_block = 364063;
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
-        let (mut game, _, _, _) = setup(
-            starting_block, starting_timestamp, terminal_timestamp
-        );
+        let (mut game, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
         add_adventurer_to_game(ref game, 1);
         testing::set_block_timestamp(starting_timestamp + DAY);
         add_adventurer_to_game(ref game, 1);
@@ -2253,9 +2256,7 @@ mod tests {
         let starting_block = 364063;
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
-        let (mut game, _, _, _) = setup(
-            starting_block, starting_timestamp, terminal_timestamp
-        );
+        let (mut game, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
         assert(game.can_play(1), 'should be able to play');
         add_adventurer_to_game(ref game, golden_token_id);
         assert(!game.can_play(1), 'should not be able to play');
@@ -2273,9 +2274,7 @@ mod tests {
         let starting_block = 364063;
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
-        let (mut game, _, _, _) = setup(
-            starting_block, starting_timestamp, terminal_timestamp
-        );
+        let (mut game, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
         add_adventurer_to_game(ref game, golden_token_id);
     }
 
@@ -2287,9 +2286,7 @@ mod tests {
         let starting_block = 364063;
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
-        let (mut game, _, _, _) = setup(
-            starting_block, starting_timestamp, terminal_timestamp
-        );
+        let (mut game, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
         add_adventurer_to_game(ref game, golden_token_id);
 
         // roll blockchain forward 1 second less than a day
@@ -2322,5 +2319,28 @@ mod tests {
         // verify adventurer is now idle
         let (is_idle, _) = game.is_idle(ADVENTURER_ID);
         assert(is_idle, 'should be idle');
+    }
+
+    const TEST_BLOCKHASH: felt252 = 0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab;
+
+    fn optimistic_start() -> IGameDispatcher {
+        // start new game
+        let mut game = new_adventurer(1000, 1696201757);
+
+        game.optimistic_start(ADVENTURER_ID, TEST_BLOCKHASH);
+
+        game
+    }
+
+    #[test]
+    #[available_gas(2300000000)]
+    fn test_optimistic_start() {
+        optimistic_start();
+    }
+
+    #[test]
+    #[available_gas(2300000000)]
+    fn test_optimistic_start_slay_invalid() {
+        let mut game = optimistic_start();
     }
 }
