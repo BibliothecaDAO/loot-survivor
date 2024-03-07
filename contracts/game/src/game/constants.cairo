@@ -31,6 +31,10 @@ mod messages {
     const NOT_OWNER_OF_TOKEN: felt252 = 'Not owner of token';
     const MA_PERIOD_LESS_THAN_WEEK: felt252 = 'MA period too small';
     const TERMINAL_TIME_REACHED: felt252 = 'terminal time reached';
+    const STARTING_ENTROPY_ALREADY_SET: felt252 = 'starting entropy already set';
+    const STARTING_ENTROPY_ZERO: felt252 = 'block hash should not be zero';
+    const GAME_ALREADY_STARTED: felt252 = 'game already started';
+    const STARTING_ENTROPY_IS_VALID: felt252 = 'starting entropy is valid';
 }
 
 // TODO: Update for mainnet

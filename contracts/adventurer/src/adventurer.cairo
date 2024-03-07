@@ -1701,6 +1701,17 @@ impl ImplAdventurer of IAdventurer {
         hash_span.append(start_hash);
         poseidon_hash_span(hash_span.span())
     }
+
+    /// @title invalidate_adventurer
+    /// @notice This function invalidates an adventurer by setting its xp to 1 and gold to 0.
+    /// @dev This function directly modifies the state of the adventurer.
+    /// @param self The Adventurer struct instance to be invalidated.
+    #[inline(always)]
+    fn invalidate_game(ref self: Adventurer) {
+        self.health = 0;
+        self.xp = 1;
+        self.gold = 0;
+    }
 }
 
 
@@ -5254,5 +5265,15 @@ mod tests {
         assert(!adventurer.is_ambushed(4), 'should not be ambushed 4');
         assert(adventurer.is_ambushed(5), 'should be ambushed 5');
         assert(!adventurer.is_ambushed(6), 'should not be ambushed 6');
+    }
+
+    #[test]
+    #[available_gas(1000000)]
+    fn test_invalidate_game() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.invalidate_game();
+        assert(adventurer.health == 0, 'adventurer health should be 0');
+        assert(adventurer.xp == 1, 'adventurer xp should be 1');
+        assert(adventurer.gold == 0, 'adventurer gold should be 0');
     }
 }
