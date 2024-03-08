@@ -2319,6 +2319,17 @@ mod tests {
         assert(is_idle, 'should be idle');
     }
 
+
+    #[test]
+    #[should_panic(expected: ('Not authorized to act', 'ENTRYPOINT_FAILED'))]
+    fn test_set_starting_entropy_not_owner() {
+        let mut game = new_adventurer(1000, 1696201757);
+        // change to different caller
+        testing::set_contract_address(contract_address_const::<50>());
+        // try to set starting entropy, should revert
+        game.set_starting_entropy(ADVENTURER_ID, 1);
+    }
+
     #[test]
     #[should_panic(expected: ('game already started', 'ENTRYPOINT_FAILED'))]
     fn test_set_starting_entropy_game_started() {
@@ -2395,7 +2406,9 @@ mod tests {
     #[test]
     #[should_panic(expected: ('starting entropy is valid', 'ENTRYPOINT_FAILED'))]
     fn test_slay_invalid_adventurer_correct_entropy() {
-        let mut game = new_adventurer_lvl3(1000, 1696201757, 0x54b720c8f3876115e2e0fd5c8f0ed2fbaa8fe24f12c402497400043adc7d26e);
+        let mut game = new_adventurer_lvl3(
+            1000, 1696201757, 0x54b720c8f3876115e2e0fd5c8f0ed2fbaa8fe24f12c402497400043adc7d26e
+        );
         let invalid_adventurers = array![ADVENTURER_ID];
         game.slay_invalid_adventurers(invalid_adventurers);
     }
