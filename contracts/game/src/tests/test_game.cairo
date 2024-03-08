@@ -289,6 +289,7 @@ mod tests {
         let mut game = new_adventurer(starting_block, starting_time);
 
         if (starting_entropy != 0) {
+            testing::set_block_number(starting_block + 2);
             game.set_starting_entropy(ADVENTURER_ID, starting_entropy);
         }
 
@@ -2324,6 +2325,7 @@ mod tests {
     #[should_panic(expected: ('Not authorized to act', 'ENTRYPOINT_FAILED'))]
     fn test_set_starting_entropy_not_owner() {
         let mut game = new_adventurer(1000, 1696201757);
+        testing::set_block_number(1002);
         // change to different caller
         testing::set_contract_address(contract_address_const::<50>());
         // try to set starting entropy, should revert
@@ -2334,9 +2336,19 @@ mod tests {
     #[should_panic(expected: ('game already started', 'ENTRYPOINT_FAILED'))]
     fn test_set_starting_entropy_game_started() {
         let mut game = new_adventurer(1000, 1696201757);
+        testing::set_block_number(1002);
         // defeat starter beast
         game.attack(ADVENTURER_ID, true);
         // then attempt to set starting entropy, should revert
+        game.set_starting_entropy(ADVENTURER_ID, 1);
+    }
+
+
+    #[test]
+    #[should_panic(expected: ('valid hash not yet available', 'ENTRYPOINT_FAILED'))]
+    fn test_set_starting_entropy_before_hash_available() {
+        let mut game = new_adventurer(1000, 1696201757);
+        // attempt to set starting entropy before hash is available, should revert
         game.set_starting_entropy(ADVENTURER_ID, 1);
     }
 
@@ -2344,6 +2356,7 @@ mod tests {
     #[should_panic(expected: ('block hash should not be zero', 'ENTRYPOINT_FAILED'))]
     fn test_set_starting_entropy_zero_hash() {
         let mut game = new_adventurer(1000, 1696201757);
+        testing::set_block_number(1002);
         // attempt to pass in 0 for starting entropy hash, should revert
         game.set_starting_entropy(ADVENTURER_ID, 0);
     }
@@ -2352,6 +2365,7 @@ mod tests {
     #[should_panic(expected: ('starting entropy already set', 'ENTRYPOINT_FAILED'))]
     fn test_set_starting_entropy_double_call() {
         let mut game = new_adventurer(1000, 1696201757);
+        testing::set_block_number(1002);
         // attempt to set starting entropy twice, should revert
         game.set_starting_entropy(ADVENTURER_ID, 1);
         game.set_starting_entropy(ADVENTURER_ID, 1);
@@ -2360,6 +2374,7 @@ mod tests {
     #[test]
     fn test_set_starting_entropy_basic() {
         let mut game = new_adventurer(1000, 1696201757);
+        testing::set_block_number(1002);
         game.set_starting_entropy(ADVENTURER_ID, 123);
         // verify starting entropy was set
         assert(
@@ -2373,6 +2388,7 @@ mod tests {
     fn test_set_starting_entropy_wrong_hash() {
         let wrong_starting_entropy = 12345678910112;
         let mut game = new_adventurer_lvl3(1000, 1696201757, wrong_starting_entropy);
+        testing::set_block_number(1002);
 
         // go out exploring till beast
         game.explore(ADVENTURER_ID, true);
