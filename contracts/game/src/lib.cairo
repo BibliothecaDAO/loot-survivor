@@ -2203,7 +2203,7 @@ mod Game {
 
                 // create new item, equip it, and record if we need unequipped an item
                 let mut new_item = ImplItemPrimitive::new(item_id);
-                new_item.set_metadata_id(adventurer, bag);
+                new_item.set_metadata_id(adventurer, bag, true);
                 unequipped_item_id =
                     _equip_item(contract_state, ref adventurer, ref bag, adventurer_id, new_item);
             } else {
