@@ -1,4 +1,4 @@
-// number of items per level per survivor
+// number of items available per stat upgrade
 const NUMBER_OF_ITEMS_PER_LEVEL: u8 = 21;
 
 // number of loot items

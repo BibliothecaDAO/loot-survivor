@@ -1,5 +1,6 @@
 use starknet::{StorePacking};
-use lootitems::constants::{ItemId, ItemSuffix};
+use lootitems::{constants::{ItemId, ItemSuffix}, loot::ImplLoot};
+use combat::combat::Slot;
 use super::{
     adventurer::{Adventurer, IAdventurer, ImplAdventurer}, item_primitive::ItemPrimitive,
     stats::Stats, bag::{Bag, IBag}
@@ -263,51 +264,81 @@ impl ImplItemSpecials of IItemSpecials {
     ///      It returns the metadata of the first item it finds that has been dropped.
     ///      If no dropped items are found, it returns 0.
     ///
+    /// @param item The Item we are assigning a metadata id to.
     /// @param adventurer The adventurer object, which contains the metadata and id for each piece of equipment the adventurer has.
     /// @param bag The bag object, which contains the metadata and id for each item in the bag.
+    /// @param equipping A boolean that indicates whether the item is being equipped or placed in the bag.
     ///
     /// @return The metadata of the first dropped item found, or 0 if no dropped items are found.
-    fn get_recycled_metadata(adventurer: Adventurer, bag: Bag) -> u8 {
-        if (adventurer.weapon.id == 0 && adventurer.weapon.metadata != 0) {
-            adventurer.weapon.metadata
-        } else if (adventurer.head.id == 0 && adventurer.head.metadata != 0) {
-            adventurer.head.metadata
-        } else if (adventurer.chest.id == 0 && adventurer.chest.metadata != 0) {
-            adventurer.chest.metadata
-        } else if (adventurer.hand.id == 0 && adventurer.hand.metadata != 0) {
-            adventurer.hand.metadata
-        } else if (adventurer.foot.id == 0 && adventurer.foot.metadata != 0) {
-            adventurer.foot.metadata
-        } else if (adventurer.ring.id == 0 && adventurer.ring.metadata != 0) {
-            adventurer.ring.metadata
-        } else if (adventurer.neck.id == 0 && adventurer.neck.metadata != 0) {
-            adventurer.neck.metadata
-        } else if (adventurer.waist.id == 0 && adventurer.waist.metadata != 0) {
-            adventurer.waist.metadata
-        } else if (bag.item_1.id == 0 && bag.item_1.metadata != 0) {
-            bag.item_1.metadata
-        } else if (bag.item_2.id == 0 && bag.item_2.metadata != 0) {
-            bag.item_2.metadata
-        } else if (bag.item_3.id == 0 && bag.item_3.metadata != 0) {
-            bag.item_3.metadata
-        } else if (bag.item_4.id == 0 && bag.item_4.metadata != 0) {
-            bag.item_4.metadata
-        } else if (bag.item_5.id == 0 && bag.item_5.metadata != 0) {
-            bag.item_5.metadata
-        } else if (bag.item_6.id == 0 && bag.item_6.metadata != 0) {
-            bag.item_6.metadata
-        } else if (bag.item_7.id == 0 && bag.item_7.metadata != 0) {
-            bag.item_7.metadata
-        } else if (bag.item_8.id == 0 && bag.item_8.metadata != 0) {
-            bag.item_8.metadata
-        } else if (bag.item_9.id == 0 && bag.item_9.metadata != 0) {
-            bag.item_9.metadata
-        } else if (bag.item_10.id == 0 && bag.item_10.metadata != 0) {
-            bag.item_10.metadata
-        } else if (bag.item_11.id == 0 && bag.item_11.metadata != 0) {
-            bag.item_11.metadata
+    fn get_recycled_metadata(
+        item: ItemPrimitive, adventurer: Adventurer, bag: Bag, equipping: bool
+    ) -> u8 {
+        // if the item is being equipped
+        if equipping {
+            // look for available metadata slots in the adventurer's equipment
+            if (ImplLoot::get_slot(item.id) == Slot::Weapon(())
+                && adventurer.weapon.id == 0
+                && adventurer.weapon.metadata != 0) {
+                adventurer.weapon.metadata
+            } else if (ImplLoot::get_slot(item.id) == Slot::Head(())
+                && adventurer.head.id == 0
+                && adventurer.head.metadata != 0) {
+                adventurer.head.metadata
+            } else if (ImplLoot::get_slot(item.id) == Slot::Chest(())
+                && adventurer.chest.id == 0
+                && adventurer.chest.metadata != 0) {
+                adventurer.chest.metadata
+            } else if (ImplLoot::get_slot(item.id) == Slot::Waist(())
+                && adventurer.waist.id == 0
+                && adventurer.waist.metadata != 0) {
+                adventurer.waist.metadata
+            } else if (ImplLoot::get_slot(item.id) == Slot::Hand(())
+                && adventurer.hand.id == 0
+                && adventurer.hand.metadata != 0) {
+                adventurer.hand.metadata
+            } else if (ImplLoot::get_slot(item.id) == Slot::Foot(())
+                && adventurer.foot.id == 0
+                && adventurer.foot.metadata != 0) {
+                adventurer.foot.metadata
+            } else if (ImplLoot::get_slot(item.id) == Slot::Ring(())
+                && adventurer.ring.id == 0
+                && adventurer.ring.metadata != 0) {
+                adventurer.ring.metadata
+            } else if (ImplLoot::get_slot(item.id) == Slot::Neck(())
+                && adventurer.neck.id == 0
+                && adventurer.neck.metadata != 0) {
+                adventurer.neck.metadata
+            } else {
+                0
+            }
+        // otherwise item is going into bag
         } else {
-            0
+            // so look for free metadata available in bag
+            if (bag.item_1.id == 0 && bag.item_1.metadata != 0) {
+                bag.item_1.metadata
+            } else if (bag.item_2.id == 0 && bag.item_2.metadata != 0) {
+                bag.item_2.metadata
+            } else if (bag.item_3.id == 0 && bag.item_3.metadata != 0) {
+                bag.item_3.metadata
+            } else if (bag.item_4.id == 0 && bag.item_4.metadata != 0) {
+                bag.item_4.metadata
+            } else if (bag.item_5.id == 0 && bag.item_5.metadata != 0) {
+                bag.item_5.metadata
+            } else if (bag.item_6.id == 0 && bag.item_6.metadata != 0) {
+                bag.item_6.metadata
+            } else if (bag.item_7.id == 0 && bag.item_7.metadata != 0) {
+                bag.item_7.metadata
+            } else if (bag.item_8.id == 0 && bag.item_8.metadata != 0) {
+                bag.item_8.metadata
+            } else if (bag.item_9.id == 0 && bag.item_9.metadata != 0) {
+                bag.item_9.metadata
+            } else if (bag.item_10.id == 0 && bag.item_10.metadata != 0) {
+                bag.item_10.metadata
+            } else if (bag.item_11.id == 0 && bag.item_11.metadata != 0) {
+                bag.item_11.metadata
+            } else {
+                0
+            }
         }
     }
 
@@ -406,8 +437,10 @@ impl ImplItemSpecials of IItemSpecials {
     /// @param bag The bag object, which contains the metadata for each item in the bag.
     ///
     /// @return None. The function modifies the item's metadata in place.
-    fn set_metadata_id(ref self: ItemPrimitive, adventurer: Adventurer, bag: Bag) {
-        let reused_metadata = ImplItemSpecials::get_recycled_metadata(adventurer, bag);
+    fn set_metadata_id(ref self: ItemPrimitive, adventurer: Adventurer, bag: Bag, equipping: bool) {
+        let reused_metadata = ImplItemSpecials::get_recycled_metadata(
+            self, adventurer, bag, equipping
+        );
         if reused_metadata > 0 {
             self.metadata = reused_metadata;
         } else {
@@ -514,7 +547,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(4000000)]
+    #[available_gas(40000000)]
     fn test_set_metadata_id() {
         // start test with a new adventurer wielding a wand
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
@@ -562,7 +595,7 @@ mod tests {
         let mut _demonhide_belt = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 0 };
 
         // take the common start with T1 Katana
-        katana.set_metadata_id(adventurer, bag);
+        katana.set_metadata_id(adventurer, bag, false);
 
         // toss starter wand in bag
         bag.add_item(starter_wand);
@@ -580,82 +613,82 @@ mod tests {
         );
 
         // proceed to buy armor for the adventurer, verifying meta data pointers for each item
-        demon_crown.set_metadata_id(adventurer, bag);
+        demon_crown.set_metadata_id(adventurer, bag, true);
         adventurer.equip_item(demon_crown);
         assert(demon_crown.metadata == 3, 'wrong demon crown metadata');
 
-        silk_robe.set_metadata_id(adventurer, bag);
+        silk_robe.set_metadata_id(adventurer, bag, true);
         adventurer.equip_item(silk_robe);
         assert(silk_robe.metadata == 4, 'wrong silk robe metadata');
 
-        demon_hands.set_metadata_id(adventurer, bag);
+        demon_hands.set_metadata_id(adventurer, bag, true);
         adventurer.equip_item(demon_hands);
         assert(demon_hands.metadata == 5, 'wrong demonhands metadata');
 
-        shoes.set_metadata_id(adventurer, bag);
+        shoes.set_metadata_id(adventurer, bag, true);
         adventurer.equip_item(shoes);
         assert(shoes.metadata == 6, 'wrong shoes metadata');
 
-        brightsilk_sash.set_metadata_id(adventurer, bag);
+        brightsilk_sash.set_metadata_id(adventurer, bag, true);
         adventurer.equip_item(brightsilk_sash);
         assert(brightsilk_sash.metadata == 7, 'wrong leather gloves metadata');
 
         // Adventurer now has full armor (we are intentionally deferring jewlery)
         // so now start buying items for the bag, filling it up to one less than capacity
-        silk_gloves.set_metadata_id(adventurer, bag);
+        silk_gloves.set_metadata_id(adventurer, bag, false);
         bag.add_item(silk_gloves);
         assert(
             bag.item_2 == silk_gloves && silk_gloves.metadata == 8, 'wrong silk gloves metadata'
         );
 
-        linen_gloves.set_metadata_id(adventurer, bag);
+        linen_gloves.set_metadata_id(adventurer, bag, false);
         bag.add_item(linen_gloves);
         assert(
             bag.item_3 == linen_gloves && linen_gloves.metadata == 9, 'wrong linen gloves metadata'
         );
 
-        crown.set_metadata_id(adventurer, bag);
+        crown.set_metadata_id(adventurer, bag, false);
         bag.add_item(crown);
         assert(bag.item_4 == crown && crown.metadata == 10, 'wrong crown metadata');
 
-        divine_slippers.set_metadata_id(adventurer, bag);
+        divine_slippers.set_metadata_id(adventurer, bag, false);
         bag.add_item(divine_slippers);
         assert(
             bag.item_5 == divine_slippers && divine_slippers.metadata == 11,
             'wrong divine slippers metadata'
         );
 
-        warhammer.set_metadata_id(adventurer, bag);
+        warhammer.set_metadata_id(adventurer, bag, false);
         bag.add_item(warhammer);
         assert(bag.item_6 == warhammer && warhammer.metadata == 12, 'wrong warhammer metadata');
 
-        ancient_helm.set_metadata_id(adventurer, bag);
+        ancient_helm.set_metadata_id(adventurer, bag, false);
         bag.add_item(ancient_helm);
         assert(
             bag.item_7 == ancient_helm && ancient_helm.metadata == 13, 'wrong ancient helm metadata'
         );
 
-        divine_robe.set_metadata_id(adventurer, bag);
+        divine_robe.set_metadata_id(adventurer, bag, false);
         bag.add_item(divine_robe);
         assert(
             bag.item_8 == divine_robe && divine_robe.metadata == 14, 'wrong divine robe metadata'
         );
 
-        holy_chestplate.set_metadata_id(adventurer, bag);
+        holy_chestplate.set_metadata_id(adventurer, bag, false);
         bag.add_item(holy_chestplate);
         assert(
             bag.item_9 == holy_chestplate && holy_chestplate.metadata == 15,
             'wrong holy chestplate metadata'
         );
 
-        holy_greaves.set_metadata_id(adventurer, bag);
+        holy_greaves.set_metadata_id(adventurer, bag, false);
         bag.add_item(holy_greaves);
         assert(
             bag.item_10 == holy_greaves && holy_greaves.metadata == 16,
             'wrong holy greaves metadata'
         );
 
-        demonhide_boots.set_metadata_id(adventurer, bag);
+        demonhide_boots.set_metadata_id(adventurer, bag, false);
         bag.add_item(demonhide_boots);
         assert(
             bag.item_11 == demonhide_boots && demonhide_boots.metadata == 17,
@@ -689,7 +722,7 @@ mod tests {
 
         // buy another item for the bag and verify it fills the spot of the dropped wand and uses the same metadata
         let mut demonhide_belt = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 0 };
-        demonhide_belt.set_metadata_id(adventurer, bag);
+        demonhide_belt.set_metadata_id(adventurer, bag, false);
         bag.add_item(demonhide_belt);
         assert(
             bag.item_1 == demonhide_belt && demonhide_belt.metadata == 1,
@@ -702,10 +735,10 @@ mod tests {
         bag.remove_item(bag.item_2.id);
         bag.remove_item(bag.item_3.id);
         let mut book = ItemPrimitive { id: ItemId::Book, xp: 1, metadata: 0 };
-        book.set_metadata_id(adventurer, bag);
+        book.set_metadata_id(adventurer, bag, false);
         bag.add_item(book);
         let mut tome = ItemPrimitive { id: ItemId::Tome, xp: 1, metadata: 0 };
-        tome.set_metadata_id(adventurer, bag);
+        tome.set_metadata_id(adventurer, bag, false);
         bag.add_item(tome);
         assert(bag.item_2 == book && book.metadata == item_2_metadata, 'wrong book metadata');
         assert(bag.item_3 == tome && tome.metadata == item_3_metadata, 'wrong tome metadata');
@@ -714,13 +747,13 @@ mod tests {
 
         // necklace should pickup metadata 18
         let mut necklace = ItemPrimitive { id: ItemId::Necklace, xp: 1, metadata: 0 };
-        necklace.set_metadata_id(adventurer, bag);
+        necklace.set_metadata_id(adventurer, bag, true);
         adventurer.equip_necklace(necklace);
         assert(adventurer.neck == necklace && necklace.metadata == 18, 'wrong necklace metadata');
 
         // and ring should get the last metadata spot of 19
         let mut gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 0 };
-        gold_ring.set_metadata_id(adventurer, bag);
+        gold_ring.set_metadata_id(adventurer, bag, true);
         adventurer.equip_ring(gold_ring);
         assert(
             adventurer.ring == gold_ring && gold_ring.metadata == 19, 'wrong gold ring metadata'
@@ -729,7 +762,7 @@ mod tests {
         // drop adventurers katana and buy a grimoire and verify the metadata is reused
         adventurer.drop_item(adventurer.weapon.id);
         let mut grimoire = ItemPrimitive { id: ItemId::Grimoire, xp: 1, metadata: 0 };
-        grimoire.set_metadata_id(adventurer, bag);
+        grimoire.set_metadata_id(adventurer, bag, true);
         adventurer.equip_item(grimoire);
         assert(adventurer.weapon == grimoire && grimoire.metadata == 2, 'wrong grimoire metadata');
     }
