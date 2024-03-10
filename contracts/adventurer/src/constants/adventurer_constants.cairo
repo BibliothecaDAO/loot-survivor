@@ -1,16 +1,6 @@
 // Starting Setting
-
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// TODO: DO NOT MERGE WITH THIS CONFIGURATION
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-const STARTING_GOLD: u16 = 511;
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// TODO: DO NOT MERGE WITH THIS CONFIGURATION
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
+const STARTING_GOLD: u16 = 25;
 const STARTING_HEALTH: u16 = 100;
-
 
 // Adventurer Max Values
 const MAX_ADVENTURER_HEALTH: u16 = 511; // 9 bits

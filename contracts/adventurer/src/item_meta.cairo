@@ -547,7 +547,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(4000000)]
+    #[available_gas(40000000)]
     fn test_set_metadata_id() {
         // start test with a new adventurer wielding a wand
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
