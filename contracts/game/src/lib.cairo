@@ -175,7 +175,7 @@ mod Game {
             // on non-mainnet, use the current block timestamp so tests run correctly
             self._genesis_timestamp.write(starknet::get_block_info().unbox().block_timestamp.into());
         };
-        
+
 
         // set the golden token address
         self._golden_token.write(golden_token_address);
@@ -1626,6 +1626,14 @@ mod Game {
             },
             ExploreResult::Discovery(()) => {
                 _process_discovery(ref self, ref adventurer, adventurer_id, rnd2);
+                _explore(
+                    ref self,
+                    ref adventurer,
+                    adventurer_id,
+                    adventurer_entropy,
+                    game_entropy,
+                    explore_till_beast
+                )
             }
         }
 
