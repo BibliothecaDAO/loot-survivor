@@ -173,9 +173,10 @@ mod Game {
             self._genesis_timestamp.write(1699552291);
         } else {
             // on non-mainnet, use the current block timestamp so tests run correctly
-            self._genesis_timestamp.write(starknet::get_block_info().unbox().block_timestamp.into());
+            self
+                ._genesis_timestamp
+                .write(starknet::get_block_info().unbox().block_timestamp.into());
         };
-
 
         // set the golden token address
         self._golden_token.write(golden_token_address);
@@ -3046,7 +3047,7 @@ mod Game {
     #[inline(always)]
     fn _get_testnet_entropy(adventurer_id: felt252, start_block: u64) -> felt252 {
         ImplAdventurer::get_entropy(
-            adventurer_id, starknet::get_block_hash_syscall(start_block - 10).unwrap_syscall()
+            adventurer_id, starknet::get_block_hash_syscall(start_block + 1).unwrap_syscall()
         )
     }
 
