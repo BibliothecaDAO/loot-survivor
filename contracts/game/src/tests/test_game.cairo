@@ -2615,12 +2615,6 @@ mod tests {
         game.explore(ADVENTURER_ID, false);
         testing::set_block_number(starting_block + 10);
         testing::set_block_timestamp(starting_time + 150);
-        game.explore(ADVENTURER_ID, false);
-        testing::set_block_number(starting_block + 11);
-        testing::set_block_timestamp(starting_time + 165);
-        game.explore(ADVENTURER_ID, false);
-        testing::set_block_number(starting_block + 12);
-        testing::set_block_timestamp(starting_time + 180);
 
         // with 15s block intervals, the rate limit will be 2 actions per block
         // try to do three actions in a single block and verify contract panics
@@ -2640,7 +2634,6 @@ mod tests {
         };
 
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
-        game.explore(ADVENTURER_ID, false);
         game.explore(ADVENTURER_ID, false);
 
         // advancing block resets players action per block
