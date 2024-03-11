@@ -166,7 +166,16 @@ mod Game {
         self._collectible_beasts.write(collectible_beasts);
         self._terminal_timestamp.write(terminal_timestamp);
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
-        self._genesis_timestamp.write(starknet::get_block_info().unbox().block_timestamp.into());
+
+        // On mainnet, set genesis timestamp to LSV1.0 genesis to preserve same reward distribution schedule for V1.1 
+        let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
+        if chain_id == MAINNET_CHAIN_ID {
+            self._genesis_timestamp.write(1699552291);
+        } else {
+            // on non-mainnet, use the current block timestamp so tests run correctly
+            self._genesis_timestamp.write(starknet::get_block_info().unbox().block_timestamp.into());
+        };
+        
 
         // set the golden token address
         self._golden_token.write(golden_token_address);
