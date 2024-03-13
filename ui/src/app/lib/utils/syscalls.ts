@@ -710,7 +710,7 @@ export function syscalls({
     // First we send the current block hash to the contract
     const setBlockHashTx: Call = {
       contractAddress: gameContract?.address ?? "",
-      entrypoint: "set_block_hash",
+      entrypoint: "set_starting_entropy",
       calldata: [blockHash!],
     };
     const attackTx: Call = {

@@ -21,7 +21,7 @@ export default function InterludeScreen({
     const nextBlockHashBlock = adventurer?.revealBlock!;
     const adventurerStartBlock = adventurer?.startBlock!;
     const blockDifference = nextBlockHashBlock - adventurerStartBlock;
-    const secondsUntilNextEntropy = (blockDifference + 1) * averageBlockTime; // add one for closer estimate
+    const secondsUntilNextEntropy = (blockDifference + 2) * averageBlockTime; // add one for closer estimate
     const adventurerCreatedTime = new Date(adventurer?.createdTime!).getTime();
     const nextEntropyTime =
       adventurerCreatedTime + secondsUntilNextEntropy * 1000;
