@@ -19,11 +19,11 @@ export const TxActivity = () => {
     hash: hash ? hash : "0x0",
   }) as { data: InvokeTransactionReceiptResponse };
 
-  if (data?.status === "ACCEPTED_ON_L2") {
+  if (data?.finality_status === "ACCEPTED_ON_L2") {
     setTxAccepted(true);
   }
 
-  if (data?.status === "REJECTED") {
+  if (data?.execution_status === "REVERTED") {
     stopLoading("Rejected");
   }
 

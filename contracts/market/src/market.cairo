@@ -580,15 +580,13 @@ mod tests {
             if (i == 100) {
                 break;
             }
-            let adventurer_id: felt252 = 1;
-            let block_number = 839152;
+            let _adventurer_id: felt252 = 1;
+            let _block_number = 839152;
             let xp: u16 = 3;
-            let stats_points_available: u8 = 4;
+            let _stats_points_available: u8 = 4;
             let adventurer_entropy = 1;
 
-            let (market_seed, market_offset) = ImplMarket::get_market_seed_and_offset(
-                adventurer_entropy, xp
-            );
+            let (_, market_offset) = ImplMarket::get_market_seed_and_offset(adventurer_entropy, xp);
 
             // assert market offset is within range of items
             assert(market_offset != 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
@@ -603,9 +601,7 @@ mod tests {
         let mut i: u128 = 0;
         loop {
             let poseidon_hash: felt252 = i.into();
-            let (market_seed, market_offset) = ImplMarket::split_hash_into_seed_and_offset(
-                poseidon_hash
-            );
+            let (_, market_offset) = ImplMarket::split_hash_into_seed_and_offset(poseidon_hash);
             if (i == 101) {
                 break;
             }
@@ -619,9 +615,7 @@ mod tests {
         let mut i: u128 = 340282366920938463463374607431768211100;
         loop {
             let poseidon_hash: felt252 = i.into();
-            let (market_seed, market_offset) = ImplMarket::split_hash_into_seed_and_offset(
-                poseidon_hash
-            );
+            let (_, market_offset) = ImplMarket::split_hash_into_seed_and_offset(poseidon_hash);
             if (i == 340282366920938463463374607431768211455) {
                 break;
             }

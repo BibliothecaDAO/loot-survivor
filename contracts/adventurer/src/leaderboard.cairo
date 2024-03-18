@@ -51,7 +51,7 @@ impl LeaderboardPacking of StorePacking<Leaderboard, felt252> {
         let mut packed = value.into();
         let (packed, first) = integer::U256DivRem::div_rem(packed, TWO_POW_83.try_into().unwrap());
         let (packed, second) = integer::U256DivRem::div_rem(packed, TWO_POW_83.try_into().unwrap());
-        let (packed, third) = integer::U256DivRem::div_rem(packed, TWO_POW_83.try_into().unwrap());
+        let (_packed, third) = integer::U256DivRem::div_rem(packed, TWO_POW_83.try_into().unwrap());
 
         Leaderboard {
             first: ScorePacking::unpack(first.try_into().unwrap()),

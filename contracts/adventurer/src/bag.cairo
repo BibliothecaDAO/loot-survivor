@@ -136,7 +136,7 @@ impl ImplBag of IBag {
     // @dev This function constructs a new item with the given item_id, sets its metadata using the Adventurer and Bag reference, and adds the item to the bag.
     fn add_new_item(ref self: Bag, adventurer: Adventurer, item_id: u8) {
         let mut item = ImplItemPrimitive::new(item_id);
-        item.set_metadata_id(adventurer, self);
+        item.set_metadata_id(adventurer, self, false);
         self.add_item(item);
     }
 
@@ -514,7 +514,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(56400)]
+    #[available_gas(66400)]
     fn test_contains() {
         let katana = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
         let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 2, metadata: 2 };
@@ -814,7 +814,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item not in bag',))]
-    #[available_gas(6820)]
+    #[available_gas(7820)]
     fn test_get_item_not_in_bag() {
         let item_1 = ItemPrimitive { id: 11, xp: 0, metadata: 0 };
         let item_2 = ItemPrimitive { id: 12, xp: 0, metadata: 0 };
@@ -851,7 +851,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(50100)]
+    #[available_gas(61100)]
     fn test_get_item() {
         let item_1 = ItemPrimitive { id: 11, xp: 0, metadata: 0 };
         let item_2 = ItemPrimitive { id: 12, xp: 0, metadata: 0 };

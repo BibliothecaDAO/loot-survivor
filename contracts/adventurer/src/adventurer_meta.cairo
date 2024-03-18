@@ -20,8 +20,8 @@ impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
 
         (value.start_block.into()
             + StatsPacking::pack(value.starting_stats).into() * TWO_POW_64
-            + interface_camel_u256 * TWO_POW_88
-            + value.name.into() * TWO_POW_89)
+            + interface_camel_u256 * TWO_POW_91
+            + value.name.into() * TWO_POW_92)
             .try_into()
             .unwrap()
     }
@@ -31,7 +31,7 @@ impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
             packed, TWO_POW_64.try_into().unwrap()
         );
         let (packed, starting_stats) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_24.try_into().unwrap()
+            packed, TWO_POW_27.try_into().unwrap()
         );
         let (packed, interface_camel_u256) = integer::U256DivRem::div_rem(
             packed, TWO_POW_1.try_into().unwrap()
@@ -68,6 +68,9 @@ const TWO_POW_64: u256 = 0x10000000000000000;
 const TWO_POW_88: u256 = 0x10000000000000000000000;
 const TWO_POW_89: u256 = 0x20000000000000000000000;
 const TWO_POW_128: u256 = 0x100000000000000000000000000000000;
+const TWO_POW_91: u256 = 0x80000000000000000000000; // 2^91
+const TWO_POW_92: u256 = 0x100000000000000000000000; // 2^92
+const TWO_POW_27: u256 = 0x8000000; // 2^27
 
 #[cfg(test)]
 #[test]

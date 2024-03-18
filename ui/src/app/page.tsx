@@ -579,7 +579,6 @@ function Home({ updateConnectors }: HomeProps) {
                   multicall={multicall}
                   mintLords={mintLords}
                   lordsBalance={lordsBalance}
-                  arcadeConnectors={arcadeConnectors}
                   gameContract={gameContract!}
                   costToPlay={costToPlay!}
                 />

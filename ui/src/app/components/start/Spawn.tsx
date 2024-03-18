@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CallData, Contract } from "starknet";
+import { Block, CallData, Contract } from "starknet";
 import { useAccount, useConnect, useBlock } from "@starknet-react/core";
 import Image from "next/image";
 import { TypeAnimation } from "react-type-animation";
@@ -120,7 +120,7 @@ export const Spawn = ({
     refetchInterval: false,
   });
 
-  const currentBlockNumber = blockData?.block_number ?? 0;
+  const currentBlockNumber = (blockData as Block)?.block_number ?? 0;
 
   const [fetchedAverageBlockTime, setFetchedAverageBlockTime] = useState(false);
 

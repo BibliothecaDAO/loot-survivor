@@ -112,21 +112,11 @@ impl ImplCombat of ICombat {
     fn get_attack_hp(weapon: CombatSpec) -> u16 {
         match weapon.tier {
             Tier::None(()) => 0,
-            Tier::T1(()) => {
-                weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T1
-            },
-            Tier::T2(()) => {
-                weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T2
-            },
-            Tier::T3(()) => {
-                weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T3
-            },
-            Tier::T4(()) => {
-                weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T4
-            },
-            Tier::T5(()) => {
-                weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T5
-            }
+            Tier::T1(()) => { weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T1 },
+            Tier::T2(()) => { weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T2 },
+            Tier::T3(()) => { weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T3 },
+            Tier::T4(()) => { weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T4 },
+            Tier::T5(()) => { weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T5 }
         }
     }
 
@@ -136,21 +126,11 @@ impl ImplCombat of ICombat {
     fn get_armor_hp(armor: CombatSpec) -> u16 {
         match armor.tier {
             Tier::None(()) => 0,
-            Tier::T1(()) => {
-                armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T1
-            },
-            Tier::T2(()) => {
-                armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T2
-            },
-            Tier::T3(()) => {
-                armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T3
-            },
-            Tier::T4(()) => {
-                armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T4
-            },
-            Tier::T5(()) => {
-                armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T5
-            }
+            Tier::T1(()) => { armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T1 },
+            Tier::T2(()) => { armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T2 },
+            Tier::T3(()) => { armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T3 },
+            Tier::T4(()) => { armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T4 },
+            Tier::T5(()) => { armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T5 }
         }
     }
 
@@ -167,15 +147,9 @@ impl ImplCombat of ICombat {
         // get weapon and qualify effectiveness of weapon against armor
         let weapon_effectiveness = ImplCombat::get_elemental_effectiveness(weapon_type, armor_type);
         match weapon_effectiveness {
-            WeaponEffectiveness::Weak(()) => {
-                damage - elemental_effect
-            },
-            WeaponEffectiveness::Fair(()) => {
-                damage
-            },
-            WeaponEffectiveness::Strong(()) => {
-                damage + elemental_effect
-            }
+            WeaponEffectiveness::Weak(()) => { damage - elemental_effect },
+            WeaponEffectiveness::Fair(()) => { damage },
+            WeaponEffectiveness::Strong(()) => { damage + elemental_effect }
         }
     }
 
@@ -186,93 +160,51 @@ impl ImplCombat of ICombat {
     // @return WeaponEffectiveness: the effectiveness of the weapon against the armor
     fn get_elemental_effectiveness(weapon_type: Type, armor_type: Type) -> WeaponEffectiveness {
         match weapon_type {
-            Type::None(()) => {
-                WeaponEffectiveness::Fair(())
-            },
+            Type::None(()) => { WeaponEffectiveness::Fair(()) },
             // Magic is strong against metal, fair against cloth, and weak against hide
             Type::Magic_or_Cloth(()) => {
                 match armor_type {
                     // weapon is strong against no armor
-                    Type::None(()) => {
-                        WeaponEffectiveness::Strong(())
-                    },
-                    Type::Magic_or_Cloth(()) => {
-                        WeaponEffectiveness::Fair(())
-                    },
-                    Type::Blade_or_Hide(()) => {
-                        WeaponEffectiveness::Weak(())
-                    },
-                    Type::Bludgeon_or_Metal(()) => {
-                        WeaponEffectiveness::Strong(())
-                    },
+                    Type::None(()) => { WeaponEffectiveness::Strong(()) },
+                    Type::Magic_or_Cloth(()) => { WeaponEffectiveness::Fair(()) },
+                    Type::Blade_or_Hide(()) => { WeaponEffectiveness::Weak(()) },
+                    Type::Bludgeon_or_Metal(()) => { WeaponEffectiveness::Strong(()) },
                     // should not happen but compiler requires exhaustive match
-                    Type::Necklace(()) => {
-                        WeaponEffectiveness::Fair(())
-                    },
+                    Type::Necklace(()) => { WeaponEffectiveness::Fair(()) },
                     // should not happen but compiler requires exhaustive match
-                    Type::Ring(()) => {
-                        WeaponEffectiveness::Fair(())
-                    }
+                    Type::Ring(()) => { WeaponEffectiveness::Fair(()) }
                 }
             },
             // Blade is strong against cloth, fair against hide, and weak against metal
             Type::Blade_or_Hide(()) => {
                 match armor_type {
                     // weapon is strong against no armor
-                    Type::None(()) => {
-                        WeaponEffectiveness::Strong(())
-                    },
-                    Type::Magic_or_Cloth(()) => {
-                        WeaponEffectiveness::Strong(())
-                    },
-                    Type::Blade_or_Hide(()) => {
-                        WeaponEffectiveness::Fair(())
-                    },
-                    Type::Bludgeon_or_Metal(()) => {
-                        WeaponEffectiveness::Weak(())
-                    },
+                    Type::None(()) => { WeaponEffectiveness::Strong(()) },
+                    Type::Magic_or_Cloth(()) => { WeaponEffectiveness::Strong(()) },
+                    Type::Blade_or_Hide(()) => { WeaponEffectiveness::Fair(()) },
+                    Type::Bludgeon_or_Metal(()) => { WeaponEffectiveness::Weak(()) },
                     // should not happen but compiler requires exhaustive match
-                    Type::Necklace(()) => {
-                        WeaponEffectiveness::Fair(())
-                    },
+                    Type::Necklace(()) => { WeaponEffectiveness::Fair(()) },
                     // should not happen but compiler requires exhaustive match
-                    Type::Ring(()) => {
-                        WeaponEffectiveness::Fair(())
-                    }
+                    Type::Ring(()) => { WeaponEffectiveness::Fair(()) }
                 }
             },
             // Bludgeon is strong against hide, fair against metal, and weak against cloth
             Type::Bludgeon_or_Metal(()) => {
                 match armor_type {
                     // weapon is strong against no armor
-                    Type::None(()) => {
-                        WeaponEffectiveness::Strong(())
-                    },
-                    Type::Magic_or_Cloth(()) => {
-                        WeaponEffectiveness::Weak(())
-                    },
-                    Type::Blade_or_Hide(()) => {
-                        WeaponEffectiveness::Strong(())
-                    },
-                    Type::Bludgeon_or_Metal(()) => {
-                        WeaponEffectiveness::Fair(())
-                    },
+                    Type::None(()) => { WeaponEffectiveness::Strong(()) },
+                    Type::Magic_or_Cloth(()) => { WeaponEffectiveness::Weak(()) },
+                    Type::Blade_or_Hide(()) => { WeaponEffectiveness::Strong(()) },
+                    Type::Bludgeon_or_Metal(()) => { WeaponEffectiveness::Fair(()) },
                     // should not happen but compiler requires exhaustive match
-                    Type::Necklace(()) => {
-                        WeaponEffectiveness::Fair(())
-                    },
+                    Type::Necklace(()) => { WeaponEffectiveness::Fair(()) },
                     // should not happen but compiler requires exhaustive match
-                    Type::Ring(()) => {
-                        WeaponEffectiveness::Fair(())
-                    }
+                    Type::Ring(()) => { WeaponEffectiveness::Fair(()) }
                 }
             },
-            Type::Necklace(()) => {
-                WeaponEffectiveness::Fair(())
-            },
-            Type::Ring(()) => {
-                WeaponEffectiveness::Fair(())
-            },
+            Type::Necklace(()) => { WeaponEffectiveness::Fair(()) },
+            Type::Ring(()) => { WeaponEffectiveness::Fair(()) },
         }
     }
 
@@ -478,24 +410,12 @@ impl ImplCombat of ICombat {
     // @return u16: the base reward
     fn get_base_reward(self: CombatSpec) -> u16 {
         match self.tier {
-            Tier::None(()) => {
-                0
-            },
-            Tier::T1(()) => {
-                (XP_MULTIPLIER::T1 * self.level) / XP_REWARD_DIVISOR
-            },
-            Tier::T2(()) => {
-                (XP_MULTIPLIER::T2 * self.level) / XP_REWARD_DIVISOR
-            },
-            Tier::T3(()) => {
-                (XP_MULTIPLIER::T3 * self.level) / XP_REWARD_DIVISOR
-            },
-            Tier::T4(()) => {
-                (XP_MULTIPLIER::T4 * self.level) / XP_REWARD_DIVISOR
-            },
-            Tier::T5(()) => {
-                (XP_MULTIPLIER::T5 * self.level) / XP_REWARD_DIVISOR
-            }
+            Tier::None(()) => { 0 },
+            Tier::T1(()) => { (XP_MULTIPLIER::T1 * self.level) / XP_REWARD_DIVISOR },
+            Tier::T2(()) => { (XP_MULTIPLIER::T2 * self.level) / XP_REWARD_DIVISOR },
+            Tier::T3(()) => { (XP_MULTIPLIER::T3 * self.level) / XP_REWARD_DIVISOR },
+            Tier::T4(()) => { (XP_MULTIPLIER::T4 * self.level) / XP_REWARD_DIVISOR },
+            Tier::T5(()) => { (XP_MULTIPLIER::T5 * self.level) / XP_REWARD_DIVISOR }
         }
     }
 
@@ -664,7 +584,7 @@ mod tests {
     fn test_get_enemy_starting_health_max_values() {
         // test max value case
         // no need to assert result just make sure it doesn't panic
-        let enemy_starting_health = ImplCombat::get_enemy_starting_health(
+        let _enemy_starting_health = ImplCombat::get_enemy_starting_health(
             255, 340282366920938463463374607431768211455
         );
     }
@@ -1055,7 +975,7 @@ mod tests {
     fn test_critical_hit_bonus() {
         let base_damage = 100;
         let critical_hit_chance = 100;
-        let mut damage_multiplier = 1;
+        let mut _damage_multiplier = 1;
 
         // low critical hit damage 
         let mut entropy = 0;
@@ -1348,10 +1268,10 @@ mod tests {
     fn test_calculate_damage() {
         let minimum_damage = 4;
 
-        let min_critical_hit_bonus = 0;
+        let _min_critical_hit_bonus = 0;
         let medium_critical_hit_bonus = 1;
-        let high_critical_hit_bonus = 2;
-        let max_critical_hit_bonus = 3;
+        let _high_critical_hit_bonus = 2;
+        let _max_critical_hit_bonus = 3;
 
         // initialize other combat parameters
         // start with simplest values to reduce number of variables to track
@@ -1487,9 +1407,9 @@ mod tests {
     #[available_gas(750000)]
     fn test_get_random_level() {
         let mut adventurer_level = 1;
-        let range_level_increase = DIFFICULTY_INCREASE_RATE::NORMAL;
-        let level_multiplier = LEVEL_MULTIPLIER::NORMAL;
-        let beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+        let _range_level_increase = DIFFICULTY_INCREASE_RATE::NORMAL;
+        let _level_multiplier = LEVEL_MULTIPLIER::NORMAL;
+        let _beast_level = ImplCombat::get_random_level(adventurer_level, 0);
 
         adventurer_level = 2;
         let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
