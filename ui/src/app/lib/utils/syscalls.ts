@@ -3,7 +3,7 @@ import {
   InvokeTransactionReceiptResponse,
   Contract,
   AccountInterface,
-  RevertedTransactionReceiptResponse,
+  GetTransactionReceiptResponse,
   Provider,
 } from "starknet";
 import { GameData } from "@/app/lib/data/GameData";
@@ -38,8 +38,7 @@ import { TRANSACTION_WAIT_RETRY_INTERVAL } from "@/app/lib/constants";
 
 const rpc_addr = process.env.NEXT_PUBLIC_RPC_URL;
 const provider = new Provider({
-  rpc: { nodeUrl: rpc_addr! },
-  sequencer: { baseUrl: rpc_addr! },
+  nodeUrl: rpc_addr!,
 });
 
 export interface SyscallsProps {
@@ -348,11 +347,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as RevertedTransactionReceiptResponse).execution_status ===
+        (receipt as GetTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as RevertedTransactionReceiptResponse).revert_reason
+          (receipt as GetTransactionReceiptResponse).revert_reason
         );
       }
       // Here we need to process the StartGame event first and use the output for AmbushedByBeast event
@@ -463,11 +462,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as RevertedTransactionReceiptResponse).execution_status ===
+        (receipt as GetTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as RevertedTransactionReceiptResponse).revert_reason
+          (receipt as GetTransactionReceiptResponse).revert_reason
         );
       }
       const events = await parseEvents(
@@ -733,11 +732,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as RevertedTransactionReceiptResponse).execution_status ===
+        (receipt as GetTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as RevertedTransactionReceiptResponse).revert_reason
+          (receipt as GetTransactionReceiptResponse).revert_reason
         );
       }
       // reset battles by tx hash
@@ -1001,11 +1000,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as RevertedTransactionReceiptResponse).execution_status ===
+        (receipt as GetTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as RevertedTransactionReceiptResponse).revert_reason
+          (receipt as GetTransactionReceiptResponse).revert_reason
         );
       }
       // Add optimistic data
@@ -1207,11 +1206,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as RevertedTransactionReceiptResponse).execution_status ===
+        (receipt as GetTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as RevertedTransactionReceiptResponse).revert_reason
+          (receipt as GetTransactionReceiptResponse).revert_reason
         );
       }
       // Add optimistic data
@@ -1359,11 +1358,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as RevertedTransactionReceiptResponse).execution_status ===
+        (receipt as GetTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as RevertedTransactionReceiptResponse).revert_reason
+          (receipt as GetTransactionReceiptResponse).revert_reason
         );
       }
       const events = await parseEvents(
@@ -1444,11 +1443,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as RevertedTransactionReceiptResponse).execution_status ===
+        (receipt as GetTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as RevertedTransactionReceiptResponse).revert_reason
+          (receipt as GetTransactionReceiptResponse).revert_reason
         );
       }
       const events = await parseEvents(

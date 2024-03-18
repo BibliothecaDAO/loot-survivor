@@ -20,8 +20,7 @@ import {
   AccountInterface,
   Contract,
   DeclareTransactionReceiptResponse,
-  RevertedTransactionReceiptResponse,
-  RejectedTransactionReceiptResponse,
+  GetTransactionReceiptResponse,
 } from "starknet";
 import { ETH_PREFUND_AMOUNT } from "@/app/lib/burner";
 import Eth from "public/icons/eth-2.svg";
@@ -77,8 +76,7 @@ interface SectionContentProps {
     ethAmount?: number | undefined
   ) => Promise<
     | DeclareTransactionReceiptResponse
-    | RevertedTransactionReceiptResponse
-    | RejectedTransactionReceiptResponse
+    | GetTransactionReceiptResponse
     | undefined
   >;
   isToppingUpEth: boolean;

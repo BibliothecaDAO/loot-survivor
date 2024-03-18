@@ -101,7 +101,7 @@ export default function InventoryScreen({
   const gameData = new GameData();
 
   const checkTransacting = (item: string) => {
-    if (txData?.status == "RECEIVED") {
+    if (txData?.finality_status !== undefined) {
       return transactingItemIds?.includes(item);
     } else {
       return false;

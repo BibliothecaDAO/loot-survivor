@@ -25,8 +25,7 @@ export const ETH_PREFUND_AMOUNT = isMainnet
 
 const rpc_addr = process.env.NEXT_PUBLIC_RPC_URL;
 const provider = new Provider({
-  rpc: { nodeUrl: rpc_addr! },
-  sequencer: { baseUrl: rpc_addr! },
+  nodeUrl: rpc_addr!,
 });
 
 interface UseBurnerProps {
