@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useBlock } from "@starknet-react/core";
-import { Contract } from "starknet";
+import { Contract, Block } from "starknet";
 import { BattleDisplay } from "@/app/components/beast/BattleDisplay";
 import { BeastDisplay } from "@/app/components/beast/BeastDisplay";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
@@ -171,7 +171,7 @@ export default function BeastScreen({
     </div>
   );
 
-  const currentBlockNumber = blockData?.block_number ?? 0;
+  const currentBlockNumber = (blockData as Block)?.block_number ?? 0;
 
   const revealBlockReached =
     currentBlockNumber >= (adventurer?.revealBlock ?? 0);

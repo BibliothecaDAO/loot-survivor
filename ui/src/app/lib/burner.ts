@@ -25,8 +25,7 @@ export const ETH_PREFUND_AMOUNT = isMainnet
 
 const rpc_addr = process.env.NEXT_PUBLIC_RPC_URL;
 const provider = new Provider({
-  rpc: { nodeUrl: rpc_addr! },
-  sequencer: { baseUrl: rpc_addr! },
+  nodeUrl: rpc_addr!,
 });
 
 interface UseBurnerProps {
@@ -311,7 +310,7 @@ export const useBurner = ({
             contractAddress: accountAAFinalAdress,
             entrypoint: "update_whitelisted_calls",
             calldata: [
-              "3",
+              "4",
               ethContract?.address ?? "",
               selector.getSelectorFromName("transfer"),
               "1",
@@ -320,6 +319,9 @@ export const useBurner = ({
               "1",
               lordsContract?.address ?? "",
               selector.getSelectorFromName("transfer"),
+              "1",
+              lordsContract?.address ?? "",
+              selector.getSelectorFromName("mint"), // needed for testnet deployment
               "1",
             ],
           },

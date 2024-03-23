@@ -87,7 +87,7 @@ impl ImplGameEntropy of IGameEntropy {
         block_number_diff * 3600 / block_timestamp_diff
     }
 
-    /// @notice Calculate the current rate of blocks produced per hour, based on a ten-minute window.
+    /// @notice Calculate the current rate of blocks produced per hour, based on a thirty minute window.
     /// @return The number of blocks produced per hour.
     #[inline(always)]
     fn current_blocks_per_hour(self: GameEntropy) -> u64 {
@@ -168,28 +168,28 @@ mod tests {
         let last_updated_block = 0;
         let last_updated_time = 0;
         let next_update_block = 0;
-        let hash = ImplGameEntropy::get_hash(
+        let _hash = ImplGameEntropy::get_hash(
             last_updated_block, last_updated_time, next_update_block
         );
     }
 
     #[test]
-    #[available_gas(14280)]
+    #[available_gas(24280)]
     fn test_is_adventurer_idle() {
         let hash = 0x123;
         let last_updated_block = 282360;
         let last_updated_time = 1696209920;
-        let next_update_block = 282364;
+        let next_update_block = 282380;
 
         let game_entropy = GameEntropy {
             hash, last_updated_block, last_updated_time, next_update_block,
         };
 
-        let adventurer_idle_blocks = 3;
+        let adventurer_idle_blocks = 4;
         let is_idle = game_entropy.is_adventurer_idle(adventurer_idle_blocks);
         assert(!is_idle, 'should not be idle');
 
-        let adventurer_idle_blocks = 4;
+        let adventurer_idle_blocks = 6;
         let is_idle = game_entropy.is_adventurer_idle(adventurer_idle_blocks);
         assert(is_idle, 'should be idle');
     }
@@ -208,7 +208,7 @@ mod tests {
 
         // next entropy rotation is in 3 blocks which is 10 minutes
         // at 1 block per 3mins (20 blocks per hour)
-        assert(next_entropy_rotation == 4, 'wrong rotation, slow speed');
+        assert(next_entropy_rotation == 11, 'wrong rotation, slow speed');
 
         // starknet expects to eventually be producing blocks every 30s (2 per min, 120 per hour)
         let blocks_per_hour = 120;
@@ -216,7 +216,7 @@ mod tests {
             current_block, blocks_per_hour
         );
         // after this blockspeed, ten minutes is now 20 blocks in the future
-        assert(next_entropy_rotation == 21, 'wrong rotation, fast speed');
+        assert(next_entropy_rotation == 61, 'wrong rotation, fast speed');
     }
 
     #[test]
@@ -229,9 +229,9 @@ mod tests {
             next_update_block: 282481,
         };
         let blocks_per_hour = game_entropy.current_blocks_per_hour();
-        assert(blocks_per_hour == 96, 'wrong blocks per hour')
+        assert(blocks_per_hour == 32, 'wrong blocks per hour')
     }
-
+    
     #[test]
     #[available_gas(29280)]
     fn test_calculate_blocks_per_hour() {

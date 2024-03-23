@@ -22,7 +22,7 @@ use super::{
             MINIMUM_DAMAGE_FROM_BEASTS, OBSTACLE_CRITICAL_HIT_CHANCE, BEAST_CRITICAL_HIT_CHANCE,
             SILVER_RING_LUCK_BONUS_PER_GREATNESS, MINIMUM_DAMAGE_FROM_OBSTACLES,
             MINIMUM_DAMAGE_TO_BEASTS, MAX_ACTIONS_PER_BLOCK, MAX_PACKABLE_ITEM_XP,
-            MAX_PACKABLE_BEAST_HEALTH, MAX_LAST_ACTION_BLOCK
+            MAX_PACKABLE_BEAST_HEALTH, MAX_LAST_ACTION_BLOCK, MAX_STAT_VALUE_5_BITS
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
     },
@@ -43,8 +43,8 @@ use beasts::{beast::{ImplBeast, Beast}, constants::BeastSettings};
 struct Adventurer {
     last_action_block: u16, // 9 bits
     health: u16, // 9 bits
-    xp: u16, // 13 bits
-    stats: Stats, // 24 bits
+    xp: u16, // 14 bits
+    stats: Stats, // 26 bits
     gold: u16, // 9 bits
     weapon: ItemPrimitive, // 21 bits
     chest: ItemPrimitive, // 21 bits
@@ -67,22 +67,23 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
         (value.last_action_block.into()
             + value.health.into() * TWO_POW_9
             + value.xp.into() * TWO_POW_18
-            + StatsPacking::pack(value.stats).into() * TWO_POW_31
-            + value.gold.into() * TWO_POW_55
-            + ItemPrimitivePacking::pack(value.weapon).into() * TWO_POW_64
-            + ItemPrimitivePacking::pack(value.chest).into() * TWO_POW_85
-            + ItemPrimitivePacking::pack(value.head).into() * TWO_POW_106
-            + ItemPrimitivePacking::pack(value.waist).into() * TWO_POW_127
-            + ItemPrimitivePacking::pack(value.foot).into() * TWO_POW_148
-            + ItemPrimitivePacking::pack(value.hand).into() * TWO_POW_169
-            + ItemPrimitivePacking::pack(value.neck).into() * TWO_POW_190
-            + ItemPrimitivePacking::pack(value.ring).into() * TWO_POW_211
-            + value.beast_health.into() * TWO_POW_232
-            + value.stat_points_available.into() * TWO_POW_241
-            + value.actions_per_block.into() * TWO_POW_244)
+            + StatsPacking::pack(value.stats).into() * TWO_POW_32
+            + value.gold.into() * TWO_POW_58
+            + ItemPrimitivePacking::pack(value.weapon).into() * TWO_POW_67
+            + ItemPrimitivePacking::pack(value.chest).into() * TWO_POW_88
+            + ItemPrimitivePacking::pack(value.head).into() * TWO_POW_109
+            + ItemPrimitivePacking::pack(value.waist).into() * TWO_POW_130
+            + ItemPrimitivePacking::pack(value.foot).into() * TWO_POW_151
+            + ItemPrimitivePacking::pack(value.hand).into() * TWO_POW_172
+            + ItemPrimitivePacking::pack(value.neck).into() * TWO_POW_193
+            + ItemPrimitivePacking::pack(value.ring).into() * TWO_POW_214
+            + value.beast_health.into() * TWO_POW_235
+            + value.stat_points_available.into() * TWO_POW_244
+            + value.actions_per_block.into() * TWO_POW_247)
             .try_into()
             .unwrap()
     }
+
 
     fn unpack(value: felt252) -> Adventurer {
         let packed = value.into();
@@ -90,8 +91,8 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
             packed, TWO_POW_9.try_into().unwrap()
         );
         let (packed, health) = integer::U256DivRem::div_rem(packed, TWO_POW_9.try_into().unwrap());
-        let (packed, xp) = integer::U256DivRem::div_rem(packed, TWO_POW_13.try_into().unwrap());
-        let (packed, stats) = integer::U256DivRem::div_rem(packed, TWO_POW_24.try_into().unwrap());
+        let (packed, xp) = integer::U256DivRem::div_rem(packed, TWO_POW_14.try_into().unwrap());
+        let (packed, stats) = integer::U256DivRem::div_rem(packed, TWO_POW_26.try_into().unwrap());
         let (packed, gold) = integer::U256DivRem::div_rem(packed, TWO_POW_9.try_into().unwrap());
         let (packed, weapon) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
         let (packed, chest) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
@@ -128,7 +129,7 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
             beast_health: beast_health.try_into().unwrap(),
             stat_points_available: stat_points_available.try_into().unwrap(),
             actions_per_block: actions_per_block.try_into().unwrap(),
-            mutated: false,
+            mutated: false, // This field is not packed/unpacked
         }
     }
 }
@@ -938,7 +939,7 @@ impl ImplAdventurer of IAdventurer {
             hash_span.append(self.xp.into());
             hash_span.append(adventurer_entropy);
             let poseidon = poseidon_hash_span(hash_span.span());
-            let (d, r) = integer::U256DivRem::div_rem(
+            let (_d, r) = integer::U256DivRem::div_rem(
                 poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
             );
             r.try_into().unwrap()
@@ -1596,30 +1597,18 @@ impl ImplAdventurer of IAdventurer {
     fn jewelry_armor_bonus(self: ItemPrimitive, armor_type: Type, base_armor: u16) -> u16 {
         // qualify no bonus outcomes and return 0
         match armor_type {
-            Type::None(()) => {
+            Type::None(()) => { return 0; },
+            Type::Magic_or_Cloth(()) => { if (self.id != ItemId::Amulet) {
                 return 0;
-            },
-            Type::Magic_or_Cloth(()) => {
-                if (self.id != ItemId::Amulet) {
-                    return 0;
-                }
-            },
-            Type::Blade_or_Hide(()) => {
-                if (self.id != ItemId::Pendant) {
-                    return 0;
-                }
-            },
-            Type::Bludgeon_or_Metal(()) => {
-                if (self.id != ItemId::Necklace) {
-                    return 0;
-                }
-            },
-            Type::Necklace(()) => {
+            } },
+            Type::Blade_or_Hide(()) => { if (self.id != ItemId::Pendant) {
                 return 0;
-            },
-            Type::Ring(()) => {
+            } },
+            Type::Bludgeon_or_Metal(()) => { if (self.id != ItemId::Necklace) {
                 return 0;
-            }
+            } },
+            Type::Necklace(()) => { return 0; },
+            Type::Ring(()) => { return 0; }
         }
 
         // if execution reaches here, the necklace provides a bonus for the armor type
@@ -1681,9 +1670,9 @@ impl ImplAdventurer of IAdventurer {
         assert(self.health <= MAX_ADVENTURER_HEALTH, 'health overflow');
         assert(self.xp <= MAX_XP, 'xp overflow');
         assert(self.gold <= MAX_GOLD, 'gold overflow');
-        assert(self.stats.strength <= MAX_STAT_VALUE, 'strength overflow');
+        assert(self.stats.strength <= MAX_STAT_VALUE_5_BITS, 'strength overflow');
         assert(self.stats.dexterity <= MAX_STAT_VALUE, 'dexterity overflow');
-        assert(self.stats.vitality <= MAX_STAT_VALUE, 'vitality overflow');
+        assert(self.stats.vitality <= MAX_STAT_VALUE_5_BITS, 'vitality overflow');
         assert(self.stats.charisma <= MAX_STAT_VALUE, 'charisma overflow');
         assert(self.stats.intelligence <= MAX_STAT_VALUE, 'intelligence overflow');
         assert(self.stats.wisdom <= MAX_STAT_VALUE, 'wisdom overflow');
@@ -1712,28 +1701,44 @@ impl ImplAdventurer of IAdventurer {
         hash_span.append(start_hash);
         poseidon_hash_span(hash_span.span())
     }
+
+    /// @title invalidate_adventurer
+    /// @notice This function invalidates an adventurer by setting its xp to 1 and gold to 0.
+    /// @dev This function directly modifies the state of the adventurer.
+    /// @param self The Adventurer struct instance to be invalidated.
+    #[inline(always)]
+    fn invalidate_game(ref self: Adventurer) {
+        self.health = 0;
+        self.xp = 1;
+        self.gold = 0;
+    }
 }
 
-const TWO_POW_3: u256 = 0x8;
-const TWO_POW_4: u256 = 0x10;
-const TWO_POW_9: u256 = 0x200;
-const TWO_POW_13: u256 = 0x2000;
-const TWO_POW_18: u256 = 0x40000;
-const TWO_POW_21: u256 = 0x200000;
-const TWO_POW_24: u256 = 0x1000000;
-const TWO_POW_31: u256 = 0x80000000;
-const TWO_POW_55: u256 = 0x80000000000000;
-const TWO_POW_64: u256 = 0x10000000000000000;
-const TWO_POW_85: u256 = 0x2000000000000000000000;
-const TWO_POW_106: u256 = 0x400000000000000000000000000;
-const TWO_POW_127: u256 = 0x80000000000000000000000000000000;
-const TWO_POW_148: u256 = 0x10000000000000000000000000000000000000;
-const TWO_POW_169: u256 = 0x2000000000000000000000000000000000000000000;
-const TWO_POW_190: u256 = 0x400000000000000000000000000000000000000000000000;
-const TWO_POW_211: u256 = 0x80000000000000000000000000000000000000000000000000000;
-const TWO_POW_232: u256 = 0x10000000000000000000000000000000000000000000000000000000000;
-const TWO_POW_241: u256 = 0x2000000000000000000000000000000000000000000000000000000000000;
-const TWO_POW_244: u256 = 0x10000000000000000000000000000000000000000000000000000000000000;
+
+const TWO_POW_3: u256 = 0x8; // 2^3
+const TWO_POW_4: u256 = 0x10; // 2^4
+const TWO_POW_9: u256 = 0x200; // 2^9
+const TWO_POW_13: u256 = 0x2000; // 2^13
+const TWO_POW_14: u256 = 0x4000; // 2^14
+const TWO_POW_18: u256 = 0x40000; // 2^18
+const TWO_POW_21: u256 = 0x200000; // 2^21
+const TWO_POW_26: u256 = 0x4000000; // 2^26
+const TWO_POW_27: u256 = 0x8000000; // 2^27
+const TWO_POW_31: u256 = 0x80000000; // 2^31
+const TWO_POW_32: u256 = 0x100000000; // 2^32
+const TWO_POW_58: u256 = 0x400000000000000; // 2^58
+const TWO_POW_67: u256 = 0x80000000000000000; // 2^67
+const TWO_POW_88: u256 = 0x10000000000000000000000; // 2^88
+const TWO_POW_109: u256 = 0x2000000000000000000000000000; // 2^109
+const TWO_POW_130: u256 = 0x400000000000000000000000000000000; // 2^130
+const TWO_POW_151: u256 = 0x80000000000000000000000000000000000000; // 2^151
+const TWO_POW_172: u256 = 0x10000000000000000000000000000000000000000000; // 2^172
+const TWO_POW_193: u256 = 0x2000000000000000000000000000000000000000000000000; // 2^193
+const TWO_POW_214: u256 = 0x400000000000000000000000000000000000000000000000000000; // 2^214
+const TWO_POW_235: u256 = 0x80000000000000000000000000000000000000000000000000000000000; // 2^235
+const TWO_POW_244: u256 = 0x10000000000000000000000000000000000000000000000000000000000000; // 2^244
+const TWO_POW_247: u256 = 0x80000000000000000000000000000000000000000000000000000000000000; // 2^247
+
 
 // ---------------------------
 // ---------- Tests ----------
@@ -1796,7 +1801,7 @@ mod tests {
         // equip gold ring with G1
         let gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 1 };
         adventurer.ring = gold_ring;
-        let bonus = adventurer.ring.jewelry_gold_bonus(base_gold_amount);
+        let _bonus = adventurer.ring.jewelry_gold_bonus(base_gold_amount);
         assert(adventurer.ring.jewelry_gold_bonus(base_gold_amount) == 3, 'bonus should be 3');
 
         // increase greatness of gold ring to 10
@@ -1821,7 +1826,7 @@ mod tests {
     fn test_get_bonus_luck_gas() {
         // instantiate silver ring
         let silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 1, metadata: 1 };
-        let bonus_luck = silver_ring.jewelry_bonus_luck();
+        let _bonus_luck = silver_ring.jewelry_bonus_luck();
     }
 
     #[test]
@@ -2530,7 +2535,7 @@ mod tests {
 
         let entropy = 1;
         // check new adventurer (level 1) gets a starter beast
-        let (beast, beast_seed) = adventurer.get_beast(entropy);
+        let (beast, _) = adventurer.get_beast(entropy);
         assert(beast.combat_spec.level == 1, 'beast should be lvl1');
         assert(beast.combat_spec.specials.special1 == 0, 'beast should have no special1');
         assert(beast.combat_spec.specials.special2 == 0, 'beast should have no special2');
@@ -2538,7 +2543,7 @@ mod tests {
 
         let entropy = 2;
         // check beast is still starter beast with different entropy source
-        let (beast, beast_seed) = adventurer.get_beast(entropy);
+        let (beast, _) = adventurer.get_beast(entropy);
         assert(beast.combat_spec.level == 1, 'beast should be lvl1');
         assert(beast.combat_spec.specials.special1 == 0, 'beast should have no special1');
         assert(beast.combat_spec.specials.special2 == 0, 'beast should have no special2');
@@ -2547,9 +2552,9 @@ mod tests {
         // advance adventurer to level 2
         adventurer.xp = 4;
         let entropy = 1;
-        let (beast1, beast_seed) = adventurer.get_beast(entropy);
+        let (beast1, _) = adventurer.get_beast(entropy);
         let entropy = 2;
-        let (beast2, beast_seed) = adventurer.get_beast(entropy);
+        let (beast2, _) = adventurer.get_beast(entropy);
 
         // verify beasts are the same since the seed did not change
         assert(beast1.id != beast2.id, 'beasts not unique');
@@ -2558,7 +2563,7 @@ mod tests {
     #[test]
     #[available_gas(70320)]
     fn test_get_greatness_gas() {
-        let greatness = ImplAdventurer::get_greatness(
+        let _greatness = ImplAdventurer::get_greatness(
             ItemPrimitive { id: 1, xp: 400, metadata: 1 }
         );
     }
@@ -2766,16 +2771,85 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(3000000)]
+    #[available_gas(30020000)]
     fn test_packing_and_unpacking_adventurer() {
         let adventurer = Adventurer {
             last_action_block: 511,
             health: 511,
-            xp: 8191,
+            xp: 16383,
             stats: Stats {
-                strength: 15,
+                strength: 31,
                 dexterity: 15,
-                vitality: 15,
+                vitality: 31,
+                intelligence: 15,
+                wisdom: 15,
+                charisma: 15,
+                luck: 15
+            },
+            gold: 511,
+            weapon: ItemPrimitive { id: 127, xp: 511, metadata: 31, },
+            chest: ItemPrimitive { id: 1, xp: 0, metadata: 0, },
+            head: ItemPrimitive { id: 127, xp: 511, metadata: 31, },
+            waist: ItemPrimitive { id: 87, xp: 511, metadata: 4, },
+            foot: ItemPrimitive { id: 78, xp: 511, metadata: 5, },
+            hand: ItemPrimitive { id: 34, xp: 511, metadata: 6, },
+            neck: ItemPrimitive { id: 32, xp: 511, metadata: 7, },
+            ring: ItemPrimitive { id: 1, xp: 511, metadata: 8, },
+            beast_health: 511,
+            stat_points_available: 7,
+            actions_per_block: 0,
+            mutated: false
+        };
+        let packed = AdventurerPacking::pack(adventurer);
+        let unpacked: Adventurer = AdventurerPacking::unpack(packed);
+        assert(adventurer.last_action_block == unpacked.last_action_block, 'last_action_block');
+        assert(adventurer.health == unpacked.health, 'health');
+        assert(adventurer.xp == unpacked.xp, 'xp');
+        assert(adventurer.stats.strength == unpacked.stats.strength, 'strength');
+        assert(adventurer.stats.dexterity == unpacked.stats.dexterity, 'dexterity');
+        assert(adventurer.stats.vitality == unpacked.stats.vitality, 'vitality');
+        assert(adventurer.stats.intelligence == unpacked.stats.intelligence, 'intelligence');
+        assert(adventurer.stats.wisdom == unpacked.stats.wisdom, 'wisdom');
+        assert(adventurer.stats.charisma == unpacked.stats.charisma, 'charisma');
+        assert(adventurer.gold == unpacked.gold, 'luck');
+        assert(adventurer.weapon.id == unpacked.weapon.id, 'weapon.id');
+        assert(adventurer.weapon.xp == unpacked.weapon.xp, 'weapon.xp');
+        assert(adventurer.weapon.metadata == unpacked.weapon.metadata, 'weapon.metadata');
+        assert(adventurer.chest.id == unpacked.chest.id, 'chest.id');
+        assert(adventurer.chest.xp == unpacked.chest.xp, 'chest.xp');
+        assert(adventurer.chest.metadata == unpacked.chest.metadata, 'chest.metadata');
+        assert(adventurer.head.id == unpacked.head.id, 'head.id');
+        assert(adventurer.head.xp == unpacked.head.xp, 'head.xp');
+        assert(adventurer.head.metadata == unpacked.head.metadata, 'head.metadata');
+        assert(adventurer.waist.id == unpacked.waist.id, 'waist.id');
+        assert(adventurer.waist.xp == unpacked.waist.xp, 'waist.xp');
+        assert(adventurer.waist.metadata == unpacked.waist.metadata, 'waist.metadata');
+        assert(adventurer.foot.id == unpacked.foot.id, 'foot.id');
+        assert(adventurer.foot.xp == unpacked.foot.xp, 'foot.xp');
+        assert(adventurer.foot.metadata == unpacked.foot.metadata, 'foot.metadata');
+        assert(adventurer.hand.id == unpacked.hand.id, 'hand.id');
+        assert(adventurer.hand.xp == unpacked.hand.xp, 'hand.xp');
+        assert(adventurer.hand.metadata == unpacked.hand.metadata, 'hand.metadata');
+        assert(adventurer.neck.id == unpacked.neck.id, 'neck.id');
+        assert(adventurer.neck.xp == unpacked.neck.xp, 'neck.xp');
+        assert(adventurer.neck.metadata == unpacked.neck.metadata, 'neck.metadata');
+        assert(adventurer.ring.id == unpacked.ring.id, 'ring.id');
+        assert(adventurer.ring.xp == unpacked.ring.xp, 'ring.xp');
+        assert(adventurer.ring.metadata == unpacked.ring.metadata, 'ring.metadata');
+        assert(adventurer.beast_health == unpacked.beast_health, 'beast_health');
+        assert(
+            adventurer.stat_points_available == unpacked.stat_points_available,
+            'stat_points_available'
+        );
+
+        let adventurer = Adventurer {
+            last_action_block: 511,
+            health: 511,
+            xp: 16383,
+            stats: Stats {
+                strength: 31,
+                dexterity: 15,
+                vitality: 31,
                 intelligence: 15,
                 wisdom: 15,
                 charisma: 15,
@@ -2870,8 +2944,17 @@ mod tests {
     #[available_gas(3000000)]
     fn test_pack_protection_overflow_strength() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.stats.strength = MAX_STAT_VALUE + 1;
+        adventurer.stats.strength = 32;
         AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[available_gas(3000000)]
+    fn test_pack_protection_strength() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.strength = 31;
+        let unpacked: Adventurer = AdventurerPacking::unpack(AdventurerPacking::pack(adventurer));
+        assert(unpacked.stats.strength == adventurer.stats.strength, 'strength should be same');
     }
 
     #[test]
@@ -2888,8 +2971,17 @@ mod tests {
     #[available_gas(3000000)]
     fn test_pack_protection_overflow_vitality() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.stats.vitality = MAX_STAT_VALUE + 1;
+        adventurer.stats.vitality = 32;
         AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[available_gas(3000000)]
+    fn test_pack_protection_vitality() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.stats.vitality = 31;
+        let unpacked: Adventurer = AdventurerPacking::unpack(AdventurerPacking::pack(adventurer));
+        assert(unpacked.stats.vitality == adventurer.stats.vitality, 'vitality should be same');
     }
 
     #[test]
@@ -3135,7 +3227,7 @@ mod tests {
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(MAX_XP + 10);
         assert(adventurer.xp == MAX_XP, 'xp should stop at max xp');
         assert(previous_level == 2, 'prev level should be 2');
-        assert(new_level == 90, 'new level should be 90');
+        assert(new_level == 127, 'new level should be max 127');
 
         // u16 overflow case
         adventurer.increase_adventurer_xp(65535);
@@ -4846,7 +4938,7 @@ mod tests {
         // overflow case
         adventurer.ring.xp = 65535;
         adventurer.neck.xp = 65535;
-        let luck = adventurer.calculate_luck(bag);
+        let _luck = adventurer.calculate_luck(bag);
         assert(
             adventurer.calculate_luck(bag) == (ITEM_MAX_GREATNESS * 2) + SILVER_RING_G20_LUCK_BONUS,
             'should be 60 luck'
@@ -5173,5 +5265,15 @@ mod tests {
         assert(!adventurer.is_ambushed(4), 'should not be ambushed 4');
         assert(adventurer.is_ambushed(5), 'should be ambushed 5');
         assert(!adventurer.is_ambushed(6), 'should not be ambushed 6');
+    }
+
+    #[test]
+    #[available_gas(1000000)]
+    fn test_invalidate_game() {
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.invalidate_game();
+        assert(adventurer.health == 0, 'adventurer health should be 0');
+        assert(adventurer.xp == 1, 'adventurer xp should be 1');
+        assert(adventurer.gold == 0, 'adventurer gold should be 0');
     }
 }

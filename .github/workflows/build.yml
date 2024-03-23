@@ -4,92 +4,32 @@ on:
   push:
     branches:
       - main
-  pull_request:    
+  pull_request:
 
 env:
-  SCARB_VERSION: 0.7.0
+  SCARB_VERSION: 2.5.4
 
 jobs:
-  build-contracts:
-    name: Build Adventurer
+  build:
+    name: Build Contracts
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        contract: [
+            adventurer,
+            game,
+            loot,
+            market,
+            obstacles,
+            combat,
+            game_entropy,
+            game_snapshot,
+          ]
     steps:
       - uses: actions/checkout@v3
 
       - name: Setup Scarb
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
+        run: curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
 
-      - name: Scarb build
-        run: |
-          cd contracts/adventurer && scarb build && scarb cairo-test
-
-  build-game:
-    name: Build Game
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Scarb
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
-
-      - name: Scarb build
-        run: |
-          cd contracts/game && scarb build && scarb cairo-test
-
-  build-loot:
-    name: Build Loot
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Scarb
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
-
-      - name: Scarb build
-        run: |
-          cd contracts/loot && scarb build && scarb cairo-test
-
-  build-market:
-    name: Build Market
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Scarb
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
-
-      - name: Scarb build
-        run: |
-          cd contracts/market && scarb build && scarb cairo-test
-
-  build-obstacles:
-    name: Build Obstacles
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Scarb
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
-
-      - name: Scarb build
-        run: |
-          cd contracts/obstacles && scarb build && scarb cairo-test         
-
-  build-combat:
-    name: Build Combat
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Scarb
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
-
-      - name: Scarb build
-        run: |
-          cd contracts/combat && scarb build && scarb cairo-test         
+      - name: Scarb build ${{ matrix.contract }}
+        run: cd contracts/${{ matrix.contract }} && scarb build && scarb cairo-test

@@ -17,3 +17,4 @@ contracts/game_entropy/target/CACHEDIR.TAG
 contracts/game_entropy/target/dev/game_entropy.sierra
 
 scripts/stress_test.py
+.env

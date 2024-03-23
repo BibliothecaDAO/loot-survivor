@@ -1,10 +1,12 @@
 #!/bin/bash
 
-export STARKNET_NETWORK=alpha-goerli
-export STARKNET_WALLET=starkware.starknet.wallets.open_zeppelin.OpenZeppelinAccount
-export CAIRO_COMPILER_DIR=~/.cairo/target/release/
-export CAIRO_COMPILER_ARGS=--add-pythonic-hints
+# Source env vars
+ENV_FILE="/workspaces/loot-survivor/.env"
+source $ENV_FILE
 
-scarb contracts/game/build
+# build game contract
+cd /workspaces/loot-survivor/contracts/
+scarb build
 
-starknet declare --contract contracts/game/target/dev/game_Game.sierra.json --account deployer_4
+# declare game contract
+starkli declare --watch /workspaces/loot-survivor/target/dev/game_Game.contract_class.json --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY
