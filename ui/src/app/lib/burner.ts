@@ -246,7 +246,9 @@ export const useBurner = ({
             addressSalt: publicKey,
           },
           {
-            maxFee: feeEstimateResult.suggestedMaxFee * BigInt(2),
+            maxFee:
+              feeEstimateResult.suggestedMaxFee *
+              (isSepolia ? BigInt(5) : BigInt(2)),
           }
         );
 
