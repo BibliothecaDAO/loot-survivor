@@ -214,10 +214,7 @@ const SectionContent = ({
                 onClick={() =>
                   onMainnet
                     ? window.open("https://starkgate.starknet.io//", "_blank")
-                    : window.open(
-                        "https://faucet.goerli.starknet.io/",
-                        "_blank"
-                      )
+                    : window.open(process.env.NEXT_PUBLIC_FAUCET_URL, "_blank")
                 }
               >
                 {onMainnet ? "Bridge Eth" : "Get ETH"}

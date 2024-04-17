@@ -113,7 +113,7 @@ export const TopUpDialog = ({
               } else {
                 onMainnet
                   ? window.open("https://starkgate.starknet.io//", "_blank")
-                  : window.open("https://faucet.goerli.starknet.io/", "_blank");
+                  : window.open(process.env.NEXT_PUBLIC_FAUCET_URL, "_blank");
               }
             }}
           >
@@ -168,7 +168,7 @@ export const TopUpDialog = ({
               } else {
                 onMainnet
                   ? window.open("https://starkgate.starknet.io//", "_blank")
-                  : window.open("https://faucet.goerli.starknet.io/", "_blank");
+                  : window.open(process.env.NEXT_PUBLIC_FAUCET_URL, "_blank");
               }
             }}
           >
