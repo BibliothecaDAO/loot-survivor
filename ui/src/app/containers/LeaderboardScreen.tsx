@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Contract } from "starknet";
+import { Block, Contract } from "starknet";
 import { useBlock } from "@starknet-react/core";
 import {
   getAdventurerByXP,
@@ -45,7 +45,7 @@ export default function LeaderboardScreen({
     refetchInterval: false,
   });
 
-  const currentBlock = blockData?.block_number;
+  const currentBlock = (blockData as Block)?.block_number;
 
   const { data, refetch, setData, setIsLoading, setNotLoading } =
     useQueriesStore();

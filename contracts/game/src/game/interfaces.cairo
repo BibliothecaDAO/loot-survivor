@@ -16,6 +16,7 @@ trait IGame<TContractState> {
     fn new_game(
         ref self: TContractState, client_reward_address: ContractAddress, weapon: u8, name: u128, golden_token_id: u256, interface_camel: bool
     );
+    fn set_starting_entropy(ref self: TContractState, adventurer_id: felt252, block_hash: felt252);
     fn explore(ref self: TContractState, adventurer_id: felt252, till_beast: bool);
     fn attack(ref self: TContractState, adventurer_id: felt252, to_the_death: bool);
     fn flee(ref self: TContractState, adventurer_id: felt252, to_the_death: bool);
@@ -29,6 +30,7 @@ trait IGame<TContractState> {
         items: Array<ItemPurchase>,
     );
     fn slay_idle_adventurers(ref self: TContractState, adventurer_ids: Array<felt252>);
+    fn slay_invalid_adventurers(ref self: TContractState, adventurer_ids: Array<felt252>);
     fn rotate_game_entropy(ref self: TContractState);
     fn update_cost_to_play(ref self: TContractState);
     fn initiate_price_change(ref self: TContractState);
@@ -39,6 +41,8 @@ trait IGame<TContractState> {
     fn get_adventurer(self: @TContractState, adventurer_id: felt252) -> Adventurer;
     fn get_adventurer_no_boosts(self: @TContractState, adventurer_id: felt252) -> Adventurer;
     fn get_adventurer_meta(self: @TContractState, adventurer_id: felt252) -> AdventurerMetadata;
+    fn get_adventurer_starting_entropy(self: @TContractState, adventurer_id: felt252) -> felt252;
+    fn get_adventurer_entropy(self: @TContractState, adventurer_id: felt252) -> felt252;
     fn get_health(self: @TContractState, adventurer_id: felt252) -> u16;
     fn get_xp(self: @TContractState, adventurer_id: felt252) -> u16;
     fn get_level(self: @TContractState, adventurer_id: felt252) -> u8;
@@ -48,6 +52,7 @@ trait IGame<TContractState> {
     fn get_actions_per_block(self: @TContractState, adventurer_id: felt252) -> u8;
     fn get_reveal_block(self: @TContractState, adventurer_id: felt252) -> u64;
     fn is_idle(self: @TContractState, adventurer_id: felt252) -> (bool, u16);
+    fn get_contract_calculated_entropy(self: @TContractState, adventurer_id: felt252) -> felt252;
 
     // adventurer stats (includes boost)
     fn get_stats(self: @TContractState, adventurer_id: felt252) -> Stats;

@@ -5,6 +5,7 @@ import {
   useContract,
   Connector,
 } from "@starknet-react/core";
+import { sepolia } from "@starknet-react/chains";
 import { InjectedConnector } from "starknetkit/injected";
 import { ArgentMobileConnector } from "starknetkit/argentMobile";
 import { WebWalletConnector } from "starknetkit/webwallet";
@@ -494,6 +495,8 @@ function Home({ updateConnectors }: HomeProps) {
       accountChainId !==
       (process.env.NEXT_PUBLIC_NETWORK === "mainnet"
         ? constants.StarknetChainId.SN_MAIN
+        : process.env.NEXT_PUBLIC_NETWORK === "sepolia"
+        ? "0x" + sepolia.id.toString(16)
         : constants.StarknetChainId.SN_GOERLI);
     setIsWrongNetwork(isWrongNetwork);
   }, [account, accountChainId, isConnected]);

@@ -1,5 +1,5 @@
 GAME="0x03c10537fa0073b2dd5120242697dbf76d6173eb9f384d3bf3d284d53388a0b0"
-START=368800
+START=388900
 MONGO_CONNECTION_STRING="mongodb://mongo:mongo@mongo:27017"
 MONGO_DB="mongo"
 STREAM_URL="https://mainnet.starknet.a5a.ch"

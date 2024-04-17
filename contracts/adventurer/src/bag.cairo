@@ -136,7 +136,7 @@ impl ImplBag of IBag {
     // @dev This function constructs a new item with the given item_id, sets its metadata using the Adventurer and Bag reference, and adds the item to the bag.
     fn add_new_item(ref self: Bag, adventurer: Adventurer, item_id: u8) {
         let mut item = ImplItemPrimitive::new(item_id);
-        item.set_metadata_id(adventurer, self);
+        item.set_metadata_id(adventurer, self, false);
         self.add_item(item);
     }
 

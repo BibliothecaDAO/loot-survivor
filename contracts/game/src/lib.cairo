@@ -117,6 +117,7 @@ mod Game {
         _cost_to_play: u128,
         _games_played_snapshot: GamesPlayedSnapshot,
         _terminal_timestamp: u64,
+        _starting_entropy: LegacyMap::<felt252, felt252>,
     }
 
     #[event]
@@ -165,7 +166,17 @@ mod Game {
         self._collectible_beasts.write(collectible_beasts);
         self._terminal_timestamp.write(terminal_timestamp);
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
-        self._genesis_timestamp.write(starknet::get_block_info().unbox().block_timestamp.into());
+
+        // On mainnet, set genesis timestamp to LSV1.0 genesis to preserve same reward distribution schedule for V1.1 
+        let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
+        if chain_id == MAINNET_CHAIN_ID {
+            self._genesis_timestamp.write(1699552291);
+        } else {
+            // on non-mainnet, use the current block timestamp so tests run correctly
+            self
+                ._genesis_timestamp
+                .write(starknet::get_block_info().unbox().block_timestamp.into());
+        };
 
         // set the golden token address
         self._golden_token.write(golden_token_address);
@@ -222,6 +233,31 @@ mod Game {
 
             // start the game
             _start_game(ref self, weapon, name, interface_camel);
+        }
+
+        fn set_starting_entropy(
+            ref self: ContractState, adventurer_id: felt252, block_hash: felt252
+        ) {
+            // only owner of the adventurer can set starting entropy
+            _assert_ownership(@self, adventurer_id);
+
+            // player can only call this before starting game (defeating starter beast)
+            assert(_load_adventurer(@self, adventurer_id).xp == 0, messages::GAME_ALREADY_STARTED);
+
+            // prevent client from trying to set start entropy prior to valid block hash being available
+            _assert_valid_block_hash_available(@self, adventurer_id);
+
+            // verify the block_hash is not zero
+            assert(block_hash != 0, messages::STARTING_ENTROPY_ZERO);
+
+            // starting entropy can only be set once
+            assert(
+                self._starting_entropy.read(adventurer_id) == 0,
+                messages::STARTING_ENTROPY_ALREADY_SET
+            );
+
+            // save starting entropy
+            self._starting_entropy.write(adventurer_id, block_hash);
         }
 
         /// @title Explore Function
@@ -331,9 +367,6 @@ mod Game {
                 @self, immutable_adventurer, adventurer_id, game_entropy
             );
 
-            // update players last action block
-            adventurer.set_last_action_block(block_number);
-
             // process attack or apply idle penalty
             if !idle {
                 // get weapon specials
@@ -436,7 +469,7 @@ mod Game {
 
                 // if adventurer died while attempting to flee, process death
                 if adventurer.health == 0 {
-                    _process_adventurer_death(ref self, adventurer, adventurer_id, beast.id, 0);
+                    _process_adventurer_death(ref self, ref adventurer, adventurer_id, beast.id, 0);
                 }
             } else {
                 _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
@@ -493,7 +526,7 @@ mod Game {
 
                 // if adventurer died from counter attack, process death
                 if (adventurer.health == 0) {
-                    _process_adventurer_death(ref self, adventurer, adventurer_id, beast.id, 0);
+                    _process_adventurer_death(ref self, ref adventurer, adventurer_id, beast.id, 0);
                 }
             }
 
@@ -657,6 +690,19 @@ mod Game {
             }
         }
 
+        fn slay_invalid_adventurers(ref self: ContractState, adventurer_ids: Array<felt252>) {
+            let mut adventurer_index: u32 = 0;
+            loop {
+                if adventurer_index == adventurer_ids.len() {
+                    break;
+                }
+                let adventurer_id = *adventurer_ids.at(adventurer_index);
+                _slay_invalid_adventurer(ref self, adventurer_id);
+                adventurer_index += 1;
+            }
+        }
+
+
         /// @title Rotate Game Entropy Function
         ///
         /// @notice Rotates the game entropy
@@ -689,6 +735,19 @@ mod Game {
         }
         fn get_adventurer_meta(self: @ContractState, adventurer_id: felt252) -> AdventurerMetadata {
             _load_adventurer_metadata(self, adventurer_id)
+        }
+        fn get_adventurer_starting_entropy(
+            self: @ContractState, adventurer_id: felt252
+        ) -> felt252 {
+            self._starting_entropy.read(adventurer_id)
+        }
+        fn get_contract_calculated_entropy(
+            self: @ContractState, adventurer_id: felt252
+        ) -> felt252 {
+            _get_starting_block_hash(self, adventurer_id)
+        }
+        fn get_adventurer_entropy(self: @ContractState, adventurer_id: felt252) -> felt252 {
+            _get_adventurer_entropy(self, adventurer_id)
         }
         fn get_bag(self: @ContractState, adventurer_id: felt252) -> Bag {
             _load_bag(self, adventurer_id)
@@ -1080,7 +1139,27 @@ mod Game {
         adventurer.health = 0;
 
         // handle adventurer death
-        _process_adventurer_death(ref self, adventurer, adventurer_id, 0, 0,);
+        _process_adventurer_death(ref self, ref adventurer, adventurer_id, 0, 0,);
+
+        // save adventurer (gg)
+        _save_adventurer_no_boosts(ref self, adventurer, adventurer_id);
+    }
+
+    fn _slay_invalid_adventurer(ref self: ContractState, adventurer_id: felt252) {
+        // unpack adventurer from storage (no need for stat boosts)
+        let mut adventurer = _load_adventurer_no_boosts(@self, adventurer_id);
+
+        // assert adventurer is not already dead
+        _assert_not_dead(adventurer);
+
+        // assert adventurer is invalid
+        _assert_invalid_starting_entropy(@self, adventurer_id);
+
+        // slay adventurer by setting health to 0
+        adventurer.health = 0;
+
+        // handle adventurer death
+        _process_adventurer_death(ref self, ref adventurer, adventurer_id, 0, 0,);
 
         // save adventurer (gg)
         _save_adventurer_no_boosts(ref self, adventurer, adventurer_id);
@@ -1098,6 +1177,9 @@ mod Game {
     ) {
         // zero out beast health
         adventurer.beast_health = 0;
+
+        // update players last action block
+        adventurer.set_last_action_block(starknet::get_block_info().unbox().block_number);
 
         // get gold reward and increase adventurers gold
         let gold_earned = beast.get_gold_reward(beast_seed);
@@ -1150,8 +1232,15 @@ mod Game {
                 owner_address,
                 _load_adventurer_metadata(@self, adventurer_id).interface_camel
             );
-            // adventurers gets the beast
-            _mint_beast(@self, beast, primary_address);
+            // check if starting entropy is valid
+            if _is_starting_entropy_valid(@self, adventurer_id) {
+                // if starting entropy is valid, mint the beast
+                _mint_beast(@self, beast, primary_address);
+            } else {
+                // if starting entropy is not valid, kill adventurer
+                adventurer.health = 0;
+                _process_adventurer_death(ref self, ref adventurer, adventurer_id, beast.id, 0);
+            }
         }
     }
 
@@ -1212,7 +1301,7 @@ mod Game {
 
     fn _process_adventurer_death(
         ref self: ContractState,
-        adventurer: Adventurer,
+        ref adventurer: Adventurer,
         adventurer_id: felt252,
         beast_id: u8,
         obstacle_id: u8
@@ -1229,8 +1318,47 @@ mod Game {
 
         __event_AdventurerDied(ref self, AdventurerDied { adventurer_state, death_details });
 
-        if _is_top_score(@self, adventurer.xp) {
-            _update_leaderboard(ref self, adventurer_id, adventurer);
+        // if starting entropy is valid
+        if _is_starting_entropy_valid(@self, adventurer_id) {
+            // and adventurer got a top score
+            if _is_top_score(@self, adventurer.xp) {
+                // update the leaderboard
+                _update_leaderboard(ref self, adventurer_id, adventurer);
+            }
+        } else {
+            // if starting entropy is not valid we invalidate adventurer's game
+            adventurer.invalidate_game();
+        }
+    }
+
+    fn _assert_invalid_starting_entropy(self: @ContractState, adventurer_id: felt252) {
+        assert(
+            !_is_starting_entropy_valid(self, adventurer_id), messages::STARTING_ENTROPY_IS_VALID
+        );
+    }
+
+    // @title Assert Valid Block Hash Availability
+    // @notice This function asserts that a valid block hash is available for the given adventurer.
+    // @dev If this function is called prior to 2 blocks from the start of the game for the given adventurer, an exception will be thrown.
+    // @param adventurer_id The ID of the adventurer for which to check the block hash availability.
+    fn _assert_valid_block_hash_available(self: @ContractState, adventurer_id: felt252) {
+        let current_block = starknet::get_block_info().unbox().block_number;
+        let adventurer_start_block = _load_adventurer_metadata(self, adventurer_id).start_block;
+        let block_hash_available = adventurer_start_block + 2;
+        assert(current_block >= block_hash_available, messages::VALID_BLOCK_HASH_UNAVAILABLE);
+    }
+
+    // @title Check if starting entropy is valid
+    // @notice This function checks if the starting entropy provided to the contract is equal to the entropy generated by the contract based on the block hash of the block after the player committed to playing the game.
+    // @dev If no manual starting entropy was provided, the starting entropy is considered valid. If a starting entropy was manually provided, it is compared with the block hash of the block after the player committed to playing the game.
+    // @param adventurer_id The ID of the adventurer for which to check the starting entropy.
+    // @return Returns true if the starting entropy is valid, false otherwise.
+    fn _is_starting_entropy_valid(self: @ContractState, adventurer_id: felt252) -> bool {
+        let starting_entropy = self._starting_entropy.read(adventurer_id);
+        if starting_entropy == 0 {
+            true
+        } else {
+            starting_entropy == _get_starting_block_hash(self, adventurer_id)
         }
     }
 
@@ -1499,6 +1627,14 @@ mod Game {
             },
             ExploreResult::Discovery(()) => {
                 _process_discovery(ref self, ref adventurer, adventurer_id, rnd2);
+                _explore(
+                    ref self,
+                    ref adventurer,
+                    adventurer_id,
+                    adventurer_entropy,
+                    game_entropy,
+                    explore_till_beast
+                )
             }
         }
 
@@ -1575,7 +1711,7 @@ mod Game {
             );
             __event_AmbushedByBeast(ref self, adventurer, adventurer_id, beast_battle_details);
             if (adventurer.health == 0) {
-                _process_adventurer_death(ref self, adventurer, adventurer_id, beast.id, 0);
+                _process_adventurer_death(ref self, ref adventurer, adventurer_id, beast.id, 0);
                 return;
             }
         } else {
@@ -1634,7 +1770,7 @@ mod Game {
                     ref self, adventurer, adventurer_id, dodged, obstacle_details
                 );
                 // process death
-                _process_adventurer_death(ref self, adventurer, adventurer_id, 0, obstacle.id);
+                _process_adventurer_death(ref self, ref adventurer, adventurer_id, 0, obstacle.id);
                 // return without granting xp to adventurer or items
                 return;
             }
@@ -1858,7 +1994,7 @@ mod Game {
 
             // if adventurer is dead
             if (adventurer.health == 0) {
-                _process_adventurer_death(ref self, adventurer, adventurer_id, beast.id, 0);
+                _process_adventurer_death(ref self, ref adventurer, adventurer_id, beast.id, 0);
                 return;
             }
 
@@ -2085,7 +2221,7 @@ mod Game {
 
                 // create new item, equip it, and record if we need unequipped an item
                 let mut new_item = ImplItemPrimitive::new(item_id);
-                new_item.set_metadata_id(adventurer, bag);
+                new_item.set_metadata_id(adventurer, bag, true);
                 unequipped_item_id =
                     _equip_item(contract_state, ref adventurer, ref bag, adventurer_id, new_item);
             } else {
@@ -2740,7 +2876,7 @@ mod Game {
         __event_IdleDeathPenalty(ref self, adventurer, adventurer_id, idle_blocks);
 
         // process adventurer death
-        _process_adventurer_death(ref self, adventurer, adventurer_id, 0, 0);
+        _process_adventurer_death(ref self, ref adventurer, adventurer_id, 0, 0);
     }
     #[inline(always)]
     fn _lords_address(self: @ContractState) -> ContractAddress {
@@ -2875,10 +3011,22 @@ mod Game {
 
     #[inline(always)]
     fn _get_adventurer_entropy(self: @ContractState, adventurer_id: felt252) -> felt252 {
-        // get the block the adventurer started the game on
+        // if player used optimistic start and manually set starting hash
+        let starting_entropy = self._starting_entropy.read(adventurer_id);
+        if starting_entropy != 0 {
+            // use it
+            starting_entropy
+        } else {
+            // otherwise use block hash
+            _get_starting_block_hash(self, adventurer_id)
+        }
+    }
+
+    fn _get_starting_block_hash(self: @ContractState, adventurer_id: felt252) -> felt252 {
+        // otherwise we'll get start entropy from the block hash after the start block
         let start_block = _load_adventurer_metadata(self, adventurer_id).start_block;
 
-        // adventurer_
+        // don't force block delay on testnet to remove this source of friction
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
         if chain_id == MAINNET_CHAIN_ID {
             _get_mainnet_entropy(adventurer_id, start_block)
@@ -2899,7 +3047,7 @@ mod Game {
     #[inline(always)]
     fn _get_testnet_entropy(adventurer_id: felt252, start_block: u64) -> felt252 {
         ImplAdventurer::get_entropy(
-            adventurer_id, starknet::get_block_hash_syscall(start_block - 10).unwrap_syscall()
+            adventurer_id, starknet::get_block_hash_syscall(start_block + 1).unwrap_syscall()
         )
     }
 

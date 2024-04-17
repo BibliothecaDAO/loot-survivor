@@ -107,6 +107,7 @@ export default function Header({
   }, [adventurer]);
 
   const isOnMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
   return (
     <div className="flex flex-row justify-between px-1 h-10 ">
@@ -135,11 +136,7 @@ export default function Header({
           size={"xs"}
           variant={"outline"}
           className="hidden sm:block self-center xl:px-5"
-          onClick={() =>
-            process.env.NEXT_PUBLIC_NETWORK === "mainnet"
-              ? window.open("https://goerli-survivor.realms.world/", "_blank")
-              : window.open("https://survivor.realms.world/", "_blank")
-          }
+          onClick={() => window.open(appUrl, "_blank")}
         >
           {isOnMainnet ? "Play on Testnet" : "Play on Mainnet"}
         </Button>

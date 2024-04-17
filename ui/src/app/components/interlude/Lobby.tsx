@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Block } from "starknet";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { Adventurer, NullAdventurer } from "@/app/types";
 import { useBlock } from "@starknet-react/core";
@@ -19,7 +20,8 @@ export default function Lobby() {
   });
   const handleFilterLobby = (adventurers: Adventurer[]) => {
     return adventurers.filter(
-      (adventurer) => adventurer?.revealBlock! > blockData?.block_number!
+      (adventurer) =>
+        adventurer?.revealBlock! > (blockData as Block)?.block_number!
     );
   };
 
@@ -78,7 +80,7 @@ export default function Lobby() {
                 key={index}
                 adventurer={adventurer}
                 handleRowSelected={handleRowSelected}
-                currentBlock={blockData?.block_number!}
+                currentBlock={(blockData as Block)?.block_number!}
               />
             )
           )}

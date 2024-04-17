@@ -19,14 +19,13 @@ import { padAddress } from "@/app/lib/utils";
 import { TRANSACTION_WAIT_RETRY_INTERVAL } from "@/app/lib/constants";
 
 const isMainnet = process.env.NEXT_PUBLIC_NETWORK == "mainnet";
-export const ETH_PREFUND_AMOUNT = isMainnet
-  ? "0x2386F26FC10000"
-  : "0x38D7EA4C68000"; // 0.01ETH on Mainnet, 0.001ETH on Testnet
+const isSepolia = process.env.NEXT_PUBLIC_NETWORK == "sepolia";
+export const ETH_PREFUND_AMOUNT =
+  isMainnet || isSepolia ? "0x2386F26FC10000" : "0x38D7EA4C68000"; // 0.01ETH on Mainnet or Sepolia, 0.001ETH on Testnet
 
 const rpc_addr = process.env.NEXT_PUBLIC_RPC_URL;
 const provider = new Provider({
-  rpc: { nodeUrl: rpc_addr! },
-  sequencer: { baseUrl: rpc_addr! },
+  nodeUrl: rpc_addr!,
 });
 
 interface UseBurnerProps {
@@ -247,7 +246,9 @@ export const useBurner = ({
             addressSalt: publicKey,
           },
           {
-            maxFee: feeEstimateResult.suggestedMaxFee * BigInt(2),
+            maxFee:
+              feeEstimateResult.suggestedMaxFee *
+              (isSepolia ? BigInt(5) : BigInt(2)),
           }
         );
 

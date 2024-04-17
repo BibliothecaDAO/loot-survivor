@@ -69,7 +69,7 @@ const MarketplaceRow = ({
   const enoughGold = calculatedNewGold >= itemPrice;
 
   const checkTransacting = (item: string) => {
-    if (txData?.status == "RECEIVED") {
+    if (txData?.finality_status !== undefined) {
       return transactingMarketIds?.includes(item);
     } else {
       return false;

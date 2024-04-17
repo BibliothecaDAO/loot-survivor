@@ -50,7 +50,7 @@ export default function InterludeScreen({
                 <Button
                   onClick={() =>
                     window.open(
-                      "https://goerli-survivor.realms.world/",
+                      "https://sepolia-survivor.realms.world/",
                       "_blank"
                     )
                   }
@@ -72,7 +72,10 @@ export default function InterludeScreen({
               </p>
               <Button
                 onClick={() =>
-                  window.open("https://goerli-survivor.realms.world/", "_blank")
+                  window.open(
+                    "https://sepolia-survivor.realms.world/",
+                    "_blank"
+                  )
                 }
                 className="w-1/2"
               >
