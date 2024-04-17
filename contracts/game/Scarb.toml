@@ -17,3 +17,5 @@ arcade_account.workspace = true
 [[target.starknet-contract]]
 allowed-libfuncs-list.name = "experimental"
 allowed-libfuncs = true
+# [[target.starknet-contract]]
+casm = true
