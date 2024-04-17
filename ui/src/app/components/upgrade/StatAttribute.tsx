@@ -44,9 +44,7 @@ export const StatAttribute = ({
 
   const maxNonBoosted =
     (nonBoostedStat ?? BigInt(0)) + BigInt(amount) >=
-    (name === "Strength" || name === "Vitality")
-      ? BigInt(31)
-      : BigInt(15);
+    (name === "Strength" || name === "Vitality" ? BigInt(31) : BigInt(15));
 
   useEffect(() => {
     if (buttonClicked) {

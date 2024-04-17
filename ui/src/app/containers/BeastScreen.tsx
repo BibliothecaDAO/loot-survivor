@@ -77,7 +77,7 @@ export default function BeastScreen({
         resetNotification();
         if (adventurer?.level === 1) {
           const entropyBlockData = await getBlock(adventurer?.startBlock! + 1);
-          await attack(false, beastData, entropyBlockData?.block_hash);
+          await attack(false, beastData, entropyBlockData?.block_hash ?? 0);
         } else {
           await attack(false, beastData);
         }

@@ -444,6 +444,22 @@
         "state_mutability": "view"
       },
       {
+        "name": "get_base_stats",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "adventurer_id",
+            "type": "core::felt252"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "survivor::stats::Stats"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
         "name": "next_game_entropy_rotation",
         "type": "function",
         "inputs": [],
