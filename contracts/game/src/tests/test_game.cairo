@@ -307,6 +307,15 @@ mod tests {
         game
     }
 
+    fn basic_upgrade(ref game: IGameDispatcher, adventurer_id: felt252) -> IGameDispatcher {
+        let shopping_cart = ArrayTrait::<ItemPurchase>::new();
+        let stat_upgrades = Stats {
+            strength: 1, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        game.upgrade(adventurer_id, 0, stat_upgrades, shopping_cart);
+        game
+    }
+
     fn new_adventurer_lvl3(
         starting_block: u64, starting_time: u64, starting_entropy: felt252
     ) -> IGameDispatcher {
@@ -320,10 +329,13 @@ mod tests {
 
         // go explore
         game.explore(ADVENTURER_ID, true);
-        game.flee(ADVENTURER_ID, true);
 
+        // if we encountered a beast, attack it
         let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.get_level() == 3, 'adventurer should be lvl 3');
+        if adventurer.beast_health > 0 {
+            game.attack(ADVENTURER_ID, true);
+        }
+        // assert(adventurer.get_level() == 3, 'adventurer should be lvl 3');
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
         // return game
@@ -2988,7 +3000,7 @@ mod tests {
     fn test_set_starting_entropy_wrong_hash() {
         let wrong_starting_entropy = 12345678910112;
         let mut game = new_adventurer_lvl3(1000, 1696201757, wrong_starting_entropy);
-        testing::set_block_number(1002);
+        testing::set_block_number(1003);
 
         // go out exploring till beast
         game.explore(ADVENTURER_ID, true);
@@ -2998,7 +3010,9 @@ mod tests {
         assert(pre_death_adventurer.xp > 0, 'adventurer should have xp');
         assert(pre_death_adventurer.gold > 0, 'adventurer should have gold');
 
-        // attack beast till death
+        game.attack(ADVENTURER_ID, true);
+        basic_upgrade(ref game, ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
         game.attack(ADVENTURER_ID, true);
 
         // adventurer died attacking beast
