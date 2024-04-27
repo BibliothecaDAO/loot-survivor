@@ -13,7 +13,7 @@ mod Game {
     use core::starknet::SyscallResultTrait;
     const TEST_ENTROPY: u64 = 12303548;
     const MAINNET_CHAIN_ID: felt252 = 0x534e5f4d41494e;
-    const GOERLI_CHAIN_ID: felt252 = 0x534e5f474f45524c49;
+    const SEPOLIA_CHAIN_ID: felt252 = 0x534e5f5345504f4c4941;
     const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 200;
     const LOOT_NAME_STORAGE_INDEX_1: u8 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u8 = 1;
@@ -2472,7 +2472,7 @@ mod Game {
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
         if chain_id == MAINNET_CHAIN_ID {
             _get_mainnet_entropy(adventurer_id, start_block)
-        } else if chain_id == GOERLI_CHAIN_ID {
+        } else if chain_id == SEPOLIA_CHAIN_ID {
             _get_testnet_entropy(adventurer_id, start_block)
         } else {
             _get_basic_entropy(adventurer_id, start_block)
@@ -3030,7 +3030,7 @@ mod Game {
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
         if chain_id == MAINNET_CHAIN_ID {
             _get_mainnet_entropy(adventurer_id, start_block)
-        } else if chain_id == GOERLI_CHAIN_ID {
+        } else if chain_id == SEPOLIA_CHAIN_ID {
             _get_testnet_entropy(adventurer_id, start_block)
         } else {
             _get_basic_entropy(adventurer_id, start_block)
