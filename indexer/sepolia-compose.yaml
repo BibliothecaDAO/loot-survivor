@@ -24,10 +24,12 @@ services:
     networks:
       - indexer
 
+
   adventurers_indexer:
     image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
+      - mongo
     restart: always
     command:
       - run
@@ -46,6 +48,7 @@ services:
     image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
+      - mongo
     restart: always
     command:
       - run
@@ -64,6 +67,7 @@ services:
     image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
+      - mongo
     restart: always
     command:
       - run
@@ -82,6 +86,7 @@ services:
     image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
+      - mongo
     restart: always
     command:
       - run
@@ -100,6 +105,7 @@ services:
     image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
+      - mongo
     restart: always
     command:
       - run
@@ -118,6 +124,7 @@ services:
     image: quay.io/apibara/sink-mongo:0.4.2
     depends_on:
       - etcd
+      - mongo
     restart: always
     command:
       - run
@@ -131,7 +138,7 @@ services:
       AUTH_TOKEN: ${AUTH_TOKEN}
     networks:
       - indexer
-
+  
 volumes:
   etcd_data:
   mongo_data:

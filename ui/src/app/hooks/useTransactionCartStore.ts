@@ -53,8 +53,7 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
     showTopUpDialog: (show: boolean) => void,
     setTopUpAccount: (account: string) => void
   ) => {
-    const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
-    const maxFee = onMainnet ? MAX_FEE_CHECK : MAX_FEE_CHECK / 10;
+    const maxFee = MAX_FEE_CHECK;
     try {
       let tx;
       if (isArcade) {

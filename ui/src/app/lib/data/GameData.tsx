@@ -1099,6 +1099,7 @@ export class GameData {
       HitByBeast: "damage",
       IdleDamagePenalty: "damage",
       IdleDamagePenaltyDead: "die",
+      Suicide: "die",
     };
 
     this.ADVENTURER_SOUNDS = {

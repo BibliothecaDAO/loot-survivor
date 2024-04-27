@@ -34,6 +34,7 @@ const TopupInput = ({
   const [inputValue, setInputValue] = useState(0);
 
   const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+  const onSepolia = process.env.NEXT_PUBLIC_NETWORK === "sepolia";
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -78,7 +79,7 @@ const TopupInput = ({
 
   const mainTopupDisabled =
     balanceType === "eth"
-      ? ethBalance < (onMainnet ? 0.01 : 0.001) * 10 ** 18
+      ? ethBalance < (onMainnet || onSepolia ? 0.01 : 0.001) * 10 ** 18
       : lordsBalance < lordsGameCost;
   const inputTopupInvalid =
     inputValue * 10 ** 18 > (balanceType === "eth" ? ethBalance : lordsBalance);
@@ -140,7 +141,7 @@ const TopupInput = ({
             disabled={disabled || mainTopupDisabled}
           >
             {balanceType === "eth"
-              ? onMainnet
+              ? onMainnet || onSepolia
                 ? "Add 0.01 ETH"
                 : "Add 0.001 ETH"
               : `Add ${formatCurrency(lordsGameCost)} LORDS`}

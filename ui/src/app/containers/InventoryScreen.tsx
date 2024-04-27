@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Contract } from "starknet";
-import { useAccount, useWaitForTransaction } from "@starknet-react/core";
+import { useAccount } from "@starknet-react/core";
 import { getKeyFromValue, groupBySlot } from "@/app/lib/utils";
 import { InventoryRow } from "@/app/components/inventory/InventoryRow";
 import Info from "@/app/components/adventurer/Info";
@@ -10,10 +10,9 @@ import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import LootIcon from "@/app/components/icons/LootIcon";
 import { InfoIcon, ProfileIcon } from "@/app/components/icons/Icons";
-import { Item, Metadata } from "@/app/types";
+import { Item } from "@/app/types";
 import { GameData } from "@/app/lib/data/GameData";
 import useUIStore from "@/app/hooks/useUIStore";
-import useTransactionManager from "@/app/hooks/useTransactionManager";
 
 interface InventoryScreenProps {
   gameContract: Contract;
@@ -38,11 +37,6 @@ export default function InventoryScreen({
   const setInventorySelected = useUIStore(
     (state) => state.setInventorySelected
   );
-  const { hashes, transactions } = useTransactionManager();
-  const { data: txData } = useWaitForTransaction({
-    hash: hashes ? hashes[0] : "0x0",
-  });
-  const transactingItemIds = (transactions[0]?.metadata as Metadata)?.items;
   const equipItems = useUIStore((state) => state.equipItems);
   const setEquipItems = useUIStore((state) => state.setEquipItems);
   const dropItems = useUIStore((state) => state.dropItems);
@@ -99,14 +93,6 @@ export default function InventoryScreen({
   };
 
   const gameData = new GameData();
-
-  const checkTransacting = (item: string) => {
-    if (txData?.finality_status !== undefined) {
-      return transactingItemIds?.includes(item);
-    } else {
-      return false;
-    }
-  };
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -337,11 +323,7 @@ export default function InventoryScreen({
                         handleEquipItems(item.item ?? "");
                       }}
                       equipped={item.equipped}
-                      disabled={
-                        item.equipped ||
-                        checkTransacting(item.item ?? "") ||
-                        equipItems.includes(itemId)
-                      }
+                      disabled={item.equipped || equipItems.includes(itemId)}
                       handleDrop={handleDropItems}
                       gameContract={gameContract}
                       key={index}

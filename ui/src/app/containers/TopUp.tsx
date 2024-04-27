@@ -271,10 +271,7 @@ const SectionContent = ({
                 onClick={() =>
                   onMainnet
                     ? window.open("https://starkgate.starknet.io//", "_blank")
-                    : window.open(
-                        "https://faucet.goerli.starknet.io/",
-                        "_blank"
-                      )
+                    : window.open(process.env.NEXT_PUBLIC_FAUCET_URL, "_blank")
                 }
               >
                 {onMainnet ? "Bridge Eth" : "Get ETH"}
@@ -310,10 +307,7 @@ const SectionContent = ({
                 } else {
                   onMainnet
                     ? window.open("https://starkgate.starknet.io//", "_blank")
-                    : window.open(
-                        "https://faucet.goerli.starknet.io/",
-                        "_blank"
-                      );
+                    : window.open(process.env.NEXT_PUBLIC_FAUCET_URL, "_blank");
                 }
               }}
             >
@@ -383,7 +377,7 @@ const SectionContent = ({
                             "_blank"
                           )
                         : window.open(
-                            "https://faucet.goerli.starknet.io/",
+                            process.env.NEXT_PUBLIC_FAUCET_URL,
                             "_blank"
                           );
                     }

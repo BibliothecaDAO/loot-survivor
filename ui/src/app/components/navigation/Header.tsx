@@ -27,6 +27,7 @@ import { getApibaraStatus } from "@/app/api/api";
 import ApibaraStatus from "@/app/components/navigation/ApibaraStatus";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import { checkArcadeConnector } from "@/app/lib/connectors";
+import { SkullIcon } from "@/app/components/icons/Icons";
 
 export interface HeaderProps {
   multicall: (
@@ -34,6 +35,7 @@ export interface HeaderProps {
     notification: string[]
   ) => Promise<void>;
   mintLords: (lordsAmount: number) => Promise<void>;
+  suicide: () => Promise<void>;
   lordsBalance: bigint;
   gameContract: Contract;
   costToPlay: bigint;
@@ -42,6 +44,7 @@ export interface HeaderProps {
 export default function Header({
   multicall,
   mintLords,
+  suicide,
   lordsBalance,
   gameContract,
   costToPlay,
@@ -104,6 +107,7 @@ export default function Header({
   }, [adventurer]);
 
   const isOnMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
   return (
     <div className="flex flex-row justify-between px-1 h-10 ">
@@ -111,6 +115,14 @@ export default function Header({
         <Logo className="fill-current w-24 md:w-32 xl:w-40 2xl:w-64" />
       </div>
       <div className="flex flex-row items-center self-end sm:gap-1 self-center">
+        {adventurer?.id && (
+          <Button onClick={() => suicide()} variant={"outline"}>
+            <div className="flex flex-row items-center gap-2">
+              <SkullIcon className="w-3 fill-current" />
+              <p>Suicide</p>
+            </div>
+          </Button>
+        )}
         <ApibaraStatus status={apibaraStatus} />
         {adventurer?.id && (
           <PenaltyCountDown
@@ -124,11 +136,7 @@ export default function Header({
           size={"xs"}
           variant={"outline"}
           className="hidden sm:block self-center xl:px-5"
-          onClick={() =>
-            process.env.NEXT_PUBLIC_NETWORK === "mainnet"
-              ? window.open("https://goerli-survivor.realms.world/", "_blank")
-              : window.open("https://survivor.realms.world/", "_blank")
-          }
+          onClick={() => window.open(appUrl, "_blank")}
         >
           {isOnMainnet ? "Play on Testnet" : "Play on Mainnet"}
         </Button>

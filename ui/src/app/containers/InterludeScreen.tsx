@@ -21,7 +21,7 @@ export default function InterludeScreen({
     const nextBlockHashBlock = adventurer?.revealBlock!;
     const adventurerStartBlock = adventurer?.startBlock!;
     const blockDifference = nextBlockHashBlock - adventurerStartBlock;
-    const secondsUntilNextEntropy = (blockDifference + 1) * averageBlockTime; // add one for closer estimate
+    const secondsUntilNextEntropy = (blockDifference + 2) * averageBlockTime; // add one for closer estimate
     const adventurerCreatedTime = new Date(adventurer?.createdTime!).getTime();
     const nextEntropyTime =
       adventurerCreatedTime + secondsUntilNextEntropy * 1000;
@@ -50,7 +50,7 @@ export default function InterludeScreen({
                 <Button
                   onClick={() =>
                     window.open(
-                      "https://goerli-survivor.realms.world/",
+                      "https://sepolia-survivor.realms.world/",
                       "_blank"
                     )
                   }
@@ -72,7 +72,10 @@ export default function InterludeScreen({
               </p>
               <Button
                 onClick={() =>
-                  window.open("https://goerli-survivor.realms.world/", "_blank")
+                  window.open(
+                    "https://sepolia-survivor.realms.world/",
+                    "_blank"
+                  )
                 }
                 className="w-1/2"
               >
