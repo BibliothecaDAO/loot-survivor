@@ -800,7 +800,7 @@ mod Game {
             let adventurer = _load_adventurer(self, adventurer_id);
             _assert_upgrades_available(adventurer);
 
-            let adventurer_entropy = _load_adventurer_entropy(self, adventurer_id);
+            let adventurer_entropy = _get_adventurer_entropy(self, adventurer_id);
 
             _get_items_on_market_by_slot(
                 self,
@@ -2458,25 +2458,10 @@ mod Game {
         self: @ContractState, adventurer_id: felt252
     ) -> (Adventurer, felt252, GameEntropy, Bag) {
         let adventurer = _load_adventurer(self, adventurer_id);
-        let adventurer_entropy = _load_adventurer_entropy(self, adventurer_id);
+        let adventurer_entropy = _get_adventurer_entropy(self, adventurer_id);
         let game_entropy = _load_game_entropy(self);
         let bag = _load_bag(self, adventurer_id);
         (adventurer, adventurer_entropy, game_entropy, bag)
-    }
-
-    fn _load_adventurer_entropy(self: @ContractState, adventurer_id: felt252) -> felt252 {
-        // get the block the adventurer started the game on
-        let start_block = _load_adventurer_metadata(self, adventurer_id).start_block;
-
-        // use longer block delay on mainnet for stronger entropy
-        let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
-        if chain_id == MAINNET_CHAIN_ID {
-            _get_mainnet_entropy(adventurer_id, start_block)
-        } else if chain_id == GOERLI_CHAIN_ID {
-            _get_testnet_entropy(adventurer_id, start_block)
-        } else {
-            _get_basic_entropy(adventurer_id, start_block)
-        }
     }
 
     fn _load_adventurer(self: @ContractState, adventurer_id: felt252) -> Adventurer {
