@@ -3,7 +3,7 @@ import {
   InvokeTransactionReceiptResponse,
   Contract,
   AccountInterface,
-  GetTransactionReceiptResponse,
+  RevertedTransactionReceiptResponse,
   Provider,
 } from "starknet";
 import { GameData } from "@/app/lib/data/GameData";
@@ -347,11 +347,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
+        (receipt as RevertedTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
+          (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
       // Here we need to process the StartGame event first and use the output for AmbushedByBeast event
@@ -462,11 +462,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
+        (receipt as RevertedTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
+          (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
       const events = await parseEvents(
@@ -700,13 +700,27 @@ export function syscalls({
     }
   };
 
-  const attack = async (tillDeath: boolean, beastData: Beast) => {
+  const attack = async (
+    tillDeath: boolean,
+    beastData: Beast,
+    blockHash?: string
+  ) => {
     resetData("latestMarketItemsQuery");
-    const attackTx = {
+    // First we send the current block hash to the contract
+    const setBlockHashTx: Call = {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "set_starting_entropy",
+      calldata: [adventurer?.id?.toString() ?? "", blockHash!],
+    };
+    const attackTx: Call = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "attack",
       calldata: [adventurer?.id?.toString() ?? "", tillDeath ? "1" : "0"],
     };
+    const attackCalls =
+      process.env.NEXT_PUBLIC_NETWORK === "mainnet"
+        ? [setBlockHashTx, attackTx]
+        : [attackTx];
     addToCalls(attackTx);
 
     const isArcade = checkArcadeConnector(connector!);
@@ -714,7 +728,7 @@ export function syscalls({
     try {
       const tx = await handleSubmitCalls(
         account,
-        [...calls, attackTx],
+        [...calls, ...attackCalls],
         isArcade,
         Number(ethBalance),
         showTopUpDialog,
@@ -732,11 +746,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
+        (receipt as RevertedTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
+          (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
       // reset battles by tx hash
@@ -1000,11 +1014,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
+        (receipt as RevertedTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
+          (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
       // Add optimistic data
@@ -1206,11 +1220,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
+        (receipt as RevertedTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
+          (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
       // Add optimistic data
@@ -1358,11 +1372,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
+        (receipt as RevertedTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
+          (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
       const events = await parseEvents(
@@ -1443,11 +1457,11 @@ export function syscalls({
       });
       // Handle if the tx was reverted
       if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
+        (receipt as RevertedTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
+          (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
       const events = await parseEvents(
@@ -1616,11 +1630,11 @@ export function syscalls({
     }
   };
 
-  const mintLords = async (lordsAmount: number) => {
+  const mintLords = async () => {
     const mintLords: Call = {
       contractAddress: lordsContract?.address ?? "",
-      entrypoint: "mint",
-      calldata: [account?.address ?? "0x0", lordsAmount.toString(), "0"],
+      entrypoint: "mint_lords",
+      calldata: [],
     };
     const isArcade = checkArcadeConnector(connector!);
     try {
@@ -1649,6 +1663,45 @@ export function syscalls({
     }
   };
 
+  const suicide = async () => {
+    const suicideTx: Call = {
+      contractAddress: lordsContract?.address ?? "",
+      entrypoint: "suicide",
+      calldata: [adventurer.id!],
+    };
+
+    const isArcade = checkArcadeConnector(connector!);
+    startLoading(
+      "Suicide",
+      "Committing Suicide",
+      "adventurerByIdQuery",
+      adventurer?.id
+    );
+    try {
+      const tx = await handleSubmitCalls(
+        account!,
+        [...calls, suicideTx],
+        isArcade,
+        Number(ethBalance),
+        showTopUpDialog,
+        setTopUpAccount
+      );
+      const result = await provider?.waitForTransaction(tx?.transaction_hash, {
+        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
+      });
+
+      if (!result) {
+        throw new Error("Lords Mint did not complete successfully.");
+      }
+
+      stopLoading(`${adventurer.name} committed suicide!`);
+      getBalances();
+    } catch (e) {
+      console.log(e);
+      stopLoading(e, true);
+    }
+  };
+
   return {
     spawn,
     explore,
@@ -1658,5 +1711,6 @@ export function syscalls({
     slayIdles,
     multicall,
     mintLords,
+    suicide,
   };
 }

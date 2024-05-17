@@ -241,7 +241,7 @@ export const ArcadeIntro = ({
                     onMainnet
                       ? window.open("https://starkgate.starknet.io//", "_blank")
                       : window.open(
-                          "https://faucet.goerli.starknet.io/",
+                          process.env.NEXT_PUBLIC_FAUCET_URL,
                           "_blank"
                         )
                   }

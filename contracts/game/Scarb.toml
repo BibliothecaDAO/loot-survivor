@@ -13,6 +13,7 @@ game_snapshot = { path = "../game_snapshot" }
 openzeppelin.workspace = true
 golden_token.workspace = true
 arcade_account.workspace = true
+pragma_lib = { git = "https://github.com/astraly-labs/pragma-lib" }
 
 [[target.starknet-contract]]
 allowed-libfuncs-list.name = "experimental"

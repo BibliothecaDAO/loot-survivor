@@ -66,8 +66,10 @@ export const TopUpDialog = ({
   );
 
   const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+  const onSepolia = process.env.NEXT_PUBLIC_NETWORK === "sepolia";
 
-  const notEnoughDefaultBalance = ethBalance < 0.01 * 10 ** 18;
+  const notEnoughDefaultBalance =
+    ethBalance < (onMainnet || onSepolia ? 0.01 : 0.001) * 10 ** 18;
   const notEnoughCustomBalance = ethBalance < inputValue * 10 ** 18;
 
   return (
@@ -111,7 +113,7 @@ export const TopUpDialog = ({
               } else {
                 onMainnet
                   ? window.open("https://starkgate.starknet.io//", "_blank")
-                  : window.open("https://faucet.goerli.starknet.io/", "_blank");
+                  : window.open(process.env.NEXT_PUBLIC_FAUCET_URL, "_blank");
               }
             }}
           >
@@ -166,7 +168,7 @@ export const TopUpDialog = ({
               } else {
                 onMainnet
                   ? window.open("https://starkgate.starknet.io//", "_blank")
-                  : window.open("https://faucet.goerli.starknet.io/", "_blank");
+                  : window.open(process.env.NEXT_PUBLIC_FAUCET_URL, "_blank");
               }
             }}
           >
