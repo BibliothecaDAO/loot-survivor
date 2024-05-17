@@ -32,6 +32,7 @@ dependencies = [
  "market",
  "obstacles",
  "openzeppelin",
+ "pragma_lib",
  "survivor",
 ]
 
@@ -85,6 +86,11 @@ dependencies = [
 name = "openzeppelin"
 version = "0.9.0"
 source = "git+https://github.com/OpenZeppelin/cairo-contracts.git?tag=v0.9.0#364db5b1aecc1335d2e65db887291d19aa28937d"
+
+[[package]]
+name = "pragma_lib"
+version = "1.0.0"
+source = "git+https://github.com/astraly-labs/pragma-lib#2eca9b70dc505788423da1eedbf2d65563cc3102"
 
 [[package]]
 name = "survivor"
