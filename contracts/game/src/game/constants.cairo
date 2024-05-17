@@ -36,6 +36,7 @@ mod messages {
     const GAME_ALREADY_STARTED: felt252 = 'game already started';
     const STARTING_ENTROPY_IS_VALID: felt252 = 'starting entropy is valid';
     const VALID_BLOCK_HASH_UNAVAILABLE: felt252 = 'valid hash not yet available';
+    const START_ENTROPY_NOT_SET: felt252 = 'starting entropy not set';
 }
 
 // TODO: Update for mainnet

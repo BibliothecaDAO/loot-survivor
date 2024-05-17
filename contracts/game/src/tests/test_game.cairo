@@ -56,6 +56,7 @@ mod tests {
         IGoldenToken, IGoldenTokenDispatcher, IGoldenTokenDispatcherTrait,
         IGoldenTokenLibraryDispatcher
     };
+    use pragma_lib::abi::{IRandomnessDispatcher, IRandomnessDispatcherTrait};
 
     const ADVENTURER_ID: felt252 = 1;
     const MAX_LORDS: u256 = 10000000000000000000000000000000000000000;
@@ -159,8 +160,17 @@ mod tests {
         utils::deploy(AA_CLASS_HASH(), calldata)
     }
 
+    fn deploy_randomness() -> IRandomnessDispatcher {
+        let mut calldata = ArrayTrait::new();
+        let contract_address = utils::deploy(Randomness::TEST_CLASS_HASH, calldata);
+        IRandomnessDispatcher { contract_address }
+    }
+
     fn deploy_game(
-        lords: ContractAddress, golden_token: ContractAddress, terminal_block: u64
+        lords: ContractAddress,
+        golden_token: ContractAddress,
+        terminal_block: u64,
+        randomness: ContractAddress
     ) -> IGameDispatcher {
         let mut calldata = ArrayTrait::new();
         calldata.append(lords.into());
@@ -168,8 +178,9 @@ mod tests {
         calldata.append(COLLECTIBLE_BEASTS().into());
         calldata.append(golden_token.into());
         calldata.append(terminal_block.into());
+        calldata.append(randomness.into());
 
-        IGameDispatcher { contract_address: utils::deploy(Game::TEST_CLASS_HASH, calldata) }
+        IGameDispatcher {contract_address: utils::deploy(Game::TEST_CLASS_HASH, calldata) }
     }
 
     fn setup(
@@ -187,9 +198,15 @@ mod tests {
         // deploy golden token
         let golden_token = deploy_golden_token(eth.contract_address);
 
+        // randomness
+        let randomness = deploy_randomness();
+
         // deploy game
         let game = deploy_game(
-            lords.contract_address, golden_token.contract_address, terminal_block
+            lords.contract_address,
+            golden_token.contract_address,
+            terminal_block,
+            randomness.contract_address
         );
 
         // set contract address (aka caller) to specific address
@@ -226,7 +243,7 @@ mod tests {
     }
 
     fn add_adventurer_to_game(ref game: IGameDispatcher, golden_token_id: u256) {
-        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero', golden_token_id, false);
+        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero', golden_token_id, false, 4000000000000000);
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
@@ -244,7 +261,7 @@ mod tests {
         let name = 'abcdefghijklmno';
 
         // start new game
-        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN.into(), false);
+        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN.into(), false, 4000000000000000);
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -288,11 +305,6 @@ mod tests {
     ) -> IGameDispatcher {
         // start game
         let mut game = new_adventurer(starting_block, starting_time);
-
-        if (starting_entropy != 0) {
-            testing::set_block_number(starting_block + 2);
-            game.set_starting_entropy(ADVENTURER_ID, starting_entropy);
-        }
 
         // attack starter beast
         game.attack(ADVENTURER_ID, false);
@@ -581,7 +593,7 @@ mod tests {
         let name = 'abcdefghijklmno';
 
         // start new game
-        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN.into(), false);
+        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN.into(), false, 4000000000000000);
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -2716,7 +2728,12 @@ mod tests {
             }
             game
                 .new_game(
-                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false
+                    INTERFACE_ID(),
+                    ItemId::Wand,
+                    'phase1',
+                    DEFAULT_NO_GOLDEN_TOKEN.into(),
+                    false,
+                    4000000000000000
                 );
             i += 1;
         };
@@ -2733,7 +2750,7 @@ mod tests {
             }
             game
                 .new_game(
-                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false
+                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false, 4000000000000000
                 );
             i += 1;
         };
@@ -2756,7 +2773,7 @@ mod tests {
             }
             game
                 .new_game(
-                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false
+                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false, 4000000000000000
                 );
             i += 1;
         };
@@ -2785,7 +2802,7 @@ mod tests {
             }
             game
                 .new_game(
-                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false
+                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false, 4000000000000000
                 );
             i += 1;
         };
@@ -2918,95 +2935,6 @@ mod tests {
         // verify adventurer is now idle
         let (is_idle, _) = game.is_idle(ADVENTURER_ID);
         assert(is_idle, 'should be idle');
-    }
-
-
-    #[test]
-    #[should_panic(expected: ('Not authorized to act', 'ENTRYPOINT_FAILED'))]
-    fn test_set_starting_entropy_not_owner() {
-        let mut game = new_adventurer(1000, 1696201757);
-        testing::set_block_number(1002);
-        // change to different caller
-        testing::set_contract_address(contract_address_const::<50>());
-        // try to set starting entropy, should revert
-        game.set_starting_entropy(ADVENTURER_ID, 1);
-    }
-
-    #[test]
-    #[should_panic(expected: ('game already started', 'ENTRYPOINT_FAILED'))]
-    fn test_set_starting_entropy_game_started() {
-        let mut game = new_adventurer(1000, 1696201757);
-        testing::set_block_number(1002);
-        // defeat starter beast
-        game.attack(ADVENTURER_ID, true);
-        // then attempt to set starting entropy, should revert
-        game.set_starting_entropy(ADVENTURER_ID, 1);
-    }
-
-
-    #[test]
-    #[should_panic(expected: ('valid hash not yet available', 'ENTRYPOINT_FAILED'))]
-    fn test_set_starting_entropy_before_hash_available() {
-        let mut game = new_adventurer(1000, 1696201757);
-        // attempt to set starting entropy before hash is available, should revert
-        game.set_starting_entropy(ADVENTURER_ID, 1);
-    }
-
-    #[test]
-    #[should_panic(expected: ('block hash should not be zero', 'ENTRYPOINT_FAILED'))]
-    fn test_set_starting_entropy_zero_hash() {
-        let mut game = new_adventurer(1000, 1696201757);
-        testing::set_block_number(1002);
-        // attempt to pass in 0 for starting entropy hash, should revert
-        game.set_starting_entropy(ADVENTURER_ID, 0);
-    }
-
-    #[test]
-    #[should_panic(expected: ('starting entropy already set', 'ENTRYPOINT_FAILED'))]
-    fn test_set_starting_entropy_double_call() {
-        let mut game = new_adventurer(1000, 1696201757);
-        testing::set_block_number(1002);
-        // attempt to set starting entropy twice, should revert
-        game.set_starting_entropy(ADVENTURER_ID, 1);
-        game.set_starting_entropy(ADVENTURER_ID, 1);
-    }
-
-    #[test]
-    fn test_set_starting_entropy_basic() {
-        let mut game = new_adventurer(1000, 1696201757);
-        testing::set_block_number(1002);
-        game.set_starting_entropy(ADVENTURER_ID, 123);
-        // verify starting entropy was set
-        assert(
-            game.get_adventurer_starting_entropy(ADVENTURER_ID) == 123, 'wrong starting entropy'
-        );
-        // verify adventurer entropy is using starting entropy
-        assert(game.get_adventurer_entropy(ADVENTURER_ID) == 123, 'wrong adventurer entropy');
-    }
-
-    #[test]
-    fn test_set_starting_entropy_wrong_hash() {
-        let wrong_starting_entropy = 12345678910112;
-        let mut game = new_adventurer_lvl3(1000, 1696201757, wrong_starting_entropy);
-        testing::set_block_number(1002);
-
-        // go out exploring till beast
-        game.explore(ADVENTURER_ID, true);
-
-        // record adventurer before death 
-        let pre_death_adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(pre_death_adventurer.xp > 0, 'adventurer should have xp');
-        assert(pre_death_adventurer.gold > 0, 'adventurer should have gold');
-
-        // attack beast till death
-        game.attack(ADVENTURER_ID, true);
-
-        // adventurer died attacking beast
-        let post_death_adventurer = game.get_adventurer(ADVENTURER_ID);
-        // because starting entropy was wrong, adventurer's xp and gold should be reset
-        assert(post_death_adventurer.health == 0, 'adventurer should be dead');
-        assert(post_death_adventurer.xp == 1, 'adventurer should have 1 xp');
-        assert(post_death_adventurer.gold == 0, 'adventurer should have 0 gold');
     }
 
     // test slay_invalid_adventurers on adventurer who didn't use optimistic start
