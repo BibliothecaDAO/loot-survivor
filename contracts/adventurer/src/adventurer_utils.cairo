@@ -170,15 +170,11 @@ impl AdventurerUtils of IAdventurerUtils {
     // @notice gets randomness for adventurer
     // @param adventurer_xp: adventurer xp
     // @param adventurer_entropy: adventurer entropy
-    // @param game_entropy: game entropy
     // @return (u128, u128): tuple of randomness
-    fn get_randomness(
-        adventurer_xp: u16, adventurer_entropy: felt252, game_entropy: felt252
-    ) -> (u128, u128) {
+    fn get_randomness(adventurer_xp: u16, adventurer_entropy: felt252) -> (u128, u128) {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(adventurer_xp.into());
         hash_span.append(adventurer_entropy);
-        hash_span.append(game_entropy);
         let poseidon = poseidon_hash_span(hash_span.span());
         AdventurerUtils::split_hash(poseidon)
     }
@@ -187,19 +183,14 @@ impl AdventurerUtils of IAdventurerUtils {
     // @param adventurer_xp: adventurer xp
     // @param adventurer_entropy: adventurer entropy
     // @param adventurer_health: adventurer health
-    // @param game_entropy: game entropy
     // @return (u128, u128): tuple of randomness
     fn get_randomness_with_health(
-        adventurer_xp: u16,
-        adventurer_health: u16,
-        adventurer_entropy: felt252,
-        game_entropy: felt252
+        adventurer_xp: u16, adventurer_health: u16, adventurer_entropy: felt252,
     ) -> (u128, u128) {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(adventurer_xp.into());
         hash_span.append(adventurer_health.into());
         hash_span.append(adventurer_entropy);
-        hash_span.append(game_entropy);
         let poseidon = poseidon_hash_span(hash_span.span());
         AdventurerUtils::split_hash(poseidon)
     }

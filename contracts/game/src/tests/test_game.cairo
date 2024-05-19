@@ -38,6 +38,10 @@ mod tests {
             },
         }
     };
+
+    use game::tests::mock_randomness::{
+        MockRandomness, IMockRandomnessDispatcher, IMockRandomnessDispatcherTrait
+    };
     use openzeppelin::utils::serde::SerializedAppend;
     use openzeppelin::presets::erc20::ERC20;
     use openzeppelin::tests::utils;
@@ -56,7 +60,6 @@ mod tests {
         IGoldenToken, IGoldenTokenDispatcher, IGoldenTokenDispatcherTrait,
         IGoldenTokenLibraryDispatcher
     };
-    use pragma_lib::abi::{IRandomnessDispatcher, IRandomnessDispatcherTrait};
 
     const ADVENTURER_ID: felt252 = 1;
     const MAX_LORDS: u256 = 10000000000000000000000000000000000000000;
@@ -81,30 +84,6 @@ mod tests {
     fn OWNER() -> ContractAddress {
         contract_address_const::<10>()
     }
-
-    fn deploy_golden_token(eth: ContractAddress) -> IGoldenTokenDispatcher {
-        let mut calldata = ArrayTrait::new();
-
-        calldata.append(SYMBOL);
-        calldata.append(OWNER().into());
-        calldata.append(DAO().into());
-        calldata.append(eth.into());
-
-        let contract_address = utils::deploy(golden_token::GoldenToken::TEST_CLASS_HASH, calldata);
-
-        IGoldenTokenDispatcher { contract_address }
-    }
-
-    fn deploy_erc20() -> IERC20CamelDispatcher {
-        let mut calldata = array![];
-        calldata.append_serde(NAME);
-        calldata.append_serde(SYMBOL);
-        calldata.append_serde(MAX_LORDS);
-        calldata.append_serde(OWNER());
-
-        IERC20CamelDispatcher { contract_address: utils::deploy(ERC20::TEST_CLASS_HASH, calldata) }
-    }
-
 
     const PUBLIC_KEY: felt252 = 0x333333;
     const NEW_PUBKEY: felt252 = 0x789789;
@@ -160,10 +139,35 @@ mod tests {
         utils::deploy(AA_CLASS_HASH(), calldata)
     }
 
-    fn deploy_randomness() -> IRandomnessDispatcher {
+    fn deploy_erc20() -> IERC20CamelDispatcher {
+        let mut calldata = array![];
+        calldata.append_serde(NAME);
+        calldata.append_serde(SYMBOL);
+        calldata.append_serde(MAX_LORDS);
+        calldata.append_serde(OWNER());
+
+        IERC20CamelDispatcher { contract_address: utils::deploy(ERC20::TEST_CLASS_HASH, calldata) }
+    }
+
+    fn deploy_golden_token(eth: ContractAddress) -> IGoldenTokenDispatcher {
         let mut calldata = ArrayTrait::new();
-        let contract_address = utils::deploy(Randomness::TEST_CLASS_HASH, calldata);
-        IRandomnessDispatcher { contract_address }
+
+        calldata.append(SYMBOL);
+        calldata.append(OWNER().into());
+        calldata.append(DAO().into());
+        calldata.append(eth.into());
+
+        let contract_address = utils::deploy(golden_token::GoldenToken::TEST_CLASS_HASH, calldata);
+        IGoldenTokenDispatcher { contract_address }
+    }
+
+    fn deploy_randomness() -> IMockRandomnessDispatcher {
+        let mut calldata = ArrayTrait::<felt252>::new();
+        calldata.append(123);
+        let contract_address = utils::deploy(MockRandomness::TEST_CLASS_HASH, calldata);
+        'hello'.print();
+        MockRandomness::TEST_CLASS_HASH.print();
+        IMockRandomnessDispatcher { contract_address }
     }
 
     fn deploy_game(
@@ -172,15 +176,17 @@ mod tests {
         terminal_block: u64,
         randomness: ContractAddress
     ) -> IGameDispatcher {
-        let mut calldata = ArrayTrait::new();
+        let mut calldata = ArrayTrait::<felt252>::new();
         calldata.append(lords.into());
         calldata.append(DAO().into());
         calldata.append(COLLECTIBLE_BEASTS().into());
         calldata.append(golden_token.into());
         calldata.append(terminal_block.into());
         calldata.append(randomness.into());
+        let vrf_level_interval = 3;
+        calldata.append(vrf_level_interval);
 
-        IGameDispatcher {contract_address: utils::deploy(Game::TEST_CLASS_HASH, calldata) }
+        IGameDispatcher { contract_address: utils::deploy(Game::TEST_CLASS_HASH, calldata) }
     }
 
     fn setup(
@@ -243,7 +249,10 @@ mod tests {
     }
 
     fn add_adventurer_to_game(ref game: IGameDispatcher, golden_token_id: u256) {
-        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero', golden_token_id, false, 4000000000000000);
+        game
+            .new_game(
+                INTERFACE_ID(), ItemId::Wand, 'loothero', golden_token_id, false, 4000000000000000
+            );
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
@@ -261,7 +270,15 @@ mod tests {
         let name = 'abcdefghijklmno';
 
         // start new game
-        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN.into(), false, 4000000000000000);
+        game
+            .new_game(
+                INTERFACE_ID(),
+                starting_weapon,
+                name,
+                DEFAULT_NO_GOLDEN_TOKEN.into(),
+                false,
+                4000000000000000
+            );
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -593,7 +610,15 @@ mod tests {
         let name = 'abcdefghijklmno';
 
         // start new game
-        game.new_game(INTERFACE_ID(), starting_weapon, name, DEFAULT_NO_GOLDEN_TOKEN.into(), false, 4000000000000000);
+        game
+            .new_game(
+                INTERFACE_ID(),
+                starting_weapon,
+                name,
+                DEFAULT_NO_GOLDEN_TOKEN.into(),
+                false,
+                4000000000000000
+            );
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1260,255 +1285,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(300000000)]
-    fn test_cant_slay_non_idle_adventurer_no_rollover() {
-        let STARTING_BLOCK_NUMBER = 513;
-
-        // deploy and start new game
-        let mut game = new_adventurer(STARTING_BLOCK_NUMBER, 1696201757);
-
-        // get game entropy
-        let game_entropy = game.get_game_entropy();
-
-        // attack starter beast, resulting in adventurer last action block number being 1
-        game.attack(ADVENTURER_ID, false);
-
-        // roll forward block chain but not enough to qualify for idle death penalty
-        testing::set_block_number(
-            STARTING_BLOCK_NUMBER
-                + MAINNET_REVEAL_DELAY_BLOCKS.into()
-                + game_entropy.get_idle_penalty_blocks()
-                - 1
-        );
-
-        // try to slay adventurer for being idle
-        // this should result in contract throwing a panic 'Adventurer is not idle'
-        // because the adventurer is not idle for the full IDLE_DEATH_PENALTY_BLOCKS
-        // This test is annotated to expect that panic
-        let idle_adventurers = array![ADVENTURER_ID];
-        game.slay_idle_adventurers(idle_adventurers);
-    }
-
-    #[test]
-    #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(300000000)]
-    fn test_cant_slay_non_idle_adventurer_with_rollover() {
-        let STARTING_BLOCK_NUMBER = 510;
-        let mut game = new_adventurer(STARTING_BLOCK_NUMBER, 1696201757);
-
-        let game_entropy = game.get_game_entropy();
-
-        // attack beast to set adventurer last action block number
-        game.attack(ADVENTURER_ID, false);
-
-        // roll forward block chain but not enough to qualify for idle death penalty
-        testing::set_block_number(
-            STARTING_BLOCK_NUMBER
-                + MAINNET_REVEAL_DELAY_BLOCKS.into()
-                + game_entropy.get_idle_penalty_blocks()
-                - 1
-        );
-
-        // try to slay adventurer for being idle
-        // this should result in contract throwing a panic 'Adventurer is not idle'
-        // because the adventurer is not idle for the full IDLE_DEATH_PENALTY_BLOCKS
-        // This test is annotated to expect that panic
-        let idle_adventurers = array![ADVENTURER_ID];
-        game.slay_idle_adventurers(idle_adventurers);
-    }
-
-    #[test]
-    #[available_gas(60000000)]
-    // @dev since we only store 511 blocks, there are two cases for the idle adventurer
-    // the first is when the adventurer last action block number is less than the
-    // (current_block_number % 511) and the other is when it is greater
-    // this test covers the case where the adventurer last action block number is less than the
-    // (current_block_number % 511)
-    fn test_slay_idle_adventurer_with_block_rollover() {
-        let STARTING_BLOCK_NUMBER = 510;
-
-        // deploy and start new game
-        let mut game = new_adventurer(STARTING_BLOCK_NUMBER, 1696201757);
-
-        // attack starter beast, resulting in adventurer last action block number being 510
-        game.attack(ADVENTURER_ID, false);
-
-        // get updated adventurer state
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        let game_entropy = game.get_game_entropy();
-
-        // verify last action block number is correct
-        assert(
-            adventurer.last_action_block == STARTING_BLOCK_NUMBER.try_into().unwrap(),
-            'unexpected last action block'
-        );
-
-        // roll forward blockchain to make adventurer idle
-        testing::set_block_number(
-            STARTING_BLOCK_NUMBER
-                + MAINNET_REVEAL_DELAY_BLOCKS.into()
-                + game_entropy.get_idle_penalty_blocks()
-                + 1
-        );
-
-        // get current block number
-        let current_block_number = starknet::get_block_info().unbox().block_number;
-
-        // verify current block number % MAX_BLOCK_COUNT is less than adventurers last action block number
-        // this is imperative because this test is testing the case where the adventurer last action block number
-        // is less than (current_block_number % MAX_BLOCK_COUNT)
-        assert(
-            (current_block_number % MAX_BLOCK_COUNT) < adventurer.last_action_block.into(),
-            'last action !> current block'
-        );
-
-        // slay idle adventurer
-        let idle_adventurers = array![ADVENTURER_ID];
-        game.slay_idle_adventurers(idle_adventurers);
-
-        // get adventurer state
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-
-        // assert adventurer is dead
-        assert(adventurer.health == 0, 'adventurer should be dead');
-    }
-
-    #[test]
-    #[available_gas(70000000)]
-    // @dev since we only store 511 blocks, there are two cases for the idle adventurer
-    // the first is when the adventurer last action block number is less than the
-    // (current_block_number % 511) and the other is when it is greater
-    // this test covers the case where the adventurer last action block number is greater than
-    // (current_block_number % 511)
-    fn test_slay_idle_adventurer_without_block_rollover() {
-        let STARTING_BLOCK_NUMBER = 512;
-
-        // deploy and start new game
-        let mut game = new_adventurer(STARTING_BLOCK_NUMBER, 1696201757);
-
-        // attack starter beast, resulting in adventurer last action block number being 1
-        game.attack(ADVENTURER_ID, false);
-
-        // get updated adventurer state
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        let game_entropy = game.get_game_entropy();
-
-        // roll forward blockchain to make adventurer idle
-        testing::set_block_number(
-            STARTING_BLOCK_NUMBER
-                + MAINNET_REVEAL_DELAY_BLOCKS.into()
-                + game_entropy.get_idle_penalty_blocks()
-                + 1
-        );
-
-        // get current block number
-        let current_block_number = starknet::get_block_info().unbox().block_number;
-
-        // verify current block number % MAX_BLOCK_COUNT is greater than adventurers last action block number
-        // this is imperative because this test is testing the case where the adventurer last action block number
-        // is greater than the (current_block_number % MAX_BLOCK_COUNT)
-        assert(
-            (current_block_number % MAX_BLOCK_COUNT) > adventurer.last_action_block.into(),
-            'last action !> current block'
-        );
-
-        // call slay idle adventurer
-        let idle_adventurers = array![ADVENTURER_ID];
-        game.slay_idle_adventurers(idle_adventurers);
-
-        // get updated adventurer state
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-
-        // assert adventurer is dead
-        assert(adventurer.health == 0, 'adventurer should be dead');
-    }
-
-    #[test]
-    #[available_gas(142346872)]
-    #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
-    fn test_slay_idle_adventurer_before_reveal_block() {
-        let STARTING_BLOCK_NUMBER = 100;
-
-        // deploy and start new game
-        let mut game = new_adventurer(STARTING_BLOCK_NUMBER, 1696201757);
-
-        // roll the blockchain back 1 block to simulate mainnet start_game scenario
-        // where the adventurers last_action will be set to 11 blocks in the future
-        // to account for the commit-and-reveal delay
-        testing::set_block_number(STARTING_BLOCK_NUMBER - 1);
-        game.slay_idle_adventurers(array![ADVENTURER_ID]);
-    }
-
-    #[test]
-    #[available_gas(142346872)]
-    fn test_multi_slay_adventurers() {
-        let STARTING_BLOCK_NUMBER = 512;
-
-        let ADVENTURER2_ID = 2;
-        let ADVENTURER3_ID = 3;
-
-        // deploy and start new game
-        let mut game = new_adventurer(STARTING_BLOCK_NUMBER, 1696201757);
-
-        // add two adventurers to the game
-        add_adventurer_to_game(ref game, 0);
-        add_adventurer_to_game(ref game, 0);
-
-        // attack starter beast, resulting in adventurer last action block number being 1
-        game.attack(ADVENTURER_ID, false);
-        game.attack(ADVENTURER2_ID, false);
-        game.attack(ADVENTURER3_ID, false);
-
-        // get updated adventurer state
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        let game_entropy = game.get_game_entropy();
-
-        // roll forward blockchain to make adventurer idle
-        testing::set_block_number(
-            STARTING_BLOCK_NUMBER
-                + MAINNET_REVEAL_DELAY_BLOCKS.into()
-                + game_entropy.get_idle_penalty_blocks()
-                + 1
-        );
-
-        // get current block number
-        let current_block_number = starknet::get_block_info().unbox().block_number;
-
-        // verify current block number % MAX_BLOCK_COUNT is greater than adventurers last action block number
-        // this is imperative because this test is testing the case where the adventurer last action block number
-        // is greater than the (current_block_number % MAX_BLOCK_COUNT)
-        assert(
-            (current_block_number % MAX_BLOCK_COUNT) > adventurer.last_action_block.into(),
-            'last action !> current block'
-        );
-
-        // call slay idle adventurer
-        let idle_adventurers = array![ADVENTURER_ID, ADVENTURER2_ID, ADVENTURER3_ID];
-        game.slay_idle_adventurers(idle_adventurers);
-
-        // get updated adventurer state
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        let adventurer2 = game.get_adventurer(ADVENTURER2_ID);
-        let adventurer3 = game.get_adventurer(ADVENTURER3_ID);
-
-        // assert adventurer is dead
-        assert(adventurer.health == 0, 'adventurer should be dead');
-        assert(adventurer2.health == 0, 'adventurer2 should be dead');
-        assert(adventurer3.health == 0, 'adventurer3 should be dead');
-    }
-
-    #[test]
-    #[available_gas(20000000)]
-    fn test_get_game_entropy() {
-        let mut game = new_adventurer(1000, 1696201757);
-        let game_entropy = game.get_game_entropy();
-        assert(game_entropy.last_updated_block == 0x3e8, 'wrong entropy last update block');
-        assert(game_entropy.last_updated_time == 0x6519fc1d, 'wrong entropy last update time');
-        assert(game_entropy.next_update_block == 0x3ee, 'wrong entropy next update block');
-    }
-
-    #[test]
     #[available_gas(100000000)]
     fn test_get_potion_price() {
         let mut game = new_adventurer(1000, 1696201757);
@@ -1577,16 +1353,6 @@ mod tests {
         assert(
             adventurer.stat_points_available == game.get_stat_upgrades_available(ADVENTURER_ID),
             'wrong stat points avail'
-        );
-    }
-    #[test]
-    #[available_gas(20000000)]
-    fn test_get_last_action_block() {
-        let mut game = new_adventurer(1000, 1696201757);
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(
-            adventurer.last_action_block == game.get_last_action_block(ADVENTURER_ID),
-            'wrong last action'
         );
     }
     #[test]
@@ -2750,7 +2516,12 @@ mod tests {
             }
             game
                 .new_game(
-                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false, 4000000000000000
+                    INTERFACE_ID(),
+                    ItemId::Wand,
+                    'phase1',
+                    DEFAULT_NO_GOLDEN_TOKEN.into(),
+                    false,
+                    4000000000000000
                 );
             i += 1;
         };
@@ -2773,7 +2544,12 @@ mod tests {
             }
             game
                 .new_game(
-                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false, 4000000000000000
+                    INTERFACE_ID(),
+                    ItemId::Wand,
+                    'phase1',
+                    DEFAULT_NO_GOLDEN_TOKEN.into(),
+                    false,
+                    4000000000000000
                 );
             i += 1;
         };
@@ -2802,7 +2578,12 @@ mod tests {
             }
             game
                 .new_game(
-                    INTERFACE_ID(), ItemId::Wand, 'phase1', DEFAULT_NO_GOLDEN_TOKEN.into(), false, 4000000000000000
+                    INTERFACE_ID(),
+                    ItemId::Wand,
+                    'phase1',
+                    DEFAULT_NO_GOLDEN_TOKEN.into(),
+                    false,
+                    4000000000000000
                 );
             i += 1;
         };
@@ -2910,62 +2691,5 @@ mod tests {
 
         // try to play again with golden token which should cause panic
         add_adventurer_to_game(ref game, golden_token_id);
-    }
-
-    #[test]
-    #[available_gas(60000000)]
-    fn test_is_idle_view_function() {
-        let STARTING_BLOCK_NUMBER = 510;
-        let mut game = new_adventurer(STARTING_BLOCK_NUMBER, 1696201757);
-        game.attack(ADVENTURER_ID, false);
-
-        // verify adventurer is not idle
-        let (is_idle, _) = game.is_idle(ADVENTURER_ID);
-        assert(!is_idle, 'should not be idle');
-
-        // roll forward blockchain to make adventurer idle
-        let game_entropy = game.get_game_entropy();
-        testing::set_block_number(
-            STARTING_BLOCK_NUMBER
-                + MAINNET_REVEAL_DELAY_BLOCKS.into()
-                + game_entropy.get_idle_penalty_blocks()
-                + 1
-        );
-
-        // verify adventurer is now idle
-        let (is_idle, _) = game.is_idle(ADVENTURER_ID);
-        assert(is_idle, 'should be idle');
-    }
-
-    // test slay_invalid_adventurers on adventurer who didn't use optimistic start
-    #[test]
-    #[should_panic(expected: ('starting entropy is valid', 'ENTRYPOINT_FAILED'))]
-    fn test_slay_invalid_adventurer_no_manual_entropy() {
-        let mut game = new_adventurer_lvl3(1000, 1696201757, 0);
-        let invalid_adventurers = array![ADVENTURER_ID];
-        game.slay_invalid_adventurers(invalid_adventurers);
-    }
-
-    // test slay_invalid_adventurers on adventurer who used optimistic start with correct hash
-    #[test]
-    #[should_panic(expected: ('starting entropy is valid', 'ENTRYPOINT_FAILED'))]
-    fn test_slay_invalid_adventurer_correct_entropy() {
-        let mut game = new_adventurer_lvl3(
-            1000, 1696201757, 0x54b720c8f3876115e2e0fd5c8f0ed2fbaa8fe24f12c402497400043adc7d26e
-        );
-        let invalid_adventurers = array![ADVENTURER_ID];
-        game.slay_invalid_adventurers(invalid_adventurers);
-    }
-
-    // test slay_invalid_adventurers on adventurer who used optimistic start with wrong hash
-    #[test]
-    fn test_slay_invalid_adventurer() {
-        let mut game = new_adventurer_lvl3(1000, 1696201757, 123456789);
-        let invalid_adventurers = array![ADVENTURER_ID];
-        game.slay_invalid_adventurers(invalid_adventurers);
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.health == 0, 'adventurer should be dead');
-        assert(adventurer.xp == 1, 'adventurer should have 1 xp');
-        assert(adventurer.gold == 0, 'adventurer should have 0 gold');
     }
 }
