@@ -11,7 +11,7 @@ enum RequestStatus {
 }
 
 #[starknet::interface]
-trait IRandomness<TContractState> {
+trait IMockRandomness<TContractState> {
     fn update_status(
         ref self: TContractState,
         requestor_address: ContractAddress,
@@ -78,8 +78,9 @@ trait IRandomness<TContractState> {
 
 #[starknet::contract]
 mod MockRandomness {
-    use super::{ContractAddress, IRandomness, RequestStatus};
-    use starknet::{get_caller_address, get_contract_address};
+    use super::{ContractAddress, IMockRandomness, RequestStatus};
+    use starknet::{get_caller_address, get_contract_address, ClassHash};
+    use game::game::interfaces::{IGameDispatcher, IGameDispatcherTrait};
     use array::ArrayTrait;
     use traits::Into;
 
@@ -90,12 +91,12 @@ mod MockRandomness {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState) {
+    fn constructor(ref self: ContractState, test: felt252) {
         return ();
     }
 
-    #[external(v0)]
-    impl IRandomnessImpl of IRandomness<ContractState> {
+    #[abi(embed_v0)]
+    impl IMockRandomnessImpl of IMockRandomness<ContractState> {
         fn update_status(
             ref self: ContractState,
             requestor_address: ContractAddress,
@@ -123,8 +124,9 @@ mod MockRandomness {
             // Mock implementation, you can customize it as needed
             let mut data = ArrayTrait::new();
             data.append(1234.into());
-            IGameDispatcher { contract_address: callback_address }.receive_random_words(data);
-
+            let game_dispatcher = IGameDispatcher { contract_address: callback_address };
+            game_dispatcher
+                .receive_random_words(starknet::get_contract_address(), 1, data.span(), calldata);
             return request_id;
         }
 
@@ -138,7 +140,9 @@ mod MockRandomness {
             callback_fee_limit: u128,
             num_words: u64
         ) {
-            self.request_status.write((requestor_address, request_id), RequestStatus::CANCELLED(()));
+            self
+                .request_status
+                .write((requestor_address, request_id), RequestStatus::CANCELLED(()));
             return ();
         }
 
@@ -155,7 +159,9 @@ mod MockRandomness {
             proof: Span<felt252>,
             calldata: Array<felt252>
         ) {
-            self.request_status.write((requestor_address, request_id), RequestStatus::FULFILLED(()));
+            self
+                .request_status
+                .write((requestor_address, request_id), RequestStatus::FULFILLED(()));
             return ();
         }
 

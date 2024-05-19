@@ -1,7 +1,6 @@
 use starknet::ContractAddress;
 
 use beasts::beast::Beast;
-use game_entropy::game_entropy::{GameEntropy};
 use market::market::{ItemPurchase};
 use survivor::{
     bag::Bag, adventurer::{Adventurer, Stats}, adventurer_meta::AdventurerMetadata,
@@ -44,9 +43,6 @@ trait IGame<TContractState> {
         stat_upgrades: Stats,
         items: Array<ItemPurchase>,
     );
-    fn slay_idle_adventurers(ref self: TContractState, adventurer_ids: Array<felt252>);
-    fn slay_invalid_adventurers(ref self: TContractState, adventurer_ids: Array<felt252>);
-    fn rotate_game_entropy(ref self: TContractState);
     fn update_cost_to_play(ref self: TContractState);
     fn initiate_price_change(ref self: TContractState);
     // ------ View Functions ------
@@ -61,10 +57,6 @@ trait IGame<TContractState> {
     fn get_level(self: @TContractState, adventurer_id: felt252) -> u8;
     fn get_gold(self: @TContractState, adventurer_id: felt252) -> u16;
     fn get_stat_upgrades_available(self: @TContractState, adventurer_id: felt252) -> u8;
-    fn get_last_action_block(self: @TContractState, adventurer_id: felt252) -> u16;
-    fn get_actions_per_block(self: @TContractState, adventurer_id: felt252) -> u8;
-    fn get_reveal_block(self: @TContractState, adventurer_id: felt252) -> u64;
-    fn is_idle(self: @TContractState, adventurer_id: felt252) -> (bool, u16);
 
     // adventurer stats (includes boost)
     fn get_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
@@ -139,8 +131,6 @@ trait IGame<TContractState> {
     fn get_beast_tier(self: @TContractState, beast_id: u8) -> u8;
 
     // game settings
-    fn next_game_entropy_rotation(self: @TContractState) -> felt252;
-    fn game_rate_limit(self: @TContractState) -> u64;
     fn starting_gold(self: @TContractState) -> u16;
     fn starting_health(self: @TContractState) -> u16;
     fn base_potion_price(self: @TContractState) -> u16;
@@ -165,8 +155,6 @@ trait IGame<TContractState> {
     fn owner_of(self: @TContractState, adventurer_id: felt252) -> ContractAddress;
     fn get_dao_address(self: @TContractState) -> ContractAddress;
     fn get_lords_address(self: @TContractState) -> ContractAddress;
-    fn get_game_entropy(self: @TContractState) -> GameEntropy;
-    fn get_idle_penalty_blocks(self: @TContractState) -> u64;
     fn get_leaderboard(self: @TContractState) -> Leaderboard;
     fn get_cost_to_play(self: @TContractState) -> u128;
     fn get_games_played_snapshot(self: @TContractState) -> GamesPlayedSnapshot;
@@ -191,7 +179,6 @@ trait IViewGame<TContractState> { // ------ View Functions ------
     // fn get_actions_per_block(self: @TContractState, adventurer_id: felt252) -> u8;
     // fn get_reveal_block(self: @TContractState, adventurer_id: felt252) -> u64;
     // fn is_idle(self: @TContractState, adventurer_id: felt252) -> (bool, u16);
-    // fn get_contract_calculated_entropy(self: @TContractState, adventurer_id: felt252) -> felt252;
 
     // // adventurer stats (includes boost)
     // fn get_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
@@ -266,7 +253,6 @@ trait IViewGame<TContractState> { // ------ View Functions ------
 // fn get_beast_tier(self: @TContractState, beast_id: u8) -> u8;
 
 // // game settings
-// fn next_game_entropy_rotation(self: @TContractState) -> felt252;
 // fn game_rate_limit(self: @TContractState) -> u64;
 // fn starting_gold(self: @TContractState) -> u16;
 // fn starting_health(self: @TContractState) -> u16;
@@ -292,8 +278,6 @@ trait IViewGame<TContractState> { // ------ View Functions ------
 // fn owner_of(self: @TContractState, adventurer_id: felt252) -> ContractAddress;
 // fn get_dao_address(self: @TContractState) -> ContractAddress;
 // fn get_lords_address(self: @TContractState) -> ContractAddress;
-// fn get_game_entropy(self: @TContractState) -> GameEntropy;
-// fn get_idle_penalty_blocks(self: @TContractState) -> u64;
 // fn get_leaderboard(self: @TContractState) -> Leaderboard;
 // fn get_cost_to_play(self: @TContractState) -> u128;
 // fn get_games_played_snapshot(self: @TContractState) -> GamesPlayedSnapshot;

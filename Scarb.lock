@@ -25,7 +25,6 @@ name = "game"
 version = "0.1.0"
 dependencies = [
  "arcade_account",
- "game_entropy",
  "game_snapshot",
  "golden_token",
  "lootitems",
@@ -35,10 +34,6 @@ dependencies = [
  "pragma_lib",
  "survivor",
 ]
-
-[[package]]
-name = "game_entropy"
-version = "0.1.0"
 
 [[package]]
 name = "game_snapshot"
