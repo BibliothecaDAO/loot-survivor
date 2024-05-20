@@ -2,6 +2,7 @@
 
 import { ApolloProvider } from "@apollo/client";
 import { gameClient, goldenTokenClient } from "@/app/lib/clients";
+import { Analytics } from "@vercel/analytics/react";
 import "@/app/globals.css";
 
 export default function RootLayout({
@@ -23,6 +24,7 @@ export default function RootLayout({
         <ApolloProvider client={gameClient}>
           <ApolloProvider client={goldenTokenClient}>{children}</ApolloProvider>
         </ApolloProvider>
+        <Analytics />
       </body>
     </html>
   );

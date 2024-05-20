@@ -26,6 +26,7 @@ export default function InterludeScreen({
     const nextEntropyTime =
       adventurerCreatedTime + secondsUntilNextEntropy * 1000;
     setNextEntropyTime(nextEntropyTime);
+    console.log(secondsUntilNextEntropy, averageBlockTime, "hello");
   };
 
   const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
@@ -33,6 +34,13 @@ export default function InterludeScreen({
   useEffect(() => {
     getNextEntropyTime();
   }, []);
+
+  console.log(
+    countDownExpired,
+    nextEntropyTime,
+    new Date().getTime(),
+    new Date(adventurer?.createdTime!).getTime()
+  );
 
   return (
     <>

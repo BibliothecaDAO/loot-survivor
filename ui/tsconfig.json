@@ -17,7 +17,7 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noUnusedLocals": true,
+    // "noUnusedLocals": true,
     // "noUnusedParameters": true,
     "noEmit": true,
     "jsx": "preserve",

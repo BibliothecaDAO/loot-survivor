@@ -710,7 +710,10 @@ export function syscalls({
     const setBlockHashTx: Call = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "set_starting_entropy",
-      calldata: [adventurer?.id?.toString() ?? "", blockHash!],
+      calldata: [
+        adventurer?.id?.toString() ?? "",
+        BigInt(blockHash! ?? 0).toString(),
+      ],
     };
     const attackTx: Call = {
       contractAddress: gameContract?.address ?? "",
@@ -718,7 +721,9 @@ export function syscalls({
       calldata: [adventurer?.id?.toString() ?? "", tillDeath ? "1" : "0"],
     };
     const attackCalls =
-      process.env.NEXT_PUBLIC_NETWORK === "mainnet"
+      (process.env.NEXT_PUBLIC_NETWORK === "mainnet" ||
+        process.env.NEXT_PUBLIC_NETWORK === "sepolia") &&
+      blockHash
         ? [setBlockHashTx, attackTx]
         : [attackTx];
     addToCalls(attackTx);
@@ -734,6 +739,7 @@ export function syscalls({
         showTopUpDialog,
         setTopUpAccount
       );
+      // }
       setTxHash(tx?.transaction_hash);
       addTransaction({
         hash: tx?.transaction_hash,

@@ -52,7 +52,9 @@ export default function BeastScreen({
     (state) => state.data.battlesByBeastQuery?.battles || []
   );
 
-  const mainnetBotProtection = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+  const mainnetBotProtection =
+    process.env.NEXT_PUBLIC_NETWORK === "mainnet" ||
+    process.env.NEXT_PUBLIC_NETWORK === "sepolia";
 
   const { data: blockData } = useBlock({
     refetchInterval:
@@ -96,7 +98,12 @@ export default function BeastScreen({
       label: "TILL DEATH",
       action: async () => {
         resetNotification();
-        await attack(true, beastData);
+        if (adventurer?.level === 1) {
+          const entropyBlockData = await getBlock(adventurer?.startBlock! + 1);
+          await attack(true, beastData, entropyBlockData?.block_hash ?? 0);
+        } else {
+          await attack(true, beastData);
+        }
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -184,7 +191,7 @@ export default function BeastScreen({
   const currentBlockNumber = (blockData as Block)?.block_number ?? 0;
 
   const revealBlockReached =
-    currentBlockNumber >= (adventurer?.revealBlock ?? 0);
+    currentBlockNumber >= (adventurer?.revealBlock! + 1 ?? 0);
 
   useEffect(() => {
     if (revealBlockReached) {
@@ -196,6 +203,8 @@ export default function BeastScreen({
   if (showBattleLog) {
     return <BattleLog />;
   }
+
+  console.log(revealBlockReached, mainnetBotProtection, averageBlockTime);
 
   return (
     <div className="sm:w-2/3 flex flex-col sm:flex-row h-full">
@@ -267,7 +276,7 @@ export default function BeastScreen({
                   <div className="flex flex-row items-center gap-2">
                     Reveal:
                     <div className="border border-terminal-green p-2">
-                      {adventurer?.revealBlock}
+                      {adventurer?.revealBlock! + 1}
                     </div>
                   </div>
                 </div>

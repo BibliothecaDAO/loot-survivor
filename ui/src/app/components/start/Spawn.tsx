@@ -112,9 +112,11 @@ export const Spawn = ({
     }
   };
 
-  const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
+  const onMainnet =
+    process.env.NEXT_PUBLIC_NETWORK === "mainnet" ||
+    process.env.NEXT_PUBLIC_NETWORK === "sepolia";
 
-  const waitEstimate = 12 * averageBlockTime; // add one for closer estimate
+  const waitEstimate = 2 * averageBlockTime;
 
   const { data: blockData } = useBlock({
     refetchInterval: false,
@@ -129,6 +131,8 @@ export const Spawn = ({
     setAverageBlockTime(result!);
     setFetchedAverageBlockTime(true);
   };
+
+  console.log(averageBlockTime);
 
   useEffect(() => {
     if (onMainnet && !fetchedAverageBlockTime && currentBlockNumber > 0) {
