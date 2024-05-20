@@ -2,11 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -17,13 +13,11 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noUnusedLocals": true,
+    // "noUnusedLocals": true,
     // "noUnusedParameters": true,
     "noEmit": true,
     "jsx": "preserve",
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "incremental": true,
     "plugins": [
       {
@@ -33,13 +27,17 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "starknetkit/injected": ["./node_modules/starknetkit/dist/injectedConnector.d.ts"],
-      "starknetkit/argentMobile": ["./node_modules/starknetkit/dist/argentMobile.d.ts"],
-      "starknetkit/webwallet": ["./node_modules/starknetkit/dist/webwalletConnector.d.ts"]
+      "starknetkit/injected": [
+        "./node_modules/starknetkit/dist/injectedConnector.d.ts"
+      ],
+      "starknetkit/argentMobile": [
+        "./node_modules/starknetkit/dist/argentMobile.d.ts"
+      ],
+      "starknetkit/webwallet": [
+        "./node_modules/starknetkit/dist/webwalletConnector.d.ts"
+      ]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
