@@ -1380,12 +1380,11 @@ impl ImplAdventurer of IAdventurer {
     }
 
     fn get_randomness(
-        self: Adventurer, adventurer_entropy: u128, game_entropy: felt252
+        self: Adventurer, adventurer_entropy: u128
     ) -> (u128, u128) {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(self.xp.into());
         hash_span.append(adventurer_entropy.into());
-        hash_span.append(game_entropy);
 
         let poseidon = poseidon_hash_span(hash_span.span());
         let (d, r) = integer::U256DivRem::div_rem(

@@ -36,14 +36,13 @@ mod messages {
     const GAME_ALREADY_STARTED: felt252 = 'game already started';
     const STARTING_ENTROPY_IS_VALID: felt252 = 'starting entropy is valid';
     const VALID_BLOCK_HASH_UNAVAILABLE: felt252 = 'valid hash not yet available';
-    const START_ENTROPY_NOT_SET: felt252 = 'starting entropy not set';
+    const ADVENTURER_ENTROPY_NOT_SET: felt252 = 'adventurer entropy not set';
 }
 
 // TODO: Update for mainnet
 const BLOCKS_IN_A_WEEK: u64 = 1000;
 const COST_TO_PLAY: u128 = 25000000000000000000;
 const NUM_STARTING_STATS: u8 = 9;
-const STARTING_GAME_ENTROPY_ROTATION_INTERVAL: u8 = 6;
 const MINIMUM_DAMAGE_FROM_BEASTS: u8 = 2;
 const MAINNET_REVEAL_DELAY_BLOCKS: u8 = 11;
 

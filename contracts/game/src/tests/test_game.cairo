@@ -10,7 +10,6 @@ mod tests {
         ArcadeAccountABIDispatcher, ArcadeAccountABIDispatcherTrait,
         ArcadeAccountCamelABIDispatcher, ArcadeAccountCamelABIDispatcherTrait,
     };
-    use game_entropy::game_entropy::IGameEntropy;
     use array::ArrayTrait;
     use core::{result::ResultTrait, traits::Into, array::SpanTrait, serde::Serde, clone::Clone};
     use option::OptionTrait;

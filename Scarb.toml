@@ -4,7 +4,6 @@ members = [
     "contracts/beasts",
     "contracts/combat",
     "contracts/game",
-    "contracts/game_entropy",
     "contracts/game_snapshot",
     "contracts/loot",
     "contracts/lords",

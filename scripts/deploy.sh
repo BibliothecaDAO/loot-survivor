@@ -8,6 +8,7 @@ collectible_address=0x06a519DCcd7Ed4D1aACD3975691AEEae47bF7f9F5b62Ed7C2D929D2E27
 golden_token_address=0x06a519DCcd7Ed4D1aACD3975691AEEae47bF7f9F5b62Ed7C2D929D2E27A9CC5E
 terminal_timestamp=0
 randomness_contract=0x60c69136b39319547a4df303b6b3a26fab8b2d78de90b6bd215ce82e9cb515c
+randomness_rotation_interval=1
 client_reward_address=0x06a519DCcd7Ed4D1aACD3975691AEEae47bF7f9F5b62Ed7C2D929D2E27A9CC5E
 starting_weapon=12
 player_name=0x706c6179657231
@@ -35,7 +36,7 @@ sleep 10
 echo "lords contract: " $lords_contract
 
 # deploy game
-game_contract=$(starkli deploy --watch $game_class_hash $lords_contract $dao_address $collectible_address $golden_token_address $terminal_timestamp $randomness_contract --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY --max-fee-raw 12224764349828573 2>/dev/null)
+game_contract=$(starkli deploy --watch $game_class_hash $lords_contract $dao_address $collectible_address $golden_token_address $terminal_timestamp $randomness_contract $randomness_rotation_interval --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY --max-fee-raw 12224764349828573 2>/dev/null)
 echo "game contract: " $game_contract
 sleep 10
 
