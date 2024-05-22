@@ -305,6 +305,7 @@ mod Game {
             _assert_not_dead(immutable_adventurer);
             _assert_no_stat_upgrades_available(immutable_adventurer);
             _assert_not_in_battle(immutable_adventurer);
+            _assert_entropy_set(@self, adventurer_id);
 
             // go explore 
             _explore(ref self, ref adventurer, adventurer_id, adventurer_entropy, till_beast);
@@ -383,6 +384,7 @@ mod Game {
             _assert_in_battle(immutable_adventurer);
             _assert_not_starter_beast(immutable_adventurer);
             _assert_dexterity_not_zero(immutable_adventurer);
+            _assert_entropy_set(@self, adventurer_id);
 
             // get beast and beast seed
             let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
@@ -524,6 +526,7 @@ mod Game {
             _assert_not_dead(immutable_adventurer);
             _assert_not_in_battle(immutable_adventurer);
             _assert_valid_stat_selection(immutable_adventurer, stat_upgrades);
+            _assert_entropy_set(@self, adventurer_id);
 
             // get number of stat upgrades available before we use them
             let pre_upgrade_stat_points = adventurer.stat_points_available;
