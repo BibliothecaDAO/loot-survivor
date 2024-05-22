@@ -23,6 +23,8 @@ mod Game {
     const SECONDS_IN_WEEK: u32 = 604800;
     const PHASE2_START: u8 = 12;
     const PHASE3_START: u8 = 24;
+    const TARGET_PRICE_USD_CENTS: u16 = 300;
+    const PRAGMA_LORDS_KEY: felt252 = 'LORDS/USD'; // felt252 conversion of "LORDS/USD"
 
     use core::{
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
@@ -46,6 +48,8 @@ mod Game {
     };
 
     use pragma_lib::abi::{IRandomnessDispatcher, IRandomnessDispatcherTrait};
+    use pragma_lib::abi::{IPragmaABIDispatcher, IPragmaABIDispatcherTrait};
+    use pragma_lib::types::{AggregationMode, DataType, PragmaPricesResponse};
 
     use arcade_account::{
         account::interface::{
@@ -97,7 +101,6 @@ mod Game {
         constants::{CombatSettings::STRENGTH_DAMAGE_BONUS, CombatEnums::{Slot, Tier, Type}}
     };
     use beasts::beast::{Beast, IBeast, ImplBeast};
-    use game_snapshot::{GamesPlayedSnapshot, GamesPlayedSnapshotImpl};
 
     #[storage]
     struct Storage {
@@ -116,11 +119,11 @@ mod Game {
         _golden_token_last_use: LegacyMap::<felt252, felt252>,
         _golden_token: ContractAddress,
         _cost_to_play: u128,
-        _games_played_snapshot: GamesPlayedSnapshot,
         _terminal_timestamp: u64,
         _adventurer_entropy: LegacyMap::<felt252, felt252>,
         _randomness_contract_address: ContractAddress,
         _randomness_rotation_interval: u8,
+        _oracle_address: ContractAddress,
     }
 
     #[event]
@@ -161,7 +164,8 @@ mod Game {
         golden_token_address: ContractAddress,
         terminal_timestamp: u64,
         randomness_contract_address: ContractAddress,
-        randomness_rotation_interval: u8
+        randomness_rotation_interval: u8,
+        oracle_address: ContractAddress
     ) {
         // init storage
         self._lords.write(lords);
@@ -171,6 +175,7 @@ mod Game {
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
         self._randomness_contract_address.write(randomness_contract_address);
         self._randomness_rotation_interval.write(randomness_rotation_interval);
+        self._oracle_address.write(oracle_address);
 
         // On mainnet, set genesis timestamp to LSV1.0 genesis to preserve same reward distribution schedule for V1.1 
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
@@ -566,17 +571,26 @@ mod Game {
             _save_adventurer(ref self, ref adventurer, adventurer_id);
         }
 
-        /// @title Updates cost to play
-        ///
-        /// @notice Adjusts the price up or down
-        /// @dev This is intentional callable by anyone
-        /// @players Adjust the cost to play if the moving price of $LORDS is too high or too low
         fn update_cost_to_play(ref self: ContractState) {
-            _update_cost_to_play(ref self);
-        }
+            let previous_price = self._cost_to_play.read();
+            let oracle_address = self._oracle_address.read();
+            let lords_price = get_asset_price_median(
+                oracle_address, DataType::SpotEntry(PRAGMA_LORDS_KEY)
+            );
 
-        fn initiate_price_change(ref self: ContractState) {
-            _initiate_price_change(ref self);
+            // target price is the target price in cents * 10^8 because pragma uses 8 decimals for LORDS price
+            let target_price = TARGET_PRICE_USD_CENTS.into() * 100000000;
+
+            // new price is the target price (in cents) divided by the current lords price (in cents)
+            let new_price = (target_price / (lords_price * 100)) * 1000000000000000000;
+
+            self._cost_to_play.write(new_price);
+            self
+                .emit(
+                    PriceChangeEvent {
+                        previous_price, new_price, lords_price, changer: get_caller_address()
+                    }
+                );
         }
         // ------------------------------------------ //
         // ------------ View Functions -------------- //
@@ -926,9 +940,6 @@ mod Game {
             _get_cost_to_play(self)
         }
 
-        fn get_games_played_snapshot(self: @ContractState) -> GamesPlayedSnapshot {
-            self._games_played_snapshot.read()
-        }
         fn can_play(self: @ContractState, golden_token_id: u256) -> bool {
             _can_play(self, golden_token_id)
         }
@@ -937,6 +948,13 @@ mod Game {
     // ------------------------------------------ //
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
+
+    fn get_asset_price_median(oracle_address: ContractAddress, asset: DataType) -> u128 {
+        let oracle_dispatcher = IPragmaABIDispatcher { contract_address: oracle_address };
+        let output: PragmaPricesResponse = oracle_dispatcher
+            .get_data(asset, AggregationMode::Median(()));
+        return output.price;
+    }
 
     fn request_randomness(
         randomness_address: ContractAddress, seed: u64, adventurer_id: felt252, fee_limit: u128
@@ -2956,10 +2974,9 @@ mod Game {
 
     #[derive(Drop, starknet::Event)]
     struct PriceChangeEvent {
-        previous_cost_to_play: u128,
-        new_cost_to_play: u128,
-        global_games_per_day: u64,
-        snapshot_games_per_day: u64,
+        previous_price: u128,
+        new_price: u128,
+        lords_price: u128,
         changer: ContractAddress
     }
 
@@ -3347,86 +3364,5 @@ mod Game {
 
     fn _last_usage(self: @ContractState, token_id: u256) -> u256 {
         self._golden_token_last_use.read(token_id.try_into().unwrap()).into()
-    }
-
-    fn _assert_week_past(self: @ContractState, time: u64) {
-        let difference: u64 = get_block_timestamp() - time;
-
-        // check if time diff is greater than a week    
-        let one_week: u64 = (SECONDS_IN_DAY.into() * 7).try_into().unwrap();
-
-        // assert enough time passed
-        assert(difference >= one_week, messages::TIME_NOT_REACHED);
-    }
-
-    fn _initiate_price_change(ref self: ContractState) {
-        // get current snapshot and verify it's not locked, pending a price change
-        // @dev this protects this function from being spammed and ensures that
-        // calls to this function are followed by a price change consideration
-        let current_snapshot = self._games_played_snapshot.read();
-        assert(current_snapshot.locked == 0, 'price change already initiated');
-
-        let timestamp = get_block_timestamp();
-        let game_count = self._game_counter.read().try_into().unwrap();
-
-        // initialize a new game snapshot with locked set to true
-        // @dev the price change will unlock it
-        let game_snapshot = GamesPlayedSnapshot { timestamp, game_count, locked: 1 };
-
-        // save snapshot
-        self._games_played_snapshot.write(game_snapshot);
-    }
-
-    fn _update_cost_to_play(ref self: ContractState) {
-        // get the current games played snapshot
-        let snapshot = self._games_played_snapshot.read();
-
-        // assert that the snapshot is locked
-        assert(snapshot.locked == 1, 'price change not initiated');
-
-        // assert the time between the snapshot and current timestamp is a week
-        _assert_week_past(@self, snapshot.timestamp);
-
-        // unlock the game snapshot so that initiate price change can be called again
-        self._games_played_snapshot.write(snapshot.unlock());
-
-        // load storage variables into local vars for cleaner var names
-        let current_game_count = self._game_counter.read();
-        let current_timestamp = get_block_timestamp();
-        // let current_timestamp = 86400;
-        let contract_deployed_timestamp = self._genesis_timestamp.read();
-        let previous_cost_to_play = self._cost_to_play.read();
-
-        // get average number of games played per day during the snapshott
-        let snapshot_games_per_day = snapshot.games_per_day(current_game_count, current_timestamp);
-
-        // get average number of games played per day from genesis to start of snapshot
-        let life_of_game_seconds: u128 = (snapshot.timestamp - contract_deployed_timestamp).into();
-
-        let global_games_per_day: u64 = snapshot.game_count
-            * SECONDS_IN_DAY.into()
-            / life_of_game_seconds.try_into().unwrap();
-
-        // get the adjusted price based on the snapshot and global games per day
-        let new_cost_to_play = GamesPlayedSnapshotImpl::get_price_adjustment(
-            previous_cost_to_play, global_games_per_day, snapshot_games_per_day
-        );
-
-        // if the cost of the game changed
-        if new_cost_to_play != previous_cost_to_play {
-            // update the cost to play
-            self._cost_to_play.write(new_cost_to_play);
-            // emit price changed event
-            self
-                .emit(
-                    PriceChangeEvent {
-                        previous_cost_to_play,
-                        new_cost_to_play,
-                        global_games_per_day,
-                        snapshot_games_per_day,
-                        changer: get_caller_address()
-                    }
-                );
-        }
     }
 }

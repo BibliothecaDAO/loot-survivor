@@ -8,7 +8,6 @@ lootitems = { path = "../loot" }
 survivor = { path = "../adventurer" }
 market = { path = "../market" }
 obstacles = { path = "../obstacles" }
-game_snapshot = { path = "../game_snapshot" }
 openzeppelin.workspace = true
 golden_token.workspace = true
 arcade_account.workspace = true

@@ -7,7 +7,6 @@ use survivor::{
     item_meta::{ItemSpecials, ItemSpecialsStorage}, leaderboard::Leaderboard,
     item_primitive::{ItemPrimitive}
 };
-use game_snapshot::GamesPlayedSnapshot;
 
 #[starknet::interface]
 trait IGame<TContractState> {
@@ -44,7 +43,6 @@ trait IGame<TContractState> {
         items: Array<ItemPurchase>,
     );
     fn update_cost_to_play(ref self: TContractState);
-    fn initiate_price_change(ref self: TContractState);
     // ------ View Functions ------
 
     // // adventurer details
@@ -157,7 +155,6 @@ trait IGame<TContractState> {
     fn get_lords_address(self: @TContractState) -> ContractAddress;
     fn get_leaderboard(self: @TContractState) -> Leaderboard;
     fn get_cost_to_play(self: @TContractState) -> u128;
-    fn get_games_played_snapshot(self: @TContractState) -> GamesPlayedSnapshot;
     fn can_play(self: @TContractState, golden_token_id: u256) -> bool;
 }
 
