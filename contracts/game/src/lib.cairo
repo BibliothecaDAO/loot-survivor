@@ -153,6 +153,8 @@ mod Game {
         NewHighScore: NewHighScore,
         RewardDistribution: RewardDistribution,
         PriceChangeEvent: PriceChangeEvent,
+        ReceivedEntropy: ReceivedEntropy,
+        ClearedEntropy: ClearedEntropy
     }
 
     #[constructor]
@@ -208,37 +210,35 @@ mod Game {
             random_words: Span<felt252>,
             calldata: Array<felt252>
         ) {
-            // verify caller is the randomness contract
-            let caller_address = get_caller_address();
+            // verify caller is the vrf contract
             assert(
-                caller_address == self._randomness_contract_address.read(),
-                'caller not randomness contract'
+                get_caller_address() == self._randomness_contract_address.read(),
+                'caller not vrf contract'
             );
 
             // verify requestor is the game contract
             assert(requestor_address == starknet::get_contract_address(), 'requestor is not self');
 
-            // save the random word to the adventurer entropy storage
+            // get random word and save it as adventurer entropy
             let adventurer_entropy = *random_words.at(0);
             let adventurer_id = *calldata.at(0);
             self._adventurer_entropy.write(adventurer_id, adventurer_entropy);
+            __event_ReceivedEntropy(
+                ref self, adventurer_id, get_caller_address(), adventurer_entropy
+            );
 
             // get adventurer
             let mut adventurer = _load_adventurer_no_boosts(@self, adventurer_id);
+            let adventurer_level = adventurer.get_level();
 
-            // if adventurer is on level, this is the start of the game
-            if adventurer.get_level() == 1 {
-                // so we reveal their starting stats and store them in Adventurer Meta
-                // technically we could just generate stats from entropy every call but
-                // for now we have the space available in adventurer meta storage so we'll use it
-                // to save us some compute
-                let adventurer_meta = _handle_stat_reveal(
-                    @self, ref adventurer, adventurer_id, adventurer_entropy
-                );
-                // update adventurer meta data (this is the last time this storage slot is updated)
-                _save_adventurer_metadata(ref self, adventurer_id, adventurer_meta);
-                _save_adventurer(ref self, ref adventurer, adventurer_id);
-            } else {
+            // If the adventurer is on level 2, they are waiting on this entropy to come in for the market to be available
+            if adventurer_level== 2 {
+                process_initial_entropy(ref self, ref adventurer, adventurer_id, adventurer_entropy);
+                // we only need to save adventurer is they received Vitality as part of starting stats
+                if adventurer.stats.vitality > 0 {
+                    _save_adventurer(ref self, ref adventurer, adventurer_id);
+                }
+            } else if adventurer_level > 2 {
                 let adventurer_state = AdventurerState {
                     owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
                 };
@@ -330,7 +330,11 @@ mod Game {
             _assert_ownership(@self, adventurer_id);
             _assert_not_dead(immutable_adventurer);
             _assert_in_battle(immutable_adventurer);
-            _assert_entropy_set(@self, adventurer_id);
+
+            // Allow Adventurer to attack starter beast before rnd from VRF comes in
+            if (adventurer.get_level() > 1) {
+                _assert_entropy_set(@self, adventurer_id);
+            }
 
             // get weapon specials
             let weapon_specials = _get_item_specials(@self, adventurer_id, adventurer.weapon);
@@ -951,6 +955,32 @@ mod Game {
     // ------------------------------------------ //
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
+
+    fn process_initial_entropy(
+        ref self: ContractState,
+        ref adventurer: Adventurer,
+        adventurer_id: felt252,
+        adventurer_entropy: felt252
+    ) {
+        // reveal starting stats
+        let adventurer_meta = _handle_stat_reveal(
+            @self, ref adventurer, adventurer_id, adventurer_entropy
+        );
+
+        // create adventurer state for UpgradesAvailable event
+        let adventurer_state = AdventurerState {
+            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+        };
+        let available_items = _get_items_on_market(
+            @self, adventurer_entropy, adventurer.xp, adventurer.stat_points_available
+        );
+
+        // emit UpgradesAvailable event
+        __event_UpgradesAvailable(ref self, adventurer_state, available_items);
+
+        // save the starting stats to adventurer metadata for cheap and easy future lookup
+        _save_adventurer_metadata(ref self, adventurer_id, adventurer_meta);
+    }
 
     fn get_asset_price_median(oracle_address: ContractAddress, asset: DataType) -> u128 {
         let oracle_dispatcher = IPragmaABIDispatcher { contract_address: oracle_address };
@@ -2371,31 +2401,52 @@ mod Game {
         previous_level: u8,
         new_level: u8,
     ) {
-        // emit level up event
-        if (new_level > previous_level) {
+        let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
+
+        // if adventurer is leveling from first level (starter beast)
+        if (previous_level == 1) {
+            // emit the leveled up event
+            let adventurer_state = AdventurerState {
+                owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            };
+            __event_AdventurerLeveledUp(ref self, adventurer_state, previous_level, new_level);
+
+            // if we already have adventurer entropy from VRF
+            if (adventurer_entropy != 0) {
+                // process initial entropy which will reveal starting stats and emit starting market
+                process_initial_entropy(ref self, ref adventurer, adventurer_id, adventurer_entropy);
+            }
+        } else if (new_level > previous_level) {
+            // if this is any level up beyond the starter beast
+
             // get randomness rotation interval
             let randomness_rotation_interval = self._randomness_rotation_interval.read();
 
-            // check if we need to get new entropy for the adventurer
+            // and check if adventurer has reached a level that merits entropy rotation
             if (previous_level
                 / randomness_rotation_interval < new_level
                 / randomness_rotation_interval) {
-                // first zero out the previous adventurer_entropy
+
+                
+                // if they have, zero out current entropy
                 self._adventurer_entropy.write(adventurer_id, 0);
-                // TODO: Figure out best way to route the callback fee into here.
-                // I don't want max callback fee to be static but I also don't want it to be required for all calls
-                // Need to figure out something in the middle
-                let max_callback_fee = 5000000000000000;
+
+                // request new entropy
+                let max_callback_fee = 300000000000000;
                 let randomness_address = self._randomness_contract_address.read();
-                request_randomness(
-                    randomness_address, adventurer.xp.into(), adventurer_id, max_callback_fee
-                );
+                let seed = adventurer.get_vrf_seed(adventurer_id, adventurer_entropy);
+                request_randomness(randomness_address, seed, adventurer_id, max_callback_fee);
+
+                // emit ClearedEntropy event to let clients know the contact is fetching new entropy
+                __event_ClearedEntropy(ref self, adventurer_id, randomness_address, seed);
             }
 
+            // get new entropy
             let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
             let adventurer_state = AdventurerState {
                 owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
             };
+            // emit the leveled up event
             __event_AdventurerLeveledUp(ref self, adventurer_state, previous_level, new_level);
         }
     }
@@ -2983,6 +3034,20 @@ mod Game {
         changer: ContractAddress
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct ClearedEntropy {
+        adventurer_id: felt252,
+        vrf_address: ContractAddress,
+        seed: u64
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct ReceivedEntropy {
+        adventurer_id: felt252,
+        vrf_address: ContractAddress,
+        rnd: felt252
+    }
+
     #[derive(Drop, Serde)]
     struct PlayerReward {
         adventurer_id: felt252,
@@ -3000,7 +3065,16 @@ mod Game {
     fn __event_RewardDistribution(ref self: ContractState, event: RewardDistribution) {
         self.emit(event);
     }
-
+    fn __event_ClearedEntropy(
+        ref self: ContractState, adventurer_id: felt252, vrf_address: ContractAddress, seed: u64
+    ) {
+        self.emit(ClearedEntropy { adventurer_id, vrf_address, seed });
+    }
+    fn __event_ReceivedEntropy(
+        ref self: ContractState, adventurer_id: felt252, vrf_address: ContractAddress, rnd: felt252
+    ) {
+        self.emit(ReceivedEntropy { adventurer_id, vrf_address, rnd });
+    }
     fn __event_AdventurerUpgraded(
         ref self: ContractState,
         adventurer: Adventurer,

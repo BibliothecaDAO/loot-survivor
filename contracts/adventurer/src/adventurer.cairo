@@ -16,7 +16,7 @@ use super::{
             MAX_STAT_VALUE, MAX_STAT_UPGRADE_POINTS, MAX_XP, MAX_ADVENTURER_BLOCKS,
             ITEM_MAX_GREATNESS, ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT,
             MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL, NECKLACE_G20_BONUS_STATS,
-            SILVER_RING_G20_LUCK_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, U128_MAX,
+            SILVER_RING_G20_LUCK_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, U128_MAX, U64_MAX,
             JEWELRY_BONUS_BEAST_GOLD_PERCENT, JEWELRY_BONUS_CRITICAL_HIT_PERCENT_PER_GREATNESS,
             JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS, NECKLACE_ARMOR_BONUS,
             MINIMUM_DAMAGE_FROM_BEASTS, OBSTACLE_CRITICAL_HIT_CHANCE, BEAST_CRITICAL_HIT_CHANCE,
@@ -1379,9 +1379,19 @@ impl ImplAdventurer of IAdventurer {
         equipped_items
     }
 
-    fn get_randomness(
-        self: Adventurer, adventurer_entropy: u128
-    ) -> (u128, u128) {
+    fn get_vrf_seed(self: Adventurer, adventurer_id: felt252, adventurer_entropy: felt252) -> u64 {
+        let mut hash_span = ArrayTrait::<felt252>::new();
+        hash_span.append(self.xp.into());
+        hash_span.append(adventurer_id);
+        hash_span.append(adventurer_entropy);
+        let poseidon = poseidon_hash_span(hash_span.span());
+        let (_, r) = integer::U256DivRem::div_rem(
+            poseidon.into(), u256_try_as_non_zero(U64_MAX.into()).unwrap()
+        );
+        return r.try_into().unwrap();
+    }
+
+    fn get_randomness(self: Adventurer, adventurer_entropy: u128) -> (u128, u128) {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(self.xp.into());
         hash_span.append(adventurer_entropy.into());
