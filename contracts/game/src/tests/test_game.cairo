@@ -1455,6 +1455,10 @@ mod tests {
             || item_id == bag.item_9.id
             || item_id == bag.item_10.id
             || item_id == bag.item_11.id
+            || item_id == bag.item_12.id
+            || item_id == bag.item_13.id
+            || item_id == bag.item_14.id
+            || item_id == bag.item_15.id
     }
 
     #[test]

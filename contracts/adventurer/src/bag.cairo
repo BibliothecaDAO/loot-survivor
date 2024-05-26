@@ -6,10 +6,10 @@ use super::{
 };
 
 // Bag is used for storing gear not equipped to the adventurer
-// Bag is a fixed size array of 11 items so it fits optimally in a felt252
+// Bag is a fixed at 15 items to fit in a felt252
 #[derive(Drop, Copy, Serde)]
-struct Bag {
-    item_1: ItemPrimitive,
+struct Bag { // 240 bits
+    item_1: ItemPrimitive, // 16 bits each
     item_2: ItemPrimitive,
     item_3: ItemPrimitive,
     item_4: ItemPrimitive,
@@ -20,41 +20,61 @@ struct Bag {
     item_9: ItemPrimitive,
     item_10: ItemPrimitive,
     item_11: ItemPrimitive,
+    item_12: ItemPrimitive,
+    item_13: ItemPrimitive,
+    item_14: ItemPrimitive,
+    item_15: ItemPrimitive,
     mutated: bool,
 }
 
 impl BagPacking of StorePacking<Bag, felt252> {
     fn pack(value: Bag) -> felt252 {
         (ItemPrimitivePacking::pack(value.item_1).into()
-            + ItemPrimitivePacking::pack(value.item_2).into() * TWO_POW_21
-            + ItemPrimitivePacking::pack(value.item_3).into() * TWO_POW_42
-            + ItemPrimitivePacking::pack(value.item_4).into() * TWO_POW_63
-            + ItemPrimitivePacking::pack(value.item_5).into() * TWO_POW_84
-            + ItemPrimitivePacking::pack(value.item_6).into() * TWO_POW_105
-            + ItemPrimitivePacking::pack(value.item_7).into() * TWO_POW_126
-            + ItemPrimitivePacking::pack(value.item_8).into() * TWO_POW_147
-            + ItemPrimitivePacking::pack(value.item_9).into() * TWO_POW_168
-            + ItemPrimitivePacking::pack(value.item_10).into() * TWO_POW_189
-            + ItemPrimitivePacking::pack(value.item_11).into() * TWO_POW_210)
+            + ItemPrimitivePacking::pack(value.item_2).into() * TWO_POW_16
+            + ItemPrimitivePacking::pack(value.item_3).into() * TWO_POW_32
+            + ItemPrimitivePacking::pack(value.item_4).into() * TWO_POW_48
+            + ItemPrimitivePacking::pack(value.item_5).into() * TWO_POW_64
+            + ItemPrimitivePacking::pack(value.item_6).into() * TWO_POW_80
+            + ItemPrimitivePacking::pack(value.item_7).into() * TWO_POW_96
+            + ItemPrimitivePacking::pack(value.item_8).into() * TWO_POW_112
+            + ItemPrimitivePacking::pack(value.item_9).into() * TWO_POW_128
+            + ItemPrimitivePacking::pack(value.item_10).into() * TWO_POW_144
+            + ItemPrimitivePacking::pack(value.item_11).into() * TWO_POW_160
+            + ItemPrimitivePacking::pack(value.item_12).into() * TWO_POW_176
+            + ItemPrimitivePacking::pack(value.item_13).into() * TWO_POW_192
+            + ItemPrimitivePacking::pack(value.item_14).into() * TWO_POW_208
+            + ItemPrimitivePacking::pack(value.item_15).into() * TWO_POW_224)
             .try_into()
             .unwrap()
     }
 
     fn unpack(value: felt252) -> Bag {
         let packed = value.into();
-        let (packed, item_1) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, item_2) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, item_3) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, item_4) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, item_5) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, item_6) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, item_7) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, item_8) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, item_9) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, item_1) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_2) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_3) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_4) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_5) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_6) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_7) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_8) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_9) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
         let (packed, item_10) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_21.try_into().unwrap()
+            packed, TWO_POW_16.try_into().unwrap()
         );
-        let (_, item_11) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, item_11) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_16.try_into().unwrap()
+        );
+        let (packed, item_12) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_16.try_into().unwrap()
+        );
+        let (packed, item_13) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_16.try_into().unwrap()
+        );
+        let (packed, item_14) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_16.try_into().unwrap()
+        );
+        let (_, item_15) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
 
         Bag {
             item_1: ItemPrimitivePacking::unpack(item_1.try_into().unwrap()),
@@ -68,6 +88,10 @@ impl BagPacking of StorePacking<Bag, felt252> {
             item_9: ItemPrimitivePacking::unpack(item_9.try_into().unwrap()),
             item_10: ItemPrimitivePacking::unpack(item_10.try_into().unwrap()),
             item_11: ItemPrimitivePacking::unpack(item_11.try_into().unwrap()),
+            item_12: ItemPrimitivePacking::unpack(item_12.try_into().unwrap()),
+            item_13: ItemPrimitivePacking::unpack(item_13.try_into().unwrap()),
+            item_14: ItemPrimitivePacking::unpack(item_14.try_into().unwrap()),
+            item_15: ItemPrimitivePacking::unpack(item_15.try_into().unwrap()),
             mutated: false
         }
     }
@@ -90,6 +114,10 @@ impl ImplBag of IBag {
             item_9: ItemPrimitive { id: 0, xp: 0 },
             item_10: ItemPrimitive { id: 0, xp: 0 },
             item_11: ItemPrimitive { id: 0, xp: 0 },
+            item_12: ItemPrimitive { id: 0, xp: 0 },
+            item_13: ItemPrimitive { id: 0, xp: 0 },
+            item_14: ItemPrimitive { id: 0, xp: 0 },
+            item_15: ItemPrimitive { id: 0, xp: 0 },
             mutated: false
         }
     }
@@ -123,6 +151,14 @@ impl ImplBag of IBag {
             self.item_10
         } else if self.item_11.id == item_id {
             self.item_11
+        } else if self.item_12.id == item_id {
+            self.item_12
+        } else if self.item_13.id == item_id {
+            self.item_13
+        } else if self.item_14.id == item_id {
+            self.item_14
+        } else if self.item_15.id == item_id {
+            self.item_15
         } else {
             panic_with_felt252('Item not in bag')
         }
@@ -169,6 +205,14 @@ impl ImplBag of IBag {
             self.item_10 = item;
         } else if self.item_11.id == 0 {
             self.item_11 = item;
+        } else if self.item_12.id == 0 {
+            self.item_12 = item;
+        } else if self.item_13.id == 0 {
+            self.item_13 = item;
+        } else if self.item_14.id == 0 {
+            self.item_14 = item;
+        } else if self.item_15.id == 0 {
+            self.item_15 = item;
         } else {
             panic_with_felt252('Bag is full')
         }
@@ -218,6 +262,18 @@ impl ImplBag of IBag {
         } else if self.item_11.id == item_id {
             self.item_11.id = 0;
             self.item_11.xp = 0;
+        } else if self.item_12.id == item_id {
+            self.item_12.id = 0;
+            self.item_12.xp = 0;
+        } else if self.item_13.id == item_id {
+            self.item_13.id = 0;
+            self.item_13.xp = 0;
+        } else if self.item_14.id == item_id {
+            self.item_14.id = 0;
+            self.item_14.xp = 0;
+        } else if self.item_15.id == item_id {
+            self.item_15.id = 0;
+            self.item_15.xp = 0;
         } else {
             panic_with_felt252('item not in bag')
         }
@@ -257,6 +313,14 @@ impl ImplBag of IBag {
             false
         } else if self.item_11.id == 0 {
             false
+        } else if self.item_12.id == 0 {
+            false
+        } else if self.item_13.id == 0 {
+            false
+        } else if self.item_14.id == 0 {
+            false
+        } else if self.item_15.id == 0 {
+            false
         } else {
             // if the id of all item slots is non-zero
             // bag is full, return true
@@ -293,6 +357,14 @@ impl ImplBag of IBag {
             return (true, self.item_10);
         } else if self.item_11.id == item_id {
             return (true, self.item_11);
+        } else if self.item_12.id == item_id {
+            return (true, self.item_12);
+        } else if self.item_13.id == item_id {
+            return (true, self.item_13);
+        } else if self.item_14.id == item_id {
+            return (true, self.item_14);
+        } else if self.item_15.id == item_id {
+            return (true, self.item_15);
         } else {
             return (false, ItemPrimitive { id: 0, xp: 0 });
         }
@@ -336,6 +408,18 @@ impl ImplBag of IBag {
         if ImplItemPrimitive::is_jewlery(self.item_11) {
             jewlery.append(self.item_11);
         }
+        if ImplItemPrimitive::is_jewlery(self.item_12) {
+            jewlery.append(self.item_12);
+        }
+        if ImplItemPrimitive::is_jewlery(self.item_13) {
+            jewlery.append(self.item_13);
+        }
+        if ImplItemPrimitive::is_jewlery(self.item_14) {
+            jewlery.append(self.item_14);
+        }
+        if ImplItemPrimitive::is_jewlery(self.item_15) {
+            jewlery.append(self.item_15);
+        }
         jewlery
     }
 
@@ -357,28 +441,34 @@ impl ImplBag of IBag {
         total_greatness
     }
 }
-
 const TWO_POW_21: u256 = 0x200000;
-const TWO_POW_42: u256 = 0x40000000000;
-const TWO_POW_63: u256 = 0x8000000000000000;
-const TWO_POW_84: u256 = 0x1000000000000000000000;
-const TWO_POW_105: u256 = 0x200000000000000000000000000;
-const TWO_POW_126: u256 = 0x40000000000000000000000000000000;
-const TWO_POW_147: u256 = 0x8000000000000000000000000000000000000;
-const TWO_POW_168: u256 = 0x1000000000000000000000000000000000000000000;
-const TWO_POW_189: u256 = 0x200000000000000000000000000000000000000000000000;
-const TWO_POW_210: u256 = 0x40000000000000000000000000000000000000000000000000000;
+const TWO_POW_16: u256 = 0x10000;
+const TWO_POW_32: u256 = 0x100000000;
+const TWO_POW_48: u256 = 0x1000000000000;
+const TWO_POW_64: u256 = 0x10000000000000000;
+const TWO_POW_80: u256 = 0x100000000000000000000;
+const TWO_POW_96: u256 = 0x1000000000000000000000000;
+const TWO_POW_112: u256 = 0x10000000000000000000000000000;
+const TWO_POW_128: u256 = 0x100000000000000000000000000000000;
+const TWO_POW_144: u256 = 0x1000000000000000000000000000000000000;
+const TWO_POW_160: u256 = 0x10000000000000000000000000000000000000000;
+const TWO_POW_176: u256 = 0x100000000000000000000000000000000000000000000;
+const TWO_POW_192: u256 = 0x1000000000000000000000000000000000000000000000000;
+const TWO_POW_208: u256 = 0x10000000000000000000000000000000000000000000000000000;
+const TWO_POW_224: u256 = 0x100000000000000000000000000000000000000000000000000000000;
+const TWO_POW_240: u256 = 0x1000000000000000000000000000000000000000000000000000000000000;
 
 // ---------------------------
 // ---------- Tests ----------
 // ---------------------------
 #[cfg(test)]
 mod tests {
+    use debug::PrintTrait;
     use survivor::{bag::{Bag, ImplBag, IBag, BagPacking}, item_primitive::{ItemPrimitive}};
     use lootitems::{constants::ItemId};
 
     #[test]
-    #[available_gas(94030)]
+    #[available_gas(97530)]
     fn test_get_jewelry_greatness() {
         let katana = ItemPrimitive { id: ItemId::Katana, xp: 1 };
         let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 2 };
@@ -403,6 +493,10 @@ mod tests {
             item_9: crown,
             item_10: amulet,
             item_11: pendant,
+            item_12: ItemPrimitive { id: 0, xp: 0 },
+            item_13: ItemPrimitive { id: 0, xp: 0 },
+            item_14: ItemPrimitive { id: 0, xp: 0 },
+            item_15: ItemPrimitive { id: 0, xp: 0 },
             mutated: false
         };
 
@@ -435,6 +529,10 @@ mod tests {
             item_9: crown,
             item_10: amulet,
             item_11: pendant,
+            item_12: ItemPrimitive { id: 0, xp: 0 },
+            item_13: ItemPrimitive { id: 0, xp: 0 },
+            item_14: ItemPrimitive { id: 0, xp: 0 },
+            item_15: ItemPrimitive { id: 0, xp: 0 },
             mutated: false
         };
 
@@ -442,7 +540,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(41710)]
+    #[available_gas(47910)]
     fn test_get_jewelry() {
         let katana = ItemPrimitive { id: ItemId::Katana, xp: 1 };
         let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 2 };
@@ -467,6 +565,10 @@ mod tests {
             item_9: crown,
             item_10: amulet,
             item_11: pendant,
+            item_12: ItemPrimitive { id: 0, xp: 0 },
+            item_13: ItemPrimitive { id: 0, xp: 0 },
+            item_14: ItemPrimitive { id: 0, xp: 0 },
+            item_15: ItemPrimitive { id: 0, xp: 0 },
             mutated: false
         };
 
@@ -502,13 +604,17 @@ mod tests {
             item_9: crown,
             item_10: ItemPrimitive { id: 0, xp: 0 },
             item_11: ItemPrimitive { id: 0, xp: 0 },
+            item_12: ItemPrimitive { id: 0, xp: 0 },
+            item_13: ItemPrimitive { id: 0, xp: 0 },
+            item_14: ItemPrimitive { id: 0, xp: 0 },
+            item_15: ItemPrimitive { id: 0, xp: 0 },
             mutated: false
         };
         bag.contains(0);
     }
 
     #[test]
-    #[available_gas(66400)]
+    #[available_gas(73500)]
     fn test_contains() {
         let katana = ItemPrimitive { id: ItemId::Katana, xp: 1 };
         let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 2 };
@@ -531,6 +637,10 @@ mod tests {
             item_9: crown,
             item_10: ItemPrimitive { id: 0, xp: 0 },
             item_11: ItemPrimitive { id: 0, xp: 0 },
+            item_12: ItemPrimitive { id: 0, xp: 0 },
+            item_13: ItemPrimitive { id: 0, xp: 0 },
+            item_14: ItemPrimitive { id: 0, xp: 0 },
+            item_15: ItemPrimitive { id: 0, xp: 0 },
             mutated: false
         };
 
@@ -600,6 +710,10 @@ mod tests {
             item_9: ItemPrimitive { id: 127, xp: 511 },
             item_10: ItemPrimitive { id: 127, xp: 511 },
             item_11: ItemPrimitive { id: 127, xp: 511 },
+            item_12: ItemPrimitive { id: 127, xp: 511 },
+            item_13: ItemPrimitive { id: 127, xp: 511 },
+            item_14: ItemPrimitive { id: 127, xp: 511 },
+            item_15: ItemPrimitive { id: 127, xp: 511 },
             mutated: false,
         };
 
@@ -637,6 +751,18 @@ mod tests {
 
         assert(packed_bag.item_11.id == 127, 'Loot 11 ID is not 127');
         assert(packed_bag.item_11.xp == 511, 'Loot 11 XP is not 511');
+
+        assert(packed_bag.item_12.id == 127, 'Loot 12 ID is not 127');
+        assert(packed_bag.item_12.xp == 511, 'Loot 12 XP is not 511');
+
+        assert(packed_bag.item_13.id == 127, 'Loot 13 ID is not 127');
+        assert(packed_bag.item_13.xp == 511, 'Loot 13 XP is not 511');
+
+        assert(packed_bag.item_14.id == 127, 'Loot 14 ID is not 127');
+        assert(packed_bag.item_14.xp == 511, 'Loot 14 XP is not 511');
+
+        assert(packed_bag.item_15.id == 127, 'Loot 15 ID is not 127');
+        assert(packed_bag.item_15.xp == 511, 'Loot 15 XP is not 511');
     }
 
     #[test]
@@ -656,6 +782,10 @@ mod tests {
             item_9: ItemPrimitive { id: 9, xp: 1 },
             item_10: ItemPrimitive { id: 10, xp: 1 },
             item_11: ItemPrimitive { id: 0, xp: 0 },
+            item_12: ItemPrimitive { id: 0, xp: 0 },
+            item_13: ItemPrimitive { id: 0, xp: 0 },
+            item_14: ItemPrimitive { id: 0, xp: 0 },
+            item_15: ItemPrimitive { id: 0, xp: 0 },
             mutated: false
         };
 
@@ -682,6 +812,10 @@ mod tests {
             item_9: ItemPrimitive { id: 9, xp: 1 },
             item_10: ItemPrimitive { id: 10, xp: 1 },
             item_11: ItemPrimitive { id: 11, xp: 1 },
+            item_12: ItemPrimitive { id: 12, xp: 1 },
+            item_13: ItemPrimitive { id: 13, xp: 1 },
+            item_14: ItemPrimitive { id: 14, xp: 1 },
+            item_15: ItemPrimitive { id: 15, xp: 1 },
             mutated: false
         };
 
@@ -707,6 +841,10 @@ mod tests {
             item_9: ItemPrimitive { id: 0, xp: 0 },
             item_10: ItemPrimitive { id: 0, xp: 0 },
             item_11: ItemPrimitive { id: 0, xp: 0 },
+            item_12: ItemPrimitive { id: 0, xp: 0 },
+            item_13: ItemPrimitive { id: 0, xp: 0 },
+            item_14: ItemPrimitive { id: 0, xp: 0 },
+            item_15: ItemPrimitive { id: 0, xp: 0 },
             mutated: false
         };
 
@@ -751,7 +889,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(40300)]
+    #[available_gas(44200)]
     fn test_is_full() {
         // start with full bag
         let mut bag = Bag {
@@ -766,6 +904,10 @@ mod tests {
             item_9: ItemPrimitive { id: 12, xp: 0 },
             item_10: ItemPrimitive { id: 13, xp: 0 },
             item_11: ItemPrimitive { id: 14, xp: 0 },
+            item_12: ItemPrimitive { id: 15, xp: 0 },
+            item_13: ItemPrimitive { id: 16, xp: 0 },
+            item_14: ItemPrimitive { id: 17, xp: 0 },
+            item_15: ItemPrimitive { id: 18, xp: 0 },
             mutated: false
         };
 
@@ -814,6 +956,10 @@ mod tests {
             item_9: item_9,
             item_10: item_10,
             item_11: item_11,
+            item_12: ItemPrimitive { id: 0, xp: 0 },
+            item_13: ItemPrimitive { id: 0, xp: 0 },
+            item_14: ItemPrimitive { id: 0, xp: 0 },
+            item_15: ItemPrimitive { id: 0, xp: 0 },
             mutated: false,
         };
 
@@ -825,7 +971,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(61100)]
+    #[available_gas(101000)]
     fn test_get_item() {
         let item_1 = ItemPrimitive { id: 11, xp: 0 };
         let item_2 = ItemPrimitive { id: 12, xp: 0 };
@@ -838,19 +984,27 @@ mod tests {
         let item_9 = ItemPrimitive { id: 19, xp: 0 };
         let item_10 = ItemPrimitive { id: 20, xp: 0 };
         let item_11 = ItemPrimitive { id: 21, xp: 0 };
+        let item_12 = ItemPrimitive { id: 22, xp: 0 };
+        let item_13 = ItemPrimitive { id: 23, xp: 0 };
+        let item_14 = ItemPrimitive { id: 24, xp: 0 };
+        let item_15 = ItemPrimitive { id: 25, xp: 0 };
 
         let bag = Bag {
-            item_1: item_1,
-            item_2: item_2,
-            item_3: item_3,
-            item_4: item_4,
-            item_5: item_5,
-            item_6: item_6,
-            item_7: item_7,
-            item_8: item_8,
-            item_9: item_9,
-            item_10: item_10,
-            item_11: item_11,
+            item_1,
+            item_2,
+            item_3,
+            item_4,
+            item_5,
+            item_6,
+            item_7,
+            item_8,
+            item_9,
+            item_10,
+            item_11,
+            item_12,
+            item_13,
+            item_14,
+            item_15,
             mutated: false,
         };
 
@@ -886,10 +1040,22 @@ mod tests {
 
         let item11_from_bag = bag.get_item(21);
         assert(item11_from_bag.id == item_11.id, 'Item id should be 21');
+
+        let item12_from_bag = bag.get_item(22);
+        assert(item12_from_bag.id == item_12.id, 'Item id should be 22');
+
+        let item13_from_bag = bag.get_item(23);
+        assert(item13_from_bag.id == item_13.id, 'Item id should be 23');
+
+        let item14_from_bag = bag.get_item(24);
+        assert(item14_from_bag.id == item_14.id, 'Item id should be 24');
+
+        let item15_from_bag = bag.get_item(25);
+        assert(item15_from_bag.id == item_15.id, 'Item id should be 25');
     }
 
     #[test]
-    #[available_gas(15700)]
+    #[available_gas(16800)]
     fn test_remove_item() {
         let mut bag = Bag {
             item_1: ItemPrimitive { id: 1, xp: 0 },
@@ -903,6 +1069,10 @@ mod tests {
             item_9: ItemPrimitive { id: 9, xp: 0 },
             item_10: ItemPrimitive { id: 10, xp: 0 },
             item_11: ItemPrimitive { id: 11, xp: 0 },
+            item_12: ItemPrimitive { id: 12, xp: 0 },
+            item_13: ItemPrimitive { id: 13, xp: 0 },
+            item_14: ItemPrimitive { id: 14, xp: 0 },
+            item_15: ItemPrimitive { id: 15, xp: 0 },
             mutated: false
         };
 
@@ -917,7 +1087,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item not in bag',))]
-    #[available_gas(10420)]
+    #[available_gas(12420)]
     fn test_remove_item_not_in_bag() {
         // initialize bag
         let mut bag = Bag {
@@ -932,6 +1102,10 @@ mod tests {
             item_9: ItemPrimitive { id: 12, xp: 0 },
             item_10: ItemPrimitive { id: 13, xp: 0 },
             item_11: ItemPrimitive { id: 14, xp: 0 },
+            item_12: ItemPrimitive { id: 15, xp: 0 },
+            item_13: ItemPrimitive { id: 16, xp: 0 },
+            item_14: ItemPrimitive { id: 17, xp: 0 },
+            item_15: ItemPrimitive { id: 18, xp: 0 },
             mutated: false
         };
 
