@@ -16,8 +16,6 @@ mod Game {
     const MAINNET_CHAIN_ID: felt252 = 0x534e5f4d41494e;
     const SEPOLIA_CHAIN_ID: felt252 = 0x534e5f5345504f4c4941;
     const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 200;
-    const LOOT_NAME_STORAGE_INDEX_1: u8 = 0;
-    const LOOT_NAME_STORAGE_INDEX_2: u8 = 1;
     const SECONDS_IN_HOUR: u32 = 3600;
     const SECONDS_IN_DAY: u32 = 86400;
     const SECONDS_IN_WEEK: u32 = 604800;
@@ -86,7 +84,6 @@ mod Game {
                 OBSTACLE_CRITICAL_HIT_CHANCE, MAX_STAT_UPGRADE_POINTS
             }
         },
-        item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
         adventurer_utils::AdventurerUtils, leaderboard::{Score, Leaderboard},
     };
     use openzeppelin::token::erc20::{interface::{IERC20Dispatcher, IERC20DispatcherTrait}};
@@ -115,7 +112,6 @@ mod Game {
         _leaderboard: Leaderboard,
         _lords: ContractAddress,
         _owner: LegacyMap::<felt252, ContractAddress>,
-        _item_specials: LegacyMap::<(felt252, u8), ItemSpecialsStorage>,
         _golden_token_last_use: LegacyMap::<felt252, felt252>,
         _golden_token: ContractAddress,
         _cost_to_play: u128,
@@ -232,8 +228,10 @@ mod Game {
             let adventurer_level = adventurer.get_level();
 
             // If the adventurer is on level 2, they are waiting on this entropy to come in for the market to be available
-            if adventurer_level== 2 {
-                process_initial_entropy(ref self, ref adventurer, adventurer_id, adventurer_entropy);
+            if adventurer_level == 2 {
+                process_initial_entropy(
+                    ref self, ref adventurer, adventurer_id, adventurer_entropy
+                );
                 // we only need to save adventurer is they received Vitality as part of starting stats
                 if adventurer.stats.vitality > 0 {
                     _save_adventurer(ref self, ref adventurer, adventurer_id);
@@ -337,7 +335,10 @@ mod Game {
             }
 
             // get weapon specials
-            let weapon_specials = _get_item_specials(@self, adventurer_id, adventurer.weapon);
+            let start_entropy = _load_adventurer_metadata(@self, adventurer_id).start_entropy;
+            let weapon_specials = ImplLoot::get_specials(
+                adventurer.weapon.id, adventurer.weapon.get_greatness(), start_entropy
+            );
 
             // get beast and beast seed
             let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
@@ -348,11 +349,7 @@ mod Game {
                 tier: weapon.tier,
                 item_type: weapon.item_type,
                 level: adventurer.weapon.get_greatness().into(),
-                specials: SpecialPowers {
-                    special1: weapon_specials.special1,
-                    special2: weapon_specials.special2,
-                    special3: weapon_specials.special3
-                }
+                specials: weapon_specials
             };
 
             _attack(
@@ -361,6 +358,7 @@ mod Game {
                 weapon_combat_spec,
                 adventurer_id,
                 adventurer_entropy,
+                start_entropy,
                 beast,
                 beast_seed,
                 to_the_death
@@ -451,8 +449,16 @@ mod Game {
                 );
 
                 // process beast attack
+                let start_entropy = _load_adventurer_metadata(@self, adventurer_id).start_entropy;
                 let beast_battle_details = _beast_attack(
-                    ref self, ref adventurer, adventurer_id, beast, beast_seed, rnd1, rnd2,
+                    ref self,
+                    ref adventurer,
+                    adventurer_id,
+                    beast,
+                    beast_seed,
+                    start_entropy,
+                    rnd1,
+                    rnd2,
                 );
 
                 // emit attacked by beast event
@@ -620,38 +626,6 @@ mod Game {
         fn get_bag(self: @ContractState, adventurer_id: felt252) -> Bag {
             _load_bag(self, adventurer_id)
         }
-        // fn get_weapon_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
-        //     let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
-        //     _get_item_specials(self, adventurer_id, adventurer.weapon)
-        // }
-        // fn get_chest_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
-        //     let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
-        //     _get_item_specials(self, adventurer_id, adventurer.chest)
-        // }
-        // fn get_head_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
-        //     let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
-        //     _get_item_specials(self, adventurer_id, adventurer.head)
-        // }
-        // fn get_waist_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
-        //     let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
-        //     _get_item_specials(self, adventurer_id, adventurer.waist)
-        // }
-        // fn get_foot_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
-        //     let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
-        //     _get_item_specials(self, adventurer_id, adventurer.foot)
-        // }
-        // fn get_hand_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
-        //     let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
-        //     _get_item_specials(self, adventurer_id, adventurer.hand)
-        // }
-        // fn get_necklace_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
-        //     let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
-        //     _get_item_specials(self, adventurer_id, adventurer.neck)
-        // }
-        // fn get_ring_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
-        //     let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
-        //     _get_item_specials(self, adventurer_id, adventurer.ring)
-        // }
         fn get_items_on_market(self: @ContractState, adventurer_id: felt252) -> Array<u8> {
             let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
             _assert_upgrades_available(adventurer);
@@ -862,11 +836,6 @@ mod Game {
         // fn get_charisma(self: @ContractState, adventurer_id: felt252) -> u8 {
         //     _load_adventurer(self, adventurer_id).stats.charisma
         // }
-        fn get_special_storage(
-            self: @ContractState, adventurer_id: felt252, storage_index: u8
-        ) -> ItemSpecialsStorage {
-            self._item_specials.read((adventurer_id, storage_index))
-        }
         fn get_beast_type(self: @ContractState, beast_id: u8) -> u8 {
             ImplCombat::type_to_u8(ImplBeast::get_type(beast_id))
         }
@@ -1050,8 +1019,9 @@ mod Game {
         // items use adventurer xp with an item multplier so they level faster than Adventurer
         let xp_earned_items = xp_earned_adventurer * ITEM_XP_MULTIPLIER_BEASTS;
         // assigning xp to items is more complex so we delegate to an internal function
+        let start_entropy = _load_adventurer_metadata(@self, adventurer_id).start_entropy;
         let items_leveled_up = _grant_xp_to_equipped_items(
-            ref self, ref adventurer, adventurer_id, xp_earned_items, attack_rnd_2
+            ref self, ref adventurer, adventurer_id, xp_earned_items, start_entropy
         );
 
         // emit slayed beast event
@@ -1127,6 +1097,8 @@ mod Game {
         let mut adventurer_meta = _load_adventurer_metadata(self, adventurer_id);
         adventurer_meta.starting_stats = starting_stats;
         adventurer_meta
+            .start_entropy = ImplAdventurerMetadata::generate_start_entropy(adventurer_entropy);
+        adventurer_meta
     }
 
     fn _mint_beast(self: @ContractState, beast: Beast, to_address: ContractAddress) {
@@ -1179,17 +1151,6 @@ mod Game {
             // update the leaderboard
             _update_leaderboard(ref self, adventurer_id, adventurer);
         }
-    }
-
-    // @title Assert Valid Block Hash Availability
-    // @notice This function asserts that a valid block hash is available for the given adventurer.
-    // @dev If this function is called prior to 2 blocks from the start of the game for the given adventurer, an exception will be thrown.
-    // @param adventurer_id The ID of the adventurer for which to check the block hash availability.
-    fn _assert_valid_block_hash_available(self: @ContractState, adventurer_id: felt252) {
-        let current_block = starknet::get_block_info().unbox().block_number;
-        let adventurer_start_block = _load_adventurer_metadata(self, adventurer_id).start_block;
-        let block_hash_available = adventurer_start_block + 2;
-        assert(current_block >= block_hash_available, messages::VALID_BLOCK_HASH_UNAVAILABLE);
     }
 
     fn _golden_token_dispatcher(ref self: ContractState) -> IERC721Dispatcher {
@@ -1361,17 +1322,14 @@ mod Game {
         // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._game_counter.read() + 1;
 
-        // use current starknet block number and timestamp as entropy sources
-        let current_block = starknet::get_block_info().unbox().block_number;
-
         // randomness for starter beast isn't sensitive so we can use basic entropy
-        let starter_beast_rnd = _get_basic_entropy(adventurer_id, current_block);
+        let starter_beast_rnd = _get_basic_entropy(adventurer_id);
 
         // generate a new adventurer using the provided started weapon
         let mut adventurer = ImplAdventurer::new(weapon);
 
         // create meta data for the adventurer
-        let adventurer_meta = ImplAdventurerMetadata::new(name, current_block, interface_camel);
+        let adventurer_meta = ImplAdventurerMetadata::new(name, interface_camel);
 
         // adventurer immediately gets ambushed by a starter beast
         let beast_battle_details = _starter_beast_ambush(
@@ -1519,8 +1477,16 @@ mod Game {
         // if adventurer was ambushed
         if (is_ambushed) {
             // process beast attack
+            let start_entropy = _load_adventurer_metadata(@self, adventurer_id).start_entropy;
             let beast_battle_details = _beast_attack(
-                ref self, ref adventurer, adventurer_id, beast, beast_seed, entropy, entropy
+                ref self,
+                ref adventurer,
+                adventurer_id,
+                beast,
+                beast_seed,
+                start_entropy,
+                entropy,
+                entropy
             );
             __event_AmbushedByBeast(ref self, adventurer, adventurer_id, beast_battle_details);
             if (adventurer.health == 0) {
@@ -1593,8 +1559,9 @@ mod Game {
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(base_reward);
 
         // grant items xp and get array of items that leveled up
+        let start_entropy = _load_adventurer_metadata(@self, adventurer_id).start_entropy;
         let items_leveled_up = _grant_xp_to_equipped_items(
-            ref self, ref adventurer, adventurer_id, item_xp_reward, entropy
+            ref self, ref adventurer, adventurer_id, item_xp_reward, start_entropy
         );
 
         // emit obstacle encounter event after granting xp to adventurer and items
@@ -1629,9 +1596,8 @@ mod Game {
         ref adventurer: Adventurer,
         adventurer_id: felt252,
         xp_amount: u16,
-        entropy: u128
+        start_entropy: u64
     ) -> Array<ItemLeveledUp> {
-        let (mut name_storage1, mut name_storage2) = _get_special_storages(@self, adventurer_id);
         let mut items_leveled_up = ArrayTrait::<ItemLeveledUp>::new();
         let equipped_items = adventurer.get_equipped_items();
         let mut item_index: u32 = 0;
@@ -1648,14 +1614,7 @@ mod Game {
             if new_level > previous_level {
                 // process level up
                 let updated_item = _process_item_level_up(
-                    ref self,
-                    ref adventurer,
-                    ref name_storage1,
-                    ref name_storage2,
-                    item,
-                    previous_level,
-                    new_level,
-                    entropy
+                    ref self, ref adventurer, item, previous_level, new_level, start_entropy
                 );
 
                 // add item to list of items that leveled up to be emitted in event
@@ -1665,28 +1624,19 @@ mod Game {
             item_index += 1;
         };
 
-        if (name_storage1.mutated) {
-            _save_item_specials(ref self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1, name_storage1);
-        }
-        if (name_storage2.mutated) {
-            _save_item_specials(ref self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2, name_storage2);
-        }
-
         items_leveled_up
     }
 
     fn _process_item_level_up(
         ref self: ContractState,
         ref adventurer: Adventurer,
-        ref name_storage1: ItemSpecialsStorage,
-        ref name_storage2: ItemSpecialsStorage,
         item: ItemPrimitive,
         previous_level: u8,
         new_level: u8,
-        entropy: u128
+        start_entropy: u64
     ) -> ItemLeveledUp {
         // init specials with no specials
-        let mut specials = ItemSpecials { special1: 0, special2: 0, special3: 0 };
+        let mut specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
 
         // check if item reached greatness 20
         if (new_level == ITEM_MAX_GREATNESS) {
@@ -1702,13 +1652,8 @@ mod Game {
         // if specials were unlocked
         if (suffix_unlocked || prefixes_unlocked) {
             // apply them and record the new specials so we can include them in event
-            if (_get_storage_index(@self, item.metadata) == LOOT_NAME_STORAGE_INDEX_1) {
-                specials = item
-                    .apply_specials(ref name_storage1, suffix_unlocked, prefixes_unlocked, entropy);
-            } else {
-                specials = item
-                    .apply_specials(ref name_storage2, suffix_unlocked, prefixes_unlocked, entropy);
-            }
+
+            specials = ImplLoot::get_specials(item.id, item.get_greatness(), start_entropy);
 
             // if item received a suffix as part of the level up
             if (suffix_unlocked) {
@@ -1750,6 +1695,7 @@ mod Game {
         weapon_combat_spec: CombatSpec,
         adventurer_id: felt252,
         adventurer_entropy: felt252,
+        start_entropy: u64,
         beast: Beast,
         beast_seed: u128,
         fight_to_the_death: bool,
@@ -1784,7 +1730,14 @@ mod Game {
 
             // process beast counter attack
             let attacked_by_beast_details = _beast_attack(
-                ref self, ref adventurer, adventurer_id, beast, beast_seed, rnd1, rnd2,
+                ref self,
+                ref adventurer,
+                adventurer_id,
+                beast,
+                beast_seed,
+                start_entropy,
+                rnd1,
+                rnd2,
             );
 
             // emit events
@@ -1818,6 +1771,7 @@ mod Game {
                     weapon_combat_spec,
                     adventurer_id,
                     adventurer_entropy,
+                    start_entropy,
                     beast,
                     beast_seed,
                     true
@@ -1842,7 +1796,8 @@ mod Game {
         adventurer_id: felt252,
         beast: Beast,
         beast_seed: u128,
-        entropy: u128,
+        start_entropy: u64,
+        battle_entropy: u128,
         attack_location_rnd: u128,
     ) -> BattleDetails {
         // beasts attack random location on adventurer
@@ -1854,11 +1809,11 @@ mod Game {
         let armor = adventurer.get_item_at_slot(attack_location);
 
         // get armor specials
-        let armor_specials = _get_item_specials(@self, adventurer_id, armor);
+        let armor_specials = ImplLoot::get_specials(armor.id, armor.get_greatness(), start_entropy);
 
         // process beast attack
         let (combat_result, _jewlery_armor_bonus) = adventurer
-            .defend(beast, armor, armor_specials, entropy);
+            .defend(beast, armor, armor_specials, battle_entropy);
 
         // deduct damage taken from adventurer's health
         adventurer.decrease_health(combat_result.total_damage);
@@ -1920,12 +1875,14 @@ mod Game {
             }
         } else {
             // if the flee attempt failed, beast counter attacks
+            let start_entropy = _load_adventurer_metadata(@self, adventurer_id).start_entropy;
             let beast_battle_details = _beast_attack(
                 ref self,
                 ref adventurer,
                 adventurer_id,
                 beast,
                 beast_seed,
+                start_entropy,
                 ambush_entropy,
                 ambush_entropy,
             );
@@ -2028,7 +1985,6 @@ mod Game {
 
                 // create new item, equip it, and record if we need unequipped an item
                 let mut new_item = ImplItemPrimitive::new(item_id);
-                new_item.set_metadata_id(adventurer, bag, true);
                 unequipped_item_id =
                     _equip_item(contract_state, ref adventurer, ref bag, adventurer_id, new_item);
             } else {
@@ -2332,9 +2288,9 @@ mod Game {
         adventurer_id: felt252,
         item: ItemPrimitive
     ) {
-        let (name_storage1, name_storage2) = _get_special_storages(self, adventurer_id);
-        let item_specials = ImplItemSpecials::get_specials_full(name_storage1, name_storage2, item);
-        adventurer.stats.apply_suffix_boost(item_specials.special1);
+        let start_entropy = _load_adventurer_metadata(self, adventurer_id).start_entropy;
+        let item_suffix = ImplLoot::get_suffix(item.id, start_entropy);
+        adventurer.stats.apply_suffix_boost(item_suffix);
     }
 
     fn _remove_item_stat_boost(
@@ -2343,9 +2299,9 @@ mod Game {
         adventurer_id: felt252,
         item: ItemPrimitive
     ) {
-        let (name_storage1, name_storage2) = _get_special_storages(self, adventurer_id);
-        let item_specials = ImplItemSpecials::get_specials_full(name_storage1, name_storage2, item);
-        adventurer.stats.remove_suffix_boost(item_specials.special1);
+        let start_entropy = _load_adventurer_metadata(self, adventurer_id).start_entropy;
+        let item_suffix = ImplLoot::get_suffix(item.id, start_entropy);
+        adventurer.stats.remove_suffix_boost(item_suffix);
 
         // if the adventurer's health is now above the max health due to a change in Vitality
         let max_health = AdventurerUtils::get_max_health(adventurer.stats.vitality);
@@ -2359,11 +2315,8 @@ mod Game {
         self: @ContractState, ref adventurer: Adventurer, adventurer_id: felt252
     ) {
         if adventurer.has_item_specials() {
-            // get specials from storage
-            let (name_storage1, name_storage2) = _get_special_storages(self, adventurer_id);
-            // get stat boosts from item specials
-            let item_stat_boosts = adventurer.get_stat_boosts(name_storage1, name_storage2);
-            // apply item stat boosts
+            let start_entropy = _load_adventurer_metadata(self, adventurer_id).start_entropy;
+            let item_stat_boosts = adventurer.get_stat_boosts(start_entropy);
             adventurer.apply_stat_boosts(item_stat_boosts);
         }
     }
@@ -2372,11 +2325,8 @@ mod Game {
         self: @ContractState, ref adventurer: Adventurer, adventurer_id: felt252
     ) {
         if adventurer.has_item_specials() {
-            // get specials from storage
-            let (name_storage1, name_storage2) = _get_special_storages(self, adventurer_id);
-            // get stat boosts from item specials
-            let item_stat_boosts = adventurer.get_stat_boosts(name_storage1, name_storage2);
-            // remove item stat boosts
+            let start_entropy = _load_adventurer_metadata(self, adventurer_id).start_entropy;
+            let item_stat_boosts = adventurer.get_stat_boosts(start_entropy);
             adventurer.remove_stat_boosts(item_stat_boosts);
         }
     }
@@ -2414,7 +2364,9 @@ mod Game {
             // if we already have adventurer entropy from VRF
             if (adventurer_entropy != 0) {
                 // process initial entropy which will reveal starting stats and emit starting market
-                process_initial_entropy(ref self, ref adventurer, adventurer_id, adventurer_entropy);
+                process_initial_entropy(
+                    ref self, ref adventurer, adventurer_id, adventurer_entropy
+                );
             }
         } else if (new_level > previous_level) {
             // if this is any level up beyond the starter beast
@@ -2426,8 +2378,6 @@ mod Game {
             if (previous_level
                 / randomness_rotation_interval < new_level
                 / randomness_rotation_interval) {
-
-                
                 // if they have, zero out current entropy
                 self._adventurer_entropy.write(adventurer_id, 0);
 
@@ -2448,47 +2398,6 @@ mod Game {
             };
             // emit the leveled up event
             __event_AdventurerLeveledUp(ref self, adventurer_state, previous_level, new_level);
-        }
-    }
-
-    #[inline(always)]
-    fn _save_item_specials(
-        ref self: ContractState,
-        adventurer_id: felt252,
-        storage_index: u8,
-        loot_special_names_storage: ItemSpecialsStorage,
-    ) {
-        self._item_specials.write((adventurer_id, storage_index), loot_special_names_storage);
-    }
-
-    #[inline(always)]
-    fn _get_special_storages(
-        self: @ContractState, adventurer_id: felt252
-    ) -> (ItemSpecialsStorage, ItemSpecialsStorage) {
-        (
-            _get_specials_storage(self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1),
-            _get_specials_storage(self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2),
-        )
-    }
-
-    #[inline(always)]
-    fn _get_specials_storage(
-        self: @ContractState, adventurer_id: felt252, storage_index: u8
-    ) -> ItemSpecialsStorage {
-        self._item_specials.read((adventurer_id, storage_index))
-    }
-
-    #[inline(always)]
-    fn _get_item_specials(
-        self: @ContractState, adventurer_id: felt252, item: ItemPrimitive
-    ) -> ItemSpecials {
-        if (item.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            ImplItemSpecials::get_specials(
-                _get_specials_storage(self, adventurer_id, _get_storage_index(self, item.metadata)),
-                item
-            )
-        } else {
-            ItemSpecials { special1: 0, special2: 0, special3: 0 }
         }
     }
     #[inline(always)]
@@ -2655,75 +2564,13 @@ mod Game {
     }
 
     #[inline(always)]
-    fn _get_storage_index(self: @ContractState, meta_data_id: u8) -> u8 {
-        if (meta_data_id <= 10) {
-            LOOT_NAME_STORAGE_INDEX_1
-        } else {
-            LOOT_NAME_STORAGE_INDEX_2
-        }
-    }
-
-    // @notice returns the combat spec for an item so it can be used with combat module
-    // @param self - read-only reference to the contract state
-    // @param adventurer_id - the id of the adventurer
-    // @param item - the item to get the combat spec for
-    fn _get_combat_spec(
-        self: @ContractState, adventurer_id: felt252, item: ItemPrimitive
-    ) -> CombatSpec {
-        // if item is 0, return a default combat spec
-        if (item.id == 0) {
-            CombatSpec {
-                tier: Tier::None(()),
-                item_type: Type::None(()),
-                level: 1,
-                specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
-            }
-        } else {
-            // otherwise get the loot item from the item id
-            let loot_item = ImplLoot::get_item(item.id);
-
-            // if the item is lower than G15
-            if item.get_greatness() < 15 {
-                // we don't need to fetch item specials from storage
-                CombatSpec {
-                    tier: loot_item.tier,
-                    item_type: loot_item.item_type,
-                    level: item.get_greatness().into(),
-                    specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
-                }
-            } else {
-                // if item is G15 or above, we need to fetch specials
-                let item_details = ImplItemSpecials::get_specials(
-                    _get_specials_storage(
-                        self, adventurer_id, _get_storage_index(self, item.metadata)
-                    ),
-                    item
-                );
-                let specials = SpecialPowers {
-                    special1: item_details.special1,
-                    special2: item_details.special2,
-                    special3: item_details.special3
-                };
-                // and return a CombatSpec with those specials
-                CombatSpec {
-                    tier: loot_item.tier,
-                    item_type: loot_item.item_type,
-                    level: item.get_greatness().into(),
-                    specials
-                }
-            }
-        }
-    }
-
-    #[inline(always)]
     fn _get_adventurer_entropy(self: @ContractState, adventurer_id: felt252) -> felt252 {
         self._adventurer_entropy.read(adventurer_id)
     }
 
     #[inline(always)]
-    fn _get_basic_entropy(adventurer_id: felt252, start_block: u64) -> felt252 {
+    fn _get_basic_entropy(adventurer_id: felt252) -> felt252 {
         let mut hash_span = ArrayTrait::new();
-        hash_span.append(start_block.into());
         hash_span.append(adventurer_id);
         poseidon_hash_span(hash_span.span())
     }
@@ -2957,21 +2804,13 @@ mod Game {
         new_level: u8,
         suffix_unlocked: bool,
         prefixes_unlocked: bool,
-        specials: ItemSpecials
+        specials: SpecialPowers
     }
 
     #[derive(Drop, starknet::Event)]
     struct ItemsLeveledUp {
         adventurer_state: AdventurerState,
         items: Array<ItemLeveledUp>,
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct ItemSpecialUnlocked {
-        adventurer_state: AdventurerState,
-        id: u8,
-        level: u8,
-        specials: ItemSpecials
     }
 
     #[derive(Drop, starknet::Event)]

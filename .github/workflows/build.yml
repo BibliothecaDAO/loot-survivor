@@ -22,7 +22,6 @@ jobs:
             market,
             obstacles,
             combat,
-            game_snapshot,
           ]
     steps:
       - uses: actions/checkout@v3

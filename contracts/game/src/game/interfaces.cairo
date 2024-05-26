@@ -4,8 +4,7 @@ use beasts::beast::Beast;
 use market::market::{ItemPurchase};
 use survivor::{
     bag::Bag, adventurer::{Adventurer, Stats}, adventurer_meta::AdventurerMetadata,
-    item_meta::{ItemSpecials, ItemSpecialsStorage}, leaderboard::Leaderboard,
-    item_primitive::{ItemPrimitive}
+    leaderboard::Leaderboard, item_primitive::{ItemPrimitive}
 };
 
 #[starknet::interface]
@@ -88,9 +87,6 @@ trait IGame<TContractState> {
 
     // bag and specials
     fn get_bag(self: @TContractState, adventurer_id: felt252) -> Bag;
-    fn get_special_storage(
-        self: @TContractState, adventurer_id: felt252, storage_index: u8
-    ) -> ItemSpecialsStorage;
 
     // // item details
     // fn get_weapon_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
@@ -209,9 +205,6 @@ trait IViewGame<TContractState> { // ------ View Functions ------
 
     // // bag and specials
     // fn get_bag(self: @TContractState, adventurer_id: felt252) -> Bag;
-    // fn get_special_storage(
-    //     self: @TContractState, adventurer_id: felt252, storage_index: u8
-    // ) -> ItemSpecialsStorage;
 
     // // item details
     // fn get_weapon_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;

@@ -5,27 +5,19 @@ use lootitems::loot::{ItemId};
 struct ItemPrimitive { // 21 storage bits
     id: u8, // 7 bits
     xp: u16, // 9 bits
-    metadata: u8, // 5 bits
 }
 
 impl ItemPrimitivePacking of StorePacking<ItemPrimitive, felt252> {
     fn pack(value: ItemPrimitive) -> felt252 {
-        (value.id.into() + value.xp.into() * TWO_POW_7 + value.metadata.into() * TWO_POW_16)
-            .try_into()
-            .unwrap()
+        (value.id.into() + value.xp.into() * TWO_POW_7).try_into().unwrap()
     }
 
     fn unpack(value: felt252) -> ItemPrimitive {
         let packed = value.into();
         let (packed, id) = integer::U256DivRem::div_rem(packed, TWO_POW_7.try_into().unwrap());
-        let (packed, xp) = integer::U256DivRem::div_rem(packed, TWO_POW_9.try_into().unwrap());
-        let (_, metadata) = integer::U256DivRem::div_rem(packed, TWO_POW_5.try_into().unwrap());
+        let (_, xp) = integer::U256DivRem::div_rem(packed, TWO_POW_9.try_into().unwrap());
 
-        ItemPrimitive {
-            id: id.try_into().unwrap(),
-            xp: xp.try_into().unwrap(),
-            metadata: metadata.try_into().unwrap()
-        }
+        ItemPrimitive { id: id.try_into().unwrap(), xp: xp.try_into().unwrap(), }
     }
 }
 
@@ -35,7 +27,7 @@ impl ImplItemPrimitive of IItemPrimitive {
     // @param item_id the id of the item
     // @return the new ItemPrimitive
     fn new(item_id: u8) -> ItemPrimitive {
-        ItemPrimitive { id: item_id, xp: 0, metadata: 0 }
+        ItemPrimitive { id: item_id, xp: 0 }
     }
 
     #[inline(always)]
@@ -116,48 +108,42 @@ mod tests {
         let item = IItemPrimitive::new(0);
         assert(item.id == 0, 'id should be 0');
         assert(item.xp == 0, 'xp should be 0');
-        assert(item.metadata == 0, 'metadata should be 0');
 
         // base case
         let item = IItemPrimitive::new(1);
         assert(item.id == 1, 'id should be 1');
         assert(item.xp == 0, 'xp should be 0');
-        assert(item.metadata == 0, 'metadata should be 0');
 
         // max u8 case
         let item = IItemPrimitive::new(255);
         assert(item.id == 255, 'id should be 255');
         assert(item.xp == 0, 'xp should be 0');
-        assert(item.metadata == 0, 'metadata should be 0');
     }
 
     #[test]
     #[available_gas(500000)]
     fn test_item_primitive_packing() {
-        let item = ItemPrimitive { id: 1, xp: 2, metadata: 3 };
+        let item = ItemPrimitive { id: 1, xp: 2 };
 
         let packed = ItemPrimitivePacking::pack(item);
         let unpacked = ItemPrimitivePacking::unpack(packed);
 
         assert(item.id == unpacked.id, 'id should be the same');
         assert(item.xp == unpacked.xp, 'xp should be the same');
-        assert(item.metadata == unpacked.metadata, 'metadata should be the same');
 
         // max value case
-        let item = ItemPrimitive { id: 127, xp: 511, metadata: 31 };
+        let item = ItemPrimitive { id: 127, xp: 511 };
 
         let packed = ItemPrimitivePacking::pack(item);
         let unpacked = ItemPrimitivePacking::unpack(packed);
         assert(item.id == unpacked.id, 'id should be the same');
         assert(item.xp == unpacked.xp, 'xp should be the same');
-        assert(item.metadata == unpacked.metadata, 'metadata should be the same');
 
         // overflow case
-        let item = ItemPrimitive { id: 128, xp: 512, metadata: 32 };
+        let item = ItemPrimitive { id: 128, xp: 512 };
         let packed = ItemPrimitivePacking::pack(item);
         let unpacked = ItemPrimitivePacking::unpack(packed);
         assert(unpacked.id == 0, 'id should overflow to 0');
         assert(unpacked.xp == 1, 'xp should overflow to 1');
-        assert(unpacked.metadata == 1, 'metadata should overflow to 1');
     }
 }

@@ -6,9 +6,8 @@ use core::{
 };
 
 use super::{
-    item_meta::{ItemSpecials, ItemSpecialsStorage, ImplItemSpecials}, stats::{Stats, StatsPacking},
-    item_primitive::{ItemPrimitive, ItemPrimitivePacking}, adventurer_utils::{AdventurerUtils},
-    exploration::ExploreUtils, bag::{Bag, IBag, ImplBag},
+    stats::{Stats, StatsPacking}, item_primitive::{ItemPrimitive, ItemPrimitivePacking},
+    adventurer_utils::{AdventurerUtils}, exploration::ExploreUtils, bag::{Bag, IBag, ImplBag},
     constants::{
         adventurer_constants::{
             STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_POTION_DISCOUNT,
@@ -46,14 +45,14 @@ struct Adventurer {
     xp: u16, // 14 bits
     stats: Stats, // 26 bits
     gold: u16, // 9 bits
-    weapon: ItemPrimitive, // 21 bits
-    chest: ItemPrimitive, // 21 bits
-    head: ItemPrimitive, // 21 bits
-    waist: ItemPrimitive, // 21 bits
-    foot: ItemPrimitive, // 21 bits
-    hand: ItemPrimitive, // 21 bits
-    neck: ItemPrimitive, // 21 bits
-    ring: ItemPrimitive, // 21 bits
+    weapon: ItemPrimitive, // 16 bits
+    chest: ItemPrimitive, // 16 bits
+    head: ItemPrimitive, // 16 bits
+    waist: ItemPrimitive, // 16 bits
+    foot: ItemPrimitive, // 16 bits
+    hand: ItemPrimitive, // 16 bits
+    neck: ItemPrimitive, // 16 bits
+    ring: ItemPrimitive, // 16 bits
     beast_health: u16, // 9 bits
     stat_points_available: u8, // 3 bits
     actions_per_block: u8, // 4 bits
@@ -151,14 +150,14 @@ impl ImplAdventurer of IAdventurer {
             xp: 0,
             stats: StatUtils::new(),
             gold: STARTING_GOLD,
-            weapon: ItemPrimitive { id: starting_item, xp: 0, metadata: 1 },
-            chest: ItemPrimitive { id: 0, xp: 0, metadata: 0 },
-            head: ItemPrimitive { id: 0, xp: 0, metadata: 0 },
-            waist: ItemPrimitive { id: 0, xp: 0, metadata: 0 },
-            foot: ItemPrimitive { id: 0, xp: 0, metadata: 0 },
-            hand: ItemPrimitive { id: 0, xp: 0, metadata: 0 },
-            neck: ItemPrimitive { id: 0, xp: 0, metadata: 0 },
-            ring: ItemPrimitive { id: 0, xp: 0, metadata: 0 },
+            weapon: ItemPrimitive { id: starting_item, xp: 0 },
+            chest: ItemPrimitive { id: 0, xp: 0 },
+            head: ItemPrimitive { id: 0, xp: 0 },
+            waist: ItemPrimitive { id: 0, xp: 0 },
+            foot: ItemPrimitive { id: 0, xp: 0 },
+            hand: ItemPrimitive { id: 0, xp: 0 },
+            neck: ItemPrimitive { id: 0, xp: 0 },
+            ring: ItemPrimitive { id: 0, xp: 0 },
             beast_health: BeastSettings::STARTER_BEAST_HEALTH,
             stat_points_available: 0,
             actions_per_block: 0,
@@ -232,7 +231,7 @@ impl ImplAdventurer of IAdventurer {
     #[inline(always)]
     fn get_item_at_slot(self: Adventurer, slot: Slot) -> ItemPrimitive {
         match slot {
-            Slot::None(()) => ItemPrimitive { id: 0, xp: 0, metadata: 0 },
+            Slot::None(()) => ItemPrimitive { id: 0, xp: 0 },
             Slot::Weapon(()) => self.weapon,
             Slot::Chest(()) => self.chest,
             Slot::Head(()) => self.head,
@@ -825,109 +824,6 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
-    /// @notice Applies specials to an item.
-    /// @param self The primitive item data.
-    /// @param name_storage Reference to the item specials storage which will be updated
-    /// @param suffix_unlocked Flag indicating if the suffix is unlocked.
-    /// @param prefixes_unlocked Flag indicating if the prefixes are unlocked.
-    /// @param entropy Randomness input for generating item specials.
-    /// @return ItemSpecials instance with applied specials.
-    fn apply_specials(
-        self: ItemPrimitive,
-        ref name_storage: ItemSpecialsStorage,
-        suffix_unlocked: bool,
-        prefixes_unlocked: bool,
-        entropy: u128
-    ) -> ItemSpecials {
-        if (suffix_unlocked && prefixes_unlocked) {
-            return self.apply_suffix_and_prefixes(ref name_storage, entropy);
-        } else if (suffix_unlocked) {
-            return self.apply_suffix(ref name_storage, entropy);
-        } else if (prefixes_unlocked) {
-            return self.apply_prefixes(ref name_storage, entropy);
-        } else {
-            panic_with_felt252('no specials unlocked')
-        }
-    }
-
-    // @notice Applies suffix and prefixes to an item
-    // @param self The primitive item data.
-    // @param name_storage Reference to the item specials storage.
-    // @param entropy Randomness input for generating item specials.
-    // @return ItemSpecials instance with applied specials.
-    fn apply_suffix_and_prefixes(
-        self: ItemPrimitive, ref name_storage: ItemSpecialsStorage, entropy: u128
-    ) -> ItemSpecials {
-        // get rnd for specials
-        let (specials_rnd1, special_rnd2) = AdventurerUtils::generate_item_special_entropy(
-            entropy, self.id
-        );
-
-        // generate special names
-        let specials = ItemSpecials {
-            special1: ImplLoot::get_special1(self.id, specials_rnd1),
-            special2: ImplLoot::generate_prefix1(self.id, special_rnd2),
-            special3: ImplLoot::generate_prefix2(self.id, specials_rnd1)
-        };
-
-        // set specials in storage
-        name_storage.set_specials(self, specials);
-
-        // return specials
-        specials
-    }
-
-    // @notice Applies suffix to an item.
-    // @param self The primitive item data.
-    // @param name_storage Reference to the item specials storage.
-    // @param entropy Randomness input for generating the item suffix.
-    // @return ItemSpecials instance with applied suffix.
-    fn apply_suffix(
-        self: ItemPrimitive, ref name_storage: ItemSpecialsStorage, entropy: u128
-    ) -> ItemSpecials {
-        // get rnd for specials
-        let (specials_rnd1, _) = AdventurerUtils::generate_item_special_entropy(entropy, self.id);
-
-        // generate special names
-        let specials = ItemSpecials {
-            special1: ImplLoot::get_special1(self.id, specials_rnd1), // set item suffix
-            special2: 0,
-            special3: 0,
-        };
-
-        // set specials in storage
-        name_storage.set_specials(self, specials);
-
-        // return specials
-        specials
-    }
-
-    // @dev Apply only the prefixes to an item while preserving any existing suffix.
-    // @param self The primitive item data.
-    // @param name_storage Reference to the item specials storage.
-    // @param entropy Randomness input for generating the item prefixes.
-    // @return ItemSpecials instance with applied prefixes.
-    fn apply_prefixes(
-        self: ItemPrimitive, ref name_storage: ItemSpecialsStorage, entropy: u128
-    ) -> ItemSpecials {
-        // get rnd for specials
-        let (specials_rnd1, specials_rnd2) = AdventurerUtils::generate_item_special_entropy(
-            entropy, self.id
-        );
-        // generate prefixes while preserving existing suffix
-        let specials = ItemSpecials {
-            special1: name_storage.get_specials(self).special1,
-            special2: ImplLoot::generate_prefix1(self.id, specials_rnd1),
-            special3: ImplLoot::generate_prefix2(self.id, specials_rnd2),
-        };
-
-        // set specials in storage
-        ImplItemSpecials::set_specials(ref name_storage, self, specials);
-
-        // return specials
-        specials
-    }
-
     // @notice provides a a beast seed that is fixed during battle. This function does not use 
     // game entropy as that could change during battle resulting in the beast changing
     // @param self A reference to the Adventurer to get the beast seed for.
@@ -1127,114 +1023,42 @@ impl ImplAdventurer of IAdventurer {
 
     // @notice gets stat boosts based on item specials
     // @param self The Adventurer to get stat boosts for.
-    // @param name_storage1 The first ItemSpecialsStorage to use for getting item specials.
-    // @param name_storage2 The second ItemSpecialsStorage to use for getting item specials.
+    // @param start_entropy The start entropy to use for getting item specials.
     // @return Returns the stat boosts for the adventurer.
-    fn get_stat_boosts(
-        self: Adventurer, name_storage1: ItemSpecialsStorage, name_storage2: ItemSpecialsStorage
-    ) -> Stats {
+    fn get_stat_boosts(self: Adventurer, start_entropy: u64) -> Stats {
         let mut stats = Stats {
             strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
         };
 
         if (self.weapon.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats
-                .apply_suffix_boost(
-                    ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.weapon)
-                        .special1
-                );
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.weapon.id, start_entropy));
         }
         if (self.chest.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats
-                .apply_suffix_boost(
-                    ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.chest)
-                        .special1
-                );
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.chest.id, start_entropy));
         }
         if (self.head.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats
-                .apply_suffix_boost(
-                    ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.head)
-                        .special1
-                );
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.head.id, start_entropy));
         }
         if (self.waist.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats
-                .apply_suffix_boost(
-                    ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.waist)
-                        .special1
-                );
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.waist.id, start_entropy));
         }
 
         if (self.foot.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats
-                .apply_suffix_boost(
-                    ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.foot)
-                        .special1
-                );
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.foot.id, start_entropy));
         }
 
         if (self.hand.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats
-                .apply_suffix_boost(
-                    ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.hand)
-                        .special1
-                );
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.hand.id, start_entropy));
         }
 
         if (self.neck.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats
-                .apply_suffix_boost(
-                    ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.neck)
-                        .special1
-                );
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.neck.id, start_entropy));
         }
 
         if (self.ring.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats
-                .apply_suffix_boost(
-                    ImplItemSpecials::get_specials_full(name_storage1, name_storage2, self.ring)
-                        .special1
-                );
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.ring.id, start_entropy));
         }
         stats
-    }
-
-    // @notice The `get_storage_index` function is a helper function that determines the storage index based on the metadata ID.
-    // @param meta_data_id The ID of the metadata. 
-    // @return Returns 0 if the metadata ID is less than or equal to 10, otherwise returns 1.
-    #[inline(always)]
-    fn get_storage_index(meta_data_id: u8) -> u256 {
-        if (meta_data_id <= 10) {
-            0
-        } else {
-            1
-        }
-    }
-
-    // @notice The `get_idle_blocks` function calculates the number of idle blocks by subtracting the last action from the 
-    // current block (modulo 512). 
-    // @param self A reference to the Adventurer instance.
-    // @param current_block The current block number.
-    // @return Returns the number of idle blocks.
-    #[inline(always)]
-    fn get_idle_blocks(self: Adventurer, current_block: u64) -> u16 {
-        // adventurer only has 9 bits of storage for block numbers
-        // the last_action_block on the adventurer is 0-511 which is based on 
-        // the current starknet block % 512. As such, when calculating the number Of
-        // idle blocks, we need to % 512 the current block
-        let current_block_modulo_512: u16 = (current_block % MAX_ADVENTURER_BLOCKS.into())
-            .try_into()
-            .unwrap();
-
-        // if the current block is greater than or equal to the last last_action_block
-        if (current_block_modulo_512 >= self.last_action_block) {
-            // we can just subtract the two to get idle blocks
-            current_block_modulo_512 - self.last_action_block
-        } else {
-            // otherwise we need to add the two and subtract 512
-            MAX_ADVENTURER_BLOCKS - self.last_action_block + current_block_modulo_512
-        }
     }
 
     // @notice gets the greatness of an item
@@ -1468,7 +1292,7 @@ impl ImplAdventurer of IAdventurer {
         self: Adventurer,
         beast: Beast,
         armor: ItemPrimitive,
-        armor_specials: ItemSpecials,
+        armor_specials: SpecialPowers,
         entropy: u128,
     ) -> (CombatResult, u16) {
         // adventurer strength isn't used for defense
@@ -1477,13 +1301,6 @@ impl ImplAdventurer of IAdventurer {
 
         // get armor details
         let armor_details = ImplLoot::get_item(armor.id);
-
-        // convert ItemSpecials to SpecialPowers used by Combat System
-        let armor_specials = SpecialPowers {
-            special1: armor_specials.special1,
-            special2: armor_specials.special2,
-            special3: armor_specials.special3,
-        };
 
         // get combat spec for armor
         let armor_combat_spec = CombatSpec {
@@ -1765,8 +1582,7 @@ mod tests {
     use combat::{constants::CombatEnums::{Slot, Type}};
     use beasts::{beast::{ImplBeast, Beast}, constants::BeastSettings};
     use survivor::{
-        adventurer::{IAdventurer, ImplAdventurer, Adventurer, AdventurerPacking},
-        item_meta::{ItemSpecials, ItemSpecialsStorage, ImplItemSpecials}, stats::Stats,
+        adventurer::{IAdventurer, ImplAdventurer, Adventurer, AdventurerPacking}, stats::Stats,
         item_primitive::ItemPrimitive, adventurer_utils::{AdventurerUtils}, bag::{Bag, ImplBag},
         constants::{
             adventurer_constants::{
@@ -1808,7 +1624,7 @@ mod tests {
         );
 
         // equip gold ring with G1
-        let gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 1 };
+        let gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
         adventurer.ring = gold_ring;
         let _bonus = adventurer.ring.jewelry_gold_bonus(base_gold_amount);
         assert(adventurer.ring.jewelry_gold_bonus(base_gold_amount) == 3, 'bonus should be 3');
@@ -1825,7 +1641,7 @@ mod tests {
         assert(adventurer.ring.jewelry_gold_bonus(0) == 0, 'bonus should be 0');
 
         // change to platinum ring
-        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 1, metadata: 1 };
+        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 1 };
         adventurer.ring = platinum_ring;
         assert(adventurer.ring.jewelry_gold_bonus(0) == 0, 'no bonus with plat ring');
     }
@@ -1834,7 +1650,7 @@ mod tests {
     #[available_gas(173744)]
     fn test_get_bonus_luck_gas() {
         // instantiate silver ring
-        let silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 1, metadata: 1 };
+        let silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 1 };
         let _bonus_luck = silver_ring.jewelry_bonus_luck();
     }
 
@@ -1842,7 +1658,7 @@ mod tests {
     #[available_gas(194024)]
     fn test_get_bonus_luck() {
         // equip silver ring
-        let mut silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 1, metadata: 1 };
+        let mut silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 1 };
         assert(
             silver_ring.jewelry_bonus_luck() == SILVER_RING_LUCK_BONUS_PER_GREATNESS,
             'wrong g1 bonus luck'
@@ -1856,10 +1672,10 @@ mod tests {
         );
 
         // verify none of the other rings provide a luck bonus
-        let gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 400, metadata: 1 };
-        let bronze_ring = ItemPrimitive { id: ItemId::BronzeRing, xp: 400, metadata: 1 };
-        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 400, metadata: 1 };
-        let titanium_ring = ItemPrimitive { id: ItemId::TitaniumRing, xp: 400, metadata: 1 };
+        let gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 400 };
+        let bronze_ring = ItemPrimitive { id: ItemId::BronzeRing, xp: 400 };
+        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 400 };
+        let titanium_ring = ItemPrimitive { id: ItemId::TitaniumRing, xp: 400 };
 
         assert(gold_ring.jewelry_bonus_luck() == 0, 'no bonus luck for gold ring');
         assert(bronze_ring.jewelry_bonus_luck() == 0, 'no bonus luck for bronze ring');
@@ -1936,445 +1752,9 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('no specials unlocked',))]
-    #[available_gas(278330)]
-    fn test_apply_specials_panic() {
-        let suffix_unlocked = false;
-        let prefixes_unlocked = false;
-        let entropy = 12345;
-
-        let blank_item_specials = ItemSpecials { special2: 0, special3: 0, special1: 0, };
-
-        let mut name_storage = ItemSpecialsStorage {
-            item_1: blank_item_specials,
-            item_2: blank_item_specials,
-            item_3: blank_item_specials,
-            item_4: blank_item_specials,
-            item_5: blank_item_specials,
-            item_6: blank_item_specials,
-            item_7: blank_item_specials,
-            item_8: blank_item_specials,
-            item_9: blank_item_specials,
-            item_10: blank_item_specials,
-            mutated: false
-        };
-
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 0, metadata: 0 };
-
-        // calling apply specials with suffix_unlock and prefixed_unlocked is not a valid
-        // apply_specials should panic in this case which the test is annotated to expect
-        katana.apply_specials(ref name_storage, suffix_unlocked, prefixes_unlocked, entropy);
-    }
-
-    #[test]
-    #[available_gas(483540)]
-    fn test_apply_prefixes() {
-        let entropy = 12345;
-
-        let katana_starting_specials = ItemSpecials { special1: 1, special2: 0, special3: 0 };
-        let blank_item_specials = ItemSpecials { special2: 0, special3: 0, special1: 0, };
-
-        let mut name_storage = ItemSpecialsStorage {
-            item_1: katana_starting_specials,
-            item_2: blank_item_specials,
-            item_3: blank_item_specials,
-            item_4: blank_item_specials,
-            item_5: blank_item_specials,
-            item_6: blank_item_specials,
-            item_7: blank_item_specials,
-            item_8: blank_item_specials,
-            item_9: blank_item_specials,
-            item_10: blank_item_specials,
-            mutated: false
-        };
-
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 0, metadata: 1 };
-        katana.apply_prefixes(ref name_storage, entropy);
-
-        // verify special2 and special3 are now set in the name_storage
-        assert(name_storage.item_1.special1 != 0, 'katana special1 not preserved');
-        assert(name_storage.item_1.special2 != 0, 'katana special2 not applied');
-        assert(name_storage.item_1.special3 != 0, 'katana special3 not applied');
-
-        // assert all other specials for all other items is still 0
-        assert(name_storage.item_2.special1 == 0, 'item2 special1 not blank');
-        assert(name_storage.item_2.special2 == 0, 'item2 special2 not blank');
-        assert(name_storage.item_2.special3 == 0, 'item2 special3 not blank');
-        assert(name_storage.item_3.special1 == 0, 'item3 special1 not blank');
-        assert(name_storage.item_3.special2 == 0, 'item3 special2 not blank');
-        assert(name_storage.item_3.special3 == 0, 'item3 special3 not blank');
-        assert(name_storage.item_4.special1 == 0, 'item4 special1 not blank');
-        assert(name_storage.item_4.special2 == 0, 'item4 special2 not blank');
-        assert(name_storage.item_4.special3 == 0, 'item4 special3 not blank');
-        assert(name_storage.item_5.special1 == 0, 'item5 special1 not blank');
-        assert(name_storage.item_5.special2 == 0, 'item5 special2 not blank');
-        assert(name_storage.item_5.special3 == 0, 'item5 special3 not blank');
-        assert(name_storage.item_6.special1 == 0, 'item6 special1 not blank');
-        assert(name_storage.item_6.special2 == 0, 'item6 special2 not blank');
-        assert(name_storage.item_6.special3 == 0, 'item6 special3 not blank');
-        assert(name_storage.item_7.special1 == 0, 'item7 special1 not blank');
-        assert(name_storage.item_7.special2 == 0, 'item7 special2 not blank');
-        assert(name_storage.item_7.special3 == 0, 'item7 special3 not blank');
-        assert(name_storage.item_8.special1 == 0, 'item8 special1 not blank');
-        assert(name_storage.item_8.special2 == 0, 'item8 special2 not blank');
-        assert(name_storage.item_8.special3 == 0, 'item8 special3 not blank');
-        assert(name_storage.item_9.special1 == 0, 'item9 special1 not blank');
-        assert(name_storage.item_9.special2 == 0, 'item9 special2 not blank');
-        assert(name_storage.item_9.special3 == 0, 'item9 special3 not blank');
-        assert(name_storage.item_10.special1 == 0, 'item10 special1 not blank');
-        assert(name_storage.item_10.special2 == 0, 'item10 special2 not blank');
-        assert(name_storage.item_10.special3 == 0, 'item10 special3 not blank');
-
-        let crown = ItemPrimitive { id: ItemId::Crown, xp: 0, metadata: 5 };
-        crown.apply_prefixes(ref name_storage, entropy);
-
-        // assert katana special2 and special3 are still set
-        assert(name_storage.item_1.special1 != 0, 'katana special1 not preserved');
-        assert(name_storage.item_1.special2 != 0, 'katana special2 not preserved');
-        assert(name_storage.item_1.special3 != 0, 'katana special3 not preserved');
-
-        // assert crown special2 and special3 are now set
-        assert(name_storage.item_5.special1 == 0, 'crown special1 not zero');
-        assert(name_storage.item_5.special2 != 0, 'crown special2 not applied');
-        assert(name_storage.item_5.special3 != 0, 'crown special3 not applied');
-
-        // assert all other specials for all other items are still 0
-        assert(name_storage.item_2.special1 == 0, 'item2 special1 not blank');
-        assert(name_storage.item_2.special2 == 0, 'item2 special2 not blank');
-        assert(name_storage.item_2.special3 == 0, 'item2 special3 not blank');
-        assert(name_storage.item_3.special1 == 0, 'item3 special1 not blank');
-        assert(name_storage.item_3.special2 == 0, 'item3 special2 not blank');
-        assert(name_storage.item_3.special3 == 0, 'item3 special3 not blank');
-        assert(name_storage.item_4.special1 == 0, 'item4 special1 not blank');
-        assert(name_storage.item_4.special2 == 0, 'item4 special2 not blank');
-        assert(name_storage.item_4.special3 == 0, 'item4 special3 not blank');
-        assert(name_storage.item_6.special1 == 0, 'item6 special1 not blank');
-        assert(name_storage.item_6.special2 == 0, 'item6 special2 not blank');
-        assert(name_storage.item_6.special3 == 0, 'item6 special3 not blank');
-        assert(name_storage.item_7.special1 == 0, 'item7 special1 not blank');
-        assert(name_storage.item_7.special2 == 0, 'item7 special2 not blank');
-        assert(name_storage.item_7.special3 == 0, 'item7 special3 not blank');
-        assert(name_storage.item_8.special1 == 0, 'item8 special1 not blank');
-        assert(name_storage.item_8.special2 == 0, 'item8 special2 not blank');
-        assert(name_storage.item_8.special3 == 0, 'item8 special3 not blank');
-        assert(name_storage.item_9.special1 == 0, 'item9 special1 not blank');
-        assert(name_storage.item_9.special2 == 0, 'item9 special2 not blank');
-        assert(name_storage.item_9.special3 == 0, 'item9 special3 not blank');
-        assert(name_storage.item_10.special1 == 0, 'item10 special1 not blank');
-        assert(name_storage.item_10.special2 == 0, 'item10 special2 not blank');
-        assert(name_storage.item_10.special3 == 0, 'item10 special3 not blank');
-    }
-    #[test]
-    #[available_gas(310600)]
-    fn test_apply_suffix() {
-        let entropy = 12345;
-
-        let blank_item_specials = ItemSpecials { special2: 0, special3: 0, special1: 0, };
-
-        let mut name_storage = ItemSpecialsStorage {
-            item_1: blank_item_specials,
-            item_2: blank_item_specials,
-            item_3: blank_item_specials,
-            item_4: blank_item_specials,
-            item_5: blank_item_specials,
-            item_6: blank_item_specials,
-            item_7: blank_item_specials,
-            item_8: blank_item_specials,
-            item_9: blank_item_specials,
-            item_10: blank_item_specials,
-            mutated: false
-        };
-
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 0, metadata: 1 };
-        katana.apply_suffix(ref name_storage, entropy);
-
-        // verify special2 and special3 are now set in the name_storage
-        assert(name_storage.item_1.special1 != 0, 'katana special1 not applied');
-        assert(name_storage.item_1.special2 == 0, 'katana special2 not zero');
-        assert(name_storage.item_1.special3 == 0, 'katana special3 not zero');
-
-        // assert special1, special2, and special3 for the other items are still 0
-        assert(name_storage.item_2.special1 == 0, 'item2 special1 not blank');
-        assert(name_storage.item_2.special2 == 0, 'item2 special2 not blank');
-        assert(name_storage.item_2.special3 == 0, 'item2 special3 not blank');
-        assert(name_storage.item_3.special1 == 0, 'item3 special1 not blank');
-        assert(name_storage.item_3.special2 == 0, 'item3 special2 not blank');
-        assert(name_storage.item_3.special3 == 0, 'item3 special3 not blank');
-
-        let crown = ItemPrimitive { id: ItemId::Crown, xp: 0, metadata: 5 };
-        crown.apply_suffix(ref name_storage, entropy);
-
-        // assert katana special1 is still set
-        assert(name_storage.item_1.special1 != 0, 'katana special1 not applied');
-        // assert crown special1 is set
-        assert(name_storage.item_5.special1 != 0, 'crown special1 not applied');
-
-        // assert all other specials for all other items are still 0
-        assert(name_storage.item_1.special2 == 0, 'katana special2 not zero');
-        assert(name_storage.item_1.special3 == 0, 'katana special3 not zero');
-        assert(name_storage.item_2.special1 == 0, 'item2 special1 not blank');
-        assert(name_storage.item_2.special2 == 0, 'crown special2 not zero');
-        assert(name_storage.item_2.special3 == 0, 'crown special3 not zero');
-        assert(name_storage.item_3.special1 == 0, 'item3 special1 not blank');
-        assert(name_storage.item_3.special2 == 0, 'item3 special2 not blank');
-        assert(name_storage.item_3.special3 == 0, 'item3 special3 not blank');
-        assert(name_storage.item_4.special1 == 0, 'item4 special1 not blank');
-        assert(name_storage.item_4.special2 == 0, 'item4 special2 not blank');
-        assert(name_storage.item_4.special3 == 0, 'item4 special3 not blank');
-        assert(name_storage.item_5.special2 == 0, 'item5 special2 not blank');
-        assert(name_storage.item_5.special3 == 0, 'item5 special3 not blank');
-        assert(name_storage.item_6.special1 == 0, 'item6 special1 not blank');
-        assert(name_storage.item_6.special2 == 0, 'item6 special2 not blank');
-        assert(name_storage.item_6.special3 == 0, 'item6 special3 not blank');
-        assert(name_storage.item_7.special1 == 0, 'item7 special1 not blank');
-        assert(name_storage.item_7.special2 == 0, 'item7 special2 not blank');
-        assert(name_storage.item_7.special3 == 0, 'item7 special3 not blank');
-        assert(name_storage.item_8.special1 == 0, 'item8 special1 not blank');
-        assert(name_storage.item_8.special2 == 0, 'item8 special2 not blank');
-        assert(name_storage.item_8.special3 == 0, 'item8 special3 not blank');
-        assert(name_storage.item_9.special1 == 0, 'item9 special1 not blank');
-        assert(name_storage.item_9.special2 == 0, 'item9 special2 not blank');
-        assert(name_storage.item_9.special3 == 0, 'item9 special3 not blank');
-        assert(name_storage.item_10.special1 == 0, 'item10 special1 not blank');
-        assert(name_storage.item_10.special2 == 0, 'item10 special2 not blank');
-        assert(name_storage.item_10.special3 == 0, 'item10 special3 not blank');
-    }
-
-    #[test]
-    #[available_gas(285140)]
-    fn test_apply_suffix_and_prefixes() {
-        let entropy = 12345;
-
-        // start katana with a special as would be the case in the game
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 0, metadata: 1 };
-        let katana_starting_special = ItemSpecials { special1: 0, special2: 0, special3: 0 };
-        let blank_item_specials = ItemSpecials { special1: 0, special2: 0, special3: 0 };
-
-        let mut name_storage = ItemSpecialsStorage {
-            item_1: katana_starting_special,
-            item_2: blank_item_specials,
-            item_3: blank_item_specials,
-            item_4: blank_item_specials,
-            item_5: blank_item_specials,
-            item_6: blank_item_specials,
-            item_7: blank_item_specials,
-            item_8: blank_item_specials,
-            item_9: blank_item_specials,
-            item_10: blank_item_specials,
-            mutated: false
-        };
-
-        // apply prefixes to katana
-        katana.apply_suffix_and_prefixes(ref name_storage, entropy);
-
-        // verify special2 and special3 are now set in the name_storage
-        assert(name_storage.item_1.special1 != 0, 'katana special1 not applied');
-        assert(name_storage.item_1.special2 != 0, 'katana special2 not applied');
-        assert(name_storage.item_1.special3 != 0, 'katana special3 not applied');
-
-        // assert special1, special2, and special3 for the other items are still 0
-        assert(name_storage.item_2.special1 == 0, 'item2 special1 not blank');
-        assert(name_storage.item_2.special2 == 0, 'item2 special2 not blank');
-        assert(name_storage.item_2.special3 == 0, 'item2 special3 not blank');
-        assert(name_storage.item_3.special1 == 0, 'item3 special1 not blank');
-        assert(name_storage.item_3.special2 == 0, 'item3 special2 not blank');
-        assert(name_storage.item_3.special3 == 0, 'item3 special3 not blank');
-    }
-
-    #[test]
-    #[available_gas(299740)]
-    fn test_apply_specials_suffix_and_prefixes() {
-        let suffix_unlocked = true;
-        let prefixes_unlocked = true;
-        let entropy = 12345;
-
-        // start katana with a special as would be the case in the game
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 0, metadata: 1 };
-        let katana_starting_special = ItemSpecials { special1: 0, special2: 0, special3: 0 };
-        let blank_item_specials = ItemSpecials { special1: 0, special2: 0, special3: 0 };
-
-        let mut name_storage = ItemSpecialsStorage {
-            item_1: katana_starting_special,
-            item_2: blank_item_specials,
-            item_3: blank_item_specials,
-            item_4: blank_item_specials,
-            item_5: blank_item_specials,
-            item_6: blank_item_specials,
-            item_7: blank_item_specials,
-            item_8: blank_item_specials,
-            item_9: blank_item_specials,
-            item_10: blank_item_specials,
-            mutated: false
-        };
-
-        // apply prefixes to katana
-        katana.apply_specials(ref name_storage, suffix_unlocked, prefixes_unlocked, entropy);
-
-        // verify special2 and special3 are now set in the name_storage
-        assert(name_storage.item_1.special1 != 0, 'katana special1 not applied');
-        assert(name_storage.item_1.special2 != 0, 'katana special2 not applied');
-        assert(name_storage.item_1.special3 != 0, 'katana special3 not applied');
-
-        // assert special1, special2, and special3 for the other items are still 0
-        assert(name_storage.item_2.special1 == 0, 'item2 special1 not blank');
-        assert(name_storage.item_2.special2 == 0, 'item2 special2 not blank');
-        assert(name_storage.item_2.special3 == 0, 'item2 special3 not blank');
-        assert(name_storage.item_3.special1 == 0, 'item3 special1 not blank');
-        assert(name_storage.item_3.special2 == 0, 'item3 special2 not blank');
-        assert(name_storage.item_3.special3 == 0, 'item3 special3 not blank');
-        assert(name_storage.item_4.special1 == 0, 'item4 special1 not blank');
-        assert(name_storage.item_4.special2 == 0, 'item4 special2 not blank');
-        assert(name_storage.item_4.special3 == 0, 'item4 special3 not blank');
-        assert(name_storage.item_5.special1 == 0, 'item5 special1 not blank');
-        assert(name_storage.item_5.special2 == 0, 'item5 special2 not blank');
-        assert(name_storage.item_5.special3 == 0, 'item5 special3 not blank');
-        assert(name_storage.item_6.special1 == 0, 'item6 special1 not blank');
-        assert(name_storage.item_6.special2 == 0, 'item6 special2 not blank');
-        assert(name_storage.item_6.special3 == 0, 'item6 special3 not blank');
-        assert(name_storage.item_7.special1 == 0, 'item7 special1 not blank');
-        assert(name_storage.item_7.special2 == 0, 'item7 special2 not blank');
-        assert(name_storage.item_7.special3 == 0, 'item7 special3 not blank');
-        assert(name_storage.item_8.special1 == 0, 'item8 special1 not blank');
-        assert(name_storage.item_8.special2 == 0, 'item8 special2 not blank');
-        assert(name_storage.item_8.special3 == 0, 'item8 special3 not blank');
-        assert(name_storage.item_9.special1 == 0, 'item9 special1 not blank');
-        assert(name_storage.item_9.special2 == 0, 'item9 special2 not blank');
-        assert(name_storage.item_9.special3 == 0, 'item9 special3 not blank');
-        assert(name_storage.item_10.special1 == 0, 'item10 special1 not blank');
-        assert(name_storage.item_10.special2 == 0, 'item10 special2 not blank');
-        assert(name_storage.item_10.special3 == 0, 'item10 special3 not blank');
-    }
-
-    #[test]
-    #[available_gas(299340)]
-    fn test_apply_specials_prefixes() {
-        let suffix_unlocked = false;
-        let prefixes_unlocked = true;
-        let entropy = 12345;
-
-        // start katana with a special as would be the case in the game
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 0, metadata: 1 };
-        let katana_starting_special = ItemSpecials { special1: 1, special2: 0, special3: 0 };
-        let blank_item_specials = ItemSpecials { special1: 0, special2: 0, special3: 0 };
-
-        let mut name_storage = ItemSpecialsStorage {
-            item_1: katana_starting_special,
-            item_2: blank_item_specials,
-            item_3: blank_item_specials,
-            item_4: blank_item_specials,
-            item_5: blank_item_specials,
-            item_6: blank_item_specials,
-            item_7: blank_item_specials,
-            item_8: blank_item_specials,
-            item_9: blank_item_specials,
-            item_10: blank_item_specials,
-            mutated: false
-        };
-
-        // apply prefixes to katana
-        katana.apply_specials(ref name_storage, suffix_unlocked, prefixes_unlocked, entropy);
-
-        // verify special2 and special3 are now set in the name_storage
-        assert(name_storage.item_1.special1 == 1, 'katana special1 not preserved');
-        assert(name_storage.item_1.special2 != 0, 'katana special2 not applied');
-        assert(name_storage.item_1.special3 != 0, 'katana special3 not applied');
-
-        // assert special1, special2, and special3 for the other items are still 0
-        assert(name_storage.item_2.special1 == 0, 'item2 special1 not blank');
-        assert(name_storage.item_2.special2 == 0, 'item2 special2 not blank');
-        assert(name_storage.item_2.special3 == 0, 'item2 special3 not blank');
-        assert(name_storage.item_3.special1 == 0, 'item3 special1 not blank');
-        assert(name_storage.item_3.special2 == 0, 'item3 special2 not blank');
-        assert(name_storage.item_3.special3 == 0, 'item3 special3 not blank');
-        assert(name_storage.item_4.special1 == 0, 'item4 special1 not blank');
-        assert(name_storage.item_4.special2 == 0, 'item4 special2 not blank');
-        assert(name_storage.item_4.special3 == 0, 'item4 special3 not blank');
-        assert(name_storage.item_5.special1 == 0, 'item5 special1 not blank');
-        assert(name_storage.item_5.special2 == 0, 'item5 special2 not blank');
-        assert(name_storage.item_5.special3 == 0, 'item5 special3 not blank');
-        assert(name_storage.item_6.special1 == 0, 'item6 special1 not blank');
-        assert(name_storage.item_6.special2 == 0, 'item6 special2 not blank');
-        assert(name_storage.item_6.special3 == 0, 'item6 special3 not blank');
-        assert(name_storage.item_7.special1 == 0, 'item7 special1 not blank');
-        assert(name_storage.item_7.special2 == 0, 'item7 special2 not blank');
-        assert(name_storage.item_7.special3 == 0, 'item7 special3 not blank');
-        assert(name_storage.item_8.special1 == 0, 'item8 special1 not blank');
-        assert(name_storage.item_8.special2 == 0, 'item8 special2 not blank');
-        assert(name_storage.item_8.special3 == 0, 'item8 special3 not blank');
-        assert(name_storage.item_9.special1 == 0, 'item9 special1 not blank');
-        assert(name_storage.item_9.special2 == 0, 'item9 special2 not blank');
-        assert(name_storage.item_9.special3 == 0, 'item9 special3 not blank');
-        assert(name_storage.item_10.special1 == 0, 'item10 special1 not blank');
-        assert(name_storage.item_10.special2 == 0, 'item10 special2 not blank');
-        assert(name_storage.item_10.special3 == 0, 'item10 special3 not blank');
-    }
-
-    #[test]
-    #[available_gas(11278330)]
-    fn test_apply_specials_suffix() {
-        let suffix_unlocked = true;
-        let prefixes_unlocked = false;
-        let entropy = 12345;
-
-        let blank_item_specials = ItemSpecials { special2: 0, special3: 0, special1: 0, };
-
-        let mut name_storage = ItemSpecialsStorage {
-            item_1: blank_item_specials,
-            item_2: blank_item_specials,
-            item_3: blank_item_specials,
-            item_4: blank_item_specials,
-            item_5: blank_item_specials,
-            item_6: blank_item_specials,
-            item_7: blank_item_specials,
-            item_8: blank_item_specials,
-            item_9: blank_item_specials,
-            item_10: blank_item_specials,
-            mutated: false
-        };
-
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 0, metadata: 1 };
-        katana.apply_specials(ref name_storage, suffix_unlocked, prefixes_unlocked, entropy);
-
-        // assert katana now has special1 set in the name_storage
-        assert(name_storage.item_1.special1 != 0, 'suffix not applied');
-        // the katanas special2 and special3 should still be empty
-        assert(name_storage.item_1.special2 == 0, 'special2 not blank');
-        assert(name_storage.item_1.special3 == 0, 'special3 not blank');
-
-        // as should the rest of the names in the storage
-        assert(name_storage.item_2.special1 == 0, 'special1 not blank');
-        assert(name_storage.item_2.special2 == 0, 'special2 not blank');
-        assert(name_storage.item_2.special3 == 0, 'special3 not blank');
-        assert(name_storage.item_3.special1 == 0, 'special1 not blank');
-        assert(name_storage.item_3.special2 == 0, 'special2 not blank');
-        assert(name_storage.item_3.special3 == 0, 'special3 not blank');
-        assert(name_storage.item_4.special1 == 0, 'special1 not blank');
-        assert(name_storage.item_4.special2 == 0, 'special2 not blank');
-        assert(name_storage.item_4.special3 == 0, 'special3 not blank');
-        assert(name_storage.item_5.special1 == 0, 'special1 not blank');
-        assert(name_storage.item_5.special2 == 0, 'special2 not blank');
-        assert(name_storage.item_5.special3 == 0, 'special3 not blank');
-        assert(name_storage.item_6.special1 == 0, 'special1 not blank');
-        assert(name_storage.item_6.special2 == 0, 'special2 not blank');
-        assert(name_storage.item_6.special3 == 0, 'special3 not blank');
-        assert(name_storage.item_7.special1 == 0, 'special1 not blank');
-        assert(name_storage.item_7.special2 == 0, 'special2 not blank');
-        assert(name_storage.item_7.special3 == 0, 'special3 not blank');
-        assert(name_storage.item_8.special1 == 0, 'special1 not blank');
-        assert(name_storage.item_8.special2 == 0, 'special2 not blank');
-        assert(name_storage.item_8.special3 == 0, 'special3 not blank');
-        assert(name_storage.item_9.special1 == 0, 'special1 not blank');
-        assert(name_storage.item_9.special2 == 0, 'special2 not blank');
-        assert(name_storage.item_9.special3 == 0, 'special3 not blank');
-        assert(name_storage.item_10.special1 == 0, 'special1 not blank');
-        assert(name_storage.item_10.special2 == 0, 'special2 not blank');
-        assert(name_storage.item_10.special3 == 0, 'special3 not blank');
-    }
-
-    #[test]
     #[available_gas(14610)]
     fn test_jewelry_armor_bonus_gas() {
-        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 400, metadata: 1 };
+        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 400 };
         amulet.jewelry_armor_bonus(Type::Magic_or_Cloth(()), 100);
     }
 
@@ -2382,7 +1762,7 @@ mod tests {
     #[available_gas(284000)]
     fn test_jewelry_armor_bonus() {
         // amulet test cases
-        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 400, metadata: 1 };
+        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 400 };
         assert(amulet.jewelry_armor_bonus(Type::None(()), 100) == 0, 'None Type gets 0 bonus');
         assert(
             amulet.jewelry_armor_bonus(Type::Magic_or_Cloth(()), 100) == NECKLACE_ARMOR_BONUS.into()
@@ -2403,7 +1783,7 @@ mod tests {
         assert(amulet.jewelry_armor_bonus(Type::Ring(()), 100) == 0, 'Ring Type gets 0 bonus');
 
         // pendant test cases
-        let pendant = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 2 };
+        let pendant = ItemPrimitive { id: ItemId::Pendant, xp: 400 };
         assert(pendant.jewelry_armor_bonus(Type::None(()), 100) == 0, 'None Type gets 0 bonus');
         assert(
             pendant.jewelry_armor_bonus(Type::Magic_or_Cloth(()), 100) == 0,
@@ -2424,7 +1804,7 @@ mod tests {
         assert(pendant.jewelry_armor_bonus(Type::Ring(()), 100) == 0, 'Ring Type gets 0 bonus');
 
         // necklace test cases
-        let necklace = ItemPrimitive { id: ItemId::Necklace, xp: 400, metadata: 3 };
+        let necklace = ItemPrimitive { id: ItemId::Necklace, xp: 400 };
         assert(necklace.jewelry_armor_bonus(Type::None(()), 100) == 0, 'None Type gets 0 bonus');
         assert(
             necklace.jewelry_armor_bonus(Type::Magic_or_Cloth(()), 100) == 0,
@@ -2447,7 +1827,7 @@ mod tests {
         assert(necklace.jewelry_armor_bonus(Type::Ring(()), 100) == 0, 'Ring Type gets 0 bonus');
 
         // test non jewelry item
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 400, metadata: 1 };
+        let katana = ItemPrimitive { id: ItemId::Katana, xp: 400 };
         assert(katana.jewelry_armor_bonus(Type::None(()), 100) == 0, 'Katan does not boost armor');
     }
 
@@ -2455,7 +1835,7 @@ mod tests {
     #[test]
     #[available_gas(13510)]
     fn test_name_match_bonus_damage_gas() {
-        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 400, metadata: 6 };
+        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 400 };
         platinum_ring.name_match_bonus_damage(0);
     }
 
@@ -2464,12 +1844,12 @@ mod tests {
     fn test_name_match_bonus_damage() {
         let base_damage = 100;
 
-        let titanium_ring = ItemPrimitive { id: ItemId::TitaniumRing, xp: 400, metadata: 6 };
+        let titanium_ring = ItemPrimitive { id: ItemId::TitaniumRing, xp: 400 };
         assert(
             titanium_ring.name_match_bonus_damage(base_damage) == 0, 'no bonus for titanium ring'
         );
 
-        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 0, metadata: 6 };
+        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 0 };
         assert(
             platinum_ring
                 .name_match_bonus_damage(
@@ -2479,7 +1859,7 @@ mod tests {
             'should be 3hp name bonus'
         );
 
-        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 100, metadata: 6 };
+        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 100 };
         assert(
             platinum_ring
                 .name_match_bonus_damage(
@@ -2489,7 +1869,7 @@ mod tests {
             'should be 30hp name bonus'
         );
 
-        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 400, metadata: 6 };
+        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 400 };
         assert(
             platinum_ring
                 .name_match_bonus_damage(
@@ -2499,33 +1879,6 @@ mod tests {
             'should be 60hp name bonus'
         );
     }
-
-    #[test]
-    #[available_gas(100000)]
-    fn test_get_storage_index() {
-        assert(ImplAdventurer::get_storage_index(0) == 0, 'storage index should be 0');
-        assert(ImplAdventurer::get_storage_index(1) == 0, 'storage index should be 0');
-        assert(ImplAdventurer::get_storage_index(2) == 0, 'storage index should be 0');
-        assert(ImplAdventurer::get_storage_index(3) == 0, 'storage index should be 0');
-        assert(ImplAdventurer::get_storage_index(4) == 0, 'storage index should be 0');
-        assert(ImplAdventurer::get_storage_index(5) == 0, 'storage index should be 0');
-        assert(ImplAdventurer::get_storage_index(6) == 0, 'storage index should be 0');
-        assert(ImplAdventurer::get_storage_index(7) == 0, 'storage index should be 0');
-        assert(ImplAdventurer::get_storage_index(8) == 0, 'storage index should be 0');
-        assert(ImplAdventurer::get_storage_index(9) == 0, 'storage index should be 0');
-        assert(ImplAdventurer::get_storage_index(10) == 0, 'storage index should be 0');
-        assert(ImplAdventurer::get_storage_index(11) == 1, 'storage index should be 1');
-        assert(ImplAdventurer::get_storage_index(12) == 1, 'storage index should be 1');
-        assert(ImplAdventurer::get_storage_index(13) == 1, 'storage index should be 1');
-        assert(ImplAdventurer::get_storage_index(14) == 1, 'storage index should be 1');
-        assert(ImplAdventurer::get_storage_index(15) == 1, 'storage index should be 1');
-        assert(ImplAdventurer::get_storage_index(16) == 1, 'storage index should be 1');
-        assert(ImplAdventurer::get_storage_index(17) == 1, 'storage index should be 1');
-        assert(ImplAdventurer::get_storage_index(18) == 1, 'storage index should be 1');
-        assert(ImplAdventurer::get_storage_index(19) == 1, 'storage index should be 1');
-        assert(ImplAdventurer::get_storage_index(20) == 1, 'storage index should be 1');
-    }
-
 
     #[test]
     #[available_gas(275934)]
@@ -2572,15 +1925,13 @@ mod tests {
     #[test]
     #[available_gas(70320)]
     fn test_get_greatness_gas() {
-        let _greatness = ImplAdventurer::get_greatness(
-            ItemPrimitive { id: 1, xp: 400, metadata: 1 }
-        );
+        let _greatness = ImplAdventurer::get_greatness(ItemPrimitive { id: 1, xp: 400 });
     }
 
     #[test]
     #[available_gas(70320)]
     fn test_get_greatness() {
-        let mut item = ItemPrimitive { id: 1, xp: 0, metadata: 0 };
+        let mut item = ItemPrimitive { id: 1, xp: 0 };
         // test 0 case (should be level 1)
         let greatness = ImplAdventurer::get_greatness(item);
         assert(greatness == 1, 'greatness should be 1');
@@ -2763,23 +2114,6 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(241584)]
-    fn test_get_idle_blocks() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.last_action_block = 1;
-
-        // test with current block greater than last action
-        assert(adventurer.get_idle_blocks(3) == 2, 'idle blocks should be 2');
-        assert(adventurer.get_idle_blocks(10) == 9, 'idle blocks should be 9');
-
-        // test with current block less than last action
-        assert(adventurer.get_idle_blocks(0) == 511, 'idle blocks should be 511');
-        adventurer.last_action_block = 511;
-        assert(adventurer.get_idle_blocks(511) == 0, 'idle blocks should be 0');
-        assert(adventurer.get_idle_blocks(0) == 1, 'idle blocks should be 1');
-    }
-
-    #[test]
     #[available_gas(30020000)]
     fn test_packing_and_unpacking_adventurer() {
         let adventurer = Adventurer {
@@ -2796,14 +2130,14 @@ mod tests {
                 luck: 15
             },
             gold: 511,
-            weapon: ItemPrimitive { id: 127, xp: 511, metadata: 31, },
-            chest: ItemPrimitive { id: 1, xp: 0, metadata: 0, },
-            head: ItemPrimitive { id: 127, xp: 511, metadata: 31, },
-            waist: ItemPrimitive { id: 87, xp: 511, metadata: 4, },
-            foot: ItemPrimitive { id: 78, xp: 511, metadata: 5, },
-            hand: ItemPrimitive { id: 34, xp: 511, metadata: 6, },
-            neck: ItemPrimitive { id: 32, xp: 511, metadata: 7, },
-            ring: ItemPrimitive { id: 1, xp: 511, metadata: 8, },
+            weapon: ItemPrimitive { id: 127, xp: 511 },
+            chest: ItemPrimitive { id: 1, xp: 0 },
+            head: ItemPrimitive { id: 127, xp: 511 },
+            waist: ItemPrimitive { id: 87, xp: 511 },
+            foot: ItemPrimitive { id: 78, xp: 511 },
+            hand: ItemPrimitive { id: 34, xp: 511 },
+            neck: ItemPrimitive { id: 32, xp: 511 },
+            ring: ItemPrimitive { id: 1, xp: 511 },
             beast_health: 511,
             stat_points_available: 7,
             actions_per_block: 0,
@@ -2823,28 +2157,20 @@ mod tests {
         assert(adventurer.gold == unpacked.gold, 'luck');
         assert(adventurer.weapon.id == unpacked.weapon.id, 'weapon.id');
         assert(adventurer.weapon.xp == unpacked.weapon.xp, 'weapon.xp');
-        assert(adventurer.weapon.metadata == unpacked.weapon.metadata, 'weapon.metadata');
         assert(adventurer.chest.id == unpacked.chest.id, 'chest.id');
         assert(adventurer.chest.xp == unpacked.chest.xp, 'chest.xp');
-        assert(adventurer.chest.metadata == unpacked.chest.metadata, 'chest.metadata');
         assert(adventurer.head.id == unpacked.head.id, 'head.id');
         assert(adventurer.head.xp == unpacked.head.xp, 'head.xp');
-        assert(adventurer.head.metadata == unpacked.head.metadata, 'head.metadata');
         assert(adventurer.waist.id == unpacked.waist.id, 'waist.id');
         assert(adventurer.waist.xp == unpacked.waist.xp, 'waist.xp');
-        assert(adventurer.waist.metadata == unpacked.waist.metadata, 'waist.metadata');
         assert(adventurer.foot.id == unpacked.foot.id, 'foot.id');
         assert(adventurer.foot.xp == unpacked.foot.xp, 'foot.xp');
-        assert(adventurer.foot.metadata == unpacked.foot.metadata, 'foot.metadata');
         assert(adventurer.hand.id == unpacked.hand.id, 'hand.id');
         assert(adventurer.hand.xp == unpacked.hand.xp, 'hand.xp');
-        assert(adventurer.hand.metadata == unpacked.hand.metadata, 'hand.metadata');
         assert(adventurer.neck.id == unpacked.neck.id, 'neck.id');
         assert(adventurer.neck.xp == unpacked.neck.xp, 'neck.xp');
-        assert(adventurer.neck.metadata == unpacked.neck.metadata, 'neck.metadata');
         assert(adventurer.ring.id == unpacked.ring.id, 'ring.id');
         assert(adventurer.ring.xp == unpacked.ring.xp, 'ring.xp');
-        assert(adventurer.ring.metadata == unpacked.ring.metadata, 'ring.metadata');
         assert(adventurer.beast_health == unpacked.beast_health, 'beast_health');
         assert(
             adventurer.stat_points_available == unpacked.stat_points_available,
@@ -2865,14 +2191,14 @@ mod tests {
                 luck: 15
             },
             gold: 511,
-            weapon: ItemPrimitive { id: 127, xp: 511, metadata: 31, },
-            chest: ItemPrimitive { id: 1, xp: 0, metadata: 0, },
-            head: ItemPrimitive { id: 127, xp: 511, metadata: 31, },
-            waist: ItemPrimitive { id: 87, xp: 511, metadata: 4, },
-            foot: ItemPrimitive { id: 78, xp: 511, metadata: 5, },
-            hand: ItemPrimitive { id: 34, xp: 511, metadata: 6, },
-            neck: ItemPrimitive { id: 32, xp: 511, metadata: 7, },
-            ring: ItemPrimitive { id: 1, xp: 511, metadata: 8, },
+            weapon: ItemPrimitive { id: 127, xp: 511 },
+            chest: ItemPrimitive { id: 1, xp: 0 },
+            head: ItemPrimitive { id: 127, xp: 511 },
+            waist: ItemPrimitive { id: 87, xp: 511 },
+            foot: ItemPrimitive { id: 78, xp: 511 },
+            hand: ItemPrimitive { id: 34, xp: 511 },
+            neck: ItemPrimitive { id: 32, xp: 511 },
+            ring: ItemPrimitive { id: 1, xp: 511 },
             beast_health: 511,
             stat_points_available: 7,
             actions_per_block: 0,
@@ -2892,28 +2218,20 @@ mod tests {
         assert(adventurer.gold == unpacked.gold, 'luck');
         assert(adventurer.weapon.id == unpacked.weapon.id, 'weapon.id');
         assert(adventurer.weapon.xp == unpacked.weapon.xp, 'weapon.xp');
-        assert(adventurer.weapon.metadata == unpacked.weapon.metadata, 'weapon.metadata');
         assert(adventurer.chest.id == unpacked.chest.id, 'chest.id');
         assert(adventurer.chest.xp == unpacked.chest.xp, 'chest.xp');
-        assert(adventurer.chest.metadata == unpacked.chest.metadata, 'chest.metadata');
         assert(adventurer.head.id == unpacked.head.id, 'head.id');
         assert(adventurer.head.xp == unpacked.head.xp, 'head.xp');
-        assert(adventurer.head.metadata == unpacked.head.metadata, 'head.metadata');
         assert(adventurer.waist.id == unpacked.waist.id, 'waist.id');
         assert(adventurer.waist.xp == unpacked.waist.xp, 'waist.xp');
-        assert(adventurer.waist.metadata == unpacked.waist.metadata, 'waist.metadata');
         assert(adventurer.foot.id == unpacked.foot.id, 'foot.id');
         assert(adventurer.foot.xp == unpacked.foot.xp, 'foot.xp');
-        assert(adventurer.foot.metadata == unpacked.foot.metadata, 'foot.metadata');
         assert(adventurer.hand.id == unpacked.hand.id, 'hand.id');
         assert(adventurer.hand.xp == unpacked.hand.xp, 'hand.xp');
-        assert(adventurer.hand.metadata == unpacked.hand.metadata, 'hand.metadata');
         assert(adventurer.neck.id == unpacked.neck.id, 'neck.id');
         assert(adventurer.neck.xp == unpacked.neck.xp, 'neck.xp');
-        assert(adventurer.neck.metadata == unpacked.neck.metadata, 'neck.metadata');
         assert(adventurer.ring.id == unpacked.ring.id, 'ring.id');
         assert(adventurer.ring.xp == unpacked.ring.xp, 'ring.xp');
-        assert(adventurer.ring.metadata == unpacked.ring.metadata, 'ring.metadata');
         assert(adventurer.beast_health == unpacked.beast_health, 'beast_health');
         assert(
             adventurer.stat_points_available == unpacked.stat_points_available,
@@ -3510,7 +2828,7 @@ mod tests {
     //     };
     //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
     //     // create demon crown item
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
     //     // try to equip it to adventurer as a weapon
     //     adventurer.equip_weapon(item);
     // // should panic with 'Item is not weapon' message
@@ -3525,7 +2843,7 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // Create Katana item
-        let item = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::Katana, xp: 1 };
 
         // Equip to adventurer as a weapon
         adventurer.equip_weapon(item);
@@ -3533,7 +2851,6 @@ mod tests {
         // Assert item was equipped
         assert(adventurer.weapon.id == ItemId::Katana, 'did not equip weapon');
         assert(adventurer.weapon.xp == 1, 'weapon xp is not 1');
-        assert(adventurer.weapon.metadata == 0, 'weapon metadata is not 0');
     }
 
     // TODO: Use conditional compilation to test this in the future
@@ -3547,7 +2864,7 @@ mod tests {
     //     };
     //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
     //     // try to equip a Demon Crown as chest item
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
     //     adventurer.equip_chest_armor(item);
     // // should panic with 'Item is not chest armor' message
     // // because Demon Crown is not chest armor
@@ -3560,14 +2877,13 @@ mod tests {
     fn test_equip_valid_chest() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         // equip Divine Robe as chest item
-        let item = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
         adventurer.equip_chest_armor(item);
 
         // this should not panic
         // assert item was equipped
         assert(adventurer.chest.id == ItemId::DivineRobe, 'did not equip chest armor');
         assert(adventurer.chest.xp == 1, 'chest armor xp is not 1');
-        assert(adventurer.chest.metadata == 0, 'chest armor metadata is not 0');
     }
 
     // TODO: Use conditional compilation to test this in the future
@@ -3581,7 +2897,7 @@ mod tests {
     //     };
     //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
     //     // try to equip a Katana as head item
-    //     let item = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::Katana, xp: 1};
     //     adventurer.equip_head_armor(item);
     // // should panic with 'Item is not head armor' message
     // }
@@ -3591,13 +2907,12 @@ mod tests {
     fn test_equip_valid_head() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         // equip Crown as head item
-        let item = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::Crown, xp: 1 };
         adventurer.equip_head_armor(item);
         // this should not panic
         // assert item was equipped
         assert(adventurer.head.id == ItemId::Crown, 'did not equip head armor');
         assert(adventurer.head.xp == 1, 'head armor xp is not 1');
-        assert(adventurer.head.metadata == 0, 'head armor metadata is not 0');
     }
 
     // TODO: Use conditional compilation to test this in the future
@@ -3611,7 +2926,7 @@ mod tests {
     //     };
     //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
     //     // try to equip a Demon Crown as waist item
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
     //     adventurer.equip_waist_armor(item);
     // // should panic with 'Item is not waist armor' message
     // }
@@ -3622,14 +2937,13 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // equip Wool Sash as waist item
-        let item = ItemPrimitive { id: ItemId::WoolSash, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::WoolSash, xp: 1 };
         adventurer.equip_waist_armor(item);
 
         // this should not panic
         // assert item was equipped
         assert(adventurer.waist.id == ItemId::WoolSash, 'did not equip waist armor');
         assert(adventurer.waist.xp == 1, 'waist armor xp is not 1');
-        assert(adventurer.waist.metadata == 0, 'waist armor metadata is not 0');
     }
 
     // TODO: Use conditional compilation to test this in the future
@@ -3643,7 +2957,7 @@ mod tests {
     //     };
     //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
     //     // try to equip a Demon Crown as foot item
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
     //     adventurer.equip_foot_armor(item);
     // // should panic with 'Item is not foot armor' message
     // }
@@ -3654,14 +2968,13 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // equip Silk Slippers as foot item
-        let item = ItemPrimitive { id: ItemId::SilkSlippers, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::SilkSlippers, xp: 1 };
         adventurer.equip_foot_armor(item);
 
         // this should not panic
         // assert item was equipped
         assert(adventurer.foot.id == ItemId::SilkSlippers, 'did not equip foot armor');
         assert(adventurer.foot.xp == 1, 'foot armor xp is not 1');
-        assert(adventurer.foot.metadata == 0, 'foot armor metadata is not 0');
     }
 
     // TODO: Use conditional compilation to test this in the future
@@ -3676,7 +2989,7 @@ mod tests {
     //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
     //     // try to equip a Demon Crown as hand item
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
     //     adventurer.equip_hand_armor(item);
     // // should panic with 'Item is not hand armor' message
     // }
@@ -3687,14 +3000,13 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // equip Divine Gloves as hand item
-        let item = ItemPrimitive { id: ItemId::DivineGloves, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::DivineGloves, xp: 1 };
         adventurer.equip_hand_armor(item);
 
         // this should not panic
         // assert item was equipped
         assert(adventurer.hand.id == ItemId::DivineGloves, 'did not equip hand armor');
         assert(adventurer.hand.xp == 1, 'hand armor xp is not 1');
-        assert(adventurer.hand.metadata == 0, 'hand armor metadata is not 0');
     }
 
     // TODO: Use conditional compilation to test this in the future
@@ -3709,7 +3021,7 @@ mod tests {
     //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
     //     // try to equip a Demon Crown as necklace
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
     //     adventurer.equip_necklace(item);
     // // should panic with 'Item is not necklace' message
     // }
@@ -3720,14 +3032,13 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // equip Pendant as necklace
-        let item = ItemPrimitive { id: ItemId::Pendant, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::Pendant, xp: 1 };
         adventurer.equip_necklace(item);
 
         // this should not panic
         // assert item was equipped
         assert(adventurer.neck.id == ItemId::Pendant, 'did not equip necklace');
         assert(adventurer.neck.xp == 1, 'necklace xp is not 1');
-        assert(adventurer.neck.metadata == 0, 'necklace metadata is not 0');
     }
 
     // TODO: Use conditional compilation to test this in the future
@@ -3742,7 +3053,7 @@ mod tests {
     //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
     //     // try to equip a Demon Crown as ring
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
     //     adventurer.equip_ring(item);
     // // should panic with 'Item is not a ring' message
     // }
@@ -3751,11 +3062,10 @@ mod tests {
     #[available_gas(172184)]
     fn test_equip_valid_ring() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        let item = ItemPrimitive { id: ItemId::PlatinumRing, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::PlatinumRing, xp: 1 };
         adventurer.equip_ring(item);
         assert(adventurer.ring.id == ItemId::PlatinumRing, 'did not equip ring');
         assert(adventurer.ring.xp == 1, 'ring xp is not 1');
-        assert(adventurer.ring.metadata == 0, 'ring metadata is not 0');
     }
 
     #[test]
@@ -3835,7 +3145,7 @@ mod tests {
         assert(*starting_equipment.at(0).id == ItemId::Wand, 'adventurer starts with wand');
 
         // equip chest armor
-        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 2 };
+        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
         adventurer.equip_chest_armor(chest);
 
         // assert we now have two items equipped
@@ -3845,7 +3155,7 @@ mod tests {
         assert(*equipped_items.at(1).id == ItemId::DivineRobe, 'should have robe equipped');
 
         // equip head armor
-        let head = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 3 };
+        let head = ItemPrimitive { id: ItemId::Crown, xp: 1 };
         adventurer.equip_head_armor(head);
 
         // assert we now have three items equipped
@@ -3856,7 +3166,7 @@ mod tests {
         assert(*equipped_items.at(2).id == ItemId::Crown, 'should have crown equipped');
 
         // equip waist armor
-        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 4 };
+        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1 };
         adventurer.equip_waist_armor(waist);
 
         // assert we now have four items equipped
@@ -3868,7 +3178,7 @@ mod tests {
         assert(*equipped_items.at(3).id == ItemId::DemonhideBelt, 'should have belt equipped');
 
         // equip foot armor
-        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1, metadata: 5 };
+        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1 };
         adventurer.equip_foot_armor(foot);
 
         // assert we now have five items equipped
@@ -3881,7 +3191,7 @@ mod tests {
         assert(*equipped_items.at(4).id == ItemId::LeatherBoots, 'should have boots equipped');
 
         // equip hand armor
-        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1, metadata: 6 };
+        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1 };
         adventurer.equip_hand_armor(hand);
 
         // assert we now have six items equipped
@@ -3895,7 +3205,7 @@ mod tests {
         assert(*equipped_items.at(5).id == ItemId::LeatherGloves, 'should have gloves equipped');
 
         // equip necklace
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
+        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
         adventurer.equip_necklace(neck);
 
         // assert we now have seven items equipped
@@ -3910,7 +3220,7 @@ mod tests {
         assert(*equipped_items.at(6).id == ItemId::Amulet, 'should have amulet equipped');
 
         // equip ring
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
+        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
         adventurer.equip_ring(ring);
 
         // assert we now have eight items equipped
@@ -3926,7 +3236,7 @@ mod tests {
         assert(*equipped_items.at(7).id == ItemId::GoldRing, 'should have ring equipped');
 
         // equip a different weapon
-        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
+        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1 };
         adventurer.equip_weapon(weapon);
 
         // assert we still have eight items equipped
@@ -3996,14 +3306,14 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // stage items
-        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
-        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 2 };
-        let head = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 3 };
-        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 4 };
-        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1, metadata: 5 };
-        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1, metadata: 6 };
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
+        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1 };
+        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
+        let head = ItemPrimitive { id: ItemId::Crown, xp: 1 };
+        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1 };
+        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1 };
+        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1 };
+        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
+        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
 
         // equip items
         adventurer.equip_weapon(weapon);
@@ -4032,14 +3342,14 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // stage items
-        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
-        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 2 };
-        let head = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 3 };
-        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 4 };
-        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1, metadata: 5 };
-        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1, metadata: 6 };
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
+        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1 };
+        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
+        let head = ItemPrimitive { id: ItemId::Crown, xp: 1 };
+        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1 };
+        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1 };
+        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1 };
+        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
+        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
 
         // equip half the items, adventurer will have nothing equipped for the other slots
         adventurer.equip_weapon(weapon);
@@ -4584,7 +3894,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(337900)]
+    #[available_gas(665600)]
     fn test_get_and_apply_stat_boosts() {
         let mut adventurer = Adventurer {
             last_action_block: 511,
@@ -4600,78 +3910,27 @@ mod tests {
                 luck: 0
             },
             gold: 40,
-            weapon: ItemPrimitive { id: 1, xp: 225, metadata: 1, },
-            chest: ItemPrimitive { id: 2, xp: 65535, metadata: 2, },
-            head: ItemPrimitive { id: 3, xp: 225, metadata: 3, },
-            waist: ItemPrimitive { id: 4, xp: 225, metadata: 4, },
-            foot: ItemPrimitive { id: 5, xp: 1000, metadata: 5, },
-            hand: ItemPrimitive { id: 6, xp: 224, metadata: 6, },
-            neck: ItemPrimitive { id: 7, xp: 1, metadata: 7, },
-            ring: ItemPrimitive { id: 8, xp: 1, metadata: 8, },
+            weapon: ItemPrimitive { id: 1, xp: 225 },
+            chest: ItemPrimitive { id: 2, xp: 65535 },
+            head: ItemPrimitive { id: 3, xp: 225 },
+            waist: ItemPrimitive { id: 4, xp: 225 },
+            foot: ItemPrimitive { id: 5, xp: 1000 },
+            hand: ItemPrimitive { id: 6, xp: 224 },
+            neck: ItemPrimitive { id: 7, xp: 1 },
+            ring: ItemPrimitive { id: 8, xp: 1 },
             beast_health: 20,
             stat_points_available: 0,
             actions_per_block: 0,
             mutated: false,
         };
 
-        let item1_names = ItemSpecials {
-            special2: 0, special3: 0, special1: ItemSuffix::of_Power,
-        };
-        let item2_names = ItemSpecials {
-            special2: 0, special3: 0, special1: ItemSuffix::of_Giant,
-        };
-        let item3_names = ItemSpecials {
-            special2: 0, special3: 0, special1: ItemSuffix::of_Perfection,
-        };
-        let item4_names = ItemSpecials { special2: 0, special3: 0, special1: ItemSuffix::of_Rage, };
-        let item5_names = ItemSpecials { special2: 0, special3: 0, special1: ItemSuffix::of_Fury, };
-        let item6_names = ItemSpecials {
-            special2: 0, special3: 0, special1: ItemSuffix::of_Skill,
-        };
-        let item7_names = ItemSpecials {
-            special2: 0, special3: 0, special1: ItemSuffix::of_Vitriol,
-        };
-        let item8_names = ItemSpecials {
-            special2: 0, special3: 0, special1: ItemSuffix::of_the_Fox,
-        };
-        let item9_names = ItemSpecials { special2: 0, special3: 0, special1: 0, };
-        let item10_names = ItemSpecials { special2: 0, special3: 0, special1: 0, };
-
-        let name_storage1 = ItemSpecialsStorage {
-            item_1: item1_names,
-            item_2: item2_names,
-            item_3: item3_names,
-            item_4: item4_names,
-            item_5: item5_names,
-            item_6: item6_names,
-            item_7: item7_names,
-            item_8: item8_names,
-            item_9: item9_names,
-            item_10: item10_names,
-            mutated: false
-        };
-
-        let name_storage2 = ItemSpecialsStorage {
-            item_1: item1_names,
-            item_2: item2_names,
-            item_3: item3_names,
-            item_4: item4_names,
-            item_5: item5_names,
-            item_6: item6_names,
-            item_7: item7_names,
-            item_8: item8_names,
-            item_9: item9_names,
-            item_10: item10_names,
-            mutated: false
-        };
-
-        let boost_stats = adventurer.get_stat_boosts(name_storage1, name_storage2);
-        assert(boost_stats.strength == 5, 'strength should be 5');
-        assert(boost_stats.vitality == 5, 'vitality should be 5');
-        assert(boost_stats.dexterity == 1, 'dexterity should be 1');
-        assert(boost_stats.intelligence == 1, 'intelligence should be 1');
-        assert(boost_stats.wisdom == 1, 'wisdom should be 1');
-        assert(boost_stats.charisma == 2, 'charisma should be 2');
+        let stat_boosts = adventurer.get_stat_boosts(1);
+        assert(stat_boosts.strength == 3, 'strength should be 3');
+        assert(stat_boosts.vitality == 5, 'vitality should be 5');
+        assert(stat_boosts.dexterity == 1, 'dexterity should be 1');
+        assert(stat_boosts.intelligence == 0, 'intelligence should be 0');
+        assert(stat_boosts.wisdom == 3, 'wisdom should be 3');
+        assert(stat_boosts.charisma == 3, 'charisma should be 3');
     }
 
     // test base case
@@ -4755,14 +4014,14 @@ mod tests {
                 luck: 0
             },
             gold: 40,
-            weapon: ItemPrimitive { id: 1, xp: 225, metadata: 1, },
-            chest: ItemPrimitive { id: 2, xp: 65535, metadata: 2, },
-            head: ItemPrimitive { id: 3, xp: 225, metadata: 3, },
-            waist: ItemPrimitive { id: 4, xp: 225, metadata: 4, },
-            foot: ItemPrimitive { id: 5, xp: 1000, metadata: 5, },
-            hand: ItemPrimitive { id: 6, xp: 224, metadata: 6, },
-            neck: ItemPrimitive { id: 7, xp: 1, metadata: 7, },
-            ring: ItemPrimitive { id: 8, xp: 1, metadata: 8, },
+            weapon: ItemPrimitive { id: 1, xp: 225 },
+            chest: ItemPrimitive { id: 2, xp: 65535 },
+            head: ItemPrimitive { id: 3, xp: 225 },
+            waist: ItemPrimitive { id: 4, xp: 225 },
+            foot: ItemPrimitive { id: 5, xp: 1000 },
+            hand: ItemPrimitive { id: 6, xp: 224 },
+            neck: ItemPrimitive { id: 7, xp: 1 },
+            ring: ItemPrimitive { id: 8, xp: 1 },
             beast_health: 20,
             stat_points_available: 0,
             actions_per_block: 0,
@@ -4800,14 +4059,14 @@ mod tests {
                 luck: 0
             },
             gold: 40,
-            weapon: ItemPrimitive { id: 1, xp: 225, metadata: 1, },
-            chest: ItemPrimitive { id: 2, xp: 65535, metadata: 2, },
-            head: ItemPrimitive { id: 3, xp: 225, metadata: 3, },
-            waist: ItemPrimitive { id: 4, xp: 225, metadata: 4, },
-            foot: ItemPrimitive { id: 5, xp: 1000, metadata: 5, },
-            hand: ItemPrimitive { id: 6, xp: 224, metadata: 6, },
-            neck: ItemPrimitive { id: 7, xp: 1, metadata: 7, },
-            ring: ItemPrimitive { id: 8, xp: 1, metadata: 8, },
+            weapon: ItemPrimitive { id: 1, xp: 225 },
+            chest: ItemPrimitive { id: 2, xp: 65535 },
+            head: ItemPrimitive { id: 3, xp: 225 },
+            waist: ItemPrimitive { id: 4, xp: 225 },
+            foot: ItemPrimitive { id: 5, xp: 1000 },
+            hand: ItemPrimitive { id: 6, xp: 224 },
+            neck: ItemPrimitive { id: 7, xp: 1 },
+            ring: ItemPrimitive { id: 8, xp: 1 },
             beast_health: 20,
             stat_points_available: 0,
             actions_per_block: 0,
@@ -4844,14 +4103,14 @@ mod tests {
                 luck: 0
             },
             gold: 40,
-            weapon: ItemPrimitive { id: 1, xp: 225, metadata: 1, },
-            chest: ItemPrimitive { id: 2, xp: 65535, metadata: 2, },
-            head: ItemPrimitive { id: 3, xp: 225, metadata: 3, },
-            waist: ItemPrimitive { id: 4, xp: 225, metadata: 4, },
-            foot: ItemPrimitive { id: 5, xp: 1000, metadata: 5, },
-            hand: ItemPrimitive { id: 6, xp: 224, metadata: 6, },
-            neck: ItemPrimitive { id: 7, xp: 1, metadata: 7, },
-            ring: ItemPrimitive { id: 8, xp: 1, metadata: 8, },
+            weapon: ItemPrimitive { id: 1, xp: 225 },
+            chest: ItemPrimitive { id: 2, xp: 65535 },
+            head: ItemPrimitive { id: 3, xp: 225 },
+            waist: ItemPrimitive { id: 4, xp: 225 },
+            foot: ItemPrimitive { id: 5, xp: 1000 },
+            hand: ItemPrimitive { id: 6, xp: 224 },
+            neck: ItemPrimitive { id: 7, xp: 1 },
+            ring: ItemPrimitive { id: 8, xp: 1 },
             beast_health: 20,
             stat_points_available: 0,
             actions_per_block: 0,
@@ -4911,9 +4170,9 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         let bag = ImplBag::new();
 
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
+        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
         adventurer.equip_necklace(neck);
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
+        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
         adventurer.equip_ring(ring);
         assert(adventurer.calculate_luck(bag) == 2, 'start with 2 luck');
     }
@@ -4926,17 +4185,17 @@ mod tests {
         assert(adventurer.calculate_luck(bag) == 2, 'start with 2 luck');
 
         // equip a greatness 1 necklace
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
+        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
         adventurer.equip_necklace(neck);
         assert(adventurer.calculate_luck(bag) == 2, 'still 2 luck');
 
         // equip a greatness 1 ring
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
+        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
         adventurer.equip_ring(ring);
         assert(adventurer.calculate_luck(bag) == 2, 'still 2 luck');
 
         // equip a greatness 19 silver ring
-        let mut silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 399, metadata: 8 };
+        let mut silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 399 };
         adventurer.equip_ring(silver_ring);
         assert(adventurer.calculate_luck(bag) == 39, 'should be 39 luck');
 
@@ -4984,14 +4243,14 @@ mod tests {
         assert(adventurer.ring.id == 0, 'ring should be 0');
 
         // stage items
-        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
-        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 2 };
-        let head = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 3 };
-        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 4 };
-        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1, metadata: 5 };
-        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1, metadata: 6 };
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
+        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1 };
+        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
+        let head = ItemPrimitive { id: ItemId::Crown, xp: 1 };
+        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1 };
+        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1 };
+        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1 };
+        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
+        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
 
         adventurer.equip_item(weapon);
         adventurer.equip_item(chest);
@@ -5017,8 +4276,8 @@ mod tests {
     #[available_gas(1000000)]
     fn test_is_equipped() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        let wand = ItemPrimitive { id: ItemId::Wand, xp: 1, metadata: 1 };
-        let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 2 };
+        let wand = ItemPrimitive { id: ItemId::Wand, xp: 1 };
+        let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 1 };
 
         // assert starting state
         assert(adventurer.weapon.id == wand.id, 'weapon should be wand');
@@ -5035,14 +4294,14 @@ mod tests {
         assert(adventurer.is_equipped(demon_crown.id) == false, 'demon crown is not equipped');
 
         // stage items
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
-        let divine_robe = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 2 };
-        let crown = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 3 };
-        let demonhide_belt = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 4 };
-        let leather_boots = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1, metadata: 5 };
-        let leather_gloves = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1, metadata: 6 };
-        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
-        let gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
+        let katana = ItemPrimitive { id: ItemId::Katana, xp: 1 };
+        let divine_robe = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
+        let crown = ItemPrimitive { id: ItemId::Crown, xp: 1 };
+        let demonhide_belt = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1 };
+        let leather_boots = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1 };
+        let leather_gloves = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1 };
+        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
+        let gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
 
         // Equip a katana and verify is_equipped returns true for katana and false everything else
         adventurer.equip_item(katana);
@@ -5182,14 +4441,14 @@ mod tests {
         assert(adventurer.weapon.xp == 0, 'weapon xp should be 0');
 
         // instantiate additional items
-        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
-        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 2 };
-        let head = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 3 };
-        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 4 };
-        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1, metadata: 5 };
-        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1, metadata: 6 };
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
+        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1 };
+        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
+        let head = ItemPrimitive { id: ItemId::Crown, xp: 1 };
+        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1 };
+        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1 };
+        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1 };
+        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
+        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
 
         // equip item
         adventurer.equip_item(weapon);
