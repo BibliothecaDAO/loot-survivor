@@ -6,7 +6,8 @@ use combat::{combat::{ImplCombat, SpecialPowers}, constants::CombatEnums::{Type,
 use super::{
     constants::{
         NamePrefixLength, ItemNameSuffix, ItemId, ItemNamePrefix, NameSuffixLength,
-        ItemSuffixLength, ItemSuffix, NUM_ITEMS, ItemIndex, ItemSlotLength
+        ItemSuffixLength, ItemSuffix, NUM_ITEMS, ItemIndex, ItemSlotLength, SUFFIX_UNLOCK_GREANTESS,
+        PREFIXES_UNLOCK_GREANTESS
     },
     utils::{
         NameUtils::{
@@ -110,9 +111,9 @@ impl ImplLoot of ILoot {
     // @param start_entropy the entropy to use for randomness
     // @return the specials of the item
     fn get_specials(id: u8, greatness: u8, start_entropy: u64) -> SpecialPowers {
-        if greatness < 15 {
-            SpecialPowers { special1: 0, special2: 0, special3: 0, }
-        } else if greatness < 19 {
+        if greatness < SUFFIX_UNLOCK_GREANTESS {
+            SpecialPowers { special1: 0, special2: 0, special3: 0 }
+        } else if greatness < PREFIXES_UNLOCK_GREANTESS {
             SpecialPowers {
                 special1: ImplLoot::get_suffix(id, start_entropy), special2: 0, special3: 0,
             }
@@ -1035,7 +1036,7 @@ mod tests {
     use core::{serde::Serde, clone::Clone};
 
     use combat::{combat::ImplCombat, constants::CombatEnums::{Type, Tier, Slot}};
-    use lootitems::{
+    use loot::{
         loot::{ImplLoot, ILoot, LootPacking, Loot},
         constants::{
             NamePrefixLength, ItemNameSuffix, ItemId, ItemNamePrefix, NameSuffixLength,
@@ -2865,13 +2866,12 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(5560)]
+    #[available_gas(5760)]
     fn test_get_type_gas() {
         ImplLoot::get_type(101);
     }
 
     #[test]
-    #[available_gas(649660)]
     fn test_get_type() {
         let warhammer = ItemId::Warhammer;
         let warhammer_type = ImplLoot::get_type(warhammer);

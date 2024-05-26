@@ -2,6 +2,17 @@
 version = 1
 
 [[package]]
+name = "adventurer"
+version = "0.1.0"
+dependencies = [
+ "beasts",
+ "combat",
+ "loot",
+ "market",
+ "obstacles",
+]
+
+[[package]]
 name = "arcade_account"
 version = "0.1.0"
 source = "git+https://github.com/BibliothecaDAO/arcade-account?branch=next#cb3a3c9ca4e56c0fcc89ec5e273b48e1f9050b5f"
@@ -24,14 +35,14 @@ version = "0.1.0"
 name = "game"
 version = "0.1.0"
 dependencies = [
+ "adventurer",
  "arcade_account",
  "golden_token",
- "lootitems",
+ "loot",
  "market",
  "obstacles",
  "openzeppelin",
  "pragma_lib",
- "survivor",
 ]
 
 [[package]]
@@ -44,7 +55,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lootitems"
+name = "loot"
 version = "0.1.0"
 dependencies = [
  "combat",
@@ -62,7 +73,7 @@ name = "market"
 version = "0.1.0"
 dependencies = [
  "combat",
- "lootitems",
+ "loot",
 ]
 
 [[package]]
@@ -81,14 +92,3 @@ source = "git+https://github.com/OpenZeppelin/cairo-contracts.git?tag=v0.9.0#364
 name = "pragma_lib"
 version = "1.0.0"
 source = "git+https://github.com/astraly-labs/pragma-lib#2eca9b70dc505788423da1eedbf2d65563cc3102"
-
-[[package]]
-name = "survivor"
-version = "0.1.0"
-dependencies = [
- "beasts",
- "combat",
- "lootitems",
- "market",
- "obstacles",
-]

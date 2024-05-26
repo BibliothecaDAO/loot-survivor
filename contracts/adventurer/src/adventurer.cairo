@@ -6,13 +6,14 @@ use core::{
 };
 
 use super::{
-    stats::{Stats, StatsPacking}, item_primitive::{ItemPrimitive, ItemPrimitivePacking},
-    adventurer_utils::{AdventurerUtils}, exploration::ExploreUtils, bag::{Bag, IBag, ImplBag},
+    stats::{Stats, StatsPacking}, item::{Item, ImplItem, ItemPacking},
+    equipment::{Equipment, EquipmentPacking}, adventurer_utils::{AdventurerUtils},
+    exploration::ExploreUtils, bag::{Bag, IBag, ImplBag},
     constants::{
         adventurer_constants::{
             STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_POTION_DISCOUNT,
             MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, HEALTH_INCREASE_PER_VITALITY, MAX_GOLD,
-            MAX_STAT_VALUE, MAX_STAT_UPGRADE_POINTS, MAX_XP, MAX_ADVENTURER_BLOCKS,
+            MAX_STAT_UPGRADES_AVAILABLE, MAX_ADVENTURER_XP, MAX_ADVENTURER_BLOCKS,
             ITEM_MAX_GREATNESS, ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT,
             MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL, NECKLACE_G20_BONUS_STATS,
             SILVER_RING_G20_LUCK_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, U128_MAX, U64_MAX,
@@ -20,14 +21,13 @@ use super::{
             JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS, NECKLACE_ARMOR_BONUS,
             MINIMUM_DAMAGE_FROM_BEASTS, OBSTACLE_CRITICAL_HIT_CHANCE, BEAST_CRITICAL_HIT_CHANCE,
             SILVER_RING_LUCK_BONUS_PER_GREATNESS, MINIMUM_DAMAGE_FROM_OBSTACLES,
-            MINIMUM_DAMAGE_TO_BEASTS, MAX_ACTIONS_PER_BLOCK, MAX_PACKABLE_ITEM_XP,
-            MAX_PACKABLE_BEAST_HEALTH, MAX_LAST_ACTION_BLOCK, MAX_STAT_VALUE_5_BITS
+            MINIMUM_DAMAGE_TO_BEASTS, MAX_PACKABLE_BEAST_HEALTH,
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
     },
-    stats::{StatUtils}
+    stats::{ImplStats}
 };
-use lootitems::{
+use loot::{
     loot::{Loot, ILoot, ImplLoot},
     constants::{ItemSuffix, ItemId, NamePrefixLength, NameSuffixLength, SUFFIX_UNLOCK_GREANTESS}
 };
@@ -40,45 +40,34 @@ use beasts::{beast::{ImplBeast, Beast}, constants::BeastSettings};
 
 #[derive(Drop, Copy, Serde)]
 struct Adventurer {
-    last_action_block: u16, // 9 bits
-    health: u16, // 9 bits
-    xp: u16, // 14 bits
-    stats: Stats, // 26 bits
+    health: u16, // 10 bits
+    xp: u16, // 15 bits
     gold: u16, // 9 bits
-    weapon: ItemPrimitive, // 16 bits
-    chest: ItemPrimitive, // 16 bits
-    head: ItemPrimitive, // 16 bits
-    waist: ItemPrimitive, // 16 bits
-    foot: ItemPrimitive, // 16 bits
-    hand: ItemPrimitive, // 16 bits
-    neck: ItemPrimitive, // 16 bits
-    ring: ItemPrimitive, // 16 bits
-    beast_health: u16, // 9 bits
-    stat_points_available: u8, // 3 bits
-    actions_per_block: u8, // 4 bits
+    beast_health: u16, // 10 bits
+    stat_upgrades_available: u8, // 4 bits
+    stats: Stats, // 30 bits
+    equipment: Equipment, // 128 bits
     mutated: bool, // not packed
 }
 
 impl AdventurerPacking of StorePacking<Adventurer, felt252> {
     fn pack(value: Adventurer) -> felt252 {
-        value.prepack_overflow_assertions();
+        assert(value.health <= MAX_ADVENTURER_HEALTH, 'health overflow');
+        assert(value.xp <= MAX_ADVENTURER_XP, 'xp overflow');
+        assert(value.gold <= MAX_GOLD, 'gold overflow');
+        assert(value.beast_health <= MAX_PACKABLE_BEAST_HEALTH, 'beast health overflow');
+        assert(
+            value.stat_upgrades_available <= MAX_STAT_UPGRADES_AVAILABLE,
+            'stat upgrades avail overflow'
+        );
 
-        (value.last_action_block.into()
-            + value.health.into() * TWO_POW_9
-            + value.xp.into() * TWO_POW_18
-            + StatsPacking::pack(value.stats).into() * TWO_POW_32
-            + value.gold.into() * TWO_POW_58
-            + ItemPrimitivePacking::pack(value.weapon).into() * TWO_POW_67
-            + ItemPrimitivePacking::pack(value.chest).into() * TWO_POW_88
-            + ItemPrimitivePacking::pack(value.head).into() * TWO_POW_109
-            + ItemPrimitivePacking::pack(value.waist).into() * TWO_POW_130
-            + ItemPrimitivePacking::pack(value.foot).into() * TWO_POW_151
-            + ItemPrimitivePacking::pack(value.hand).into() * TWO_POW_172
-            + ItemPrimitivePacking::pack(value.neck).into() * TWO_POW_193
-            + ItemPrimitivePacking::pack(value.ring).into() * TWO_POW_214
-            + value.beast_health.into() * TWO_POW_235
-            + value.stat_points_available.into() * TWO_POW_244
-            + value.actions_per_block.into() * TWO_POW_247)
+        (value.health.into()
+            + value.xp.into() * TWO_POW_10
+            + value.gold.into() * TWO_POW_25
+            + value.beast_health.into() * TWO_POW_34
+            + value.stat_upgrades_available.into() * TWO_POW_44
+            + StatsPacking::pack(value.stats).into() * TWO_POW_48
+            + EquipmentPacking::pack(value.equipment).into() * TWO_POW_78)
             .try_into()
             .unwrap()
     }
@@ -86,48 +75,26 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
 
     fn unpack(value: felt252) -> Adventurer {
         let packed = value.into();
-        let (packed, last_action_block) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_9.try_into().unwrap()
-        );
-        let (packed, health) = integer::U256DivRem::div_rem(packed, TWO_POW_9.try_into().unwrap());
-        let (packed, xp) = integer::U256DivRem::div_rem(packed, TWO_POW_14.try_into().unwrap());
-        let (packed, stats) = integer::U256DivRem::div_rem(packed, TWO_POW_26.try_into().unwrap());
+        let (packed, health) = integer::U256DivRem::div_rem(packed, TWO_POW_10.try_into().unwrap());
+        let (packed, xp) = integer::U256DivRem::div_rem(packed, TWO_POW_15.try_into().unwrap());
         let (packed, gold) = integer::U256DivRem::div_rem(packed, TWO_POW_9.try_into().unwrap());
-        let (packed, weapon) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, chest) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, head) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, waist) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, foot) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, hand) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, neck) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
-        let (packed, ring) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
         let (packed, beast_health) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_9.try_into().unwrap()
+            packed, TWO_POW_10.try_into().unwrap()
         );
-        let (packed, stat_points_available) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_3.try_into().unwrap()
-        );
-        let (_, actions_per_block) = integer::U256DivRem::div_rem(
+        let (packed, stat_upgrades_available) = integer::U256DivRem::div_rem(
             packed, TWO_POW_4.try_into().unwrap()
         );
+        let (packed, stats) = integer::U256DivRem::div_rem(packed, TWO_POW_30.try_into().unwrap());
+        let (_, equipment) = integer::U256DivRem::div_rem(packed, TWO_POW_128.try_into().unwrap());
 
         Adventurer {
-            last_action_block: last_action_block.try_into().unwrap(),
             health: health.try_into().unwrap(),
             xp: xp.try_into().unwrap(),
-            stats: StatsPacking::unpack(stats.try_into().unwrap()),
             gold: gold.try_into().unwrap(),
-            weapon: ItemPrimitivePacking::unpack(weapon.try_into().unwrap()),
-            chest: ItemPrimitivePacking::unpack(chest.try_into().unwrap()),
-            head: ItemPrimitivePacking::unpack(head.try_into().unwrap()),
-            waist: ItemPrimitivePacking::unpack(waist.try_into().unwrap()),
-            foot: ItemPrimitivePacking::unpack(foot.try_into().unwrap()),
-            hand: ItemPrimitivePacking::unpack(hand.try_into().unwrap()),
-            neck: ItemPrimitivePacking::unpack(neck.try_into().unwrap()),
-            ring: ItemPrimitivePacking::unpack(ring.try_into().unwrap()),
             beast_health: beast_health.try_into().unwrap(),
-            stat_points_available: stat_points_available.try_into().unwrap(),
-            actions_per_block: actions_per_block.try_into().unwrap(),
+            stat_upgrades_available: stat_upgrades_available.try_into().unwrap(),
+            stats: StatsPacking::unpack(stats.try_into().unwrap()),
+            equipment: EquipmentPacking::unpack(equipment.try_into().unwrap()),
             mutated: false, // This field is not packed/unpacked
         }
     }
@@ -145,22 +112,22 @@ impl ImplAdventurer of IAdventurer {
     /// @return An Adventurer struct initialized with default and provided values.
     fn new(starting_item: u8) -> Adventurer {
         Adventurer {
-            last_action_block: 0,
             health: STARTING_HEALTH,
             xp: 0,
-            stats: StatUtils::new(),
+            stats: ImplStats::new(),
             gold: STARTING_GOLD,
-            weapon: ItemPrimitive { id: starting_item, xp: 0 },
-            chest: ItemPrimitive { id: 0, xp: 0 },
-            head: ItemPrimitive { id: 0, xp: 0 },
-            waist: ItemPrimitive { id: 0, xp: 0 },
-            foot: ItemPrimitive { id: 0, xp: 0 },
-            hand: ItemPrimitive { id: 0, xp: 0 },
-            neck: ItemPrimitive { id: 0, xp: 0 },
-            ring: ItemPrimitive { id: 0, xp: 0 },
+            equipment: Equipment {
+                weapon: Item { id: starting_item, xp: 0 },
+                chest: Item { id: 0, xp: 0 },
+                head: Item { id: 0, xp: 0 },
+                waist: Item { id: 0, xp: 0 },
+                foot: Item { id: 0, xp: 0 },
+                hand: Item { id: 0, xp: 0 },
+                neck: Item { id: 0, xp: 0 },
+                ring: Item { id: 0, xp: 0 }
+            },
             beast_health: BeastSettings::STARTER_BEAST_HEALTH,
-            stat_points_available: 0,
-            actions_per_block: 0,
+            stat_upgrades_available: 0,
             mutated: false,
         }
     }
@@ -168,24 +135,24 @@ impl ImplAdventurer of IAdventurer {
     // @notice Calculates the charisma potion discount for the adventurer based on their charisma stat.
     // @return The charisma potion discount.
     #[inline(always)]
-    fn charisma_potion_discount(self: Adventurer) -> u16 {
-        CHARISMA_POTION_DISCOUNT * self.stats.charisma.into()
+    fn charisma_potion_discount(self: Stats) -> u16 {
+        CHARISMA_POTION_DISCOUNT * self.charisma.into()
     }
 
     // @notice Calculates the charisma item discount for the adventurer based on their charisma stat.
     // @return The charisma item discount.
     #[inline(always)]
-    fn charisma_item_discount(self: Adventurer) -> u16 {
-        CHARISMA_ITEM_DISCOUNT * self.stats.charisma.into()
+    fn charisma_item_discount(self: Stats) -> u16 {
+        CHARISMA_ITEM_DISCOUNT * self.charisma.into()
     }
 
     // @notice Gets the item cost for the adventurer after applying any charisma discounts.
     // @param item_cost The original cost of the item.
     // @return The final cost of the item after applying discounts. If the discount exceeds the original cost, returns the MINIMUM_ITEM_PRICE.
     fn charisma_adjusted_item_price(self: Adventurer, item_cost: u16) -> u16 {
-        if (u16_overflowing_sub(item_cost, self.charisma_item_discount()).is_ok()) {
-            if (item_cost - self.charisma_item_discount() > MINIMUM_ITEM_PRICE) {
-                return (item_cost - self.charisma_item_discount());
+        if (u16_overflowing_sub(item_cost, self.stats.charisma_item_discount()).is_ok()) {
+            if (item_cost - self.stats.charisma_item_discount() > MINIMUM_ITEM_PRICE) {
+                return (item_cost - self.stats.charisma_item_discount());
             }
         }
 
@@ -198,11 +165,11 @@ impl ImplAdventurer of IAdventurer {
     fn charisma_adjusted_potion_price(self: Adventurer) -> u16 {
         // check if we overflow
         if (u16_overflowing_sub(
-            POTION_PRICE * self.get_level().into(), self.charisma_potion_discount()
+            POTION_PRICE * self.get_level().into(), self.stats.charisma_potion_discount()
         )
             .is_ok()) {
             let potion_price = POTION_PRICE * self.get_level().into()
-                - self.charisma_potion_discount();
+                - self.stats.charisma_potion_discount();
             if (potion_price > MINIMUM_POTION_PRICE) {
                 return potion_price;
             }
@@ -225,13 +192,13 @@ impl ImplAdventurer of IAdventurer {
     }
 
     // get_item_at_slot returns the item at a given item slot
-    // @param self: Adventurer to check
+    // @param self: Equipment to check
     // @param slot: Slot to check
-    // @return ItemPrimitive: Item at slot
+    // @return Item: Item at slot
     #[inline(always)]
-    fn get_item_at_slot(self: Adventurer, slot: Slot) -> ItemPrimitive {
+    fn get_item_at_slot(self: Equipment, slot: Slot) -> Item {
         match slot {
-            Slot::None(()) => ItemPrimitive { id: 0, xp: 0 },
+            Slot::None(()) => Item { id: 0, xp: 0 },
             Slot::Weapon(()) => self.weapon,
             Slot::Chest(()) => self.chest,
             Slot::Head(()) => self.head,
@@ -244,11 +211,11 @@ impl ImplAdventurer of IAdventurer {
     }
 
     // is_slot_free checks if an item slot is free for an adventurer
-    // @param self: Adventurer to check
+    // @param self: Equipment to check
     // @param item: Item to check
     // @return bool: True if slot is free, false if not
     #[inline(always)]
-    fn is_slot_free(self: Adventurer, item: ItemPrimitive) -> bool {
+    fn is_slot_free(self: Equipment, item: Item) -> bool {
         let slot = ImplLoot::get_slot(item.id);
         match slot {
             Slot::None(()) => false,
@@ -278,7 +245,9 @@ impl ImplAdventurer of IAdventurer {
         // @dev ideally this would be a setting but to minimize gas we're using hardcoded value so we can use cheaper equal operator
         if (adventurer_level == 1) {
             (
-                ImplBeast::get_starter_beast(ImplLoot::get_type(self.weapon.id), beast_seed),
+                ImplBeast::get_starter_beast(
+                    ImplLoot::get_type(self.equipment.weapon.id), beast_seed
+                ),
                 beast_seed
             )
         } else {
@@ -315,6 +284,7 @@ impl ImplAdventurer of IAdventurer {
     // @param self: Adventurer to check
     // @param entropy: Entropy for determining if the adventurer was ambushed
     // @return bool: True if the adventurer was ambushed, false if not
+    #[inline(always)]
     fn is_ambushed(self: Adventurer, entropy: u128) -> bool {
         !ImplCombat::ability_based_avoid_threat(self.get_level(), self.stats.wisdom, entropy)
     }
@@ -347,11 +317,11 @@ impl ImplAdventurer of IAdventurer {
     //      1. Greatness of equipped jewlery
     //      2. Greatness of bagged jewlery
     //      3. Bonus luck, currently an equipped G20 Silver Ring
-    // @param self: Adventurer to calculate luck for
+    // @param self: Equipment to calculate luck for
     // @param bag: Bag to calculate luck for
     // @return The adventurer's luck.
     #[inline(always)]
-    fn calculate_luck(self: Adventurer, bag: Bag) -> u8 {
+    fn calculate_luck(self: Equipment, bag: Bag) -> u8 {
         let equipped_necklace_luck = self.neck.get_greatness();
         let equipped_ring_luck = self.ring.get_greatness();
         let bonus_luck = self.ring.jewelry_bonus_luck();
@@ -364,7 +334,7 @@ impl ImplAdventurer of IAdventurer {
     // @param bag: Bag needed for calculating luck
     #[inline(always)]
     fn set_luck(ref self: Adventurer, bag: Bag) {
-        self.stats.luck = self.calculate_luck(bag);
+        self.stats.luck = self.equipment.calculate_luck(bag);
     }
 
     // in_battle returns true if the adventurer is in battle
@@ -465,16 +435,16 @@ impl ImplAdventurer of IAdventurer {
         if (u16_overflowing_add(self.xp, amount).is_ok()) {
             // if overflow is ok
             // check if added amount is less than or equal to max xp
-            if (self.xp + amount <= MAX_XP) {
+            if (self.xp + amount <= MAX_ADVENTURER_XP) {
                 // if it is, add xp
                 self.xp += amount;
             } else {
                 // if amount to add exceeds max xp, set xp to max
-                self.xp = MAX_XP;
+                self.xp = MAX_ADVENTURER_XP;
             }
         } else {
             // if we overflow u16, set xp to max xp
-            self.xp = MAX_XP;
+            self.xp = MAX_ADVENTURER_XP;
         }
 
         // get the new level
@@ -484,7 +454,7 @@ impl ImplAdventurer of IAdventurer {
         if (new_level > previous_level) {
             // add stat upgrade points
             let stat_upgrade_points = (new_level - previous_level) * STAT_UPGRADE_POINTS_PER_LEVEL;
-            self.increase_stat_points_available(stat_upgrade_points);
+            self.increase_stat_upgrades_available(stat_upgrade_points);
         }
 
         // return the previous and new levels
@@ -492,190 +462,32 @@ impl ImplAdventurer of IAdventurer {
     }
 
     // @notice Grants stat upgrades to the Adventurer.
-    // @dev The function will add the specified value to the stat_points_available up to the maximum limit of MAX_STAT_UPGRADE_POINTS.
+    // @dev The function will add the specified value to the stat_upgrades_available up to the maximum limit of MAX_STAT_UPGRADES_AVAILABLE.
     // @param value The amount of stat points to be added to the Adventurer.
     #[inline(always)]
-    fn increase_stat_points_available(ref self: Adventurer, amount: u8) {
+    fn increase_stat_upgrades_available(ref self: Adventurer, amount: u8) {
         // check for u8 overflow
-        if (u8_overflowing_add(self.stat_points_available, amount).is_ok()) {
+        if (u8_overflowing_add(self.stat_upgrades_available, amount).is_ok()) {
             // if overflow is ok
             // check if added amount is less than or equal to max upgrade points
-            if (self.stat_points_available + amount <= MAX_STAT_UPGRADE_POINTS) {
+            if (self.stat_upgrades_available + amount <= MAX_STAT_UPGRADES_AVAILABLE) {
                 // if it is, add upgrade points to adventurer and return
-                self.stat_points_available += amount;
+                self.stat_upgrades_available += amount;
                 return;
             }
         }
 
-        // fall through is to return MAX_STAT_UPGRADE_POINTS
+        // fall through is to return MAX_STAT_UPGRADES_AVAILABLE
         // this will happen either in a u8 overflow case
         // or if the upgrade points being added exceeds max upgrade points
-        self.stat_points_available = MAX_STAT_UPGRADE_POINTS
-    }
-
-    // @notice Increase the Adventurer's strength stat.
-    // @dev The function will add the specified amount to the strength stat up to the maximum limit of MAX_STAT_VALUE.
-    // @param amount The amount to be added to the strength stat.
-    #[inline(always)]
-    fn increase_strength(ref self: Stats, amount: u8) {
-        AdventurerUtils::overflow_protected_stat_increase(ref self.strength, amount)
-    }
-
-    // @notice Increase the Adventurer's dexterity stat.
-    // @dev The function will add the specified amount to the dexterity stat up to the maximum limit of MAX_STAT_VALUE.
-    // @param amount The amount to be added to the dexterity stat.
-    #[inline(always)]
-    fn increase_dexterity(ref self: Stats, amount: u8) {
-        AdventurerUtils::overflow_protected_stat_increase(ref self.dexterity, amount)
-    }
-
-    // @notice Increase the Adventurer's vitality stat.
-    // @dev The function will add the specified amount to the vitality stat up to the maximum limit of MAX_STAT_VALUE.
-    // @param amount The amount to be added to the vitality stat.
-    #[inline(always)]
-    fn increase_vitality(ref self: Stats, amount: u8) {
-        AdventurerUtils::overflow_protected_stat_increase(ref self.vitality, amount)
-    }
-
-    // @notice Increase the Adventurer's intelligence stat.
-    // @dev The function will add the specified amount to the intelligence stat up to the maximum limit of MAX_STAT_VALUE.
-    // @param amount The amount to be added to the intelligence stat.
-    #[inline(always)]
-    fn increase_intelligence(ref self: Stats, amount: u8) {
-        AdventurerUtils::overflow_protected_stat_increase(ref self.intelligence, amount)
-    }
-
-    // @notice Increase the Adventurer's wisdom stat.
-    // @dev The function will add the specified amount to the wisdom stat up to the maximum limit of MAX_STAT_VALUE.
-    // @param amount The amount to be added to the wisdom stat.
-    #[inline(always)]
-    fn increase_wisdom(ref self: Stats, amount: u8) {
-        AdventurerUtils::overflow_protected_stat_increase(ref self.wisdom, amount)
-    }
-
-    // @notice Increase the Adventurer's charisma stat.
-    // @dev The function will add the specified amount to the charisma stat up to the maximum limit of MAX_STAT_VALUE.
-    // @param amount The amount to be added to the charisma stat.
-    #[inline(always)]
-    fn increase_charisma(ref self: Stats, amount: u8) {
-        AdventurerUtils::overflow_protected_stat_increase(ref self.charisma, amount)
-    }
-
-    // @notice Decrease the Adventurer's strength stat.
-    // @dev The function will subtract the specified amount from the strength stat without allowing it to fall below 0.
-    // @param amount The amount to be subtracted from the strength stat.
-    #[inline(always)]
-    fn decrease_strength(ref self: Stats, amount: u8) {
-        assert(amount <= self.strength, 'amount exceeds strength');
-        self.strength -= amount;
-    }
-
-    // @notice Decrease the Adventurer's dexterity stat.
-    // @dev The function will subtract the specified amount from the dexterity stat without allowing it to fall below 0.
-    // @param amount The amount to be deducted from the dexterity stat.
-    #[inline(always)]
-    fn decrease_dexterity(ref self: Stats, amount: u8) {
-        assert(amount <= self.dexterity, 'amount exceeds dexterity');
-        self.dexterity -= amount;
-    }
-
-    // @notice Decrease the Adventurer's vitality stat.
-    // @dev The function will subtract the specified amount from the vitality stat without allowing it to fall below 0.
-    // @param amount The amount to be deducted from the vitality stat.
-    #[inline(always)]
-    fn decrease_vitality(ref self: Stats, amount: u8) {
-        assert(amount <= self.vitality, 'amount exceeds vitality');
-        self.vitality -= amount;
-    }
-
-    // @notice Decrease the Adventurer's intelligence stat.
-    // @dev The function will subtract the specified amount from the intelligence stat without allowing it to fall below 0.
-    // @param amount The amount to be deducted from the intelligence stat.
-    #[inline(always)]
-    fn decrease_intelligence(ref self: Stats, amount: u8) {
-        assert(amount <= self.intelligence, 'amount exceeds intelligence');
-        self.intelligence -= amount;
-    }
-
-    // @notice Decrease the Adventurer's wisdom stat.
-    // @dev The function will subtract the specified amount from the wisdom stat without allowing it to fall below 0.
-    // @param amount The amount to be deducted from the wisdom stat.
-    #[inline(always)]
-    fn decrease_wisdom(ref self: Stats, amount: u8) {
-        assert(amount <= self.wisdom, 'amount exceeds wisdom');
-        self.wisdom -= amount;
-    }
-
-    // @notice Decrease the Adventurer's charisma stat.
-    // @dev The function will subtract the specified amount from the charisma stat without allowing it to fall below 0.
-    // @param amount The amount to be deducted from the charisma stat.
-    #[inline(always)]
-    fn decrease_charisma(ref self: Stats, amount: u8) {
-        assert(amount <= self.charisma, 'amount exceeds charisma');
-        self.charisma -= amount;
-    }
-
-    // @notice Adds an item to the adventurer's equipment.
-    // @dev The type of the item determines which equipment slot it goes into.
-    // @param item The item to be added to the adventurer's equipment.
-    #[inline(always)]
-    fn equip_item(ref self: Adventurer, item: ItemPrimitive) {
-        let slot = ImplLoot::get_slot(item.id);
-        match slot {
-            Slot::None(()) => (),
-            Slot::Weapon(()) => self.equip_weapon(item),
-            Slot::Chest(()) => self.equip_chest_armor(item),
-            Slot::Head(()) => self.equip_head_armor(item),
-            Slot::Waist(()) => self.equip_waist_armor(item),
-            Slot::Foot(()) => self.equip_foot_armor(item),
-            Slot::Hand(()) => self.equip_hand_armor(item),
-            Slot::Neck(()) => self.equip_necklace(item),
-            Slot::Ring(()) => self.equip_ring(item),
-        }
-    }
-
-    // @dev This function allows an adventurer to drop an item they have equipped.
-    // @notice The function only works if the item is currently equipped by the adventurer. It removes the item from the adventurer's equipment and replaces it with a blank item.
-    // @param item_id The ID of the item to be dropped. The function will assert if the item is not currently equipped.
-    #[inline(always)]
-    fn drop_item(ref self: Adventurer, item_id: u8) {
-        if self.weapon.id == item_id {
-            self.weapon.id = 0;
-            self.weapon.xp = 0;
-        } else if self.chest.id == item_id {
-            self.chest.id = 0;
-            self.chest.xp = 0;
-        } else if self.head.id == item_id {
-            self.head.id = 0;
-            self.head.xp = 0;
-        } else if self.waist.id == item_id {
-            self.waist.id = 0;
-            self.waist.xp = 0;
-        } else if self.foot.id == item_id {
-            self.foot.id = 0;
-            self.foot.xp = 0;
-        } else if self.hand.id == item_id {
-            self.hand.id = 0;
-            self.hand.xp = 0;
-        } else if self.neck.id == item_id {
-            self.neck.id = 0;
-            self.neck.xp = 0;
-        } else if self.ring.id == item_id {
-            self.ring.id = 0;
-            self.ring.xp = 0;
-        } else {
-            panic_with_felt252('item is not equipped')
-        }
-
-        // flag adventurer as mutated
-        self.mutated = true;
+        self.stat_upgrades_available = MAX_STAT_UPGRADES_AVAILABLE
     }
 
     // @dev This function checks if the adventurer has a given item equipped
     // @param item_id The id of the item to check
     // @return A boolean indicating if the item is equipped by the adventurer. Returns true if the item is equipped, false otherwise.
     #[inline(always)]
-    fn is_equipped(self: Adventurer, item_id: u8) -> bool {
+    fn is_equipped(self: Equipment, item_id: u8) -> bool {
         if (self.weapon.id == item_id) {
             true
         } else if (self.chest.id == item_id) {
@@ -697,110 +509,6 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
-    // @notice Equips the adventurer with a weapon. 
-    // @dev The function asserts that the given item is a weapon before adding it to the adventurer's weapon slot.
-    // @param item The weapon to be added to the adventurer's equipment.
-    #[inline(always)]
-    fn equip_weapon(ref self: Adventurer, item: ItemPrimitive) {
-        // TODO: use configuration compilation to assert that the item is a weapon during development
-        // but not in production so we don't waste gas on this check see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-        //assert(ImplLoot::get_slot(item.id) == Slot::Weapon(()), 'Item is not weapon');
-        self.weapon = item
-    }
-
-    // @notice Equips the adventurer with a chest armor. 
-    // @dev The function asserts that the given item is a chest armor before adding it to the adventurer's chest slot.
-    // @param item The chest armor to be added to the adventurer's equipment.
-    #[inline(always)]
-    fn equip_chest_armor(ref self: Adventurer, item: ItemPrimitive) {
-        // TODO: use configuration compilation to assert that the item is a weapon during development
-        // but not in production so we don't waste gas on this check see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-        //assert(ImplLoot::get_slot(item.id) == Slot::Chest(()), 'Item is not chest armor');
-        self.chest = item
-    }
-
-    // @notice Equips the adventurer with a head armor. 
-    // @dev The function asserts that the given item is a head armor before adding it to the adventurer's head slot.
-    // @param item The head armor to be added to the adventurer's equipment.
-    #[inline(always)]
-    fn equip_head_armor(ref self: Adventurer, item: ItemPrimitive) {
-        // TODO: use configuration compilation to assert that the item is a weapon during development
-        // but not in production so we don't waste gas on this check see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-        //assert(ImplLoot::get_slot(item.id) == Slot::Head(()), 'Item is not head armor');
-        self.head = item
-    }
-
-    // @notice Equips the adventurer with a waist armor. 
-    // @dev The function asserts that the given item is a waist armor before adding it to the adventurer's waist slot.
-    // @param item The waist armor to be added to the adventurer's equipment.
-    #[inline(always)]
-    fn equip_waist_armor(ref self: Adventurer, item: ItemPrimitive) {
-        // TODO: use configuration compilation to assert that the item is a weapon during development
-        // but not in production so we don't waste gas on this check see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-        //assert(ImplLoot::get_slot(item.id) == Slot::Waist(()), 'Item is not waist armor');
-        self.waist = item
-    }
-
-    // @notice Equips the adventurer with a foot armor. 
-    // @dev The function asserts that the given item is a foot armor before adding it to the adventurer's foot slot.
-    // @param item The foot armor to be added to the adventurer's equipment.
-    #[inline(always)]
-    fn equip_foot_armor(ref self: Adventurer, item: ItemPrimitive) {
-        // TODO: use configuration compilation to assert that the item is a weapon during development
-        // but not in production so we don't waste gas on this check see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-        //assert(ImplLoot::get_slot(item.id) == Slot::Foot(()), 'Item is not foot armor');
-        self.foot = item
-    }
-
-    // @notice Equips the adventurer with a hand armor. 
-    // @dev The function asserts that the given item is a hand armor before adding it to the adventurer's hand slot.
-    // @param item The hand armor to be added to the adventurer's equipment.
-    #[inline(always)]
-    fn equip_hand_armor(ref self: Adventurer, item: ItemPrimitive) {
-        // TODO: use configuration compilation to assert that the item is a weapon during development
-        // but not in production so we don't waste gas on this check see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-        //assert(ImplLoot::get_slot(item.id) == Slot::Hand(()), 'Item is not hand armor');
-        self.hand = item
-    }
-
-    // @notice Equips the adventurer with a necklace. 
-    // @dev The function asserts that the given item is a necklace before adding it to the adventurer's neck slot.
-    // @param item The necklace to be added to the adventurer's equipment.
-    #[inline(always)]
-    fn equip_necklace(ref self: Adventurer, item: ItemPrimitive) {
-        // TODO: use configuration compilation to assert that the item is a weapon during development
-        // but not in production so we don't waste gas on this check see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-        //assert(ImplLoot::get_slot(item.id) == Slot::Neck(()), 'Item is not necklace');
-        self.neck = item
-    }
-
-    // @notice Equips the adventurer with a ring. 
-    // @dev The function asserts that the given item is a ring before adding it to the adventurer's ring slot.
-    // @param item The ring to be added to the adventurer's equipment.
-    #[inline(always)]
-    fn equip_ring(ref self: Adventurer, item: ItemPrimitive) {
-        // TODO: use configuration compilation to assert that the item is a weapon during development
-        // but not in production so we don't waste gas on this check see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-        //assert(ImplLoot::get_slot(item.id) == Slot::Ring(()), 'Item is not a ring');
-        self.ring = item;
-    }
-
-
-    #[inline(always)]
-    fn increase_xp(ref self: ItemPrimitive, amount: u16) -> (u8, u8) {
-        let previous_level = self.get_greatness();
-        if (u16_overflowing_add(self.xp, amount).is_ok()) {
-            if (self.xp + amount > ITEM_MAX_XP) {
-                self.xp = ITEM_MAX_XP;
-            } else {
-                self.xp += amount;
-            }
-        } else {
-            self.xp = ITEM_MAX_XP;
-        }
-        let new_level = self.get_greatness();
-        (previous_level, new_level)
-    }
 
     // @notice determines if a level up resulted in item specials being unlocked
     // @param previous_level: the level of the item before the level up
@@ -844,252 +552,11 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
-    // @notice This function adds a boost to an adventurer's attributes based on a provided suffix.
-    // Each suffix corresponds to a unique combination of attribute enhancements.
-    //
-    // The following enhancements are available:
-    // - of_Power: Increases the adventurer's Strength by 3 points.
-    // - of_Giant: Increases the adventurer's Vitality by 3 points.
-    // - of_Titans: Increases the adventurer's Strength by 2 points and Charisma by 1 point.
-    // - of_Skill: Increases the adventurer's Dexterity by 3 points.
-    // - of_Perfection: Increases the adventurer's Strength, Dexterity, and Vitality by 1 point each.
-    // - of_Brilliance: Increases the adventurer's Intelligence by 3 points.
-    // - of_Enlightenment: Increases the adventurer's Wisdom by 3 points.
-    // - of_Protection: Increases the adventurer's Vitality by 2 points and Dexterity by 1 point.
-    // - of_Anger: Increases the adventurer's Strength by 2 points and Dexterity by 1 point.
-    // - of_Rage: Increases the adventurer's Strength, Charisma, and Wisdom by 1 point each.
-    // - of_Fury: Increases the adventurer's Vitality, Charisma, and Intelligence by 1 point each.
-    // - of_Vitriol: Increases the adventurer's Intelligence by 2 points and Wisdom by 1 point.
-    // - of_the_Fox: Increases the adventurer's Dexterity by 2 points and Charisma by 1 point.
-    // - of_Detection: Increases the adventurer's Wisdom by 2 points and Dexterity by 1 point.
-    // - of_Reflection: Increases the adventurer's Intelligence by 1 point and Wisdom by 2 points.
-    // - of_the_Twins: Increases the adventurer's Charisma by 3 points.
-    //
-    // @param self A mutable reference to the Adventurer Stats on which the function operates.
-    // @param suffix A u8 value representing the suffix tied to the attribute enhancement.
-    fn apply_suffix_boost(ref self: Stats, suffix: u8) {
-        if (suffix == ItemSuffix::of_Power) {
-            self.increase_strength(3);
-        } else if (suffix == ItemSuffix::of_Giant) {
-            self.increase_vitality(3);
-        } else if (suffix == ItemSuffix::of_Titans) {
-            self.increase_strength(2);
-            self.increase_charisma(1);
-        } else if (suffix == ItemSuffix::of_Skill) {
-            self.increase_dexterity(3);
-        } else if (suffix == ItemSuffix::of_Perfection) {
-            self.increase_strength(1);
-            self.increase_dexterity(1);
-            self.increase_vitality(1);
-        } else if (suffix == ItemSuffix::of_Brilliance) {
-            self.increase_intelligence(3);
-        } else if (suffix == ItemSuffix::of_Enlightenment) {
-            self.increase_wisdom(3);
-        } else if (suffix == ItemSuffix::of_Protection) {
-            self.increase_vitality(2);
-            self.increase_dexterity(1);
-        } else if (suffix == ItemSuffix::of_Anger) {
-            self.increase_strength(2);
-            self.increase_dexterity(1);
-        } else if (suffix == ItemSuffix::of_Rage) {
-            self.increase_strength(1);
-            self.increase_charisma(1);
-            self.increase_wisdom(1);
-        } else if (suffix == ItemSuffix::of_Fury) {
-            self.increase_vitality(1);
-            self.increase_charisma(1);
-            self.increase_intelligence(1);
-        } else if (suffix == ItemSuffix::of_Vitriol) {
-            self.increase_intelligence(2);
-            self.increase_wisdom(1);
-        } else if (suffix == ItemSuffix::of_the_Fox) {
-            self.increase_dexterity(2);
-            self.increase_charisma(1);
-        } else if (suffix == ItemSuffix::of_Detection) {
-            self.increase_wisdom(2);
-            self.increase_dexterity(1);
-        } else if (suffix == ItemSuffix::of_Reflection) {
-            self.increase_intelligence(1);
-            self.increase_wisdom(2);
-        } else if (suffix == ItemSuffix::of_the_Twins) {
-            self.increase_charisma(3);
-        }
-    }
-
-    // @notice Removes a specified suffix boost from an adventurer's stats.
-    // @param self The instance of the Stats struct which contains the adventurer's stats.
-    // @param suffix The suffix to be removed from the adventurer's stats.
-    fn remove_suffix_boost(ref self: Stats, suffix: u8) {
-        if (suffix == ItemSuffix::of_Power) {
-            self.decrease_strength(3);
-        } else if (suffix == ItemSuffix::of_Giant) {
-            self.decrease_vitality(3);
-        } else if (suffix == ItemSuffix::of_Titans) {
-            self.decrease_strength(2);
-            self.decrease_charisma(1);
-        } else if (suffix == ItemSuffix::of_Skill) {
-            self.decrease_dexterity(3);
-        } else if (suffix == ItemSuffix::of_Perfection) {
-            self.decrease_strength(1);
-            self.decrease_dexterity(1);
-            self.decrease_vitality(1);
-        } else if (suffix == ItemSuffix::of_Brilliance) {
-            self.decrease_intelligence(3);
-        } else if (suffix == ItemSuffix::of_Enlightenment) {
-            self.decrease_wisdom(3);
-        } else if (suffix == ItemSuffix::of_Protection) {
-            self.decrease_vitality(2);
-            self.decrease_dexterity(1);
-        } else if (suffix == ItemSuffix::of_Anger) {
-            self.decrease_strength(2);
-            self.decrease_dexterity(1);
-        } else if (suffix == ItemSuffix::of_Rage) {
-            self.decrease_strength(1);
-            self.decrease_charisma(1);
-            self.decrease_wisdom(1);
-        } else if (suffix == ItemSuffix::of_Fury) {
-            self.decrease_vitality(1);
-            self.decrease_charisma(1);
-            self.decrease_intelligence(1);
-        } else if (suffix == ItemSuffix::of_Vitriol) {
-            self.decrease_intelligence(2);
-            self.decrease_wisdom(1);
-        } else if (suffix == ItemSuffix::of_the_Fox) {
-            self.decrease_dexterity(2);
-            self.decrease_charisma(1);
-        } else if (suffix == ItemSuffix::of_Detection) {
-            self.decrease_wisdom(2);
-            self.decrease_dexterity(1);
-        } else if (suffix == ItemSuffix::of_Reflection) {
-            self.decrease_intelligence(1);
-            self.decrease_wisdom(2);
-        } else if (suffix == ItemSuffix::of_the_Twins) {
-            self.decrease_charisma(3);
-        }
-    }
-
-    // @notice checks if the adventurer has any items with special names.
-    // @param self The Adventurer to check for item specials.
-    // @return Returns true if adventurer has item specials, false otherwise.
-    fn has_item_specials(self: Adventurer) -> bool {
-        if (self.weapon.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            true
-        } else if (self.chest.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            true
-        } else if (self.head.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            true
-        } else if (self.waist.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            true
-        } else if (self.foot.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            true
-        } else if (self.hand.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            true
-        } else if (self.neck.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            true
-        } else if (self.ring.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            true
-        } else {
-            false
-        }
-    }
-
-    // @notice applies stat boosts to adventurer
-    // @param self The Adventurer to apply stat boosts to.
-    // @param stat_boosts The stat boosts to apply to the adventurer.
-    // @dev overflow protection is handled further up the stack
-    #[inline(always)]
-    fn apply_stat_boosts(ref self: Adventurer, stat_boosts: Stats) {
-        self.stats.increase_strength(stat_boosts.strength);
-        self.stats.increase_dexterity(stat_boosts.dexterity);
-        self.stats.increase_vitality(stat_boosts.vitality);
-        self.stats.increase_charisma(stat_boosts.charisma);
-        self.stats.increase_intelligence(stat_boosts.intelligence);
-        self.stats.increase_wisdom(stat_boosts.wisdom);
-    }
-
-    // @notice removes stat boosts from adventurer
-    // @param self The Adventurer to remove stat boosts from.
-    // @param stat_boosts The stat boosts to remove from the adventurer.
-    // @dev underflow protection is handled further up the stack
-    #[inline(always)]
-    fn remove_stat_boosts(ref self: Adventurer, stat_boosts: Stats) {
-        self.stats.decrease_strength(stat_boosts.strength);
-        self.stats.decrease_dexterity(stat_boosts.dexterity);
-        self.stats.decrease_vitality(stat_boosts.vitality);
-        self.stats.decrease_charisma(stat_boosts.charisma);
-        self.stats.decrease_intelligence(stat_boosts.intelligence);
-        self.stats.decrease_wisdom(stat_boosts.wisdom);
-    }
-
-    // @notice gets stat boosts based on item specials
-    // @param self The Adventurer to get stat boosts for.
-    // @param start_entropy The start entropy to use for getting item specials.
-    // @return Returns the stat boosts for the adventurer.
-    fn get_stat_boosts(self: Adventurer, start_entropy: u64) -> Stats {
-        let mut stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
-        };
-
-        if (self.weapon.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.weapon.id, start_entropy));
-        }
-        if (self.chest.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.chest.id, start_entropy));
-        }
-        if (self.head.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.head.id, start_entropy));
-        }
-        if (self.waist.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.waist.id, start_entropy));
-        }
-
-        if (self.foot.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.foot.id, start_entropy));
-        }
-
-        if (self.hand.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.hand.id, start_entropy));
-        }
-
-        if (self.neck.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.neck.id, start_entropy));
-        }
-
-        if (self.ring.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.ring.id, start_entropy));
-        }
-        stats
-    }
-
-    // @notice gets the greatness of an item
-    // @param self the ItemPrimitive to get the greatness of
-    // @return u8: the greatness of the item
-    #[inline(always)]
-    fn get_greatness(self: ItemPrimitive) -> u8 {
-        let level = ImplCombat::get_level_from_xp(self.xp);
-        if level > ITEM_MAX_GREATNESS {
-            ITEM_MAX_GREATNESS
-        } else {
-            level
-        }
-    }
-
-    // @notice: last_action_block.set_last_action_block sets the last action on the adventurer to the current block
-    // @dev: we only have 9 bits of storage for block numbers so we need to modulo the current block
-    // @dev: by 512 to ensure we don't overflow the storage
-    // @param self A reference to the Adventurer instance.
-    // @param current_block The current block number.
-    #[inline(always)]
-    fn set_last_action_block(ref self: Adventurer, current_block: u64) {
-        self.last_action_block = (current_block % MAX_BLOCK_COUNT).try_into().unwrap();
-    }
-
-
     // @notice Calculates the bonus luck provided by the jewelry.
     // @param self The item for which the luck bonus is to be calculated.
     // @return Returns the amount of bonus luck, or 0 if the item does not provide a luck bonus.
     #[inline(always)]
-    fn jewelry_bonus_luck(self: ItemPrimitive) -> u8 {
+    fn jewelry_bonus_luck(self: Item) -> u8 {
         if (self.id == ItemId::SilverRing) {
             self.get_greatness() * SILVER_RING_LUCK_BONUS_PER_GREATNESS
         } else {
@@ -1102,7 +569,7 @@ impl ImplAdventurer of IAdventurer {
     // @param base_gold_amount Base gold amount before the jewelry bonus is applied.
     // @return Returns the amount of bonus gold, or 0 if the item does not provide a gold bonus.
     #[inline(always)]
-    fn jewelry_gold_bonus(self: ItemPrimitive, base_gold_amount: u16) -> u16 {
+    fn jewelry_gold_bonus(self: Item, base_gold_amount: u16) -> u16 {
         if (self.id == ItemId::GoldRing) {
             base_gold_amount
                 * JEWELRY_BONUS_BEAST_GOLD_PERCENT.into()
@@ -1122,7 +589,7 @@ impl ImplAdventurer of IAdventurer {
     /// @return Returns the amount of bonus damage, or 0 if the item does not provide a 
     /// name match damage bonus.
     #[inline(always)]
-    fn name_match_bonus_damage(self: ItemPrimitive, base_damage: u16) -> u16 {
+    fn name_match_bonus_damage(self: Item, base_damage: u16) -> u16 {
         if (self.id == ItemId::PlatinumRing) {
             base_damage
                 * JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS.into()
@@ -1141,7 +608,7 @@ impl ImplAdventurer of IAdventurer {
     /// @return Returns the amount of bonus damage, or 0 if the item does not provide a 
     /// critical hit damage bonus.
     #[inline(always)]
-    fn critical_hit_bonus_damage(self: ItemPrimitive, base_damage: u16) -> u16 {
+    fn critical_hit_bonus_damage(self: Item, base_damage: u16) -> u16 {
         if (self.id == ItemId::TitaniumRing) {
             base_damage
                 * JEWELRY_BONUS_CRITICAL_HIT_PERCENT_PER_GREATNESS.into()
@@ -1152,53 +619,34 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
-    // @notice increases the xp of an item at a given slot
-    // @param self the Adventurer to increase item xp for
-    // @param slot the Slot to increase item xp for
-    // @param amount the amount of xp to increase the item by
-    // @return (u8, u8): a tuple containing the previous and new level of the item
-    fn increase_item_xp_at_slot(ref self: Adventurer, slot: Slot, amount: u16) -> (u8, u8) {
-        match slot {
-            Slot::None(()) => (0, 0),
-            Slot::Weapon(()) => self.weapon.increase_xp(amount),
-            Slot::Chest(()) => self.chest.increase_xp(amount),
-            Slot::Head(()) => self.head.increase_xp(amount),
-            Slot::Waist(()) => self.waist.increase_xp(amount),
-            Slot::Foot(()) => self.foot.increase_xp(amount),
-            Slot::Hand(()) => self.hand.increase_xp(amount),
-            Slot::Neck(()) => self.neck.increase_xp(amount),
-            Slot::Ring(()) => self.ring.increase_xp(amount),
-        }
-    }
-
     // @notice get the adventurer's equipped items
     // @param adventurer the Adventurer to get equipped items for
-    // @return Array<ItemPrimitive>: the adventurer's equipped items
-    fn get_equipped_items(self: Adventurer) -> Array<ItemPrimitive> {
-        let mut equipped_items = ArrayTrait::<ItemPrimitive>::new();
-        if self.weapon.id != 0 {
-            equipped_items.append(self.weapon);
+    // @return Array<Item>: the adventurer's equipped items
+    fn get_equipped_items(self: Adventurer) -> Array<Item> {
+        let mut equipped_items = ArrayTrait::<Item>::new();
+        if self.equipment.weapon.id != 0 {
+            equipped_items.append(self.equipment.weapon);
         }
-        if self.chest.id != 0 {
-            equipped_items.append(self.chest);
+        if self.equipment.chest.id != 0 {
+            equipped_items.append(self.equipment.chest);
         }
-        if self.head.id != 0 {
-            equipped_items.append(self.head);
+        if self.equipment.head.id != 0 {
+            equipped_items.append(self.equipment.head);
         }
-        if self.waist.id != 0 {
-            equipped_items.append(self.waist);
+        if self.equipment.waist.id != 0 {
+            equipped_items.append(self.equipment.waist);
         }
-        if self.foot.id != 0 {
-            equipped_items.append(self.foot);
+        if self.equipment.foot.id != 0 {
+            equipped_items.append(self.equipment.foot);
         }
-        if self.hand.id != 0 {
-            equipped_items.append(self.hand);
+        if self.equipment.hand.id != 0 {
+            equipped_items.append(self.equipment.hand);
         }
-        if self.neck.id != 0 {
-            equipped_items.append(self.neck);
+        if self.equipment.neck.id != 0 {
+            equipped_items.append(self.equipment.neck);
         }
-        if self.ring.id != 0 {
-            equipped_items.append(self.ring);
+        if self.equipment.ring.id != 0 {
+            equipped_items.append(self.equipment.ring);
         }
         equipped_items
     }
@@ -1229,7 +677,7 @@ impl ImplAdventurer of IAdventurer {
 
     #[inline(always)]
     fn can_explore(self: Adventurer) -> bool {
-        self.health != 0 && self.beast_health == 0 && self.stat_points_available == 0
+        self.health != 0 && self.beast_health == 0 && self.stat_upgrades_available == 0
     }
 
 
@@ -1266,11 +714,13 @@ impl ImplAdventurer of IAdventurer {
 
         // get jewelry bonus for name match damage
         let name_match_jewelry_bonus = self
+            .equipment
             .ring
             .name_match_bonus_damage(combat_results.weapon_special_bonus);
 
         // get jewelry bonus for name match damage
         let critical_hit_jewelry_bonus = self
+            .equipment
             .ring
             .critical_hit_bonus_damage(combat_results.critical_hit_bonus);
 
@@ -1289,11 +739,7 @@ impl ImplAdventurer of IAdventurer {
     // @param entropy Randomness input for the function's calculations.
     // @return A tuple containing the combat result and jewelry armor bonus.
     fn defend(
-        self: Adventurer,
-        beast: Beast,
-        armor: ItemPrimitive,
-        armor_specials: SpecialPowers,
-        entropy: u128,
+        self: Adventurer, beast: Beast, armor: Item, armor_specials: SpecialPowers, entropy: u128,
     ) -> (CombatResult, u16) {
         // adventurer strength isn't used for defense
         let attacker_strength = 0;
@@ -1323,6 +769,7 @@ impl ImplAdventurer of IAdventurer {
 
         // get jewelry armor bonus
         let jewelry_armor_bonus = self
+            .equipment
             .neck
             .jewelry_armor_bonus(armor_details.item_type, combat_result.base_armor);
 
@@ -1347,14 +794,6 @@ impl ImplAdventurer of IAdventurer {
         ImplObstacle::get_obstacle(obstacle_id, obstacle_level)
     }
 
-    // @notice Determine if the adventurer can dodge an obstacle.
-    // @param self The adventurer.
-    // @param entropy Randomness input for the dodge chance.
-    // @return True if the adventurer dodges, otherwise False.
-    fn dodge_obstacle(self: Adventurer, entropy: u128) -> bool {
-        ImplCombat::ability_based_avoid_threat(self.get_level(), self.stats.intelligence, entropy)
-    }
-
     // @notice Calculate damage from an obstacle while considering armor.
     // @param self The adventurer.
     // @param obstacle The obstacle the adventurer is facing.
@@ -1362,7 +801,7 @@ impl ImplAdventurer of IAdventurer {
     // @param entropy Randomness input for the damage calculation.
     // @return A tuple containing the combat result and jewelry armor bonus.
     fn get_obstacle_damage(
-        self: Adventurer, obstacle: Obstacle, armor: ItemPrimitive, entropy: u128,
+        self: Adventurer, obstacle: Obstacle, armor: Item, entropy: u128,
     ) -> (CombatResult, u16) {
         // adventurer strength isn't used for obstacle encounters
         let attacker_strength = 0;
@@ -1392,6 +831,7 @@ impl ImplAdventurer of IAdventurer {
 
         // get jewelry armor bonus
         let jewelry_armor_bonus = self
+            .equipment
             .neck
             .jewelry_armor_bonus(armor_details.item_type, combat_result.base_armor);
 
@@ -1420,7 +860,7 @@ impl ImplAdventurer of IAdventurer {
     /// @param base_armor The base armor value to which the bonus would be applied if applicable.
     ///
     /// @return The bonus armor value provided by the jewelry to the armor. Returns 0 if no bonus.
-    fn jewelry_armor_bonus(self: ItemPrimitive, armor_type: Type, base_armor: u16) -> u16 {
+    fn jewelry_armor_bonus(self: Item, armor_type: Type, base_armor: u16) -> u16 {
         // qualify no bonus outcomes and return 0
         match armor_type {
             Type::None(()) => { return 0; },
@@ -1440,176 +880,164 @@ impl ImplAdventurer of IAdventurer {
         // if execution reaches here, the necklace provides a bonus for the armor type
         base_armor * (self.get_greatness() * NECKLACE_ARMOR_BONUS).into() / 100
     }
-
-    /// @notice Calculates the damage bonus if the item's name matches "Platinum Ring"
-    /// @param self The ItemPrimitive object
-    /// @param base_damage The base damage without any bonuses
-    /// @return Returns the modified damage value after applying the bonus, or the base damage if the ID doesn't match.
-    fn name_match_ring_bonus(self: ItemPrimitive, base_damage: u16) -> u16 {
-        if self.id == ItemId::PlatinumRing {
-            (base_damage * (self.get_greatness() * 5).into()) / 100
-        } else {
-            base_damage
-        }
-    }
-
-    /// @notice Calculates the critical hit bonus if the item's name matches "Titanium Ring"
-    /// @param self The ItemPrimitive object
-    /// @param base_damage The base damage without any bonuses
-    /// @return Returns the modified damage value after applying the bonus, or the base damage if the ID doesn't match.
-    fn critical_hit_ring_bonus(self: ItemPrimitive, base_damage: u16) -> u16 {
-        if self.id == ItemId::TitaniumRing {
-            (base_damage * (self.get_greatness() * 5).into()) / 100
-        } else {
-            base_damage
-        }
-    }
-
-    #[inline(always)]
-    fn update_actions_per_block(ref self: Adventurer, current_block: u64) {
-        if self.block_changed_since_last_action(current_block) {
-            self.reset_actions_per_block();
-        } else {
-            self.increment_actions_per_block();
-        }
-    }
-
-    #[inline(always)]
-    fn block_changed_since_last_action(self: Adventurer, block_number: u64) -> bool {
-        self.last_action_block != (block_number % MAX_ADVENTURER_BLOCKS.into()).try_into().unwrap()
-    }
-
-    #[inline(always)]
-    fn increment_actions_per_block(ref self: Adventurer) {
-        if self.actions_per_block < MAX_ACTIONS_PER_BLOCK {
-            self.actions_per_block += 1;
-        }
-    }
-
-    #[inline(always)]
-    fn reset_actions_per_block(ref self: Adventurer) {
-        self.actions_per_block = 0;
-    }
-
-    #[inline(always)]
-    fn prepack_overflow_assertions(self: Adventurer) {
-        assert(self.health <= MAX_ADVENTURER_HEALTH, 'health overflow');
-        assert(self.xp <= MAX_XP, 'xp overflow');
-        assert(self.gold <= MAX_GOLD, 'gold overflow');
-        assert(self.stats.strength <= MAX_STAT_VALUE_5_BITS, 'strength overflow');
-        assert(self.stats.dexterity <= MAX_STAT_VALUE, 'dexterity overflow');
-        assert(self.stats.vitality <= MAX_STAT_VALUE_5_BITS, 'vitality overflow');
-        assert(self.stats.charisma <= MAX_STAT_VALUE, 'charisma overflow');
-        assert(self.stats.intelligence <= MAX_STAT_VALUE, 'intelligence overflow');
-        assert(self.stats.wisdom <= MAX_STAT_VALUE, 'wisdom overflow');
-        assert(self.weapon.xp <= MAX_PACKABLE_ITEM_XP, 'weapon xp overflow');
-        assert(self.chest.xp <= MAX_PACKABLE_ITEM_XP, 'chest xp overflow');
-        assert(self.head.xp <= MAX_PACKABLE_ITEM_XP, 'head xp overflow');
-        assert(self.waist.xp <= MAX_PACKABLE_ITEM_XP, 'waist xp overflow');
-        assert(self.foot.xp <= MAX_PACKABLE_ITEM_XP, 'foot xp overflow');
-        assert(self.hand.xp <= MAX_PACKABLE_ITEM_XP, 'hand xp overflow');
-        assert(self.neck.xp <= MAX_PACKABLE_ITEM_XP, 'neck xp overflow');
-        assert(self.ring.xp <= MAX_PACKABLE_ITEM_XP, 'ring xp overflow');
-        assert(self.beast_health <= MAX_PACKABLE_BEAST_HEALTH, 'beast health overflow');
-        assert(self.stat_points_available <= MAX_STAT_UPGRADE_POINTS, 'stat points avail overflow');
-        assert(self.last_action_block <= MAX_LAST_ACTION_BLOCK, 'last action block overflow');
-        assert(self.actions_per_block <= MAX_ACTIONS_PER_BLOCK, 'actions per block overflow');
-    }
-
-    /// @title Entropy Generation Function
-    /// @notice Generates a deterministic hash value based on an adventurer ID and a starting hash.
-    /// @param adventurer_id A unique identifier of the adventurer.
-    /// @param start_hash An initial hash value to be used in generating the resultant entropy.
-    /// @return A `felt252` hash value generated by hashing the concatenated input values.
-    fn get_entropy(adventurer_id: felt252, start_hash: felt252) -> felt252 {
-        let mut hash_span = ArrayTrait::new();
-        hash_span.append(adventurer_id);
-        hash_span.append(start_hash);
-        poseidon_hash_span(hash_span.span())
-    }
-
-    /// @title invalidate_adventurer
-    /// @notice This function invalidates an adventurer by setting its xp to 1 and gold to 0.
-    /// @dev This function directly modifies the state of the adventurer.
-    /// @param self The Adventurer struct instance to be invalidated.
-    #[inline(always)]
-    fn invalidate_game(ref self: Adventurer) {
-        self.health = 0;
-        self.xp = 1;
-        self.gold = 0;
-    }
 }
 
-
-const TWO_POW_3: u256 = 0x8; // 2^3
-const TWO_POW_4: u256 = 0x10; // 2^4
-const TWO_POW_9: u256 = 0x200; // 2^9
-const TWO_POW_13: u256 = 0x2000; // 2^13
-const TWO_POW_14: u256 = 0x4000; // 2^14
-const TWO_POW_18: u256 = 0x40000; // 2^18
-const TWO_POW_21: u256 = 0x200000; // 2^21
-const TWO_POW_26: u256 = 0x4000000; // 2^26
-const TWO_POW_27: u256 = 0x8000000; // 2^27
-const TWO_POW_31: u256 = 0x80000000; // 2^31
-const TWO_POW_32: u256 = 0x100000000; // 2^32
-const TWO_POW_58: u256 = 0x400000000000000; // 2^58
-const TWO_POW_67: u256 = 0x80000000000000000; // 2^67
-const TWO_POW_88: u256 = 0x10000000000000000000000; // 2^88
-const TWO_POW_109: u256 = 0x2000000000000000000000000000; // 2^109
-const TWO_POW_130: u256 = 0x400000000000000000000000000000000; // 2^130
-const TWO_POW_151: u256 = 0x80000000000000000000000000000000000000; // 2^151
-const TWO_POW_172: u256 = 0x10000000000000000000000000000000000000000000; // 2^172
-const TWO_POW_193: u256 = 0x2000000000000000000000000000000000000000000000000; // 2^193
-const TWO_POW_214: u256 = 0x400000000000000000000000000000000000000000000000000000; // 2^214
-const TWO_POW_235: u256 = 0x80000000000000000000000000000000000000000000000000000000000; // 2^235
-const TWO_POW_244: u256 = 0x10000000000000000000000000000000000000000000000000000000000000; // 2^244
-const TWO_POW_247: u256 = 0x80000000000000000000000000000000000000000000000000000000000000; // 2^247
-
+const TWO_POW_4: u256 = 0x10;
+const TWO_POW_9: u256 = 0x200;
+const TWO_POW_10: u256 = 0x400;
+const TWO_POW_15: u256 = 0x8000;
+const TWO_POW_25: u256 = 0x2000000;
+const TWO_POW_30: u256 = 0x40000000;
+const TWO_POW_34: u256 = 0x400000000;
+const TWO_POW_44: u256 = 0x100000000000;
+const TWO_POW_48: u256 = 0x1000000000000;
+const TWO_POW_78: u256 = 0x40000000000000000000;
+const TWO_POW_128: u256 = 0x100000000000000000000000000000000;
 
 // ---------------------------
 // ---------- Tests ----------
 // ---------------------------
 #[cfg(test)]
 mod tests {
-    use debug::PrintTrait;
     use core::result::ResultTrait;
     use integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub};
     use traits::{TryInto, Into};
     use option::OptionTrait;
     use poseidon::poseidon_hash_span;
     use array::ArrayTrait;
-    use lootitems::{loot::{Loot, ILoot, ImplLoot}, constants::{ItemSuffix, ItemId}};
+    use loot::{loot::{Loot, ILoot, ImplLoot}, constants::{ItemSuffix, ItemId}};
     use combat::{constants::CombatEnums::{Slot, Type}};
     use beasts::{beast::{ImplBeast, Beast}, constants::BeastSettings};
-    use survivor::{
-        adventurer::{IAdventurer, ImplAdventurer, Adventurer, AdventurerPacking}, stats::Stats,
-        item_primitive::ItemPrimitive, adventurer_utils::{AdventurerUtils}, bag::{Bag, ImplBag},
+    use adventurer::{
+        adventurer::{IAdventurer, ImplAdventurer, Adventurer, AdventurerPacking},
+        stats::{Stats, ImplStats, MAX_STAT_VALUE}, equipment::{Equipment, ImplEquipment},
+        item::{Item, MAX_PACKABLE_XP}, adventurer_utils::{AdventurerUtils}, bag::{Bag, ImplBag},
         constants::{
             adventurer_constants::{
                 STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH,
                 CHARISMA_POTION_DISCOUNT, MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE,
-                HEALTH_INCREASE_PER_VITALITY, MAX_GOLD, MAX_STAT_VALUE, MAX_STAT_UPGRADE_POINTS,
-                MAX_XP, MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS, ITEM_MAX_XP,
+                HEALTH_INCREASE_PER_VITALITY, MAX_GOLD, MAX_STAT_UPGRADES_AVAILABLE,
+                MAX_ADVENTURER_XP, MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS, ITEM_MAX_XP,
                 MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT, MAX_BLOCK_COUNT,
                 SILVER_RING_G20_LUCK_BONUS, JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS,
-                NECKLACE_ARMOR_BONUS, SILVER_RING_LUCK_BONUS_PER_GREATNESS, MAX_ACTIONS_PER_BLOCK,
-                MAX_PACKABLE_ITEM_XP, MAX_PACKABLE_BEAST_HEALTH, MAX_LAST_ACTION_BLOCK
+                NECKLACE_ARMOR_BONUS, SILVER_RING_LUCK_BONUS_PER_GREATNESS,
+                MAX_PACKABLE_BEAST_HEALTH,
             },
             discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
         }
     };
 
     #[test]
-    #[available_gas(505770)]
-    fn test_attack() {}
+    #[available_gas(30020000)]
+    fn test_adventurer_packing() {
+        let weapon = Item { id: ItemId::Wand, xp: MAX_PACKABLE_XP };
+        let chest = Item { id: ItemId::DivineRobe, xp: MAX_PACKABLE_XP };
+        let head = Item { id: ItemId::DivineHood, xp: MAX_PACKABLE_XP };
+        let waist = Item { id: ItemId::BrightsilkSash, xp: MAX_PACKABLE_XP };
+        let foot = Item { id: ItemId::DivineSlippers, xp: MAX_PACKABLE_XP };
+        let hand = Item { id: ItemId::DivineGloves, xp: MAX_PACKABLE_XP };
+        let neck = Item { id: ItemId::Amulet, xp: MAX_PACKABLE_XP };
+        let ring = Item { id: ItemId::GoldRing, xp: MAX_PACKABLE_XP };
+        let equipment = Equipment { weapon, chest, head, waist, foot, hand, neck, ring };
+
+        let strength = MAX_STAT_VALUE;
+        let dexterity = MAX_STAT_VALUE;
+        let vitality = MAX_STAT_VALUE;
+        let intelligence = MAX_STAT_VALUE;
+        let wisdom = MAX_STAT_VALUE;
+        let charisma = MAX_STAT_VALUE;
+        let luck = 0;
+        let stats = Stats { strength, dexterity, vitality, intelligence, wisdom, charisma, luck };
+
+        let adventurer = Adventurer {
+            health: MAX_ADVENTURER_HEALTH,
+            xp: MAX_ADVENTURER_XP,
+            gold: MAX_GOLD,
+            stats,
+            equipment,
+            beast_health: MAX_PACKABLE_BEAST_HEALTH,
+            stat_upgrades_available: MAX_STAT_UPGRADES_AVAILABLE,
+            mutated: false
+        };
+        let unpacked: Adventurer = AdventurerPacking::unpack(AdventurerPacking::pack(adventurer));
+        assert(adventurer.health == unpacked.health, 'health');
+        assert(adventurer.xp == unpacked.xp, 'xp');
+        assert(adventurer.gold == unpacked.gold, 'luck');
+        assert(adventurer.beast_health == unpacked.beast_health, 'wrong beast health');
+        assert(
+            adventurer.stat_upgrades_available == unpacked.stat_upgrades_available,
+            'stat_upgrades_available'
+        );
+        assert(adventurer.stats == unpacked.stats, 'wrong unpacked stats');
+        assert(adventurer.equipment == unpacked.equipment, 'equipment mistmatch');
+
+        let adventurer = Adventurer {
+            health: MAX_ADVENTURER_HEALTH,
+            xp: MAX_ADVENTURER_XP,
+            gold: MAX_GOLD,
+            stats: Stats {
+                strength: MAX_STAT_VALUE,
+                dexterity: 0,
+                vitality: MAX_STAT_VALUE,
+                intelligence: 1,
+                wisdom: MAX_STAT_VALUE,
+                charisma: 2,
+                luck: 0
+            },
+            equipment: Equipment {
+                weapon: Item { id: 127, xp: 511 },
+                chest: Item { id: 1, xp: 0 },
+                head: Item { id: 127, xp: 511 },
+                waist: Item { id: 87, xp: 1 },
+                foot: Item { id: 78, xp: 511 },
+                hand: Item { id: 34, xp: 2 },
+                neck: Item { id: 32, xp: 511 },
+                ring: Item { id: 1, xp: 3 }
+            },
+            beast_health: MAX_PACKABLE_BEAST_HEALTH,
+            stat_upgrades_available: MAX_STAT_UPGRADES_AVAILABLE,
+            mutated: false
+        };
+        let packed = AdventurerPacking::pack(adventurer);
+        let unpacked: Adventurer = AdventurerPacking::unpack(packed);
+        assert(adventurer.health == unpacked.health, 'health');
+        assert(adventurer.xp == unpacked.xp, 'xp');
+        assert(adventurer.stats.strength == unpacked.stats.strength, 'strength');
+        assert(adventurer.stats.dexterity == unpacked.stats.dexterity, 'dexterity');
+        assert(adventurer.stats.vitality == unpacked.stats.vitality, 'vitality');
+        assert(adventurer.stats.intelligence == unpacked.stats.intelligence, 'intelligence');
+        assert(adventurer.stats.wisdom == unpacked.stats.wisdom, 'wisdom');
+        assert(adventurer.stats.charisma == unpacked.stats.charisma, 'charisma');
+        assert(adventurer.gold == unpacked.gold, 'luck');
+        assert(adventurer.equipment.weapon.id == unpacked.equipment.weapon.id, 'weapon.id');
+        assert(adventurer.equipment.weapon.xp == unpacked.equipment.weapon.xp, 'weapon.xp');
+        assert(adventurer.equipment.chest.id == unpacked.equipment.chest.id, 'chest.id');
+        assert(adventurer.equipment.chest.xp == unpacked.equipment.chest.xp, 'chest.xp');
+        assert(adventurer.equipment.head.id == unpacked.equipment.head.id, 'head.id');
+        assert(adventurer.equipment.head.xp == unpacked.equipment.head.xp, 'head.xp');
+        assert(adventurer.equipment.waist.id == unpacked.equipment.waist.id, 'waist.id');
+        assert(adventurer.equipment.waist.xp == unpacked.equipment.waist.xp, 'waist.xp');
+        assert(adventurer.equipment.foot.id == unpacked.equipment.foot.id, 'foot.id');
+        assert(adventurer.equipment.foot.xp == unpacked.equipment.foot.xp, 'foot.xp');
+        assert(adventurer.equipment.hand.id == unpacked.equipment.hand.id, 'hand.id');
+        assert(adventurer.equipment.hand.xp == unpacked.equipment.hand.xp, 'hand.xp2');
+        assert(adventurer.equipment.neck.id == unpacked.equipment.neck.id, 'neck.id');
+        assert(adventurer.equipment.neck.xp == unpacked.equipment.neck.xp, 'neck.xp');
+        assert(adventurer.equipment.ring.id == unpacked.equipment.ring.id, 'ring.id');
+        assert(adventurer.equipment.ring.xp == unpacked.equipment.ring.xp, 'ring.xp');
+        //assert(adventurer.beast_health == unpacked.beast_health, 'beast_health');
+        assert(
+            adventurer.stat_upgrades_available == unpacked.stat_upgrades_available,
+            'stat_upgrades_available'
+        );
+    }
 
     #[test]
     #[available_gas(184194)]
     fn test_jewelry_gold_bonus_gas() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.ring.jewelry_gold_bonus(1);
+        adventurer.equipment.ring.jewelry_gold_bonus(1);
     }
-
 
     #[test]
     #[available_gas(1914024)]
@@ -1619,38 +1047,46 @@ mod tests {
 
         // no gold ring equipped gets no bonus
         assert(
-            adventurer.ring.jewelry_gold_bonus(base_gold_amount) == 0,
+            adventurer.equipment.ring.jewelry_gold_bonus(base_gold_amount) == 0,
             'no bonus with gold gold ring'
         );
 
         // equip gold ring with G1
-        let gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
-        adventurer.ring = gold_ring;
-        let _bonus = adventurer.ring.jewelry_gold_bonus(base_gold_amount);
-        assert(adventurer.ring.jewelry_gold_bonus(base_gold_amount) == 3, 'bonus should be 3');
+        let gold_ring = Item { id: ItemId::GoldRing, xp: 1 };
+        adventurer.equipment.ring = gold_ring;
+        let _bonus = adventurer.equipment.ring.jewelry_gold_bonus(base_gold_amount);
+        assert(
+            adventurer.equipment.ring.jewelry_gold_bonus(base_gold_amount) == 3, 'bonus should be 3'
+        );
 
         // increase greatness of gold ring to 10
-        adventurer.ring.xp = 100;
-        assert(adventurer.ring.jewelry_gold_bonus(base_gold_amount) == 30, 'bonus should be 30');
+        adventurer.equipment.ring.xp = 100;
+        assert(
+            adventurer.equipment.ring.jewelry_gold_bonus(base_gold_amount) == 30,
+            'bonus should be 30'
+        );
 
         // increase greatness of gold ring to 20
-        adventurer.ring.xp = 400;
-        assert(adventurer.ring.jewelry_gold_bonus(base_gold_amount) == 60, 'bonus should be 60');
+        adventurer.equipment.ring.xp = 400;
+        assert(
+            adventurer.equipment.ring.jewelry_gold_bonus(base_gold_amount) == 60,
+            'bonus should be 60'
+        );
 
         // zero case
-        assert(adventurer.ring.jewelry_gold_bonus(0) == 0, 'bonus should be 0');
+        assert(adventurer.equipment.ring.jewelry_gold_bonus(0) == 0, 'bonus should be 0');
 
         // change to platinum ring
-        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 1 };
-        adventurer.ring = platinum_ring;
-        assert(adventurer.ring.jewelry_gold_bonus(0) == 0, 'no bonus with plat ring');
+        let platinum_ring = Item { id: ItemId::PlatinumRing, xp: 1 };
+        adventurer.equipment.ring = platinum_ring;
+        assert(adventurer.equipment.ring.jewelry_gold_bonus(0) == 0, 'no bonus with plat ring');
     }
 
     #[test]
     #[available_gas(173744)]
     fn test_get_bonus_luck_gas() {
         // instantiate silver ring
-        let silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 1 };
+        let silver_ring = Item { id: ItemId::SilverRing, xp: 1 };
         let _bonus_luck = silver_ring.jewelry_bonus_luck();
     }
 
@@ -1658,7 +1094,7 @@ mod tests {
     #[available_gas(194024)]
     fn test_get_bonus_luck() {
         // equip silver ring
-        let mut silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 1 };
+        let mut silver_ring = Item { id: ItemId::SilverRing, xp: 1 };
         assert(
             silver_ring.jewelry_bonus_luck() == SILVER_RING_LUCK_BONUS_PER_GREATNESS,
             'wrong g1 bonus luck'
@@ -1672,10 +1108,10 @@ mod tests {
         );
 
         // verify none of the other rings provide a luck bonus
-        let gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 400 };
-        let bronze_ring = ItemPrimitive { id: ItemId::BronzeRing, xp: 400 };
-        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 400 };
-        let titanium_ring = ItemPrimitive { id: ItemId::TitaniumRing, xp: 400 };
+        let gold_ring = Item { id: ItemId::GoldRing, xp: 400 };
+        let bronze_ring = Item { id: ItemId::BronzeRing, xp: 400 };
+        let platinum_ring = Item { id: ItemId::PlatinumRing, xp: 400 };
+        let titanium_ring = Item { id: ItemId::TitaniumRing, xp: 400 };
 
         assert(gold_ring.jewelry_bonus_luck() == 0, 'no bonus luck for gold ring');
         assert(bronze_ring.jewelry_bonus_luck() == 0, 'no bonus luck for bronze ring');
@@ -1754,7 +1190,7 @@ mod tests {
     #[test]
     #[available_gas(14610)]
     fn test_jewelry_armor_bonus_gas() {
-        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 400 };
+        let amulet = Item { id: ItemId::Amulet, xp: 400 };
         amulet.jewelry_armor_bonus(Type::Magic_or_Cloth(()), 100);
     }
 
@@ -1762,7 +1198,7 @@ mod tests {
     #[available_gas(284000)]
     fn test_jewelry_armor_bonus() {
         // amulet test cases
-        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 400 };
+        let amulet = Item { id: ItemId::Amulet, xp: 400 };
         assert(amulet.jewelry_armor_bonus(Type::None(()), 100) == 0, 'None Type gets 0 bonus');
         assert(
             amulet.jewelry_armor_bonus(Type::Magic_or_Cloth(()), 100) == NECKLACE_ARMOR_BONUS.into()
@@ -1783,7 +1219,7 @@ mod tests {
         assert(amulet.jewelry_armor_bonus(Type::Ring(()), 100) == 0, 'Ring Type gets 0 bonus');
 
         // pendant test cases
-        let pendant = ItemPrimitive { id: ItemId::Pendant, xp: 400 };
+        let pendant = Item { id: ItemId::Pendant, xp: 400 };
         assert(pendant.jewelry_armor_bonus(Type::None(()), 100) == 0, 'None Type gets 0 bonus');
         assert(
             pendant.jewelry_armor_bonus(Type::Magic_or_Cloth(()), 100) == 0,
@@ -1804,7 +1240,7 @@ mod tests {
         assert(pendant.jewelry_armor_bonus(Type::Ring(()), 100) == 0, 'Ring Type gets 0 bonus');
 
         // necklace test cases
-        let necklace = ItemPrimitive { id: ItemId::Necklace, xp: 400 };
+        let necklace = Item { id: ItemId::Necklace, xp: 400 };
         assert(necklace.jewelry_armor_bonus(Type::None(()), 100) == 0, 'None Type gets 0 bonus');
         assert(
             necklace.jewelry_armor_bonus(Type::Magic_or_Cloth(()), 100) == 0,
@@ -1827,7 +1263,7 @@ mod tests {
         assert(necklace.jewelry_armor_bonus(Type::Ring(()), 100) == 0, 'Ring Type gets 0 bonus');
 
         // test non jewelry item
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 400 };
+        let katana = Item { id: ItemId::Katana, xp: 400 };
         assert(katana.jewelry_armor_bonus(Type::None(()), 100) == 0, 'Katan does not boost armor');
     }
 
@@ -1835,7 +1271,7 @@ mod tests {
     #[test]
     #[available_gas(13510)]
     fn test_name_match_bonus_damage_gas() {
-        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 400 };
+        let platinum_ring = Item { id: ItemId::PlatinumRing, xp: 400 };
         platinum_ring.name_match_bonus_damage(0);
     }
 
@@ -1844,12 +1280,12 @@ mod tests {
     fn test_name_match_bonus_damage() {
         let base_damage = 100;
 
-        let titanium_ring = ItemPrimitive { id: ItemId::TitaniumRing, xp: 400 };
+        let titanium_ring = Item { id: ItemId::TitaniumRing, xp: 400 };
         assert(
             titanium_ring.name_match_bonus_damage(base_damage) == 0, 'no bonus for titanium ring'
         );
 
-        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 0 };
+        let platinum_ring = Item { id: ItemId::PlatinumRing, xp: 0 };
         assert(
             platinum_ring
                 .name_match_bonus_damage(
@@ -1859,7 +1295,7 @@ mod tests {
             'should be 3hp name bonus'
         );
 
-        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 100 };
+        let platinum_ring = Item { id: ItemId::PlatinumRing, xp: 100 };
         assert(
             platinum_ring
                 .name_match_bonus_damage(
@@ -1869,7 +1305,7 @@ mod tests {
             'should be 30hp name bonus'
         );
 
-        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 400 };
+        let platinum_ring = Item { id: ItemId::PlatinumRing, xp: 400 };
         assert(
             platinum_ring
                 .name_match_bonus_damage(
@@ -1920,142 +1356,6 @@ mod tests {
 
         // verify beasts are the same since the seed did not change
         assert(beast1.id != beast2.id, 'beasts not unique');
-    }
-
-    #[test]
-    #[available_gas(70320)]
-    fn test_get_greatness_gas() {
-        let _greatness = ImplAdventurer::get_greatness(ItemPrimitive { id: 1, xp: 400 });
-    }
-
-    #[test]
-    #[available_gas(70320)]
-    fn test_get_greatness() {
-        let mut item = ItemPrimitive { id: 1, xp: 0 };
-        // test 0 case (should be level 1)
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 1, 'greatness should be 1');
-
-        // test level 1
-        item.xp = 1;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 1, 'greatness should be 1');
-
-        // test level 2
-        item.xp = 4;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 2, 'greatness should be 2');
-
-        // test level 3
-        item.xp = 9;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 3, 'greatness should be 3');
-
-        // test level 4
-        item.xp = 16;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 4, 'greatness should be 4');
-
-        // test level 5
-        item.xp = 25;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 5, 'greatness should be 5');
-
-        // test level 6
-        item.xp = 36;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 6, 'greatness should be 6');
-
-        // test level 7
-        item.xp = 49;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 7, 'greatness should be 7');
-
-        // test level 8
-        item.xp = 64;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 8, 'greatness should be 8');
-
-        // test level 9
-        item.xp = 81;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 9, 'greatness should be 9');
-
-        // test level 10
-        item.xp = 100;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 10, 'greatness should be 10');
-
-        // test level 11
-        item.xp = 121;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 11, 'greatness should be 11');
-
-        // test level 12
-        item.xp = 144;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 12, 'greatness should be 12');
-
-        // test level 13
-        item.xp = 169;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 13, 'greatness should be 13');
-
-        // test level 14
-        item.xp = 196;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 14, 'greatness should be 14');
-
-        // test level 15
-        item.xp = 225;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 15, 'greatness should be 15');
-
-        // test level 16
-        item.xp = 256;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 16, 'greatness should be 16');
-
-        // test level 17
-        item.xp = 289;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 17, 'greatness should be 17');
-
-        // test level 18
-        item.xp = 324;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 18, 'greatness should be 18');
-
-        // test level 19
-        item.xp = 361;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 19, 'greatness should be 19');
-
-        // test level 20
-        item.xp = 400;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 20, 'greatness should be 20');
-
-        // test overflow / max u16
-        item.xp = 65535;
-        let greatness = ImplAdventurer::get_greatness(item);
-        assert(greatness == 20, 'greatness should be 20');
-    }
-
-    #[test]
-    #[available_gas(217684)]
-    fn test_set_last_action_block() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.set_last_action_block(0);
-        assert(adventurer.last_action_block == 0, 'last action should be 0');
-        adventurer.set_last_action_block(511);
-        assert(adventurer.last_action_block == 511, 'last action should be 511');
-        adventurer.set_last_action_block(512);
-        assert(adventurer.last_action_block == 0, 'last action should be 0');
-        adventurer.set_last_action_block(1023);
-        assert(adventurer.last_action_block == 511, 'last action should be 511');
-        adventurer.set_last_action_block(1024);
-        assert(adventurer.last_action_block == 0, 'last action should be 0');
     }
 
     #[test]
@@ -2114,132 +1414,6 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(30020000)]
-    fn test_packing_and_unpacking_adventurer() {
-        let adventurer = Adventurer {
-            last_action_block: 511,
-            health: 511,
-            xp: 16383,
-            stats: Stats {
-                strength: 31,
-                dexterity: 15,
-                vitality: 31,
-                intelligence: 15,
-                wisdom: 15,
-                charisma: 15,
-                luck: 15
-            },
-            gold: 511,
-            weapon: ItemPrimitive { id: 127, xp: 511 },
-            chest: ItemPrimitive { id: 1, xp: 0 },
-            head: ItemPrimitive { id: 127, xp: 511 },
-            waist: ItemPrimitive { id: 87, xp: 511 },
-            foot: ItemPrimitive { id: 78, xp: 511 },
-            hand: ItemPrimitive { id: 34, xp: 511 },
-            neck: ItemPrimitive { id: 32, xp: 511 },
-            ring: ItemPrimitive { id: 1, xp: 511 },
-            beast_health: 511,
-            stat_points_available: 7,
-            actions_per_block: 0,
-            mutated: false
-        };
-        let packed = AdventurerPacking::pack(adventurer);
-        let unpacked: Adventurer = AdventurerPacking::unpack(packed);
-        assert(adventurer.last_action_block == unpacked.last_action_block, 'last_action_block');
-        assert(adventurer.health == unpacked.health, 'health');
-        assert(adventurer.xp == unpacked.xp, 'xp');
-        assert(adventurer.stats.strength == unpacked.stats.strength, 'strength');
-        assert(adventurer.stats.dexterity == unpacked.stats.dexterity, 'dexterity');
-        assert(adventurer.stats.vitality == unpacked.stats.vitality, 'vitality');
-        assert(adventurer.stats.intelligence == unpacked.stats.intelligence, 'intelligence');
-        assert(adventurer.stats.wisdom == unpacked.stats.wisdom, 'wisdom');
-        assert(adventurer.stats.charisma == unpacked.stats.charisma, 'charisma');
-        assert(adventurer.gold == unpacked.gold, 'luck');
-        assert(adventurer.weapon.id == unpacked.weapon.id, 'weapon.id');
-        assert(adventurer.weapon.xp == unpacked.weapon.xp, 'weapon.xp');
-        assert(adventurer.chest.id == unpacked.chest.id, 'chest.id');
-        assert(adventurer.chest.xp == unpacked.chest.xp, 'chest.xp');
-        assert(adventurer.head.id == unpacked.head.id, 'head.id');
-        assert(adventurer.head.xp == unpacked.head.xp, 'head.xp');
-        assert(adventurer.waist.id == unpacked.waist.id, 'waist.id');
-        assert(adventurer.waist.xp == unpacked.waist.xp, 'waist.xp');
-        assert(adventurer.foot.id == unpacked.foot.id, 'foot.id');
-        assert(adventurer.foot.xp == unpacked.foot.xp, 'foot.xp');
-        assert(adventurer.hand.id == unpacked.hand.id, 'hand.id');
-        assert(adventurer.hand.xp == unpacked.hand.xp, 'hand.xp');
-        assert(adventurer.neck.id == unpacked.neck.id, 'neck.id');
-        assert(adventurer.neck.xp == unpacked.neck.xp, 'neck.xp');
-        assert(adventurer.ring.id == unpacked.ring.id, 'ring.id');
-        assert(adventurer.ring.xp == unpacked.ring.xp, 'ring.xp');
-        assert(adventurer.beast_health == unpacked.beast_health, 'beast_health');
-        assert(
-            adventurer.stat_points_available == unpacked.stat_points_available,
-            'stat_points_available'
-        );
-
-        let adventurer = Adventurer {
-            last_action_block: 511,
-            health: 511,
-            xp: 16383,
-            stats: Stats {
-                strength: 31,
-                dexterity: 15,
-                vitality: 31,
-                intelligence: 15,
-                wisdom: 15,
-                charisma: 15,
-                luck: 15
-            },
-            gold: 511,
-            weapon: ItemPrimitive { id: 127, xp: 511 },
-            chest: ItemPrimitive { id: 1, xp: 0 },
-            head: ItemPrimitive { id: 127, xp: 511 },
-            waist: ItemPrimitive { id: 87, xp: 511 },
-            foot: ItemPrimitive { id: 78, xp: 511 },
-            hand: ItemPrimitive { id: 34, xp: 511 },
-            neck: ItemPrimitive { id: 32, xp: 511 },
-            ring: ItemPrimitive { id: 1, xp: 511 },
-            beast_health: 511,
-            stat_points_available: 7,
-            actions_per_block: 0,
-            mutated: false
-        };
-        let packed = AdventurerPacking::pack(adventurer);
-        let unpacked: Adventurer = AdventurerPacking::unpack(packed);
-        assert(adventurer.last_action_block == unpacked.last_action_block, 'last_action_block');
-        assert(adventurer.health == unpacked.health, 'health');
-        assert(adventurer.xp == unpacked.xp, 'xp');
-        assert(adventurer.stats.strength == unpacked.stats.strength, 'strength');
-        assert(adventurer.stats.dexterity == unpacked.stats.dexterity, 'dexterity');
-        assert(adventurer.stats.vitality == unpacked.stats.vitality, 'vitality');
-        assert(adventurer.stats.intelligence == unpacked.stats.intelligence, 'intelligence');
-        assert(adventurer.stats.wisdom == unpacked.stats.wisdom, 'wisdom');
-        assert(adventurer.stats.charisma == unpacked.stats.charisma, 'charisma');
-        assert(adventurer.gold == unpacked.gold, 'luck');
-        assert(adventurer.weapon.id == unpacked.weapon.id, 'weapon.id');
-        assert(adventurer.weapon.xp == unpacked.weapon.xp, 'weapon.xp');
-        assert(adventurer.chest.id == unpacked.chest.id, 'chest.id');
-        assert(adventurer.chest.xp == unpacked.chest.xp, 'chest.xp');
-        assert(adventurer.head.id == unpacked.head.id, 'head.id');
-        assert(adventurer.head.xp == unpacked.head.xp, 'head.xp');
-        assert(adventurer.waist.id == unpacked.waist.id, 'waist.id');
-        assert(adventurer.waist.xp == unpacked.waist.xp, 'waist.xp');
-        assert(adventurer.foot.id == unpacked.foot.id, 'foot.id');
-        assert(adventurer.foot.xp == unpacked.foot.xp, 'foot.xp');
-        assert(adventurer.hand.id == unpacked.hand.id, 'hand.id');
-        assert(adventurer.hand.xp == unpacked.hand.xp, 'hand.xp');
-        assert(adventurer.neck.id == unpacked.neck.id, 'neck.id');
-        assert(adventurer.neck.xp == unpacked.neck.xp, 'neck.xp');
-        assert(adventurer.ring.id == unpacked.ring.id, 'ring.id');
-        assert(adventurer.ring.xp == unpacked.ring.xp, 'ring.xp');
-        assert(adventurer.beast_health == unpacked.beast_health, 'beast_health');
-        assert(
-            adventurer.stat_points_available == unpacked.stat_points_available,
-            'stat_points_available'
-        );
-    }
-
-    #[test]
     #[should_panic(expected: ('health overflow',))]
     #[available_gas(3000000)]
     fn test_pack_protection_overflow_health() {
@@ -2262,142 +1436,7 @@ mod tests {
     #[available_gas(3000000)]
     fn test_pack_protection_overflow_xp() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.xp = MAX_XP + 1;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[should_panic(expected: ('strength overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_strength() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.stats.strength = 32;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[available_gas(3000000)]
-    fn test_pack_protection_strength() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.stats.strength = 31;
-        let unpacked: Adventurer = AdventurerPacking::unpack(AdventurerPacking::pack(adventurer));
-        assert(unpacked.stats.strength == adventurer.stats.strength, 'strength should be same');
-    }
-
-    #[test]
-    #[should_panic(expected: ('dexterity overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_dexterity() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.stats.dexterity = MAX_STAT_VALUE + 1;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[should_panic(expected: ('vitality overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_vitality() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.stats.vitality = 32;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[available_gas(3000000)]
-    fn test_pack_protection_vitality() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.stats.vitality = 31;
-        let unpacked: Adventurer = AdventurerPacking::unpack(AdventurerPacking::pack(adventurer));
-        assert(unpacked.stats.vitality == adventurer.stats.vitality, 'vitality should be same');
-    }
-
-    #[test]
-    #[should_panic(expected: ('intelligence overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_intelligence() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.stats.intelligence = MAX_STAT_VALUE + 1;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[should_panic(expected: ('wisdom overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_wisdom() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.stats.wisdom = MAX_STAT_VALUE + 1;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[should_panic(expected: ('weapon xp overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_weapon_xp() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.weapon.xp = MAX_PACKABLE_ITEM_XP + 1;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[should_panic(expected: ('chest xp overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_chest_xp() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.chest.xp = MAX_PACKABLE_ITEM_XP + 1;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[should_panic(expected: ('head xp overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_head_xp() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.head.xp = MAX_PACKABLE_ITEM_XP + 1;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[should_panic(expected: ('waist xp overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_waist_xp() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.waist.xp = MAX_PACKABLE_ITEM_XP + 1;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[should_panic(expected: ('foot xp overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_foot_xp() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.foot.xp = MAX_PACKABLE_ITEM_XP + 1;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[should_panic(expected: ('hand xp overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_hand_xp() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.hand.xp = MAX_PACKABLE_ITEM_XP + 1;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[should_panic(expected: ('neck xp overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_neck_xp() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.neck.xp = MAX_PACKABLE_ITEM_XP + 1;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[should_panic(expected: ('ring xp overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_ring_xp() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.ring.xp = MAX_PACKABLE_ITEM_XP + 1;
+        adventurer.xp = MAX_ADVENTURER_XP + 1;
         AdventurerPacking::pack(adventurer);
     }
 
@@ -2411,29 +1450,11 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('stat points avail overflow',))]
+    #[should_panic(expected: ('stat upgrades avail overflow',))]
     #[available_gas(3000000)]
     fn test_pack_protection_overflow_stat_points_available() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.stat_points_available = MAX_STAT_UPGRADE_POINTS + 1;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[should_panic(expected: ('actions per block overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_actions_per_block() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.actions_per_block = MAX_ACTIONS_PER_BLOCK + 1;
-        AdventurerPacking::pack(adventurer);
-    }
-
-    #[test]
-    #[should_panic(expected: ('last action block overflow',))]
-    #[available_gas(3000000)]
-    fn test_pack_protection_overflow_last_action_block() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.last_action_block = MAX_LAST_ACTION_BLOCK + 1;
+        adventurer.stat_upgrades_available = MAX_STAT_UPGRADES_AVAILABLE + 1;
         AdventurerPacking::pack(adventurer);
     }
 
@@ -2551,53 +1572,56 @@ mod tests {
         assert(new_level == 2, 'new level should still be 2');
 
         // multi-level and exceed max xp case
-        let (previous_level, new_level) = adventurer.increase_adventurer_xp(MAX_XP + 10);
-        assert(adventurer.xp == MAX_XP, 'xp should stop at max xp');
+        let (previous_level, new_level) = adventurer.increase_adventurer_xp(MAX_ADVENTURER_XP + 10);
+        assert(adventurer.xp == MAX_ADVENTURER_XP, 'xp should stop at max xp');
         assert(previous_level == 2, 'prev level should be 2');
-        assert(new_level == 127, 'new level should be max 127');
+        assert(new_level == 181, 'new level should be max 181');
 
         // u16 overflow case
         adventurer.increase_adventurer_xp(65535);
-        assert(adventurer.xp == MAX_XP, 'xp should be max on overflow');
+        assert(adventurer.xp == MAX_ADVENTURER_XP, 'xp should be max on overflow');
     }
 
     #[test]
     #[available_gas(3000000)]
-    fn test_increase_stat_points_available() {
+    fn test_increase_stat_upgrades_available() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        let original_stat_points = adventurer.stat_points_available;
+        let original_stat_points = adventurer.stat_upgrades_available;
 
         // zero case
-        adventurer.increase_stat_points_available(0);
+        adventurer.increase_stat_upgrades_available(0);
         assert(
-            adventurer.stat_points_available == original_stat_points,
+            adventurer.stat_upgrades_available == original_stat_points,
             'stat points should not change'
         );
 
         // base case - adding 1 stat point (no need to pack and unpack this test case)
-        adventurer.increase_stat_points_available(1);
+        adventurer.increase_stat_upgrades_available(1);
         assert(
-            adventurer.stat_points_available == 1 + original_stat_points, 'stat points should be +1'
+            adventurer.stat_upgrades_available == 1 + original_stat_points,
+            'stat points should be +1'
         );
 
         // max stat upgrade value case
-        adventurer.increase_stat_points_available(MAX_STAT_UPGRADE_POINTS);
+        adventurer.increase_stat_upgrades_available(MAX_STAT_UPGRADES_AVAILABLE);
         assert(
-            adventurer.stat_points_available == MAX_STAT_UPGRADE_POINTS, 'stat points should be max'
+            adventurer.stat_upgrades_available == MAX_STAT_UPGRADES_AVAILABLE,
+            'stat points should be max'
         );
 
         // pack and unpack at max value to ensure our max values are correct for packing
         let unpacked: Adventurer = AdventurerPacking::unpack(AdventurerPacking::pack(adventurer));
         assert(
-            unpacked.stat_points_available == MAX_STAT_UPGRADE_POINTS,
+            unpacked.stat_upgrades_available == MAX_STAT_UPGRADES_AVAILABLE,
             'stat point should still be max'
         );
 
         // extreme/overflow case
-        adventurer.stat_points_available = 255;
-        adventurer.increase_stat_points_available(255);
+        adventurer.stat_upgrades_available = 255;
+        adventurer.increase_stat_upgrades_available(255);
         assert(
-            adventurer.stat_points_available == MAX_STAT_UPGRADE_POINTS, 'stat points should be max'
+            adventurer.stat_upgrades_available == MAX_STAT_UPGRADES_AVAILABLE,
+            'stat points should be max'
         );
     }
 
@@ -2817,324 +1841,6 @@ mod tests {
         adventurer.stats.decrease_charisma(6);
     }
 
-    // TODO: Use conditional compilation to test this in the future
-    // see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-    // #[test]
-    // #[should_panic(expected: ('Item is not weapon',))]
-    // #[available_gas(90000)]
-    // fn test_equip_invalid_weapon() {
-    //     let starting_stats = Stats {
-    //         strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
-    //     };
-    //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-    //     // create demon crown item
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
-    //     // try to equip it to adventurer as a weapon
-    //     adventurer.equip_weapon(item);
-    // // should panic with 'Item is not weapon' message
-    // // because demon crown is not a weapon
-    // // test is annotated to expect this panic and will
-    // // pass if it does, otherwise it will fail
-    // }
-
-    #[test]
-    #[available_gas(171984)]
-    fn test_equip_valid_weapon() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-        // Create Katana item
-        let item = ItemPrimitive { id: ItemId::Katana, xp: 1 };
-
-        // Equip to adventurer as a weapon
-        adventurer.equip_weapon(item);
-
-        // Assert item was equipped
-        assert(adventurer.weapon.id == ItemId::Katana, 'did not equip weapon');
-        assert(adventurer.weapon.xp == 1, 'weapon xp is not 1');
-    }
-
-    // TODO: Use conditional compilation to test this in the future
-    // see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-    // #[test]
-    // #[should_panic(expected: ('Item is not chest armor',))]
-    // #[available_gas(90000)]
-    // fn test_equip_invalid_chest() {
-    //     let starting_stats = Stats {
-    //         strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
-    //     };
-    //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-    //     // try to equip a Demon Crown as chest item
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
-    //     adventurer.equip_chest_armor(item);
-    // // should panic with 'Item is not chest armor' message
-    // // because Demon Crown is not chest armor
-    // // test is annotated to expect this panic and will
-    // // pass if it does, otherwise it will fail
-    // }
-
-    #[test]
-    #[available_gas(171984)]
-    fn test_equip_valid_chest() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        // equip Divine Robe as chest item
-        let item = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
-        adventurer.equip_chest_armor(item);
-
-        // this should not panic
-        // assert item was equipped
-        assert(adventurer.chest.id == ItemId::DivineRobe, 'did not equip chest armor');
-        assert(adventurer.chest.xp == 1, 'chest armor xp is not 1');
-    }
-
-    // TODO: Use conditional compilation to test this in the future
-    // see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-    // #[test]
-    // #[should_panic(expected: ('Item is not head armor',))]
-    // #[available_gas(90000)]
-    // fn test_equip_invalid_head() {
-    //     let starting_stats = Stats {
-    //         strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
-    //     };
-    //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-    //     // try to equip a Katana as head item
-    //     let item = ItemPrimitive { id: ItemId::Katana, xp: 1};
-    //     adventurer.equip_head_armor(item);
-    // // should panic with 'Item is not head armor' message
-    // }
-
-    #[test]
-    #[available_gas(171984)]
-    fn test_equip_valid_head() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        // equip Crown as head item
-        let item = ItemPrimitive { id: ItemId::Crown, xp: 1 };
-        adventurer.equip_head_armor(item);
-        // this should not panic
-        // assert item was equipped
-        assert(adventurer.head.id == ItemId::Crown, 'did not equip head armor');
-        assert(adventurer.head.xp == 1, 'head armor xp is not 1');
-    }
-
-    // TODO: Use conditional compilation to test this in the future
-    // see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-    // #[test]
-    // #[should_panic(expected: ('Item is not waist armor',))]
-    // #[available_gas(90000)]
-    // fn test_equip_invalid_waist() {
-    //     let starting_stats = Stats {
-    //         strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
-    //     };
-    //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-    //     // try to equip a Demon Crown as waist item
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
-    //     adventurer.equip_waist_armor(item);
-    // // should panic with 'Item is not waist armor' message
-    // }
-
-    #[test]
-    #[available_gas(171984)]
-    fn test_equip_valid_waist() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-        // equip Wool Sash as waist item
-        let item = ItemPrimitive { id: ItemId::WoolSash, xp: 1 };
-        adventurer.equip_waist_armor(item);
-
-        // this should not panic
-        // assert item was equipped
-        assert(adventurer.waist.id == ItemId::WoolSash, 'did not equip waist armor');
-        assert(adventurer.waist.xp == 1, 'waist armor xp is not 1');
-    }
-
-    // TODO: Use conditional compilation to test this in the future
-    // see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-    // #[test]
-    // #[should_panic(expected: ('Item is not foot armor',))]
-    // #[available_gas(90000)]
-    // fn test_equip_invalid_foot() {
-    //     let starting_stats = Stats {
-    //         strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
-    //     };
-    //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-    //     // try to equip a Demon Crown as foot item
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
-    //     adventurer.equip_foot_armor(item);
-    // // should panic with 'Item is not foot armor' message
-    // }
-
-    #[test]
-    #[available_gas(172184)]
-    fn test_equip_valid_foot() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-        // equip Silk Slippers as foot item
-        let item = ItemPrimitive { id: ItemId::SilkSlippers, xp: 1 };
-        adventurer.equip_foot_armor(item);
-
-        // this should not panic
-        // assert item was equipped
-        assert(adventurer.foot.id == ItemId::SilkSlippers, 'did not equip foot armor');
-        assert(adventurer.foot.xp == 1, 'foot armor xp is not 1');
-    }
-
-    // TODO: Use conditional compilation to test this in the future
-    // see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-    // #[test]
-    // #[should_panic(expected: ('Item is not hand armor',))]
-    // #[available_gas(90000)]
-    // fn test_equip_invalid_hand() {
-    //     let starting_stats = Stats {
-    //         strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
-    //     };
-    //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-    //     // try to equip a Demon Crown as hand item
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
-    //     adventurer.equip_hand_armor(item);
-    // // should panic with 'Item is not hand armor' message
-    // }
-
-    #[test]
-    #[available_gas(172184)]
-    fn test_equip_valid_hand() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-        // equip Divine Gloves as hand item
-        let item = ItemPrimitive { id: ItemId::DivineGloves, xp: 1 };
-        adventurer.equip_hand_armor(item);
-
-        // this should not panic
-        // assert item was equipped
-        assert(adventurer.hand.id == ItemId::DivineGloves, 'did not equip hand armor');
-        assert(adventurer.hand.xp == 1, 'hand armor xp is not 1');
-    }
-
-    // TODO: Use conditional compilation to test this in the future
-    // see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-    // #[test]
-    // #[should_panic(expected: ('Item is not necklace',))]
-    // #[available_gas(90000)]
-    // fn test_equip_invalid_neck() {
-    //     let starting_stats = Stats {
-    //         strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
-    //     };
-    //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-    //     // try to equip a Demon Crown as necklace
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
-    //     adventurer.equip_necklace(item);
-    // // should panic with 'Item is not necklace' message
-    // }
-
-    #[test]
-    #[available_gas(172184)]
-    fn test_equip_valid_neck() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-        // equip Pendant as necklace
-        let item = ItemPrimitive { id: ItemId::Pendant, xp: 1 };
-        adventurer.equip_necklace(item);
-
-        // this should not panic
-        // assert item was equipped
-        assert(adventurer.neck.id == ItemId::Pendant, 'did not equip necklace');
-        assert(adventurer.neck.xp == 1, 'necklace xp is not 1');
-    }
-
-    // TODO: Use conditional compilation to test this in the future
-    // see https://docs.swmansion.com/scarb/docs/reference/conditional-compilation.html
-    // #[test]
-    // #[should_panic(expected: ('Item is not a ring',))]
-    // #[available_gas(90000)]
-    // fn test_equip_invalid_ring() {
-    //     let starting_stats = Stats {
-    //         strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
-    //     };
-    //     let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-    //     // try to equip a Demon Crown as ring
-    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1};
-    //     adventurer.equip_ring(item);
-    // // should panic with 'Item is not a ring' message
-    // }
-
-    #[test]
-    #[available_gas(172184)]
-    fn test_equip_valid_ring() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        let item = ItemPrimitive { id: ItemId::PlatinumRing, xp: 1 };
-        adventurer.equip_ring(item);
-        assert(adventurer.ring.id == ItemId::PlatinumRing, 'did not equip ring');
-        assert(adventurer.ring.xp == 1, 'ring xp is not 1');
-    }
-
-    #[test]
-    #[available_gas(198584)]
-    fn test_increase_item_xp_at_slot_gas() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.increase_item_xp_at_slot(Slot::Weapon(()), 1);
-    }
-
-    #[test]
-    #[available_gas(385184)]
-    fn test_increase_item_xp_at_slot() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-        // assert starting conditions
-        assert(adventurer.weapon.xp == 0, 'weapon should start with 0xp');
-        assert(adventurer.chest.xp == 0, 'chest should start with 0xp');
-        assert(adventurer.head.xp == 0, 'head should start with 0xp');
-        assert(adventurer.waist.xp == 0, 'waist should start with 0xp');
-        assert(adventurer.foot.xp == 0, 'foot should start with 0xp');
-        assert(adventurer.hand.xp == 0, 'hand should start with 0xp');
-        assert(adventurer.neck.xp == 0, 'neck should start with 0xp');
-        assert(adventurer.ring.xp == 0, 'ring should start with 0xp');
-
-        adventurer.increase_item_xp_at_slot(Slot::Weapon(()), 1);
-        assert(adventurer.weapon.xp == 1, 'weapon should have 1xp');
-
-        adventurer.increase_item_xp_at_slot(Slot::Chest(()), 1);
-        assert(adventurer.chest.xp == 1, 'chest should have 1xp');
-
-        adventurer.increase_item_xp_at_slot(Slot::Head(()), 1);
-        assert(adventurer.head.xp == 1, 'head should have 1xp');
-
-        adventurer.increase_item_xp_at_slot(Slot::Waist(()), 1);
-        assert(adventurer.waist.xp == 1, 'waist should have 1xp');
-
-        adventurer.increase_item_xp_at_slot(Slot::Foot(()), 1);
-        assert(adventurer.foot.xp == 1, 'foot should have 1xp');
-
-        adventurer.increase_item_xp_at_slot(Slot::Hand(()), 1);
-        assert(adventurer.hand.xp == 1, 'hand should have 1xp');
-
-        adventurer.increase_item_xp_at_slot(Slot::Neck(()), 1);
-        assert(adventurer.neck.xp == 1, 'neck should have 1xp');
-
-        adventurer.increase_item_xp_at_slot(Slot::Ring(()), 1);
-        assert(adventurer.ring.xp == 1, 'ring should have 1xp');
-    }
-
-    #[test]
-    #[available_gas(198084)]
-    fn test_increase_item_xp_at_slot_max() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-        assert(adventurer.weapon.xp == 0, 'weapon should start with 0xp');
-        adventurer.increase_item_xp_at_slot(Slot::Weapon(()), 65535);
-        assert(adventurer.weapon.xp == ITEM_MAX_XP, 'weapon should have have xp');
-    }
-
-    #[test]
-    #[available_gas(198084)]
-    fn test_increase_item_xp_at_slot_zero() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-        assert(adventurer.weapon.xp == 0, 'weapon should start with 0xp');
-        adventurer.increase_item_xp_at_slot(Slot::Weapon(()), 0);
-        assert(adventurer.weapon.xp == 0, 'weapon should still have 0xp');
-    }
-
     #[test]
     #[available_gas(449564)]
     fn test_get_equipped_items() {
@@ -3145,8 +1851,8 @@ mod tests {
         assert(*starting_equipment.at(0).id == ItemId::Wand, 'adventurer starts with wand');
 
         // equip chest armor
-        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
-        adventurer.equip_chest_armor(chest);
+        let chest = Item { id: ItemId::DivineRobe, xp: 1 };
+        adventurer.equipment.equip_chest_armor(chest);
 
         // assert we now have two items equipped
         let equipped_items = adventurer.get_equipped_items();
@@ -3155,8 +1861,8 @@ mod tests {
         assert(*equipped_items.at(1).id == ItemId::DivineRobe, 'should have robe equipped');
 
         // equip head armor
-        let head = ItemPrimitive { id: ItemId::Crown, xp: 1 };
-        adventurer.equip_head_armor(head);
+        let head = Item { id: ItemId::Crown, xp: 1 };
+        adventurer.equipment.equip_head_armor(head);
 
         // assert we now have three items equipped
         let equipped_items = adventurer.get_equipped_items();
@@ -3166,8 +1872,8 @@ mod tests {
         assert(*equipped_items.at(2).id == ItemId::Crown, 'should have crown equipped');
 
         // equip waist armor
-        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1 };
-        adventurer.equip_waist_armor(waist);
+        let waist = Item { id: ItemId::DemonhideBelt, xp: 1 };
+        adventurer.equipment.equip_waist_armor(waist);
 
         // assert we now have four items equipped
         let equipped_items = adventurer.get_equipped_items();
@@ -3178,8 +1884,8 @@ mod tests {
         assert(*equipped_items.at(3).id == ItemId::DemonhideBelt, 'should have belt equipped');
 
         // equip foot armor
-        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1 };
-        adventurer.equip_foot_armor(foot);
+        let foot = Item { id: ItemId::LeatherBoots, xp: 1 };
+        adventurer.equipment.equip_foot_armor(foot);
 
         // assert we now have five items equipped
         let equipped_items = adventurer.get_equipped_items();
@@ -3191,8 +1897,8 @@ mod tests {
         assert(*equipped_items.at(4).id == ItemId::LeatherBoots, 'should have boots equipped');
 
         // equip hand armor
-        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1 };
-        adventurer.equip_hand_armor(hand);
+        let hand = Item { id: ItemId::LeatherGloves, xp: 1 };
+        adventurer.equipment.equip_hand_armor(hand);
 
         // assert we now have six items equipped
         let equipped_items = adventurer.get_equipped_items();
@@ -3205,8 +1911,8 @@ mod tests {
         assert(*equipped_items.at(5).id == ItemId::LeatherGloves, 'should have gloves equipped');
 
         // equip necklace
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
-        adventurer.equip_necklace(neck);
+        let neck = Item { id: ItemId::Amulet, xp: 1 };
+        adventurer.equipment.equip_necklace(neck);
 
         // assert we now have seven items equipped
         let equipped_items = adventurer.get_equipped_items();
@@ -3220,8 +1926,8 @@ mod tests {
         assert(*equipped_items.at(6).id == ItemId::Amulet, 'should have amulet equipped');
 
         // equip ring
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
-        adventurer.equip_ring(ring);
+        let ring = Item { id: ItemId::GoldRing, xp: 1 };
+        adventurer.equipment.equip_ring(ring);
 
         // assert we now have eight items equipped
         let equipped_items = adventurer.get_equipped_items();
@@ -3236,8 +1942,8 @@ mod tests {
         assert(*equipped_items.at(7).id == ItemId::GoldRing, 'should have ring equipped');
 
         // equip a different weapon
-        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1 };
-        adventurer.equip_weapon(weapon);
+        let weapon = Item { id: ItemId::Katana, xp: 1 };
+        adventurer.equipment.equip_weapon(weapon);
 
         // assert we still have eight items equipped
         let equipped_items = adventurer.get_equipped_items();
@@ -3306,34 +2012,38 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // stage items
-        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1 };
-        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
-        let head = ItemPrimitive { id: ItemId::Crown, xp: 1 };
-        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1 };
-        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1 };
-        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1 };
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
+        let weapon = Item { id: ItemId::Katana, xp: 1 };
+        let chest = Item { id: ItemId::DivineRobe, xp: 1 };
+        let head = Item { id: ItemId::Crown, xp: 1 };
+        let waist = Item { id: ItemId::DemonhideBelt, xp: 1 };
+        let foot = Item { id: ItemId::LeatherBoots, xp: 1 };
+        let hand = Item { id: ItemId::LeatherGloves, xp: 1 };
+        let neck = Item { id: ItemId::Amulet, xp: 1 };
+        let ring = Item { id: ItemId::GoldRing, xp: 1 };
 
         // equip items
-        adventurer.equip_weapon(weapon);
-        adventurer.equip_chest_armor(chest);
-        adventurer.equip_head_armor(head);
-        adventurer.equip_waist_armor(waist);
-        adventurer.equip_foot_armor(foot);
-        adventurer.equip_hand_armor(hand);
-        adventurer.equip_necklace(neck);
-        adventurer.equip_ring(ring);
+        adventurer.equipment.equip_weapon(weapon);
+        adventurer.equipment.equip_chest_armor(chest);
+        adventurer.equipment.equip_head_armor(head);
+        adventurer.equipment.equip_waist_armor(waist);
+        adventurer.equipment.equip_foot_armor(foot);
+        adventurer.equipment.equip_hand_armor(hand);
+        adventurer.equipment.equip_necklace(neck);
+        adventurer.equipment.equip_ring(ring);
 
         // verify getting item by slot returns correct items
-        assert(adventurer.get_item_at_slot(Slot::Weapon(())) == weapon, 'wrong weapon');
-        assert(adventurer.get_item_at_slot(Slot::Chest(())) == chest, 'wrong chest armor');
-        assert(adventurer.get_item_at_slot(Slot::Head(())) == head, 'wrong head armor');
-        assert(adventurer.get_item_at_slot(Slot::Waist(())) == waist, 'wrong waist armor');
-        assert(adventurer.get_item_at_slot(Slot::Foot(())) == foot, 'wrong foot armor');
-        assert(adventurer.get_item_at_slot(Slot::Hand(())) == hand, 'wrong hand armor');
-        assert(adventurer.get_item_at_slot(Slot::Neck(())) == neck, 'wrong necklace');
-        assert(adventurer.get_item_at_slot(Slot::Ring(())) == ring, 'wrong ring');
+        assert(adventurer.equipment.get_item_at_slot(Slot::Weapon(())) == weapon, 'wrong weapon');
+        assert(
+            adventurer.equipment.get_item_at_slot(Slot::Chest(())) == chest, 'wrong chest armor'
+        );
+        assert(adventurer.equipment.get_item_at_slot(Slot::Head(())) == head, 'wrong head armor');
+        assert(
+            adventurer.equipment.get_item_at_slot(Slot::Waist(())) == waist, 'wrong waist armor'
+        );
+        assert(adventurer.equipment.get_item_at_slot(Slot::Foot(())) == foot, 'wrong foot armor');
+        assert(adventurer.equipment.get_item_at_slot(Slot::Hand(())) == hand, 'wrong hand armor');
+        assert(adventurer.equipment.get_item_at_slot(Slot::Neck(())) == neck, 'wrong necklace');
+        assert(adventurer.equipment.get_item_at_slot(Slot::Ring(())) == ring, 'wrong ring');
     }
 
     #[test]
@@ -3342,30 +2052,32 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         // stage items
-        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1 };
-        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
-        let head = ItemPrimitive { id: ItemId::Crown, xp: 1 };
-        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1 };
-        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1 };
-        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1 };
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
+        let weapon = Item { id: ItemId::Katana, xp: 1 };
+        let chest = Item { id: ItemId::DivineRobe, xp: 1 };
+        let head = Item { id: ItemId::Crown, xp: 1 };
+        let waist = Item { id: ItemId::DemonhideBelt, xp: 1 };
+        let foot = Item { id: ItemId::LeatherBoots, xp: 1 };
+        let hand = Item { id: ItemId::LeatherGloves, xp: 1 };
+        let neck = Item { id: ItemId::Amulet, xp: 1 };
+        let ring = Item { id: ItemId::GoldRing, xp: 1 };
 
         // equip half the items, adventurer will have nothing equipped for the other slots
-        adventurer.equip_weapon(weapon);
-        adventurer.equip_head_armor(head);
-        adventurer.equip_foot_armor(foot);
-        adventurer.equip_necklace(neck);
+        adventurer.equipment.equip_weapon(weapon);
+        adventurer.equipment.equip_head_armor(head);
+        adventurer.equipment.equip_foot_armor(foot);
+        adventurer.equipment.equip_necklace(neck);
 
         // verify is_slot_free returns correct values
-        assert(adventurer.is_slot_free(weapon) == false, 'weapon slot should be occupied');
-        assert(adventurer.is_slot_free(chest) == true, 'chest slot should be free');
-        assert(adventurer.is_slot_free(head) == false, 'head slot should be occupied');
-        assert(adventurer.is_slot_free(waist) == true, 'waist slot should be free');
-        assert(adventurer.is_slot_free(foot) == false, 'foot slot should be occupied');
-        assert(adventurer.is_slot_free(hand) == true, 'hand slot should be free');
-        assert(adventurer.is_slot_free(neck) == false, 'neck slot should be occupied');
-        assert(adventurer.is_slot_free(ring) == true, 'ring slot should be free');
+        assert(
+            adventurer.equipment.is_slot_free(weapon) == false, 'weapon slot should be occupied'
+        );
+        assert(adventurer.equipment.is_slot_free(chest) == true, 'chest slot should be free');
+        assert(adventurer.equipment.is_slot_free(head) == false, 'head slot should be occupied');
+        assert(adventurer.equipment.is_slot_free(waist) == true, 'waist slot should be free');
+        assert(adventurer.equipment.is_slot_free(foot) == false, 'foot slot should be occupied');
+        assert(adventurer.equipment.is_slot_free(hand) == true, 'hand slot should be free');
+        assert(adventurer.equipment.is_slot_free(neck) == false, 'neck slot should be occupied');
+        assert(adventurer.equipment.is_slot_free(ring) == true, 'ring slot should be free');
     }
 
     #[test]
@@ -3897,7 +2609,6 @@ mod tests {
     #[available_gas(665600)]
     fn test_get_and_apply_stat_boosts() {
         let mut adventurer = Adventurer {
-            last_action_block: 511,
             health: 100,
             xp: 1,
             stats: Stats {
@@ -3910,21 +2621,22 @@ mod tests {
                 luck: 0
             },
             gold: 40,
-            weapon: ItemPrimitive { id: 1, xp: 225 },
-            chest: ItemPrimitive { id: 2, xp: 65535 },
-            head: ItemPrimitive { id: 3, xp: 225 },
-            waist: ItemPrimitive { id: 4, xp: 225 },
-            foot: ItemPrimitive { id: 5, xp: 1000 },
-            hand: ItemPrimitive { id: 6, xp: 224 },
-            neck: ItemPrimitive { id: 7, xp: 1 },
-            ring: ItemPrimitive { id: 8, xp: 1 },
+            equipment: Equipment {
+                weapon: Item { id: 1, xp: 225 },
+                chest: Item { id: 2, xp: 65535 },
+                head: Item { id: 3, xp: 225 },
+                waist: Item { id: 4, xp: 225 },
+                foot: Item { id: 5, xp: 1000 },
+                hand: Item { id: 6, xp: 224 },
+                neck: Item { id: 7, xp: 1 },
+                ring: Item { id: 8, xp: 1 }
+            },
             beast_health: 20,
-            stat_points_available: 0,
-            actions_per_block: 0,
+            stat_upgrades_available: 0,
             mutated: false,
         };
 
-        let stat_boosts = adventurer.get_stat_boosts(1);
+        let stat_boosts = adventurer.equipment.get_stat_boosts(1);
         assert(stat_boosts.strength == 3, 'strength should be 3');
         assert(stat_boosts.vitality == 5, 'vitality should be 5');
         assert(stat_boosts.dexterity == 1, 'dexterity should be 1');
@@ -3943,7 +2655,7 @@ mod tests {
             strength: 5, dexterity: 1, vitality: 5, intelligence: 1, wisdom: 1, charisma: 2, luck: 1
         };
 
-        adventurer.apply_stat_boosts(boost_stats);
+        adventurer.stats.apply_stat_boosts(boost_stats);
         assert(adventurer.stats.strength == 5, 'strength should be 5');
         assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
         assert(adventurer.stats.vitality == 5, 'vitality should be 5');
@@ -3963,7 +2675,7 @@ mod tests {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         };
 
-        adventurer.apply_stat_boosts(boost_stats);
+        adventurer.stats.apply_stat_boosts(boost_stats);
         assert(adventurer.stats.strength == 0, 'strength should be 0');
         assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
         assert(adventurer.stats.vitality == 0, 'vitality should be 0');
@@ -3987,7 +2699,7 @@ mod tests {
             luck: 255,
         };
 
-        adventurer.apply_stat_boosts(boost_stats);
+        adventurer.stats.apply_stat_boosts(boost_stats);
         assert(adventurer.stats.strength == 255, 'strength should be max');
         assert(adventurer.stats.dexterity == 255, 'dexterity should be max');
         assert(adventurer.stats.vitality == 255, 'vitality should be max');
@@ -4001,7 +2713,6 @@ mod tests {
     #[available_gas(53430)]
     fn test_remove_stat_boosts() {
         let mut adventurer = Adventurer {
-            last_action_block: 511,
             health: 100,
             xp: 1,
             stats: Stats {
@@ -4014,17 +2725,18 @@ mod tests {
                 luck: 0
             },
             gold: 40,
-            weapon: ItemPrimitive { id: 1, xp: 225 },
-            chest: ItemPrimitive { id: 2, xp: 65535 },
-            head: ItemPrimitive { id: 3, xp: 225 },
-            waist: ItemPrimitive { id: 4, xp: 225 },
-            foot: ItemPrimitive { id: 5, xp: 1000 },
-            hand: ItemPrimitive { id: 6, xp: 224 },
-            neck: ItemPrimitive { id: 7, xp: 1 },
-            ring: ItemPrimitive { id: 8, xp: 1 },
+            equipment: Equipment {
+                weapon: Item { id: 1, xp: 225 },
+                chest: Item { id: 2, xp: 65535 },
+                head: Item { id: 3, xp: 225 },
+                waist: Item { id: 4, xp: 225 },
+                foot: Item { id: 5, xp: 1000 },
+                hand: Item { id: 6, xp: 224 },
+                neck: Item { id: 7, xp: 1 },
+                ring: Item { id: 8, xp: 1 }
+            },
             beast_health: 20,
-            stat_points_available: 0,
-            actions_per_block: 0,
+            stat_upgrades_available: 0,
             mutated: false,
         };
 
@@ -4032,7 +2744,7 @@ mod tests {
             strength: 5, dexterity: 4, vitality: 3, intelligence: 2, wisdom: 1, charisma: 0, luck: 1
         };
 
-        adventurer.remove_stat_boosts(boost_stats);
+        adventurer.stats.remove_stat_boosts(boost_stats);
         assert(adventurer.stats.strength == 0, 'strength should be 0');
         assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
         assert(adventurer.stats.vitality == 0, 'vitality should be 0');
@@ -4046,7 +2758,6 @@ mod tests {
     #[available_gas(53430)]
     fn test_remove_stat_boosts_zero() {
         let mut adventurer = Adventurer {
-            last_action_block: 511,
             health: 100,
             xp: 1,
             stats: Stats {
@@ -4059,17 +2770,18 @@ mod tests {
                 luck: 0
             },
             gold: 40,
-            weapon: ItemPrimitive { id: 1, xp: 225 },
-            chest: ItemPrimitive { id: 2, xp: 65535 },
-            head: ItemPrimitive { id: 3, xp: 225 },
-            waist: ItemPrimitive { id: 4, xp: 225 },
-            foot: ItemPrimitive { id: 5, xp: 1000 },
-            hand: ItemPrimitive { id: 6, xp: 224 },
-            neck: ItemPrimitive { id: 7, xp: 1 },
-            ring: ItemPrimitive { id: 8, xp: 1 },
+            equipment: Equipment {
+                weapon: Item { id: 1, xp: 225 },
+                chest: Item { id: 2, xp: 65535 },
+                head: Item { id: 3, xp: 225 },
+                waist: Item { id: 4, xp: 225 },
+                foot: Item { id: 5, xp: 1000 },
+                hand: Item { id: 6, xp: 224 },
+                neck: Item { id: 7, xp: 1 },
+                ring: Item { id: 8, xp: 1 }
+            },
             beast_health: 20,
-            stat_points_available: 0,
-            actions_per_block: 0,
+            stat_upgrades_available: 0,
             mutated: false,
         };
 
@@ -4077,7 +2789,7 @@ mod tests {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         };
 
-        adventurer.remove_stat_boosts(boost_stats);
+        adventurer.stats.remove_stat_boosts(boost_stats);
         assert(adventurer.stats.strength == 5, 'strength should be 5');
         assert(adventurer.stats.dexterity == 4, 'dexterity should be 4');
         assert(adventurer.stats.vitality == 3, 'vitality should be 3');
@@ -4090,7 +2802,6 @@ mod tests {
     #[test]
     fn test_remove_stat_boosts_max() {
         let mut adventurer = Adventurer {
-            last_action_block: 511,
             health: 100,
             xp: 1,
             stats: Stats {
@@ -4103,17 +2814,18 @@ mod tests {
                 luck: 0
             },
             gold: 40,
-            weapon: ItemPrimitive { id: 1, xp: 225 },
-            chest: ItemPrimitive { id: 2, xp: 65535 },
-            head: ItemPrimitive { id: 3, xp: 225 },
-            waist: ItemPrimitive { id: 4, xp: 225 },
-            foot: ItemPrimitive { id: 5, xp: 1000 },
-            hand: ItemPrimitive { id: 6, xp: 224 },
-            neck: ItemPrimitive { id: 7, xp: 1 },
-            ring: ItemPrimitive { id: 8, xp: 1 },
+            equipment: Equipment {
+                weapon: Item { id: 1, xp: 225 },
+                chest: Item { id: 2, xp: 65535 },
+                head: Item { id: 3, xp: 225 },
+                waist: Item { id: 4, xp: 225 },
+                foot: Item { id: 5, xp: 1000 },
+                hand: Item { id: 6, xp: 224 },
+                neck: Item { id: 7, xp: 1 },
+                ring: Item { id: 8, xp: 1 }
+            },
             beast_health: 20,
-            stat_points_available: 0,
-            actions_per_block: 0,
+            stat_upgrades_available: 0,
             mutated: false,
         };
 
@@ -4127,7 +2839,7 @@ mod tests {
             luck: 255,
         };
 
-        adventurer.remove_stat_boosts(boost_stats);
+        adventurer.stats.remove_stat_boosts(boost_stats);
         assert(adventurer.stats.strength == 0, 'strength should be 0');
         assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
         assert(adventurer.stats.vitality == 0, 'vitality should be 0');
@@ -4161,7 +2873,7 @@ mod tests {
     fn test_calculate_luck_gas_no_luck() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         let bag = ImplBag::new();
-        assert(adventurer.calculate_luck(bag) == 2, 'start with 2 luck');
+        assert(adventurer.equipment.calculate_luck(bag) == 2, 'start with 2 luck');
     }
 
     #[test]
@@ -4170,11 +2882,11 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         let bag = ImplBag::new();
 
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
-        adventurer.equip_necklace(neck);
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
-        adventurer.equip_ring(ring);
-        assert(adventurer.calculate_luck(bag) == 2, 'start with 2 luck');
+        let neck = Item { id: ItemId::Amulet, xp: 1 };
+        adventurer.equipment.equip_necklace(neck);
+        let ring = Item { id: ItemId::GoldRing, xp: 1 };
+        adventurer.equipment.equip_ring(ring);
+        assert(adventurer.equipment.calculate_luck(bag) == 2, 'start with 2 luck');
     }
 
     #[test]
@@ -4182,33 +2894,34 @@ mod tests {
     fn test_calculate_luck() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         let bag = ImplBag::new();
-        assert(adventurer.calculate_luck(bag) == 2, 'start with 2 luck');
+        assert(adventurer.equipment.calculate_luck(bag) == 2, 'start with 2 luck');
 
         // equip a greatness 1 necklace
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
-        adventurer.equip_necklace(neck);
-        assert(adventurer.calculate_luck(bag) == 2, 'still 2 luck');
+        let neck = Item { id: ItemId::Amulet, xp: 1 };
+        adventurer.equipment.equip_necklace(neck);
+        assert(adventurer.equipment.calculate_luck(bag) == 2, 'still 2 luck');
 
         // equip a greatness 1 ring
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
-        adventurer.equip_ring(ring);
-        assert(adventurer.calculate_luck(bag) == 2, 'still 2 luck');
+        let ring = Item { id: ItemId::GoldRing, xp: 1 };
+        adventurer.equipment.equip_ring(ring);
+        assert(adventurer.equipment.calculate_luck(bag) == 2, 'still 2 luck');
 
         // equip a greatness 19 silver ring
-        let mut silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 399 };
-        adventurer.equip_ring(silver_ring);
-        assert(adventurer.calculate_luck(bag) == 39, 'should be 39 luck');
+        let mut silver_ring = Item { id: ItemId::SilverRing, xp: 399 };
+        adventurer.equipment.equip_ring(silver_ring);
+        assert(adventurer.equipment.calculate_luck(bag) == 39, 'should be 39 luck');
 
         // increase silver ring to greatness 20 to unlock extra 20 luck
-        adventurer.ring.xp = 400;
-        assert(adventurer.calculate_luck(bag) == 41, 'should be 41 luck');
+        adventurer.equipment.ring.xp = 400;
+        assert(adventurer.equipment.calculate_luck(bag) == 41, 'should be 41 luck');
 
         // overflow case
-        adventurer.ring.xp = 65535;
-        adventurer.neck.xp = 65535;
-        let _luck = adventurer.calculate_luck(bag);
+        adventurer.equipment.ring.xp = 65535;
+        adventurer.equipment.neck.xp = 65535;
+        let _luck = adventurer.equipment.calculate_luck(bag);
         assert(
-            adventurer.calculate_luck(bag) == (ITEM_MAX_GREATNESS * 2) + SILVER_RING_G20_LUCK_BONUS,
+            adventurer.equipment.calculate_luck(bag) == (ITEM_MAX_GREATNESS * 2)
+                + SILVER_RING_G20_LUCK_BONUS,
             'should be 60 luck'
         );
     }
@@ -4225,283 +2938,6 @@ mod tests {
         // overflow check
         adventurer.beast_health = 65535;
         assert(adventurer.in_battle() == true, 'advntr in battle');
-    }
-
-    #[test]
-    #[available_gas(550000)]
-    fn test_equip_item() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-        // assert starting conditions
-        assert(adventurer.weapon.id == 12, 'weapon should be 12');
-        assert(adventurer.chest.id == 0, 'chest should be 0');
-        assert(adventurer.head.id == 0, 'head should be 0');
-        assert(adventurer.waist.id == 0, 'waist should be 0');
-        assert(adventurer.foot.id == 0, 'foot should be 0');
-        assert(adventurer.hand.id == 0, 'hand should be 0');
-        assert(adventurer.neck.id == 0, 'neck should be 0');
-        assert(adventurer.ring.id == 0, 'ring should be 0');
-
-        // stage items
-        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1 };
-        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
-        let head = ItemPrimitive { id: ItemId::Crown, xp: 1 };
-        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1 };
-        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1 };
-        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1 };
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
-
-        adventurer.equip_item(weapon);
-        adventurer.equip_item(chest);
-        adventurer.equip_item(head);
-        adventurer.equip_item(waist);
-        adventurer.equip_item(foot);
-        adventurer.equip_item(hand);
-        adventurer.equip_item(neck);
-        adventurer.equip_item(ring);
-
-        // assert items were added
-        assert(adventurer.weapon.id == weapon.id, 'weapon should be equipped');
-        assert(adventurer.chest.id == chest.id, 'chest should be equipped');
-        assert(adventurer.head.id == head.id, 'head should be equipped');
-        assert(adventurer.waist.id == waist.id, 'waist should be equipped');
-        assert(adventurer.foot.id == foot.id, 'foot should be equipped');
-        assert(adventurer.hand.id == hand.id, 'hand should be equipped');
-        assert(adventurer.neck.id == neck.id, 'neck should be equipped');
-        assert(adventurer.ring.id == ring.id, 'ring should be equipped');
-    }
-
-    #[test]
-    #[available_gas(1000000)]
-    fn test_is_equipped() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        let wand = ItemPrimitive { id: ItemId::Wand, xp: 1 };
-        let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 1 };
-
-        // assert starting state
-        assert(adventurer.weapon.id == wand.id, 'weapon should be wand');
-        assert(adventurer.chest.id == 0, 'chest should be 0');
-        assert(adventurer.head.id == 0, 'head should be 0');
-        assert(adventurer.waist.id == 0, 'waist should be 0');
-        assert(adventurer.foot.id == 0, 'foot should be 0');
-        assert(adventurer.hand.id == 0, 'hand should be 0');
-        assert(adventurer.neck.id == 0, 'neck should be 0');
-        assert(adventurer.ring.id == 0, 'ring should be 0');
-
-        // assert base case for is_equipped
-        assert(adventurer.is_equipped(wand.id) == true, 'wand should be equipped');
-        assert(adventurer.is_equipped(demon_crown.id) == false, 'demon crown is not equipped');
-
-        // stage items
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 1 };
-        let divine_robe = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
-        let crown = ItemPrimitive { id: ItemId::Crown, xp: 1 };
-        let demonhide_belt = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1 };
-        let leather_boots = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1 };
-        let leather_gloves = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1 };
-        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
-        let gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
-
-        // Equip a katana and verify is_equipped returns true for katana and false everything else
-        adventurer.equip_item(katana);
-        assert(adventurer.is_equipped(katana.id) == true, 'weapon should be equipped');
-        assert(adventurer.is_equipped(wand.id) == false, 'wand should not be equipped');
-        assert(adventurer.is_equipped(crown.id) == false, 'crown should not be equipped');
-        assert(adventurer.is_equipped(divine_robe.id) == false, 'divine robe is not equipped');
-        assert(
-            adventurer.is_equipped(demonhide_belt.id) == false, 'demonhide belt is not equipped'
-        );
-        assert(adventurer.is_equipped(leather_boots.id) == false, 'leather boots is not equipped');
-        assert(
-            adventurer.is_equipped(leather_gloves.id) == false, 'leather gloves is not equipped'
-        );
-        assert(adventurer.is_equipped(amulet.id) == false, 'amulet is not equipped');
-        assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
-
-        // equip a divine robe and verify is_equipped returns true for katana and divine robe and false everything else
-        adventurer.equip_item(divine_robe);
-        assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
-        assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
-        assert(adventurer.is_equipped(crown.id) == false, 'crown should not be equipped');
-        assert(
-            adventurer.is_equipped(demonhide_belt.id) == false, 'demonhide belt is not equipped'
-        );
-        assert(adventurer.is_equipped(leather_boots.id) == false, 'leather boots is not equipped');
-        assert(
-            adventurer.is_equipped(leather_gloves.id) == false, 'leather gloves is not equipped'
-        );
-        assert(adventurer.is_equipped(amulet.id) == false, 'amulet is not equipped');
-        assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
-
-        // equip a crown and verify is_equipped returns true for katana, divine robe, and crown and false everything else
-        adventurer.equip_item(crown);
-        assert(adventurer.is_equipped(crown.id) == true, 'crown should be equipped');
-        assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
-        assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
-        assert(
-            adventurer.is_equipped(demonhide_belt.id) == false, 'demonhide belt is not equipped'
-        );
-        assert(adventurer.is_equipped(leather_boots.id) == false, 'leather boots is not equipped');
-        assert(
-            adventurer.is_equipped(leather_gloves.id) == false, 'leather gloves is not equipped'
-        );
-        assert(adventurer.is_equipped(amulet.id) == false, 'amulet is not equipped');
-        assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
-
-        // equip a demonhide belt and verify is_equipped returns true for katana, divine robe, crown, and demonhide belt and false everything else
-        adventurer.equip_item(demonhide_belt);
-        assert(adventurer.is_equipped(demonhide_belt.id) == true, 'demonhide belt is equipped');
-        assert(adventurer.is_equipped(crown.id) == true, 'crown should be equipped');
-        assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
-        assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
-        assert(adventurer.is_equipped(leather_boots.id) == false, 'leather boots is not equipped');
-        assert(
-            adventurer.is_equipped(leather_gloves.id) == false, 'leather gloves is not equipped'
-        );
-        assert(adventurer.is_equipped(amulet.id) == false, 'amulet is not equipped');
-        assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
-
-        // equip leather boots and verify is_equipped returns true for katana, divine robe, crown, demonhide belt, and leather boots and false everything else
-        adventurer.equip_item(leather_boots);
-        assert(adventurer.is_equipped(leather_boots.id) == true, 'leather boots is equipped');
-        assert(adventurer.is_equipped(demonhide_belt.id) == true, 'demonhide belt is equipped');
-        assert(adventurer.is_equipped(crown.id) == true, 'crown should be equipped');
-        assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
-        assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
-        assert(
-            adventurer.is_equipped(leather_gloves.id) == false, 'leather gloves is not equipped'
-        );
-        assert(adventurer.is_equipped(amulet.id) == false, 'amulet is not equipped');
-        assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
-
-        // equip leather gloves and verify is_equipped returns true for katana, divine robe, crown, demonhide belt, leather boots, and leather gloves and false everything else
-        adventurer.equip_item(leather_gloves);
-        assert(adventurer.is_equipped(leather_gloves.id) == true, 'leather gloves is equipped');
-        assert(adventurer.is_equipped(leather_boots.id) == true, 'leather boots is equipped');
-        assert(adventurer.is_equipped(demonhide_belt.id) == true, 'demonhide belt is equipped');
-        assert(adventurer.is_equipped(crown.id) == true, 'crown should be equipped');
-        assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
-        assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
-        assert(adventurer.is_equipped(amulet.id) == false, 'amulet is not equipped');
-        assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
-
-        // equip amulet and verify is_equipped returns true for katana, divine robe, crown, demonhide belt, leather boots, leather gloves, and amulet and false everything else
-        adventurer.equip_item(amulet);
-        assert(adventurer.is_equipped(amulet.id) == true, 'amulet is equipped');
-        assert(adventurer.is_equipped(leather_gloves.id) == true, 'leather gloves is equipped');
-        assert(adventurer.is_equipped(leather_boots.id) == true, 'leather boots is equipped');
-        assert(adventurer.is_equipped(demonhide_belt.id) == true, 'demonhide belt is equipped');
-        assert(adventurer.is_equipped(crown.id) == true, 'crown should be equipped');
-        assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
-        assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
-        assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
-
-        // equip gold ring and verify is_equipped returns true for katana, divine robe, crown, demonhide belt, leather boots, leather gloves, amulet, and gold ring and false everything else
-        adventurer.equip_item(gold_ring);
-        assert(adventurer.is_equipped(gold_ring.id) == true, 'gold ring is equipped');
-        assert(adventurer.is_equipped(amulet.id) == true, 'amulet is equipped');
-        assert(adventurer.is_equipped(leather_gloves.id) == true, 'leather gloves is equipped');
-        assert(adventurer.is_equipped(leather_boots.id) == true, 'leather boots is equipped');
-        assert(adventurer.is_equipped(demonhide_belt.id) == true, 'demonhide belt is equipped');
-        assert(adventurer.is_equipped(crown.id) == true, 'crown should be equipped');
-        assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
-        assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
-    }
-
-    #[test]
-    #[should_panic(expected: ('item is not equipped',))]
-    #[available_gas(172984)]
-    fn test_drop_item_not_equipped() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        // try to drop an item that isn't equipped
-        // this should panic with 'item is not equipped'
-        // the test is annotated to expect this panic
-        adventurer.drop_item(ItemId::Crown);
-    }
-
-    #[test]
-    #[available_gas(511384)]
-    fn test_drop_item() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-
-        // assert starting conditions
-        assert(adventurer.weapon.id == ItemId::Wand, 'weapon should be wand');
-        assert(adventurer.chest.id == 0, 'chest should be 0');
-        assert(adventurer.head.id == 0, 'head should be 0');
-        assert(adventurer.waist.id == 0, 'waist should be 0');
-        assert(adventurer.foot.id == 0, 'foot should be 0');
-        assert(adventurer.hand.id == 0, 'hand should be 0');
-        assert(adventurer.neck.id == 0, 'neck should be 0');
-        assert(adventurer.ring.id == 0, 'ring should be 0');
-
-        // drop equipped wand
-        adventurer.drop_item(ItemId::Wand);
-        assert(adventurer.weapon.id == 0, 'weapon should be 0');
-        assert(adventurer.weapon.xp == 0, 'weapon xp should be 0');
-
-        // instantiate additional items
-        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1 };
-        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1 };
-        let head = ItemPrimitive { id: ItemId::Crown, xp: 1 };
-        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1 };
-        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1 };
-        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1 };
-        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1 };
-        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1 };
-
-        // equip item
-        adventurer.equip_item(weapon);
-        adventurer.equip_item(chest);
-        adventurer.equip_item(head);
-        adventurer.equip_item(waist);
-        adventurer.equip_item(foot);
-        adventurer.equip_item(hand);
-        adventurer.equip_item(neck);
-        adventurer.equip_item(ring);
-
-        // assert items were equipped
-        assert(adventurer.weapon.id == weapon.id, 'weapon should be equipped');
-        assert(adventurer.chest.id == chest.id, 'chest should be equipped');
-        assert(adventurer.head.id == head.id, 'head should be equipped');
-        assert(adventurer.waist.id == waist.id, 'waist should be equipped');
-        assert(adventurer.foot.id == foot.id, 'foot should be equipped');
-        assert(adventurer.hand.id == hand.id, 'hand should be equipped');
-        assert(adventurer.neck.id == neck.id, 'neck should be equipped');
-        assert(adventurer.ring.id == ring.id, 'ring should be equipped');
-
-        // drop equipped items one by one and assert they get dropped
-        adventurer.drop_item(weapon.id);
-        assert(adventurer.weapon.id == 0, 'weapon should be 0');
-        assert(adventurer.weapon.xp == 0, 'weapon xp should be 0');
-
-        adventurer.drop_item(chest.id);
-        assert(adventurer.chest.id == 0, 'chest should be 0');
-        assert(adventurer.chest.xp == 0, 'chest xp should be 0');
-
-        adventurer.drop_item(head.id);
-        assert(adventurer.head.id == 0, 'head should be 0');
-        assert(adventurer.head.xp == 0, 'head xp should be 0');
-
-        adventurer.drop_item(waist.id);
-        assert(adventurer.waist.id == 0, 'waist should be 0');
-        assert(adventurer.waist.xp == 0, 'waist xp should be 0');
-
-        adventurer.drop_item(foot.id);
-        assert(adventurer.foot.id == 0, 'foot should be 0');
-        assert(adventurer.foot.xp == 0, 'foot xp should be 0');
-
-        adventurer.drop_item(hand.id);
-        assert(adventurer.hand.id == 0, 'hand should be 0');
-        assert(adventurer.hand.xp == 0, 'hand xp should be 0');
-
-        adventurer.drop_item(neck.id);
-        assert(adventurer.neck.id == 0, 'neck should be 0');
-        assert(adventurer.neck.xp == 0, 'neck xp should be 0');
-
-        adventurer.drop_item(ring.id);
-        assert(adventurer.ring.id == 0, 'ring should be 0');
-        assert(adventurer.ring.xp == 0, 'ring xp should be 0');
     }
 
     #[test]
@@ -4533,15 +2969,5 @@ mod tests {
         assert(!adventurer.is_ambushed(4), 'should not be ambushed 4');
         assert(adventurer.is_ambushed(5), 'should be ambushed 5');
         assert(!adventurer.is_ambushed(6), 'should not be ambushed 6');
-    }
-
-    #[test]
-    #[available_gas(1000000)]
-    fn test_invalidate_game() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
-        adventurer.invalidate_game();
-        assert(adventurer.health == 0, 'adventurer health should be 0');
-        assert(adventurer.xp == 1, 'adventurer xp should be 1');
-        assert(adventurer.gold == 0, 'adventurer gold should be 0');
     }
 }

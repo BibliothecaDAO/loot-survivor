@@ -13,7 +13,7 @@ name = "combat"
 version = "0.1.0"
 
 [[package]]
-name = "lootitems"
+name = "loot"
 version = "0.1.0"
 dependencies = [
  "combat",
@@ -24,7 +24,7 @@ name = "market"
 version = "0.1.0"
 dependencies = [
  "combat",
- "lootitems",
+ "loot",
 ]
 
 [[package]]
@@ -35,12 +35,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "survivor"
+name = "adventurer"
 version = "0.1.0"
 dependencies = [
  "beasts",
  "combat",
- "lootitems",
+ "loot",
  "market",
  "obstacles",
 ]

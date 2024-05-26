@@ -83,7 +83,7 @@ const TWO_POW_220: u256 = 0x1000000000000000000000000000000000000000000000000000
 // ---------------------------
 #[cfg(test)]
 mod tests {
-    use survivor::leaderboard::{Score, ScorePacking, Leaderboard, LeaderboardPacking};
+    use adventurer::leaderboard::{Score, ScorePacking, Leaderboard, LeaderboardPacking};
 
     #[test]
     #[available_gas(201560)]

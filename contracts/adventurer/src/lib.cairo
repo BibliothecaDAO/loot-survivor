@@ -2,7 +2,8 @@ mod adventurer;
 mod adventurer_meta;
 mod adventurer_utils;
 mod stats;
-mod item_primitive;
+mod equipment;
+mod item;
 mod exploration;
 mod bag;
 mod constants {

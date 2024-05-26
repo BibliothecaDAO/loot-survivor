@@ -1,13 +1,11 @@
 [package]
-name = "survivor"
+name = "adventurer"
 version = "0.1.0"
 description = "Adventurer Library"
-homepage = "https://github.com/BibliothecaDAO/loot-survivor"
-
-# See more keys and their definitions at https://docs.swmansion.com/scarb/docs/reference/manifest
+homepage = "https://github.com/provable-games/loot-survivor"
 
 [dependencies]
-lootitems = { path = "../loot" }
+loot = { path = "../loot" }
 obstacles = { path = "../obstacles" }
 combat = { path = "../combat" }
 market = { path = "../market" }

@@ -6,7 +6,7 @@ use core::clone::Clone;
 use poseidon::poseidon_hash_span;
 use integer::u256_try_as_non_zero;
 
-use lootitems::{loot::{Loot, ILoot, ImplLoot}, constants::{ItemId, NUM_ITEMS}};
+use loot::{loot::{Loot, ILoot, ImplLoot}, constants::{ItemId, NUM_ITEMS}};
 
 use combat::constants::CombatEnums::{Tier, Slot};
 use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, TIER_PRICE};
@@ -138,8 +138,8 @@ impl ImplMarket of IMarket {
     // @notice Returns an array of items that are available on the market.
     // @param stats_points_available: The number of stat points available to the adventurer.
     // @return An array of items that are available on the market.
-    fn get_market_size(stat_points_available: u8) -> u16 {
-        stat_points_available.into() * NUMBER_OF_ITEMS_PER_LEVEL.into()
+    fn get_market_size(stat_upgrades_available: u8) -> u16 {
+        stat_upgrades_available.into() * NUMBER_OF_ITEMS_PER_LEVEL.into()
     }
 
     // @notice Gets a u8 item id from a u256 seed
@@ -239,7 +239,7 @@ mod tests {
     use array::{ArrayTrait, SpanTrait};
     use option::OptionTrait;
     use core::clone::Clone;
-    use lootitems::{loot::{Loot, ILoot, ImplLoot}, constants::{ItemId, NUM_ITEMS}};
+    use loot::{loot::{Loot, ILoot, ImplLoot}, constants::{ItemId, NUM_ITEMS}};
     use combat::constants::CombatEnums::{Tier, Slot};
     use market::{
         market::ImplMarket, constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, TIER_PRICE}

@@ -1,11 +1,11 @@
 use core::option::OptionTrait;
 use core::traits::{Into, TryInto};
 
-use survivor::{
-    adventurer::{Adventurer, ImplAdventurer, ItemPrimitive},
+use adventurer::{
+    adventurer::{Adventurer, ImplAdventurer, Item},
     constants::discovery_constants::{DiscoveryEnums::DiscoveryType, DiscoveryEnums::ExploreResult}
 };
-use lootitems::constants::ItemId;
+use loot::constants::ItemId;
 
 #[generate_trait]
 impl ExploreUtils of Explore {
@@ -64,10 +64,8 @@ impl ExploreUtils of Explore {
 // ---------------------------
 #[cfg(test)]
 mod tests {
-    use survivor::{
-        exploration::ExploreUtils, adventurer::{ImplAdventurer, ItemPrimitive}, stats::Stats
-    };
-    use lootitems::constants::ItemId;
+    use adventurer::{exploration::ExploreUtils, adventurer::{ImplAdventurer, Item}, stats::Stats};
+    use loot::constants::ItemId;
 
     #[test]
     #[available_gas(328654)]

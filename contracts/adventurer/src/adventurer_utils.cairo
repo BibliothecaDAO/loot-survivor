@@ -9,14 +9,13 @@ use core::{
 use super::{
     constants::{
         adventurer_constants::{
-            MAX_STAT_VALUE, U128_MAX, STARTING_HEALTH, HEALTH_INCREASE_PER_VITALITY,
-            MAX_ADVENTURER_HEALTH
+            U128_MAX, STARTING_HEALTH, HEALTH_INCREASE_PER_VITALITY, MAX_ADVENTURER_HEALTH
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
     },
     stats::Stats, adventurer::{Adventurer, ImplAdventurer, IAdventurer},
 };
-use lootitems::constants::{
+use loot::constants::{
     NUM_ITEMS,
     ItemSuffix::{
         of_Power, of_Giant, of_Titans, of_Skill, of_Perfection, of_Brilliance, of_Enlightenment,
@@ -28,21 +27,6 @@ use combat::constants::CombatEnums::{Type, Tier, Slot};
 
 #[generate_trait]
 impl AdventurerUtils of IAdventurerUtils {
-    // @dev Provides overflow protected stat increase.
-    //      This function protects against u8 overflow but allows stat
-    //      to exceed MAX_STAT_VALUE as adventurers live stats can exceed this threshold
-    // @param current_stat The current value of the stat.
-    // @param increase_amount The amount by which to increase the stat.
-    // @return The increased stat value, or `MAX_STAT_VALUE` if an increase would cause an overflow.
-    fn overflow_protected_stat_increase(ref self: u8, amount: u8) {
-        // u8 overflow check
-        if (u8_overflowing_add(self, amount).is_ok()) {
-            self += amount
-        } else {
-            self = MAX_STAT_VALUE
-        }
-    }
-
     // get_random_explore returns a random number between 0 and 3 based on provided entropy
     // @param entropy: entropy for generating random explore
     // @return u64: A random number between 0 and 3 denoting the outcome of the explore
@@ -295,11 +279,10 @@ const TWO_POW_120: u256 = 0x1000000000000000000000000000000;
 mod tests {
     use debug::PrintTrait;
     use poseidon::poseidon_hash_span;
-    use survivor::{
+    use adventurer::{
         constants::{
             adventurer_constants::{
-                MAX_STAT_VALUE, U128_MAX, STARTING_HEALTH, HEALTH_INCREASE_PER_VITALITY,
-                MAX_ADVENTURER_HEALTH
+                U128_MAX, STARTING_HEALTH, HEALTH_INCREASE_PER_VITALITY, MAX_ADVENTURER_HEALTH
             },
             discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
         },
@@ -307,7 +290,7 @@ mod tests {
         adventurer_utils::AdventurerUtils
     };
     use combat::constants::CombatEnums::{Type, Tier, Slot};
-    use lootitems::{constants::{ItemId}};
+    use loot::{constants::{ItemId}};
 
     #[test]
     #[available_gas(286398)]
@@ -512,20 +495,6 @@ mod tests {
             AdventurerUtils::get_max_health(adventurer.stats.vitality) == MAX_ADVENTURER_HEALTH,
             'wrong max health'
         );
-    }
-
-    #[test]
-    #[available_gas(30000)]
-    fn test_overflow_protected_stat_increase() {
-        let mut stat: u8 = 1;
-
-        // base case
-        AdventurerUtils::overflow_protected_stat_increase(ref stat, 1);
-        assert(stat == 2, 'stat should increase by 1');
-
-        // u8 overflow case
-        AdventurerUtils::overflow_protected_stat_increase(ref stat, 255);
-        assert(stat == MAX_STAT_VALUE, 'stat should not overflow');
     }
 
     #[test]

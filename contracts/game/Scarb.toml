@@ -4,8 +4,8 @@ version = "0.1.0"
 
 [dependencies]
 starknet.workspace = true
-lootitems = { path = "../loot" }
-survivor = { path = "../adventurer" }
+loot = { path = "../loot" }
+adventurer = { path = "../adventurer" }
 market = { path = "../market" }
 obstacles = { path = "../obstacles" }
 openzeppelin.workspace = true

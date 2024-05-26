@@ -1,49 +1,46 @@
 use starknet::{StorePacking};
-use lootitems::constants::ItemId;
-use super::{
-    adventurer::{Adventurer, ImplAdventurer},
-    item_primitive::{ItemPrimitive, ImplItemPrimitive, ItemPrimitivePacking}
-};
+use loot::constants::ItemId;
+use super::{adventurer::{Adventurer, ImplAdventurer}, item::{Item, ImplItem, ItemPacking}};
 
 // Bag is used for storing gear not equipped to the adventurer
 // Bag is a fixed at 15 items to fit in a felt252
 #[derive(Drop, Copy, Serde)]
 struct Bag { // 240 bits
-    item_1: ItemPrimitive, // 16 bits each
-    item_2: ItemPrimitive,
-    item_3: ItemPrimitive,
-    item_4: ItemPrimitive,
-    item_5: ItemPrimitive,
-    item_6: ItemPrimitive,
-    item_7: ItemPrimitive,
-    item_8: ItemPrimitive,
-    item_9: ItemPrimitive,
-    item_10: ItemPrimitive,
-    item_11: ItemPrimitive,
-    item_12: ItemPrimitive,
-    item_13: ItemPrimitive,
-    item_14: ItemPrimitive,
-    item_15: ItemPrimitive,
+    item_1: Item, // 16 bits each
+    item_2: Item,
+    item_3: Item,
+    item_4: Item,
+    item_5: Item,
+    item_6: Item,
+    item_7: Item,
+    item_8: Item,
+    item_9: Item,
+    item_10: Item,
+    item_11: Item,
+    item_12: Item,
+    item_13: Item,
+    item_14: Item,
+    item_15: Item,
     mutated: bool,
 }
 
 impl BagPacking of StorePacking<Bag, felt252> {
     fn pack(value: Bag) -> felt252 {
-        (ItemPrimitivePacking::pack(value.item_1).into()
-            + ItemPrimitivePacking::pack(value.item_2).into() * TWO_POW_16
-            + ItemPrimitivePacking::pack(value.item_3).into() * TWO_POW_32
-            + ItemPrimitivePacking::pack(value.item_4).into() * TWO_POW_48
-            + ItemPrimitivePacking::pack(value.item_5).into() * TWO_POW_64
-            + ItemPrimitivePacking::pack(value.item_6).into() * TWO_POW_80
-            + ItemPrimitivePacking::pack(value.item_7).into() * TWO_POW_96
-            + ItemPrimitivePacking::pack(value.item_8).into() * TWO_POW_112
-            + ItemPrimitivePacking::pack(value.item_9).into() * TWO_POW_128
-            + ItemPrimitivePacking::pack(value.item_10).into() * TWO_POW_144
-            + ItemPrimitivePacking::pack(value.item_11).into() * TWO_POW_160
-            + ItemPrimitivePacking::pack(value.item_12).into() * TWO_POW_176
-            + ItemPrimitivePacking::pack(value.item_13).into() * TWO_POW_192
-            + ItemPrimitivePacking::pack(value.item_14).into() * TWO_POW_208
-            + ItemPrimitivePacking::pack(value.item_15).into() * TWO_POW_224)
+        (ItemPacking::pack(value.item_1).into()
+            + ItemPacking::pack(value.item_2).into() * TWO_POW_16
+            + ItemPacking::pack(value.item_3).into() * TWO_POW_32
+            + ItemPacking::pack(value.item_4).into() * TWO_POW_48
+            + ItemPacking::pack(value.item_5).into() * TWO_POW_64
+            + ItemPacking::pack(value.item_6).into() * TWO_POW_80
+            + ItemPacking::pack(value.item_7).into() * TWO_POW_96
+            + ItemPacking::pack(value.item_8).into() * TWO_POW_112
+            + ItemPacking::pack(value.item_9).into() * TWO_POW_128
+            + ItemPacking::pack(value.item_10).into() * TWO_POW_144
+            + ItemPacking::pack(value.item_11).into() * TWO_POW_160
+            + ItemPacking::pack(value.item_12).into() * TWO_POW_176
+            + ItemPacking::pack(value.item_13).into() * TWO_POW_192
+            + ItemPacking::pack(value.item_14).into() * TWO_POW_208
+            + ItemPacking::pack(value.item_15).into() * TWO_POW_224)
             .try_into()
             .unwrap()
     }
@@ -77,21 +74,21 @@ impl BagPacking of StorePacking<Bag, felt252> {
         let (_, item_15) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
 
         Bag {
-            item_1: ItemPrimitivePacking::unpack(item_1.try_into().unwrap()),
-            item_2: ItemPrimitivePacking::unpack(item_2.try_into().unwrap()),
-            item_3: ItemPrimitivePacking::unpack(item_3.try_into().unwrap()),
-            item_4: ItemPrimitivePacking::unpack(item_4.try_into().unwrap()),
-            item_5: ItemPrimitivePacking::unpack(item_5.try_into().unwrap()),
-            item_6: ItemPrimitivePacking::unpack(item_6.try_into().unwrap()),
-            item_7: ItemPrimitivePacking::unpack(item_7.try_into().unwrap()),
-            item_8: ItemPrimitivePacking::unpack(item_8.try_into().unwrap()),
-            item_9: ItemPrimitivePacking::unpack(item_9.try_into().unwrap()),
-            item_10: ItemPrimitivePacking::unpack(item_10.try_into().unwrap()),
-            item_11: ItemPrimitivePacking::unpack(item_11.try_into().unwrap()),
-            item_12: ItemPrimitivePacking::unpack(item_12.try_into().unwrap()),
-            item_13: ItemPrimitivePacking::unpack(item_13.try_into().unwrap()),
-            item_14: ItemPrimitivePacking::unpack(item_14.try_into().unwrap()),
-            item_15: ItemPrimitivePacking::unpack(item_15.try_into().unwrap()),
+            item_1: ItemPacking::unpack(item_1.try_into().unwrap()),
+            item_2: ItemPacking::unpack(item_2.try_into().unwrap()),
+            item_3: ItemPacking::unpack(item_3.try_into().unwrap()),
+            item_4: ItemPacking::unpack(item_4.try_into().unwrap()),
+            item_5: ItemPacking::unpack(item_5.try_into().unwrap()),
+            item_6: ItemPacking::unpack(item_6.try_into().unwrap()),
+            item_7: ItemPacking::unpack(item_7.try_into().unwrap()),
+            item_8: ItemPacking::unpack(item_8.try_into().unwrap()),
+            item_9: ItemPacking::unpack(item_9.try_into().unwrap()),
+            item_10: ItemPacking::unpack(item_10.try_into().unwrap()),
+            item_11: ItemPacking::unpack(item_11.try_into().unwrap()),
+            item_12: ItemPacking::unpack(item_12.try_into().unwrap()),
+            item_13: ItemPacking::unpack(item_13.try_into().unwrap()),
+            item_14: ItemPacking::unpack(item_14.try_into().unwrap()),
+            item_15: ItemPacking::unpack(item_15.try_into().unwrap()),
             mutated: false
         }
     }
@@ -103,21 +100,21 @@ impl ImplBag of IBag {
     // @return The instance of the Bag
     fn new() -> Bag {
         Bag {
-            item_1: ItemPrimitive { id: 0, xp: 0 },
-            item_2: ItemPrimitive { id: 0, xp: 0 },
-            item_3: ItemPrimitive { id: 0, xp: 0 },
-            item_4: ItemPrimitive { id: 0, xp: 0 },
-            item_5: ItemPrimitive { id: 0, xp: 0 },
-            item_6: ItemPrimitive { id: 0, xp: 0 },
-            item_7: ItemPrimitive { id: 0, xp: 0 },
-            item_8: ItemPrimitive { id: 0, xp: 0 },
-            item_9: ItemPrimitive { id: 0, xp: 0 },
-            item_10: ItemPrimitive { id: 0, xp: 0 },
-            item_11: ItemPrimitive { id: 0, xp: 0 },
-            item_12: ItemPrimitive { id: 0, xp: 0 },
-            item_13: ItemPrimitive { id: 0, xp: 0 },
-            item_14: ItemPrimitive { id: 0, xp: 0 },
-            item_15: ItemPrimitive { id: 0, xp: 0 },
+            item_1: Item { id: 0, xp: 0 },
+            item_2: Item { id: 0, xp: 0 },
+            item_3: Item { id: 0, xp: 0 },
+            item_4: Item { id: 0, xp: 0 },
+            item_5: Item { id: 0, xp: 0 },
+            item_6: Item { id: 0, xp: 0 },
+            item_7: Item { id: 0, xp: 0 },
+            item_8: Item { id: 0, xp: 0 },
+            item_9: Item { id: 0, xp: 0 },
+            item_10: Item { id: 0, xp: 0 },
+            item_11: Item { id: 0, xp: 0 },
+            item_12: Item { id: 0, xp: 0 },
+            item_13: Item { id: 0, xp: 0 },
+            item_14: Item { id: 0, xp: 0 },
+            item_15: Item { id: 0, xp: 0 },
             mutated: false
         }
     }
@@ -128,7 +125,7 @@ impl ImplBag of IBag {
     // @param item_id The id of the item to be retrieved
     // @return The item from the bag with the specified id
     #[inline(always)]
-    fn get_item(self: Bag, item_id: u8) -> ItemPrimitive {
+    fn get_item(self: Bag, item_id: u8) -> Item {
         if self.item_1.id == item_id {
             self.item_1
         } else if self.item_2.id == item_id {
@@ -169,7 +166,7 @@ impl ImplBag of IBag {
     // @param adventurer The instance of the Adventurer
     // @param item_id The id of the item to be added
     fn add_new_item(ref self: Bag, adventurer: Adventurer, item_id: u8) {
-        let mut item = ImplItemPrimitive::new(item_id);
+        let mut item = ImplItem::new(item_id);
         self.add_item(item);
     }
 
@@ -178,7 +175,7 @@ impl ImplBag of IBag {
     // @param self The instance of the Bag
     // @param item The item to be added to the bag
     #[inline(always)]
-    fn add_item(ref self: Bag, item: ItemPrimitive) {
+    fn add_item(ref self: Bag, item: Item) {
         // assert item id is not 0
         assert(item.id != 0, 'Item ID cannot be 0');
 
@@ -226,7 +223,7 @@ impl ImplBag of IBag {
     // @param item_id The id of the item to be removed
     // @return The item that was removed from the bag
     #[inline(always)]
-    fn remove_item(ref self: Bag, item_id: u8) -> ItemPrimitive {
+    fn remove_item(ref self: Bag, item_id: u8) -> Item {
         let removed_item = self.get_item(item_id);
 
         if self.item_1.id == item_id {
@@ -333,7 +330,7 @@ impl ImplBag of IBag {
     // @param item The id of the item to search for
     // @return A bool indicating whether the item is present in the bag
     #[inline(always)]
-    fn contains(self: Bag, item_id: u8) -> (bool, ItemPrimitive) {
+    fn contains(self: Bag, item_id: u8) -> (bool, Item) {
         assert(item_id != 0, 'Item ID cannot be 0');
         if self.item_1.id == item_id {
             return (true, self.item_1);
@@ -366,58 +363,58 @@ impl ImplBag of IBag {
         } else if self.item_15.id == item_id {
             return (true, self.item_15);
         } else {
-            return (false, ItemPrimitive { id: 0, xp: 0 });
+            return (false, Item { id: 0, xp: 0 });
         }
     }
 
     // @notice Gets all the jewelry items in the bag
     // @param self The instance of the Bag
     // @return An array of all the jewelry items in the bag
-    fn get_jewelry(self: Bag) -> Array<ItemPrimitive> {
-        let mut jewlery = ArrayTrait::<ItemPrimitive>::new();
-        if ImplItemPrimitive::is_jewlery(self.item_1) {
+    fn get_jewelry(self: Bag) -> Array<Item> {
+        let mut jewlery = ArrayTrait::<Item>::new();
+        if ImplItem::is_jewlery(self.item_1) {
             jewlery.append(self.item_1);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_2) {
+        if ImplItem::is_jewlery(self.item_2) {
             jewlery.append(self.item_2);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_3) {
+        if ImplItem::is_jewlery(self.item_3) {
             jewlery.append(self.item_3);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_4) {
+        if ImplItem::is_jewlery(self.item_4) {
             jewlery.append(self.item_4);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_5) {
+        if ImplItem::is_jewlery(self.item_5) {
             jewlery.append(self.item_5);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_6) {
+        if ImplItem::is_jewlery(self.item_6) {
             jewlery.append(self.item_6);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_7) {
+        if ImplItem::is_jewlery(self.item_7) {
             jewlery.append(self.item_7);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_8) {
+        if ImplItem::is_jewlery(self.item_8) {
             jewlery.append(self.item_8);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_9) {
+        if ImplItem::is_jewlery(self.item_9) {
             jewlery.append(self.item_9);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_10) {
+        if ImplItem::is_jewlery(self.item_10) {
             jewlery.append(self.item_10);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_11) {
+        if ImplItem::is_jewlery(self.item_11) {
             jewlery.append(self.item_11);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_12) {
+        if ImplItem::is_jewlery(self.item_12) {
             jewlery.append(self.item_12);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_13) {
+        if ImplItem::is_jewlery(self.item_13) {
             jewlery.append(self.item_13);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_14) {
+        if ImplItem::is_jewlery(self.item_14) {
             jewlery.append(self.item_14);
         }
-        if ImplItemPrimitive::is_jewlery(self.item_15) {
+        if ImplItem::is_jewlery(self.item_15) {
             jewlery.append(self.item_15);
         }
         jewlery
@@ -463,24 +460,23 @@ const TWO_POW_240: u256 = 0x1000000000000000000000000000000000000000000000000000
 // ---------------------------
 #[cfg(test)]
 mod tests {
-    use debug::PrintTrait;
-    use survivor::{bag::{Bag, ImplBag, IBag, BagPacking}, item_primitive::{ItemPrimitive}};
-    use lootitems::{constants::ItemId};
+    use adventurer::{bag::{Bag, ImplBag, IBag, BagPacking}, item::{Item}};
+    use loot::{constants::ItemId};
 
     #[test]
     #[available_gas(97530)]
     fn test_get_jewelry_greatness() {
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 1 };
-        let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 2 };
-        let silk_robe = ItemPrimitive { id: ItemId::SilkRobe, xp: 3 };
-        let silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 4 };
-        let ghost_wand = ItemPrimitive { id: ItemId::GhostWand, xp: 5 };
-        let leather_gloves = ItemPrimitive { id: ItemId::LeatherGloves, xp: 6 };
-        let silk_gloves = ItemPrimitive { id: ItemId::SilkGloves, xp: 7 };
-        let linen_gloves = ItemPrimitive { id: ItemId::LinenGloves, xp: 8 };
-        let crown = ItemPrimitive { id: ItemId::Crown, xp: 10 };
-        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 9 };
-        let pendant = ItemPrimitive { id: ItemId::Pendant, xp: 16 };
+        let katana = Item { id: ItemId::Katana, xp: 1 };
+        let demon_crown = Item { id: ItemId::DemonCrown, xp: 2 };
+        let silk_robe = Item { id: ItemId::SilkRobe, xp: 3 };
+        let silver_ring = Item { id: ItemId::SilverRing, xp: 4 };
+        let ghost_wand = Item { id: ItemId::GhostWand, xp: 5 };
+        let leather_gloves = Item { id: ItemId::LeatherGloves, xp: 6 };
+        let silk_gloves = Item { id: ItemId::SilkGloves, xp: 7 };
+        let linen_gloves = Item { id: ItemId::LinenGloves, xp: 8 };
+        let crown = Item { id: ItemId::Crown, xp: 10 };
+        let amulet = Item { id: ItemId::Amulet, xp: 9 };
+        let pendant = Item { id: ItemId::Pendant, xp: 16 };
         let bag = Bag {
             item_1: katana,
             item_2: demon_crown,
@@ -493,10 +489,10 @@ mod tests {
             item_9: crown,
             item_10: amulet,
             item_11: pendant,
-            item_12: ItemPrimitive { id: 0, xp: 0 },
-            item_13: ItemPrimitive { id: 0, xp: 0 },
-            item_14: ItemPrimitive { id: 0, xp: 0 },
-            item_15: ItemPrimitive { id: 0, xp: 0 },
+            item_12: Item { id: 0, xp: 0 },
+            item_13: Item { id: 0, xp: 0 },
+            item_14: Item { id: 0, xp: 0 },
+            item_15: Item { id: 0, xp: 0 },
             mutated: false
         };
 
@@ -506,17 +502,17 @@ mod tests {
     #[test]
     #[available_gas(107010)]
     fn test_get_jewelry_gas() {
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 1 };
-        let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 2 };
-        let silk_robe = ItemPrimitive { id: ItemId::SilkRobe, xp: 3 };
-        let silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 4 };
-        let ghost_wand = ItemPrimitive { id: ItemId::GhostWand, xp: 5 };
-        let leather_gloves = ItemPrimitive { id: ItemId::LeatherGloves, xp: 6 };
-        let silk_gloves = ItemPrimitive { id: ItemId::SilkGloves, xp: 7 };
-        let linen_gloves = ItemPrimitive { id: ItemId::LinenGloves, xp: 8 };
-        let crown = ItemPrimitive { id: ItemId::Crown, xp: 10 };
-        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 10 };
-        let pendant = ItemPrimitive { id: ItemId::Pendant, xp: 10 };
+        let katana = Item { id: ItemId::Katana, xp: 1 };
+        let demon_crown = Item { id: ItemId::DemonCrown, xp: 2 };
+        let silk_robe = Item { id: ItemId::SilkRobe, xp: 3 };
+        let silver_ring = Item { id: ItemId::SilverRing, xp: 4 };
+        let ghost_wand = Item { id: ItemId::GhostWand, xp: 5 };
+        let leather_gloves = Item { id: ItemId::LeatherGloves, xp: 6 };
+        let silk_gloves = Item { id: ItemId::SilkGloves, xp: 7 };
+        let linen_gloves = Item { id: ItemId::LinenGloves, xp: 8 };
+        let crown = Item { id: ItemId::Crown, xp: 10 };
+        let amulet = Item { id: ItemId::Amulet, xp: 10 };
+        let pendant = Item { id: ItemId::Pendant, xp: 10 };
         let bag = Bag {
             item_1: katana,
             item_2: demon_crown,
@@ -529,10 +525,10 @@ mod tests {
             item_9: crown,
             item_10: amulet,
             item_11: pendant,
-            item_12: ItemPrimitive { id: 0, xp: 0 },
-            item_13: ItemPrimitive { id: 0, xp: 0 },
-            item_14: ItemPrimitive { id: 0, xp: 0 },
-            item_15: ItemPrimitive { id: 0, xp: 0 },
+            item_12: Item { id: 0, xp: 0 },
+            item_13: Item { id: 0, xp: 0 },
+            item_14: Item { id: 0, xp: 0 },
+            item_15: Item { id: 0, xp: 0 },
             mutated: false
         };
 
@@ -542,17 +538,17 @@ mod tests {
     #[test]
     #[available_gas(47910)]
     fn test_get_jewelry() {
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 1 };
-        let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 2 };
-        let silk_robe = ItemPrimitive { id: ItemId::SilkRobe, xp: 3 };
-        let silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 4 };
-        let ghost_wand = ItemPrimitive { id: ItemId::GhostWand, xp: 5 };
-        let leather_gloves = ItemPrimitive { id: ItemId::LeatherGloves, xp: 6 };
-        let silk_gloves = ItemPrimitive { id: ItemId::SilkGloves, xp: 7 };
-        let linen_gloves = ItemPrimitive { id: ItemId::LinenGloves, xp: 8 };
-        let crown = ItemPrimitive { id: ItemId::Crown, xp: 10 };
-        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 10 };
-        let pendant = ItemPrimitive { id: ItemId::Pendant, xp: 10 };
+        let katana = Item { id: ItemId::Katana, xp: 1 };
+        let demon_crown = Item { id: ItemId::DemonCrown, xp: 2 };
+        let silk_robe = Item { id: ItemId::SilkRobe, xp: 3 };
+        let silver_ring = Item { id: ItemId::SilverRing, xp: 4 };
+        let ghost_wand = Item { id: ItemId::GhostWand, xp: 5 };
+        let leather_gloves = Item { id: ItemId::LeatherGloves, xp: 6 };
+        let silk_gloves = Item { id: ItemId::SilkGloves, xp: 7 };
+        let linen_gloves = Item { id: ItemId::LinenGloves, xp: 8 };
+        let crown = Item { id: ItemId::Crown, xp: 10 };
+        let amulet = Item { id: ItemId::Amulet, xp: 10 };
+        let pendant = Item { id: ItemId::Pendant, xp: 10 };
         let bag = Bag {
             item_1: katana,
             item_2: demon_crown,
@@ -565,10 +561,10 @@ mod tests {
             item_9: crown,
             item_10: amulet,
             item_11: pendant,
-            item_12: ItemPrimitive { id: 0, xp: 0 },
-            item_13: ItemPrimitive { id: 0, xp: 0 },
-            item_14: ItemPrimitive { id: 0, xp: 0 },
-            item_15: ItemPrimitive { id: 0, xp: 0 },
+            item_12: Item { id: 0, xp: 0 },
+            item_13: Item { id: 0, xp: 0 },
+            item_14: Item { id: 0, xp: 0 },
+            item_15: Item { id: 0, xp: 0 },
             mutated: false
         };
 
@@ -583,15 +579,15 @@ mod tests {
     #[should_panic(expected: ('Item ID cannot be 0',))]
     #[available_gas(6900)]
     fn test_contains_invalid_zero() {
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 1 };
-        let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 2 };
-        let silk_robe = ItemPrimitive { id: ItemId::SilkRobe, xp: 3 };
-        let silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 4 };
-        let ghost_wand = ItemPrimitive { id: ItemId::GhostWand, xp: 5 };
-        let leather_gloves = ItemPrimitive { id: ItemId::LeatherGloves, xp: 6 };
-        let silk_gloves = ItemPrimitive { id: ItemId::SilkGloves, xp: 7 };
-        let linen_gloves = ItemPrimitive { id: ItemId::LinenGloves, xp: 8 };
-        let crown = ItemPrimitive { id: ItemId::Crown, xp: 10 };
+        let katana = Item { id: ItemId::Katana, xp: 1 };
+        let demon_crown = Item { id: ItemId::DemonCrown, xp: 2 };
+        let silk_robe = Item { id: ItemId::SilkRobe, xp: 3 };
+        let silver_ring = Item { id: ItemId::SilverRing, xp: 4 };
+        let ghost_wand = Item { id: ItemId::GhostWand, xp: 5 };
+        let leather_gloves = Item { id: ItemId::LeatherGloves, xp: 6 };
+        let silk_gloves = Item { id: ItemId::SilkGloves, xp: 7 };
+        let linen_gloves = Item { id: ItemId::LinenGloves, xp: 8 };
+        let crown = Item { id: ItemId::Crown, xp: 10 };
         let bag = Bag {
             item_1: katana,
             item_2: demon_crown,
@@ -602,12 +598,12 @@ mod tests {
             item_7: silk_gloves,
             item_8: linen_gloves,
             item_9: crown,
-            item_10: ItemPrimitive { id: 0, xp: 0 },
-            item_11: ItemPrimitive { id: 0, xp: 0 },
-            item_12: ItemPrimitive { id: 0, xp: 0 },
-            item_13: ItemPrimitive { id: 0, xp: 0 },
-            item_14: ItemPrimitive { id: 0, xp: 0 },
-            item_15: ItemPrimitive { id: 0, xp: 0 },
+            item_10: Item { id: 0, xp: 0 },
+            item_11: Item { id: 0, xp: 0 },
+            item_12: Item { id: 0, xp: 0 },
+            item_13: Item { id: 0, xp: 0 },
+            item_14: Item { id: 0, xp: 0 },
+            item_15: Item { id: 0, xp: 0 },
             mutated: false
         };
         bag.contains(0);
@@ -616,15 +612,15 @@ mod tests {
     #[test]
     #[available_gas(73500)]
     fn test_contains() {
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 1 };
-        let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 2 };
-        let silk_robe = ItemPrimitive { id: ItemId::SilkRobe, xp: 3 };
-        let silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 4 };
-        let ghost_wand = ItemPrimitive { id: ItemId::GhostWand, xp: 5 };
-        let leather_gloves = ItemPrimitive { id: ItemId::LeatherGloves, xp: 6 };
-        let silk_gloves = ItemPrimitive { id: ItemId::SilkGloves, xp: 7 };
-        let linen_gloves = ItemPrimitive { id: ItemId::LinenGloves, xp: 8 };
-        let crown = ItemPrimitive { id: ItemId::Crown, xp: 10 };
+        let katana = Item { id: ItemId::Katana, xp: 1 };
+        let demon_crown = Item { id: ItemId::DemonCrown, xp: 2 };
+        let silk_robe = Item { id: ItemId::SilkRobe, xp: 3 };
+        let silver_ring = Item { id: ItemId::SilverRing, xp: 4 };
+        let ghost_wand = Item { id: ItemId::GhostWand, xp: 5 };
+        let leather_gloves = Item { id: ItemId::LeatherGloves, xp: 6 };
+        let silk_gloves = Item { id: ItemId::SilkGloves, xp: 7 };
+        let linen_gloves = Item { id: ItemId::LinenGloves, xp: 8 };
+        let crown = Item { id: ItemId::Crown, xp: 10 };
         let bag = Bag {
             item_1: katana,
             item_2: demon_crown,
@@ -635,12 +631,12 @@ mod tests {
             item_7: silk_gloves,
             item_8: linen_gloves,
             item_9: crown,
-            item_10: ItemPrimitive { id: 0, xp: 0 },
-            item_11: ItemPrimitive { id: 0, xp: 0 },
-            item_12: ItemPrimitive { id: 0, xp: 0 },
-            item_13: ItemPrimitive { id: 0, xp: 0 },
-            item_14: ItemPrimitive { id: 0, xp: 0 },
-            item_15: ItemPrimitive { id: 0, xp: 0 },
+            item_10: Item { id: 0, xp: 0 },
+            item_11: Item { id: 0, xp: 0 },
+            item_12: Item { id: 0, xp: 0 },
+            item_13: Item { id: 0, xp: 0 },
+            item_14: Item { id: 0, xp: 0 },
+            item_15: Item { id: 0, xp: 0 },
             mutated: false
         };
 
@@ -699,21 +695,21 @@ mod tests {
     #[available_gas(2383150)]
     fn test_save_bag() {
         let mut bag = Bag {
-            item_1: ItemPrimitive { id: 127, xp: 511 },
-            item_2: ItemPrimitive { id: 127, xp: 511 },
-            item_3: ItemPrimitive { id: 127, xp: 511 },
-            item_4: ItemPrimitive { id: 127, xp: 511 },
-            item_5: ItemPrimitive { id: 127, xp: 511 },
-            item_6: ItemPrimitive { id: 127, xp: 511 },
-            item_7: ItemPrimitive { id: 127, xp: 511 },
-            item_8: ItemPrimitive { id: 127, xp: 511 },
-            item_9: ItemPrimitive { id: 127, xp: 511 },
-            item_10: ItemPrimitive { id: 127, xp: 511 },
-            item_11: ItemPrimitive { id: 127, xp: 511 },
-            item_12: ItemPrimitive { id: 127, xp: 511 },
-            item_13: ItemPrimitive { id: 127, xp: 511 },
-            item_14: ItemPrimitive { id: 127, xp: 511 },
-            item_15: ItemPrimitive { id: 127, xp: 511 },
+            item_1: Item { id: 127, xp: 511 },
+            item_2: Item { id: 127, xp: 511 },
+            item_3: Item { id: 127, xp: 511 },
+            item_4: Item { id: 127, xp: 511 },
+            item_5: Item { id: 127, xp: 511 },
+            item_6: Item { id: 127, xp: 511 },
+            item_7: Item { id: 127, xp: 511 },
+            item_8: Item { id: 127, xp: 511 },
+            item_9: Item { id: 127, xp: 511 },
+            item_10: Item { id: 127, xp: 511 },
+            item_11: Item { id: 127, xp: 511 },
+            item_12: Item { id: 127, xp: 511 },
+            item_13: Item { id: 127, xp: 511 },
+            item_14: Item { id: 127, xp: 511 },
+            item_15: Item { id: 127, xp: 511 },
             mutated: false,
         };
 
@@ -771,28 +767,28 @@ mod tests {
     fn test_add_item_blank_item() {
         // start with full bag
         let mut bag = Bag {
-            item_1: ItemPrimitive { id: 1, xp: 1 },
-            item_2: ItemPrimitive { id: 2, xp: 1 },
-            item_3: ItemPrimitive { id: 3, xp: 1 },
-            item_4: ItemPrimitive { id: 4, xp: 1 },
-            item_5: ItemPrimitive { id: 5, xp: 1 },
-            item_6: ItemPrimitive { id: 6, xp: 1 },
-            item_7: ItemPrimitive { id: 7, xp: 1 },
-            item_8: ItemPrimitive { id: 8, xp: 1 },
-            item_9: ItemPrimitive { id: 9, xp: 1 },
-            item_10: ItemPrimitive { id: 10, xp: 1 },
-            item_11: ItemPrimitive { id: 0, xp: 0 },
-            item_12: ItemPrimitive { id: 0, xp: 0 },
-            item_13: ItemPrimitive { id: 0, xp: 0 },
-            item_14: ItemPrimitive { id: 0, xp: 0 },
-            item_15: ItemPrimitive { id: 0, xp: 0 },
+            item_1: Item { id: 1, xp: 1 },
+            item_2: Item { id: 2, xp: 1 },
+            item_3: Item { id: 3, xp: 1 },
+            item_4: Item { id: 4, xp: 1 },
+            item_5: Item { id: 5, xp: 1 },
+            item_6: Item { id: 6, xp: 1 },
+            item_7: Item { id: 7, xp: 1 },
+            item_8: Item { id: 8, xp: 1 },
+            item_9: Item { id: 9, xp: 1 },
+            item_10: Item { id: 10, xp: 1 },
+            item_11: Item { id: 0, xp: 0 },
+            item_12: Item { id: 0, xp: 0 },
+            item_13: Item { id: 0, xp: 0 },
+            item_14: Item { id: 0, xp: 0 },
+            item_15: Item { id: 0, xp: 0 },
             mutated: false
         };
 
         // try adding an empty item to the bag
         // this should panic with 'Item ID cannot be 0'
         // which this test is annotated to expect
-        bag.add_item(ItemPrimitive { id: 0, xp: 1 });
+        bag.add_item(Item { id: 0, xp: 1 });
     }
 
     #[test]
@@ -801,65 +797,91 @@ mod tests {
     fn test_add_item_full_bag() {
         // start with full bag
         let mut bag = Bag {
-            item_1: ItemPrimitive { id: 1, xp: 1 },
-            item_2: ItemPrimitive { id: 2, xp: 1 },
-            item_3: ItemPrimitive { id: 3, xp: 1 },
-            item_4: ItemPrimitive { id: 4, xp: 1 },
-            item_5: ItemPrimitive { id: 5, xp: 1 },
-            item_6: ItemPrimitive { id: 6, xp: 1 },
-            item_7: ItemPrimitive { id: 7, xp: 1 },
-            item_8: ItemPrimitive { id: 8, xp: 1 },
-            item_9: ItemPrimitive { id: 9, xp: 1 },
-            item_10: ItemPrimitive { id: 10, xp: 1 },
-            item_11: ItemPrimitive { id: 11, xp: 1 },
-            item_12: ItemPrimitive { id: 12, xp: 1 },
-            item_13: ItemPrimitive { id: 13, xp: 1 },
-            item_14: ItemPrimitive { id: 14, xp: 1 },
-            item_15: ItemPrimitive { id: 15, xp: 1 },
+            item_1: Item { id: 1, xp: 1 },
+            item_2: Item { id: 2, xp: 1 },
+            item_3: Item { id: 3, xp: 1 },
+            item_4: Item { id: 4, xp: 1 },
+            item_5: Item { id: 5, xp: 1 },
+            item_6: Item { id: 6, xp: 1 },
+            item_7: Item { id: 7, xp: 1 },
+            item_8: Item { id: 8, xp: 1 },
+            item_9: Item { id: 9, xp: 1 },
+            item_10: Item { id: 10, xp: 1 },
+            item_11: Item { id: 11, xp: 1 },
+            item_12: Item { id: 12, xp: 1 },
+            item_13: Item { id: 13, xp: 1 },
+            item_14: Item { id: 14, xp: 1 },
+            item_15: Item { id: 15, xp: 1 },
             mutated: false
         };
 
         // try adding an item to a full bag
         // this should panic with 'Bag is full'
         // which this test is annotated to expect
-        bag.add_item(ItemPrimitive { id: ItemId::Katana, xp: 1 });
+        bag.add_item(Item { id: ItemId::Katana, xp: 1 });
     }
 
     #[test]
-    #[available_gas(129100)]
+    #[available_gas(6740)]
+    fn test_add_item_gas() {
+        // start with empty bag
+        let mut bag = Bag {
+            item_1: Item { id: 0, xp: 0 },
+            item_2: Item { id: 0, xp: 0 },
+            item_3: Item { id: 0, xp: 0 },
+            item_4: Item { id: 0, xp: 0 },
+            item_5: Item { id: 0, xp: 0 },
+            item_6: Item { id: 0, xp: 0 },
+            item_7: Item { id: 0, xp: 0 },
+            item_8: Item { id: 0, xp: 0 },
+            item_9: Item { id: 0, xp: 0 },
+            item_10: Item { id: 0, xp: 0 },
+            item_11: Item { id: 0, xp: 0 },
+            item_12: Item { id: 0, xp: 0 },
+            item_13: Item { id: 0, xp: 0 },
+            item_14: Item { id: 0, xp: 0 },
+            item_15: Item { id: 0, xp: 0 },
+            mutated: false
+        };
+
+        // add item to bag
+        bag.add_item(Item { id: ItemId::Katana, xp: 1 });
+    }
+
+    #[test]
     fn test_add_item() {
         // start with empty bag
         let mut bag = Bag {
-            item_1: ItemPrimitive { id: 0, xp: 0 },
-            item_2: ItemPrimitive { id: 0, xp: 0 },
-            item_3: ItemPrimitive { id: 0, xp: 0 },
-            item_4: ItemPrimitive { id: 0, xp: 0 },
-            item_5: ItemPrimitive { id: 0, xp: 0 },
-            item_6: ItemPrimitive { id: 0, xp: 0 },
-            item_7: ItemPrimitive { id: 0, xp: 0 },
-            item_8: ItemPrimitive { id: 0, xp: 0 },
-            item_9: ItemPrimitive { id: 0, xp: 0 },
-            item_10: ItemPrimitive { id: 0, xp: 0 },
-            item_11: ItemPrimitive { id: 0, xp: 0 },
-            item_12: ItemPrimitive { id: 0, xp: 0 },
-            item_13: ItemPrimitive { id: 0, xp: 0 },
-            item_14: ItemPrimitive { id: 0, xp: 0 },
-            item_15: ItemPrimitive { id: 0, xp: 0 },
+            item_1: Item { id: 0, xp: 0 },
+            item_2: Item { id: 0, xp: 0 },
+            item_3: Item { id: 0, xp: 0 },
+            item_4: Item { id: 0, xp: 0 },
+            item_5: Item { id: 0, xp: 0 },
+            item_6: Item { id: 0, xp: 0 },
+            item_7: Item { id: 0, xp: 0 },
+            item_8: Item { id: 0, xp: 0 },
+            item_9: Item { id: 0, xp: 0 },
+            item_10: Item { id: 0, xp: 0 },
+            item_11: Item { id: 0, xp: 0 },
+            item_12: Item { id: 0, xp: 0 },
+            item_13: Item { id: 0, xp: 0 },
+            item_14: Item { id: 0, xp: 0 },
+            item_15: Item { id: 0, xp: 0 },
             mutated: false
         };
 
         // initialize items
-        let katana = ItemPrimitive { id: ItemId::Katana, xp: 1 };
-        let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 1 };
-        let silk_robe = ItemPrimitive { id: ItemId::SilkRobe, xp: 1 };
-        let silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 1 };
-        let ghost_wand = ItemPrimitive { id: ItemId::GhostWand, xp: 1 };
-        let leather_gloves = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1 };
-        let silk_gloves = ItemPrimitive { id: ItemId::SilkGloves, xp: 1 };
-        let linen_gloves = ItemPrimitive { id: ItemId::LinenGloves, xp: 1 };
-        let crown = ItemPrimitive { id: ItemId::Crown, xp: 1 };
-        let divine_slippers = ItemPrimitive { id: ItemId::DivineSlippers, xp: 1 };
-        let warhammer = ItemPrimitive { id: ItemId::Warhammer, xp: 1 };
+        let katana = Item { id: ItemId::Katana, xp: 1 };
+        let demon_crown = Item { id: ItemId::DemonCrown, xp: 1 };
+        let silk_robe = Item { id: ItemId::SilkRobe, xp: 1 };
+        let silver_ring = Item { id: ItemId::SilverRing, xp: 1 };
+        let ghost_wand = Item { id: ItemId::GhostWand, xp: 1 };
+        let leather_gloves = Item { id: ItemId::LeatherGloves, xp: 1 };
+        let silk_gloves = Item { id: ItemId::SilkGloves, xp: 1 };
+        let linen_gloves = Item { id: ItemId::LinenGloves, xp: 1 };
+        let crown = Item { id: ItemId::Crown, xp: 1 };
+        let divine_slippers = Item { id: ItemId::DivineSlippers, xp: 1 };
+        let warhammer = Item { id: ItemId::Warhammer, xp: 1 };
 
         // add items to bag
         bag.add_item(katana);
@@ -889,25 +911,25 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(44200)]
-    fn test_is_full() {
+    #[available_gas(59500)]
+    fn test_is_full_gas() {
         // start with full bag
         let mut bag = Bag {
-            item_1: ItemPrimitive { id: 1, xp: 0 },
-            item_2: ItemPrimitive { id: 2, xp: 0 },
-            item_3: ItemPrimitive { id: 3, xp: 0 },
-            item_4: ItemPrimitive { id: 4, xp: 0 },
-            item_5: ItemPrimitive { id: 5, xp: 0 },
-            item_6: ItemPrimitive { id: 8, xp: 0 },
-            item_7: ItemPrimitive { id: 9, xp: 0 },
-            item_8: ItemPrimitive { id: 11, xp: 0 },
-            item_9: ItemPrimitive { id: 12, xp: 0 },
-            item_10: ItemPrimitive { id: 13, xp: 0 },
-            item_11: ItemPrimitive { id: 14, xp: 0 },
-            item_12: ItemPrimitive { id: 15, xp: 0 },
-            item_13: ItemPrimitive { id: 16, xp: 0 },
-            item_14: ItemPrimitive { id: 17, xp: 0 },
-            item_15: ItemPrimitive { id: 18, xp: 0 },
+            item_1: Item { id: 1, xp: 0 },
+            item_2: Item { id: 2, xp: 0 },
+            item_3: Item { id: 3, xp: 0 },
+            item_4: Item { id: 4, xp: 0 },
+            item_5: Item { id: 5, xp: 0 },
+            item_6: Item { id: 8, xp: 0 },
+            item_7: Item { id: 9, xp: 0 },
+            item_8: Item { id: 11, xp: 0 },
+            item_9: Item { id: 12, xp: 0 },
+            item_10: Item { id: 13, xp: 0 },
+            item_11: Item { id: 14, xp: 0 },
+            item_12: Item { id: 15, xp: 0 },
+            item_13: Item { id: 16, xp: 0 },
+            item_14: Item { id: 17, xp: 0 },
+            item_15: Item { id: 18, xp: 0 },
             mutated: false
         };
 
@@ -921,7 +943,46 @@ mod tests {
         assert(bag.is_full() == false, 'Bag should be not full');
 
         // add a new item
-        let mut warhammer = ItemPrimitive { id: ItemId::Warhammer, xp: 1 };
+        let mut warhammer = Item { id: ItemId::Warhammer, xp: 1 };
+        bag.add_item(warhammer);
+
+        // assert bag is full again
+        assert(bag.is_full() == true, 'Bag should be full again');
+    }
+
+    #[test]
+    fn test_is_full() {
+        // start with full bag
+        let mut bag = Bag {
+            item_1: Item { id: 1, xp: 0 },
+            item_2: Item { id: 2, xp: 0 },
+            item_3: Item { id: 3, xp: 0 },
+            item_4: Item { id: 4, xp: 0 },
+            item_5: Item { id: 5, xp: 0 },
+            item_6: Item { id: 8, xp: 0 },
+            item_7: Item { id: 9, xp: 0 },
+            item_8: Item { id: 11, xp: 0 },
+            item_9: Item { id: 12, xp: 0 },
+            item_10: Item { id: 13, xp: 0 },
+            item_11: Item { id: 14, xp: 0 },
+            item_12: Item { id: 15, xp: 0 },
+            item_13: Item { id: 16, xp: 0 },
+            item_14: Item { id: 17, xp: 0 },
+            item_15: Item { id: 18, xp: 0 },
+            mutated: false
+        };
+
+        // assert bag is full
+        assert(bag.is_full() == true, 'Bag should be full');
+
+        // remove an item
+        bag.remove_item(1);
+
+        // assert bag is not full
+        assert(bag.is_full() == false, 'Bag should be not full');
+
+        // add a new item
+        let mut warhammer = Item { id: ItemId::Warhammer, xp: 1 };
         bag.add_item(warhammer);
 
         // assert bag is full again
@@ -932,17 +993,17 @@ mod tests {
     #[should_panic(expected: ('Item not in bag',))]
     #[available_gas(7820)]
     fn test_get_item_not_in_bag() {
-        let item_1 = ItemPrimitive { id: 11, xp: 0 };
-        let item_2 = ItemPrimitive { id: 12, xp: 0 };
-        let item_3 = ItemPrimitive { id: 13, xp: 0 };
-        let item_4 = ItemPrimitive { id: 14, xp: 0 };
-        let item_5 = ItemPrimitive { id: 15, xp: 0 };
-        let item_6 = ItemPrimitive { id: 16, xp: 0 };
-        let item_7 = ItemPrimitive { id: 17, xp: 0 };
-        let item_8 = ItemPrimitive { id: 18, xp: 0 };
-        let item_9 = ItemPrimitive { id: 19, xp: 0 };
-        let item_10 = ItemPrimitive { id: 20, xp: 0 };
-        let item_11 = ItemPrimitive { id: 21, xp: 0 };
+        let item_1 = Item { id: 11, xp: 0 };
+        let item_2 = Item { id: 12, xp: 0 };
+        let item_3 = Item { id: 13, xp: 0 };
+        let item_4 = Item { id: 14, xp: 0 };
+        let item_5 = Item { id: 15, xp: 0 };
+        let item_6 = Item { id: 16, xp: 0 };
+        let item_7 = Item { id: 17, xp: 0 };
+        let item_8 = Item { id: 18, xp: 0 };
+        let item_9 = Item { id: 19, xp: 0 };
+        let item_10 = Item { id: 20, xp: 0 };
+        let item_11 = Item { id: 21, xp: 0 };
 
         let bag = Bag {
             item_1: item_1,
@@ -956,10 +1017,10 @@ mod tests {
             item_9: item_9,
             item_10: item_10,
             item_11: item_11,
-            item_12: ItemPrimitive { id: 0, xp: 0 },
-            item_13: ItemPrimitive { id: 0, xp: 0 },
-            item_14: ItemPrimitive { id: 0, xp: 0 },
-            item_15: ItemPrimitive { id: 0, xp: 0 },
+            item_12: Item { id: 0, xp: 0 },
+            item_13: Item { id: 0, xp: 0 },
+            item_14: Item { id: 0, xp: 0 },
+            item_15: Item { id: 0, xp: 0 },
             mutated: false,
         };
 
@@ -973,21 +1034,21 @@ mod tests {
     #[test]
     #[available_gas(101000)]
     fn test_get_item() {
-        let item_1 = ItemPrimitive { id: 11, xp: 0 };
-        let item_2 = ItemPrimitive { id: 12, xp: 0 };
-        let item_3 = ItemPrimitive { id: 13, xp: 0 };
-        let item_4 = ItemPrimitive { id: 14, xp: 0 };
-        let item_5 = ItemPrimitive { id: 15, xp: 0 };
-        let item_6 = ItemPrimitive { id: 16, xp: 0 };
-        let item_7 = ItemPrimitive { id: 17, xp: 0 };
-        let item_8 = ItemPrimitive { id: 18, xp: 0 };
-        let item_9 = ItemPrimitive { id: 19, xp: 0 };
-        let item_10 = ItemPrimitive { id: 20, xp: 0 };
-        let item_11 = ItemPrimitive { id: 21, xp: 0 };
-        let item_12 = ItemPrimitive { id: 22, xp: 0 };
-        let item_13 = ItemPrimitive { id: 23, xp: 0 };
-        let item_14 = ItemPrimitive { id: 24, xp: 0 };
-        let item_15 = ItemPrimitive { id: 25, xp: 0 };
+        let item_1 = Item { id: 11, xp: 0 };
+        let item_2 = Item { id: 12, xp: 0 };
+        let item_3 = Item { id: 13, xp: 0 };
+        let item_4 = Item { id: 14, xp: 0 };
+        let item_5 = Item { id: 15, xp: 0 };
+        let item_6 = Item { id: 16, xp: 0 };
+        let item_7 = Item { id: 17, xp: 0 };
+        let item_8 = Item { id: 18, xp: 0 };
+        let item_9 = Item { id: 19, xp: 0 };
+        let item_10 = Item { id: 20, xp: 0 };
+        let item_11 = Item { id: 21, xp: 0 };
+        let item_12 = Item { id: 22, xp: 0 };
+        let item_13 = Item { id: 23, xp: 0 };
+        let item_14 = Item { id: 24, xp: 0 };
+        let item_15 = Item { id: 25, xp: 0 };
 
         let bag = Bag {
             item_1,
@@ -1055,24 +1116,47 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(16800)]
+    #[available_gas(12440)]
+    fn test_remove_item_gas() {
+        let mut bag = Bag {
+            item_1: Item { id: 1, xp: 0 },
+            item_2: Item { id: 2, xp: 0 },
+            item_3: Item { id: 3, xp: 0 },
+            item_4: Item { id: 4, xp: 0 },
+            item_5: Item { id: 5, xp: 0 },
+            item_6: Item { id: 6, xp: 0 },
+            item_7: Item { id: 7, xp: 0 },
+            item_8: Item { id: 8, xp: 1 },
+            item_9: Item { id: 9, xp: 0 },
+            item_10: Item { id: 10, xp: 0 },
+            item_11: Item { id: 11, xp: 0 },
+            item_12: Item { id: 12, xp: 0 },
+            item_13: Item { id: 13, xp: 0 },
+            item_14: Item { id: 14, xp: 0 },
+            item_15: Item { id: 15, xp: 0 },
+            mutated: false
+        };
+        bag.remove_item(6);
+    }
+
+    #[test]
     fn test_remove_item() {
         let mut bag = Bag {
-            item_1: ItemPrimitive { id: 1, xp: 0 },
-            item_2: ItemPrimitive { id: 2, xp: 0 },
-            item_3: ItemPrimitive { id: 3, xp: 0 },
-            item_4: ItemPrimitive { id: 4, xp: 0 },
-            item_5: ItemPrimitive { id: 5, xp: 0 },
-            item_6: ItemPrimitive { id: 6, xp: 0 },
-            item_7: ItemPrimitive { id: 7, xp: 0 },
-            item_8: ItemPrimitive { id: 8, xp: 1 },
-            item_9: ItemPrimitive { id: 9, xp: 0 },
-            item_10: ItemPrimitive { id: 10, xp: 0 },
-            item_11: ItemPrimitive { id: 11, xp: 0 },
-            item_12: ItemPrimitive { id: 12, xp: 0 },
-            item_13: ItemPrimitive { id: 13, xp: 0 },
-            item_14: ItemPrimitive { id: 14, xp: 0 },
-            item_15: ItemPrimitive { id: 15, xp: 0 },
+            item_1: Item { id: 1, xp: 0 },
+            item_2: Item { id: 2, xp: 0 },
+            item_3: Item { id: 3, xp: 0 },
+            item_4: Item { id: 4, xp: 0 },
+            item_5: Item { id: 5, xp: 0 },
+            item_6: Item { id: 6, xp: 0 },
+            item_7: Item { id: 7, xp: 0 },
+            item_8: Item { id: 8, xp: 1 },
+            item_9: Item { id: 9, xp: 0 },
+            item_10: Item { id: 10, xp: 0 },
+            item_11: Item { id: 11, xp: 0 },
+            item_12: Item { id: 12, xp: 0 },
+            item_13: Item { id: 13, xp: 0 },
+            item_14: Item { id: 14, xp: 0 },
+            item_15: Item { id: 15, xp: 0 },
             mutated: false
         };
 
@@ -1087,25 +1171,24 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item not in bag',))]
-    #[available_gas(12420)]
     fn test_remove_item_not_in_bag() {
         // initialize bag
         let mut bag = Bag {
-            item_1: ItemPrimitive { id: 1, xp: 0 },
-            item_2: ItemPrimitive { id: 2, xp: 0 },
-            item_3: ItemPrimitive { id: 3, xp: 0 },
-            item_4: ItemPrimitive { id: 4, xp: 0 },
-            item_5: ItemPrimitive { id: 5, xp: 0 },
-            item_6: ItemPrimitive { id: 8, xp: 0 },
-            item_7: ItemPrimitive { id: 9, xp: 0 },
-            item_8: ItemPrimitive { id: 11, xp: 0 },
-            item_9: ItemPrimitive { id: 12, xp: 0 },
-            item_10: ItemPrimitive { id: 13, xp: 0 },
-            item_11: ItemPrimitive { id: 14, xp: 0 },
-            item_12: ItemPrimitive { id: 15, xp: 0 },
-            item_13: ItemPrimitive { id: 16, xp: 0 },
-            item_14: ItemPrimitive { id: 17, xp: 0 },
-            item_15: ItemPrimitive { id: 18, xp: 0 },
+            item_1: Item { id: 1, xp: 0 },
+            item_2: Item { id: 2, xp: 0 },
+            item_3: Item { id: 3, xp: 0 },
+            item_4: Item { id: 4, xp: 0 },
+            item_5: Item { id: 5, xp: 0 },
+            item_6: Item { id: 8, xp: 0 },
+            item_7: Item { id: 9, xp: 0 },
+            item_8: Item { id: 11, xp: 0 },
+            item_9: Item { id: 12, xp: 0 },
+            item_10: Item { id: 13, xp: 0 },
+            item_11: Item { id: 14, xp: 0 },
+            item_12: Item { id: 15, xp: 0 },
+            item_13: Item { id: 16, xp: 0 },
+            item_14: Item { id: 17, xp: 0 },
+            item_15: Item { id: 18, xp: 0 },
             mutated: false
         };
 

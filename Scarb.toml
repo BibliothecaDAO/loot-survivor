@@ -12,8 +12,8 @@ members = [
 ]
 name = "loot_survivor"
 version = "0.1.0"
-description = "Loot Survivor collection of libraries and contracts for the BibliothecaDAO ecosystem and beyond."
-homepage = "https://github.com/BibliothecaDAO/loot-survivor"
+description = "A fully onchain arcade dungeon crawler built on Starknet in conjunction with Realms.world. Explore the dynamically generated dungeons while you fight for your life against beasts and obstacles in pursuit of a spot on the esteemed leaderboard."
+homepage = "https://github.com/provable-games/loot-survivor"
 
 [workspace.dependencies]
 starknet = ">=2.5.3"

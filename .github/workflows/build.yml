@@ -7,7 +7,7 @@ on:
   pull_request:
 
 env:
-  SCARB_VERSION: 2.5.4
+  SCARB_VERSION: 2.6.4
 
 jobs:
   build:

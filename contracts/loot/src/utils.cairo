@@ -1,5 +1,5 @@
 mod NameUtils {
-    use lootitems::constants::{ItemNameSuffix, ItemSuffix, ItemId};
+    use loot::constants::{ItemNameSuffix, ItemSuffix, ItemId};
 
     fn is_special3_set1(name: u8) -> bool {
         (name == ItemNameSuffix::Bane
@@ -77,7 +77,7 @@ mod NameUtils {
 }
 
 mod ItemUtils {
-    use lootitems::{loot::Loot, constants::{ItemNameSuffix, ItemSuffix, ItemId}};
+    use loot::{loot::Loot, constants::{ItemNameSuffix, ItemSuffix, ItemId}};
     use combat::constants::CombatEnums::{Type, Tier, Slot};
 
 
@@ -1066,7 +1066,7 @@ mod ItemUtils {
 #[cfg(test)]
 mod tests {
     use core::array::ArrayTrait;
-    use lootitems::{utils::{NameUtils, ItemUtils}, constants::{ItemId}};
+    use loot::{utils::{NameUtils, ItemUtils}, constants::{ItemId}};
 
     #[test]
     #[available_gas(151130)]

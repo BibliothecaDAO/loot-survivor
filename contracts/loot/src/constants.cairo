@@ -102,7 +102,7 @@ mod ItemId {
     const HeavyGloves: u8 = 101;
 }
 
-// ItemPrimitive Slot Length
+// Item Slot Length
 mod ItemSlotLength {
     const SlotItemsLengthWeapon: u8 = 18;
     const SlotItemsLengthChest: u8 = 15;

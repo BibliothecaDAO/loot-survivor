@@ -1,14 +1,14 @@
 use core::integer::u256_try_as_non_zero;
 use starknet::{StorePacking};
 use traits::{TryInto, Into};
-use super::stats::{Stats, StatsPacking, StatUtils};
+use super::stats::{Stats, StatsPacking, ImplStats};
 
 #[derive(Drop, Copy, Serde)]
 struct AdventurerMetadata {
     start_entropy: u64, // 64 bits in storage
     starting_stats: Stats, // 24 bits in storage
-    name: u128, // 128 bits in storage
     interface_camel: bool, // 1 bit bool in storage
+    name: u128, // 162 bits in storage
 }
 
 impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
@@ -19,10 +19,16 @@ impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
             0
         };
 
+        // we don't use StatsPacking here because we only want to use 4 bits per stat
         (value.start_entropy.into()
-            + StatsPacking::pack(value.starting_stats).into() * TWO_POW_64
-            + interface_camel_u256 * TWO_POW_91
-            + value.name.into() * TWO_POW_92)
+            + value.starting_stats.strength.into() * TWO_POW_64
+            + value.starting_stats.dexterity.into() * TWO_POW_68
+            + value.starting_stats.vitality.into() * TWO_POW_72
+            + value.starting_stats.intelligence.into() * TWO_POW_76
+            + value.starting_stats.wisdom.into() * TWO_POW_80
+            + value.starting_stats.charisma.into() * TWO_POW_84
+            + interface_camel_u256 * TWO_POW_88
+            + value.name.into() * TWO_POW_89)
             .try_into()
             .unwrap()
     }
@@ -31,19 +37,40 @@ impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
         let (packed, start_entropy) = integer::U256DivRem::div_rem(
             packed, TWO_POW_64.try_into().unwrap()
         );
-        let (packed, starting_stats) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_27.try_into().unwrap()
+        let (packed, strength) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_4.try_into().unwrap()
+        );
+        let (packed, dexterity) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_4.try_into().unwrap()
+        );
+        let (packed, vitality) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_4.try_into().unwrap()
+        );
+        let (packed, intelligence) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_4.try_into().unwrap()
+        );
+        let (packed, wisdom) = integer::U256DivRem::div_rem(packed, TWO_POW_4.try_into().unwrap());
+        let (packed, charisma) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_4.try_into().unwrap()
         );
         let (packed, interface_camel_u256) = integer::U256DivRem::div_rem(
             packed, TWO_POW_1.try_into().unwrap()
         );
-        let (_, name) = integer::U256DivRem::div_rem(packed, TWO_POW_128.try_into().unwrap());
+        let (_, name) = integer::U256DivRem::div_rem(packed, TWO_POW_162.try_into().unwrap());
 
         let interface_camel = interface_camel_u256 == 1;
 
         AdventurerMetadata {
             start_entropy: start_entropy.try_into().unwrap(),
-            starting_stats: StatsPacking::unpack(starting_stats.try_into().unwrap()),
+            starting_stats: Stats {
+                strength: strength.try_into().unwrap(),
+                dexterity: dexterity.try_into().unwrap(),
+                vitality: vitality.try_into().unwrap(),
+                intelligence: intelligence.try_into().unwrap(),
+                wisdom: wisdom.try_into().unwrap(),
+                charisma: charisma.try_into().unwrap(),
+                luck: 0
+            },
             name: name.try_into().unwrap(),
             interface_camel
         }
@@ -58,9 +85,15 @@ impl ImplAdventurerMetadata of IAdventurerMetadata {
     // @param interface_camel: Whether the players account is using a camelcase interface
     // @return: The newly created AdventurerMetadata struct
     fn new(name: u128, interface_camel: bool) -> AdventurerMetadata {
-        AdventurerMetadata { name, start_entropy: 0, starting_stats: StatUtils::new(), interface_camel }
+        AdventurerMetadata {
+            name, start_entropy: 0, starting_stats: ImplStats::new(), interface_camel
+        }
     }
 
+    // @notice: Generates a start entropy for the adventurer
+    // @dev: The start entropy is used for game fixed entropy such as generating item specials
+    // @param adventurer_entropy: The entropy of the adventurer
+    // @return: The start entropy
     fn generate_start_entropy(adventurer_entropy: felt252) -> u64 {
         let (_, r) = integer::U256DivRem::div_rem(
             adventurer_entropy.into(), u256_try_as_non_zero(U64_MAX.into()).unwrap()
@@ -70,16 +103,17 @@ impl ImplAdventurerMetadata of IAdventurerMetadata {
 }
 
 const TWO_POW_1: u256 = 0x2;
-const TWO_POW_24: u256 = 0x1000000;
+const TWO_POW_4: u256 = 0x10;
 const TWO_POW_64: u256 = 0x10000000000000000;
+const TWO_POW_68: u256 = 0x100000000000000000;
+const TWO_POW_72: u256 = 0x1000000000000000000;
+const TWO_POW_76: u256 = 0x10000000000000000000;
+const TWO_POW_80: u256 = 0x100000000000000000000;
+const TWO_POW_84: u256 = 0x1000000000000000000000;
 const TWO_POW_88: u256 = 0x10000000000000000000000;
 const TWO_POW_89: u256 = 0x20000000000000000000000;
-const TWO_POW_128: u256 = 0x100000000000000000000000000000000;
-const TWO_POW_91: u256 = 0x80000000000000000000000; // 2^91
-const TWO_POW_92: u256 = 0x100000000000000000000000; // 2^92
-const TWO_POW_27: u256 = 0x8000000; // 2^27
+const TWO_POW_162: u256 = 0x40000000000000000000000000000000000000;
 const U64_MAX: u64 = 18446744073709551615;
-
 
 #[cfg(test)]
 #[test]
@@ -88,6 +122,7 @@ fn test_adventurer_metadata_packing() {
     // max value case
     let max_u64 = 0xffffffffffffffff;
     let max_name_length = 'abcdefghijklmnop';
+
     let max_starting_stats = Stats {
         strength: 15,
         dexterity: 15,
