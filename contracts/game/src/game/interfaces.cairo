@@ -24,7 +24,7 @@ trait IGame<TContractState> {
         ref self: TContractState,
         client_reward_address: ContractAddress,
         weapon: u8,
-        name: u128,
+        name: felt252,
         golden_token_id: u256,
         interface_camel: bool,
         vrf_fee_limit: u128

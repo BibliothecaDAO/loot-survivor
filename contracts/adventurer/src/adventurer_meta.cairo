@@ -8,7 +8,7 @@ struct AdventurerMetadata {
     start_entropy: u64, // 64 bits in storage
     starting_stats: Stats, // 24 bits in storage
     interface_camel: bool, // 1 bit bool in storage
-    name: u128, // 162 bits in storage
+    name: felt252, // 162 bits in storage
 }
 
 impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
@@ -84,7 +84,7 @@ impl ImplAdventurerMetadata of IAdventurerMetadata {
     // @param name: The name of the adventurer
     // @param interface_camel: Whether the players account is using a camelcase interface
     // @return: The newly created AdventurerMetadata struct
-    fn new(name: u128, interface_camel: bool) -> AdventurerMetadata {
+    fn new(name: felt252, interface_camel: bool) -> AdventurerMetadata {
         AdventurerMetadata {
             name, start_entropy: 0, starting_stats: ImplStats::new(), interface_camel
         }
@@ -121,7 +121,7 @@ const U64_MAX: u64 = 18446744073709551615;
 fn test_adventurer_metadata_packing() {
     // max value case
     let max_u64 = 0xffffffffffffffff;
-    let max_name_length = 'abcdefghijklmnop';
+    let max_name_length = 'abcdefghijklmnopqr';
 
     let max_starting_stats = Stats {
         strength: 15,

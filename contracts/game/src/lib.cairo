@@ -238,7 +238,10 @@ mod Game {
                 }
             } else if adventurer_level > 2 {
                 let adventurer_state = AdventurerState {
-                    owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+                    owner: self._owner.read(adventurer_id),
+                    adventurer_id,
+                    adventurer_entropy,
+                    adventurer
                 };
 
                 // get market items based on new adventurer entropy 
@@ -263,7 +266,7 @@ mod Game {
             ref self: ContractState,
             client_reward_address: ContractAddress,
             weapon: u8,
-            name: u128,
+            name: felt252,
             golden_token_id: u256,
             interface_camel: bool,
             vrf_fee_limit: u128
@@ -828,7 +831,7 @@ mod Game {
             self._leaderboard.read()
         }
         fn owner_of(self: @ContractState, adventurer_id: felt252) -> ContractAddress {
-            _owner_of(self, adventurer_id)
+            self._owner.read(adventurer_id)
         }
         // fn starting_gold(self: @ContractState) -> u16 {
         //     STARTING_GOLD
@@ -914,7 +917,7 @@ mod Game {
 
         // create adventurer state for UpgradesAvailable event
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let available_items = _get_items_on_market(
             @self, adventurer_entropy, adventurer.xp, adventurer.stat_upgrades_available
@@ -1111,7 +1114,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: _owner_of(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
 
         let death_details = DeathDetails {
@@ -1293,7 +1296,11 @@ mod Game {
     }
 
     fn _start_game(
-        ref self: ContractState, weapon: u8, name: u128, interface_camel: bool, vrf_fee_limit: u128
+        ref self: ContractState,
+        weapon: u8,
+        name: felt252,
+        interface_camel: bool,
+        vrf_fee_limit: u128
     ) {
         // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._game_counter.read() + 1;
@@ -2331,7 +2338,10 @@ mod Game {
         if (previous_level == 1) {
             // emit the leveled up event
             let adventurer_state = AdventurerState {
-                owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+                owner: self._owner.read(adventurer_id),
+                adventurer_id,
+                adventurer_entropy,
+                adventurer
             };
             __event_AdventurerLeveledUp(ref self, adventurer_state, previous_level, new_level);
 
@@ -2368,15 +2378,14 @@ mod Game {
             // get new entropy
             let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
             let adventurer_state = AdventurerState {
-                owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+                owner: self._owner.read(adventurer_id),
+                adventurer_id,
+                adventurer_entropy,
+                adventurer
             };
             // emit the leveled up event
             __event_AdventurerLeveledUp(ref self, adventurer_state, previous_level, new_level);
         }
-    }
-    #[inline(always)]
-    fn _owner_of(self: @ContractState, adventurer_id: felt252) -> ContractAddress {
-        self._owner.read(adventurer_id)
     }
     fn _assert_ownership(self: @ContractState, adventurer_id: felt252) {
         assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);
@@ -2897,7 +2906,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let adventurer_state_with_bag = AdventurerStateWithBag { adventurer_state, bag };
         self
@@ -2922,7 +2931,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
 
         let reveal_block = 0; // TODO: consider removing this
@@ -2939,7 +2948,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
 
         let discovery = Discovery { adventurer_state, amount };
@@ -2959,7 +2968,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
 
         let obstacle_event = ObstacleEvent { adventurer_state, obstacle_details, };
@@ -2980,7 +2989,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
 
         let discovered_beast_event = DiscoveredBeast {
@@ -2997,7 +3006,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(AttackedBeast { adventurer_state, beast_battle_details });
     }
@@ -3010,7 +3019,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(AttackedByBeast { adventurer_state, beast_battle_details });
     }
@@ -3023,7 +3032,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(AmbushedByBeast { adventurer_state, beast_battle_details });
     }
@@ -3042,7 +3051,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let slayed_beast_event = SlayedBeast {
             adventurer_state,
@@ -3067,7 +3076,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let flee_event = FleeEvent {
             adventurer_state, seed, id: beast.id, beast_specs: beast.combat_spec
@@ -3084,7 +3093,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let flee_event = FleeEvent {
             adventurer_state, seed, id: beast.id, beast_specs: beast.combat_spec
@@ -3102,7 +3111,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let adventurer_state_with_bag = AdventurerStateWithBag { adventurer_state, bag };
         let equipped_items_event = EquippedItems {
@@ -3120,7 +3129,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let adventurer_state_with_bag = AdventurerStateWithBag { adventurer_state, bag };
         self.emit(DroppedItems { adventurer_state_with_bag, item_ids });
@@ -3134,7 +3143,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(ItemsLeveledUp { adventurer_state, items });
     }
@@ -3177,7 +3186,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let adventurer_state_with_bag = AdventurerStateWithBag { adventurer_state, bag };
         self.emit(PurchasedItems { adventurer_state_with_bag, purchases });
@@ -3193,7 +3202,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer_entropy, adventurer
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(PurchasedPotions { adventurer_state, quantity, cost, health, });
     }
