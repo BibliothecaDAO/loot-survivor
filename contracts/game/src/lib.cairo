@@ -2366,7 +2366,7 @@ mod Game {
                 self._adventurer_entropy.write(adventurer_id, 0);
 
                 // request new entropy
-                let max_callback_fee = 300000000000000;
+                let max_callback_fee = 1000000000000000;
                 let randomness_address = self._randomness_contract_address.read();
                 let seed = adventurer.get_vrf_seed(adventurer_id, adventurer_entropy);
                 request_randomness(randomness_address, seed, adventurer_id, max_callback_fee);
