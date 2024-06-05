@@ -1391,9 +1391,6 @@ mod Game {
             },
             ExploreResult::Discovery(()) => {
                 _process_discovery(ref self, ref adventurer, adventurer_id, rnd2);
-                _explore(
-                    ref self, ref adventurer, adventurer_id, adventurer_entropy, explore_till_beast
-                )
             }
         }
 
