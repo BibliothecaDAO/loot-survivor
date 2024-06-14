@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { Call } from "@/app/types";
 import { AccountInterface } from "starknet";
-import { MAX_FEE_CHECK } from "../lib/constants";
+import { getMaxFee } from "@/app/lib/constants";
+import { Network } from "@/app/hooks/useUIStore";
 
 type TransactionCartState = {
   error: boolean;
@@ -12,7 +13,8 @@ type TransactionCartState = {
     isArcade: boolean,
     ethBalance: number,
     showTopUpDialog: (show: boolean) => void,
-    setTopUpAccount: (account: string) => void
+    setTopUpAccount: (account: string) => void,
+    network: Network
   ) => Promise<any>;
   calls: Call[];
   addToCalls: (value: Call) => void;
@@ -51,9 +53,10 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
     isArcade: boolean,
     ethBalance: number,
     showTopUpDialog: (show: boolean) => void,
-    setTopUpAccount: (account: string) => void
+    setTopUpAccount: (account: string) => void,
+    network: Network
   ) => {
-    const maxFee = MAX_FEE_CHECK;
+    const maxFee = getMaxFee(network!);
     try {
       let tx;
       if (isArcade) {

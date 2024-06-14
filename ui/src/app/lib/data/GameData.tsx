@@ -1097,8 +1097,6 @@ export class GameData {
       HitByObstacle: "damage",
       Multicall: "purchaseItem",
       HitByBeast: "damage",
-      IdleDamagePenalty: "damage",
-      IdleDamagePenaltyDead: "die",
       Suicide: "die",
     };
 
@@ -1142,7 +1140,6 @@ export class GameData {
       AdventurerDied: hash.getSelectorFromName("AdventurerDied"),
       AdventurerLeveledUp: hash.getSelectorFromName("AdventurerLeveledUp"),
       UpgradesAvailable: hash.getSelectorFromName("UpgradesAvailable"),
-      IdleDeathPenalty: hash.getSelectorFromName("IdleDeathPenalty"),
       Transfer: hash.getSelectorFromName("Transfer"),
     };
 

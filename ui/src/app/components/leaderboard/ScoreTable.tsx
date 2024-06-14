@@ -5,6 +5,7 @@ import ScoreRow from "@/app/components/leaderboard/ScoreRow";
 import useUIStore from "@/app/hooks/useUIStore";
 import { getScoresInList } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
+import { networkConfig } from "@/app/lib/networkConfig";
 
 export interface ScoreLeaderboardTableProps {
   itemsPerPage: number;
@@ -21,25 +22,23 @@ const ScoreLeaderboardTable = ({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
-  const campaignAdventurers = adventurers.filter(
-    (score) => score.startBlock! > 942308
-  );
-
+  const onMainnet = useUIStore((state) => state.onMainnet);
+  const onSepolia = useUIStore((state) => state.onSepolia);
+  const network = useUIStore((state) => state.network);
   const displayScores = adventurers?.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  const campaignDisplayScores = campaignAdventurers?.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
   const scoreIds = adventurers?.map((score) => score.id ?? 0);
 
-  const scoresData = useCustomQuery("topScoresQuery", getScoresInList, {
-    ids: scoreIds,
-  });
+  const scoresData = useCustomQuery(
+    networkConfig[network!].lsGQLURL!,
+    "topScoresQuery",
+    getScoresInList,
+    {
+      ids: scoreIds,
+    }
+  );
 
   const mergedScores = displayScores.map((item1) => {
     const matchingItem2 = scoresData?.scores.find(
@@ -52,27 +51,9 @@ const ScoreLeaderboardTable = ({
     };
   });
 
-  const campaignMergedScores = campaignDisplayScores.map((item1) => {
-    const matchingItem2 = scoresData?.scores.find(
-      (item2: Score) => item2.adventurerId === item1.id
-    );
-
-    return {
-      ...item1,
-      ...matchingItem2,
-    };
-  });
-
   const scoresWithLords = mergedScores;
 
-  const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
-  const onSepolia = process.env.NEXT_PUBLIC_NETWORK === "sepolia";
-
-  const totalPages = Math.ceil(
-    (!onMainnet && !onSepolia && !showAllTime
-      ? campaignAdventurers.length
-      : adventurers.length) / itemsPerPage
-  );
+  const totalPages = Math.ceil(adventurers.length / itemsPerPage);
 
   let previousXp = -1;
   let currentRank = 0;
@@ -137,10 +118,7 @@ const ScoreLeaderboardTable = ({
                 </tr>
               </thead>
               <tbody>
-                {(!onMainnet && !onSepolia && !showAllTime
-                  ? campaignMergedScores
-                  : scoresWithLords
-                ).map((adventurer: any, index: number) => (
+                {scoresWithLords.map((adventurer: any, index: number) => (
                   <ScoreRow
                     key={index}
                     adventurer={adventurer}
@@ -150,9 +128,7 @@ const ScoreLeaderboardTable = ({
                 ))}
               </tbody>
             </table>
-            {(!onMainnet && !onSepolia && !showAllTime
-              ? campaignAdventurers.length
-              : adventurers.length) > 10 && (
+            {adventurers.length > 10 && (
               <div className="flex justify-center sm:mt-8 xl:mt-2">
                 <Button
                   variant={"outline"}

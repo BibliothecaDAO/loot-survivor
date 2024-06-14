@@ -38,6 +38,9 @@ import Summary from "@/app/components/upgrade/Summary";
 import { HealthCountDown } from "@/app/components/CountDown";
 import { calculateVitBoostRemoved } from "@/app/lib/utils";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import InterludeScreen from "@/app/containers/InterludeScreen";
+import { useController } from "@/app/context/ControllerContext";
+import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
 
 interface UpgradeScreenProps {
   upgrade: (
@@ -58,6 +61,9 @@ export default function UpgradeScreen({
   gameContract,
 }: UpgradeScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const updateAdventurerStats = useAdventurerStore(
+    (state) => state.updateAdventurerStats
+  );
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
@@ -79,12 +85,91 @@ export default function UpgradeScreen({
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const dropItems = useUIStore((state) => state.dropItems);
+  const entropyReady = useUIStore((state) => state.entropyReady);
+  const setEntropyReady = useUIStore((state) => state.setEntropyReady);
+  const onKatana = useUIStore((state) => state.onKatana);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const [summary, setSummary] = useState<UpgradeSummary>({
     Stats: { ...ZeroUpgrade },
     Items: [],
     Potions: 0,
   });
+
+  const { play: clickPlay } = useUiSounds(soundSelector.click);
+
+  useEffect(() => {
+    if (onKatana) return;
+    const fetchEntropy = async () => {
+      const entropy = await gameContract!.call("get_adventurer_entropy", [
+        adventurer?.id!,
+      ]);
+      if (entropy !== BigInt(0)) {
+        setEntropyReady(true);
+        clearInterval(interval);
+      }
+    };
+
+    // Call the function immediately
+    fetchEntropy();
+
+    // Set up the interval to call the function every 10 seconds
+    const interval = setInterval(fetchEntropy, 10000);
+
+    return () => clearInterval(interval); // Cleanup on component unmount
+  }, []);
+
+  const setData = useQueriesStore((state) => state.setData);
+
+  useEffect(() => {
+    const fetchMarketItems = async () => {
+      if (entropyReady || onKatana) {
+        const marketItems = (await gameContract!.call("get_items_on_market", [
+          adventurer?.id!,
+        ])) as string[];
+        const itemData = [];
+        for (let item of marketItems) {
+          itemData.unshift({
+            item: gameData.ITEMS[parseInt(item)],
+            adventurerId: adventurer?.id,
+            owner: false,
+            equipped: false,
+            ownerAddress: adventurer?.owner,
+            xp: 0,
+            special1: null,
+            special2: null,
+            special3: null,
+            isAvailable: false,
+            purchasedTime: null,
+            timestamp: new Date(),
+          });
+        }
+        setData("latestMarketItemsQuery", {
+          items: itemData,
+        });
+      }
+    };
+
+    const fetchAdventurerStats = async () => {
+      if ((entropyReady || onKatana) && adventurer?.level == 2) {
+        const updatedAdventurer = (await gameContract!.call("get_adventurer", [
+          adventurer?.id!,
+        ])) as any;
+        updateAdventurerStats({
+          health: parseInt(updatedAdventurer.health),
+          strength: parseInt(updatedAdventurer.stats.strength),
+          dexterity: parseInt(updatedAdventurer.stats.dexterity),
+          vitality: parseInt(updatedAdventurer.stats.vitality),
+          intelligence: parseInt(updatedAdventurer.stats.intelligence),
+          wisdom: parseInt(updatedAdventurer.stats.wisdom),
+          charisma: parseInt(updatedAdventurer.stats.charisma),
+          luck: parseInt(updatedAdventurer.stats.luck),
+        });
+      }
+    };
+
+    fetchMarketItems();
+    fetchAdventurerStats();
+  }, [entropyReady]);
 
   const gameData = new GameData();
 
@@ -222,8 +307,13 @@ export default function UpgradeScreen({
   const selectedCharisma = upgrades["Charisma"] ?? 0;
   const selectedVitality = upgrades["Vitality"] ?? 0;
 
-  const totalVitality = (adventurer?.vitality ?? 0) + selectedVitality;
-  const totalCharisma = (adventurer?.charisma ?? 0) + selectedCharisma;
+  const [totalVitality, setTotalVitality] = useState(0);
+  const [totalCharisma, setTotalCharisma] = useState(0);
+
+  useEffect(() => {
+    setTotalVitality((adventurer?.vitality ?? 0) + selectedVitality);
+    setTotalCharisma((adventurer?.charisma ?? 0) + selectedCharisma);
+  }, [adventurer, selectedVitality, selectedCharisma]);
 
   const purchaseGoldAmount =
     potionAmount * getPotionPrice(adventurer?.level ?? 0, totalCharisma);
@@ -289,7 +379,7 @@ export default function UpgradeScreen({
     adventurerItems
   );
 
-  const maxHealth = Math.min(100 + totalVitality * 10, 511);
+  const maxHealth = Math.min(100 + totalVitality * 10, 1023);
   const newMaxHealth = 100 + (totalVitality - vitBoostRemoved) * 10;
   const currentHealth = adventurer?.health! + selectedVitality * 10;
   const healthPlusPots = Math.min(
@@ -326,6 +416,17 @@ export default function UpgradeScreen({
     }
   };
 
+  const { addControl } = useController();
+
+  useEffect(() => {
+    addControl("u", () => {
+      console.log("Key u pressed");
+      handleSubmitUpgradeTx();
+      setUpgradeScreen(1);
+      clickPlay();
+    });
+  }, [upgrades, purchaseItems, potionAmount]);
+
   const upgradesTotal = Object.values(upgrades)
     .filter((value) => value !== 0)
     .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
@@ -361,11 +462,11 @@ export default function UpgradeScreen({
   );
 
   const getNoBoostedStats = async () => {
-    const stats = await gameContract?.call(
-      "get_base_stats",
+    const baseAdventurer = (await gameContract?.call(
+      "get_adventurer_no_boosts",
       CallData.compile({ token_id: adventurer?.id! })
-    ); // check whether player can use the current token
-    setNonBoostedStats(stats);
+    )) as any; // check whether player can use the current token
+    setNonBoostedStats(baseAdventurer.stats);
   };
 
   useEffect(() => {
@@ -380,6 +481,7 @@ export default function UpgradeScreen({
 
   return (
     <>
+      {!entropyReady && !onKatana && <InterludeScreen />}
       {hasStatUpgrades ? (
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 h-full">
           <div className="w-1/3 hidden sm:flex h-full">
@@ -391,8 +493,8 @@ export default function UpgradeScreen({
           </div>
           {!checkTransacting ? (
             <div className="w-full sm:w-2/3 h-full">
-              <div className="flex flex-col gap-2 xl:gap-0 h-full">
-                <div className="flex flex-col gap-2 sm:gap-0 justify-center text-terminal-green h-1/3 sm:h-1/4">
+              <div className="flex flex-col h-full">
+                <div className="flex flex-col sm:justify-center text-terminal-green sm:h-1/4">
                   <div className="w-full flex flex-row gap-2 mx-auto border border-terminal-green justify-between">
                     <Button
                       variant={"outline"}

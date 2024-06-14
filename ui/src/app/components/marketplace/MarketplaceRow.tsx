@@ -108,7 +108,7 @@ const MarketplaceRow = ({
   ).length;
 
   const equipFull = equippedItems + purchaseEquipItems === 8;
-  const bagFull = baggedItems + purchaseNoEquipItems === 11;
+  const bagFull = baggedItems + purchaseNoEquipItems === 15;
 
   useEffect(() => {
     if (isActive) {

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Contract } from "starknet";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
@@ -9,6 +10,8 @@ import MazeLoader from "@/app/components/icons/MazeLoader";
 import useUIStore from "@/app/hooks/useUIStore";
 import ActionMenu from "@/app/components/menu/ActionMenu";
 import { Beast } from "@/app/types";
+import { useController } from "@/app/context/ControllerContext";
+import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
 
 interface ActionsScreenProps {
   explore: (till_beast: boolean) => Promise<void>;
@@ -32,6 +35,7 @@ export default function ActionsScreen({
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
+  const onKatana = useUIStore((state) => state.onKatana);
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
@@ -41,14 +45,40 @@ export default function ActionsScreen({
       : []
   );
 
+  const { play: clickPlay } = useUiSounds(soundSelector.click);
+
+  const handleSingleExplore = async () => {
+    resetNotification();
+    await explore(false);
+  };
+
+  const handleExploreTillBeast = async () => {
+    resetNotification();
+    await explore(true);
+  };
+
+  const { addControl } = useController();
+
+  useEffect(() => {
+    addControl("e", () => {
+      console.log("Key e pressed");
+      handleSingleExplore();
+      clickPlay();
+    });
+    addControl("r", () => {
+      console.log("Key r pressed");
+      handleExploreTillBeast();
+      clickPlay();
+    });
+  }, []);
+
   const buttonsData = [
     {
       id: 1,
       label: loading ? "Exploring..." : hasBeast ? "Beast found!!" : "Once",
       value: "explore",
       action: async () => {
-        resetNotification();
-        await explore(false);
+        handleSingleExplore();
       },
       disabled: hasBeast || loading || !adventurer?.id || estimatingFee,
       loading: loading,
@@ -64,8 +94,7 @@ export default function ActionsScreen({
         : "Till Beast",
       value: "explore",
       action: async () => {
-        resetNotification();
-        await explore(true);
+        handleExploreTillBeast();
       },
       disabled: hasBeast || loading || !adventurer?.id || estimatingFee,
       loading: loading,
@@ -98,7 +127,7 @@ export default function ActionsScreen({
             </p>
           )}
           <div className="flex flex-col items-center lg:w-1/2 my-4 w-full px-4 sm:order-1 h-1/6 sm:h-full">
-            {loading && <MazeLoader />}
+            {loading && !onKatana && <MazeLoader />}
             <div className="w-3/4 h-full sm:h-1/6">
               <ActionMenu
                 buttonsData={buttonsData}

@@ -43,8 +43,7 @@ export const StatAttribute = ({
     amount + ((adventurer?.statUpgrades ?? 0) - upgradesTotal);
 
   const maxNonBoosted =
-    (nonBoostedStat ?? BigInt(0)) + BigInt(amount) >=
-    (name === "Strength" || name === "Vitality" ? BigInt(31) : BigInt(15));
+    (nonBoostedStat ?? BigInt(0)) + BigInt(amount) >= BigInt(31);
 
   useEffect(() => {
     if (buttonClicked) {
@@ -75,7 +74,7 @@ export const StatAttribute = ({
         {maxNonBoosted ? (
           <p className="sm:text-4xl text-center">Base Stat Maxed Out</p>
         ) : (
-          <p className="sm:text-[28px] xl:text-2xl text-center h-2/3">
+          <p className="sm:text-[28px] xl:text-2xl text-center h-2/3 px-2 sm:px-0">
             {description}
           </p>
         )}

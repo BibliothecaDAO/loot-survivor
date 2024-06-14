@@ -9,7 +9,11 @@ import { NullAdventurer, FormData } from "@/app/types";
 import useUIStore from "@/app/hooks/useUIStore";
 
 interface AdventurerScreenProps {
-  spawn: (formData: FormData, goldenTokenId: string) => Promise<void>;
+  spawn: (
+    formData: FormData,
+    goldenTokenId: string,
+    revenueAddress: string
+  ) => Promise<void>;
   handleSwitchAdventurer: (adventurerId: number) => Promise<void>;
   lordsBalance?: bigint;
   gameContract: Contract;

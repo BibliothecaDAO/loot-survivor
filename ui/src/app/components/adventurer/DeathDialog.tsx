@@ -12,6 +12,7 @@ import { useQueriesStore, AdventurersResult } from "@/app/hooks/useQueryStore";
 import GlitchEffect from "@/app/components/animations/GlitchEffect";
 import PixelatedImage from "@/app/components/animations/PixelatedImage";
 import { getDeathMessageByRank } from "@/app/lib/utils";
+import { networkConfig } from "@/app/lib/networkConfig";
 
 export const DeathDialog = () => {
   const messageRef = useRef<HTMLSpanElement>(null);
@@ -24,11 +25,18 @@ export const DeathDialog = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
+  const setScreen = useUIStore((state) => state.setScreen);
+  const network = useUIStore((state) => state.network);
   const [imageLoading, setImageLoading] = useState(false);
 
   const { refetch, setData } = useQueriesStore();
 
-  useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
+  useCustomQuery(
+    networkConfig[network!].lsGQLURL!,
+    "adventurersByXPQuery",
+    getAdventurerByXP,
+    undefined
+  );
 
   const handleSortXp = (xpData: AdventurersResult) => {
     const copiedAdventurersByXpData = xpData?.adventurers.slice();
@@ -52,7 +60,10 @@ export const DeathDialog = () => {
         );
         setRank(rank + 1);
       })
-      .catch((error) => console.error("Error refetching data:", error));
+      .catch((error) => {
+        console.error("Error refetching data:", error);
+        setRank(null); // Set rank to null or a default value in case of error
+      });
   }, []);
 
   useEffect(() => {
@@ -61,7 +72,7 @@ export const DeathDialog = () => {
 
   return (
     <>
-      {rank && (
+      {rank !== null && (
         <div className="top-0 left-0 fixed text-center h-full w-full z-40">
           <PixelatedImage
             src={"/scenes/intro/skulls.png"}
@@ -124,10 +135,21 @@ export const DeathDialog = () => {
                 )} place on #LootSurvivor with ${
                   adventurer?.xp
                 } XP.\n\nGravestone bears the inscription:\n\n"${twitterDeathMessage}"🪦\n\nEnter here and try to survive: ${
-                  process.env.NEXT_PUBLIC_APP_URL
+                  networkConfig[network!].appUrl
                 }\n\n@lootrealms #Starknet #Play2Die #🪦`}
                 className="animate-pulse"
               />
+              <Button
+                onClick={() => {
+                  showDeathDialog(false);
+                  setDeathMessage(null);
+                  setAdventurer(NullAdventurer);
+                  setScreen("leaderboard");
+                }}
+                className="z-10"
+              >
+                See Leaderboard
+              </Button>
               <Button
                 onClick={() => {
                   showDeathDialog(false);

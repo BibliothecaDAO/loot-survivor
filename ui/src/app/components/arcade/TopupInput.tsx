@@ -2,6 +2,7 @@ import React, { useState, ChangeEvent } from "react";
 import { AccountInterface } from "starknet";
 import { Button } from "@/app/components/buttons/Button";
 import { formatCurrency } from "@/app/lib/utils";
+import useUIStore from "@/app/hooks/useUIStore";
 
 interface TopupInputProps {
   balanceType: string;
@@ -33,8 +34,7 @@ const TopupInput = ({
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState(0);
 
-  const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
-  const onSepolia = process.env.NEXT_PUBLIC_NETWORK === "sepolia";
+  const { onMainnet, onSepolia } = useUIStore();
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>

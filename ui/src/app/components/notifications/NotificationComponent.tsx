@@ -53,7 +53,6 @@ const NotificationComponent = ({
       if (currentIndex < notifications.length - 1) {
         const timer = setTimeout(() => {
           setCurrentIndex((prev) => prev + 1);
-          playSound();
         }, 2000);
         return () => {
           clearTimeout(timer);
@@ -62,7 +61,6 @@ const NotificationComponent = ({
         const timer = setTimeout(
           () => {
             resetNotification();
-            playSound();
           },
           error ? 5000 : 2000
         );
@@ -115,7 +113,10 @@ const NotificationComponent = ({
         <div className="relative flex flex-row w-full gap-5 sm:p-2 items-center justify-center h-full">
           <div
             className="absolute top-0 right-0 cursor-pointer"
-            onClick={() => resetNotification()}
+            onClick={() => {
+              resetNotification();
+              playSound();
+            }}
           >
             <MdClose className="w-10 h-10" />
           </div>

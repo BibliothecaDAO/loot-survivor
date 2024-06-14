@@ -9,10 +9,10 @@ type u16 = number;
 type u8 = number;
 
 type AdventurerMetadata = {
-  startBlock: u64;
+  startEntropy: string;
   startingStats: Stats;
-  name: u128;
   interfaceCamel: boolean;
+  name: u128;
 };
 
 type Stats = {
@@ -25,18 +25,7 @@ type Stats = {
   luck: u8;
 };
 
-type LootStatistics = {
-  id: u8;
-  xp: u16;
-  metadata: u8;
-};
-
-type Adventurer = {
-  lastAction: u16;
-  health: u16;
-  xp: u16;
-  stats: Stats;
-  gold: u16;
+type Equipment = {
   weapon: LootStatistics;
   chest: LootStatistics;
   head: LootStatistics;
@@ -45,9 +34,21 @@ type Adventurer = {
   hand: LootStatistics;
   neck: LootStatistics;
   ring: LootStatistics;
+};
+
+type LootStatistics = {
+  id: u8;
+  xp: u16;
+};
+
+type Adventurer = {
+  health: u16;
+  xp: u16;
+  gold: u16;
   beastHealth: u16;
-  statPointsAvailable: u8;
-  actionsPerBlock: u8;
+  statUpgradesAvailable: u8;
+  stats: Stats;
+  equipment: Equipment;
   mutated: boolean;
 };
 
@@ -63,6 +64,10 @@ type Bag = {
   item9: LootStatistics;
   item10: LootStatistics;
   item11: LootStatistics;
+  item12: LootStatistics;
+  item13: LootStatistics;
+  item14: LootStatistics;
+  item15: LootStatistics;
   mutated: boolean;
 };
 
@@ -113,6 +118,7 @@ type ContractAddress = string;
 export type AdventurerState = {
   owner: ContractAddress;
   adventurerId: u128;
+  adventurerEntropy: string;
   adventurer: Adventurer;
 };
 
@@ -304,13 +310,6 @@ export type AdventurerLeveledUpEvent = {
 export type UpgradesAvailableEvent = {
   adventurerState: AdventurerState;
   items: number[];
-};
-
-export type IdleDeathPenaltyEvent = {
-  adventurerState: AdventurerState;
-  idleBlocks: u16;
-  penaltyThreshold: u16;
-  caller: ContractAddress;
 };
 
 export type AdventurerUpgradedEvent = {

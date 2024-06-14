@@ -159,6 +159,19 @@ bash scripts/starkli_setup.sh
 bash scripts/deploy.sh.sh
 ```
 
+#### Run UI
+
+```bash
+cd ui
+yarn dev
+```
+
+#### Deploy Katana & Run UI
+
+```bash
+bash scripts/katana/setup.sh
+```
+
 ### Play
 
 #### Mint $lords and approve LS to spend

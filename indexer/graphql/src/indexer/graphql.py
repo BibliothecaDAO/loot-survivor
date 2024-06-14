@@ -653,7 +653,7 @@ class OrderByInput:
 @strawberry.input
 class AdventurersFilter:
     id: Optional[FeltValueFilter] = None
-    lastAction: Optional[FeltValueFilter] = None
+    entropy: Optional[HexValueFilter] = None
     owner: Optional[HexValueFilter] = None
     name: Optional[StringFilter] = None
     health: Optional[FeltValueFilter] = None
@@ -675,7 +675,7 @@ class AdventurersFilter:
     ring: Optional[FeltValueFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     statUpgrades: Optional[FeltValueFilter] = None
-    startBlock: Optional[FeltValueFilter] = None
+    startEntropy: Optional[FeltValueFilter] = None
     revealBlock: Optional[FeltValueFilter] = None
     actionsPerBlock: Optional[FeltValueFilter] = None
     gold: Optional[FeltValueFilter] = None
@@ -778,7 +778,7 @@ class ItemsFilter:
 @strawberry.input
 class AdventurersOrderByInput:
     id: Optional[OrderByInput] = None
-    lastAction: Optional[OrderByInput] = None
+    entropy: Optional[OrderByInput] = None
     owner: Optional[OrderByInput] = None
     name: Optional[OrderByInput] = None
     health: Optional[OrderByInput] = None
@@ -801,7 +801,7 @@ class AdventurersOrderByInput:
     ring: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     statUpgrades: Optional[OrderByInput] = None
-    startBlock: Optional[OrderByInput] = None
+    startEntropy: Optional[OrderByInput] = None
     revealBlock: Optional[OrderByInput] = None
     actionsPerBlock: Optional[OrderByInput] = None
     gold: Optional[OrderByInput] = None
@@ -905,7 +905,7 @@ class ItemsOrderByInput:
 @strawberry.type
 class Adventurer:
     id: Optional[FeltValue]
-    lastAction: Optional[FeltValue]
+    entropy: Optional[HexValue]
     owner: Optional[HexValue]
     name: Optional[StringValue]
     health: Optional[FeltValue]
@@ -927,9 +927,8 @@ class Adventurer:
     ring: Optional[ItemValue]
     beastHealth: Optional[FeltValue]
     statUpgrades: Optional[FeltValue]
-    startBlock: Optional[FeltValue]
+    startEntropy: Optional[FeltValue]
     revealBlock: Optional[FeltValue]
-    actionsPerBlock: Optional[FeltValue]
     gold: Optional[FeltValue]
     createdTime: Optional[str]
     lastUpdatedTime: Optional[str]
@@ -939,7 +938,7 @@ class Adventurer:
     def from_mongo(cls, data):
         return cls(
             id=data["id"],
-            lastAction=data["lastAction"],
+            entropy=data["entropy"],
             owner=data["owner"],
             name=data["name"],
             health=data["health"],
@@ -961,9 +960,8 @@ class Adventurer:
             ring=data["ring"],
             beastHealth=data["beastHealth"],
             statUpgrades=data["statUpgrades"],
-            startBlock=data["startBlock"],
+            startEntropy=data["startEntropy"],
             revealBlock=data["revealBlock"],
-            actionsPerBlock=data["actionsPerBlock"],
             gold=data["gold"],
             createdTime=data["createdTime"],
             lastUpdatedTime=data["lastUpdatedTime"],
@@ -1599,15 +1597,20 @@ async def run_graphql_api(mongo=None, port="8080"):
         },
     )
 
-    ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-    ssl_context.load_cert_chain(
-        "/etc/letsencrypt/live/survivor-sepolia-indexer.realms.world/fullchain.pem",
-        "/etc/letsencrypt/live/survivor-sepolia-indexer.realms.world/privkey.pem",
-    )
+
 
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", int(port), ssl_context=ssl_context)
+
+    # Comment out with path to your certs if deploying with SSL support
+    #ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    #ssl_context.load_cert_chain(
+        #"/etc/letsencrypt/live/fullchain.pem",
+        #"/etc/letsencrypt/live/privkey.pem",
+    )
+    #site = web.TCPSite(runner, "0.0.0.0", int(port), ssl_context=ssl_context)
+    
+    site = web.TCPSite(runner, "0.0.0.0", int(port))
     await site.start()
 
     print(f"GraphQL server started on port {port}")

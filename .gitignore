@@ -12,7 +12,8 @@ contracts/beasts/target/CACHEDIR.TAG
 
 keys
 account
-loot-survivor.pem
+ls1.5.pem
 
-scripts/stress_test.py
 .env
+katana.log
+scripts/katana/katana/

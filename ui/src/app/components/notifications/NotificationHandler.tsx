@@ -18,10 +18,7 @@ import {
   ItemPurchase,
 } from "@/app/types";
 import LootIcon from "@/app/components/icons/LootIcon";
-import {
-  HealthPotionIcon,
-  GiSandsOfTimeIcon,
-} from "@/app/components/icons/Icons";
+import { HealthPotionIcon } from "@/app/components/icons/Icons";
 
 const handleUpgrade = (notificationData: any, notifications: any[]) => {
   const gameData = new GameData();
@@ -199,12 +196,6 @@ const processAnimation = (
       }
     } else if (notificationData?.discoveryType == "Item") {
       return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
-    } else if (!notificationData?.discoveryType) {
-      if (notificationData?.adventurerHealth == 0) {
-        return gameData.ADVENTURER_ANIMATIONS["IdleDamagePenaltyDead"];
-      } else {
-        return gameData.ADVENTURER_ANIMATIONS["IdleDamagePenalty"];
-      }
     }
   } else if (type == "Multicall") {
     if ((adventurer.beastHealth ?? 0) > 0) {
@@ -242,7 +233,6 @@ export const processNotifications = (
   battles?: Battle[],
   error?: boolean
 ) => {
-  const gameData = new GameData();
   const notifications: Notification[] = [];
   const handleAnimation = (data: any) => {
     return processAnimation(type, data, adventurer ?? NullAdventurer);
@@ -397,19 +387,7 @@ export const processNotifications = (
       }
     }
   } else if (type == "Upgrade") {
-    if (notificationData === "Death Penalty") {
-      notifications.push({
-        message: (
-          <span className="flex flex-row items-center justify-between">
-            <p>OOPS! Killed by idle death penalty!</p>
-            <GiSandsOfTimeIcon />
-          </span>
-        ),
-        animation: gameData.ADVENTURER_ANIMATIONS["Dead"],
-      });
-    } else if (isObject(notificationData)) {
-      handleUpgrade(notificationData, notifications);
-    }
+    handleUpgrade(notificationData, notifications);
   } else {
     const animation = handleAnimation(notificationData as string);
     notifications.push({

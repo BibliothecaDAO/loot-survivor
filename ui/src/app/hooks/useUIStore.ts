@@ -24,6 +24,13 @@ export type ScreenPage =
   | "onboarding"
   | "create adventurer";
 
+export type Network =
+  | "mainnet"
+  | "katana"
+  | "sepolia"
+  | "localKatana"
+  | undefined;
+
 type State = {
   disconnected: boolean;
   setDisconnected: (value: boolean) => void;
@@ -31,6 +38,7 @@ type State = {
   setIsWrongNetwork: (value: boolean) => void;
   onboarded: boolean;
   handleOnboarded: () => void;
+  handleOffboarded: () => void;
   isMuted: boolean;
   setIsMuted: (value: boolean) => void;
   screen: ScreenPage;
@@ -87,10 +95,15 @@ type State = {
   setIsMintingLords: (value: boolean) => void;
   averageBlockTime: number;
   setAverageBlockTime: (value: number) => void;
-  updateDeathPenalty: boolean;
-  setUpdateDeathPenalty: (value: boolean) => void;
-  startPenalty: boolean;
-  setStartPenalty: (value: boolean) => void;
+  entropyReady: boolean;
+  setEntropyReady: (value: boolean) => void;
+  loginScreen: boolean;
+  setLoginScreen: (value: boolean) => void;
+  network: Network;
+  setNetwork: (value: Network) => void;
+  onMainnet: boolean;
+  onSepolia: boolean;
+  onKatana: boolean;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -101,6 +114,9 @@ const useUIStore = create<State>((set) => ({
   onboarded: false,
   handleOnboarded: () => {
     set({ onboarded: true });
+  },
+  handleOffboarded: () => {
+    set({ onboarded: false });
   },
   isMuted: false,
   setIsMuted: (value) => set({ isMuted: value }),
@@ -158,10 +174,20 @@ const useUIStore = create<State>((set) => ({
   setIsMintingLords: (value) => set({ isMintingLords: value }),
   averageBlockTime: 0,
   setAverageBlockTime: (value) => set({ averageBlockTime: value }),
-  updateDeathPenalty: false,
-  setUpdateDeathPenalty: (value) => set({ updateDeathPenalty: value }),
-  startPenalty: false,
-  setStartPenalty: (value) => set({ startPenalty: value }),
+  entropyReady: false,
+  setEntropyReady: (value) => set({ entropyReady: value }),
+  loginScreen: false,
+  setLoginScreen: (value) => set({ loginScreen: value }),
+  network: undefined,
+  setNetwork: (value) => {
+    set({ network: value });
+    set({ onMainnet: value === "mainnet" });
+    set({ onSepolia: value === "sepolia" });
+    set({ onKatana: value === "katana" || value === "localKatana" });
+  },
+  onMainnet: false,
+  onSepolia: false,
+  onKatana: false,
 }));
 
 export default useUIStore;

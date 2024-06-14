@@ -12,6 +12,8 @@ import {
   getDiscoveries,
 } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
+import { networkConfig } from "@/app/lib/networkConfig";
+import useUIStore from "@/app/hooks/useUIStore";
 
 export interface EncountersProps {
   profile?: number;
@@ -25,6 +27,7 @@ export interface EncountersProps {
 export default function EncountersScreen({ profile }: EncountersProps) {
   const { adventurer } = useAdventurerStore();
   const { data, isLoading } = useQueriesStore();
+  const network = useUIStore((state) => state.network);
   const encountersPerPage = 10;
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [loadingData, setLoadingData] = useState(true);
@@ -32,11 +35,17 @@ export default function EncountersScreen({ profile }: EncountersProps) {
     []
   );
 
-  const discoveriesData = useCustomQuery("discoveriesQuery", getDiscoveries, {
-    id: profile ? profile : adventurer?.id ?? 0,
-  });
+  const discoveriesData = useCustomQuery(
+    networkConfig[network!].lsGQLURL!,
+    "discoveriesQuery",
+    getDiscoveries,
+    {
+      id: profile ? profile : adventurer?.id ?? 0,
+    }
+  );
 
   const battlesData = useCustomQuery(
+    networkConfig[network!].lsGQLURL!,
     "battlesByAdventurerQuery",
     getBattlesByAdventurer,
     {

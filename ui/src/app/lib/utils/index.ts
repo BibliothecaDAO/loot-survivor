@@ -11,7 +11,6 @@ import {
   potionBasePrice,
 } from "@/app/lib/constants";
 import { deathMessages } from "@/app/lib/constants";
-import { getBlock } from "@/app/api/api";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -23,7 +22,7 @@ export function formatNumber(num: number): string {
   } else if (Math.abs(num) >= 1000) {
     return parseFloat((num / 1000).toFixed(2)) + "k";
   } else {
-    return num.toFixed(0);
+    return num.toFixed(2);
   }
 }
 
@@ -371,36 +370,6 @@ export function getDeathMessageByRank(rank: number): string {
 
   return message || "Better luck next time - You can improve!";
 }
-
-export const fetchAverageBlockTime = async (
-  currentBlock: number,
-  numberOfBlocks: number
-) => {
-  try {
-    let totalTimeInterval = 0;
-
-    for (let i = currentBlock - numberOfBlocks; i < currentBlock; i++) {
-      const currentBlockData = await getBlock(i);
-      const nextBlockData = await getBlock(i + 1);
-
-      const timeInterval = nextBlockData.timestamp - currentBlockData.timestamp;
-      totalTimeInterval += timeInterval;
-    }
-    const averageTime = totalTimeInterval / numberOfBlocks;
-    return averageTime;
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
-
-export const fetchBlockTime = async (currentBlock: number) => {
-  try {
-    const currentBlockData = await getBlock(currentBlock);
-    return currentBlockData.timestamp;
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
 
 export const calculateVitBoostRemoved = (
   purchases: ItemPurchase[],

@@ -1,33 +1,41 @@
 "use client";
 import React from "react";
 import {
-  Connector,
   StarknetConfig,
-  alchemyProvider,
-  blastProvider,
+  starkscan,
+  jsonRpcProvider,
 } from "@starknet-react/core";
-import { goerli, mainnet, sepolia } from "@starknet-react/chains";
+import { sepolia } from "@starknet-react/chains";
+import { Chain } from "@starknet-react/chains";
+import { connectors } from "@/app/lib/connectors";
+import { networkConfig } from "./lib/networkConfig";
+import { Network } from "./hooks/useUIStore";
 
 export function StarknetProvider({
-  connectors,
   children,
+  network,
 }: {
-  connectors: Connector[];
   children: React.ReactNode;
+  network: Network;
 }) {
-  const apiKey = process.env.NEXT_PUBLIC_RPC_API_KEY!;
-  const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
-  const onSepolia = process.env.NEXT_PUBLIC_NETWORK === "sepolia";
-  const provider = onMainnet
-    ? alchemyProvider({ apiKey })
-    : blastProvider({ apiKey });
-  const chains = onMainnet ? [mainnet] : onSepolia ? [sepolia] : [goerli];
+  function rpc(_chain: Chain) {
+    return {
+      nodeUrl: networkConfig[network!].rpcUrl,
+    };
+  }
+
   return (
     <StarknetConfig
-      connectors={connectors}
-      autoConnect
-      provider={provider}
-      chains={chains}
+      autoConnect={
+        network === "mainnet" || network === "sepolia" ? true : false
+      }
+      chains={[sepolia]}
+      connectors={connectors(
+        networkConfig[network!].gameAddress,
+        networkConfig[network!].lordsAddress
+      )}
+      explorer={starkscan}
+      provider={jsonRpcProvider({ rpc })}
     >
       {children}
     </StarknetConfig>

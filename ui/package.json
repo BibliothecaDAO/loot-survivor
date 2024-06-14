@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@apollo/client": "^3.7.11",
-    "@cartridge/controller": "^0.3.18",
+    "@cartridge/connector": "^0.3.26",
+    "@dojoengine/create-burner": "^0.7.0-alpha.1",
     "@fontsource/vt323": "^4.5.10",
     "@starknet-react/core": "^2.5.0",
     "@svgr/webpack": "^7.0.0",
@@ -19,6 +20,7 @@
     "@types/react": "18.0.31",
     "@types/react-dom": "18.0.11",
     "autoprefixer": "^10.4.14",
+    "bn.js": "^5.2.1",
     "class-variance-authority": "^0.4.0",
     "clsx": "^1.2.1",
     "encoding": "^0.1.13",

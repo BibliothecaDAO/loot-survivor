@@ -4,7 +4,6 @@ import {
   GiBruteIcon,
   SkullCrossedBonesIcon,
   SpikedWallIcon,
-  GiSandsOfTimeIcon,
   TwoCoinIcon,
   HealthPotionIcon,
 } from "@/app/components/icons/Icons";
@@ -101,15 +100,6 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
           </span>
         );
       }
-    }
-
-    if (!discoveryData?.discoveryType) {
-      return (
-        <span className="flex flex-row items-center justify-between">
-          <p>OOPS! Killed by idle death penalty!</p>
-          <GiSandsOfTimeIcon />
-        </span>
-      );
     }
 
     if (discoveryData?.discoveryType === "Item") {

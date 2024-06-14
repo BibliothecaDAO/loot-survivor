@@ -1,10 +1,10 @@
 import { shortString } from "starknet";
 
 export const fetchBeastImage = async (
+  rpcUrl: string,
   beastsAddress: string,
   tokenId: number
 ) => {
-  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL!;
   const response = await fetch(rpcUrl, {
     method: "POST",
     headers: {
@@ -54,8 +54,10 @@ export const fetchBeastImage = async (
   return parsedJson.image;
 };
 
-export const fetchGoldenTokenImage = async (goldenTokenAddress: string) => {
-  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL!;
+export const fetchGoldenTokenImage = async (
+  rpcUrl: string,
+  goldenTokenAddress: string
+) => {
   const response = await fetch(rpcUrl, {
     method: "POST",
     headers: {

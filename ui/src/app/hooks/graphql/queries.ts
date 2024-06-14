@@ -2,8 +2,8 @@ import { gql } from "@apollo/client";
 
 const ADVENTURER_FIELDS = `
   id
-  lastAction
   owner
+  entropy
   name
   health
   strength
@@ -24,9 +24,8 @@ const ADVENTURER_FIELDS = `
   ring
   beastHealth
   statUpgrades
-  startBlock
+  startEntropy
   revealBlock
-  actionsPerBlock
   gold
   createdTime
   lastUpdatedTime

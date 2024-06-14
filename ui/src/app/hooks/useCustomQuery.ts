@@ -1,7 +1,7 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "@/app/hooks/useQueryStore";
-import { gameClient } from "../lib/clients";
+import { gameClient } from "@/app/lib/clients";
 
 type Variables = Record<
   string,
@@ -11,6 +11,7 @@ type Variables = Record<
 // type Queries = | AdventurerQuery | BattleQuery
 
 const useCustomQuery = (
+  clientUrl: string,
   queryKey: QueryKey,
   query: any,
   variables?: Variables,
@@ -20,8 +21,11 @@ const useCustomQuery = (
     setRefetch: state.setRefetch,
   }));
 
+  // Memoize the Apollo Client instance
+  const client = useMemo(() => gameClient(clientUrl), [clientUrl]);
+
   const { data, refetch } = useQuery(query, {
-    client: gameClient,
+    client: client,
     variables: variables,
     skip: skip,
   });

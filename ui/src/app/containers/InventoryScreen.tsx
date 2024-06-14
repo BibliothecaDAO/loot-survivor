@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { Contract } from "starknet";
-import { useAccount } from "@starknet-react/core";
 import { getKeyFromValue, groupBySlot } from "@/app/lib/utils";
 import { InventoryRow } from "@/app/components/inventory/InventoryRow";
 import Info from "@/app/components/adventurer/Info";
@@ -13,6 +12,7 @@ import { InfoIcon, ProfileIcon } from "@/app/components/icons/Icons";
 import { Item } from "@/app/types";
 import { GameData } from "@/app/lib/data/GameData";
 import useUIStore from "@/app/hooks/useUIStore";
+import useNetworkAccount from "@/app/hooks/useNetworkAccount";
 
 interface InventoryScreenProps {
   gameContract: Contract;
@@ -25,7 +25,7 @@ interface InventoryScreenProps {
 export default function InventoryScreen({
   gameContract,
 }: InventoryScreenProps) {
-  const { account } = useAccount();
+  const { account } = useNetworkAccount();
   const formatAddress = account ? account.address : "0x0";
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
@@ -296,7 +296,7 @@ export default function InventoryScreen({
                 </span>
                 <span className="flex flex-row gap-1 text-lg items-center sm:text-3xl">
                   <LootIcon type="bag" size="w-5" />
-                  {`${bagItems.length}/${11}`}
+                  {`${bagItems.length}/${15}`}
                 </span>
               </span>
             </span>

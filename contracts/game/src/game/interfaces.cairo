@@ -58,6 +58,9 @@ trait IGame<TContractState> {
     // adventurer stats (includes boost)
     fn get_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
     fn get_base_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
+    fn get_starting_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
+    fn equipment_specials_unlocked(self: @TContractState, adventurer_id: felt252) -> bool;
+    fn equipment_stat_boosts(self: @TContractState, adventurer_id: felt252) -> Stats;
 
     // // item details
     fn get_equipped_items(self: @TContractState, adventurer_id: felt252) -> Array<Item>;

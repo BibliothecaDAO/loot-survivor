@@ -152,7 +152,7 @@ const MarketplaceTable = ({
           {(() => {
             const item = sortedMarketLatestItems[showEquipQ ?? 0];
             const bagFull =
-              adventurerItems.filter((obj) => !obj.equipped).length == 11;
+              adventurerItems.filter((obj) => !obj.equipped).length == 15;
 
             return (
               <div

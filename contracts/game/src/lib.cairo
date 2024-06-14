@@ -15,6 +15,7 @@ mod Game {
     const TEST_ENTROPY: u64 = 12303548;
     const MAINNET_CHAIN_ID: felt252 = 0x534e5f4d41494e;
     const SEPOLIA_CHAIN_ID: felt252 = 0x534e5f5345504f4c4941;
+    const KATANA_CHAIN_ID: felt252 = 0x4b4154414e41;
     const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 200;
     const SECONDS_IN_HOUR: u32 = 3600;
     const SECONDS_IN_DAY: u32 = 86400;
@@ -215,43 +216,15 @@ mod Game {
             // verify requestor is the game contract
             assert(requestor_address == starknet::get_contract_address(), 'requestor is not self');
 
-            // get random word and save it as adventurer entropy
             let adventurer_entropy = *random_words.at(0);
             let adventurer_id = *calldata.at(0);
-            self._adventurer_entropy.write(adventurer_id, adventurer_entropy);
-            __event_ReceivedEntropy(
-                ref self, adventurer_id, get_caller_address(), adventurer_entropy
-            );
 
             // get adventurer
             let mut adventurer = _load_adventurer_no_boosts(@self, adventurer_id);
-            let adventurer_level = adventurer.get_level();
 
-            // If the adventurer is on level 2, they are waiting on this entropy to come in for the market to be available
-            if adventurer_level == 2 {
-                process_initial_entropy(
-                    ref self, ref adventurer, adventurer_id, adventurer_entropy
-                );
-                // we only need to save adventurer is they received Vitality as part of starting stats
-                if adventurer.stats.vitality > 0 {
-                    _save_adventurer(ref self, ref adventurer, adventurer_id);
-                }
-            } else if adventurer_level > 2 {
-                let adventurer_state = AdventurerState {
-                    owner: self._owner.read(adventurer_id),
-                    adventurer_id,
-                    adventurer_entropy,
-                    adventurer
-                };
-
-                // get market items based on new adventurer entropy 
-                let available_items = _get_items_on_market(
-                    @self, adventurer_entropy, adventurer.xp, adventurer.stat_upgrades_available
-                );
-
-                // emit upgrades available event 
-                __event_UpgradesAvailable(ref self, adventurer_state, available_items);
-            }
+            process_vrf_randomness(
+                ref self, requestor_address, ref adventurer, adventurer_id, adventurer_entropy
+            );
         }
 
         /// @title New Game
@@ -277,11 +250,15 @@ mod Game {
             // assert provided weapon
             _assert_valid_starter_weapon(weapon);
 
-            // process payment for game and distribute rewards
-            if (golden_token_id != 0) {
-                _play_with_token(ref self, golden_token_id, interface_camel);
-            } else {
-                _process_payment_and_distribute_rewards(ref self, client_reward_address);
+            // don't process payment distributions on Katana
+            let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
+            if chain_id != KATANA_CHAIN_ID {
+                // process payment for game and distribute rewards
+                if (golden_token_id != 0) {
+                    _play_with_token(ref self, golden_token_id, interface_camel);
+                } else {
+                    _process_payment_and_distribute_rewards(ref self, client_reward_address);
+                }
             }
 
             // start the game
@@ -779,6 +756,18 @@ mod Game {
         fn get_stats(self: @ContractState, adventurer_id: felt252) -> Stats {
             _load_adventurer(self, adventurer_id).stats
         }
+        fn get_starting_stats(self: @ContractState, adventurer_id: felt252) -> Stats {
+            _load_adventurer_metadata(self, adventurer_id).starting_stats
+        }
+        fn equipment_specials_unlocked(self: @ContractState, adventurer_id: felt252) -> bool {
+            let adventurer = self._adventurer.read(adventurer_id);
+            adventurer.equipment.has_specials()
+        }
+        fn equipment_stat_boosts(self: @ContractState, adventurer_id: felt252) -> Stats {
+            let adventurer = self._adventurer.read(adventurer_id);
+            let adventurer_meta = _load_adventurer_metadata(self, adventurer_id);
+            adventurer.equipment.get_stat_boosts(adventurer_meta.start_entropy)
+        }
         // fn get_base_strength(self: @ContractState, adventurer_id: felt252) -> u8 {
         //     _load_adventurer_no_boosts(self, adventurer_id).stats.strength
         // }
@@ -904,6 +893,47 @@ mod Game {
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
 
+    fn process_vrf_randomness(
+        ref self: ContractState,
+        requestor_address: ContractAddress,
+        ref adventurer: Adventurer,
+        adventurer_id: felt252,
+        adventurer_entropy: felt252,
+    ) {
+        self._adventurer_entropy.write(adventurer_id, adventurer_entropy);
+        __event_ReceivedEntropy(ref self, adventurer_id, requestor_address, adventurer_entropy);
+
+        let adventurer_level = adventurer.get_level();
+
+        // If the adventurer is on level 2, they are waiting on this entropy to come in for the market to be available
+        if adventurer_level == 2 {
+            process_initial_entropy(ref self, ref adventurer, adventurer_id, adventurer_entropy);
+
+            // we only need to save adventurer is they received Vitality as part of starting stats
+            let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
+            if chain_id != KATANA_CHAIN_ID {
+                if adventurer.stats.vitality > 0 {
+                    _save_adventurer(ref self, ref adventurer, adventurer_id);
+                }
+            }
+        } else if adventurer_level > 2 {
+            let adventurer_state = AdventurerState {
+                owner: self._owner.read(adventurer_id),
+                adventurer_id,
+                adventurer_entropy,
+                adventurer
+            };
+
+            // get market items based on new adventurer entropy 
+            let available_items = _get_items_on_market(
+                @self, adventurer_entropy, adventurer.xp, adventurer.stat_upgrades_available
+            );
+
+            // emit upgrades available event 
+            __event_UpgradesAvailable(ref self, adventurer_state, available_items);
+        }
+    }
+
     fn process_initial_entropy(
         ref self: ContractState,
         ref adventurer: Adventurer,
@@ -924,7 +954,9 @@ mod Game {
         );
 
         // emit UpgradesAvailable event
-        __event_UpgradesAvailable(ref self, adventurer_state, available_items);
+        if adventurer.get_level() == 2 {
+            __event_UpgradesAvailable(ref self, adventurer_state, available_items);
+        }
 
         // save the starting stats to adventurer metadata for cheap and easy future lookup
         _save_adventurer_metadata(ref self, adventurer_id, adventurer_meta);
@@ -1029,8 +1061,10 @@ mod Game {
             _process_level_up(ref self, ref adventurer, adventurer_id, previous_level, new_level);
         }
 
+        let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
         // if beast beast level is above collectible threshold
-        if beast.combat_spec.level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK {
+        if beast.combat_spec.level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK
+            && chain_id != KATANA_CHAIN_ID {
             // mint beast to the players Primary Account address instead of Arcade Account
             let owner_address = self._owner.read(adventurer_id);
             let primary_address = _get_primary_account_address(
@@ -1306,7 +1340,7 @@ mod Game {
         let adventurer_id = self._game_counter.read() + 1;
 
         // randomness for starter beast isn't sensitive so we can use basic entropy
-        let starter_beast_rnd = _get_basic_entropy(adventurer_id);
+        let basic_entropy = _get_basic_entropy(adventurer_id, 1);
 
         // generate a new adventurer using the provided started weapon
         let mut adventurer = ImplAdventurer::new(weapon);
@@ -1316,16 +1350,17 @@ mod Game {
 
         // adventurer immediately gets ambushed by a starter beast
         let beast_battle_details = _starter_beast_ambush(
-            ref adventurer, adventurer_id, weapon, starter_beast_rnd
+            ref adventurer, adventurer_id, weapon, basic_entropy
         );
 
-        // request verifiable randomness for starting entropy
-        let randomness_address = self._randomness_contract_address.read();
-        request_randomness(randomness_address, adventurer.xp.into(), adventurer_id, vrf_fee_limit);
-
-        // pack and save new adventurer and metadata
-        _save_adventurer_no_boosts(ref self, adventurer, adventurer_id);
-        _save_adventurer_metadata(ref self, adventurer_id, adventurer_meta);
+        // if we're not running on Katana, request randomness from VRF as soon as game starts
+        let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
+        if chain_id != KATANA_CHAIN_ID {
+            let randomness_address = self._randomness_contract_address.read();
+            request_randomness(
+                randomness_address, adventurer.xp.into(), adventurer_id, vrf_fee_limit
+            );
+        }
 
         // increment the adventurer id counter
         self._game_counter.write(adventurer_id);
@@ -1336,6 +1371,9 @@ mod Game {
         // emit events 
         __event_StartGame(ref self, adventurer, adventurer_id, adventurer_meta);
         __event_AmbushedByBeast(ref self, adventurer, adventurer_id, beast_battle_details);
+
+        _save_adventurer_metadata(ref self, adventurer_id, adventurer_meta);
+        _save_adventurer_no_boosts(ref self, adventurer, adventurer_id);
     }
 
     fn _starter_beast_ambush(
@@ -2340,14 +2378,34 @@ mod Game {
                 adventurer_entropy,
                 adventurer
             };
+
             __event_AdventurerLeveledUp(ref self, adventurer_state, previous_level, new_level);
 
-            // if we already have adventurer entropy from VRF
-            if (adventurer_entropy != 0) {
-                // process initial entropy which will reveal starting stats and emit starting market
-                process_initial_entropy(
-                    ref self, ref adventurer, adventurer_id, adventurer_entropy
+            // get chain_id
+            let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
+            // if chain is Katana
+            if chain_id == KATANA_CHAIN_ID {
+                // emit the leveled up event
+                process_vrf_randomness(
+                    ref self,
+                    starknet::get_contract_address(),
+                    ref adventurer,
+                    adventurer_id,
+                    _get_basic_entropy(adventurer_id, adventurer.xp)
                 );
+            } else {
+                // if we already have adventurer entropy from VRF
+                if (adventurer_entropy != 0) {
+                    // process initial entropy which will reveal starting stats and emit starting market
+                    process_initial_entropy(
+                        ref self, ref adventurer, adventurer_id, adventurer_entropy
+                    );
+                } else {
+                    // emit the leveled up event
+                    __event_AdventurerLeveledUp(
+                        ref self, adventurer_state, previous_level, new_level
+                    );
+                }
             }
         } else if (new_level > previous_level) {
             // if this is any level up beyond the starter beast
@@ -2359,18 +2417,29 @@ mod Game {
             if (previous_level
                 / randomness_rotation_interval < new_level
                 / randomness_rotation_interval) {
-                // if they have, zero out current entropy
-                self._adventurer_entropy.write(adventurer_id, 0);
+                let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
+                if chain_id != KATANA_CHAIN_ID {
+                    // zero out adventurer entropy
+                    self._adventurer_entropy.write(adventurer_id, 0);
+                    let max_callback_fee = 10000000000000000;
+                    let seed = adventurer.get_vrf_seed(adventurer_id, adventurer_entropy);
+                    let randomness_address = self._randomness_contract_address.read();
 
-                // request new entropy
-                // TODO: make this dynamic
-                let max_callback_fee = 10000000000000000;
-                let randomness_address = self._randomness_contract_address.read();
-                let seed = adventurer.get_vrf_seed(adventurer_id, adventurer_entropy);
-                request_randomness(randomness_address, seed, adventurer_id, max_callback_fee);
+                    // request new entropy
+                    request_randomness(randomness_address, seed, adventurer_id, max_callback_fee);
 
-                // emit ClearedEntropy event to let clients know the contact is fetching new entropy
-                __event_ClearedEntropy(ref self, adventurer_id, randomness_address, seed);
+                    // emit ClearedEntropy event to let clients know the contact is fetching new entropy
+                    __event_ClearedEntropy(ref self, adventurer_id, randomness_address, seed);
+                } else {
+                    // if contract is running on katana, we don't do full vrf, and instead use basic entropy which is hash of adventurer id and xp
+                    process_vrf_randomness(
+                        ref self,
+                        starknet::get_contract_address(),
+                        ref adventurer,
+                        adventurer_id,
+                        _get_basic_entropy(adventurer_id, adventurer.xp)
+                    );
+                }
             }
 
             // get new entropy
@@ -2550,9 +2619,10 @@ mod Game {
     }
 
     #[inline(always)]
-    fn _get_basic_entropy(adventurer_id: felt252) -> felt252 {
+    fn _get_basic_entropy(adventurer_id: felt252, adventurer_xp: u16) -> felt252 {
         let mut hash_span = ArrayTrait::new();
         hash_span.append(adventurer_id);
+        hash_span.append(adventurer_xp.into());
         poseidon_hash_span(hash_span.span())
     }
 
