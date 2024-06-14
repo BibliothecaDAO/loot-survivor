@@ -19,7 +19,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Clone loot survivor
-RUN git clone https://github.com/Provable-Games/loot-survivor.git && cd loot-survivor && git checkout 'katana-support'
+RUN git clone https://github.com/Provable-Games/loot-survivor.git && cd loot-survivor'
 
 # Install scarb v2.6.4
 RUN curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v 2.6.4
