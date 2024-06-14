@@ -67,7 +67,7 @@ mod Game {
     };
     use loot::{
         loot::{ILoot, Loot, ImplLoot},
-        constants::{ItemId, NamePrefixLength, NameSuffixLength, SUFFIX_UNLOCK_GREANTESS}
+        constants::{ItemId, NamePrefixLength, NameSuffixLength, SUFFIX_UNLOCK_GREATNESS}
     };
     use adventurer::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, stats::{Stats, ImplStats},
@@ -1631,11 +1631,17 @@ mod Game {
             let (previous_level, new_level) = adventurer
                 .equipment
                 .increase_item_xp_at_slot(ImplLoot::get_slot(item.id), xp_amount);
+
             // if item leveled up
             if new_level > previous_level {
                 // process level up
                 let updated_item = _process_item_level_up(
-                    ref self, ref adventurer, item, previous_level, new_level, start_entropy
+                    ref self,
+                    ref adventurer,
+                    adventurer.equipment.get_item_at_slot(ImplLoot::get_slot(item.id)),
+                    previous_level,
+                    new_level,
+                    start_entropy
                 );
 
                 // add item to list of items that leveled up to be emitted in event
@@ -1948,7 +1954,7 @@ mod Game {
             bag.add_item(unequipping_item);
 
             // if the item was providing a stat boosts, remove it
-            if unequipping_item.get_greatness() >= SUFFIX_UNLOCK_GREANTESS {
+            if unequipping_item.get_greatness() >= SUFFIX_UNLOCK_GREATNESS {
                 _remove_item_stat_boost(self, ref adventurer, adventurer_id, unequipping_item);
             }
         }
@@ -1957,7 +1963,7 @@ mod Game {
         adventurer.equipment.equip(item);
 
         // if item being equipped has stat boosts unlocked, apply it to adventurer
-        if item.get_greatness() >= SUFFIX_UNLOCK_GREANTESS {
+        if item.get_greatness() >= SUFFIX_UNLOCK_GREATNESS {
             _apply_item_stat_boost(self, ref adventurer, adventurer_id, item);
         }
 
@@ -2289,14 +2295,14 @@ mod Game {
         self: @ContractState, ref adventurer: Adventurer, adventurer_id: felt252
     ) {
         let starting_stats = _load_adventurer_metadata(self, adventurer_id).starting_stats;
-        adventurer.stats.apply_stat_boosts(starting_stats);
+        adventurer.stats.apply_stats(starting_stats);
     }
 
     fn _remove_starting_stats(
         self: @ContractState, ref adventurer: Adventurer, adventurer_id: felt252
     ) {
         let starting_stats = _load_adventurer_metadata(self, adventurer_id).starting_stats;
-        adventurer.stats.remove_stat_boosts(starting_stats);
+        adventurer.stats.remove_stats(starting_stats);
     }
     fn _load_adventurer_metadata(
         self: @ContractState, adventurer_id: felt252
@@ -2333,7 +2339,7 @@ mod Game {
         if adventurer.equipment.has_specials() {
             let start_entropy = _load_adventurer_metadata(self, adventurer_id).start_entropy;
             let item_stat_boosts = adventurer.equipment.get_stat_boosts(start_entropy);
-            adventurer.stats.apply_stat_boosts(item_stat_boosts);
+            adventurer.stats.apply_stats(item_stat_boosts);
         }
     }
 
@@ -2343,7 +2349,7 @@ mod Game {
         if adventurer.equipment.has_specials() {
             let start_entropy = _load_adventurer_metadata(self, adventurer_id).start_entropy;
             let item_stat_boosts = adventurer.equipment.get_stat_boosts(start_entropy);
-            adventurer.stats.remove_stat_boosts(item_stat_boosts);
+            adventurer.stats.remove_stats(item_stat_boosts);
         }
     }
     #[inline(always)]

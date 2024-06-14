@@ -73,30 +73,30 @@ impl ImplStats of IStat {
 
     // @notice applies stat boosts to adventurer
     // @param self The Adventurer to apply stat boosts to.
-    // @param stat_boosts The stat boosts to apply to the adventurer.
+    // @param stats The stat boosts to apply to the adventurer.
     // @dev overflow protection is handled further up the stack
     #[inline(always)]
-    fn apply_stat_boosts(ref self: Stats, stat_boosts: Stats) {
-        self.increase_strength(stat_boosts.strength);
-        self.increase_dexterity(stat_boosts.dexterity);
-        self.increase_vitality(stat_boosts.vitality);
-        self.increase_charisma(stat_boosts.charisma);
-        self.increase_intelligence(stat_boosts.intelligence);
-        self.increase_wisdom(stat_boosts.wisdom);
+    fn apply_stats(ref self: Stats, stats: Stats) {
+        self.increase_strength(stats.strength);
+        self.increase_dexterity(stats.dexterity);
+        self.increase_vitality(stats.vitality);
+        self.increase_charisma(stats.charisma);
+        self.increase_intelligence(stats.intelligence);
+        self.increase_wisdom(stats.wisdom);
     }
 
     // @notice removes stat boosts from adventurer
     // @param self The Stats to remove stat boosts from.
-    // @param stat_boosts The stat boosts to remove from the adventurer.
+    // @param stats The stat boosts to remove from the adventurer.
     // @dev underflow protection is handled further up the stack
     #[inline(always)]
-    fn remove_stat_boosts(ref self: Stats, stat_boosts: Stats) {
-        self.decrease_strength(stat_boosts.strength);
-        self.decrease_dexterity(stat_boosts.dexterity);
-        self.decrease_vitality(stat_boosts.vitality);
-        self.decrease_charisma(stat_boosts.charisma);
-        self.decrease_intelligence(stat_boosts.intelligence);
-        self.decrease_wisdom(stat_boosts.wisdom);
+    fn remove_stats(ref self: Stats, stats: Stats) {
+        self.decrease_strength(stats.strength);
+        self.decrease_dexterity(stats.dexterity);
+        self.decrease_vitality(stats.vitality);
+        self.decrease_charisma(stats.charisma);
+        self.decrease_intelligence(stats.intelligence);
+        self.decrease_wisdom(stats.wisdom);
     }
 
     // @notice This function adds a boost to an adventurer's attributes based on a provided suffix.
@@ -285,7 +285,7 @@ impl ImplStats of IStat {
     // @param amount The amount to be subtracted from the strength stat.
     #[inline(always)]
     fn decrease_strength(ref self: Stats, amount: u8) {
-        assert(amount <= self.strength, 'amount exceeds strength');
+        assert(amount <= self.strength, 'strength underflow');
         self.strength -= amount;
     }
 
@@ -294,7 +294,7 @@ impl ImplStats of IStat {
     // @param amount The amount to be deducted from the dexterity stat.
     #[inline(always)]
     fn decrease_dexterity(ref self: Stats, amount: u8) {
-        assert(amount <= self.dexterity, 'amount exceeds dexterity');
+        assert(amount <= self.dexterity, 'dexterity underflow');
         self.dexterity -= amount;
     }
 
@@ -303,7 +303,7 @@ impl ImplStats of IStat {
     // @param amount The amount to be deducted from the vitality stat.
     #[inline(always)]
     fn decrease_vitality(ref self: Stats, amount: u8) {
-        assert(amount <= self.vitality, 'amount exceeds vitality');
+        assert(amount <= self.vitality, 'vitality underflow');
         self.vitality -= amount;
     }
 
@@ -312,7 +312,7 @@ impl ImplStats of IStat {
     // @param amount The amount to be deducted from the intelligence stat.
     #[inline(always)]
     fn decrease_intelligence(ref self: Stats, amount: u8) {
-        assert(amount <= self.intelligence, 'amount exceeds intelligence');
+        assert(amount <= self.intelligence, 'intelligence underflow');
         self.intelligence -= amount;
     }
 
@@ -321,7 +321,7 @@ impl ImplStats of IStat {
     // @param amount The amount to be deducted from the wisdom stat.
     #[inline(always)]
     fn decrease_wisdom(ref self: Stats, amount: u8) {
-        assert(amount <= self.wisdom, 'amount exceeds wisdom');
+        assert(amount <= self.wisdom, 'wisdom underflow');
         self.wisdom -= amount;
     }
 
@@ -330,7 +330,7 @@ impl ImplStats of IStat {
     // @param amount The amount to be deducted from the charisma stat.
     #[inline(always)]
     fn decrease_charisma(ref self: Stats, amount: u8) {
-        assert(amount <= self.charisma, 'amount exceeds charisma');
+        assert(amount <= self.charisma, 'charisma underflow');
         self.charisma -= amount;
     }
 }

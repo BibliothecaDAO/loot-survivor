@@ -1,7 +1,7 @@
 use core::starknet::StorePacking;
 use super::item::{Item, ImplItem, ItemPacking};
 use loot::loot::ImplLoot;
-use loot::constants::SUFFIX_UNLOCK_GREANTESS;
+use loot::constants::SUFFIX_UNLOCK_GREATNESS;
 use combat::constants::CombatEnums::Slot;
 use adventurer::stats::{Stats, ImplStats};
 
@@ -218,21 +218,21 @@ impl ImplEquipment of IEquipment {
     // @param self The Equipment to check for item specials.
     // @return Returns true if equipment has item specials, false otherwise.
     fn has_specials(self: Equipment) -> bool {
-        if (self.weapon.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        if (self.weapon.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             true
-        } else if (self.chest.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        } else if (self.chest.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             true
-        } else if (self.head.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        } else if (self.head.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             true
-        } else if (self.waist.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        } else if (self.waist.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             true
-        } else if (self.foot.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        } else if (self.foot.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             true
-        } else if (self.hand.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        } else if (self.hand.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             true
-        } else if (self.neck.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        } else if (self.neck.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             true
-        } else if (self.ring.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        } else if (self.ring.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             true
         } else {
             false
@@ -248,28 +248,28 @@ impl ImplEquipment of IEquipment {
             strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
         };
 
-        if (self.weapon.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        if (self.weapon.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             stats.apply_suffix_boost(ImplLoot::get_suffix(self.weapon.id, start_entropy));
         }
-        if (self.chest.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        if (self.chest.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             stats.apply_suffix_boost(ImplLoot::get_suffix(self.chest.id, start_entropy));
         }
-        if (self.head.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        if (self.head.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             stats.apply_suffix_boost(ImplLoot::get_suffix(self.head.id, start_entropy));
         }
-        if (self.waist.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        if (self.waist.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             stats.apply_suffix_boost(ImplLoot::get_suffix(self.waist.id, start_entropy));
         }
-        if (self.foot.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        if (self.foot.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             stats.apply_suffix_boost(ImplLoot::get_suffix(self.foot.id, start_entropy));
         }
-        if (self.hand.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        if (self.hand.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             stats.apply_suffix_boost(ImplLoot::get_suffix(self.hand.id, start_entropy));
         }
-        if (self.neck.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        if (self.neck.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             stats.apply_suffix_boost(ImplLoot::get_suffix(self.neck.id, start_entropy));
         }
-        if (self.ring.get_greatness() >= SUFFIX_UNLOCK_GREANTESS) {
+        if (self.ring.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             stats.apply_suffix_boost(ImplLoot::get_suffix(self.ring.id, start_entropy));
         }
         stats

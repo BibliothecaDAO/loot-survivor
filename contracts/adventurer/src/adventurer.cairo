@@ -29,7 +29,7 @@ use super::{
 };
 use loot::{
     loot::{Loot, ILoot, ImplLoot},
-    constants::{ItemSuffix, ItemId, NamePrefixLength, NameSuffixLength, SUFFIX_UNLOCK_GREANTESS}
+    constants::{ItemSuffix, ItemId, NamePrefixLength, NameSuffixLength, SUFFIX_UNLOCK_GREATNESS}
 };
 use combat::{
     combat::{ImplCombat, CombatSpec, SpecialPowers, CombatResult},
@@ -519,8 +519,8 @@ impl ImplAdventurer of IAdventurer {
         if (previous_level < 15 && new_level >= 19) {
             // if previous level was below G15 and new level is G19+, sufix and prefixes were unlocked
             return (true, true);
-        } else if (previous_level < SUFFIX_UNLOCK_GREANTESS
-            && new_level >= SUFFIX_UNLOCK_GREANTESS) {
+        } else if (previous_level < SUFFIX_UNLOCK_GREATNESS
+            && new_level >= SUFFIX_UNLOCK_GREATNESS) {
             // if previous level was below G15 and new level is G15+, suffix was unlocked
             return (true, false);
         } else if (previous_level < 19 && new_level >= 19) {
@@ -1714,7 +1714,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('amount exceeds strength',))]
+    #[should_panic(expected: ('strength underflow',))]
     fn test_decrease_strength_underflow() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         adventurer.stats.increase_strength(5);
@@ -1738,7 +1738,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('amount exceeds dexterity',))]
+    #[should_panic(expected: ('dexterity underflow',))]
     fn test_decrease_dexterity_underflow() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         adventurer.stats.increase_dexterity(5);
@@ -1762,7 +1762,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('amount exceeds vitality',))]
+    #[should_panic(expected: ('vitality underflow',))]
     fn test_decrease_vitality_underflow() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         adventurer.stats.increase_vitality(5);
@@ -1786,7 +1786,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('amount exceeds intelligence',))]
+    #[should_panic(expected: ('intelligence underflow',))]
     fn test_decrease_intelligence_underflow() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         adventurer.stats.increase_intelligence(5);
@@ -1810,7 +1810,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('amount exceeds wisdom',))]
+    #[should_panic(expected: ('wisdom underflow',))]
     fn test_decrease_wisdom_underflow() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         adventurer.stats.increase_wisdom(5);
@@ -1834,7 +1834,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('amount exceeds charisma',))]
+    #[should_panic(expected: ('charisma underflow',))]
     fn test_decrease_charisma_underflow() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         adventurer.stats.increase_charisma(5);
@@ -2607,7 +2607,7 @@ mod tests {
 
     #[test]
     #[available_gas(665600)]
-    fn test_get_and_apply_stat_boosts() {
+    fn test_get_and_apply_stats() {
         let mut adventurer = Adventurer {
             health: 100,
             xp: 1,
@@ -2648,14 +2648,14 @@ mod tests {
     // test base case
     #[test]
     #[available_gas(207524)]
-    fn test_apply_stat_boosts() {
+    fn test_apply_stats() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         let boost_stats = Stats {
             strength: 5, dexterity: 1, vitality: 5, intelligence: 1, wisdom: 1, charisma: 2, luck: 1
         };
 
-        adventurer.stats.apply_stat_boosts(boost_stats);
+        adventurer.stats.apply_stats(boost_stats);
         assert(adventurer.stats.strength == 5, 'strength should be 5');
         assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
         assert(adventurer.stats.vitality == 5, 'vitality should be 5');
@@ -2668,14 +2668,14 @@ mod tests {
     // test zero case
     #[test]
     #[available_gas(207524)]
-    fn test_apply_stat_boosts_zero() {
+    fn test_apply_stats_zero() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
 
         let boost_stats = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         };
 
-        adventurer.stats.apply_stat_boosts(boost_stats);
+        adventurer.stats.apply_stats(boost_stats);
         assert(adventurer.stats.strength == 0, 'strength should be 0');
         assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
         assert(adventurer.stats.vitality == 0, 'vitality should be 0');
@@ -2687,7 +2687,7 @@ mod tests {
     // test max value case
     #[test]
     #[available_gas(207524)]
-    fn test_apply_stat_boosts_max() {
+    fn test_apply_stats_max() {
         let mut adventurer = ImplAdventurer::new(ItemId::Wand);
         let boost_stats = Stats {
             strength: 255,
@@ -2699,7 +2699,7 @@ mod tests {
             luck: 255,
         };
 
-        adventurer.stats.apply_stat_boosts(boost_stats);
+        adventurer.stats.apply_stats(boost_stats);
         assert(adventurer.stats.strength == 255, 'strength should be max');
         assert(adventurer.stats.dexterity == 255, 'dexterity should be max');
         assert(adventurer.stats.vitality == 255, 'vitality should be max');
@@ -2711,7 +2711,7 @@ mod tests {
     // base case
     #[test]
     #[available_gas(53430)]
-    fn test_remove_stat_boosts() {
+    fn test_remove_stats() {
         let mut adventurer = Adventurer {
             health: 100,
             xp: 1,
@@ -2744,7 +2744,7 @@ mod tests {
             strength: 5, dexterity: 4, vitality: 3, intelligence: 2, wisdom: 1, charisma: 0, luck: 1
         };
 
-        adventurer.stats.remove_stat_boosts(boost_stats);
+        adventurer.stats.remove_stats(boost_stats);
         assert(adventurer.stats.strength == 0, 'strength should be 0');
         assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
         assert(adventurer.stats.vitality == 0, 'vitality should be 0');
@@ -2756,7 +2756,7 @@ mod tests {
     // zero case
     #[test]
     #[available_gas(53430)]
-    fn test_remove_stat_boosts_zero() {
+    fn test_remove_stats_zero() {
         let mut adventurer = Adventurer {
             health: 100,
             xp: 1,
@@ -2789,7 +2789,7 @@ mod tests {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         };
 
-        adventurer.stats.remove_stat_boosts(boost_stats);
+        adventurer.stats.remove_stats(boost_stats);
         assert(adventurer.stats.strength == 5, 'strength should be 5');
         assert(adventurer.stats.dexterity == 4, 'dexterity should be 4');
         assert(adventurer.stats.vitality == 3, 'vitality should be 3');
@@ -2800,7 +2800,7 @@ mod tests {
 
     // max values case
     #[test]
-    fn test_remove_stat_boosts_max() {
+    fn test_remove_stats_max() {
         let mut adventurer = Adventurer {
             health: 100,
             xp: 1,
@@ -2839,7 +2839,7 @@ mod tests {
             luck: 255,
         };
 
-        adventurer.stats.remove_stat_boosts(boost_stats);
+        adventurer.stats.remove_stats(boost_stats);
         assert(adventurer.stats.strength == 0, 'strength should be 0');
         assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
         assert(adventurer.stats.vitality == 0, 'vitality should be 0');

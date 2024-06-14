@@ -6,8 +6,8 @@ use combat::{combat::{ImplCombat, SpecialPowers}, constants::CombatEnums::{Type,
 use super::{
     constants::{
         NamePrefixLength, ItemNameSuffix, ItemId, ItemNamePrefix, NameSuffixLength,
-        ItemSuffixLength, ItemSuffix, NUM_ITEMS, ItemIndex, ItemSlotLength, SUFFIX_UNLOCK_GREANTESS,
-        PREFIXES_UNLOCK_GREANTESS
+        ItemSuffixLength, ItemSuffix, NUM_ITEMS, ItemIndex, ItemSlotLength, SUFFIX_UNLOCK_GREATNESS,
+        PREFIXES_UNLOCK_GREATNESS
     },
     utils::{
         NameUtils::{
@@ -111,9 +111,9 @@ impl ImplLoot of ILoot {
     // @param start_entropy the entropy to use for randomness
     // @return the specials of the item
     fn get_specials(id: u8, greatness: u8, start_entropy: u64) -> SpecialPowers {
-        if greatness < SUFFIX_UNLOCK_GREANTESS {
+        if greatness < SUFFIX_UNLOCK_GREATNESS {
             SpecialPowers { special1: 0, special2: 0, special3: 0 }
-        } else if greatness < PREFIXES_UNLOCK_GREANTESS {
+        } else if greatness < PREFIXES_UNLOCK_GREATNESS {
             SpecialPowers {
                 special1: ImplLoot::get_suffix(id, start_entropy), special2: 0, special3: 0,
             }
