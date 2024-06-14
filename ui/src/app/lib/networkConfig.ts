@@ -8,9 +8,9 @@ export const networkConfig = {
     ethAddress:
       "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
     gameAddress:
-      "0x0305f26ad19e0a10715d9f3137573d3a543de7b707967cd85d11234d6ec0fb7e",
+      "0x05a502f60dac021a4d15a7a2df02b8a486aa672d747cca614589d10e8c50ba9d",
     lordsAddress:
-      "0x072599086bffce6593a2e08169c21d23564f08be1e1d0b8e05a9768f20469a3f",
+      "0x0619077dc1fcc970a03a3239a5dc9c55990afcdb7f02a48a32dd107593cc3f71",
     beastsAddress:
       "0x020c7c02c973ffa3a48fb78e9472b679c72c11b59512f524154ade0a39f54136",
     goldenTokenAddress:
@@ -60,7 +60,7 @@ export const networkConfig = {
     tokensGQLURL: "",
     ethAddress: "0x0",
     gameAddress:
-      "0x056bfe5bd27b650dce5ca729e69fdc4cc0e583e081b219a0ee512eca37d9efd9",
+      "0x0536408bd909a22d1e9aed189537825210d7d6b4781706031bf969c56ff0d5df",
     lordsAddress: "0x0",
     beastsAddress: "0x0",
     goldenTokenAddress: "0x0",
