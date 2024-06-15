@@ -379,9 +379,9 @@ export default function UpgradeScreen({
     adventurerItems
   );
 
-  const maxHealth = Math.min(100 + totalVitality * 10, 1023);
-  const newMaxHealth = 100 + (totalVitality - vitBoostRemoved) * 10;
-  const currentHealth = adventurer?.health! + selectedVitality * 10;
+  const maxHealth = Math.min(100 + totalVitality * 20, 1023);
+  const newMaxHealth = 100 + (totalVitality - vitBoostRemoved) * 20;
+  const currentHealth = adventurer?.health! + selectedVitality * 20;
   const healthPlusPots = Math.min(
     currentHealth! + potionAmount * 10,
     maxHealth
@@ -450,11 +450,11 @@ export default function UpgradeScreen({
   const totalStatUpgrades = (adventurer?.statUpgrades ?? 0) - upgradesTotal;
 
   const healthPlus = Math.min(
-    (selectedVitality + potionAmount) * 10,
+    selectedVitality * 20 + potionAmount * 10,
     maxHealth - (adventurer?.health ?? 0)
   );
 
-  const maxHealthPlus = selectedVitality * 10;
+  const maxHealthPlus = selectedVitality * 20;
 
   const totalHealth = Math.min(
     (adventurer?.health ?? 0) + healthPlus,

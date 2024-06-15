@@ -296,9 +296,9 @@ export default function Header({
     let upgradeTx: any;
     if (potionAmount > 0) {
       // Check whether health + pots is within vitBoostRemoved of the maxHealth
-      const maxHealth = 100 + totalVitality * 10;
-      const newMaxHealth = 100 + (totalVitality - vitBoostRemoved) * 10;
-      const currentHealth = adventurer?.health! + selectedVitality * 10;
+      const maxHealth = 100 + totalVitality * 20;
+      const newMaxHealth = 100 + (totalVitality - vitBoostRemoved) * 20;
+      const currentHealth = adventurer?.health! + selectedVitality * 20;
       const healthPlusPots = Math.min(
         currentHealth! + potionAmount * 10,
         maxHealth

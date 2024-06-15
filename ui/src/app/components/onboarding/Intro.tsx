@@ -61,16 +61,17 @@ const Intro = () => {
                   setLoginScreen(true);
                   setNetwork("sepolia");
                 }}
+                disabled
               >
-                Login to Sepolia
+                Login to Mainnet
               </Button>
             </div>
           </div>
           <div className="flex flex-col items-center justify-between border border-terminal-green p-2 sm:p-5 text-center gap-2 sm:gap-10 z-1 h-[250px] sm:h-[425px] 2xl:h-[500px] w-full sm:w-1/3">
-            <h4 className="m-0 uppercase text-3xl">Play As Guest</h4>
+            <h4 className="m-0 uppercase text-3xl">Play On Testnet</h4>
             <QuestionMark className="sm:hidden 2xl:block fill-current h-12 sm:h-32" />
             <p className="sm:text-xl">
-              Looking for a hassle-free gaming experience? Play as a Guest,
+              Looking for a hassle-free gaming experience? Play on Testnet,
               enjoying quick gameplay without any real funds or prizes involved.
             </p>
             <div className="flex flex-col gap-5">
@@ -82,7 +83,7 @@ const Intro = () => {
                   setNetwork("katana");
                 }}
               >
-                Continue as Guest
+                Play on Testnet
               </Button>
             </div>
           </div>

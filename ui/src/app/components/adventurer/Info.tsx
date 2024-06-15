@@ -97,14 +97,14 @@ export default function Info({
 
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
 
-  const maxHealth = Math.min(100 + totalVitality * 10, 720);
+  const maxHealth = Math.min(100 + totalVitality * 20, 1023);
 
   const healthPlus = Math.min(
-    (vitalitySelected + potionAmount) * 10,
+    vitalitySelected * 20 + potionAmount * 10,
     maxHealth - (formatAdventurer.health ?? 0)
   );
 
-  const maxHealthPlus = vitalitySelected * 10;
+  const maxHealthPlus = vitalitySelected * 20;
 
   const totalHealth = Math.min(
     (formatAdventurer.health ?? 0) + healthPlus,

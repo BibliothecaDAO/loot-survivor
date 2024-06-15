@@ -36,11 +36,11 @@ const PurchaseHealth = ({
 
   const hasBalance = adventurer?.gold && adventurer?.gold >= upgradeTotalCost;
 
-  const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
+  const maxHealth = 100 + (adventurer?.vitality ?? 0) * 20;
 
   const max = Math.min(
     Math.ceil(
-      (maxHealth - (adventurer?.health ?? 0) - vitBoostRemoved * 10) / 10
+      (maxHealth - (adventurer?.health ?? 0) - vitBoostRemoved * 20) / 10
     ),
     Math.floor(
       (adventurer?.gold! - (upgradeTotalCost - potionAmount * potionCost)) /
