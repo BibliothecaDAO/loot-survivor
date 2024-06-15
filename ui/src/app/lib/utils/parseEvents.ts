@@ -606,7 +606,7 @@ export async function parseEvents(
       case "DroppedItems":
         const itemIds = [];
         // Skip array length
-        const itemsData = raw.data.slice(65);
+        const itemsData = raw.data.slice(64);
         for (let i = 0; i < itemsData.length; i++) {
           itemIds.push(parseInt(itemsData[i]));
         }

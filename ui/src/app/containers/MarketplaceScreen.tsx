@@ -38,7 +38,7 @@ export default function MarketplaceScreen({
     ? adventurer?.gold - upgradeTotalCost
     : 0;
 
-  const underMaxItems = adventurerItems.length < 19;
+  const underMaxItems = adventurerItems.length < 23;
 
   return (
     <>
