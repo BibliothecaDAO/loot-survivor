@@ -198,7 +198,7 @@ export default function UpgradeScreen({
       name: "Vitality",
       id: 3,
       icon: <HeartVitalityIcon />,
-      description: "Vitality increases max health and gives +10hp ",
+      description: "Vitality increases max health and gives +20hp per point",
       buttonText: "Upgrade Vitality",
       abbrev: "VIT",
       nonBoostedStat: nonBoostedStats?.vitality,

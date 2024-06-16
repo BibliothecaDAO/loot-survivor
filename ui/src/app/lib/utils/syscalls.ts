@@ -1139,6 +1139,14 @@ export function syscalls({
             item.equipped = true;
           }
         }
+        for (let unequippedItem of equippedItemsEvent.data[2]) {
+          let item = purchasedItems.find(
+            (item) => item.item === unequippedItem
+          );
+          if (item) {
+            item.equipped = false;
+          }
+        }
       }
 
       const filteredEquips = queryData.itemsByAdventurerQuery?.items?.filter(
@@ -1147,7 +1155,9 @@ export function syscalls({
       );
       const filteredUnequips = filteredEquips?.filter(
         (item: Item) =>
-          !unequippedItems.some((droppedItem) => droppedItem.item == item.item)
+          !unequippedItems.some(
+            (unequippedItem) => unequippedItem.item == item.item
+          )
       );
       const filteredDrops = [
         ...(filteredUnequips ?? []),
