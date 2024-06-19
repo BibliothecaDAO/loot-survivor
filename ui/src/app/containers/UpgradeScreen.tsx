@@ -84,10 +84,12 @@ export default function UpgradeScreen({
   const setUpgrades = useUIStore((state) => state.setUpgrades);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
+  const equipItems = useUIStore((state) => state.equipItems);
   const dropItems = useUIStore((state) => state.dropItems);
   const entropyReady = useUIStore((state) => state.entropyReady);
   const setEntropyReady = useUIStore((state) => state.setEntropyReady);
   const onKatana = useUIStore((state) => state.onKatana);
+  const setVitBoostRemoved = useUIStore((state) => state.setVitBoostRemoved);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const [summary, setSummary] = useState<UpgradeSummary>({
     Stats: { ...ZeroUpgrade },
@@ -376,8 +378,11 @@ export default function UpgradeScreen({
   const vitBoostRemoved = calculateVitBoostRemoved(
     purchaseItems,
     adventurer!,
-    adventurerItems
+    adventurerItems,
+    equipItems,
+    dropItems
   );
+  setVitBoostRemoved(vitBoostRemoved);
 
   const maxHealth = Math.min(100 + totalVitality * 20, 1023);
   const newMaxHealth = 100 + (totalVitality - vitBoostRemoved) * 20;

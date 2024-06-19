@@ -35,6 +35,7 @@ export default function Info({
   const setDropItems = useUIStore((state) => state.setDropItems);
   const potionAmount = useUIStore((state) => state.potionAmount);
   const upgrades = useUIStore((state) => state.upgrades);
+  const vitBoostRemoved = useUIStore((state) => state.vitBoostRemoved);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
@@ -97,7 +98,10 @@ export default function Info({
 
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
 
-  const maxHealth = Math.min(100 + totalVitality * 20, 1023);
+  const maxHealth = Math.min(
+    100 + (totalVitality - vitBoostRemoved) * 20,
+    1023
+  );
 
   const healthPlus = Math.min(
     vitalitySelected * 20 + potionAmount * 10,

@@ -10,7 +10,6 @@ import Eth from "public/icons/eth.svg";
 import Lords from "public/icons/lords.svg";
 import { Button } from "@/app/components/buttons/Button";
 import {
-  calculateVitBoostRemoved,
   formatNumber,
   displayAddress,
   indexAddress,
@@ -85,6 +84,7 @@ export default function Header({
   const setNetwork = useUIStore((state) => state.setNetwork);
   const onMainnet = useUIStore((state) => state.onMainnet);
   const onKatana = useUIStore((state) => state.onKatana);
+  const vitBoostRemoved = useUIStore((state) => state.vitBoostRemoved);
   const handleOffboarded = useUIStore((state) => state.handleOffboarded);
   const setLoginScreen = useUIStore((state) => state.setLoginScreen);
 
@@ -288,11 +288,6 @@ export default function Header({
   const handleSubmitMulticall = async () => {
     resetNotification();
     // Handle for vitBoostRemoval
-    const vitBoostRemoved = calculateVitBoostRemoved(
-      purchaseItems,
-      adventurer!,
-      data.itemsByAdventurerQuery?.items ?? []
-    );
     let upgradeTx: any;
     if (potionAmount > 0) {
       // Check whether health + pots is within vitBoostRemoved of the maxHealth
@@ -354,6 +349,7 @@ export default function Header({
               setNetwork("sepolia");
             }
           }}
+          disabled
         >
           {onMainnet ? "Play on Testnet" : "Play on Mainnet"}
         </Button>

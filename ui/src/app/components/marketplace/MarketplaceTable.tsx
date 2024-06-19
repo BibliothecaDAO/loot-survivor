@@ -103,50 +103,56 @@ const MarketplaceTable = ({
 
   return (
     <>
-      <table
-        className={`w-full sm:border sm:border-terminal-green ${
-          showEquipQ === null ? "" : "hidden sm:table h-full"
-        }`}
-      >
-        <thead className="sticky top-0 sm:border z-5 sm:border-terminal-green bg-terminal-black sm:text-xl">
-          <tr className="">
-            {headings.map((heading, index) => (
-              <th
-                key={index}
-                className="px-2.5 sm:px-3 cursor-pointer"
-                onClick={() => handleSort(heading)}
-              >
-                {heading}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="text-xs sm:text-base">
-          {!isLoading.latestMarketItemsQuery ? (
-            sortedMarketLatestItems.map((item: Item, index: number) => (
-              <MarketplaceRow
-                item={item}
-                index={index}
-                activeMenu={showEquipQ}
-                setActiveMenu={setShowEquipQ}
-                calculatedNewGold={calculatedNewGold}
-                ownedItems={adventurerItems}
-                purchaseItems={purchaseItems}
-                setPurchaseItems={setPurchaseItems}
-                upgradeHandler={upgradeHandler}
-                totalCharisma={totalCharisma}
-                dropItems={dropItems}
-                key={index}
-              />
-            ))
-          ) : (
-            <div className="h-full w-full flex justify-center p-10 align-center">
-              Generating Loot{" "}
-              <LootIconLoader className="self-center ml-3" size={"w-4"} />
-            </div>
-          )}
-        </tbody>
-      </table>
+      {marketLatestItems.length > 0 ? (
+        <table
+          className={`w-full sm:border sm:border-terminal-green ${
+            showEquipQ === null ? "" : "hidden sm:table h-full"
+          }`}
+        >
+          <thead className="sticky top-0 sm:border z-5 sm:border-terminal-green bg-terminal-black sm:text-xl">
+            <tr className="">
+              {headings.map((heading, index) => (
+                <th
+                  key={index}
+                  className="px-2.5 sm:px-3 cursor-pointer"
+                  onClick={() => handleSort(heading)}
+                >
+                  {heading}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="text-xs sm:text-base">
+            {!isLoading.latestMarketItemsQuery ? (
+              sortedMarketLatestItems.map((item: Item, index: number) => (
+                <MarketplaceRow
+                  item={item}
+                  index={index}
+                  activeMenu={showEquipQ}
+                  setActiveMenu={setShowEquipQ}
+                  calculatedNewGold={calculatedNewGold}
+                  ownedItems={adventurerItems}
+                  purchaseItems={purchaseItems}
+                  setPurchaseItems={setPurchaseItems}
+                  upgradeHandler={upgradeHandler}
+                  totalCharisma={totalCharisma}
+                  dropItems={dropItems}
+                  key={index}
+                />
+              ))
+            ) : (
+              <div className="h-full w-full flex justify-center p-10 align-center">
+                Generating Loot{" "}
+                <LootIconLoader className="self-center ml-3" size={"w-4"} />
+              </div>
+            )}
+          </tbody>
+        </table>
+      ) : (
+        <div className="h-full w-full flex justify-center p-10 align-center">
+          <LootIconLoader className="m-auto" size="w-10" />
+        </div>
+      )}
       {showEquipQ !== null && showEquipQ >= 0 && (
         <div className="sm:hidden h-full">
           {(() => {

@@ -374,13 +374,28 @@ export function getDeathMessageByRank(rank: number): string {
 export const calculateVitBoostRemoved = (
   purchases: ItemPurchase[],
   adventurer: Adventurer,
-  items: Item[]
+  items: Item[],
+  equipItems: string[],
+  dropItems: string[]
 ) => {
   const gameData = new GameData();
-  const equippedItems = purchases.filter((purchase) => purchase.equip === "1");
-  const itemStrings = equippedItems.map(
+  const equippedPurchasedItems = purchases.filter(
+    (purchase) => purchase.equip === "1"
+  );
+  const purchasedItemStrings = equippedPurchasedItems.map(
     (purchase) => gameData.ITEMS[parseInt(purchase?.item) ?? 0]
   );
+  const equippedItemStrings = equipItems.map(
+    (equip) => gameData.ITEMS[parseInt(equip) ?? 0]
+  );
+  const droppedItemStrings = dropItems.map(
+    (drop) => gameData.ITEMS[parseInt(drop) ?? 0]
+  );
+  const itemStrings = [
+    ...purchasedItemStrings,
+    ...equippedItemStrings,
+    ...droppedItemStrings,
+  ];
   const slotStrings = itemStrings.map(
     (itemString) => gameData.ITEM_SLOTS[itemString.split(" ").join("")]
   );

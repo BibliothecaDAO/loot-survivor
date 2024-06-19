@@ -104,6 +104,8 @@ type State = {
   onMainnet: boolean;
   onSepolia: boolean;
   onKatana: boolean;
+  vitBoostRemoved: number;
+  setVitBoostRemoved: (value: number) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -188,6 +190,8 @@ const useUIStore = create<State>((set) => ({
   onMainnet: false,
   onSepolia: false,
   onKatana: false,
+  vitBoostRemoved: 0,
+  setVitBoostRemoved: (value) => set({ vitBoostRemoved: value }),
 }));
 
 export default useUIStore;
