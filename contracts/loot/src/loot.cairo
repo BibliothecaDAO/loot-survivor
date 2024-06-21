@@ -3267,160 +3267,62 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(2772740)]
+    #[available_gas(2176550)]
     fn test_get_item_verify_tier() {
-        let t1_items = array![
-            ItemId::Necklace,
-            ItemId::Pendant,
-            ItemId::Amulet,
-            ItemId::PlatinumRing,
-            ItemId::TitaniumRing,
-            ItemId::GoldRing,
-            ItemId::GhostWand,
-            ItemId::Grimoire,
-            ItemId::DivineRobe,
-            ItemId::Crown,
-            ItemId::BrightsilkSash,
-            ItemId::DivineSlippers,
-            ItemId::DivineGloves,
-            ItemId::Katana,
-            ItemId::DemonHusk,
-            ItemId::DemonCrown,
-            ItemId::DemonhideBelt,
-            ItemId::DemonsHands,
-            ItemId::DemonhideBoots,
-            ItemId::Warhammer,
-            ItemId::HolyChestplate,
-            ItemId::AncientHelm,
-            ItemId::HolyGreaves,
-            ItemId::HolyGauntlets
-        ];
-
-        let mut item_index = 0;
+        let mut t1_items = ItemUtils::get_t1_items();
         loop {
-            if item_index == t1_items.len() {
-                break;
-            }
-            let item_id = *t1_items.at(item_index);
-            let item = ImplLoot::get_item(item_id);
-            assert(item.tier == Tier::T1(()), 'item is tier 1');
-            item_index += 1;
+            match t1_items.pop_front() {
+                Option::Some(item_id) => {
+                    let item = ImplLoot::get_item(*item_id);
+                    assert(item.tier == Tier::T1(()), 'item is not tier 1');
+                },
+                Option::None(_) => { break; }
+            };
         };
 
-        let t2_items = array![
-            ItemId::SilverRing,
-            ItemId::Falchion,
-            ItemId::Quarterstaff,
-            ItemId::GraveWand,
-            ItemId::Chronicle,
-            ItemId::SilkRobe,
-            ItemId::DivineHood,
-            ItemId::SilkSash,
-            ItemId::SilkSlippers,
-            ItemId::SilkGloves,
-            ItemId::DragonsCrown,
-            ItemId::DragonskinBelt,
-            ItemId::DragonskinBoots,
-            ItemId::DragonskinArmor,
-            ItemId::OrnateChestplate,
-            ItemId::WarBelt,
-            ItemId::OrnateHelm,
-            ItemId::OrnateGreaves,
-            ItemId::OrnateGauntlets,
-        ];
-
-        let mut item_index = 0;
+        let mut t2_items = ItemUtils::get_t2_items();
         loop {
-            if item_index == t2_items.len() {
-                break;
-            }
-            let item_id = *t2_items.at(item_index);
-            let item = ImplLoot::get_item(item_id);
-            assert(item.tier == Tier::T2(()), 'item is tier 2');
-            item_index += 1;
+            match t2_items.pop_front() {
+                Option::Some(item_id) => {
+                    let item = ImplLoot::get_item(*item_id);
+                    assert(item.tier == Tier::T2(()), 'item is not tier 2');
+                },
+                Option::None(_) => { break; }
+            };
         };
 
-        let t3_items = array![
-            ItemId::LinenRobe,
-            ItemId::SilkHood,
-            ItemId::WoolSash,
-            ItemId::WoolShoes,
-            ItemId::WoolGloves,
-            ItemId::Scimitar,
-            ItemId::StuddedLeatherArmor,
-            ItemId::WarCap,
-            ItemId::Greaves,
-            ItemId::Gauntlets,
-            ItemId::Scimitar,
-            ItemId::StuddedLeatherBoots,
-            ItemId::Maul,
-            ItemId::PlateMail,
-            ItemId::GreatHelm,
-            ItemId::PlatedBelt,
-        ];
-
-        let mut item_index = 0;
+        let mut t3_items = ItemUtils::get_t3_items();
         loop {
-            if item_index == t3_items.len() {
-                break;
-            }
-            let item_id = *t3_items.at(item_index);
-            let item = ImplLoot::get_item(item_id);
-            assert(item.tier == Tier::T3(()), 'item is tier 3');
-            item_index += 1;
+            match t3_items.pop_front() {
+                Option::Some(item_id) => {
+                    let item = ImplLoot::get_item(*item_id);
+                    assert(item.tier == Tier::T3(()), 'item is not tier 3');
+                },
+                Option::None(_) => { break; }
+            };
         };
 
-        let t4_items = array![
-            ItemId::HardLeatherBelt,
-            ItemId::HardLeatherBoots,
-            ItemId::HardLeatherArmor,
-            ItemId::LeatherCap,
-            ItemId::HardLeatherGloves,
-            ItemId::LongSword,
-            ItemId::ChainMail,
-            ItemId::FullHelm,
-            ItemId::ChainBoots,
-            ItemId::ChainGloves,
-            ItemId::Mace,
-        ];
-
-        let mut item_index = 0;
+        let mut t4_items = ItemUtils::get_t4_items();
         loop {
-            if item_index == t4_items.len() {
-                break;
-            }
-            let item_id = *t4_items.at(item_index);
-            let item = ImplLoot::get_item(item_id);
-            assert(item.tier == Tier::T4(()), 'item is tier 4');
-            item_index += 1;
+            match t4_items.pop_front() {
+                Option::Some(item_id) => {
+                    let item = ImplLoot::get_item(*item_id);
+                    assert(item.tier == Tier::T4(()), 'item is not tier 4');
+                },
+                Option::None(_) => { break; }
+            };
         };
 
-        let t5_items = array![
-            ItemId::Cap,
-            ItemId::Club,
-            ItemId::Sash,
-            ItemId::Helm,
-            ItemId::Shirt,
-            ItemId::Shoes,
-            ItemId::Gloves,
-            ItemId::RingMail,
-            ItemId::HeavyBoots,
-            ItemId::HeavyBelt,
-            ItemId::ShortSword,
-            ItemId::HeavyGloves,
-            ItemId::LeatherBelt,
-            ItemId::LeatherBoots,
-        ];
+        let mut t5_items = ItemUtils::get_t5_items();
 
-        let mut item_index = 0;
         loop {
-            if item_index == t5_items.len() {
-                break;
-            }
-            let item_id = *t5_items.at(item_index);
-            let item = ImplLoot::get_item(item_id);
-            assert(item.tier == Tier::T5(()), 'item is tier 5');
-            item_index += 1;
+            match t5_items.pop_front() {
+                Option::Some(item_id) => {
+                    let item = ImplLoot::get_item(*item_id);
+                    assert(item.tier == Tier::T5(()), 'item is not tier 5');
+                },
+                Option::None(_) => { break; }
+            };
         };
     }
 

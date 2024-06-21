@@ -72,7 +72,7 @@ mod Game {
     use adventurer::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, stats::{Stats, ImplStats},
         item::{ImplItem, Item}, equipment::{Equipment, ImplEquipment}, bag::{Bag, IBag, ImplBag},
-        adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata}, exploration::ExploreUtils,
+        adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata},
         constants::{
             discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType},
             adventurer_constants::{
@@ -130,6 +130,7 @@ mod Game {
         UpgradesAvailable: UpgradesAvailable,
         DiscoveredHealth: DiscoveredHealth,
         DiscoveredGold: DiscoveredGold,
+        DiscoveredLoot: DiscoveredLoot,
         DodgedObstacle: DodgedObstacle,
         HitByObstacle: HitByObstacle,
         AmbushedByBeast: AmbushedByBeast,
@@ -143,6 +144,7 @@ mod Game {
         PurchasedItems: PurchasedItems,
         PurchasedPotions: PurchasedPotions,
         AdventurerUpgraded: AdventurerUpgraded,
+        EquipmentChanged: EquipmentChanged,
         EquippedItems: EquippedItems,
         DroppedItems: DroppedItems,
         ItemsLeveledUp: ItemsLeveledUp,
@@ -275,6 +277,8 @@ mod Game {
             // load player assets
             let (mut adventurer, adventurer_entropy, _) = _load_player_assets(@self, adventurer_id);
 
+            let mut bag = _load_bag(@self, adventurer_id);
+
             // use an immutable adventurer for assertions
             let immutable_adventurer = adventurer.clone();
 
@@ -286,9 +290,15 @@ mod Game {
             _assert_entropy_set(@self, adventurer_id);
 
             // go explore 
-            _explore(ref self, ref adventurer, adventurer_id, adventurer_entropy, till_beast);
+            _explore(
+                ref self, ref adventurer, ref bag, adventurer_id, adventurer_entropy, till_beast
+            );
 
             _save_adventurer(ref self, ref adventurer, adventurer_id);
+
+            if bag.mutated {
+                _save_bag(ref self, adventurer_id, bag);
+            }
         }
 
         /// @title Attack Function
@@ -1412,6 +1422,7 @@ mod Game {
     fn _explore(
         ref self: ContractState,
         ref adventurer: Adventurer,
+        ref bag: Bag,
         adventurer_id: felt252,
         adventurer_entropy: felt252,
         explore_till_beast: bool
@@ -1428,7 +1439,7 @@ mod Game {
                 _obstacle_encounter(ref self, ref adventurer, adventurer_id, rnd2);
             },
             ExploreResult::Discovery(()) => {
-                _process_discovery(ref self, ref adventurer, adventurer_id, rnd2);
+                _process_discovery(ref self, ref adventurer, ref bag, adventurer_id, rnd2);
             }
         }
 
@@ -1436,7 +1447,12 @@ mod Game {
         if explore_till_beast && adventurer.can_explore() {
             // Keep exploring
             _explore(
-                ref self, ref adventurer, adventurer_id, adventurer_entropy, explore_till_beast
+                ref self,
+                ref adventurer,
+                ref bag,
+                adventurer_id,
+                adventurer_entropy,
+                explore_till_beast
             );
         }
     }
@@ -1446,28 +1462,80 @@ mod Game {
     }
 
     fn _process_discovery(
-        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: felt252, entropy: u128
+        ref self: ContractState,
+        ref adventurer: Adventurer,
+        ref bag: Bag,
+        adventurer_id: felt252,
+        entropy: u128
     ) {
-        // TODO: Consider passing in adventurer ref into discover_treasure and handling
-        //       adventurer mutations within lib functions. The lib functions could return
-        //       a generic Discovery event which would be emitted here
-        let (treasure_type, mut amount) = adventurer.discover_treasure(entropy);
+        // get discovery type
+        let discovery_type = ImplAdventurer::get_discovery(adventurer.get_level(), entropy);
 
-        // Grant adventurer XP to ensure entropy changes
+        // Grant adventurer XP to progress entropy
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(XP_FOR_DISCOVERIES);
 
-        match treasure_type {
-            DiscoveryType::Gold(()) => {
-                // add gold to adventurer
+        // handle discovery type
+        match discovery_type {
+            DiscoveryType::Gold(amount) => {
                 adventurer.increase_gold(amount);
+                __event_DiscoveredGold(ref self, adventurer, adventurer_id, amount);
             },
-            DiscoveryType::Health(()) => {
-                // otherwise add health
+            DiscoveryType::Health(amount) => {
                 adventurer.increase_health(amount);
+                __event_DiscoveredHealth(ref self, adventurer, adventurer_id, amount);
+            },
+            DiscoveryType::Loot(item_id) => {
+                let (item_in_bag, _) = bag.contains(item_id);
+
+                let slot_free = adventurer.equipment.is_slot_free_item_id(item_id);
+
+                // if the bag is full and the slot is not free
+                let inventory_full = bag.is_full() && slot_free == false;
+
+                // if item is in adventurers bag, is equipped or inventory is full
+                if item_in_bag || adventurer.equipment.is_equipped(item_id) || inventory_full {
+                    // we replace item discovery with gold based on market value of the item
+                    let mut amount = 0;
+                    match ImplLoot::get_tier(item_id) {
+                        Tier::None(()) => panic!("found invalid item"),
+                        Tier::T1(()) => amount = 20,
+                        Tier::T2(()) => amount = 16,
+                        Tier::T3(()) => amount = 12,
+                        Tier::T4(()) => amount = 8,
+                        Tier::T5(()) => amount = 4,
+                    }
+                    adventurer.increase_gold(amount);
+                    __event_DiscoveredGold(ref self, adventurer, adventurer_id, amount);
+                // if the item is not already owned or equipped and the adventurer has space for it
+                } else {
+                    // no items will be dropped as part of discovery
+                    let dropped_items = ArrayTrait::<u8>::new();
+                    let mut equipped_items = ArrayTrait::<u8>::new();
+                    let mut bagged_items = ArrayTrait::<u8>::new();
+
+                    let item = ImplItem::new(item_id);
+                    if slot_free {
+                        // equip the item
+                        adventurer.equipment.equip(item);
+                        equipped_items.append(item.id);
+                    } else {
+                        // otherwise toss it in bag
+                        bag.add_item(item);
+                        bagged_items.append(item.id);
+                    }
+                    __event_DiscoveredLoot(ref self, adventurer, adventurer_id, item_id);
+                    __event_EquipmentChanged(
+                        ref self,
+                        adventurer,
+                        adventurer_id,
+                        bag,
+                        equipped_items,
+                        bagged_items,
+                        dropped_items,
+                    );
+                }
             }
         }
-
-        __event_Discovery(ref self, adventurer, adventurer_id, amount, treasure_type,);
 
         // check for level up
         if (adventurer.stat_upgrades_available != 0) {
@@ -2717,20 +2785,21 @@ mod Game {
         reveal_block: u64,
     }
 
-    #[derive(Drop, Serde, starknet::Event)]
-    struct Discovery {
+    #[derive(Drop, starknet::Event)]
+    struct DiscoveredGold {
         adventurer_state: AdventurerState,
         amount: u16
     }
 
     #[derive(Drop, starknet::Event)]
-    struct DiscoveredGold {
-        discovery: Discovery
-    }
-
-    #[derive(Drop, starknet::Event)]
     struct DiscoveredHealth {
-        discovery: Discovery
+        adventurer_state: AdventurerState,
+        amount: u16
+    }
+    #[derive(Drop, starknet::Event)]
+    struct DiscoveredLoot {
+        adventurer_state: AdventurerState,
+        item_id: u8
     }
 
     #[derive(Drop, Serde, starknet::Event)]
@@ -2839,6 +2908,14 @@ mod Game {
     struct PurchasedItems {
         adventurer_state_with_bag: AdventurerStateWithBag,
         purchases: Array<LootWithPrice>,
+    }
+
+    #[derive(Clone, Drop, starknet::Event)]
+    struct EquipmentChanged {
+        adventurer_state_with_bag: AdventurerStateWithBag,
+        equipped_items: Array<u8>,
+        bagged_items: Array<u8>,
+        dropped_items: Array<u8>,
     }
 
     #[derive(Clone, Drop, starknet::Event)]
@@ -3013,24 +3090,34 @@ mod Game {
         self.emit(StartGame { adventurer_state, adventurer_meta, reveal_block });
     }
 
-    fn __event_Discovery(
-        ref self: ContractState,
-        adventurer: Adventurer,
-        adventurer_id: felt252,
-        amount: u16,
-        discovery_type: DiscoveryType
+    fn __event_DiscoveredGold(
+        ref self: ContractState, adventurer: Adventurer, adventurer_id: felt252, amount: u16
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
             owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
+        self.emit(DiscoveredGold { adventurer_state, amount });
+    }
 
-        let discovery = Discovery { adventurer_state, amount };
+    fn __event_DiscoveredHealth(
+        ref self: ContractState, adventurer: Adventurer, adventurer_id: felt252, amount: u16
+    ) {
+        let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
+        let adventurer_state = AdventurerState {
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+        };
+        self.emit(DiscoveredHealth { adventurer_state, amount });
+    }
 
-        match discovery_type {
-            DiscoveryType::Gold => { self.emit(DiscoveredGold { discovery }); },
-            DiscoveryType::Health => { self.emit(DiscoveredHealth { discovery }); }
-        }
+    fn __event_DiscoveredLoot(
+        ref self: ContractState, adventurer: Adventurer, adventurer_id: felt252, item_id: u8
+    ) {
+        let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
+        let adventurer_state = AdventurerState {
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+        };
+        self.emit(DiscoveredLoot { adventurer_state, item_id });
     }
 
     fn __event_ObstacleEncounter(
@@ -3173,6 +3260,28 @@ mod Game {
             adventurer_state, seed, id: beast.id, beast_specs: beast.combat_spec
         };
         self.emit(FleeSucceeded { flee_event });
+    }
+
+    fn __event_EquipmentChanged(
+        ref self: ContractState,
+        adventurer: Adventurer,
+        adventurer_id: felt252,
+        bag: Bag,
+        equipped_items: Array<u8>,
+        bagged_items: Array<u8>,
+        dropped_items: Array<u8>,
+    ) {
+        let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
+        let adventurer_state = AdventurerState {
+            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+        };
+        let adventurer_state_with_bag = AdventurerStateWithBag { adventurer_state, bag };
+        self
+            .emit(
+                EquipmentChanged {
+                    adventurer_state_with_bag, equipped_items, bagged_items, dropped_items,
+                }
+            );
     }
 
     fn __event_EquippedItems(
