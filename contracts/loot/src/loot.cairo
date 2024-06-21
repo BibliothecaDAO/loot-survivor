@@ -1,5 +1,6 @@
 use core::{
-    serde::Serde, clone::Clone, option::OptionTrait, starknet::StorePacking, traits::{TryInto, Into}
+    serde::Serde, clone::Clone, option::OptionTrait, starknet::StorePacking,
+    traits::{TryInto, Into}, integer::u64_overflowing_add
 };
 
 use combat::{combat::{ImplCombat, SpecialPowers}, constants::CombatEnums::{Type, Tier, Slot}};
@@ -67,7 +68,14 @@ impl ImplLoot of ILoot {
     // @return The naming seed.
     #[inline(always)]
     fn generate_naming_seed(item_id: u8, entropy: u64) -> u64 {
-        let rnd = entropy % NUM_ITEMS.into();
+        let mut item_entropy = 1;
+        if (u64_overflowing_add(entropy, item_id.into()).is_ok()) {
+            item_entropy = entropy + item_id.into();
+        } else {
+            item_entropy = entropy - item_id.into();
+        }
+
+        let rnd = item_entropy % NUM_ITEMS.into();
         rnd * ImplLoot::get_slot_length(ImplLoot::get_slot(item_id)).into()
             + ImplLoot::get_item_index(item_id).into()
     }
@@ -3267,7 +3275,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(2176550)]
+    #[available_gas(2368710)]
     fn test_get_item_verify_tier() {
         let mut t1_items = ItemUtils::get_t1_items();
         loop {

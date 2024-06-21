@@ -2660,7 +2660,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(665600)]
+    #[available_gas(510840)]
     fn test_get_and_apply_stats() {
         let mut adventurer = Adventurer {
             health: 100,
@@ -2691,12 +2691,12 @@ mod tests {
         };
 
         let stat_boosts = adventurer.equipment.get_stat_boosts(1);
-        assert(stat_boosts.strength == 3, 'strength should be 3');
-        assert(stat_boosts.vitality == 5, 'vitality should be 5');
-        assert(stat_boosts.dexterity == 1, 'dexterity should be 1');
-        assert(stat_boosts.intelligence == 0, 'intelligence should be 0');
-        assert(stat_boosts.wisdom == 3, 'wisdom should be 3');
-        assert(stat_boosts.charisma == 3, 'charisma should be 3');
+        assert(stat_boosts.strength == 6, 'wrong strength');
+        assert(stat_boosts.vitality == 1, 'wrong vitality');
+        assert(stat_boosts.dexterity == 2, 'wrong dexterity');
+        assert(stat_boosts.intelligence == 1, 'wrong intelligence');
+        assert(stat_boosts.wisdom == 4, 'wrong wisdom');
+        assert(stat_boosts.charisma == 1, 'wrong charisma');
     }
 
     // test base case
