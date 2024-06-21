@@ -59,7 +59,6 @@ import useControls from "@/app/hooks/useControls";
 import { networkConfig } from "@/app/lib/networkConfig";
 import useNetworkAccount from "@/app/hooks/useNetworkAccount";
 import { useController } from "@/app/context/ControllerContext";
-import EncounterTable from "@/app/components/encounters/EncounterTable";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -124,11 +123,6 @@ function Home() {
   const setSpecialBeastDefeated = useUIStore(
     (state) => state.setSpecialBeastDefeated
   );
-  const encounterTable = useUIStore((state) => state.encounterTable);
-  const setAdventurerEntropy = useUIStore(
-    (state) => state.setAdventurerEntropy
-  );
-
   const { contract: gameContract } = useContract({
     address: networkConfig[network!].gameAddress,
     abi: Game,
@@ -165,7 +159,6 @@ function Home() {
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const setStartOption = useUIStore((state) => state.setStartOption);
   const setEntropyReady = useUIStore((state) => state.setEntropyReady);
-  const adventurerEntropy = useUIStore((state) => state.adventurerEntropy);
   const [accountChainId, setAccountChainId] = useState<
     constants.StarknetChainId | undefined
   >();
@@ -528,29 +521,6 @@ function Home() {
     }
   }, [onboarded]);
 
-  useEffect(() => {
-    const fetchEntropy = async () => {
-      if (adventurer?.id) {
-        const entropy = await gameContract!.call("get_adventurer_entropy", [
-          adventurer?.id!,
-        ]);
-        if (entropy !== BigInt(0)) {
-          setAdventurerEntropy(BigInt(entropy.toString()));
-          setEntropyReady(true);
-          clearInterval(interval);
-        }
-      }
-    };
-
-    // Call the function immediately
-    fetchEntropy();
-
-    // Set up the interval to call the function every 10 seconds
-    const interval = setInterval(fetchEntropy, 10000);
-
-    return () => clearInterval(interval); // Cleanup on component unmount
-  }, [adventurer?.level]);
-
   if (!isConnected && disconnected) {
     return <WalletSelect />;
   }
@@ -615,9 +585,6 @@ function Home() {
                     setScreen(value);
                   }}
                   disabled={mobileMenuDisabled}
-                  hideEncounters={
-                    adventurerEntropy === BigInt(0) || !adventurer?.id
-                  }
                 />
               </div>
               <div className="hidden sm:block flex justify-center sm:justify-normal sm:pb-2">
@@ -673,12 +640,6 @@ function Home() {
                 {screen === "settings" && <Settings />}
                 {screen === "player" && <Player gameContract={gameContract!} />}
                 {screen === "wallet" && <WalletSelect />}
-
-                {encounterTable && (
-                  <div className="absolute top-0 right-0 sm:right-32 sm:top-32">
-                    <EncounterTable />
-                  </div>
-                )}
               </div>
             </>
           </div>

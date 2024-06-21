@@ -5,25 +5,12 @@ import { BeastDisplay } from "@/app/components/beast/BeastDisplay";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import { processBeastName, getItemData, getBeastData } from "@/app/lib/utils";
+import { processBeastName } from "@/app/lib/utils";
 import { Battle, NullBeast, ButtonData, Beast } from "@/app/types";
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import ActionMenu from "@/app/components/menu/ActionMenu";
 import { useController } from "@/app/context/ControllerContext";
-import {
-  getGoldReward,
-  nextAttackResult,
-  simulateBattle,
-  simulateFlee,
-} from "@/app/lib/utils/processFutures";
-import {
-  GiBattleGearIcon,
-  HeartIcon,
-  SkullCrossedBonesIcon,
-} from "@/app/components/icons/Icons";
-import { FleeDialog } from "@/app/components/FleeDialog";
-import { BattleDialog } from "@/app/components/BattleDialog";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
 
 interface BeastScreenProps {
@@ -48,14 +35,8 @@ export default function BeastScreen({
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
-  const adventurerEntropy = useUIStore((state) => state.adventurerEntropy);
-  const battleDialog = useUIStore((state) => state.battleDialog);
-  const fleeDialog = useUIStore((state) => state.fleeDialog);
-  const showBattleDialog = useUIStore((state) => state.showBattleDialog);
-  const showFleeDialog = useUIStore((state) => state.showFleeDialog);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const [showBattleLog, setShowBattleLog] = useState(false);
-  const [showFutures, setShowFutures] = useState(false);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
   const beastData = useQueriesStore(
@@ -196,73 +177,6 @@ export default function BeastScreen({
     },
   ];
 
-  const [attackDetails, setAttackDetails] = useState<any>();
-  const [battleDetails, setBattleDetails] = useState<any>();
-  const [fleeDetails, setFleeDetails] = useState<any>();
-  const [goldReward, setGoldReward] = useState<number>(0);
-
-  const { data } = useQueriesStore();
-
-  useEffect(() => {
-    if (
-      !data.itemsByAdventurerQuery ||
-      !beastData ||
-      !adventurer?.beastHealth ||
-      !isAlive ||
-      !adventurerEntropy
-    )
-      return;
-
-    let items: any = data.itemsByAdventurerQuery?.items
-      .filter((item) => item.equipped)
-      .map((item) => ({
-        item: item.item,
-        ...getItemData(item.item ?? ""),
-        special2: item.special2,
-        special3: item.special3,
-        xp: Math.max(1, item.xp!),
-      }));
-
-    const beastDetails = {
-      ...getBeastData(beastData?.beast ?? ""),
-      special2: beastData?.special2,
-      special3: beastData?.special3,
-      level: beastData.level,
-      seed: beastData.seed,
-    };
-
-    if (!goldReward) {
-      setGoldReward(
-        getGoldReward(
-          items,
-          beastDetails,
-          adventurer.xp!,
-          BigInt(adventurerEntropy)
-        )
-      );
-    }
-
-    setAttackDetails(
-      nextAttackResult(
-        items,
-        beastDetails,
-        adventurer,
-        BigInt(adventurerEntropy)
-      )
-    );
-    setFleeDetails(
-      simulateFlee(items, beastDetails, adventurer, BigInt(adventurerEntropy))
-    );
-    setBattleDetails(
-      simulateBattle(items, beastDetails, adventurer, BigInt(adventurerEntropy))
-    );
-  }, [
-    data.itemsByAdventurerQuery,
-    beastData,
-    adventurerEntropy,
-    adventurer?.beastHealth,
-  ]);
-
   const beastName = processBeastName(
     beastData?.beast ?? "",
     beastData?.special2 ?? "",
@@ -354,199 +268,12 @@ export default function BeastScreen({
           {(hasBeast || formatBattles.length > 0) && <BattleLog />}
         </div>
 
-        {!showFutures && (
-          <span className="flex flex-row gap-5 sm:hidden">
-            <Button
-              className="uppercase"
-              onClick={() => setShowBattleLog(true)}
-            >
-              Battle log with {beastData?.beast}
-            </Button>
-
-            <Button
-              className="uppercase"
-              onClick={() => setShowFutures(!showFutures)}
-            >
-              Show Futures
-            </Button>
-          </span>
-        )}
-
-        {isAlive && hasBeast && attackDetails && showFutures && (
-          <div className="sm:hidden px-2">
-            <div className="flex gap-2 sm:gap-3 text-xs sm:text-sm h-full text-center uppercase">
-              <div className="border p-2 sm:px-10 border-terminal-green flex flex-col justify-center items-center gap-0.5 text-xs sm:text-sm">
-                <span className="hidden sm:block">Battle Result</span>
-
-                {battleDetails.success && (
-                  <span className="flex gap-1 items-center text-terminal-yellow">
-                    Success!
-                    <GiBattleGearIcon />
-                  </span>
-                )}
-
-                {!battleDetails.success && (
-                  <span className="flex gap-1 items-center text-red-500">
-                    Failure!
-                    <SkullCrossedBonesIcon />
-                  </span>
-                )}
-
-                <span className="flex gap-1 items-center">
-                  {battleDetails.healthLeft} Health left
-                  <HeartIcon className="self-center w-4 h-4 fill-current" />
-                </span>
-
-                <Button
-                  variant={"link"}
-                  className="hidden sm:block sm:h-4 mt-1"
-                  onClick={() => showBattleDialog(true)}
-                >
-                  <span
-                    className="text-xs"
-                    style={{ color: "rgba(255, 255, 255, 0.4)" }}
-                  >
-                    Details
-                  </span>
-                </Button>
-              </div>
-
-              <Button
-                className="uppercase"
-                onClick={() => setShowFutures(!showFutures)}
-              >
-                Close Futures
-              </Button>
-
-              <div className="border p-2 sm:px-10 border-terminal-green flex flex-col justify-center items-center gap-0.5 text-xs sm:text-sm">
-                <span className="hidden sm:block">Flee Result</span>
-
-                {fleeDetails.flee && (
-                  <span className="flex gap-1 items-center text-terminal-yellow">
-                    Success!
-                    <GiBattleGearIcon />
-                  </span>
-                )}
-
-                {!fleeDetails.flee && (
-                  <span className="flex gap-1 items-center text-red-500">
-                    Failure!
-                    <SkullCrossedBonesIcon />
-                  </span>
-                )}
-
-                <span className="flex gap-1 items-center">
-                  {fleeDetails.healthLeft} Health left
-                  <HeartIcon className="self-center w-4 h-4 fill-current" />
-                </span>
-
-                <Button
-                  variant={"link"}
-                  className="hidden sm:block sm:h-4 mt-1"
-                  onClick={() => showFleeDialog(true)}
-                >
-                  <span
-                    className="text-xs"
-                    style={{ color: "rgba(255, 255, 255, 0.4)" }}
-                  >
-                    Details
-                  </span>
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isAlive && hasBeast && attackDetails && (
-          <div className="hidden sm:flex px-2">
-            <div className="flex gap-20 sm:gap-3 text-xs sm:text-sm h-full text-center uppercase">
-              <div className="border p-2 sm:px-10 border-terminal-green flex flex-col justify-center items-center gap-0.5 text-xs sm:text-sm">
-                <span className="hidden sm:block">Battle Result</span>
-
-                {battleDetails.success && (
-                  <span className="flex gap-1 items-center text-terminal-yellow">
-                    Success!
-                    <GiBattleGearIcon />
-                  </span>
-                )}
-
-                {!battleDetails.success && (
-                  <span className="flex gap-1 items-center text-red-500">
-                    Failure!
-                    <SkullCrossedBonesIcon />
-                  </span>
-                )}
-
-                <span className="flex gap-1 items-center">
-                  {battleDetails.healthLeft} Health left
-                  <HeartIcon className="self-center w-4 h-4 fill-current" />
-                </span>
-
-                <Button
-                  variant={"link"}
-                  className="hidden sm:block sm:h-4 mt-1"
-                  onClick={() => showBattleDialog(true)}
-                >
-                  <span
-                    className="text-xs"
-                    style={{ color: "rgba(255, 255, 255, 0.4)" }}
-                  >
-                    Details
-                  </span>
-                </Button>
-              </div>
-
-              <div className="border p-2 sm:px-10 border-terminal-green flex flex-col justify-center items-center gap-0.5 text-xs sm:text-sm">
-                {adventurer?.dexterity !== 0 ? (
-                  <>
-                    <span className="hidden sm:block">Flee Result</span>
-
-                    {fleeDetails.flee && (
-                      <span className="flex gap-1 items-center text-terminal-yellow">
-                        Success!
-                        <GiBattleGearIcon />
-                      </span>
-                    )}
-
-                    {!fleeDetails.flee && (
-                      <span className="flex gap-1 items-center text-red-500">
-                        Failure!
-                        <SkullCrossedBonesIcon />
-                      </span>
-                    )}
-
-                    <span className="flex gap-1 items-center">
-                      {fleeDetails.healthLeft} Health left
-                      <HeartIcon className="self-center w-4 h-4 fill-current" />
-                    </span>
-
-                    <Button
-                      variant={"link"}
-                      className="hidden sm:block sm:h-4 mt-1"
-                      onClick={() => showFleeDialog(true)}
-                    >
-                      <span
-                        className="text-xs"
-                        style={{ color: "rgba(255, 255, 255, 0.4)" }}
-                      >
-                        Details
-                      </span>
-                    </Button>
-                  </>
-                ) : (
-                  <div className="text-red-500">No DEX</div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {battleDialog && battleDetails?.events && (
-          <BattleDialog events={battleDetails.events} />
-        )}
-        {fleeDialog && fleeDetails?.events && (
-          <FleeDialog events={fleeDetails.events} success={fleeDetails.flee} />
-        )}
+        <Button
+          className="sm:hidden uppercase"
+          onClick={() => setShowBattleLog(true)}
+        >
+          Battle log with {beastData?.beast}
+        </Button>
       </div>
     </div>
   );

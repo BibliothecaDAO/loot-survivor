@@ -879,6 +879,7 @@ export function syscalls({
       setEquipItems([]);
       setDropItems([]);
       !onKatana && getEthBalance();
+      setEntropyReady(false);
     } catch (e) {
       console.log(e);
       stopLoading(e, true);
@@ -1181,6 +1182,7 @@ export function syscalls({
       setScreen("play");
 
       !onKatana && getEthBalance();
+      setEntropyReady(false);
     } catch (e) {
       console.log(e);
       stopLoading(e, true);
