@@ -22,7 +22,8 @@ export type ScreenPage =
   | "wallet"
   | "tutorial"
   | "onboarding"
-  | "create adventurer";
+  | "create adventurer"
+  | "future";
 
 export type Network =
   | "mainnet"
@@ -95,6 +96,8 @@ type State = {
   setIsMintingLords: (value: boolean) => void;
   averageBlockTime: number;
   setAverageBlockTime: (value: number) => void;
+  adventurerEntropy: bigint;
+  setAdventurerEntropy: (value: bigint) => void;
   entropyReady: boolean;
   setEntropyReady: (value: boolean) => void;
   loginScreen: boolean;
@@ -104,6 +107,12 @@ type State = {
   onMainnet: boolean;
   onSepolia: boolean;
   onKatana: boolean;
+  encounterTable: boolean;
+  battleDialog: boolean;
+  fleeDialog: boolean;
+  showEncounterTable: (value: boolean) => void;
+  showBattleDialog: (value: boolean) => void;
+  showFleeDialog: (value: boolean) => void;
   vitBoostRemoved: number;
   setVitBoostRemoved: (value: number) => void;
 };
@@ -176,6 +185,8 @@ const useUIStore = create<State>((set) => ({
   setIsMintingLords: (value) => set({ isMintingLords: value }),
   averageBlockTime: 0,
   setAverageBlockTime: (value) => set({ averageBlockTime: value }),
+  adventurerEntropy: BigInt(0),
+  setAdventurerEntropy: (value) => set({ adventurerEntropy: value }),
   entropyReady: false,
   setEntropyReady: (value) => set({ entropyReady: value }),
   loginScreen: false,
@@ -190,6 +201,12 @@ const useUIStore = create<State>((set) => ({
   onMainnet: false,
   onSepolia: false,
   onKatana: false,
+  encounterTable: false,
+  battleDialog: false,
+  fleeDialog: false,
+  showEncounterTable: (value) => set({ encounterTable: value }),
+  showBattleDialog: (value) => set({ battleDialog: value }),
+  showFleeDialog: (value) => set({ fleeDialog: value }),
   vitBoostRemoved: 0,
   setVitBoostRemoved: (value) => set({ vitBoostRemoved: value }),
 }));

@@ -136,6 +136,8 @@ export default function Header({
   const setUpgrades = useUIStore((state) => state.setUpgrades);
   const setUpgradeScreen = useUIStore((state) => state.setUpgradeScreen);
   const setSlayAdventurers = useUIStore((state) => state.setSlayAdventurers);
+  const encounterTable = useUIStore((state) => state.encounterTable);
+  const showEncounterTable = useUIStore((state) => state.showEncounterTable);
 
   const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
@@ -335,6 +337,13 @@ export default function Header({
         <Logo className="fill-current w-24 md:w-32 xl:w-40 2xl:w-72 2xl:mb-5" />
       </div>
       <div className="flex flex-row items-center self-end sm:gap-1 self-center">
+        <Button
+          className="sm:hidden px-2.5 sm:px-3"
+          variant={encounterTable ? "default" : "outline"}
+          onClick={() => showEncounterTable(!encounterTable)}
+        >
+          Prescience
+        </Button>
         <ApibaraStatus status={apibaraStatus} />
         <Button
           size={"xs"}
