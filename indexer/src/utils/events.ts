@@ -37,7 +37,6 @@ export const ADVENTURER_DIED = eventKey("AdventurerDied");
 export const FLEE_FAILED = eventKey("FleeFailed");
 export const FLEE_SUCCEEDED = eventKey("FleeSucceeded");
 
-export const PURCHASED_POTIONS = eventKey("PurchasedPotions");
 export const PURCHASED_ITEMS = eventKey("PurchasedItems");
 export const UPGRADES_AVAILABLE = eventKey("UpgradesAvailable");
 export const EQUIPPED_ITEMS = eventKey("EquippedItems");

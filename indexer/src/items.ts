@@ -42,6 +42,8 @@ const filter = {
   events: [
     { fromAddress: GAME, keys: [START_GAME] },
     { fromAddress: GAME, keys: [PURCHASED_ITEMS] },
+    { fromAddress: GAME, keys: [DISCOVERED_LOOT] },
+    { fromAddress: GAME, keys: [EQUIPMENT_CHANGED] },
     { fromAddress: GAME, keys: [EQUIPPED_ITEMS] },
     { fromAddress: GAME, keys: [DROPPED_ITEMS] },
     { fromAddress: GAME, keys: [HIT_BY_OBSTACLE] },
