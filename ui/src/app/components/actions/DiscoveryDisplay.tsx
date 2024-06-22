@@ -7,7 +7,10 @@ import {
   TwoCoinIcon,
   HealthPotionIcon,
 } from "@/app/components/icons/Icons";
+import LootIcon from "@/app/components/icons/LootIcon";
 import { Discovery } from "@/app/types";
+import { GameData } from "@/app/lib/data/GameData";
+import { getItemData } from "@/app/lib/utils";
 
 interface DiscoveryProps {
   discoveryData: Discovery;
@@ -21,6 +24,8 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   );
 
   const AdventurerHealthExists = (discoveryData?.adventurerHealth ?? 0) > 0;
+
+  const gameData = new GameData();
 
   const renderDiscoveryMessage = () => {
     if (discoveryData?.discoveryType === "Beast") {
@@ -125,6 +130,22 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
           <span className="flex flex-row items-center justify-between">
             <div className="flex self-center">
               <p>GREAT! Discovered {discoveryData?.outputAmount} health! </p>
+            </div>
+            <HealthPotionIcon />
+          </span>
+        );
+      }
+
+      if (discoveryData?.subDiscoveryType === "Loot") {
+        const itemName = gameData.ITEMS[discoveryData?.outputAmount!];
+        const { slot } = getItemData(itemName ?? "");
+        return (
+          <span className="flex flex-row items-center justify-between">
+            <div className="flex self-center">
+              <p>
+                WOW! Discovered the Loot item {itemName}!{" "}
+                <LootIcon size={"w-5"} type={slot} />
+              </p>
             </div>
             <HealthPotionIcon />
           </span>

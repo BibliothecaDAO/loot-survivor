@@ -8,16 +8,16 @@ export const networkConfig = {
     ethAddress:
       "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
     gameAddress:
-      "0x05a502f60dac021a4d15a7a2df02b8a486aa672d747cca614589d10e8c50ba9d",
+      "0x05545d79b497a9b924ed3321361520566c90dc1abb0aa1643cc4839b12c73136",
     lordsAddress:
-      "0x0619077dc1fcc970a03a3239a5dc9c55990afcdb7f02a48a32dd107593cc3f71",
+      "0x0213c1cd576885fac65226505f8e01b908ad569c138e34f17ca220d67dd3c106",
     beastsAddress:
       "0x020c7c02c973ffa3a48fb78e9472b679c72c11b59512f524154ade0a39f54136",
     goldenTokenAddress:
       "0x07626660faba349aad9ad2aaa0ff8645c079fa8e043a168d640d92472806eeac",
     revenueAddress:
       "0x0314924118945405ac0bcd6181457712795c0effc29d8dd3be86d3f3ec62adc1",
-    appUrl: "https://sepolia-survivor.provable.games",
+    appUrl: "https://sepolia-lootsurvivor.io",
     beastsViewer: "https://testnet.realms.world/collection/beasts",
     goldenTokenMintUrl: "https://testnet.realms.world/collection/goldenToken",
     blockExplorerUrl: "https://sepolia.voyager.online/",

@@ -1,7 +1,7 @@
 import { Button } from "@/app/components/buttons/Button";
 import Profile from "public/icons/profile.svg";
 import QuestionMark from "public/icons/question-mark.svg";
-import useUIStore from "@/app/hooks/useUIStore";
+import useUIStore, { Network } from "@/app/hooks/useUIStore";
 import { SoundOffIcon, SoundOnIcon } from "@/app/components/icons/Icons";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
 
@@ -16,6 +16,8 @@ const Intro = () => {
   } = useUIStore();
 
   const { play: clickPlay } = useUiSounds(soundSelector.click);
+
+  const network = process.env.NEXT_PUBLIC_NETWORK;
   return (
     <div className="min-h-screen container flex flex-col items-center">
       <Button
@@ -51,24 +53,26 @@ const Intro = () => {
             <Profile className="sm:hidden 2xl:block fill-current h-12 sm:h-32" />
             <p className="sm:text-xl">
               Dive into the full immersion of Loot Survivor by logging in now!
-              Join the Mainnet for a chance to win real funds and exciting
-              prizes.
+              Join {network?.toUpperCase()} for a chance to win real funds and
+              exciting prizes.
             </p>
             <div className="flex flex-col gap-2">
               <Button
                 size={"lg"}
                 onClick={() => {
                   setLoginScreen(true);
-                  setNetwork("sepolia");
+                  setNetwork(network! as Network);
                 }}
-                disabled
+                disabled={network == "sepolia" ? false : true}
               >
-                Login to Mainnet
+                Login to {network}
               </Button>
             </div>
           </div>
           <div className="flex flex-col items-center justify-between border border-terminal-green p-2 sm:p-5 text-center gap-2 sm:gap-10 z-1 h-[250px] sm:h-[425px] 2xl:h-[500px] w-full sm:w-1/3">
-            <h4 className="m-0 uppercase text-3xl">Play On Testnet</h4>
+            <h4 className="m-0 uppercase text-3xl">
+              Play On {network == "sepolia" ? "Testnet" : "Mainnet"}
+            </h4>
             <QuestionMark className="sm:hidden 2xl:block fill-current h-12 sm:h-32" />
             <p className="sm:text-xl">
               Looking for a hassle-free gaming experience? Play on Testnet,
