@@ -8,7 +8,7 @@ use core::{
 use super::{
     stats::{Stats, StatsPacking}, item::{Item, ImplItem, ItemPacking},
     equipment::{Equipment, EquipmentPacking}, adventurer_utils::{AdventurerUtils},
-    exploration::ExploreUtils, bag::{Bag, IBag, ImplBag},
+    bag::{Bag, IBag, ImplBag},
     constants::{
         adventurer_constants::{
             STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_POTION_DISCOUNT,
@@ -29,7 +29,8 @@ use super::{
 };
 use loot::{
     loot::{Loot, ILoot, ImplLoot},
-    constants::{ItemSuffix, ItemId, NamePrefixLength, NameSuffixLength, SUFFIX_UNLOCK_GREATNESS}
+    constants::{ItemSuffix, ItemId, NamePrefixLength, NameSuffixLength, SUFFIX_UNLOCK_GREATNESS},
+    utils::{ItemUtils}
 };
 use combat::{
     combat::{ImplCombat, CombatSpec, SpecialPowers, CombatResult},
@@ -230,6 +231,21 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
+    fn is_slot_free_item_id(self: Equipment, item_id: u8) -> bool {
+        let slot = ImplLoot::get_slot(item_id);
+        match slot {
+            Slot::None(()) => false,
+            Slot::Weapon(()) => self.weapon.id == 0,
+            Slot::Chest(()) => self.chest.id == 0,
+            Slot::Head(()) => self.head.id == 0,
+            Slot::Waist(()) => self.waist.id == 0,
+            Slot::Foot(()) => self.foot.id == 0,
+            Slot::Hand(()) => self.hand.id == 0,
+            Slot::Neck(()) => self.neck.id == 0,
+            Slot::Ring(()) => self.ring.id == 0,
+        }
+    }
+
     // Returns the current level of the adventurer based on their XP.
     // @param self: Adventurer to get level for
     // @return The current level of the adventurer.
@@ -296,19 +312,57 @@ impl ImplAdventurer of IAdventurer {
     // @param entropy: Entropy for generating treasure
     // @return DiscoveryType: The type of treasure discovered.
     // @return u16: The amount of treasure discovered.
-    fn discover_treasure(self: Adventurer, entropy: u128) -> (DiscoveryType, u16) {
-        // generate random item discovery
-        let item_type = ExploreUtils::get_random_discovery(entropy);
+    fn get_discovery(adventurer_level: u8, entropy: u128) -> DiscoveryType {
+        let (discovery_entropy, discovery_type) = DivRem::div_rem(entropy, 100);
+        if discovery_type < 45 {
+            DiscoveryType::Gold(
+                ImplAdventurer::get_gold_discovery(adventurer_level, discovery_entropy)
+            )
+        } else if discovery_type < 90 {
+            DiscoveryType::Health(
+                ImplAdventurer::get_health_discovery(adventurer_level, discovery_entropy)
+            )
+        } else {
+            DiscoveryType::Loot(ImplAdventurer::get_loot_discovery(discovery_entropy))
+        }
+    }
 
-        match item_type {
-            DiscoveryType::Gold(()) => {
-                // return discovery type and amount
-                (DiscoveryType::Gold(()), ExploreUtils::get_gold_discovery(self, entropy))
-            },
-            DiscoveryType::Health(()) => {
-                // return discovery type and amount
-                (DiscoveryType::Health(()), ExploreUtils::get_health_discovery(self, entropy))
-            }
+    fn get_gold_discovery(adventurer_level: u8, entropy: u128) -> u16 {
+        (entropy % adventurer_level.into()).try_into().unwrap() + 1
+    }
+
+    fn get_health_discovery(adventurer_level: u8, entropy: u128) -> u16 {
+        ((entropy % adventurer_level.into()).try_into().unwrap() + 1) * 2
+    }
+
+    fn get_loot_discovery(entropy: u128) -> u8 {
+        let roll = entropy % 100;
+
+        // 50% chance of T5
+        if roll < 50 {
+            let t5_items = ItemUtils::get_t5_items();
+            let item_index = (entropy % t5_items.len().into()).try_into().unwrap();
+            *t5_items.at(item_index)
+        // 30% chance of T4
+        } else if roll < 80 {
+            let t4_items = ItemUtils::get_t4_items();
+            let item_index = (entropy % t4_items.len().into()).try_into().unwrap();
+            *t4_items.at(item_index)
+        // 12% chance of T3
+        } else if roll < 92 {
+            let t3_items = ItemUtils::get_t3_items();
+            let item_index = (entropy % t3_items.len().into()).try_into().unwrap();
+            *t3_items.at(item_index)
+        // 6% chance of T2
+        } else if roll < 98 {
+            let t2_items = ItemUtils::get_t2_items();
+            let item_index = (entropy % t2_items.len().into()).try_into().unwrap();
+            *t2_items.at(item_index)
+        // 2% chance of T1
+        } else {
+            let t1_items = ItemUtils::get_t1_items();
+            let item_index = (entropy % t1_items.len().into()).try_into().unwrap();
+            *t1_items.at(item_index)
         }
     }
 
@@ -905,7 +959,7 @@ mod tests {
     use option::OptionTrait;
     use poseidon::poseidon_hash_span;
     use array::ArrayTrait;
-    use loot::{loot::{Loot, ILoot, ImplLoot}, constants::{ItemSuffix, ItemId}};
+    use loot::{loot::{Loot, ILoot, ImplLoot}, constants::{ItemSuffix, ItemId}, utils::{ItemUtils}};
     use combat::{constants::CombatEnums::{Slot, Type}};
     use beasts::{beast::{ImplBeast, Beast}, constants::BeastSettings};
     use adventurer::{
@@ -2606,7 +2660,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(665600)]
+    #[available_gas(510840)]
     fn test_get_and_apply_stats() {
         let mut adventurer = Adventurer {
             health: 100,
@@ -2637,12 +2691,12 @@ mod tests {
         };
 
         let stat_boosts = adventurer.equipment.get_stat_boosts(1);
-        assert(stat_boosts.strength == 3, 'strength should be 3');
-        assert(stat_boosts.vitality == 5, 'vitality should be 5');
-        assert(stat_boosts.dexterity == 1, 'dexterity should be 1');
-        assert(stat_boosts.intelligence == 0, 'intelligence should be 0');
-        assert(stat_boosts.wisdom == 3, 'wisdom should be 3');
-        assert(stat_boosts.charisma == 3, 'charisma should be 3');
+        assert(stat_boosts.strength == 6, 'wrong strength');
+        assert(stat_boosts.vitality == 1, 'wrong vitality');
+        assert(stat_boosts.dexterity == 2, 'wrong dexterity');
+        assert(stat_boosts.intelligence == 1, 'wrong intelligence');
+        assert(stat_boosts.wisdom == 4, 'wrong wisdom');
+        assert(stat_boosts.charisma == 1, 'wrong charisma');
     }
 
     // test base case
@@ -2850,22 +2904,16 @@ mod tests {
 
     #[test]
     #[available_gas(390000)]
-    fn test_discover_treasure() {
-        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+    fn test_get_discovery() {
+        let adventurer_level = 1;
 
-        // give vitality so we can discover health
-        adventurer.stats.vitality = 1;
-        adventurer.xp = 25;
-
-        // disover gold
-        let (discovery_type, amount) = adventurer.discover_treasure(0);
-        assert(discovery_type == DiscoveryType::Gold(()), 'should have found gold');
-        assert(amount != 0, 'gold should be non-zero');
+        // discover gold
+        let discovery_type = ImplAdventurer::get_discovery(adventurer_level, 1);
+        assert(discovery_type == DiscoveryType::Gold((1)), 'should have found gold');
 
         // discover health
-        let (discovery_type, amount) = adventurer.discover_treasure(1);
-        assert(discovery_type == DiscoveryType::Health(()), 'should have found health');
-        assert(amount != 0, 'health should be non-zero');
+        let discovery_type = ImplAdventurer::get_discovery(adventurer_level, 46);
+        assert(discovery_type == DiscoveryType::Health((2)), 'should have found health');
     }
 
     #[test]
@@ -2969,5 +3017,209 @@ mod tests {
         assert(!adventurer.is_ambushed(4), 'should not be ambushed 4');
         assert(adventurer.is_ambushed(5), 'should be ambushed 5');
         assert(!adventurer.is_ambushed(6), 'should not be ambushed 6');
+    }
+
+    #[test]
+    #[available_gas(3820)]
+    fn test_get_gold_discovery_gas() {
+        ImplAdventurer::get_gold_discovery(1, 0);
+    }
+
+    #[test]
+    fn test_get_gold_discovery() {
+        let adventurer_level = 1;
+        let entropy = 0;
+        let gold_discovery = ImplAdventurer::get_gold_discovery(adventurer_level, entropy);
+        assert(gold_discovery == 1, 'gold_discovery should be 1');
+    }
+
+    #[test]
+    #[available_gas(4690)]
+    fn test_get_health_discovery_gas() {
+        let adventurer_level = 1;
+        let entropy = 12345;
+        ImplAdventurer::get_health_discovery(adventurer_level, entropy);
+    }
+
+    #[test]
+    fn test_get_health_discovery() {
+        let adventurer_level = 1;
+        let entropy = 0;
+        let discovery_amount = ImplAdventurer::get_health_discovery(adventurer_level, entropy);
+        assert(discovery_amount == 2, 'health discovery should be 2');
+    }
+
+    #[test]
+    #[available_gas(16210)]
+    fn test_get_discovery_gas() {
+        let adventurer_level = 1;
+        let entropy = 12345;
+        ImplAdventurer::get_discovery(adventurer_level, entropy);
+    }
+
+    #[test]
+    #[available_gas(328654)]
+    fn test_get_loot_discovery_gas() {
+        let entropy = 0;
+        ImplAdventurer::get_loot_discovery(entropy);
+    }
+
+    fn is_item_in_set(item_id: u8, ref item_set: Span<u8>) -> bool {
+        loop {
+            match item_set.pop_front() {
+                Option::Some(item) => { if item_id == (*item).into() {
+                    break true;
+                } },
+                Option::None(_) => { break false; }
+            };
+        }
+    }
+
+    #[test]
+    fn test_is_item_in_set_found() {
+        let mut item_set = array![ItemId::Cap, ItemId::Club, ItemId::Sash];
+        let item_id: u8 = ItemId::Club.into();
+        let mut item_set_span = item_set.span();
+        assert(is_item_in_set(item_id, ref item_set_span), 'Item should be in set');
+    }
+
+    #[test]
+    fn test_is_item_in_set_not_found() {
+        let mut item_set = array![ItemId::Cap, ItemId::Club, ItemId::Sash];
+        let item_id: u8 = ItemId::Helm.into();
+        let mut item_set_span = item_set.span();
+        assert(!is_item_in_set(item_id, ref item_set_span), 'Item should not be in set');
+    }
+
+    #[test]
+    fn test_is_item_in_set_empty_set() {
+        let mut item_set = array![];
+        let item_id: u8 = ItemId::Cap.into();
+        let mut item_set_span = item_set.span();
+        assert(!is_item_in_set(item_id, ref item_set_span), 'Item should not be in empty set');
+    }
+
+    #[test]
+    fn test_is_item_in_set_single_item_found() {
+        let mut item_set = array![ItemId::Cap];
+        let item_id: u8 = ItemId::Cap.into();
+        let mut item_set_span = item_set.span();
+        assert(is_item_in_set(item_id, ref item_set_span), 'Single item should be in set');
+    }
+
+    #[test]
+    fn test_is_item_in_set_single_item_not_found() {
+        let mut item_set = array![ItemId::Cap];
+        let item_id: u8 = ItemId::Club.into();
+        let mut item_set_span = item_set.span();
+        assert(!is_item_in_set(item_id, ref item_set_span), 'Single item should not be set');
+    }
+
+    #[test]
+    fn test_loot_discovery_distribution() {
+        let mut t5_count: u32 = 0;
+        let mut t4_count: u32 = 0;
+        let mut t3_count: u32 = 0;
+        let mut t2_count: u32 = 0;
+        let mut t1_count: u32 = 0;
+
+        let mut entropy = 0;
+        loop {
+            if entropy == 10000 {
+                break;
+            }
+
+            let mut t5_items = ItemUtils::get_t5_items();
+            let mut t4_items = ItemUtils::get_t4_items();
+            let mut t3_items = ItemUtils::get_t3_items();
+            let mut t2_items = ItemUtils::get_t2_items();
+            let mut t1_items = ItemUtils::get_t1_items();
+            let mut jewlery_items = ItemUtils::get_jewelry_items();
+
+            let item_id = ImplAdventurer::get_loot_discovery(entropy);
+
+            assert(!is_item_in_set(item_id, ref jewlery_items), 'No finding jewlery');
+
+            if is_item_in_set(item_id, ref t5_items) {
+                t5_count += 1;
+            } else if is_item_in_set(item_id, ref t4_items) {
+                t4_count += 1;
+            } else if is_item_in_set(item_id, ref t3_items) {
+                t3_count += 1;
+            } else if is_item_in_set(item_id, ref t2_items) {
+                t2_count += 1;
+            } else if is_item_in_set(item_id, ref t1_items) {
+                t1_count += 1;
+            }
+
+            entropy += 1;
+        };
+
+        // assert T5 is greater than T4 is greater than T3 is greater than T2 is greater than T1
+        assert(t5_count > t4_count, 'T5 should be more than T4');
+        assert(t4_count > t3_count, 'T4 should be more than T3');
+        assert(t3_count > t2_count, 'T3 should be more than T2');
+        assert(t2_count > t1_count, 'T2 should be more than T1');
+
+        // generate percentages
+        let total_count = t5_count + t4_count + t3_count + t2_count + t1_count;
+        let t5_percentage = (t5_count * 100) / total_count;
+        let t4_percentage = (t4_count * 100) / total_count;
+        let t3_percentage = (t3_count * 100) / total_count;
+        let t2_percentage = (t2_count * 100) / total_count;
+        let t1_percentage = (t1_count * 100) / total_count;
+
+        // verify against hard coded percentages
+        assert(t5_percentage == 50, 'wrong t5 percentage');
+        assert(t4_percentage == 30, 'wrong t4 percentage');
+        assert(t3_percentage == 12, 'wrong t3 percentage');
+        assert(t2_percentage == 6, 'wrong t2 percentage');
+        assert(t1_percentage == 2, 'wrong t1 percentage');
+    }
+
+    #[test]
+    fn test_get_random_discovery_distribution() {
+        let mut gold_count: u32 = 0;
+        let mut health_count: u32 = 0;
+        let mut loot_count: u32 = 0;
+
+        let mut adventurer_level = 1;
+        let mut entropy = 0;
+
+        loop {
+            if adventurer_level == 50 {
+                break;
+            }
+
+            loop {
+                if entropy == 10000 {
+                    break;
+                }
+
+                let discovery_type = ImplAdventurer::get_discovery(adventurer_level, entropy);
+
+                match discovery_type {
+                    DiscoveryType::Gold(_) => { gold_count += 1; },
+                    DiscoveryType::Health(_) => { health_count += 1; },
+                    DiscoveryType::Loot(_) => { loot_count += 1; }
+                }
+
+                entropy += 1;
+            };
+            adventurer_level += 1;
+        };
+
+        // Calculate total count
+        let total_count = gold_count + health_count + loot_count;
+
+        // Calculate percentages
+        let gold_percentage = (gold_count * 100) / total_count;
+        let health_percentage = (health_count * 100) / total_count;
+        let loot_percentage = (loot_count * 100) / total_count;
+
+        // Verify percentages
+        assert(gold_percentage == 45, 'wrong gold percentage');
+        assert(health_percentage == 45, 'wrong health percentage');
+        assert(loot_percentage == 10, 'wrong loot percentage');
     }
 }

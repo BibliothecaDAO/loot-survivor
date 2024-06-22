@@ -1,14 +1,15 @@
 mod DiscoveryEnums {
     #[derive(Copy, Drop, PartialEq)]
     enum ExploreResult {
-        Beast: (),
-        Obstacle: (),
-        Discovery: (),
+        Beast,
+        Obstacle,
+        Discovery,
     }
 
     #[derive(Copy, Drop, PartialEq)]
     enum DiscoveryType {
-        Gold: (),
-        Health: (),
+        Gold: u16,
+        Health: u16,
+        Loot: u8,
     }
 }
