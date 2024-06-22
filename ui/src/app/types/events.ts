@@ -162,6 +162,18 @@ export type DiscoveredXPEvent = {
   xpAmount: u16;
 };
 
+export type DiscoveredLootEvent = {
+  adventurerState: AdventurerState;
+  itemId: u16;
+};
+
+export type EquipmentChangedEvent = {
+  adventurerStateWithBag: AdventurerStateWithBag;
+  equippedItems: u8[];
+  baggedItems: u8[];
+  droppedItems: u8[];
+};
+
 export type DodgedObstacleEvent = {
   adventurerState: AdventurerState;
   id: u8;

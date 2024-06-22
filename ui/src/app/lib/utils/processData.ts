@@ -24,6 +24,8 @@ import {
   AdventurerLeveledUpEvent,
   UpgradesAvailableEvent,
   AdventurerUpgradedEvent,
+  DiscoveredLootEvent,
+  EquipmentChangedEvent,
 } from "@/app/types/events";
 import {
   Adventurer,
@@ -42,6 +44,8 @@ type EventData =
   | DiscoveredGoldEvent
   | StartGameEvent
   | DiscoveredXPEvent
+  | DiscoveredLootEvent
+  | EquipmentChangedEvent
   | DodgedObstacleEvent
   | HitByObstacleEvent
   | DiscoveredBeastEvent
@@ -172,6 +176,32 @@ export function processItemLevels(data: any) {
     });
   }
   return itemLevels;
+}
+
+export function processLootDiscovery(
+  data: any,
+  equipped: boolean,
+  adventurerState: any
+) {
+  const gameData = new GameData();
+  const lootDiscoveries: Item[] = [];
+  for (let item of data) {
+    lootDiscoveries.push({
+      item: gameData.ITEMS[item],
+      adventurerId: adventurerState["adventurerId"],
+      owner: true,
+      equipped: equipped,
+      ownerAddress: adventurerState["owner"],
+      xp: 0,
+      special1: undefined,
+      special2: undefined,
+      special3: undefined,
+      isAvailable: false,
+      purchasedTime: new Date(),
+      timestamp: new Date(),
+    });
+  }
+  return lootDiscoveries;
 }
 
 export function processData(
@@ -331,20 +361,20 @@ export function processData(
       };
 
       return [discoveredGoldAdventurerData, discoverGoldData];
-    case "DiscoveredXP":
-      const discoveredXPEvent = event as DiscoveredXPEvent;
-      const discoveredXPAdventurerData = processAdventurerState(
-        discoveredXPEvent,
+    case "DiscoveredLoot":
+      const discoveredLootEvent = event as DiscoveredLootEvent;
+      const discoveredLootAdventurerData = processAdventurerState(
+        discoveredLootEvent,
         currentAdventurer
       );
-      const discoverXPData: Discovery = {
+      const discoverLootData: Discovery = {
         txHash: txHash,
-        adventurerId: discoveredXPEvent.adventurerState["adventurerId"],
+        adventurerId: discoveredLootEvent.adventurerState["adventurerId"],
         adventurerHealth:
-          discoveredXPEvent.adventurerState["adventurer"]["health"],
+          discoveredLootEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[3],
         subDiscoveryType: gameData.ITEM_DISCOVERY_TYPES[3],
-        outputAmount: discoveredXPEvent.xpAmount,
+        outputAmount: discoveredLootEvent.itemId,
         obstacle: undefined,
         obstacleLevel: undefined,
         dodgedObstacle: false,
@@ -364,7 +394,48 @@ export function processData(
         timestamp: new Date(),
       };
 
-      return [discoveredXPAdventurerData, discoverXPData];
+      return [discoveredLootAdventurerData, discoverLootData];
+    case "EquipmentChanged":
+      const equipmentChangedEvent = event as EquipmentChangedEvent;
+      const equipmentChangedAdventurerData = processAdventurerState(
+        equipmentChangedEvent.adventurerStateWithBag,
+        currentAdventurer
+      );
+      const formattedEquipmentChangedEquippedItems: string[] = [];
+      for (let i = 0; i < equipmentChangedEvent.equippedItems.length; i++) {
+        formattedEquipmentChangedEquippedItems.push(
+          gameData.ITEMS[equipmentChangedEvent.equippedItems[i]]
+        );
+      }
+      const formattedEquipmentChangedBaggedItems: string[] = [];
+      for (let i = 0; i < equipmentChangedEvent.baggedItems.length; i++) {
+        formattedEquipmentChangedBaggedItems.push(
+          gameData.ITEMS[equipmentChangedEvent.baggedItems[i]]
+        );
+      }
+      const formattedEquipmentChangedDroppedItems: string[] = [];
+      for (let i = 0; i < equipmentChangedEvent.droppedItems.length; i++) {
+        formattedEquipmentChangedDroppedItems.push(
+          gameData.ITEMS[equipmentChangedEvent.droppedItems[i]]
+        );
+      }
+
+      const processedEquippedItems = processLootDiscovery(
+        formattedEquipmentChangedEquippedItems,
+        true,
+        equipmentChangedEvent.adventurerStateWithBag.adventurerState
+      );
+      const processedBaggedItems = processLootDiscovery(
+        formattedEquipmentChangedBaggedItems,
+        false,
+        equipmentChangedEvent.adventurerStateWithBag.adventurerState
+      );
+      return [
+        equipmentChangedAdventurerData,
+        processedEquippedItems,
+        processedBaggedItems,
+        formattedEquipmentChangedDroppedItems,
+      ];
     case "DodgedObstacle":
       const dodgedObstacleEvent = event as DodgedObstacleEvent;
       const dodgedObstacleAdventurerData = processAdventurerState(

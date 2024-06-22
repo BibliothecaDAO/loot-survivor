@@ -493,22 +493,18 @@ export function syscalls({
         (item: Item) =>
           !unequippedItems.some((droppedItem) => droppedItem.item == item.item)
       );
-      const filteredDrops = [
-        ...(filteredUnequips ?? []),
-        ...equippedItems,
-        ...unequippedItems,
-      ]?.filter((item: Item) => !droppedItems.includes(item.item ?? ""));
-      setData("itemsByAdventurerQuery", {
-        items: [...filteredDrops],
-      });
 
       const discoveries: Discovery[] = [];
+
+      let discoveredLootEquipped = [];
+      let discoveredLootBagged = [];
 
       const filteredDiscoveries = events.filter(
         (event) =>
           event.name === "DiscoveredHealth" ||
           event.name === "DiscoveredGold" ||
           event.name === "DiscoveredXP" ||
+          event.name === "DiscoveredLoot" ||
           event.name === "DodgedObstacle" ||
           event.name === "HitByObstacle"
       );
@@ -558,8 +554,30 @@ export function syscalls({
               }
             }
           }
+          if (discovery.name === "DiscoveredLoot") {
+            const filteredEquipmentChangedEvents = events.filter(
+              (event) => event.name === "EquipmentChanged"
+            );
+            for (let filteredEquipmentChangedEvent of filteredEquipmentChangedEvents) {
+              discoveredLootEquipped = filteredEquipmentChangedEvent.data[1];
+              discoveredLootBagged = filteredEquipmentChangedEvent.data[2];
+            }
+          }
         }
       }
+
+      const filteredDrops = [
+        ...(filteredUnequips ?? []),
+        ...equippedItems,
+        ...unequippedItems,
+      ]?.filter((item: Item) => !droppedItems.includes(item.item ?? ""));
+      setData("itemsByAdventurerQuery", {
+        items: [
+          ...filteredDrops,
+          ...discoveredLootEquipped,
+          ...discoveredLootBagged,
+        ],
+      });
 
       const filteredBeastDiscoveries = events.filter(
         (event) => event.name === "DiscoveredBeast"

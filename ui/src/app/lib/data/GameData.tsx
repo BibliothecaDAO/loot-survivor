@@ -855,7 +855,7 @@ export class GameData {
     this.ITEM_DISCOVERY_TYPES = {
       1: "Health",
       2: "Gold",
-      3: "XP",
+      3: "Loot",
     };
 
     this.ITEM_NAME_PREFIXES = {

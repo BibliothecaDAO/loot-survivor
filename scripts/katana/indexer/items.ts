@@ -23,6 +23,10 @@ import {
   PURCHASED_ITEMS,
   SLAYED_BEAST,
   START_GAME,
+  DISCOVERED_LOOT,
+  parseDiscoveredLoot,
+  EQUIPMENT_CHANGED,
+  parseEquipmentChanged,
 } from "./utils/events.ts";
 import { insertItem, updateItemsXP } from "./utils/helpers.ts";
 import { checkExistsInt, encodeIntAsBytes } from "./utils/encode.ts";
@@ -118,6 +122,59 @@ export default function transform({ header, events }: Block) {
           },
         }));
         return result;
+      }
+      case DISCOVERED_LOOT: {
+        const { value } = parseDiscoveredLoot(event.data, 0);
+        const as = value.adventurerState;
+        console.log("DISCOVERED_LOOT", "->", "ITEMS UPDATES");
+        return {
+          entity: {
+            item: checkExistsInt(BigInt(value.itemId)),
+            adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+          },
+          update: {
+            $set: {
+              item: checkExistsInt(BigInt(value.itemId)),
+              adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+              equipped: false,
+              timestamp: new Date().toISOString(),
+            },
+          },
+        };
+      }
+      case EQUIPMENT_CHANGED: {
+        const { value } = parseEquipmentChanged(event.data, 0);
+        const as = value.adventurerStateWithBag.adventurerState;
+        console.log("EQUIPMENT_CHANGED", "->", "ITEMS UPDATES");
+        const equippedResult = value.equippedItems.map((item) => ({
+          entity: {
+            item: checkExistsInt(BigInt(item)),
+            adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+          },
+          update: {
+            $set: {
+              item: checkExistsInt(BigInt(item)),
+              adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+              equipped: true,
+              timestamp: new Date().toISOString(),
+            },
+          },
+        }));
+        const baggedResult = value.baggedItems.map((item) => ({
+          entity: {
+            item: checkExistsInt(BigInt(item)),
+            adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+          },
+          update: {
+            $set: {
+              item: checkExistsInt(BigInt(item)),
+              adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+              equipped: false,
+              timestamp: new Date().toISOString(),
+            },
+          },
+        }));
+        return [...equippedResult, ...baggedResult];
       }
       case EQUIPPED_ITEMS: {
         const { value } = parseEquippedItems(event.data, 0);

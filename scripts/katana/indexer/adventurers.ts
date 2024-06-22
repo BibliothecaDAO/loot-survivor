@@ -6,11 +6,9 @@ import {
   ADVENTURER_UPGRADED,
   DISCOVERED_GOLD,
   DISCOVERED_HEALTH,
-  DISCOVERED_XP,
   parseAdventurerUpgraded,
   parseDiscoveredGold,
   parseDiscoveredHealth,
-  parseDiscoveredXp,
   parseStartGame,
   START_GAME,
   PURCHASED_POTIONS,
@@ -43,6 +41,8 @@ import {
   parseUpgradesAvailable,
   DISCOVERED_BEAST,
   parseDiscoveredBeast,
+  DISCOVERED_LOOT,
+  parseDiscoveredLoot,
 } from "./utils/events.ts";
 import { insertAdventurer, updateAdventurer } from "./utils/helpers.ts";
 import { MONGO_CONNECTION_STRING } from "./utils/constants.ts";
@@ -167,9 +167,9 @@ export default function transform({ header, events }: Block) {
           }),
         ];
       }
-      case DISCOVERED_XP: {
-        console.log("DISCOVERED_XP", "->", "ADVENTURER UPDATES");
-        const { value } = parseDiscoveredXp(event.data, 0);
+      case DISCOVERED_LOOT: {
+        console.log("DISCOVERED_LOOT", "->", "ADVENTURER UPDATES");
+        const { value } = parseDiscoveredLoot(event.data, 0);
         return [
           updateAdventurer({
             timestamp: new Date().toISOString(),

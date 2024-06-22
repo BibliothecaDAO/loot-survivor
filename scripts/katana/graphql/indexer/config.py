@@ -395,7 +395,7 @@ class Config:
             3: "Item",
         }
 
-        self.SUB_DISCOVERY_TYPES = {1: "Health", 2: "Gold", 3: "XP"}
+        self.SUB_DISCOVERY_TYPES = {1: "Health", 2: "Gold", 3: "Loot"}
 
         self.MATERIALS = {
             0: "Generic",

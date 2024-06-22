@@ -6,6 +6,8 @@ import {
   DiscoveredGoldEvent,
   StartGameEvent,
   DiscoveredXPEvent,
+  DiscoveredLootEvent,
+  EquipmentChangedEvent,
   DodgedObstacleEvent,
   HitByObstacleEvent,
   DiscoveredBeastEvent,
@@ -207,6 +209,25 @@ function parseEquippedItems(data: string[]) {
   return { equippedItems, unequippedItems };
 }
 
+function parseEquipmentChanged(data: string[]) {
+  const equippedLength = parseInt(data[0]);
+  const equippedItems = [];
+  const baggedItems = [];
+  const droppedItems = [];
+  for (let i = 1; i <= equippedLength; i++) {
+    equippedItems.push(parseInt(data[i]));
+  }
+  const baggedLength = parseInt(data[equippedLength + 1]);
+  for (let i = 2; i <= baggedLength + 1; i++) {
+    baggedItems.push(parseInt(data[i + equippedLength]));
+  }
+  const droppedLength = parseInt(data[baggedLength + 1]);
+  for (let i = 2; i <= droppedLength + 1; i++) {
+    droppedItems.push(parseInt(data[i + baggedLength]));
+  }
+  return { equippedItems, baggedItems, droppedItems };
+}
+
 export async function parseEvents(
   receipt: InvokeTransactionReceiptResponse,
   currentAdventurer?: AdventurerClass,
@@ -331,6 +352,45 @@ export async function parseEvents(
           currentAdventurer
         );
         events.push({ name: eventName, data: discoveredXPEvent });
+        break;
+      case "DiscoveredLoot":
+        const discoveredLootData: DiscoveredLootEvent = {
+          adventurerState: parseAdventurerState(raw.data.slice(0, 31)),
+          itemId: parseInt(raw.data[32]),
+        };
+        const discoveredLootEvent = processData(
+          discoveredLootData,
+          eventName,
+          receipt.transaction_hash,
+          currentAdventurer
+        );
+        events.push({ name: eventName, data: discoveredLootEvent });
+        break;
+      case "EquipmentChanged":
+        const {
+          equippedItems: equipmentChangedEquippedItems,
+          baggedItems: equipmentChangedBaggedItems,
+          droppedItems: equipmentChangedDroppedItems,
+        } = parseEquipmentChanged(
+          // Include equipped array length
+          raw.data.slice(63)
+        );
+        const equipmentChangedData: EquipmentChangedEvent = {
+          adventurerStateWithBag: {
+            adventurerState: parseAdventurerState(raw.data.slice(0, 31)),
+            bag: parseBag(raw.data.slice(32, 63)),
+          },
+          equippedItems: equipmentChangedEquippedItems,
+          baggedItems: equipmentChangedBaggedItems,
+          droppedItems: equipmentChangedDroppedItems,
+        };
+        const equipmentChangedEvent = processData(
+          equipmentChangedData,
+          eventName,
+          receipt.transaction_hash,
+          currentAdventurer
+        );
+        events.push({ name: eventName, data: equipmentChangedEvent });
         break;
       case "DodgedObstacle":
         const dodgedObstacleData: DodgedObstacleEvent = {

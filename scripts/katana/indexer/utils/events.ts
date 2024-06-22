@@ -22,7 +22,7 @@ export const START_GAME = eventKey("StartGame");
 export const ADVENTURER_UPGRADED = eventKey("AdventurerUpgraded");
 export const DISCOVERED_HEALTH = eventKey("DiscoveredHealth");
 export const DISCOVERED_GOLD = eventKey("DiscoveredGold");
-export const DISCOVERED_XP = eventKey("DiscoveredXP");
+export const DISCOVERED_LOOT = eventKey("DiscoveredLoot");
 export const HIT_BY_OBSTACLE = eventKey("HitByObstacle");
 export const DODGED_OBSTACLE = eventKey("DodgedObstacle");
 
@@ -43,6 +43,7 @@ export const UPGRADES_AVAILABLE = eventKey("UpgradesAvailable");
 export const EQUIPPED_ITEMS = eventKey("EquippedItems");
 export const DROPPED_ITEMS = eventKey("DroppedItems");
 export const ITEMS_LEVELED_UP = eventKey("ItemsLeveledUp");
+export const EQUIPMENT_CHANGED = eventKey("EquipmentChanged");
 
 export const NEW_HIGH_SCORE = eventKey("NewHighScore");
 export const REWARD_DISTRIBUTION = eventKey("RewardDistribution");
@@ -230,9 +231,9 @@ export const parseDiscoveredGold = combineParsers({
   goldAmount: { index: 1, parser: parseU16 },
 });
 
-export const parseDiscoveredXp = combineParsers({
+export const parseDiscoveredLoot = combineParsers({
   adventurerState: { index: 0, parser: parseAdventurerState },
-  xpAmount: { index: 1, parser: parseU16 },
+  itemId: { index: 1, parser: parseU8 },
 });
 
 export const parseHitByObstacle = combineParsers({
@@ -293,6 +294,13 @@ export const parseEquippedItems = combineParsers({
 export const parseDroppedItems = combineParsers({
   adventurerStateWithBag: { index: 0, parser: parseAdventurerStateWithBag },
   itemIds: { index: 1, parser: parseArray(parseU8) },
+});
+
+export const parseEquipmentChanged = combineParsers({
+  adventurerStateWithBag: { index: 0, parser: parseAdventurerStateWithBag },
+  equippedItems: { index: 1, parser: parseArray(parseU8) },
+  baggedItems: { index: 2, parser: parseArray(parseU8) },
+  droppedItems: { index: 3, parser: parseArray(parseU8) },
 });
 
 export const parseUpgradesAvailable = combineParsers({

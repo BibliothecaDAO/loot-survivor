@@ -7,6 +7,7 @@ import {
   DISCOVERED_BEAST,
   DISCOVERED_GOLD,
   DISCOVERED_HEALTH,
+  DISCOVERED_LOOT,
   DISCOVERED_XP,
   DODGED_OBSTACLE,
   HIT_BY_OBSTACLE,
@@ -14,6 +15,7 @@ import {
   parseDiscoveredBeast,
   parseDiscoveredGold,
   parseDiscoveredHealth,
+  parseDiscoveredLoot,
   parseDiscoveredXp,
   parseHitByObstacle,
 } from "./utils/events.ts";
@@ -92,14 +94,14 @@ export default function transform({ header, events }: Block) {
       case DISCOVERED_GOLD: {
         const { value } = parseDiscoveredGold(event.data, 0);
         const as = value.adventurerState;
-        console.log("DISCOVERED_HEALTH", "->", "DISCOVERIES UPDATES");
+        console.log("DISCOVERED_GOLD", "->", "DISCOVERIES UPDATES");
         return [
           insertDiscovery({
             txHash: receipt.transactionHash,
             adventurerId: as.adventurerId,
             adventurerHealth: as.adventurer.health,
             discoveryType: 3,
-            subDiscoveryType: 1,
+            subDiscoveryType: 2,
             outputAmount: value.goldAmount,
             obstacle: 0,
             obstacleLevel: 0,
@@ -121,18 +123,18 @@ export default function transform({ header, events }: Block) {
           }),
         ];
       }
-      case DISCOVERED_XP: {
-        const { value } = parseDiscoveredXp(event.data, 0);
+      case DISCOVERED_LOOT: {
+        const { value } = parseDiscoveredLoot(event.data, 0);
         const as = value.adventurerState;
-        console.log("DISCOVERED_XP", "->", "DISCOVERIES UPDATES");
+        console.log("DISCOVERED_LOOT", "->", "DISCOVERIES UPDATES");
         return [
           insertDiscovery({
             txHash: receipt.transactionHash,
             adventurerId: as.adventurerId,
             adventurerHealth: as.adventurer.health,
             discoveryType: 3,
-            subDiscoveryType: 1,
-            outputAmount: value.xpAmount,
+            subDiscoveryType: 3,
+            outputAmount: value.itemId,
             obstacle: 0,
             obstacleLevel: 0,
             dodgedObstacle: false,

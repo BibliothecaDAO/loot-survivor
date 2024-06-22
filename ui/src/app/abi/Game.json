@@ -198,7 +198,7 @@
       },
       {
         "name": "name",
-        "type": "core::integer::u128"
+        "type": "core::felt252"
       }
     ]
   },
@@ -479,7 +479,7 @@
           },
           {
             "name": "name",
-            "type": "core::integer::u128"
+            "type": "core::felt252"
           },
           {
             "name": "golden_token_id",
@@ -770,6 +770,54 @@
       },
       {
         "name": "get_base_stats",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "adventurer_id",
+            "type": "core::felt252"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "adventurer::stats::Stats"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_starting_stats",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "adventurer_id",
+            "type": "core::felt252"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "adventurer::stats::Stats"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "equipment_specials_unlocked",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "adventurer_id",
+            "type": "core::felt252"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::bool"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "equipment_stat_boosts",
         "type": "function",
         "inputs": [
           {
@@ -1278,28 +1326,19 @@
     ]
   },
   {
-    "name": "game::Game::Discovery",
-    "type": "struct",
-    "members": [
-      {
-        "name": "adventurer_state",
-        "type": "game::Game::AdventurerState"
-      },
-      {
-        "name": "amount",
-        "type": "core::integer::u16"
-      }
-    ]
-  },
-  {
     "kind": "struct",
     "name": "game::Game::DiscoveredHealth",
     "type": "event",
     "members": [
       {
         "kind": "data",
-        "name": "discovery",
-        "type": "game::Game::Discovery"
+        "name": "adventurer_state",
+        "type": "game::Game::AdventurerState"
+      },
+      {
+        "kind": "data",
+        "name": "amount",
+        "type": "core::integer::u16"
       }
     ]
   },
@@ -1310,8 +1349,30 @@
     "members": [
       {
         "kind": "data",
-        "name": "discovery",
-        "type": "game::Game::Discovery"
+        "name": "adventurer_state",
+        "type": "game::Game::AdventurerState"
+      },
+      {
+        "kind": "data",
+        "name": "amount",
+        "type": "core::integer::u16"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "game::Game::DiscoveredLoot",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "adventurer_state",
+        "type": "game::Game::AdventurerState"
+      },
+      {
+        "kind": "data",
+        "name": "item_id",
+        "type": "core::integer::u8"
       }
     ]
   },
@@ -1795,6 +1856,33 @@
   },
   {
     "kind": "struct",
+    "name": "game::Game::EquipmentChanged",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "adventurer_state_with_bag",
+        "type": "game::Game::AdventurerStateWithBag"
+      },
+      {
+        "kind": "data",
+        "name": "equipped_items",
+        "type": "core::array::Array::<core::integer::u8>"
+      },
+      {
+        "kind": "data",
+        "name": "bagged_items",
+        "type": "core::array::Array::<core::integer::u8>"
+      },
+      {
+        "kind": "data",
+        "name": "dropped_items",
+        "type": "core::array::Array::<core::integer::u8>"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
     "name": "game::Game::EquippedItems",
     "type": "event",
     "members": [
@@ -2097,6 +2185,11 @@
       },
       {
         "kind": "nested",
+        "name": "DiscoveredLoot",
+        "type": "game::Game::DiscoveredLoot"
+      },
+      {
+        "kind": "nested",
         "name": "DodgedObstacle",
         "type": "game::Game::DodgedObstacle"
       },
@@ -2159,6 +2252,11 @@
         "kind": "nested",
         "name": "AdventurerUpgraded",
         "type": "game::Game::AdventurerUpgraded"
+      },
+      {
+        "kind": "nested",
+        "name": "EquipmentChanged",
+        "type": "game::Game::EquipmentChanged"
       },
       {
         "kind": "nested",
