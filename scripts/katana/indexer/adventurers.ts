@@ -11,7 +11,6 @@ import {
   parseDiscoveredHealth,
   parseStartGame,
   START_GAME,
-  PURCHASED_POTIONS,
   PURCHASED_ITEMS,
   ATTACKED_BY_BEAST,
   ADVENTURER_DIED,
@@ -59,11 +58,10 @@ const filter = {
     { fromAddress: GAME, keys: [ADVENTURER_UPGRADED] },
     { fromAddress: GAME, keys: [DISCOVERED_HEALTH] },
     { fromAddress: GAME, keys: [DISCOVERED_GOLD] },
-    { fromAddress: GAME, keys: [DISCOVERED_XP] },
+    { fromAddress: GAME, keys: [DISCOVERED_LOOT] },
     { fromAddress: GAME, keys: [DODGED_OBSTACLE] },
     { fromAddress: GAME, keys: [HIT_BY_OBSTACLE] },
     { fromAddress: GAME, keys: [DISCOVERED_BEAST] },
-    { fromAddress: GAME, keys: [PURCHASED_POTIONS] },
     { fromAddress: GAME, keys: [PURCHASED_ITEMS] },
     { fromAddress: GAME, keys: [EQUIPPED_ITEMS] },
     { fromAddress: GAME, keys: [DROPPED_ITEMS] },
@@ -200,16 +198,6 @@ export default function transform({ header, events }: Block) {
       case DISCOVERED_BEAST: {
         console.log("DISCOVERED_BEAST", "->", "ADVENTURER UPDATES");
         const { value } = parseDiscoveredBeast(event.data, 0);
-        return [
-          updateAdventurer({
-            timestamp: new Date().toISOString(),
-            adventurerState: value.adventurerState,
-          }),
-        ];
-      }
-      case PURCHASED_POTIONS: {
-        console.log("PURCHASED_POTIONS", "->", "ADVENTURER UPDATES");
-        const { value } = parseDiscoveredXp(event.data, 0);
         return [
           updateAdventurer({
             timestamp: new Date().toISOString(),

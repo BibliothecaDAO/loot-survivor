@@ -8,7 +8,6 @@ import {
   DISCOVERED_GOLD,
   DISCOVERED_HEALTH,
   DISCOVERED_LOOT,
-  DISCOVERED_XP,
   DODGED_OBSTACLE,
   HIT_BY_OBSTACLE,
   parseAmbushedByBeast,
@@ -16,7 +15,6 @@ import {
   parseDiscoveredGold,
   parseDiscoveredHealth,
   parseDiscoveredLoot,
-  parseDiscoveredXp,
   parseHitByObstacle,
 } from "./utils/events.ts";
 import { insertDiscovery } from "./utils/helpers.ts";
@@ -32,7 +30,7 @@ const filter = {
   events: [
     { fromAddress: GAME, keys: [DISCOVERED_HEALTH] },
     { fromAddress: GAME, keys: [DISCOVERED_GOLD] },
-    { fromAddress: GAME, keys: [DISCOVERED_XP] },
+    { fromAddress: GAME, keys: [DISCOVERED_LOOT] },
     { fromAddress: GAME, keys: [HIT_BY_OBSTACLE] },
     { fromAddress: GAME, keys: [DODGED_OBSTACLE] },
     { fromAddress: GAME, keys: [AMBUSHED_BY_BEAST] },
