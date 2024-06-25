@@ -7,7 +7,7 @@ echo '' > /katana/.env
 source ~/.bashrc
 
 # Start katana in the background
-/root/.dojo/bin/katana --disable-fee --allowed-origins "*" --dev --block-time 5000 --seed 0x6c6f6f747375727669766f72 --accounts 10 --json-log --db-dir /katana/db > ~/katana.log 2>&1 &
+/root/.dojo/bin/katana --disable-fee --allowed-origins "*" --block-time 10000 --seed 0x6c6f6f747375727669766f72 --accounts 10 --json-log --db-dir /katana/db > ~/katana.log 2>&1 &
 
 # Give katana a few seconds to initialize and log seed accounts
 sleep 3
