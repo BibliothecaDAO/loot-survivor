@@ -421,12 +421,12 @@ export function processData(
       }
 
       const processedEquippedItems = processLootDiscovery(
-        formattedEquipmentChangedEquippedItems,
+        equipmentChangedEvent.equippedItems,
         true,
         equipmentChangedEvent.adventurerStateWithBag.adventurerState
       );
       const processedBaggedItems = processLootDiscovery(
-        formattedEquipmentChangedBaggedItems,
+        equipmentChangedEvent.baggedItems,
         false,
         equipmentChangedEvent.adventurerStateWithBag.adventurerState
       );
