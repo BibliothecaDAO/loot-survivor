@@ -351,7 +351,7 @@ impl ImplCombat of ICombat {
     /// @return The calculated random level.
     fn get_random_level(adventurer_level: u8, entropy: u128) -> u16 {
         // Calculate the base random level using entropy and the adventurer's level
-        let level = 1 + (entropy % (adventurer_level.into() * 2)).try_into().unwrap();
+        let level = 1 + (entropy % (adventurer_level.into() * 3)).try_into().unwrap();
 
         // Adjust the level upward based on the adventurer's current level
         if (adventurer_level >= 50) {
@@ -377,7 +377,7 @@ impl ImplCombat of ICombat {
     /// @return The calculated starting health for the enemy.
     fn get_enemy_starting_health(adventurer_level: u8, entropy: u128) -> u16 {
         // Calculate the base enemy health using entropy and the adventurer's level
-        let health = 1 + (entropy % (adventurer_level.into() * 15)).try_into().unwrap();
+        let health = 1 + (entropy % (adventurer_level.into() * 20)).try_into().unwrap();
 
         // Adjust the enemy's health upward based on the adventurer's current level
         if (adventurer_level >= 50) {
