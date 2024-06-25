@@ -26,7 +26,7 @@ source $ENV_FILE
 cd /workspaces/loot-survivor/contracts/
 scarb build
 
-katana --disable-fee --dev --block-time 3000 --seed 0x6c6f6f747375727669766f72 --accounts 1 --json-log > ~/katana.log 2>&1 & echo $! > ~/katana_pid.txt
+katana --disable-fee --block-time 30000 --seed 0x6c6f6f747375727669766f72 --accounts 1 --json-log > ~/katana.log 2>&1 & echo $! > ~/katana_pid.txt
 sleep 3
 output=$(head -n 1 ~/katana.log | jq -r '.fields.message | fromjson | .accounts[0] | .[0], .[-1].private_key')
 account_address_decimal=$(echo "$output" | head -n 1)
