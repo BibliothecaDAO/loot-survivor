@@ -114,8 +114,8 @@ export default function UpgradeScreen({
     // Call the function immediately
     fetchEntropy();
 
-    // Set up the interval to call the function every 10 seconds
-    const interval = setInterval(fetchEntropy, 10000);
+    // Set up the interval to call the function every 5 seconds
+    const interval = setInterval(fetchEntropy, 5000);
 
     return () => clearInterval(interval); // Cleanup on component unmount
   }, []);
