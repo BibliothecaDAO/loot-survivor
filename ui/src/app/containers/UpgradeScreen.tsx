@@ -87,7 +87,6 @@ export default function UpgradeScreen({
   const equipItems = useUIStore((state) => state.equipItems);
   const dropItems = useUIStore((state) => state.dropItems);
   const entropyReady = useUIStore((state) => state.entropyReady);
-  const setEntropyReady = useUIStore((state) => state.setEntropyReady);
   const onKatana = useUIStore((state) => state.onKatana);
   const setVitBoostRemoved = useUIStore((state) => state.setVitBoostRemoved);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
@@ -98,27 +97,6 @@ export default function UpgradeScreen({
   });
 
   const { play: clickPlay } = useUiSounds(soundSelector.click);
-
-  useEffect(() => {
-    if (onKatana) return;
-    const fetchEntropy = async () => {
-      const entropy = await gameContract!.call("get_adventurer_entropy", [
-        adventurer?.id!,
-      ]);
-      if (entropy !== BigInt(0)) {
-        setEntropyReady(true);
-        clearInterval(interval);
-      }
-    };
-
-    // Call the function immediately
-    fetchEntropy();
-
-    // Set up the interval to call the function every 5 seconds
-    const interval = setInterval(fetchEntropy, 5000);
-
-    return () => clearInterval(interval); // Cleanup on component unmount
-  }, []);
 
   const setData = useQueriesStore((state) => state.setData);
 

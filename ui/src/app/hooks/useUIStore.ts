@@ -95,6 +95,8 @@ type State = {
   setIsMintingLords: (value: boolean) => void;
   averageBlockTime: number;
   setAverageBlockTime: (value: number) => void;
+  adventurerEntropy: bigint;
+  setAdventurerEntropy: (value: bigint) => void;
   entropyReady: boolean;
   setEntropyReady: (value: boolean) => void;
   loginScreen: boolean;
@@ -176,6 +178,8 @@ const useUIStore = create<State>((set) => ({
   setIsMintingLords: (value) => set({ isMintingLords: value }),
   averageBlockTime: 0,
   setAverageBlockTime: (value) => set({ averageBlockTime: value }),
+  adventurerEntropy: BigInt(0),
+  setAdventurerEntropy: (value) => set({ adventurerEntropy: value }),
   entropyReady: false,
   setEntropyReady: (value) => set({ entropyReady: value }),
   loginScreen: false,

@@ -159,6 +159,9 @@ function Home() {
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const setStartOption = useUIStore((state) => state.setStartOption);
   const setEntropyReady = useUIStore((state) => state.setEntropyReady);
+  const setAdventurerEntropy = useUIStore(
+    (state) => state.setAdventurerEntropy
+  );
   const [accountChainId, setAccountChainId] = useState<
     constants.StarknetChainId | undefined
   >();
@@ -520,6 +523,29 @@ function Home() {
       setScreen("start");
     }
   }, [onboarded]);
+
+  useEffect(() => {
+    const fetchEntropy = async () => {
+      if (adventurer?.id) {
+        const entropy = await gameContract!.call("get_adventurer_entropy", [
+          adventurer?.id!,
+        ]);
+        if (entropy !== BigInt(0)) {
+          setAdventurerEntropy(BigInt(entropy.toString()));
+          setEntropyReady(true);
+          clearInterval(interval);
+        }
+      }
+    };
+
+    // Call the function immediately
+    fetchEntropy();
+
+    // Set up the interval to call the function every 5 seconds
+    const interval = setInterval(fetchEntropy, 5000);
+
+    return () => clearInterval(interval); // Cleanup on component unmount
+  }, [adventurer?.level]);
 
   if (!isConnected && disconnected) {
     return <WalletSelect />;
