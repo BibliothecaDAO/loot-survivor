@@ -362,6 +362,9 @@ function Home() {
     const newAdventurerData = await refetch("adventurerByIdQuery", {
       id: adventurerId,
     });
+    const newAdventurersData = await refetch("adventurersByOwnerQuery", {
+      owner: owner,
+    });
     const newLatestDiscoveriesData = await refetch("latestDiscoveriesQuery", {
       id: adventurerId,
     });
@@ -385,6 +388,7 @@ function Home() {
       seed: newLastBeastData.discoveries[0]?.seed,
     });
     setData("adventurerByIdQuery", newAdventurerData);
+    setData("adventurersByOwnerQuery", newAdventurersData);
     setData("latestDiscoveriesQuery", newLatestDiscoveriesData);
     setData("itemsByAdventurerQuery", newAdventurerItemsData);
     setData("latestMarketItemsQuery", newMarketItemsData);
