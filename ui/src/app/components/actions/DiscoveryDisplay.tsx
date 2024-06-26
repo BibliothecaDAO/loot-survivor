@@ -11,17 +11,22 @@ import LootIcon from "@/app/components/icons/LootIcon";
 import { Discovery } from "@/app/types";
 import { GameData } from "@/app/lib/data/GameData";
 import { getItemData } from "@/app/lib/utils";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
 interface DiscoveryProps {
   discoveryData: Discovery;
 }
 
 export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
+  const adventurer = useAdventurerStore((state) => state.adventurer);
   const beastName = processBeastName(
     discoveryData?.entity ?? "",
     discoveryData?.special2 ?? "",
     discoveryData?.special3 ?? ""
   );
+
+  console.log(adventurer!["weapon"]);
+  console.log(getItemData("Wand" ?? ""));
 
   const AdventurerHealthExists = (discoveryData?.adventurerHealth ?? 0) > 0;
 
@@ -139,13 +144,21 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       if (discoveryData?.subDiscoveryType === "Loot") {
         const itemName = gameData.ITEMS[discoveryData?.outputAmount!];
         const { slot } = getItemData(itemName ?? "");
+        const hasEquipped = adventurer![slot.toLowerCase()] == itemName;
         return (
           <span className="flex flex-row items-center justify-between">
             <div className="flex self-center">
-              <p>
-                WOW! Discovered the Loot item {itemName}!{" "}
-                <LootIcon size={"w-5"} type={slot} />
-              </p>
+              {!hasEquipped ? (
+                <p>
+                  WOW! Discovered {itemName}. Check your bag!
+                  <LootIcon size={"w-5"} type={slot} />
+                </p>
+              ) : (
+                <p>
+                  WOW! Discovered and equipped {itemName}!
+                  <LootIcon size={"w-5"} type={slot} />
+                </p>
+              )}
             </div>
             <HealthPotionIcon />
           </span>
