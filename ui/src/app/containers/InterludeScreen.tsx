@@ -8,7 +8,7 @@ export default function InterludeScreen() {
 
   useEffect(() => {
     const currentTime = new Date().getTime();
-    setNextEntropyTime(currentTime + 60 * 1000);
+    setNextEntropyTime(currentTime + 30 * 1000);
   }, []);
   return (
     <>
