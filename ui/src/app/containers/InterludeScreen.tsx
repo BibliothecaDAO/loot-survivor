@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import Hints from "@/app/components/interlude/Hints";
 import { EntropyCountDown } from "@/app/components/CountDown";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 
 export default function InterludeScreen() {
   const [countDownExpired, setCountDownExpired] = useState(false);
   const [nextEntropyTime, setNextEntropyTime] = useState<number | null>(null);
+  const adventurer = useAdventurerStore((state) => state.adventurer);
 
   useEffect(() => {
     const currentTime = new Date().getTime();
@@ -16,7 +18,9 @@ export default function InterludeScreen() {
       <div className="fixed inset-0 z-40 w-full h-full sm:py-8 2xl:py-20">
         <div className="h-1/4 flex items-center justify-center">
           <span className="flex flex-col gap-1 items-center justify-center">
-            <p className="text-2xl">Generating Verifiable Randomness</p>
+            <p className="text-2xl">
+              Generating Verifiable Randomness for Level {adventurer?.level}
+            </p>
             {!countDownExpired ? (
               <EntropyCountDown
                 targetTime={nextEntropyTime}
