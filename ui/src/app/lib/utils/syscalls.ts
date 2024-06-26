@@ -217,8 +217,8 @@ export function syscalls({
     const weaponIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
       (item: Item) => item.item == weapon
     );
-    const chest = adventurerState.chest;
     setData("itemsByAdventurerQuery", itemsXP[0], "xp", weaponIndex);
+    const chest = adventurerState.chest;
     const chestIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
       (item: Item) => item.item == chest
     );
@@ -515,45 +515,6 @@ export function syscalls({
           });
           setAdventurer(discovery.data[0]);
           discoveries.unshift(discovery.data[1]);
-          if (
-            discovery.name === "DodgedObstacle" ||
-            discovery.name === "HitByObstacle"
-          ) {
-            updateItemsXP(discovery.data[0], discovery.data[2]);
-            const itemsLeveledUpEvents = events.filter(
-              (event) => event.name === "ItemsLeveledUp"
-            );
-            for (let itemsLeveledUpEvent of itemsLeveledUpEvents) {
-              for (let itemLeveled of itemsLeveledUpEvent.data[1]) {
-                const ownedItemIndex =
-                  queryData.itemsByAdventurerQuery?.items.findIndex(
-                    (item: Item) => item.item == itemLeveled.item
-                  );
-                if (itemLeveled.suffixUnlocked) {
-                  setData(
-                    "itemsByAdventurerQuery",
-                    itemLeveled.special1,
-                    "special1",
-                    ownedItemIndex
-                  );
-                }
-                if (itemLeveled.prefixesUnlocked) {
-                  setData(
-                    "itemsByAdventurerQuery",
-                    itemLeveled.special2,
-                    "special2",
-                    ownedItemIndex
-                  );
-                  setData(
-                    "itemsByAdventurerQuery",
-                    itemLeveled.special3,
-                    "special3",
-                    ownedItemIndex
-                  );
-                }
-              }
-            }
-          }
           if (discovery.name === "DiscoveredLoot") {
             const filteredEquipmentChangedEvents = events.filter(
               (event) => event.name === "EquipmentChanged"
@@ -578,6 +539,49 @@ export function syscalls({
           ...discoveredLootBagged,
         ],
       });
+
+      const filteredObstacles = events.filter(
+        (event) =>
+          event.name === "DodgedObstacle" || event.name === "HitByObstacle"
+      );
+      if (filteredObstacles.length > 0) {
+        for (let discovery of filteredDiscoveries) {
+          updateItemsXP(discovery.data[0], discovery.data[2]);
+          const itemsLeveledUpEvents = events.filter(
+            (event) => event.name === "ItemsLeveledUp"
+          );
+          for (let itemsLeveledUpEvent of itemsLeveledUpEvents) {
+            for (let itemLeveled of itemsLeveledUpEvent.data[1]) {
+              const ownedItemIndex =
+                queryData.itemsByAdventurerQuery?.items.findIndex(
+                  (item: Item) => item.item == itemLeveled.item
+                );
+              if (itemLeveled.suffixUnlocked) {
+                setData(
+                  "itemsByAdventurerQuery",
+                  itemLeveled.special1,
+                  "special1",
+                  ownedItemIndex
+                );
+              }
+              if (itemLeveled.prefixesUnlocked) {
+                setData(
+                  "itemsByAdventurerQuery",
+                  itemLeveled.special2,
+                  "special2",
+                  ownedItemIndex
+                );
+                setData(
+                  "itemsByAdventurerQuery",
+                  itemLeveled.special3,
+                  "special3",
+                  ownedItemIndex
+                );
+              }
+            }
+          }
+        }
+      }
 
       const filteredBeastDiscoveries = events.filter(
         (event) => event.name === "DiscoveredBeast"
