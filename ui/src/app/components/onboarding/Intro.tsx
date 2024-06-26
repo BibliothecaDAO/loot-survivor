@@ -34,15 +34,6 @@ const Intro = () => {
           <SoundOnIcon className="w-10 h-10 justify-center fill-current" />
         )}
       </Button>
-      <Button
-        className="fixed top-2 right-2 sm:top-20 sm:right-20"
-        onClick={() => {
-          setScreen("start");
-          handleOnboarded();
-        }}
-      >
-        Continue As Guest
-      </Button>
       <div className="flex flex-col items-center gap-5 py-20 sm:p-0">
         <h1 className="m-0 uppercase text-4xl sm:text-6xl text-center">
           Welcome to Loot Survivor

@@ -42,10 +42,9 @@ const WalletSection = ({ step }: WalletSectionProps) => {
         </>
       )}
       <div className="flex flex-col items-center justify-between border border-terminal-green p-5 text-center gap-10 z-1 h-[400px] sm:h-[425px] 2xl:h-[500px]">
-        <h4 className="m-0 uppercase text-3xl">Connect Starknet Wallet</h4>
+        <h4 className="m-0 uppercase text-3xl">Login</h4>
         <p className="sm:hidden 2xl:block text-xl">
-          In order to play LOOT SURVIVOR you are required to connect a Starknet
-          wallet.
+          Login with your Starknet account to play
         </p>
         <div className="hidden sm:flex flex-col">
           {walletConnectors.map((connector, index) => (
@@ -58,7 +57,7 @@ const WalletSection = ({ step }: WalletSectionProps) => {
               key={index}
             >
               {connector.id === "braavos" || connector.id === "argentX"
-                ? `Connect ${connector.id}`
+                ? `Login With ${connector.id}`
                 : connector.id === "argentWebWallet"
                 ? "Login With Email"
                 : "Login with Cartridge Controller"}
@@ -77,7 +76,7 @@ const WalletSection = ({ step }: WalletSectionProps) => {
               key={index}
             >
               {connector.id === "braavos" || connector.id === "argentX"
-                ? `Connect ${connector.id}`
+                ? `Login With ${connector.id}`
                 : connector.id === "argentWebWallet"
                 ? "Login With Email"
                 : "Login with Cartridge Controller"}

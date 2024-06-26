@@ -73,7 +73,7 @@ const cartridgeConnector = (gameAddress: string, lordsAddress: string) =>
   ]) as never as Connector;
 
 export const connectors = (gameAddress: string, lordsAddress: string) => [
+  cartridgeConnector(gameAddress, lordsAddress),
   new InjectedConnector({ options: { id: "braavos", name: "Braavos" } }),
   new InjectedConnector({ options: { id: "argentX", name: "Argent X" } }),
-  cartridgeConnector(gameAddress, lordsAddress),
 ];

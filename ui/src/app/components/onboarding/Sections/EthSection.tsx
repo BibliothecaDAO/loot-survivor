@@ -46,18 +46,11 @@ const EthSection = ({
         <p className="text-xl sm:text-base">
           Balance: {formatCurrency(eth)} ETH
         </p>
-        {onMainnet ? (
-          <p className="text-xl">
-            We are on <span className="uppercase">{network}</span> so you are
-            required to bridge from Ethereum or directly purchase through one of
-            the wallets.
-          </p>
-        ) : (
-          <p className="text-xl sm:text-base">
-            We are on <span className="uppercase">{network}</span> so you are
-            able to get some test ETH from the faucet.
-          </p>
-        )}
+        <p className="text-xl">
+          ETH is required to play Loot Survivor on{" "}
+          <span className="uppercase">{network}</span> to pay for transactions
+          and verifiable randomness.
+        </p>
         <span
           className="flex items-center justify-center border border-terminal-green w-1/2 p-2 cursor-pointer"
           onClick={() => setSection("eth")}
