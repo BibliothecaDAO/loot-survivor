@@ -129,6 +129,7 @@ trait IGame<TContractState> {
     // contract details
     fn owner_of(self: @TContractState, adventurer_id: felt252) -> ContractAddress;
     fn get_dao_address(self: @TContractState) -> ContractAddress;
+    fn get_pg_address(self: @TContractState) -> ContractAddress;
     fn get_lords_address(self: @TContractState) -> ContractAddress;
     fn get_leaderboard(self: @TContractState) -> Leaderboard;
     fn get_cost_to_play(self: @TContractState) -> u128;
