@@ -1,6 +1,7 @@
 import { Connector } from "@starknet-react/core";
 import { InjectedConnector } from "starknetkit/injected";
 import CartridgeConnector from "@cartridge/connector";
+import { shortString } from "starknet";
 
 export const checkArcadeConnector = (connector?: Connector) => {
   return typeof connector?.id === "string" && connector?.id.includes("0x");
@@ -33,44 +34,52 @@ export const providerInterfaceCamel = (provider: string) => {
 };
 
 const cartridgeConnector = (gameAddress: string, lordsAddress: string) =>
-  new CartridgeConnector([
+  new CartridgeConnector(
+    [
+      {
+        target: gameAddress,
+        method: "new_game",
+      },
+      {
+        target: gameAddress,
+        method: "explore",
+      },
+      {
+        target: gameAddress,
+        method: "attack",
+      },
+      {
+        target: gameAddress,
+        method: "flee",
+      },
+      {
+        target: gameAddress,
+        method: "equip",
+      },
+      {
+        target: gameAddress,
+        method: "drop",
+      },
+      {
+        target: gameAddress,
+        method: "upgrade",
+      },
+      {
+        target: lordsAddress,
+        method: "approve",
+      },
+      {
+        target: lordsAddress,
+        method: "mint",
+      },
+    ],
     {
-      target: gameAddress,
-      method: "new_game",
-    },
-    {
-      target: gameAddress,
-      method: "explore",
-    },
-    {
-      target: gameAddress,
-      method: "attack",
-    },
-    {
-      target: gameAddress,
-      method: "flee",
-    },
-    {
-      target: gameAddress,
-      method: "equip",
-    },
-    {
-      target: gameAddress,
-      method: "drop",
-    },
-    {
-      target: gameAddress,
-      method: "upgrade",
-    },
-    {
-      target: lordsAddress,
-      method: "approve",
-    },
-    {
-      target: lordsAddress,
-      method: "mint",
-    },
-  ]) as never as Connector;
+      paymaster: {
+        caller: shortString.encodeShortString("ANY_CALLER"),
+      },
+      theme: "loot-survivor",
+    }
+  ) as never as Connector;
 
 export const connectors = (gameAddress: string, lordsAddress: string) => [
   cartridgeConnector(gameAddress, lordsAddress),

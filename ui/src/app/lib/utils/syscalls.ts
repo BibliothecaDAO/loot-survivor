@@ -520,8 +520,10 @@ export function syscalls({
               (event) => event.name === "EquipmentChanged"
             );
             for (let filteredEquipmentChangedEvent of filteredEquipmentChangedEvents) {
-              discoveredLootEquipped = filteredEquipmentChangedEvent.data[1];
-              discoveredLootBagged = filteredEquipmentChangedEvent.data[2];
+              discoveredLootEquipped.push(
+                ...filteredEquipmentChangedEvent.data[1]
+              );
+              discoveredLootBagged.push(filteredEquipmentChangedEvent.data[2]);
             }
           }
         }

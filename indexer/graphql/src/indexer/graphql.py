@@ -1607,7 +1607,7 @@ async def run_graphql_api(mongo=None, port="8080"):
     #ssl_context.load_cert_chain(
         #"/etc/letsencrypt/live/fullchain.pem",
         #"/etc/letsencrypt/live/privkey.pem",
-    )
+    # )
     #site = web.TCPSite(runner, "0.0.0.0", int(port), ssl_context=ssl_context)
     
     site = web.TCPSite(runner, "0.0.0.0", int(port))
