@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import ReactDOMServer from "react-dom/server"; // Import this to convert ReactElement to string
 import TwitterShareButton from "@/app/components/buttons/TwitterShareButtons";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
@@ -66,9 +67,21 @@ export const DeathDialog = () => {
       });
   }, []);
 
+  // Utility function to strip HTML tags
+  const stripHtmlTags = (html: string) => {
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    return div.textContent || div.innerText || "";
+  };
+
   useEffect(() => {
-    setTwitterDeathMessage(messageRef.current?.innerText);
-  }, [messageRef.current]);
+    if (deathMessage) {
+      const deathMessageString =
+        ReactDOMServer.renderToStaticMarkup(deathMessage);
+      const plainTextMessage = stripHtmlTags(deathMessageString);
+      setTwitterDeathMessage(plainTextMessage);
+    }
+  }, [deathMessage]);
 
   return (
     <>

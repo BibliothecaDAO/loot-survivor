@@ -25,9 +25,6 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     discoveryData?.special3 ?? ""
   );
 
-  console.log(adventurer!["weapon"]);
-  console.log(getItemData("Wand" ?? ""));
-
   const AdventurerHealthExists = (discoveryData?.adventurerHealth ?? 0) > 0;
 
   const gameData = new GameData();
