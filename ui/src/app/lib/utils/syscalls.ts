@@ -547,7 +547,7 @@ export function syscalls({
           event.name === "DodgedObstacle" || event.name === "HitByObstacle"
       );
       if (filteredObstacles.length > 0) {
-        for (let discovery of filteredDiscoveries) {
+        for (let discovery of filteredObstacles) {
           updateItemsXP(discovery.data[0], discovery.data[2]);
           const itemsLeveledUpEvents = events.filter(
             (event) => event.name === "ItemsLeveledUp"
