@@ -81,7 +81,7 @@ export const SpecialBeast = ({ beastsContract }: SpecialBeastProps) => {
                 onMainnet ? `\n\nToken: ${beastUrl}👹` : ""
               }\n\nEnter here and try to survive: ${
                 networkConfig[network!].appUrl
-              }\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+              }\n\n@lootrealms @provablegames #LootSurvivor #Starknet`}
             />
             {onMainnet && (
               <a href={beastUrl} target="_blank">
