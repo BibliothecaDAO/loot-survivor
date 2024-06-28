@@ -5,6 +5,7 @@ export class AdventurerClass implements Adventurer {
   [key: string]: number | string | Date | undefined;
   id?: number; // Adventurer ID
   owner?: string; // Hex address of the owner
+  entropy?: string; // Entropy of the adventurer
   name?: string; // Name of the adventurer
   order?: string; // Order of the adventurer
   health?: number; // Health of the adventurer
@@ -37,6 +38,7 @@ export class AdventurerClass implements Adventurer {
     const {
       id,
       owner,
+      entropy,
       name,
       order,
       health,
@@ -68,6 +70,7 @@ export class AdventurerClass implements Adventurer {
 
     this.id = id;
     this.owner = owner;
+    this.entropy = entropy;
     this.name = name;
     this.order = order;
     this.health = health;

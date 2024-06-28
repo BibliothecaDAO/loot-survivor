@@ -535,3 +535,7 @@ function findAndSumVitValues(arr: string[]): number {
 export function formatCurrency(value: number): string {
   return (value / 10 ** 18).toFixed(4);
 }
+
+export const formatItemName = (name: string): string => {
+  return name.replace(/([a-z])([A-Z])/g, "$1 $2");
+};

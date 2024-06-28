@@ -10,6 +10,11 @@ export class GameData {
   BEAST_ATTACK_TYPES: DictString<string>;
   BEAST_ARMOR_TYPES: DictString<string>;
   ITEMS: Dict<string>;
+  T1_ITEMS: string[];
+  T2_ITEMS: string[];
+  T3_ITEMS: string[];
+  T4_ITEMS: string[];
+  T5_ITEMS: string[];
   CLASSES: Dict<string>;
   ORDERS: Dict<string>;
   STATS: Dict<string>;
@@ -400,6 +405,114 @@ export class GameData {
       100: "Chain Gloves",
       101: "Heavy Gloves",
     };
+
+    this.T1_ITEMS = [
+      "Ghost Wand",
+      "Grimoire",
+      "Divine Robe",
+      "Crown",
+      "Brightsilk Sash",
+      "Divine Slippers",
+      "Divine Gloves",
+      "Katana",
+      "Demon Husk",
+      "Demon Crown",
+      "Demonhide Belt",
+      "Demons Hands",
+      "Demonhide Boots",
+      "Warhammer",
+      "Holy Chestplate",
+      "Ancient Helm",
+      "Holy Greaves",
+      "Holy Gauntlets",
+      "Ornate Belt",
+    ];
+
+    this.T2_ITEMS = [
+      "Grave Wand",
+      "Chronicle",
+      "Silk Robe",
+      "Divine Hood",
+      "Silk Sash",
+      "Silk Slippers",
+      "Silk Gloves",
+      "Falchion",
+      "Dragons Crown",
+      "Dragonskin Belt",
+      "Dragonskin Boots",
+      "Dragonskin Armor",
+      "Dragonskin Gloves",
+      "Quarterstaff",
+      "Ornate Chestplate",
+      "War Belt",
+      "Ornate Helm",
+      "Ornate Greaves",
+      "Ornate Gauntlets",
+    ];
+
+    this.T3_ITEMS = [
+      "Tome",
+      "Bone Wand",
+      "Linen Robe",
+      "Silk Hood",
+      "Wool Sash",
+      "Wool Shoes",
+      "Wool Gloves",
+      "Scimitar",
+      "Studded Leather Armor",
+      "Studded Leather Boots",
+      "Studded Leather Belt",
+      "Studded Leather Gloves",
+      "War Cap",
+      "Maul",
+      "Greaves",
+      "Gauntlets",
+      "Plate Mail",
+      "Great Helm",
+      "Plated Belt",
+    ];
+
+    this.T4_ITEMS = [
+      "Long Sword",
+      "Hard Leather Belt",
+      "Hard Leather Boots",
+      "Hard Leather Armor",
+      "Leather Cap",
+      "Hard Leather Gloves",
+      "Mace",
+      "Chain Mail",
+      "Full Helm",
+      "Chain Boots",
+      "Chain Gloves",
+      "Mesh Belt",
+      "Robe",
+      "Linen Hood",
+      "Linen Sash",
+      "Linen Shoes",
+      "Linen Gloves",
+    ];
+
+    this.T5_ITEMS = [
+      "Book",
+      "Wand",
+      "Hood",
+      "Sash",
+      "Shirt",
+      "Shoes",
+      "Gloves",
+      "Club",
+      "Helm",
+      "Ring Mail",
+      "Heavy Boots",
+      "Heavy Belt",
+      "Heavy Gloves",
+      "Short Sword",
+      "Leather Belt",
+      "Leather Boots",
+      "Leather Armor",
+      "Leather Gloves",
+      "Cap",
+    ];
 
     this.ITEM_TYPES = {
       1: "Necklace",

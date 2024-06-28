@@ -15,17 +15,21 @@ interface HorizontalKeyboardControlProps {
   buttonsData: Menu[];
   disabled?: boolean[];
   onButtonClick: (value: any) => void;
+  hideEncounters?: boolean;
 }
 
 const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
   buttonsData,
   onButtonClick,
   disabled,
+  hideEncounters,
 }) => {
   const { play } = useUiSounds(soundSelector.click);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const screen = useUIStore((state) => state.screen);
+  const encounterTable = useUIStore((state) => state.encounterTable);
+  const showEncounterTable = useUIStore((state) => state.showEncounterTable);
 
   useEffect(() => {
     onButtonClick(buttonsData[selectedIndex]?.screen);
@@ -99,6 +103,14 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
           {buttonData.label}
         </Button>
       ))}
+      <Button
+        className="hidden sm:block px-2.5 sm:px-3"
+        variant={encounterTable ? "default" : "outline"}
+        onClick={() => showEncounterTable(!encounterTable)}
+        disabled={hideEncounters}
+      >
+        Prescience
+      </Button>
     </div>
   );
 };
