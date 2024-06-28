@@ -45,7 +45,7 @@ export const networkConfig = {
     revenueAddress:
       "0x0314924118945405ac0bcd6181457712795c0effc29d8dd3be86d3f3ec62adc1",
     appUrl: "https://survivor.provable.games/",
-    beastsViewer: "https://testnet.realms.world/collection/beasts",
+    beastsViewer: "https://realms.world/collection/beasts",
     goldenTokenMintUrl: "https://realms.world/collection/goldenToken",
     blockExplorerUrl: "https:/voyager.online/",
     faucetUrl: "https://blastapi.io/faucets/starknet-sepolia-eth",

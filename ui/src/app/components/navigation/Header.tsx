@@ -32,6 +32,7 @@ import {
   NullItem,
   UpgradeStats,
   ZeroUpgrade,
+  Call,
 } from "@/app/types";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { getApibaraStatus } from "@/app/api/api";
@@ -199,8 +200,13 @@ export default function Header({
     setLoadingMessage((messages) => [...messages, "Slaying Adventurer"]);
   }, []);
 
+  const prevCallsRef = useRef<Call[]>([]);
+
   const handleLoadData = useCallback(() => {
-    for (let call of calls) {
+    const prevCalls = prevCallsRef.current;
+
+    const addedCalls = calls.filter((call) => !prevCalls.includes(call));
+    addedCalls.forEach((call) => {
       switch (call.entrypoint) {
         case "buy_item":
           handleBuyItem(call);
@@ -220,7 +226,9 @@ export default function Header({
         default:
           break;
       }
-    }
+    });
+
+    prevCallsRef.current = calls;
   }, [
     calls,
     handleBuyItem,
@@ -323,7 +331,7 @@ export default function Header({
         clickPlay();
       }
     });
-  }, [calls]);
+  }, [calls, notification]);
 
   useEffect(() => {
     setNotification([]);

@@ -23,6 +23,7 @@ export const SpecialBeast = ({ beastsContract }: SpecialBeastProps) => {
     (state) => state.setSpecialBeastDefeated
   );
   const network = useUIStore((state) => state.network);
+  const onMainnet = useUIStore((state) => state.onMainnet);
 
   const fetchBeast = async () => {
     const image = await fetchBeastImage(
@@ -76,7 +77,9 @@ export const SpecialBeast = ({ beastsContract }: SpecialBeastProps) => {
             <TwitterShareButton
               text={`${
                 adventurer?.name
-              } just defeated the first ${beastName} and collects the 1:1 Beast #LootSurvivor.\n\nToken: ${beastUrl}👹\n\nEnter here and try to survive: ${
+              } just defeated the first ${beastName} and collects the 1:1 Beast #LootSurvivor.${
+                onMainnet ? `\n\nToken: ${beastUrl}👹` : ""
+              }\n\nEnter here and try to survive: ${
                 networkConfig[network!].appUrl
               }\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
             />
