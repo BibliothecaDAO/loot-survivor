@@ -1220,15 +1220,33 @@ mod Game {
 
     fn _get_reward_distribution(self: @ContractState) -> Rewards {
         let cost_to_play = self._cost_to_play.read();
-        Rewards {
-            BIBLIO: _calculate_payout(REWARD_DISTRIBUTIONS_BP::BIBLIO, cost_to_play),
-            PG: _calculate_payout(REWARD_DISTRIBUTIONS_BP::PG, cost_to_play),
-            CLIENT_PROVIDER: _calculate_payout(
-                REWARD_DISTRIBUTIONS_BP::CLIENT_PROVIDER, cost_to_play
-            ),
-            FIRST_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::FIRST_PLACE, cost_to_play),
-            SECOND_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::SECOND_PLACE, cost_to_play),
-            THIRD_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::THIRD_PLACE, cost_to_play)
+
+        // Alternate contract reward between PG and Biblo for each game
+        // @dev this reduces total erc20 transfers per game
+        let game_count = self._game_counter.read();
+        let (_, r) = integer::U256DivRem::div_rem(game_count.into(), 2);
+        if r == 1 {
+            Rewards {
+                BIBLIO: _calculate_payout(REWARD_DISTRIBUTIONS_BP::BIBLIO, cost_to_play),
+                PG: 0,
+                CLIENT_PROVIDER: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_BP::CLIENT_PROVIDER, cost_to_play
+                ),
+                FIRST_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::FIRST_PLACE, cost_to_play),
+                SECOND_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::SECOND_PLACE, cost_to_play),
+                THIRD_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::THIRD_PLACE, cost_to_play)
+            }
+        } else {
+            Rewards {
+                BIBLIO: 0,
+                PG: _calculate_payout(REWARD_DISTRIBUTIONS_BP::PG, cost_to_play),
+                CLIENT_PROVIDER: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_BP::CLIENT_PROVIDER, cost_to_play
+                ),
+                FIRST_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::FIRST_PLACE, cost_to_play),
+                SECOND_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::SECOND_PLACE, cost_to_play),
+                THIRD_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::THIRD_PLACE, cost_to_play)
+            }
         }
     }
 
@@ -1240,7 +1258,7 @@ mod Game {
         let caller = get_caller_address();
         let dao_address = self._dao.read();
         let pg_address = self._pg_address.read();
-        let leaderboard = self._leaderboard.read();
+        let mut leaderboard = self._leaderboard.read();
         let mut first_place_address = self._owner.read(leaderboard.first.adventurer_id.into());
         let mut second_place_address = self._owner.read(leaderboard.second.adventurer_id.into());
         let mut third_place_address = self._owner.read(leaderboard.third.adventurer_id.into());
@@ -1251,13 +1269,12 @@ mod Game {
             first_place_address = self._previous_first_place.read();
             second_place_address = self._previous_second_place.read();
             third_place_address = self._previous_third_place.read();
+            leaderboard.first.adventurer_id = 0;
+            leaderboard.second.adventurer_id = 0;
+            leaderboard.third.adventurer_id = 0;
         }
 
-        // Alternate contract reward between PG and Biblo for each game
-        // @dev this reduces total erc20 transfers per game
-        let game_count = self._game_counter.read();
-        let (_, r) = integer::U256DivRem::div_rem(game_count.into(), 2);
-        if r == 1 {
+        if (rewards.BIBLIO != 0) {
             _lords_dispatcher(ref self).transferFrom(caller, dao_address, rewards.BIBLIO);
         } else {
             _lords_dispatcher(ref self).transferFrom(caller, pg_address, rewards.PG);
