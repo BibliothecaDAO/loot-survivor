@@ -20,15 +20,16 @@ export STARKNET_ACCOUNT="/katana/starkli_account"
 # we don't need any of these contracts for core functionality on katana
 lords_address=0
 dao_address=0
+pg_address=0
 beasts_address=0
 golden_token_address=0
 terminal_timestamp=0
 randomness_contract=0
 randomness_rotation_interval=1
 oracle_address=0
-previous_first_place_address=0x02cd97240db3f679de98a729ae91eb996cab9fd92a9a578df11a72f49be1c356
-previous_second_place_address=0x02cd97240db3f679de98a729ae91eb996cab9fd92a9a578df11a72f49be1c356
-previous_third_place_address=0x02cd97240db3f679de98a729ae91eb996cab9fd92a9a578df11a72f49be1c356
+previous_first_place_address=0
+previous_second_place_address=0
+previous_third_place_address=0
 
 # extract account details from katana logs
 output=$(head -n 1 ~/katana.log | jq -r '.fields.message | fromjson | .accounts[0] | .[0], .[-1].private_key')
