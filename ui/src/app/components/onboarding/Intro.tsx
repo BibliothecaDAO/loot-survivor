@@ -40,13 +40,20 @@ const Intro = () => {
         </h1>
         <div className="flex flex-col sm:flex-row sm:mt-20 gap-2 sm:gap-10 px-2 sm:p-0 justify-center items-center">
           <div className="flex flex-col items-center justify-between border border-terminal-green p-2 sm:p-5 text-center gap-2 sm:gap-10 z-1 h-[250px] sm:h-[425px] 2xl:h-[500px] w-full sm:w-1/3">
-            <h4 className="m-0 uppercase text-3xl">Login</h4>
             <Profile className="sm:hidden 2xl:block fill-current h-12 sm:h-32" />
-            <p className="sm:text-xl">
-              Dive into the full immersion of Loot Survivor by logging in now!
-              Join {network?.toUpperCase()} for a chance to win real funds and
-              exciting prizes.
-            </p>
+            {network === "mainnet" ? (
+              <p className="sm:text-xl">
+                Experience the full version of Loot Survivor on Starknet{" "}
+                {network?.toUpperCase()}. Earn $lords rewards, collect NFTs, and
+                compete for a spot on the global leaderboard!
+              </p>
+            ) : (
+              <p className="sm:text-xl">
+                Experience a preview of Loot Survivor on Starknet{" "}
+                {network?.toUpperCase()}. Earn $lords rewards, collect NFTs, and
+                compete for the global leaderboard!
+              </p>
+            )}
             <div className="flex flex-col gap-2">
               <Button
                 size={"lg"}
@@ -56,14 +63,11 @@ const Intro = () => {
                 }}
                 disabled={network == "sepolia" ? false : true}
               >
-                Login to {network}
+                Play on {network}
               </Button>
             </div>
           </div>
           <div className="flex flex-col items-center justify-between border border-terminal-green p-2 sm:p-5 text-center gap-2 sm:gap-10 z-1 h-[250px] sm:h-[425px] 2xl:h-[500px] w-full sm:w-1/3">
-            <h4 className="m-0 uppercase text-3xl">
-              Play On {network == "sepolia" ? "Testnet" : "Mainnet"}
-            </h4>
             <QuestionMark className="sm:hidden 2xl:block fill-current h-12 sm:h-32" />
             <p className="sm:text-xl">
               Looking for a hassle-free gaming experience? Play on Testnet,
