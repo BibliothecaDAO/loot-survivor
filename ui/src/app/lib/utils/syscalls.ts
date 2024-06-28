@@ -511,7 +511,9 @@ export function syscalls({
               discoveredLootEquipped.push(
                 ...filteredEquipmentChangedEvent.data[1]
               );
-              discoveredLootBagged.push(filteredEquipmentChangedEvent.data[2]);
+              discoveredLootBagged.push(
+                ...filteredEquipmentChangedEvent.data[2]
+              );
             }
           }
         }
@@ -529,6 +531,12 @@ export function syscalls({
           ...discoveredLootBagged,
         ],
       });
+
+      console.log([
+        ...filteredDrops,
+        ...discoveredLootEquipped,
+        ...discoveredLootBagged,
+      ]);
 
       const filteredObstacles = events.filter(
         (event) =>
