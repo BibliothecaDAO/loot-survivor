@@ -75,6 +75,18 @@ mod tests {
         contract_address_const::<1>()
     }
 
+    fn PREV_FIRST_PLACE() -> ContractAddress {
+        contract_address_const::<1>()
+    }
+
+    fn PREV_SECOND_PLACE() -> ContractAddress {
+        contract_address_const::<1>()
+    }
+
+    fn PREV_THIRD_PLACE() -> ContractAddress {
+        contract_address_const::<1>()
+    }
+
     fn COLLECTIBLE_BEASTS() -> ContractAddress {
         contract_address_const::<1>()
     }
@@ -181,6 +193,10 @@ mod tests {
         calldata.append(randomness.into());
         let vrf_level_interval = 3;
         calldata.append(vrf_level_interval);
+        calldata.append(PREV_FIRST_PLACE().into());
+        calldata.append(PREV_SECOND_PLACE().into());
+        calldata.append(PREV_THIRD_PLACE().into());
+        
 
         IGameDispatcher { contract_address: utils::deploy(Game::TEST_CLASS_HASH, calldata) }
     }

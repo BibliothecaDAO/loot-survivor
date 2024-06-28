@@ -121,6 +121,9 @@ mod Game {
         _randomness_contract_address: ContractAddress,
         _randomness_rotation_interval: u8,
         _oracle_address: ContractAddress,
+        _previous_first_place: ContractAddress,
+        _previous_second_place: ContractAddress,
+        _previous_third_place: ContractAddress,
     }
 
     #[event]
@@ -167,7 +170,10 @@ mod Game {
         terminal_timestamp: u64,
         randomness_contract_address: ContractAddress,
         randomness_rotation_interval: u8,
-        oracle_address: ContractAddress
+        oracle_address: ContractAddress,
+        previous_first_place: ContractAddress,
+        previous_second_place: ContractAddress,
+        previous_third_place: ContractAddress,
     ) {
         // init storage
         self._lords.write(lords);
@@ -179,6 +185,9 @@ mod Game {
         self._randomness_contract_address.write(randomness_contract_address);
         self._randomness_rotation_interval.write(randomness_rotation_interval);
         self._oracle_address.write(oracle_address);
+        self._previous_first_place.write(previous_first_place);
+        self._previous_second_place.write(previous_second_place);
+        self._previous_third_place.write(previous_third_place);
 
         // On mainnet, set genesis timestamp to LSV1.0 genesis to preserve same reward distribution schedule for V1.1 
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
@@ -1226,15 +1235,23 @@ mod Game {
     fn _process_payment_and_distribute_rewards(
         ref self: ContractState, client_address: ContractAddress
     ) {
+        let rewards = _get_reward_distribution(@self);
+
         let caller = get_caller_address();
         let dao_address = self._dao.read();
         let pg_address = self._pg_address.read();
         let leaderboard = self._leaderboard.read();
-        let first_place_address = self._owner.read(leaderboard.first.adventurer_id.into());
-        let second_place_address = self._owner.read(leaderboard.second.adventurer_id.into());
-        let third_place_address = self._owner.read(leaderboard.third.adventurer_id.into());
+        let mut first_place_address = self._owner.read(leaderboard.first.adventurer_id.into());
+        let mut second_place_address = self._owner.read(leaderboard.second.adventurer_id.into());
+        let mut third_place_address = self._owner.read(leaderboard.third.adventurer_id.into());
 
-        let rewards = _get_reward_distribution(@self);
+        // until we have three scores above 200 on the new contract
+        if leaderboard.third.xp < 200 {
+            // pay out to the top scores on the game previous contract
+            first_place_address = self._previous_first_place.read();
+            second_place_address = self._previous_second_place.read();
+            third_place_address = self._previous_third_place.read();
+        }
 
         // Alternate contract reward between PG and Biblo for each game
         // @dev this reduces total erc20 transfers per game
