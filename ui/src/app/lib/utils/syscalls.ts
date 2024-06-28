@@ -532,12 +532,6 @@ export function syscalls({
         ],
       });
 
-      console.log([
-        ...filteredDrops,
-        ...discoveredLootEquipped,
-        ...discoveredLootBagged,
-      ]);
-
       const filteredObstacles = events.filter(
         (event) =>
           event.name === "DodgedObstacle" || event.name === "HitByObstacle"
