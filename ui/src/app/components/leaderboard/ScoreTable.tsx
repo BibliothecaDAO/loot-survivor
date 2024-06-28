@@ -18,12 +18,9 @@ const ScoreLeaderboardTable = ({
   handleFetchProfileData,
   adventurers,
 }: ScoreLeaderboardTableProps) => {
-  const [showAllTime, setShowAllTime] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
-  const onMainnet = useUIStore((state) => state.onMainnet);
-  const onSepolia = useUIStore((state) => state.onSepolia);
   const network = useUIStore((state) => state.network);
   const displayScores = adventurers?.slice(
     (currentPage - 1) * itemsPerPage,
@@ -94,14 +91,6 @@ const ScoreLeaderboardTable = ({
   return (
     <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row justify-between w-full">
       <div className="relative flex flex-col w-full sm:mr-4 flex-grow-2 p-2 gap-2">
-        {!onMainnet && !onSepolia && (
-          <Button
-            className="absolute top-0 right-0"
-            onClick={() => setShowAllTime(!showAllTime)}
-          >
-            {showAllTime ? "Campaign" : "All Time"}
-          </Button>
-        )}
         {adventurers.length > 0 ? (
           <>
             <h4 className="text-2xl text-center sm:text-2xl m-0">
