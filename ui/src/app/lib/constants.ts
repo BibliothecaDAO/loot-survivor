@@ -35,7 +35,7 @@ export const VRF_FEE_LIMIT = 5000000000000000; // 0.005 ETH
 // UI PARAMS
 export const MIN_BALANCE = 100000000000000; // 0.00001ETH or $0.15
 export const getWaitRetryInterval = (network: string) =>
-  network === "mainnet" || network === "sepolia" ? 4000 : 10; // 6 seconds on sepolia + mainnet, 10ms on katana
+  network === "mainnet" || network === "sepolia" ? 3000 : 10; // 6 seconds on sepolia + mainnet, 10ms on katana
 export const ETH_INCREMENT = 0.001;
 export const LORDS_INCREMENT = 5;
 export const getMaxFee = (network: string) =>
