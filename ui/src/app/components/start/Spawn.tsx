@@ -13,11 +13,7 @@ import { FormData, GameToken } from "@/app/types";
 import { Button } from "@/app/components/buttons/Button";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import Lords from "public/icons/lords.svg";
-import {
-  indexAddress,
-  formatTimeSeconds,
-  formatCurrency,
-} from "@/app/lib/utils";
+import { indexAddress, formatTimeSeconds, formatLords } from "@/app/lib/utils";
 import { networkConfig } from "@/app/lib/networkConfig";
 import useNetworkAccount from "@/app/hooks/useNetworkAccount";
 
@@ -237,7 +233,7 @@ export const Spawn = ({
                           : "Fill details"
                         : "Not enough Lords"}
                     </p>
-                    {formatCurrency(lordsGameCost)}
+                    {formatLords(lordsGameCost)}
                     <Lords className="absolute self-center sm:w-5 sm:h-5  h-3 w-3 fill-current right-5" />
                   </div>
                 </Button>
@@ -276,14 +272,16 @@ export const Spawn = ({
                       </div>
                     </div>
                   </Button>
-                  <a
-                    href={networkConfig[network!].goldenTokenMintUrl}
-                    target="_blank"
-                  >
-                    <Button type="button" className="text-black">
-                      Buy
-                    </Button>
-                  </a>
+                  {onMainnet && (
+                    <a
+                      href={networkConfig[network!].goldenTokenMintUrl}
+                      target="_blank"
+                    >
+                      <Button type="button" className="text-black">
+                        Buy
+                      </Button>
+                    </a>
+                  )}
                 </div>
               </div>
               {!checkEnoughLords && (
