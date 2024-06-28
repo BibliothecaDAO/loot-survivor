@@ -157,7 +157,6 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
                 </p>
               )}
             </div>
-            <HealthPotionIcon />
           </span>
         );
       }
