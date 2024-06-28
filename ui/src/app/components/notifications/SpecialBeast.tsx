@@ -83,9 +83,11 @@ export const SpecialBeast = ({ beastsContract }: SpecialBeastProps) => {
                 networkConfig[network!].appUrl
               }\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
             />
-            <a href={beastUrl} target="_blank">
-              <Button>View Collectible</Button>
-            </a>
+            {onMainnet && (
+              <a href={beastUrl} target="_blank">
+                <Button>View Collectible</Button>
+              </a>
+            )}
             <Button onClick={() => resetBeast()}>Continue</Button>
           </div>
         </div>
