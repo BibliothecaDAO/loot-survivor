@@ -8,9 +8,9 @@ export const networkConfig = {
     ethAddress:
       "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
     gameAddress:
-      "0x05f687281d6bad5faa6ee43d24179acb1b3bfad0b56023d3baaa3469bf75fb09",
+      "0x07b31a6039b5eac7de479e751333e050992eb40cf35800f6a99632ed5ac272b6",
     lordsAddress:
-      "0x029fb69e8bda3f300829e6c25dd57f8413949321abfa9cca9b1d6332192932b1",
+      "0x03a044c6b7ec171f83f6769526e21848eac8640772a1e49db95474048efc366b",
     beastsAddress:
       "0x041b6ffc02ce30c6e941f1b34244ef8af0b3e8a70f5528476a7a68765afd6b39",
     goldenTokenAddress:
