@@ -64,8 +64,7 @@ mod REWARD_DISTRIBUTIONS_BP {
     const FIRST_PLACE: u256 = 270;
     const SECOND_PLACE: u256 = 160;
     const THIRD_PLACE: u256 = 100;
-    const BIBLIO: u256 = 100;
-    const PG: u256 = 100;
+    const CREATOR: u256 = 200;
 }
 
 const STARTER_BEAST_ATTACK_DAMAGE: u16 = 10;

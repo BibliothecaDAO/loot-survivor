@@ -1683,8 +1683,8 @@ mod tests {
         assert(lords.balanceOf(DAO()) == COST_TO_PLAY.into(), 'wrong stage 1 balance');
 
         let mut _rewards = Rewards {
-            BIBLIO: _calculate_payout(REWARD_DISTRIBUTIONS_BP::BIBLIO, COST_TO_PLAY),
-            PG: _calculate_payout(REWARD_DISTRIBUTIONS_BP::PG, COST_TO_PLAY),
+            BIBLIO: _calculate_payout(REWARD_DISTRIBUTIONS_BP::CREATOR, COST_TO_PLAY),
+            PG: _calculate_payout(REWARD_DISTRIBUTIONS_BP::CREATOR, COST_TO_PLAY),
             CLIENT_PROVIDER: _calculate_payout(
                 REWARD_DISTRIBUTIONS_BP::CLIENT_PROVIDER, COST_TO_PLAY
             ),
