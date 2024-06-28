@@ -1227,7 +1227,7 @@ mod Game {
         let (_, r) = integer::U256DivRem::div_rem(game_count.into(), 2);
         if r == 1 {
             Rewards {
-                BIBLIO: _calculate_payout(REWARD_DISTRIBUTIONS_BP::BIBLIO, cost_to_play),
+                BIBLIO: _calculate_payout(REWARD_DISTRIBUTIONS_BP::CREATOR, cost_to_play),
                 PG: 0,
                 CLIENT_PROVIDER: _calculate_payout(
                     REWARD_DISTRIBUTIONS_BP::CLIENT_PROVIDER, cost_to_play
@@ -1239,7 +1239,7 @@ mod Game {
         } else {
             Rewards {
                 BIBLIO: 0,
-                PG: _calculate_payout(REWARD_DISTRIBUTIONS_BP::PG, cost_to_play),
+                PG: _calculate_payout(REWARD_DISTRIBUTIONS_BP::CREATOR, cost_to_play),
                 CLIENT_PROVIDER: _calculate_payout(
                     REWARD_DISTRIBUTIONS_BP::CLIENT_PROVIDER, cost_to_play
                 ),
