@@ -345,8 +345,8 @@ mod tests {
         // at level 1, we'll get a beast with level 1 or 2
         assert(ImplBeast::get_level(adventurer_level, 0) == 1, 'lvl should eql advr lvl');
         assert(ImplBeast::get_level(adventurer_level, 1) == 2, 'lvl should eql advr lvl');
-        assert(ImplBeast::get_level(adventurer_level, 2) == 1, 'lvl should eql advr lvl');
-        assert(ImplBeast::get_level(adventurer_level, 3) == 2, 'lvl should eql advr lvl');
+        assert(ImplBeast::get_level(adventurer_level, 2) == 3, 'lvl should eql advr lvl');
+        assert(ImplBeast::get_level(adventurer_level, 3) == 1, 'lvl should eql advr lvl');
 
         // advance adventurer to level 4
         adventurer_level = 4;
@@ -358,8 +358,13 @@ mod tests {
         assert(ImplBeast::get_level(adventurer_level, 5) == 6, 'beast lvl should be 6');
         assert(ImplBeast::get_level(adventurer_level, 6) == 7, 'beast lvl should be 7');
         assert(ImplBeast::get_level(adventurer_level, 7) == 8, 'beast lvl should be 8');
+        assert(ImplBeast::get_level(adventurer_level, 8) == 9, 'beast lvl should be 9');
+        assert(ImplBeast::get_level(adventurer_level, 9) == 10, 'beast lvl should be 10');
+        assert(ImplBeast::get_level(adventurer_level, 10) == 11, 'beast lvl should be 11');
+        assert(ImplBeast::get_level(adventurer_level, 11) == 12, 'beast lvl should be 12');
+
         // verify we rollover back to 1 for our lvl4 adventurer
-        assert(ImplBeast::get_level(adventurer_level, 8) == 1, 'beast lvl should be 1');
+        assert(ImplBeast::get_level(adventurer_level, 12) == 1, 'beast lvl should be 1');
     }
 
     #[test]

@@ -60,9 +60,8 @@ mod Game {
     use super::game::{
         interfaces::{IGame},
         constants::{
-            messages, Rewards, REWARD_DISTRIBUTIONS_PHASE1_BP, REWARD_DISTRIBUTIONS_PHASE2_BP,
-            REWARD_DISTRIBUTIONS_PHASE3_BP, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
-            STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS, MINIMUM_DAMAGE_FROM_BEASTS
+            messages, Rewards, REWARD_DISTRIBUTIONS_BP, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX,
+            U128_MAX, STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS, MINIMUM_DAMAGE_FROM_BEASTS
         }
     };
     use loot::{
@@ -107,6 +106,7 @@ mod Game {
         _bag: LegacyMap::<felt252, Bag>,
         _collectible_beasts: ContractAddress,
         _dao: ContractAddress,
+        _pg_address: ContractAddress,
         _game_counter: felt252,
         _genesis_block: u64,
         _genesis_timestamp: u64,
@@ -161,6 +161,7 @@ mod Game {
         ref self: ContractState,
         lords: ContractAddress,
         dao: ContractAddress,
+        pg_address: ContractAddress,
         collectible_beasts: ContractAddress,
         golden_token_address: ContractAddress,
         terminal_timestamp: u64,
@@ -171,6 +172,7 @@ mod Game {
         // init storage
         self._lords.write(lords);
         self._dao.write(dao);
+        self._pg_address.write(pg_address);
         self._collectible_beasts.write(collectible_beasts);
         self._terminal_timestamp.write(terminal_timestamp);
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
@@ -821,10 +823,13 @@ mod Game {
             ImplCombat::tier_to_u8(ImplBeast::get_tier(beast_id))
         }
         fn get_dao_address(self: @ContractState) -> ContractAddress {
-            _dao_address(self)
+            self._dao.read()
         }
         fn get_lords_address(self: @ContractState) -> ContractAddress {
-            _lords_address(self)
+            self._lords.read()
+        }
+        fn get_pg_address(self: @ContractState) -> ContractAddress {
+            self._pg_address.read()
         }
         fn get_leaderboard(self: @ContractState) -> Leaderboard {
             self._leaderboard.read()
@@ -1206,74 +1211,15 @@ mod Game {
 
     fn _get_reward_distribution(self: @ContractState) -> Rewards {
         let cost_to_play = self._cost_to_play.read();
-        let third_place_score = self._leaderboard.read().third.xp;
-
-        // use hours for distribution phases on testnet and weeks for mainnet
-        let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
-        let age_of_game = if chain_id == MAINNET_CHAIN_ID {
-            _age_of_game_weeks(self)
-        } else {
-            _age_of_game_hours(self)
-        };
-
-        // distribute all rewards to DAO until we get a reasonable third place score
-        if (third_place_score < MINIMUM_SCORE_FOR_PAYOUTS) {
-            Rewards {
-                DAO: cost_to_play.into(),
-                INTERFACE: 0,
-                FIRST_PLACE: 0,
-                SECOND_PLACE: 0,
-                THIRD_PLACE: 0
-            }
-        } else if age_of_game > PHASE3_START.into() {
-            // use phase 3 distribution
-            Rewards {
-                DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE3_BP::DAO, cost_to_play),
-                INTERFACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE3_BP::INTERFACE, cost_to_play
-                ),
-                FIRST_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE3_BP::FIRST_PLACE, cost_to_play
-                ),
-                SECOND_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE3_BP::SECOND_PLACE, cost_to_play
-                ),
-                THIRD_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE3_BP::THIRD_PLACE, cost_to_play
-                )
-            }
-        } else if age_of_game > PHASE2_START.into() {
-            Rewards {
-                DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE2_BP::DAO, cost_to_play),
-                INTERFACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE2_BP::INTERFACE, cost_to_play
-                ),
-                FIRST_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE2_BP::FIRST_PLACE, cost_to_play
-                ),
-                SECOND_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE2_BP::SECOND_PLACE, cost_to_play
-                ),
-                THIRD_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE2_BP::THIRD_PLACE, cost_to_play
-                )
-            }
-        } else {
-            Rewards {
-                DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, cost_to_play),
-                INTERFACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, cost_to_play
-                ),
-                FIRST_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, cost_to_play
-                ),
-                SECOND_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE1_BP::SECOND_PLACE, cost_to_play
-                ),
-                THIRD_PLACE: _calculate_payout(
-                    REWARD_DISTRIBUTIONS_PHASE1_BP::THIRD_PLACE, cost_to_play
-                )
-            }
+        Rewards {
+            BIBLIO: _calculate_payout(REWARD_DISTRIBUTIONS_BP::BIBLIO, cost_to_play),
+            PG: _calculate_payout(REWARD_DISTRIBUTIONS_BP::PG, cost_to_play),
+            CLIENT_PROVIDER: _calculate_payout(
+                REWARD_DISTRIBUTIONS_BP::CLIENT_PROVIDER, cost_to_play
+            ),
+            FIRST_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::FIRST_PLACE, cost_to_play),
+            SECOND_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::SECOND_PLACE, cost_to_play),
+            THIRD_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::THIRD_PLACE, cost_to_play)
         }
     }
 
@@ -1282,6 +1228,7 @@ mod Game {
     ) {
         let caller = get_caller_address();
         let dao_address = self._dao.read();
+        let pg_address = self._pg_address.read();
         let leaderboard = self._leaderboard.read();
         let first_place_address = self._owner.read(leaderboard.first.adventurer_id.into());
         let second_place_address = self._owner.read(leaderboard.second.adventurer_id.into());
@@ -1289,28 +1236,21 @@ mod Game {
 
         let rewards = _get_reward_distribution(@self);
 
-        if (rewards.DAO != 0) {
-            _lords_dispatcher(ref self).transferFrom(caller, dao_address, rewards.DAO);
+        // Alternate contract reward between PG and Biblo for each game
+        // @dev this reduces total erc20 transfers per game
+        let game_count = self._game_counter.read();
+        let (_, r) = integer::U256DivRem::div_rem(game_count.into(), 2);
+        if r == 1 {
+            _lords_dispatcher(ref self).transferFrom(caller, dao_address, rewards.BIBLIO);
+        } else {
+            _lords_dispatcher(ref self).transferFrom(caller, pg_address, rewards.PG);
         }
 
-        if (rewards.INTERFACE != 0) {
-            _lords_dispatcher(ref self).transferFrom(caller, client_address, rewards.INTERFACE);
-        }
-
-        if (rewards.FIRST_PLACE != 0) {
-            _lords_dispatcher(ref self)
-                .transferFrom(caller, first_place_address, rewards.FIRST_PLACE);
-        }
-
-        if (rewards.SECOND_PLACE != 0) {
-            _lords_dispatcher(ref self)
-                .transferFrom(caller, second_place_address, rewards.SECOND_PLACE);
-        }
-
-        if (rewards.THIRD_PLACE != 0) {
-            _lords_dispatcher(ref self)
-                .transferFrom(caller, third_place_address, rewards.THIRD_PLACE);
-        }
+        _lords_dispatcher(ref self).transferFrom(caller, client_address, rewards.CLIENT_PROVIDER);
+        _lords_dispatcher(ref self).transferFrom(caller, first_place_address, rewards.FIRST_PLACE);
+        _lords_dispatcher(ref self)
+            .transferFrom(caller, second_place_address, rewards.SECOND_PLACE);
+        _lords_dispatcher(ref self).transferFrom(caller, third_place_address, rewards.THIRD_PLACE);
 
         __event_RewardDistribution(
             ref self,
@@ -1333,8 +1273,9 @@ mod Game {
                     amount: rewards.THIRD_PLACE,
                     address: third_place_address
                 },
-                client: ClientReward { amount: rewards.INTERFACE, address: client_address },
-                dao: rewards.DAO
+                client: ClientReward { amount: rewards.CLIENT_PROVIDER, address: client_address },
+                dao: rewards.BIBLIO,
+                pg: rewards.PG
             }
         );
     }
@@ -2618,14 +2559,6 @@ mod Game {
         );
     }
     #[inline(always)]
-    fn _lords_address(self: @ContractState) -> ContractAddress {
-        self._lords.read()
-    }
-    #[inline(always)]
-    fn _dao_address(self: @ContractState) -> ContractAddress {
-        self._dao.read()
-    }
-    #[inline(always)]
     fn _get_items_on_market(
         self: @ContractState,
         adventurer_entropy: felt252,
@@ -2997,6 +2930,7 @@ mod Game {
         third_place: PlayerReward,
         client: ClientReward,
         dao: u256,
+        pg: u256
     }
 
     #[derive(Drop, starknet::Event)]

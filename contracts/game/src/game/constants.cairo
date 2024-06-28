@@ -51,35 +51,21 @@ const U128_MAX: u128 = 340282366920938463463374607431768211455;
 
 #[derive(Drop, Copy)]
 struct Rewards {
-    DAO: u256,
-    INTERFACE: u256,
+    BIBLIO: u256,
+    PG: u256,
+    CLIENT_PROVIDER: u256,
     FIRST_PLACE: u256,
     SECOND_PLACE: u256,
     THIRD_PLACE: u256,
 }
 
-mod REWARD_DISTRIBUTIONS_PHASE1_BP {
-    const DAO: u256 = 0;
-    const INTERFACE: u256 = 0;
-    const FIRST_PLACE: u256 = 480;
-    const SECOND_PLACE: u256 = 320;
-    const THIRD_PLACE: u256 = 200;
-}
-
-mod REWARD_DISTRIBUTIONS_PHASE2_BP {
-    const DAO: u256 = 0;
-    const INTERFACE: u256 = 280;
-    const FIRST_PLACE: u256 = 320;
-    const SECOND_PLACE: u256 = 240;
-    const THIRD_PLACE: u256 = 160;
-}
-
-mod REWARD_DISTRIBUTIONS_PHASE3_BP {
-    const DAO: u256 = 200;
-    const INTERFACE: u256 = 240;
-    const FIRST_PLACE: u256 = 280;
+mod REWARD_DISTRIBUTIONS_BP {
+    const CLIENT_PROVIDER: u256 = 270;
+    const FIRST_PLACE: u256 = 270;
     const SECOND_PLACE: u256 = 160;
-    const THIRD_PLACE: u256 = 120;
+    const THIRD_PLACE: u256 = 100;
+    const BIBLIO: u256 = 100;
+    const PG: u256 = 100;
 }
 
 const STARTER_BEAST_ATTACK_DAMAGE: u16 = 10;

@@ -30,8 +30,7 @@ mod tests {
         game::{
             interfaces::{IGameDispatcherTrait, IGameDispatcher},
             constants::{
-                COST_TO_PLAY, BLOCKS_IN_A_WEEK, Rewards, REWARD_DISTRIBUTIONS_PHASE1_BP,
-                REWARD_DISTRIBUTIONS_PHASE2_BP, REWARD_DISTRIBUTIONS_PHASE3_BP,
+                COST_TO_PLAY, BLOCKS_IN_A_WEEK, Rewards, REWARD_DISTRIBUTIONS_BP,
                 messages::{STAT_UPGRADES_AVAILABLE}, STARTER_BEAST_ATTACK_DAMAGE,
                 MAINNET_REVEAL_DELAY_BLOCKS
             },
@@ -1668,17 +1667,14 @@ mod tests {
         assert(lords.balanceOf(DAO()) == COST_TO_PLAY.into(), 'wrong stage 1 balance');
 
         let mut _rewards = Rewards {
-            DAO: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::DAO, COST_TO_PLAY),
-            INTERFACE: _calculate_payout(REWARD_DISTRIBUTIONS_PHASE1_BP::INTERFACE, COST_TO_PLAY),
-            FIRST_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, COST_TO_PLAY
+            BIBLIO: _calculate_payout(REWARD_DISTRIBUTIONS_BP::BIBLIO, COST_TO_PLAY),
+            PG: _calculate_payout(REWARD_DISTRIBUTIONS_BP::PG, COST_TO_PLAY),
+            CLIENT_PROVIDER: _calculate_payout(
+                REWARD_DISTRIBUTIONS_BP::CLIENT_PROVIDER, COST_TO_PLAY
             ),
-            SECOND_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::SECOND_PLACE, COST_TO_PLAY
-            ),
-            THIRD_PLACE: _calculate_payout(
-                REWARD_DISTRIBUTIONS_PHASE1_BP::THIRD_PLACE, COST_TO_PLAY
-            )
+            FIRST_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::FIRST_PLACE, COST_TO_PLAY),
+            SECOND_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::SECOND_PLACE, COST_TO_PLAY),
+            THIRD_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::THIRD_PLACE, COST_TO_PLAY)
         };
     // week.FIRST_PLACE.print();
 
