@@ -233,7 +233,7 @@ mod Game {
             let adventurer_id = *calldata.at(0);
 
             // get adventurer
-            let mut adventurer = _load_adventurer_no_boosts(@self, adventurer_id);
+            let mut adventurer = _load_adventurer(@self, adventurer_id);
 
             process_vrf_randomness(
                 ref self, requestor_address, ref adventurer, adventurer_id, adventurer_entropy
