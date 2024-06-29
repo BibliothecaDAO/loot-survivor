@@ -68,7 +68,7 @@ const sectionInfo = (section: Section) => {
           <p>
             ETH is required to pay gas for transactions on the Starknet network.
           </p>
-          <p>This step will complete once you have at least 0.001 ETH.</p>
+          <p>This step will complete once you have at least 0.01 ETH.</p>
         </div>
       );
     case "lords":
