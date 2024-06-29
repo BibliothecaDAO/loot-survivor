@@ -17,7 +17,7 @@ export const networkConfig = {
       "0x07626660faba349aad9ad2aaa0ff8645c079fa8e043a168d640d92472806eeac",
     revenueAddress:
       "0x0314924118945405ac0bcd6181457712795c0effc29d8dd3be86d3f3ec62adc1",
-    appUrl: "https://sepolia-lootsurvivor.io",
+    appUrl: "https://sepolia.lootsurvivor.io",
     beastsViewer: "https://testnet.realms.world/collection/beasts",
     goldenTokenMintUrl: "https://testnet.realms.world/collection/goldenToken",
     blockExplorerUrl: "https://sepolia.voyager.online/",
@@ -44,7 +44,7 @@ export const networkConfig = {
       "0x07626660faba349aad9ad2aaa0ff8645c079fa8e043a168d640d92472806eeac",
     revenueAddress:
       "0x0314924118945405ac0bcd6181457712795c0effc29d8dd3be86d3f3ec62adc1",
-    appUrl: "https://survivor.provable.games/",
+    appUrl: "https://lootsurvivor.io/",
     beastsViewer: "https://realms.world/collection/beasts",
     goldenTokenMintUrl: "https://realms.world/collection/goldenToken",
     blockExplorerUrl: "https:/voyager.online/",
