@@ -498,7 +498,7 @@ mod Game {
             assert(items.len() != 0, messages::NO_ITEMS);
 
             // drop items
-            _drop(ref self, ref adventurer, ref bag, adventurer_id, items.clone());
+            _drop(@self, ref adventurer, ref bag, adventurer_id, items.clone());
 
             // emit dropped items event
             __event_DroppedItems(ref self, adventurer, adventurer_id, bag, items);
@@ -2106,7 +2106,7 @@ mod Game {
     // @param items The list of items to be dropped
     // @return A tuple containing two boolean values. The first indicates if the adventurer was mutated, the second indicates if the bag was mutated
     fn _drop(
-        ref self: ContractState,
+        self: @ContractState,
         ref adventurer: Adventurer,
         ref bag: Bag,
         adventurer_id: felt252,
@@ -2122,6 +2122,13 @@ mod Game {
             // get and drop item
             let item_id = *items.at(i);
             if adventurer.equipment.is_equipped(item_id) {
+                let item = adventurer.equipment.get_item(item_id);
+
+                // if the item was providing a stat boosts, remove it
+                if item.get_greatness() >= SUFFIX_UNLOCK_GREATNESS {
+                    _remove_item_stat_boost(self, ref adventurer, adventurer_id, item);
+                }
+
                 adventurer.equipment.drop(item_id);
                 adventurer.mutated = true;
             } else {
