@@ -3,18 +3,21 @@ import {
   getAdventurerByXP,
   getAdventurerById,
   getItemsByAdventurer,
+  getKilledBeasts,
 } from "@/app/hooks/graphql/queries";
 import { Button } from "@/app/components/buttons/Button";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
-import { Adventurer } from "@/app/types";
+import { Adventurer, Beast } from "@/app/types";
+import BeastTable from "@/app/components/leaderboard/BeastTable";
 import ScoreTable from "@/app/components/leaderboard/ScoreTable";
 import LiveTable from "@/app/components/leaderboard/LiveTable";
 import { RefreshIcon } from "@/app/components/icons/Icons";
 import LootIconLoader from "@/app/components/icons/Loader";
 import { ProfileIcon, SkullIcon } from "@/app/components/icons/Icons";
 import { networkConfig } from "@/app/lib/networkConfig";
+import { getBeastData } from "@/app/lib/utils";
 
 /**
  * @container
@@ -23,6 +26,7 @@ import { networkConfig } from "@/app/lib/networkConfig";
 export default function LeaderboardScreen() {
   const itemsPerPage = 10;
   const [showScores, setShowScores] = useState(false);
+  const [showKilledBeasts, setShowKilledBeasts] = useState(false);
 
   const { data, refetch, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
@@ -34,6 +38,25 @@ export default function LeaderboardScreen() {
     "adventurersByXPQuery",
     getAdventurerByXP,
     undefined
+  );
+
+  const killedBeastsData = useCustomQuery(
+    networkConfig[network!].lsGQLURL!,
+    "killedBeastsQuery",
+    getKilledBeasts,
+    undefined
+  );
+
+  const copiedKilledBeasts = killedBeastsData?.beasts.slice();
+
+  const sortedKilledBeastsArray = copiedKilledBeasts?.sort(
+    (a: Beast, b: Beast) => {
+      const { tier: aTier } = getBeastData(a.beast!);
+      const aDifficulty = a.level! * (6 - aTier);
+      const { tier: bTier } = getBeastData(b.beast!);
+      const bDifficulty = b.level! * (6 - bTier);
+      return bDifficulty - aDifficulty;
+    }
   );
 
   const adventurers = data.adventurersByXPQuery?.adventurers
@@ -128,31 +151,41 @@ export default function LeaderboardScreen() {
               <SkullIcon className="fill-current w-4 h-4 sm:w-8 sm:h-8" />
               <p className="sm:text-2xl">{scores.length}</p>
             </div>
+            <Button onClick={() => setShowKilledBeasts(!showKilledBeasts)}>
+              {showKilledBeasts ? "Scores" : "Killed Beasts"}
+            </Button>
           </div>
-          <div className="flex flex-row w-full">
-            <div
-              className={`${
-                showScores ? "hidden " : ""
-              }sm:block w-full sm:w-1/2`}
-            >
-              <LiveTable
-                itemsPerPage={itemsPerPage}
-                handleFetchProfileData={handlefetchProfileData}
-                adventurers={aliveAdventurers}
-              />
+          {showKilledBeasts ? (
+            <BeastTable
+              itemsPerPage={itemsPerPage}
+              beasts={sortedKilledBeastsArray}
+            />
+          ) : (
+            <div className="flex flex-row w-full">
+              <div
+                className={`${
+                  showScores ? "hidden " : ""
+                }sm:block w-full sm:w-1/2`}
+              >
+                <LiveTable
+                  itemsPerPage={itemsPerPage}
+                  handleFetchProfileData={handlefetchProfileData}
+                  adventurers={aliveAdventurers}
+                />
+              </div>
+              <div
+                className={`${
+                  showScores ? "" : "hidden "
+                }sm:block w-full sm:w-1/2`}
+              >
+                <ScoreTable
+                  itemsPerPage={itemsPerPage}
+                  handleFetchProfileData={handlefetchProfileData}
+                  adventurers={scores}
+                />
+              </div>
             </div>
-            <div
-              className={`${
-                showScores ? "" : "hidden "
-              }sm:block w-full sm:w-1/2`}
-            >
-              <ScoreTable
-                itemsPerPage={itemsPerPage}
-                handleFetchProfileData={handlefetchProfileData}
-                adventurers={scores}
-              />
-            </div>
-          </div>
+          )}
           <Button
             onClick={() =>
               showScores ? setShowScores(false) : setShowScores(true)

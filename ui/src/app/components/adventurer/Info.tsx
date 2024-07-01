@@ -15,6 +15,7 @@ import { HealthCountDown } from "@/app/components/CountDown";
 import { GameData } from "@/app/lib/data/GameData";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { calculateLevel } from "@/app/lib/utils";
+import { vitalityIncrease } from "@/app/lib/constants";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
@@ -99,16 +100,16 @@ export default function Info({
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
 
   const maxHealth = Math.min(
-    100 + (totalVitality - vitBoostRemoved) * 20,
+    100 + (totalVitality - vitBoostRemoved) * vitalityIncrease,
     1023
   );
 
   const healthPlus = Math.min(
-    vitalitySelected * 20 + potionAmount * 10,
+    vitalitySelected * vitalityIncrease + potionAmount * 10,
     maxHealth - (formatAdventurer.health ?? 0)
   );
 
-  const maxHealthPlus = vitalitySelected * 20;
+  const maxHealthPlus = vitalitySelected * vitalityIncrease;
 
   const totalHealth = Math.min(
     (formatAdventurer.health ?? 0) + healthPlus,

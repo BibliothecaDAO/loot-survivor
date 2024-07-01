@@ -5,6 +5,7 @@ import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { getPotionPrice } from "@/app/lib/utils";
 import { UpgradeStats } from "@/app/types";
 import { CoinIcon } from "@/app/components/icons/Icons";
+import { vitalityIncrease } from "@/app/lib/constants";
 
 interface PurchaseHealthProps {
   upgradeTotalCost: number;
@@ -36,11 +37,14 @@ const PurchaseHealth = ({
 
   const hasBalance = adventurer?.gold && adventurer?.gold >= upgradeTotalCost;
 
-  const maxHealth = 100 + (adventurer?.vitality ?? 0) * 20;
+  const maxHealth = 100 + (adventurer?.vitality ?? 0) * vitalityIncrease;
 
   const max = Math.min(
     Math.ceil(
-      (maxHealth - (adventurer?.health ?? 0) - vitBoostRemoved * 20) / 10
+      (maxHealth -
+        (adventurer?.health ?? 0) -
+        vitBoostRemoved * vitalityIncrease) /
+        10
     ),
     Math.floor(
       (adventurer?.gold! - (upgradeTotalCost - potionAmount * potionCost)) /

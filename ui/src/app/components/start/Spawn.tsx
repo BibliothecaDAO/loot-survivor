@@ -225,7 +225,7 @@ export const Spawn = ({
                   onClick={() => handleSubmitLords()}
                   className="relative"
                 >
-                  <div className="flex flex-row items-center gap-1 w-full h-full">
+                  <div className="flex flex-row items-center gap-5 w-full h-full">
                     <p className="whitespace-nowrap w-3/4 mr-5">
                       {checkEnoughLords
                         ? formFilled
@@ -233,8 +233,10 @@ export const Spawn = ({
                           : "Fill details"
                         : "Not enough Lords"}
                     </p>
-                    {formatLords(lordsGameCost)}
-                    <Lords className="absolute self-center sm:w-5 sm:h-5  h-3 w-3 fill-current right-5" />
+                    <span className="absolute flex flex-row right-5">
+                      {formatLords(lordsGameCost)}
+                      <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current" />
+                    </span>
                   </div>
                 </Button>
 
