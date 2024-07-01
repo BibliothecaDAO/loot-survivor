@@ -10,6 +10,7 @@ export type QueryKey =
   | "battlesByBeastQuery"
   | "lastBeastQuery"
   | "beastQuery"
+  | "killedBeastsQuery"
   | "discoveriesQuery"
   | "latestDiscoveriesQuery"
   | "discoveryByTxHashQuery"
@@ -64,6 +65,7 @@ export interface QueryData {
   battlesByBeastQuery: BattlesResult | null;
   lastBeastQuery: DiscoveriesResult | null;
   beastQuery: BeastsResult | null;
+  killedBeastsQuery: BeastsResult | null;
   discoveriesQuery: DiscoveriesResult | null;
   latestDiscoveriesQuery: DiscoveriesResult | null;
   discoveryByTxHashQuery: DiscoveriesResult | null;
@@ -106,6 +108,7 @@ const initialData: QueryData = {
   battlesByBeastQuery: null,
   lastBeastQuery: null,
   beastQuery: null,
+  killedBeastsQuery: null,
   discoveriesQuery: null,
   latestDiscoveriesQuery: null,
   discoveryByTxHashQuery: null,
@@ -131,6 +134,7 @@ const initialLoading: Record<QueryKey, boolean> & { global: boolean } = {
   battlesByBeastQuery: false,
   lastBeastQuery: false,
   beastQuery: false,
+  killedBeastsQuery: false,
   discoveriesQuery: false,
   latestDiscoveriesQuery: false,
   discoveryByTxHashQuery: false,
@@ -157,6 +161,7 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   battlesByBeastQuery: async () => {},
   lastBeastQuery: async () => {},
   beastQuery: async () => {},
+  killedBeastsQuery: async () => {},
   discoveriesQuery: async () => {},
   latestDiscoveriesQuery: async () => {},
   discoveryByTxHashQuery: async () => {},
@@ -283,6 +288,7 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
         battlesByBeastQuery: null,
         lastBeastQuery: null,
         beastQuery: null,
+        killedBeastsQuery: null,
         discoveriesQuery: null,
         latestDiscoveriesQuery: null,
         discoveryByTxHashQuery: null,

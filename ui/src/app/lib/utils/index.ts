@@ -371,7 +371,7 @@ export function getDeathMessageByRank(rank: number): string {
   return message || "Better luck next time - You can improve!";
 }
 
-export const calculateVitBoostRemoved = (
+export const getUnequippedSuffixBoosts = (
   purchases: ItemPurchase[],
   adventurer: Adventurer,
   items: Item[],
@@ -508,11 +508,43 @@ export const calculateVitBoostRemoved = (
       );
     }
   }
-  const filteredSuffixBoosts = unequippedSuffixBoosts.filter(
-    (suffix) => suffix !== undefined
+  return unequippedSuffixBoosts.filter((suffix) => suffix !== undefined);
+};
+
+export const calculateVitBoostRemoved = (
+  purchases: ItemPurchase[],
+  adventurer: Adventurer,
+  items: Item[],
+  equipItems: string[],
+  dropItems: string[]
+) => {
+  const filteredSuffixBoosts = getUnequippedSuffixBoosts(
+    purchases,
+    adventurer,
+    items,
+    equipItems,
+    dropItems
   );
   const vitTotal = findAndSumVitValues(filteredSuffixBoosts);
   return vitTotal;
+};
+
+export const calculateChaBoostRemoved = (
+  purchases: ItemPurchase[],
+  adventurer: Adventurer,
+  items: Item[],
+  equipItems: string[],
+  dropItems: string[]
+) => {
+  const filteredSuffixBoosts = getUnequippedSuffixBoosts(
+    purchases,
+    adventurer,
+    items,
+    equipItems,
+    dropItems
+  );
+  const chaTotal = findAndSumChaValues(filteredSuffixBoosts);
+  return chaTotal;
 };
 
 function findAndSumVitValues(arr: string[]): number {
@@ -520,6 +552,23 @@ function findAndSumVitValues(arr: string[]): number {
 
   arr.forEach((str) => {
     const matches = str.match(/VIT \+\d+/g);
+
+    if (matches) {
+      matches.forEach((match) => {
+        const value = parseInt(match.split("+")[1]);
+        total += value;
+      });
+    }
+  });
+
+  return total;
+}
+
+function findAndSumChaValues(arr: string[]): number {
+  let total = 0;
+
+  arr.forEach((str) => {
+    const matches = str.match(/CHA \+\d+/g);
 
     if (matches) {
       matches.forEach((match) => {

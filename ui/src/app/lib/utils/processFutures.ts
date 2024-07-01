@@ -375,7 +375,7 @@ function beastEncounter(
   let roll = abilityBasedAvoidThreat(level, seed);
   let xp_reward = getXpReward(beast_level, beast_tier);
   let specialName = getSpecialName(seed);
-  let criticalMultiplier = critical_multiplier(10, rnd2);
+  let criticalMultiplier = critical_multiplier(Number(level * BigInt(3)), rnd2);
 
   let adventurerArmor = items?.find((item) => item.slot === ambush_location);
 
@@ -385,8 +385,20 @@ function beastEncounter(
     Number(beast_level),
     adventurerArmor,
     rnd2,
-    2
+    2,
+    Number(level)
   );
+
+  let neck = items?.find((item) => item.slot === "Neck");
+  if (neck_reduction(adventurerArmor, neck)) {
+    damage -= Math.floor(
+      (Math.floor(Math.sqrt(adventurerArmor!.xp!)) *
+        (6 - adventurerArmor!.tier!) *
+        Math.floor(Math.sqrt(neck!.xp!)) *
+        3) /
+        100
+    );
+  }
 
   return {
     encounter: "Beast",
@@ -418,7 +430,7 @@ function obstacleEncounter(
   let location = getAttackLocation(rnd2);
   let roll = abilityBasedAvoidThreat(level, rnd2);
   let xp_reward = getXpReward(obstacle_level, obstacle_tier);
-  let criticalMultiplier = critical_multiplier(10, rnd2);
+  let criticalMultiplier = critical_multiplier(Number(level * BigInt(3)), rnd2);
 
   let adventurerArmor = items?.find((item) => item.slot === location);
 
@@ -428,8 +440,20 @@ function obstacleEncounter(
     Number(obstacle_level),
     adventurerArmor,
     rnd2,
-    2
+    2,
+    Number(level)
   );
+
+  let neck = items?.find((item) => item.slot === "Neck");
+  if (neck_reduction(adventurerArmor, neck)) {
+    damage -= Math.floor(
+      (Math.floor(Math.sqrt(adventurerArmor!.xp!)) *
+        (6 - adventurerArmor!.tier!) *
+        Math.floor(Math.sqrt(neck!.xp!)) *
+        3) /
+        100
+    );
+  }
 
   return {
     encounter: "Obstacle",
@@ -655,7 +679,8 @@ function calculateEncounterDamage(
   level: number,
   adventurerArmor: Item | undefined,
   entropy: bigint,
-  minimumDmg: number
+  minimumDmg: number,
+  adventurerLevel: number
 ) {
   if (!type) return minimumDmg;
 
@@ -676,7 +701,12 @@ function calculateEncounterDamage(
     elemental_damage = base_attack * 1.5;
   }
 
-  let crit_bonus = critical_hit_bonus(elemental_damage, 10, undefined, entropy);
+  let crit_bonus = critical_hit_bonus(
+    elemental_damage,
+    adventurerLevel * 3,
+    undefined,
+    entropy
+  );
 
   let total_attack = elemental_damage + crit_bonus;
   let total_damage = Math.floor(total_attack - base_armor);
@@ -709,11 +739,20 @@ function beastCounterAttack(
   items: Item[],
   beast: any,
   rnd1: bigint,
-  rnd2: bigint
+  rnd2: bigint,
+  adventurerLevel: number
 ) {
   let attack_location = getAttackLocation(rnd2);
   let item = items.find((item) => item.slot === attack_location);
-  let combatResult = calculateDamage(beast, item, undefined, 0, 10, rnd1, 2);
+  let combatResult = calculateDamage(
+    beast,
+    item,
+    undefined,
+    0,
+    adventurerLevel,
+    rnd1,
+    2
+  );
 
   let neck = items.find((item) => item.slot === "Neck");
   if (neck_reduction(item, neck)) {
@@ -781,7 +820,13 @@ export function nextAttackResult(
     };
   }
 
-  let beastCounter = beastCounterAttack(items, beast, rnd1, rnd2);
+  let beastCounter = beastCounterAttack(
+    items,
+    beast,
+    rnd1,
+    rnd2,
+    adventurer?.level
+  );
 
   return {
     beastFatal: false,
@@ -882,7 +927,13 @@ export function simulateBattle(
       };
     }
 
-    let beastCounter = beastCounterAttack(items, beast, rnd1, rnd2);
+    let beastCounter = beastCounterAttack(
+      items,
+      beast,
+      rnd1,
+      rnd2,
+      adventurer?.level
+    );
 
     events.push({
       type: "beast_attack",
@@ -946,7 +997,13 @@ export function simulateFlee(
       };
     }
 
-    let beastCounter = beastCounterAttack(items, beast, rnd2, rnd2);
+    let beastCounter = beastCounterAttack(
+      items,
+      beast,
+      rnd2,
+      rnd2,
+      Number(level)
+    );
     health -= beastCounter.damage;
 
     events.push({

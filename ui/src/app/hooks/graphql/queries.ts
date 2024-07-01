@@ -334,6 +334,15 @@ const getBeast = gql`
   }
 `;
 
+const getKilledBeasts = gql`
+  ${BEASTS_FRAGMENT}
+  query get_killed_beasts {
+    beasts(where: { health: { eq: 0 } }, limit: 10000000) {
+      ...BeastFields
+    }
+  }
+`;
+
 const getBeastsByAdventurer = gql`
   ${DISCOVERIES_FRAGMENT}
   query get_beast_by_id($id: FeltValue) {
@@ -502,6 +511,7 @@ export {
   getAdventurerByGold,
   getBeastsByAdventurer,
   getBeast,
+  getKilledBeasts,
   getLatestBattlesByAdventurer,
   getBattlesByBeast,
   getLastBattleByAdventurer,

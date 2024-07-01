@@ -115,6 +115,8 @@ type State = {
   showFleeDialog: (value: boolean) => void;
   vitBoostRemoved: number;
   setVitBoostRemoved: (value: number) => void;
+  chaBoostRemoved: number;
+  setChaBoostRemoved: (value: number) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -209,6 +211,8 @@ const useUIStore = create<State>((set) => ({
   showFleeDialog: (value) => set({ fleeDialog: value }),
   vitBoostRemoved: 0,
   setVitBoostRemoved: (value) => set({ vitBoostRemoved: value }),
+  chaBoostRemoved: 0,
+  setChaBoostRemoved: (value) => set({ chaBoostRemoved: value }),
 }));
 
 export default useUIStore;
