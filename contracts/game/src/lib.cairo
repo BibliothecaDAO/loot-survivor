@@ -1050,12 +1050,12 @@ mod Game {
         adventurer.beast_health = 0;
 
         // get gold reward and increase adventurers gold
-        let gold_earned = beast.get_gold_reward(beast_seed);
+        let gold_earned = beast.get_gold_reward();
         let ring_bonus = adventurer.equipment.ring.jewelry_gold_bonus(gold_earned);
         adventurer.increase_gold(gold_earned + ring_bonus);
 
         // get xp reward and increase adventurers xp
-        let xp_earned_adventurer = beast.get_xp_reward();
+        let xp_earned_adventurer = beast.get_xp_reward(adventurer.get_level());
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_earned_adventurer);
 
         // items use adventurer xp with an item multplier so they level faster than Adventurer
@@ -1591,7 +1591,7 @@ mod Game {
         let damage_taken = combat_result.total_damage;
 
         // get base xp reward for obstacle
-        let base_reward = obstacle.get_xp_reward();
+        let base_reward = obstacle.get_xp_reward(adventurer.get_level());
 
         // get item xp reward for obstacle
         let item_xp_reward = base_reward * ITEM_XP_MULTIPLIER_OBSTACLES;
