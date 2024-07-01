@@ -36,11 +36,15 @@ import {
 } from "@/app/types";
 import Summary from "@/app/components/upgrade/Summary";
 import { HealthCountDown } from "@/app/components/CountDown";
-import { calculateVitBoostRemoved } from "@/app/lib/utils";
+import {
+  calculateVitBoostRemoved,
+  calculateChaBoostRemoved,
+} from "@/app/lib/utils";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import InterludeScreen from "@/app/containers/InterludeScreen";
 import { useController } from "@/app/context/ControllerContext";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
+import { vitalityIncrease } from "@/app/lib/constants";
 
 interface UpgradeScreenProps {
   upgrade: (
@@ -89,6 +93,7 @@ export default function UpgradeScreen({
   const entropyReady = useUIStore((state) => state.entropyReady);
   const onKatana = useUIStore((state) => state.onKatana);
   const setVitBoostRemoved = useUIStore((state) => state.setVitBoostRemoved);
+  const setChaBoostRemoved = useUIStore((state) => state.setChaBoostRemoved);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const [summary, setSummary] = useState<UpgradeSummary>({
     Stats: { ...ZeroUpgrade },
@@ -178,7 +183,7 @@ export default function UpgradeScreen({
       name: "Vitality",
       id: 3,
       icon: <HeartVitalityIcon />,
-      description: "Vitality increases max health and gives +20hp per point",
+      description: `Vitality increases max health and gives +${vitalityIncrease}hp per point`,
       buttonText: "Upgrade Vitality",
       abbrev: "VIT",
       nonBoostedStat: nonBoostedStats?.vitality,
@@ -290,10 +295,25 @@ export default function UpgradeScreen({
   const [totalVitality, setTotalVitality] = useState(0);
   const [totalCharisma, setTotalCharisma] = useState(0);
 
+  const adventurerItems = useQueriesStore(
+    (state) => state.data.itemsByAdventurerQuery?.items || []
+  );
+
+  const chaBoostRemoved = calculateChaBoostRemoved(
+    purchaseItems,
+    adventurer!,
+    adventurerItems,
+    equipItems,
+    dropItems
+  );
+  setChaBoostRemoved(chaBoostRemoved);
+
   useEffect(() => {
     setTotalVitality((adventurer?.vitality ?? 0) + selectedVitality);
-    setTotalCharisma((adventurer?.charisma ?? 0) + selectedCharisma);
-  }, [adventurer, selectedVitality, selectedCharisma]);
+    setTotalCharisma(
+      (adventurer?.charisma ?? 0) + selectedCharisma - chaBoostRemoved
+    );
+  }, [adventurer, selectedVitality, selectedCharisma, chaBoostRemoved]);
 
   const purchaseGoldAmount =
     potionAmount * getPotionPrice(adventurer?.level ?? 0, totalCharisma);
@@ -349,10 +369,6 @@ export default function UpgradeScreen({
     return upgradeTx;
   };
 
-  const adventurerItems = useQueriesStore(
-    (state) => state.data.itemsByAdventurerQuery?.items || []
-  );
-
   const vitBoostRemoved = calculateVitBoostRemoved(
     purchaseItems,
     adventurer!,
@@ -362,9 +378,11 @@ export default function UpgradeScreen({
   );
   setVitBoostRemoved(vitBoostRemoved);
 
-  const maxHealth = Math.min(100 + totalVitality * 20, 1023);
-  const newMaxHealth = 100 + (totalVitality - vitBoostRemoved) * 20;
-  const currentHealth = adventurer?.health! + selectedVitality * 20;
+  const maxHealth = Math.min(100 + totalVitality * vitalityIncrease, 1023);
+  const newMaxHealth =
+    100 + (totalVitality - vitBoostRemoved) * vitalityIncrease;
+  const currentHealth =
+    adventurer?.health! + selectedVitality * vitalityIncrease;
   const healthPlusPots = Math.min(
     currentHealth! + potionAmount * 10,
     maxHealth
@@ -433,11 +451,11 @@ export default function UpgradeScreen({
   const totalStatUpgrades = (adventurer?.statUpgrades ?? 0) - upgradesTotal;
 
   const healthPlus = Math.min(
-    selectedVitality * 20 + potionAmount * 10,
+    selectedVitality * vitalityIncrease + potionAmount * 10,
     maxHealth - (adventurer?.health ?? 0)
   );
 
-  const maxHealthPlus = selectedVitality * 20;
+  const maxHealthPlus = selectedVitality * vitalityIncrease;
 
   const totalHealth = Math.min(
     (adventurer?.health ?? 0) + healthPlus,
@@ -455,6 +473,8 @@ export default function UpgradeScreen({
   useEffect(() => {
     getNoBoostedStats();
   }, []);
+
+  const bankrupt = upgradeTotalCost > (adventurer?.gold ?? 0);
 
   useEffect(() => {
     if (healthOverflow) {
@@ -511,12 +531,14 @@ export default function UpgradeScreen({
                         handleSubmitUpgradeTx();
                         setUpgradeScreen(1);
                       }}
-                      disabled={nextDisabled || loading || estimatingFee}
+                      disabled={
+                        nextDisabled || loading || estimatingFee || bankrupt
+                      }
                     >
                       {loading ? (
                         <span>Upgrading...</span>
                       ) : (
-                        <span>Upgrade</span>
+                        <span>{bankrupt ? "Bankrupt" : "Upgrade"}</span>
                       )}
                     </Button>
                     <Button
@@ -552,9 +574,7 @@ export default function UpgradeScreen({
                           <CoinIcon className="self-center w-5 h-5 fill-current text-terminal-yellow self-center ml-1" />
                           <p
                             className={
-                              upgradeTotalCost > (adventurer?.gold ?? 0)
-                                ? "text-red-600"
-                                : "text-terminal-yellow"
+                              bankrupt ? "text-red-600" : "text-terminal-yellow"
                             }
                           >
                             {upgradeTotalCost}

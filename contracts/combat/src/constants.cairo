@@ -114,4 +114,6 @@ mod CombatSettings {
         const T4: u16 = 2; // 2 * level
         const T5: u16 = 1; // 1 * level
     }
+
+    const MAX_XP_DECAY: u8 = 95;
 }

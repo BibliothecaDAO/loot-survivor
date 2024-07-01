@@ -43,6 +43,7 @@ import { networkConfig } from "@/app/lib/networkConfig";
 import useNetworkAccount from "@/app/hooks/useNetworkAccount";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { useController } from "@/app/context/ControllerContext";
+import { vitalityIncrease } from "@/app/lib/constants";
 
 export interface HeaderProps {
   multicall: (
@@ -301,9 +302,11 @@ export default function Header({
     let upgradeTx: any;
     if (potionAmount > 0) {
       // Check whether health + pots is within vitBoostRemoved of the maxHealth
-      const maxHealth = 100 + totalVitality * 20;
-      const newMaxHealth = 100 + (totalVitality - vitBoostRemoved) * 20;
-      const currentHealth = adventurer?.health! + selectedVitality * 20;
+      const maxHealth = 100 + totalVitality * vitalityIncrease;
+      const newMaxHealth =
+        100 + (totalVitality - vitBoostRemoved) * vitalityIncrease;
+      const currentHealth =
+        adventurer?.health! + selectedVitality * vitalityIncrease;
       const healthPlusPots = Math.min(
         currentHealth! + potionAmount * 10,
         maxHealth
