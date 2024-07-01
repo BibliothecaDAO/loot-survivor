@@ -586,7 +586,7 @@ export function formatCurrency(value: number): string {
 }
 
 export function formatLords(value: number): string {
-  return (value / 10 ** 18).toFixed(2);
+  return (value / 10 ** 18).toFixed(0);
 }
 
 export const formatItemName = (name: string): string => {
