@@ -1354,7 +1354,7 @@ mod Game {
         if chain_id != KATANA_CHAIN_ID {
             let randomness_address = self._randomness_contract_address.read();
             request_randomness(
-                randomness_address, adventurer.xp.into(), adventurer_id, vrf_fee_limit
+                randomness_address, adventurer_id.try_into().unwrap(), adventurer_id, vrf_fee_limit
             );
         }
 

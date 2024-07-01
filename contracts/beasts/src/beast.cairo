@@ -421,7 +421,7 @@ mod tests {
         let adventurer_level = 255; // max u8
         assert(
             ImplBeast::get_starting_health(
-                adventurer_level, 340282366920938463463374607431768211455
+                adventurer_level, 1022
             ) == MAXIMUM_HEALTH,
             'beast health should be max'
         );
