@@ -272,14 +272,21 @@ function getAttackLocation(entropy: bigint): string {
   return "Unknown";
 }
 
-function getXpReward(level: bigint, tier: bigint): bigint {
+function getXpReward(
+  level: bigint,
+  tier: bigint,
+  adventurerLevel: number
+): bigint {
   let xp = ((BigInt(6) - tier) * level) / BigInt(2);
 
-  if (xp < 4) {
+  let adusted_xp =
+    (xp * BigInt(100 - Math.min(adventurerLevel * 2, 95))) / BigInt(100);
+
+  if (adusted_xp < 4) {
     return BigInt(4);
   }
 
-  return xp;
+  return adusted_xp;
 }
 
 function abilityBasedAvoidThreat(level: bigint, entropy: bigint): bigint {
@@ -382,7 +389,7 @@ function beastEncounter(
 
   let ambush_location = getAttackLocation(rnd2);
   let roll = abilityBasedAvoidThreat(level, seed);
-  let xp_reward = getXpReward(beast_level, beast_tier);
+  let xp_reward = getXpReward(beast_level, beast_tier, Number(level));
   let specialName = getSpecialName(seed);
   let criticalMultiplier = critical_multiplier(Number(level * BigInt(3)), rnd2);
 
@@ -438,7 +445,7 @@ function obstacleEncounter(
 
   let location = getAttackLocation(rnd2);
   let roll = abilityBasedAvoidThreat(level, rnd2);
-  let xp_reward = getXpReward(obstacle_level, obstacle_tier);
+  let xp_reward = getXpReward(obstacle_level, obstacle_tier, Number(level));
   let criticalMultiplier = critical_multiplier(Number(level * BigInt(3)), rnd2);
 
   let adventurerArmor = items?.find((item) => item.slot === location);
