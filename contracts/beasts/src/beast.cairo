@@ -16,7 +16,8 @@ use super::constants::{
         STARTER_BEAST_HEALTH, MINIMUM_HEALTH, BEAST_SPECIAL_NAME_UNLOCK_LEVEL, MINIMUM_DAMAGE,
         STRENGTH_BONUS, MINIMUM_XP_REWARD, GOLD_REWARD_BASE_MINIMUM, GOLD_BASE_REWARD_DIVISOR,
         GOLD_REWARD_BONUS_DIVISOR, GOLD_REWARD_BONUS_MAX_MULTPLIER, STARTER_BEAST_LEVEL_THRESHOLD,
-        MAXIMUM_HEALTH
+        MAXIMUM_HEALTH, CRITICAL_HIT_LEVEL_MULTIPLIER, CRITICAL_HIT_AMBUSH_MULTIPLIER,
+        GOLD_MULTIPLIER, GOLD_REWARD_DIVISOR
     }
 };
 
@@ -137,9 +138,10 @@ impl ImplBeast of IBeast {
 
     // get_xp_reward is used to determine the xp reward for defeating a beast
     // @param beast: the beast being defeated
+    // @param adventurer_level: the level of the adventurer
     // @return: the xp reward for defeating the beast
-    fn get_xp_reward(self: Beast) -> u16 {
-        let xp_reward = self.combat_spec.get_base_reward();
+    fn get_xp_reward(self: Beast, adventurer_level: u8) -> u16 {
+        let xp_reward = self.combat_spec.get_base_reward(adventurer_level);
         if (xp_reward < MINIMUM_XP_REWARD) {
             MINIMUM_XP_REWARD
         } else {
@@ -147,23 +149,26 @@ impl ImplBeast of IBeast {
         }
     }
 
-    fn get_gold_reward(self: Beast, entropy: u128) -> u16 {
-        // base for the gold reward is XP which uses beast tier and level
-        let mut base_reward = self.combat_spec.get_base_reward() / GOLD_BASE_REWARD_DIVISOR;
-        if (base_reward < GOLD_REWARD_BASE_MINIMUM) {
-            base_reward = GOLD_REWARD_BASE_MINIMUM;
+    // @notice gets the gold reward for defeating a beast
+    // @param self: the beast being defeated
+    // @return: the gold reward for defeating the beast
+    fn get_gold_reward(self: Beast) -> u16 {
+        match self.combat_spec.tier {
+            Tier::None(()) => { panic_with_felt252('Beast tier is None') },
+            Tier::T1(()) => {
+                (GOLD_MULTIPLIER::T1 * self.combat_spec.level) / GOLD_REWARD_DIVISOR
+            },
+            Tier::T2(()) => {
+                (GOLD_MULTIPLIER::T2 * self.combat_spec.level) / GOLD_REWARD_DIVISOR
+            },
+            Tier::T3(()) => {
+                (GOLD_MULTIPLIER::T3 * self.combat_spec.level) / GOLD_REWARD_DIVISOR
+            },
+            Tier::T4(()) => {
+                (GOLD_MULTIPLIER::T4 * self.combat_spec.level) / GOLD_REWARD_DIVISOR
+            },
+            Tier::T5(()) => { (GOLD_MULTIPLIER::T5 * self.combat_spec.level) / GOLD_REWARD_DIVISOR }
         }
-
-        // gold bonus will be based on 25% increments
-        let bonus_base = base_reward / GOLD_REWARD_BONUS_DIVISOR;
-
-        // multiplier will be 0-4 inclusive, providing a bonus range of (25%, 50%, 75%, 100%)
-        let bonus_multiplier = (entropy % (1 + GOLD_REWARD_BONUS_MAX_MULTPLIER))
-            .try_into()
-            .unwrap();
-
-        // return base reward + bonus
-        base_reward + (bonus_base * bonus_multiplier)
     }
 
     // @notice gets the type of a beast
@@ -195,6 +200,28 @@ impl ImplBeast of IBeast {
             return Tier::T4(());
         } else {
             return Tier::T5(());
+        }
+    }
+
+    // @notice gets the critical hit chance for a beast
+    // @param adventurer_level: the level of the adventurer
+    // @param is_ambush: whether the beast is being ambushed
+    // @return: the critical hit chance for the beast
+    fn get_critical_hit_chance(adventurer_level: u8, is_ambush: bool) -> u8 {
+        let mut chance = 0;
+
+        // critical hit chance is higher on ambush
+        if is_ambush {
+            chance = adventurer_level.into() * CRITICAL_HIT_AMBUSH_MULTIPLIER;
+        } else {
+            chance = adventurer_level.into() * CRITICAL_HIT_LEVEL_MULTIPLIER;
+        }
+
+        // cap chance at 100%
+        if chance > 100 {
+            100
+        } else {
+            chance.try_into().unwrap()
         }
     }
 
@@ -242,7 +269,8 @@ mod tests {
                 STARTER_BEAST_HEALTH, MINIMUM_HEALTH, BEAST_SPECIAL_NAME_UNLOCK_LEVEL,
                 MINIMUM_DAMAGE, STRENGTH_BONUS, MINIMUM_XP_REWARD, GOLD_REWARD_BASE_MINIMUM,
                 GOLD_BASE_REWARD_DIVISOR, GOLD_REWARD_BONUS_DIVISOR,
-                GOLD_REWARD_BONUS_MAX_MULTPLIER, STARTER_BEAST_LEVEL_THRESHOLD, MAXIMUM_HEALTH
+                GOLD_REWARD_BONUS_MAX_MULTPLIER, STARTER_BEAST_LEVEL_THRESHOLD, MAXIMUM_HEALTH,
+                CRITICAL_HIT_LEVEL_MULTIPLIER, CRITICAL_HIT_AMBUSH_MULTIPLIER
             }
         }
     };
@@ -393,7 +421,7 @@ mod tests {
         let adventurer_level = 255; // max u8
         assert(
             ImplBeast::get_starting_health(
-                adventurer_level, 340282366920938463463374607431768211455
+                adventurer_level, 1022
             ) == MAXIMUM_HEALTH,
             'beast health should be max'
         );
@@ -419,9 +447,9 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(250000)]
-    fn test_get_gold_reward() {
-        let mut beast = Beast {
+    #[available_gas(3980)]
+    fn test_get_gold_reward_gas() {
+        let beast = Beast {
             id: 1,
             starting_health: 100,
             combat_spec: CombatSpec {
@@ -432,41 +460,91 @@ mod tests {
             },
         };
 
-        // T1, LVL10 beast will produce a base reward of 50
-        // We will divide this by GOLD_BASE_REWARD_DIVISOR which is currently 2
-        // to create a base reward of 25. We'll then calculate a gold bonus
-        // based on GOLD_REWARD_BONUS_DIVISOR and GOLD_REWARD_BONUS_MAX_MULTPLIER
-        // with the current settings, there will be 10 discrete gold bonuses
-        // 0%, 10%, 20%, ..., 100%
-        // with entropy 0 we hit the 0% bonus case so reward should be 25
-        let mut entropy: u128 = 0;
-        let gold_reward = beast.get_gold_reward(entropy);
-        assert(gold_reward == 12, 'gold reward should be 12');
+        beast.get_gold_reward();
+    }
 
-        // increasing entropy to 1 should produce ~10% bonus
-        entropy = 1;
-        let gold_reward = beast.get_gold_reward(entropy);
-        assert(gold_reward == 15, 'gold reward should be 15');
+    #[test]
+    fn test_get_gold_reward() {
+        let mut beast = Beast {
+            id: 1,
+            starting_health: 100,
+            combat_spec: CombatSpec {
+                tier: Tier::T1(()),
+                item_type: Type::Magic_or_Cloth(()),
+                level: 1,
+                specials: SpecialPowers { special1: 3, special2: 1, special3: 2 },
+            },
+        };
+        let gold_reward = beast.get_gold_reward();
+        assert(gold_reward == 2, 'gold reward should be 2');
 
-        // increasing entropy to 2 should produce ~20% bonus from base
-        entropy = 2;
-        let gold_reward = beast.get_gold_reward(entropy);
-        assert(gold_reward == 18, 'gold reward should be 18');
+        // increase beast to level 10
+        beast.combat_spec.level = 10;
+        let gold_reward = beast.get_gold_reward();
+        assert(gold_reward == 25, 'gold reward should be 25');
 
-        // increasing entropy to 3 produces maximum bonus with current settings
-        // which will be ~100% of the base
-        entropy = 3;
-        let gold_reward = beast.get_gold_reward(entropy);
-        assert(gold_reward == 21, 'gold reward should be 21');
+        // increase beast to level 15
+        beast.combat_spec.level = 15;
+        let gold_reward = beast.get_gold_reward();
+        assert(gold_reward == 37, 'gold reward should be 37');
 
-        // if we double the beast level, we approximately double the reward
+        // increase beast to level 20
         beast.combat_spec.level = 20;
-        let gold_reward = beast.get_gold_reward(entropy);
-        assert(gold_reward == 43, 'lvl 20 max gold reward is 43');
+        let gold_reward = beast.get_gold_reward();
+        assert(gold_reward == 50, 'gold reward should be 50');
+    }
 
-        // dropping beast from T1 to T5, significantly drops the gold reward
-        beast.combat_spec.tier = Tier::T5(());
-        let gold_reward = beast.get_gold_reward(entropy);
-        assert(gold_reward == 8, 'lvl20 t5 max gold reward is 8');
+    #[test]
+    #[available_gas(3510)]
+    fn test_get_critical_hit_chance_gas() {
+        ImplBeast::get_critical_hit_chance(10, false);
+    }
+
+    #[test]
+    fn test_get_critical_hit_chance_no_ambush() {
+        let adventurer_level = 10;
+        let is_ambush = false;
+        let chance = ImplBeast::get_critical_hit_chance(adventurer_level, is_ambush);
+        assert(
+            chance == (adventurer_level.into() * CRITICAL_HIT_LEVEL_MULTIPLIER).try_into().unwrap(),
+            'crit hit chance no ambush'
+        );
+    }
+
+    #[test]
+    fn test_get_critical_hit_chance_with_ambush() {
+        let adventurer_level = 10;
+        let is_ambush = true;
+        let chance = ImplBeast::get_critical_hit_chance(adventurer_level, is_ambush);
+        assert(
+            chance == (adventurer_level.into() * CRITICAL_HIT_AMBUSH_MULTIPLIER)
+                .try_into()
+                .unwrap(),
+            'crit hit chance for ambush'
+        );
+    }
+
+    #[test]
+    fn test_get_critical_hit_chance_cap() {
+        let adventurer_level = 105;
+        let is_ambush = true;
+        let chance = ImplBeast::get_critical_hit_chance(adventurer_level, is_ambush);
+        assert(chance == 100, 'crit hit exceeded 100');
+    }
+
+    #[test]
+    fn test_get_critical_hit_chance_no_ambush_cap() {
+        let adventurer_level = 105;
+        let is_ambush = false;
+        let chance = ImplBeast::get_critical_hit_chance(adventurer_level, is_ambush);
+        assert(chance == 100, 'crit hit ambush exceeded 100');
+    }
+
+    #[test]
+    fn test_get_critical_hit_chance_mul_overflow() {
+        let adventurer_level = 255;
+        let is_ambush = false;
+        let chance = ImplBeast::get_critical_hit_chance(adventurer_level, is_ambush);
+        assert(chance == 100, 'crit hit ambush exceeded 100');
     }
 }

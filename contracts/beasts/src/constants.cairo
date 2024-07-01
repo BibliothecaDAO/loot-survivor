@@ -13,7 +13,7 @@ mod BeastSettings {
 
     // Controls minimum health for beasts
     const MINIMUM_HEALTH: u8 = 5;
-    const MAXIMUM_HEALTH: u16 = 511; // 2^9 - 1
+    const MAXIMUM_HEALTH: u16 = 1023; // 2^10 - 1
 
     // Controls the amount of gold received for slaying a beast
     // relative to XP. The current setting of 2 will result
@@ -46,6 +46,19 @@ mod BeastSettings {
     // controls at what level adventurers will discover random beasts
     // vs starter beasts which are always the same and maximally easy
     const STARTER_BEAST_LEVEL_THRESHOLD: u8 = 1;
+
+    const CRITICAL_HIT_LEVEL_MULTIPLIER: u16 = 1;
+    const CRITICAL_HIT_AMBUSH_MULTIPLIER: u16 = 3;
+
+    mod GOLD_MULTIPLIER {
+        const T1: u16 = 5; // 5 * level
+        const T2: u16 = 4; // 4 * level
+        const T3: u16 = 3; // 3 * level
+        const T4: u16 = 2; // 2 * level
+        const T5: u16 = 1; // 1 * level
+    }
+
+    const GOLD_REWARD_DIVISOR: u16 = 2;
 }
 
 mod BeastId {

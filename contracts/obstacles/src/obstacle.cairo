@@ -96,9 +96,10 @@ impl ImplObstacle of IObstacle {
 
     // @notice get_xp_reward returns the xp reward from encountering the obstacle
     // @param obstacle: Obstacle - the obstacle
+    // @param adventurer_level: u8 - the level of adventurer
     // @return u16 - the xp reward
-    fn get_xp_reward(self: Obstacle) -> u16 {
-        let xp_reward = self.combat_spec.get_base_reward();
+    fn get_xp_reward(self: Obstacle, adventurer_level: u8) -> u16 {
+        let xp_reward = self.combat_spec.get_base_reward(adventurer_level);
         if (xp_reward < ObstacleSettings::MINIMUM_XP_REWARD) {
             ObstacleSettings::MINIMUM_XP_REWARD
         } else {

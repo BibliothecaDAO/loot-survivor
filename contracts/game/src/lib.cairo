@@ -80,8 +80,7 @@ mod Game {
                 VITALITY_INSTANT_HEALTH_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, XP_FOR_DISCOVERIES,
                 STARTING_GOLD, STARTING_HEALTH, POTION_PRICE, MINIMUM_POTION_PRICE,
                 CHARISMA_POTION_DISCOUNT, CHARISMA_ITEM_DISCOUNT, MINIMUM_ITEM_PRICE,
-                MINIMUM_DAMAGE_TO_BEASTS, MINIMUM_DAMAGE_FROM_OBSTACLES,
-                OBSTACLE_CRITICAL_HIT_CHANCE, MAX_STAT_UPGRADES_AVAILABLE
+                MINIMUM_DAMAGE_TO_BEASTS, MINIMUM_DAMAGE_FROM_OBSTACLES, MAX_STAT_UPGRADES_AVAILABLE
             }
         },
         adventurer_utils::AdventurerUtils, leaderboard::{Score, Leaderboard},
@@ -462,6 +461,7 @@ mod Game {
                     start_entropy,
                     rnd1,
                     rnd2,
+                    false
                 );
 
                 // emit attacked by beast event
@@ -498,7 +498,7 @@ mod Game {
             assert(items.len() != 0, messages::NO_ITEMS);
 
             // drop items
-            _drop(ref self, ref adventurer, ref bag, adventurer_id, items.clone());
+            _drop(@self, ref adventurer, ref bag, adventurer_id, items.clone());
 
             // emit dropped items event
             __event_DroppedItems(ref self, adventurer, adventurer_id, bag, items);
@@ -885,9 +885,16 @@ mod Game {
         // fn minimum_damage_from_obstacles(self: @ContractState) -> u8 {
         //     MINIMUM_DAMAGE_FROM_OBSTACLES
         // }
-        // fn obstacle_critical_hit_chance(self: @ContractState) -> u8 {
-        //     OBSTACLE_CRITICAL_HIT_CHANCE
-        // }
+        fn obstacle_critical_hit_chance(self: @ContractState, adventurer_id: felt252) -> u8 {
+            let adventurer = self._adventurer.read(adventurer_id);
+            ImplAdventurer::get_dynamic_critical_hit_chance(adventurer.get_level())
+        }
+        fn beast_critical_hit_chance(
+            self: @ContractState, adventurer_id: felt252, is_ambush: bool
+        ) -> u8 {
+            let adventurer = self._adventurer.read(adventurer_id);
+            ImplBeast::get_critical_hit_chance(adventurer.get_level(), is_ambush)
+        }
         // fn stat_upgrades_per_level(self: @ContractState) -> u8 {
         //     MAX_STAT_UPGRADES_AVAILABLE
         // }
@@ -1043,12 +1050,12 @@ mod Game {
         adventurer.beast_health = 0;
 
         // get gold reward and increase adventurers gold
-        let gold_earned = beast.get_gold_reward(beast_seed);
+        let gold_earned = beast.get_gold_reward();
         let ring_bonus = adventurer.equipment.ring.jewelry_gold_bonus(gold_earned);
         adventurer.increase_gold(gold_earned + ring_bonus);
 
         // get xp reward and increase adventurers xp
-        let xp_earned_adventurer = beast.get_xp_reward();
+        let xp_earned_adventurer = beast.get_xp_reward(adventurer.get_level());
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_earned_adventurer);
 
         // items use adventurer xp with an item multplier so they level faster than Adventurer
@@ -1233,7 +1240,9 @@ mod Game {
                     REWARD_DISTRIBUTIONS_BP::CLIENT_PROVIDER, cost_to_play
                 ),
                 FIRST_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::FIRST_PLACE, cost_to_play),
-                SECOND_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::SECOND_PLACE, cost_to_play),
+                SECOND_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_BP::SECOND_PLACE, cost_to_play
+                ),
                 THIRD_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::THIRD_PLACE, cost_to_play)
             }
         } else {
@@ -1244,7 +1253,9 @@ mod Game {
                     REWARD_DISTRIBUTIONS_BP::CLIENT_PROVIDER, cost_to_play
                 ),
                 FIRST_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::FIRST_PLACE, cost_to_play),
-                SECOND_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::SECOND_PLACE, cost_to_play),
+                SECOND_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_BP::SECOND_PLACE, cost_to_play
+                ),
                 THIRD_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::THIRD_PLACE, cost_to_play)
             }
         }
@@ -1343,7 +1354,7 @@ mod Game {
         if chain_id != KATANA_CHAIN_ID {
             let randomness_address = self._randomness_contract_address.read();
             request_randomness(
-                randomness_address, adventurer.xp.into(), adventurer_id, vrf_fee_limit
+                randomness_address, adventurer_id.try_into().unwrap(), adventurer_id, vrf_fee_limit
             );
         }
 
@@ -1533,10 +1544,10 @@ mod Game {
         adventurer.beast_health = beast.starting_health;
 
         // check if beast ambushed adventurer
-        let is_ambushed = adventurer.is_ambushed(beast_seed);
+        let is_ambush = adventurer.is_ambushed(beast_seed);
 
         // if adventurer was ambushed
-        if (is_ambushed) {
+        if (is_ambush) {
             // process beast attack
             let start_entropy = _load_adventurer_metadata(@self, adventurer_id).start_entropy;
             let beast_battle_details = _beast_attack(
@@ -1547,7 +1558,8 @@ mod Game {
                 beast_seed,
                 start_entropy,
                 entropy,
-                entropy
+                entropy,
+                is_ambush
             );
             __event_AmbushedByBeast(ref self, adventurer, adventurer_id, beast_battle_details);
             if (adventurer.health == 0) {
@@ -1579,7 +1591,7 @@ mod Game {
         let damage_taken = combat_result.total_damage;
 
         // get base xp reward for obstacle
-        let base_reward = obstacle.get_xp_reward();
+        let base_reward = obstacle.get_xp_reward(adventurer.get_level());
 
         // get item xp reward for obstacle
         let item_xp_reward = base_reward * ITEM_XP_MULTIPLIER_OBSTACLES;
@@ -1808,6 +1820,7 @@ mod Game {
                 start_entropy,
                 rnd1,
                 rnd2,
+                false
             );
 
             // emit events
@@ -1869,6 +1882,7 @@ mod Game {
         start_entropy: u64,
         battle_entropy: u128,
         attack_location_rnd: u128,
+        is_ambush: bool
     ) -> BattleDetails {
         // beasts attack random location on adventurer
         let attack_location = AdventurerUtils::get_random_attack_location(
@@ -1883,7 +1897,7 @@ mod Game {
 
         // process beast attack
         let (combat_result, _jewlery_armor_bonus) = adventurer
-            .defend(beast, armor, armor_specials, battle_entropy);
+            .defend(beast, armor, armor_specials, battle_entropy, is_ambush);
 
         // deduct damage taken from adventurer's health
         adventurer.decrease_health(combat_result.total_damage);
@@ -1955,6 +1969,7 @@ mod Game {
                 start_entropy,
                 ambush_entropy,
                 ambush_entropy,
+                false
             );
 
             __event_FleeFailed(ref self, adventurer, adventurer_id, beast_seed, beast);
@@ -2091,7 +2106,7 @@ mod Game {
     // @param items The list of items to be dropped
     // @return A tuple containing two boolean values. The first indicates if the adventurer was mutated, the second indicates if the bag was mutated
     fn _drop(
-        ref self: ContractState,
+        self: @ContractState,
         ref adventurer: Adventurer,
         ref bag: Bag,
         adventurer_id: felt252,
@@ -2107,6 +2122,13 @@ mod Game {
             // get and drop item
             let item_id = *items.at(i);
             if adventurer.equipment.is_equipped(item_id) {
+                let item = adventurer.equipment.get_item(item_id);
+
+                // if the item was providing a stat boosts, remove it
+                if item.get_greatness() >= SUFFIX_UNLOCK_GREATNESS {
+                    _remove_item_stat_boost(self, ref adventurer, adventurer_id, item);
+                }
+
                 adventurer.equipment.drop(item_id);
                 adventurer.mutated = true;
             } else {

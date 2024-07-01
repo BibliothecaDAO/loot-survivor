@@ -4,7 +4,7 @@ use super::constants::{
     CombatSettings::{
         XP_MULTIPLIER, DIFFICULTY_INCREASE_RATE, XP_REWARD_DIVISOR, WEAPON_TIER_DAMAGE_MULTIPLIER,
         ARMOR_TIER_DAMAGE_MULTIPLIER, ELEMENTAL_DAMAGE_BONUS, STRONG_ELEMENTAL_BONUS_MIN,
-        LEVEL_MULTIPLIER, STRENGTH_DAMAGE_BONUS, MINIMUM_BASE_DAMAGE
+        LEVEL_MULTIPLIER, STRENGTH_DAMAGE_BONUS, MINIMUM_BASE_DAMAGE, MAX_XP_DECAY
     }
 };
 
@@ -405,18 +405,32 @@ impl ImplCombat of ICombat {
         }
     }
 
-    // @notice gets the base reward for defeating an entity
+    // @notice gets the base reward for defeating an entity. 
+    // @dev amount decreases as the adventurer's level increases
     // @param CombatSpec for the defeated the entity
+    // @param adventurer_level: the level of the adventurer
     // @return u16: the base reward
-    fn get_base_reward(self: CombatSpec) -> u16 {
-        match self.tier {
-            Tier::None(()) => { 0 },
-            Tier::T1(()) => { (XP_MULTIPLIER::T1 * self.level) / XP_REWARD_DIVISOR },
-            Tier::T2(()) => { (XP_MULTIPLIER::T2 * self.level) / XP_REWARD_DIVISOR },
-            Tier::T3(()) => { (XP_MULTIPLIER::T3 * self.level) / XP_REWARD_DIVISOR },
-            Tier::T4(()) => { (XP_MULTIPLIER::T4 * self.level) / XP_REWARD_DIVISOR },
-            Tier::T5(()) => { (XP_MULTIPLIER::T5 * self.level) / XP_REWARD_DIVISOR }
+    fn get_base_reward(self: CombatSpec, adventurer_level: u8) -> u16 {
+        let mut level_decay_percentage: u16 = adventurer_level.into() * 2;
+        if (level_decay_percentage >= MAX_XP_DECAY.into()) {
+            level_decay_percentage = MAX_XP_DECAY.into();
         }
+
+        let mut tier_multiplier = 0;
+
+        match self.tier {
+            Tier::None(()) => { panic_with_felt252('get_base_reward: tier is none'); },
+            Tier::T1(()) => { tier_multiplier = XP_MULTIPLIER::T1; },
+            Tier::T2(()) => { tier_multiplier = XP_MULTIPLIER::T2; },
+            Tier::T3(()) => { tier_multiplier = XP_MULTIPLIER::T3; },
+            Tier::T4(()) => { tier_multiplier = XP_MULTIPLIER::T4; },
+            Tier::T5(()) => { tier_multiplier = XP_MULTIPLIER::T5; },
+        }
+
+        let reward_amount: u16 = (tier_multiplier * self.level) / XP_REWARD_DIVISOR;
+
+        // apply level decay percentage on reward_amount and return
+        reward_amount * (100 - level_decay_percentage) / 100
     }
 
     // @notice Determine a random armor slot for damage application
@@ -563,6 +577,7 @@ impl ImplCombat of ICombat {
 // ---------------------------
 #[cfg(test)]
 mod tests {
+    use debug::PrintTrait;
     use core::option::OptionTrait;
     use integer::{u16_sqrt};
     use core::traits::{TryInto, Into};
@@ -1452,5 +1467,98 @@ mod tests {
         let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
         assert(min_beast_level == 81, 'on lvl50, min beast lvl is 51');
         assert(max_beast_level == 180, 'on lvl50, max beast lvl is 180');
+    }
+
+    #[test]
+    #[available_gas(7480)]
+    fn test_get_base_reward_gas() {
+        let combat_spec = CombatSpec {
+            item_type: Type::Blade_or_Hide(()),
+            tier: Tier::T1(()),
+            level: 1,
+            specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
+        };
+
+        combat_spec.get_base_reward(1);
+    }
+
+    #[test]
+    fn test_get_base_reward_overflow() {
+        let combat_spec = CombatSpec {
+            item_type: Type::Blade_or_Hide(()),
+            tier: Tier::T1(()),
+            level: 1,
+            specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
+        };
+
+        combat_spec.get_base_reward(255);
+    }
+
+    #[test]
+    fn test_get_base_reward() {
+        // Initialize CombatSpec struct
+        let mut combat_spec = CombatSpec {
+            item_type: Type::Blade_or_Hide(()),
+            tier: Tier::T1(()),
+            level: 10,
+            specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
+        };
+
+        // the xp reward for defeating a T1 level 10 beasts will decrease as the adventurer
+        // increases in level
+        let mut adventurer_level = 1;
+        let base_reward = combat_spec.get_base_reward(adventurer_level);
+        // println!("base reward: {}", base_reward);
+        assert(base_reward == 24, 'base reward should be 24');
+
+        adventurer_level = 5;
+        let base_reward = combat_spec.get_base_reward(adventurer_level);
+        // println!("base reward: {}", base_reward);
+        assert(base_reward == 22, 'base reward should be 22');
+
+        adventurer_level = 10;
+        let base_reward = combat_spec.get_base_reward(adventurer_level);
+        // println!("base reward: {}", base_reward);
+        assert(base_reward == 20, 'base reward should be 20');
+
+        adventurer_level = 15;
+        let base_reward = combat_spec.get_base_reward(adventurer_level);
+        // println!("base reward: {}", base_reward);
+        assert(base_reward == 17, 'base reward should be 17');
+
+        adventurer_level = 20;
+        let base_reward = combat_spec.get_base_reward(adventurer_level);
+        // println!("base reward: {}", base_reward);
+        assert(base_reward == 15, 'base reward should be 15');
+
+        adventurer_level = 25;
+        let base_reward = combat_spec.get_base_reward(adventurer_level);
+        // println!("base reward: {}", base_reward);
+        assert(base_reward == 12, 'base reward should be 12');
+
+        adventurer_level = 30;
+        let base_reward = combat_spec.get_base_reward(adventurer_level);
+        // println!("base reward: {}", base_reward);
+        assert(base_reward == 10, 'base reward should be 10');
+
+        adventurer_level = 35;
+        let base_reward = combat_spec.get_base_reward(adventurer_level);
+        // println!("base reward: {}", base_reward);
+        assert(base_reward == 7, 'base reward should be 7');
+
+        adventurer_level = 40;
+        let base_reward = combat_spec.get_base_reward(adventurer_level);
+        // println!("base reward: {}", base_reward);
+        assert(base_reward == 5, 'base reward should be 5');
+
+        adventurer_level = 45;
+        let base_reward = combat_spec.get_base_reward(adventurer_level);
+        // println!("base reward: {}", base_reward);
+        assert(base_reward == 2, 'base reward should be 2');
+
+        adventurer_level = 50;
+        let base_reward = combat_spec.get_base_reward(adventurer_level);
+        // println!("base reward: {}", base_reward);
+        assert(base_reward == 1, 'base reward should be 1');
     }
 }
