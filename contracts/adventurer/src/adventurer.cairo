@@ -624,10 +624,10 @@ impl ImplAdventurer of IAdventurer {
             hash_span.append(self.xp.into());
             hash_span.append(adventurer_entropy);
             let poseidon = poseidon_hash_span(hash_span.span());
-            let (_d, r) = integer::U256DivRem::div_rem(
+            let (d, _) = integer::U256DivRem::div_rem(
                 poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
             );
-            r.try_into().unwrap()
+            d.try_into().unwrap()
         } else {
             0
         }
@@ -742,18 +742,6 @@ impl ImplAdventurer of IAdventurer {
             poseidon.into(), u256_try_as_non_zero(U64_MAX.into()).unwrap()
         );
         return r.try_into().unwrap();
-    }
-
-    fn get_randomness(self: Adventurer, adventurer_entropy: u128) -> (u128, u128) {
-        let mut hash_span = ArrayTrait::<felt252>::new();
-        hash_span.append(self.xp.into());
-        hash_span.append(adventurer_entropy.into());
-
-        let poseidon = poseidon_hash_span(hash_span.span());
-        let (d, r) = integer::U256DivRem::div_rem(
-            poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
-        );
-        return (r.try_into().unwrap(), d.try_into().unwrap());
     }
 
     #[inline(always)]
@@ -1006,7 +994,7 @@ mod tests {
     use array::ArrayTrait;
     use loot::{loot::{Loot, ILoot, ImplLoot}, constants::{ItemSuffix, ItemId}, utils::{ItemUtils}};
     use combat::{constants::CombatEnums::{Slot, Type}};
-    use beasts::{beast::{ImplBeast, Beast}, constants::BeastSettings};
+    use beasts::{beast::{ImplBeast, Beast}, constants::{BeastSettings, BeastId}};
     use adventurer::{
         adventurer::{IAdventurer, ImplAdventurer, Adventurer, AdventurerPacking},
         stats::{Stats, ImplStats, MAX_STAT_VALUE}, equipment::{Equipment, ImplEquipment},
@@ -1455,6 +1443,1268 @@ mod tests {
 
         // verify beasts are the same since the seed did not change
         assert(beast1.id != beast2.id, 'beasts not unique');
+    }
+
+    #[test]
+    fn test_get_beast_distribution_fixed_entropy() {
+        let mut warlock_count: u32 = 0;
+        let mut typhon_count: u32 = 0;
+        let mut jiangshi_count: u32 = 0;
+        let mut anansi_count: u32 = 0;
+        let mut basilisk_count: u32 = 0;
+        let mut gorgon_count: u32 = 0;
+        let mut kitsune_count: u32 = 0;
+        let mut lich_count: u32 = 0;
+        let mut chimera_count: u32 = 0;
+        let mut wendigo_count: u32 = 0;
+        let mut raksasa_count: u32 = 0;
+        let mut werewolf_count: u32 = 0;
+        let mut banshee_count: u32 = 0;
+        let mut draugr_count: u32 = 0;
+        let mut vampire_count: u32 = 0;
+        let mut goblin_count: u32 = 0;
+        let mut ghoul_count: u32 = 0;
+        let mut wraith_count: u32 = 0;
+        let mut sprite_count: u32 = 0;
+        let mut kappa_count: u32 = 0;
+        let mut fairy_count: u32 = 0;
+        let mut leprechaun_count: u32 = 0;
+        let mut kelpie_count: u32 = 0;
+        let mut pixie_count: u32 = 0;
+        let mut gnome_count: u32 = 0;
+        let mut griffin_count: u32 = 0;
+        let mut manticore_count: u32 = 0;
+        let mut phoenix_count: u32 = 0;
+        let mut dragon_count: u32 = 0;
+        let mut minotaur_count: u32 = 0;
+        let mut qilin_count: u32 = 0;
+        let mut ammit_count: u32 = 0;
+        let mut nue_count: u32 = 0;
+        let mut skinwalker_count: u32 = 0;
+        let mut chupacabra_count: u32 = 0;
+        let mut weretiger_count: u32 = 0;
+        let mut wyvern_count: u32 = 0;
+        let mut roc_count: u32 = 0;
+        let mut harpy_count: u32 = 0;
+        let mut pegasus_count: u32 = 0;
+        let mut hippogriff_count: u32 = 0;
+        let mut fenrir_count: u32 = 0;
+        let mut jaguar_count: u32 = 0;
+        let mut satori_count: u32 = 0;
+        let mut direwolf_count: u32 = 0;
+        let mut bear_count: u32 = 0;
+        let mut wolf_count: u32 = 0;
+        let mut mantis_count: u32 = 0;
+        let mut spider_count: u32 = 0;
+        let mut rat_count: u32 = 0;
+        let mut kraken_count: u32 = 0;
+        let mut colossus_count: u32 = 0;
+        let mut balrog_count: u32 = 0;
+        let mut leviathan_count: u32 = 0;
+        let mut tarrasque_count: u32 = 0;
+        let mut titan_count: u32 = 0;
+        let mut nephilim_count: u32 = 0;
+        let mut behemoth_count: u32 = 0;
+        let mut hydra_count: u32 = 0;
+        let mut juggernaut_count: u32 = 0;
+        let mut oni_count: u32 = 0;
+        let mut jotunn_count: u32 = 0;
+        let mut ettin_count: u32 = 0;
+        let mut cyclops_count: u32 = 0;
+        let mut giant_count: u32 = 0;
+        let mut nemean_lion_count: u32 = 0;
+        let mut berserker_count: u32 = 0;
+        let mut yeti_count: u32 = 0;
+        let mut golem_count: u32 = 0;
+        let mut ent_count: u32 = 0;
+        let mut troll_count: u32 = 0;
+        let mut bigfoot_count: u32 = 0;
+        let mut ogre_count: u32 = 0;
+        let mut orc_count: u32 = 0;
+        let mut skeleton_count: u32 = 0;
+
+        let mut total_beasts = 0;
+
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        let mut xp = 1;
+
+        let adventurer_entropy: felt252 = 123456789;
+        loop {
+            if xp == 7500 {
+                break;
+            }
+
+            adventurer.xp = xp;
+
+            let (r, _) = AdventurerUtils::get_randomness(xp, adventurer_entropy);
+
+            match AdventurerUtils::get_random_explore(r) {
+                ExploreResult::Beast(()) => {
+                    total_beasts += 1;
+                    let (beast, _seed) = adventurer.get_beast(adventurer_entropy);
+                    if beast.id == BeastId::Warlock {
+                        warlock_count += 1;
+                    } else if beast.id == BeastId::Typhon {
+                        typhon_count += 1;
+                    } else if beast.id == BeastId::Jiangshi {
+                        jiangshi_count += 1;
+                    } else if beast.id == BeastId::Anansi {
+                        anansi_count += 1;
+                    } else if beast.id == BeastId::Basilisk {
+                        basilisk_count += 1;
+                    } else if beast.id == BeastId::Gorgon {
+                        gorgon_count += 1;
+                    } else if beast.id == BeastId::Kitsune {
+                        kitsune_count += 1;
+                    } else if beast.id == BeastId::Lich {
+                        lich_count += 1;
+                    } else if beast.id == BeastId::Chimera {
+                        chimera_count += 1;
+                    } else if beast.id == BeastId::Wendigo {
+                        wendigo_count += 1;
+                    } else if beast.id == BeastId::Rakshasa {
+                        raksasa_count += 1;
+                    } else if beast.id == BeastId::Werewolf {
+                        werewolf_count += 1;
+                    } else if beast.id == BeastId::Banshee {
+                        banshee_count += 1;
+                    } else if beast.id == BeastId::Draugr {
+                        draugr_count += 1;
+                    } else if beast.id == BeastId::Vampire {
+                        vampire_count += 1;
+                    } else if beast.id == BeastId::Goblin {
+                        goblin_count += 1;
+                    } else if beast.id == BeastId::Ghoul {
+                        ghoul_count += 1;
+                    } else if beast.id == BeastId::Wraith {
+                        wraith_count += 1;
+                    } else if beast.id == BeastId::Sprite {
+                        sprite_count += 1;
+                    } else if beast.id == BeastId::Kappa {
+                        kappa_count += 1;
+                    } else if beast.id == BeastId::Fairy {
+                        fairy_count += 1;
+                    } else if beast.id == BeastId::Leprechaun {
+                        leprechaun_count += 1;
+                    } else if beast.id == BeastId::Kelpie {
+                        kelpie_count += 1;
+                    } else if beast.id == BeastId::Pixie {
+                        pixie_count += 1;
+                    } else if beast.id == BeastId::Gnome {
+                        gnome_count += 1;
+                    } else if beast.id == BeastId::Griffin {
+                        griffin_count += 1;
+                    } else if beast.id == BeastId::Manticore {
+                        manticore_count += 1;
+                    } else if beast.id == BeastId::Phoenix {
+                        phoenix_count += 1;
+                    } else if beast.id == BeastId::Dragon {
+                        dragon_count += 1;
+                    } else if beast.id == BeastId::Minotaur {
+                        minotaur_count += 1;
+                    } else if beast.id == BeastId::Qilin {
+                        qilin_count += 1;
+                    } else if beast.id == BeastId::Ammit {
+                        ammit_count += 1;
+                    } else if beast.id == BeastId::Nue {
+                        nue_count += 1;
+                    } else if beast.id == BeastId::Skinwalker {
+                        skinwalker_count += 1;
+                    } else if beast.id == BeastId::Chupacabra {
+                        chupacabra_count += 1;
+                    } else if beast.id == BeastId::Weretiger {
+                        weretiger_count += 1;
+                    } else if beast.id == BeastId::Wyvern {
+                        wyvern_count += 1;
+                    } else if beast.id == BeastId::Roc {
+                        roc_count += 1;
+                    } else if beast.id == BeastId::Harpy {
+                        harpy_count += 1;
+                    } else if beast.id == BeastId::Pegasus {
+                        pegasus_count += 1;
+                    } else if beast.id == BeastId::Hippogriff {
+                        hippogriff_count += 1;
+                    } else if beast.id == BeastId::Fenrir {
+                        fenrir_count += 1;
+                    } else if beast.id == BeastId::Jaguar {
+                        jaguar_count += 1;
+                    } else if beast.id == BeastId::Satori {
+                        satori_count += 1;
+                    } else if beast.id == BeastId::DireWolf {
+                        direwolf_count += 1;
+                    } else if beast.id == BeastId::Bear {
+                        bear_count += 1;
+                    } else if beast.id == BeastId::Wolf {
+                        wolf_count += 1;
+                    } else if beast.id == BeastId::Mantis {
+                        mantis_count += 1;
+                    } else if beast.id == BeastId::Spider {
+                        spider_count += 1;
+                    } else if beast.id == BeastId::Rat {
+                        rat_count += 1;
+                    } else if beast.id == BeastId::Kraken {
+                        kraken_count += 1;
+                    } else if beast.id == BeastId::Colossus {
+                        colossus_count += 1;
+                    } else if beast.id == BeastId::Balrog {
+                        balrog_count += 1;
+                    } else if beast.id == BeastId::Leviathan {
+                        leviathan_count += 1;
+                    } else if beast.id == BeastId::Tarrasque {
+                        tarrasque_count += 1;
+                    } else if beast.id == BeastId::Titan {
+                        titan_count += 1;
+                    } else if beast.id == BeastId::Nephilim {
+                        nephilim_count += 1;
+                    } else if beast.id == BeastId::Behemoth {
+                        behemoth_count += 1;
+                    } else if beast.id == BeastId::Hydra {
+                        hydra_count += 1;
+                    } else if beast.id == BeastId::Juggernaut {
+                        juggernaut_count += 1;
+                    } else if beast.id == BeastId::Oni {
+                        oni_count += 1;
+                    } else if beast.id == BeastId::Jotunn {
+                        jotunn_count += 1;
+                    } else if beast.id == BeastId::Ettin {
+                        ettin_count += 1;
+                    } else if beast.id == BeastId::Cyclops {
+                        cyclops_count += 1;
+                    } else if beast.id == BeastId::Giant {
+                        giant_count += 1;
+                    } else if beast.id == BeastId::NemeanLion {
+                        nemean_lion_count += 1;
+                    } else if beast.id == BeastId::Berserker {
+                        berserker_count += 1;
+                    } else if beast.id == BeastId::Yeti {
+                        yeti_count += 1;
+                    } else if beast.id == BeastId::Golem {
+                        golem_count += 1;
+                    } else if beast.id == BeastId::Ent {
+                        ent_count += 1;
+                    } else if beast.id == BeastId::Troll {
+                        troll_count += 1;
+                    } else if beast.id == BeastId::Bigfoot {
+                        bigfoot_count += 1;
+                    } else if beast.id == BeastId::Ogre {
+                        ogre_count += 1;
+                    } else if beast.id == BeastId::Orc {
+                        orc_count += 1;
+                    } else if beast.id == BeastId::Skeleton {
+                        skeleton_count += 1;
+                    }
+                },
+                ExploreResult::Obstacle(()) => {},
+                ExploreResult::Discovery(()) => {}
+            }
+
+            xp += 1;
+        };
+
+        // assert beasts distributions are reasonably uniform
+        let warlock_percentage = (warlock_count * 1000) / total_beasts;
+        assert(
+            warlock_percentage >= 7 && warlock_percentage <= 21, 'warlock distribution'
+        );
+
+        let typhon_percentage = (typhon_count * 1000) / total_beasts;
+        assert(
+            typhon_percentage >= 7 && typhon_percentage <= 21, 'typhon distribution'
+        );
+
+        let jiangshi_percentage = (jiangshi_count * 1000) / total_beasts;
+        assert(
+            jiangshi_percentage >= 7 && jiangshi_percentage <= 21, 'jiangshi distribution'
+        );
+
+        let anansi_percentage = (anansi_count * 1000) / total_beasts;
+        assert(
+            anansi_percentage >= 7 && anansi_percentage <= 21, 'anansi distribution'
+        );
+
+        let basilisk_percentage = (basilisk_count * 1000) / total_beasts;
+        assert(
+            basilisk_percentage >= 7 && basilisk_percentage <= 21, 'basilisk distribution'
+        );
+
+        let gorgon_percentage = (gorgon_count * 1000) / total_beasts;
+        assert(
+            gorgon_percentage >= 7 && gorgon_percentage <= 21, 'gorgon distribution'
+        );
+
+        let kitsune_percentage = (kitsune_count * 1000) / total_beasts;
+        assert(
+            kitsune_percentage >= 7 && kitsune_percentage <= 21, 'kitsune distribution'
+        );
+
+        let lich_percentage = (lich_count * 1000) / total_beasts;
+        assert(
+            lich_percentage >= 7 && lich_percentage <= 21, 'lich distribution'
+        );
+
+        let chimera_percentage = (chimera_count * 1000) / total_beasts;
+        assert(
+            chimera_percentage >= 7 && chimera_percentage <= 21, 'chimera distribution'
+        );
+
+        let wendigo_percentage = (wendigo_count * 1000) / total_beasts;
+        assert(
+            wendigo_percentage >= 7 && wendigo_percentage <= 21, 'wendigo distribution'
+        );
+
+        let raksasa_percentage = (raksasa_count * 1000) / total_beasts;
+        assert(
+            raksasa_percentage >= 7 && raksasa_percentage <= 21, 'raksasa distribution'
+        );
+
+        let werewolf_percentage = (werewolf_count * 1000) / total_beasts;
+        assert(
+            werewolf_percentage >= 7 && werewolf_percentage <= 21, 'werewolf distribution'
+        );
+
+        let banshee_percentage = (banshee_count * 1000) / total_beasts;
+        assert(
+            banshee_percentage >= 7 && banshee_percentage <= 21, 'banshee distribution'
+        );
+
+        let draugr_percentage = (draugr_count * 1000) / total_beasts;
+        assert(
+            draugr_percentage >= 7 && draugr_percentage <= 21, 'draugr distribution'
+        );
+
+        let vampire_percentage = (vampire_count * 1000) / total_beasts;
+        assert(
+            vampire_percentage >= 7 && vampire_percentage <= 21, 'vampire distribution'
+        );
+
+        let goblin_percentage = (goblin_count * 1000) / total_beasts;
+        assert(
+            goblin_percentage >= 7 && goblin_percentage <= 21, 'goblin distribution'
+        );
+
+        let ghoul_percentage = (ghoul_count * 1000) / total_beasts;
+        assert(
+            ghoul_percentage >= 7 && ghoul_percentage <= 21, 'ghoul distribution'
+        );
+
+        let wraith_percentage = (wraith_count * 1000) / total_beasts;
+        assert(
+            wraith_percentage >= 7 && wraith_percentage <= 21, 'wraith distribution'
+        );
+
+        let sprite_percentage = (sprite_count * 1000) / total_beasts;
+        assert(
+            sprite_percentage >= 7 && sprite_percentage <= 21, 'sprite distribution'
+        );
+
+        let kappa_percentage = (kappa_count * 1000) / total_beasts;
+        assert(
+            kappa_percentage >= 7 && kappa_percentage <= 21, 'kappa distribution'
+        );
+
+        let fairy_percentage = (fairy_count * 1000) / total_beasts;
+        assert(
+            fairy_percentage >= 7 && fairy_percentage <= 21, 'fairy distribution'
+        );
+
+        let leprechaun_percentage = (leprechaun_count * 1000) / total_beasts;
+        assert(
+            leprechaun_percentage >= 7 && leprechaun_percentage <= 21, 'leprechaun distribution'
+        );
+
+        let kelpie_percentage = (kelpie_count * 1000) / total_beasts;
+        assert(
+            kelpie_percentage >= 7 && kelpie_percentage <= 21, 'kelpie distribution'
+        );
+
+        let pixie_percentage = (pixie_count * 1000) / total_beasts;
+        assert(
+            pixie_percentage >= 7 && pixie_percentage <= 21, 'pixie distribution'
+        );
+
+        let gnome_percentage = (gnome_count * 1000) / total_beasts;
+        assert(
+            gnome_percentage >= 7 && gnome_percentage <= 21, 'gnome distribution'
+        );
+
+        let griffin_percentage = (griffin_count * 1000) / total_beasts;
+        assert(
+            griffin_percentage >= 7 && griffin_percentage <= 21, 'griffin distribution'
+        );
+
+        let manticore_percentage = (manticore_count * 1000) / total_beasts;
+        assert(
+            manticore_percentage >= 7 && manticore_percentage <= 21, 'manticore distribution'
+        );
+
+        let phoenix_percentage = (phoenix_count * 1000) / total_beasts;
+        assert(
+            phoenix_percentage >= 7 && phoenix_percentage <= 21, 'phoenix distribution'
+        );
+
+        let dragon_percentage = (dragon_count * 1000) / total_beasts;
+        assert(
+            dragon_percentage >= 7 && dragon_percentage <= 21, 'dragon distribution'
+        );
+
+        let minotaur_percentage = (minotaur_count * 1000) / total_beasts;
+        assert(
+            minotaur_percentage >= 7 && minotaur_percentage <= 21, 'minotaur distribution'
+        );
+
+        let qilin_percentage = (qilin_count * 1000) / total_beasts;
+        assert(
+            qilin_percentage >= 7 && qilin_percentage <= 21, 'qilin distribution'
+        );
+
+        let ammit_percentage = (ammit_count * 1000) / total_beasts;
+        assert(
+            ammit_percentage >= 7 && ammit_percentage <= 21, 'ammit distribution'
+        );
+
+        let nue_percentage = (nue_count * 1000) / total_beasts;
+        assert(
+            nue_percentage >= 7 && nue_percentage <= 21, 'nue distribution'
+        );
+
+        let skinwalker_percentage = (skinwalker_count * 1000) / total_beasts;
+        assert(
+            skinwalker_percentage >= 7 && skinwalker_percentage <= 21, 'skinwalker distribution'
+        );
+
+        let chupacabra_percentage = (chupacabra_count * 1000) / total_beasts;
+        assert(
+            chupacabra_percentage >= 7 && chupacabra_percentage <= 21, 'chupacabra distribution'
+        );
+
+        let weretiger_percentage = (weretiger_count * 1000) / total_beasts;
+        assert(
+            weretiger_percentage >= 7 && weretiger_percentage <= 21, 'weretiger distribution'
+        );
+
+        let wyvern_percentage = (wyvern_count * 1000) / total_beasts;
+        assert(
+            wyvern_percentage >= 7 && wyvern_percentage <= 21, 'wyvern distribution'
+        );
+
+        let roc_percentage = (roc_count * 1000) / total_beasts;
+        assert(
+            roc_percentage >= 7 && roc_percentage <= 21, 'roc distribution'
+        );
+
+        let harpy_percentage = (harpy_count * 1000) / total_beasts;
+        assert(
+            harpy_percentage >= 7 && harpy_percentage <= 21, 'harpy distribution'
+        );
+
+        let pegasus_percentage = (pegasus_count * 1000) / total_beasts;
+        assert(
+            pegasus_percentage >= 7 && pegasus_percentage <= 21, 'pegasus distribution'
+        );
+
+        let hippogriff_percentage = (hippogriff_count * 1000) / total_beasts;
+        assert(
+            hippogriff_percentage >= 7 && hippogriff_percentage <= 21, 'hippogriff distribution'
+        );
+
+        let fenrir_percentage = (fenrir_count * 1000) / total_beasts;
+        assert(
+            fenrir_percentage >= 7 && fenrir_percentage <= 21, 'fenrir distribution'
+        );
+
+        let jaguar_percentage = (jaguar_count * 1000) / total_beasts;
+        assert(
+            jaguar_percentage >= 7 && jaguar_percentage <= 21, 'jaguar distribution'
+        );
+
+        let satori_percentage = (satori_count * 1000) / total_beasts;
+        assert(
+            satori_percentage >= 7 && satori_percentage <= 21, 'satori distribution'
+        );
+
+        let direwolf_percentage = (direwolf_count * 1000) / total_beasts;
+        assert(
+            direwolf_percentage >= 7 && direwolf_percentage <= 21, 'direwolf distribution'
+        );
+
+        let bear_percentage = (bear_count * 1000) / total_beasts;
+        assert(
+            bear_percentage >= 7 && bear_percentage <= 21, 'bear distribution'
+        );
+
+        let wolf_percentage = (wolf_count * 1000) / total_beasts;
+        assert(
+            wolf_percentage >= 7 && wolf_percentage <= 21, 'wolf distribution'
+        );
+
+        let mantis_percentage = (mantis_count * 1000) / total_beasts;
+        assert(
+            mantis_percentage >= 7 && mantis_percentage <= 21, 'mantis distribution'
+        );
+
+        let spider_percentage = (spider_count * 1000) / total_beasts;
+        assert(
+            spider_percentage >= 7 && spider_percentage <= 21, 'spider distribution'
+        );
+
+        let rat_percentage = (rat_count * 1000) / total_beasts;
+        assert(
+            rat_percentage >= 7 && rat_percentage <= 21, 'rat distribution'
+        );
+
+        let kraken_percentage = (kraken_count * 1000) / total_beasts;
+        assert(
+            kraken_percentage >= 7 && kraken_percentage <= 21, 'kraken distribution'
+        );
+
+        let colossus_percentage = (colossus_count * 1000) / total_beasts;
+        assert(
+            colossus_percentage >= 7 && colossus_percentage <= 21, 'colossus distribution'
+        );
+
+        let balrog_percentage = (balrog_count * 1000) / total_beasts;
+        assert(
+            balrog_percentage >= 7 && balrog_percentage <= 21, 'balrog distribution'
+        );
+
+        let leviathan_percentage = (leviathan_count * 1000) / total_beasts;
+        assert(
+            leviathan_percentage >= 7 && leviathan_percentage <= 21, 'leviathan distribution'
+        );
+
+        let tarrasque_percentage = (tarrasque_count * 1000) / total_beasts;
+        assert(
+            tarrasque_percentage >= 7 && tarrasque_percentage <= 21, 'tarrasque distribution'
+        );
+
+        let titan_percentage = (titan_count * 1000) / total_beasts;
+        assert(
+            titan_percentage >= 7 && titan_percentage <= 21, 'titan distribution'
+        );
+
+        let nephilim_percentage = (nephilim_count * 1000) / total_beasts;
+        assert(
+            nephilim_percentage >= 7 && nephilim_percentage <= 21, 'nephilim distribution'
+        );
+
+        let behemoth_percentage = (behemoth_count * 1000) / total_beasts;
+        assert(
+            behemoth_percentage >= 7 && behemoth_percentage <= 21, 'behemoth distribution'
+        );
+
+        let hydra_percentage = (hydra_count * 1000) / total_beasts;
+        assert(
+            hydra_percentage >= 7 && hydra_percentage <= 21, 'hydra distribution'
+        );
+
+        let juggernaut_percentage = (juggernaut_count * 1000) / total_beasts;
+        assert(
+            juggernaut_percentage >= 7 && juggernaut_percentage <= 21, 'juggernaut distribution'
+        );
+
+        let oni_percentage = (oni_count * 1000) / total_beasts;
+        assert(
+            oni_percentage >= 7 && oni_percentage <= 21, 'oni distribution'
+        );
+
+        let jotunn_percentage = (jotunn_count * 1000) / total_beasts;
+        assert(
+            jotunn_percentage >= 7 && jotunn_percentage <= 21, 'jotunn distribution'
+        );
+
+        let ettin_percentage = (ettin_count * 1000) / total_beasts;
+        assert(
+            ettin_percentage >= 7 && ettin_percentage <= 21, 'ettin distribution'
+        );
+
+        let cyclops_percentage = (cyclops_count * 1000) / total_beasts;
+        assert(
+            cyclops_percentage >= 7 && cyclops_percentage <= 21, 'cyclops distribution'
+        );
+
+        let giant_percentage = (giant_count * 1000) / total_beasts;
+        assert(
+            giant_percentage >= 7 && giant_percentage <= 21, 'giant distribution'
+        );
+
+        let nemean_lion_percentage = (nemean_lion_count * 1000) / total_beasts;
+        assert(
+            nemean_lion_percentage >= 7 && nemean_lion_percentage <= 21, 'nemean_lion distribution'
+        );
+
+        let berserker_percentage = (berserker_count * 1000) / total_beasts;
+        assert(
+            berserker_percentage >= 7 && berserker_percentage <= 21, 'berserker distribution'
+        );
+
+        let yeti_percentage = (yeti_count * 1000) / total_beasts;
+        assert(
+            yeti_percentage >= 7 && yeti_percentage <= 21, 'yeti distribution'
+        );
+
+        let golem_percentage = (golem_count * 1000) / total_beasts;
+        assert(
+            golem_percentage >= 7 && golem_percentage <= 21, 'golem distribution'
+        );
+
+        let ent_percentage = (ent_count * 1000) / total_beasts;
+        assert(
+            ent_percentage >= 7 && ent_percentage <= 21, 'ent distribution'
+        );
+
+        let troll_percentage = (troll_count * 1000) / total_beasts;
+        assert(
+            troll_percentage >= 7 && troll_percentage <= 21, 'troll distribution'
+        );
+
+        let bigfoot_percentage = (bigfoot_count * 1000) / total_beasts;
+        assert(
+            bigfoot_percentage >= 7 && bigfoot_percentage <= 21, 'bigfoot distribution'
+        );
+
+        let ogre_percentage = (ogre_count * 1000) / total_beasts;
+        assert(
+            ogre_percentage >= 7 && ogre_percentage <= 21, 'ogre distribution'
+        );
+
+        let orc_percentage = (orc_count * 1000) / total_beasts;
+        assert(
+            orc_percentage >= 7 && orc_percentage <= 21, 'orc distribution'
+        );
+
+        let skeleton_percentage = (skeleton_count * 1000) / total_beasts;
+        assert(
+            skeleton_percentage >= 7 && skeleton_percentage <= 21, 'skeleton distribution'
+        );
+    }
+
+    #[test]
+    fn test_get_beast_distribution_fixed_xp() {
+        let mut warlock_count: u32 = 0;
+        let mut typhon_count: u32 = 0;
+        let mut jiangshi_count: u32 = 0;
+        let mut anansi_count: u32 = 0;
+        let mut basilisk_count: u32 = 0;
+        let mut gorgon_count: u32 = 0;
+        let mut kitsune_count: u32 = 0;
+        let mut lich_count: u32 = 0;
+        let mut chimera_count: u32 = 0;
+        let mut wendigo_count: u32 = 0;
+        let mut raksasa_count: u32 = 0;
+        let mut werewolf_count: u32 = 0;
+        let mut banshee_count: u32 = 0;
+        let mut draugr_count: u32 = 0;
+        let mut vampire_count: u32 = 0;
+        let mut goblin_count: u32 = 0;
+        let mut ghoul_count: u32 = 0;
+        let mut wraith_count: u32 = 0;
+        let mut sprite_count: u32 = 0;
+        let mut kappa_count: u32 = 0;
+        let mut fairy_count: u32 = 0;
+        let mut leprechaun_count: u32 = 0;
+        let mut kelpie_count: u32 = 0;
+        let mut pixie_count: u32 = 0;
+        let mut gnome_count: u32 = 0;
+        let mut griffin_count: u32 = 0;
+        let mut manticore_count: u32 = 0;
+        let mut phoenix_count: u32 = 0;
+        let mut dragon_count: u32 = 0;
+        let mut minotaur_count: u32 = 0;
+        let mut qilin_count: u32 = 0;
+        let mut ammit_count: u32 = 0;
+        let mut nue_count: u32 = 0;
+        let mut skinwalker_count: u32 = 0;
+        let mut chupacabra_count: u32 = 0;
+        let mut weretiger_count: u32 = 0;
+        let mut wyvern_count: u32 = 0;
+        let mut roc_count: u32 = 0;
+        let mut harpy_count: u32 = 0;
+        let mut pegasus_count: u32 = 0;
+        let mut hippogriff_count: u32 = 0;
+        let mut fenrir_count: u32 = 0;
+        let mut jaguar_count: u32 = 0;
+        let mut satori_count: u32 = 0;
+        let mut direwolf_count: u32 = 0;
+        let mut bear_count: u32 = 0;
+        let mut wolf_count: u32 = 0;
+        let mut mantis_count: u32 = 0;
+        let mut spider_count: u32 = 0;
+        let mut rat_count: u32 = 0;
+        let mut kraken_count: u32 = 0;
+        let mut colossus_count: u32 = 0;
+        let mut balrog_count: u32 = 0;
+        let mut leviathan_count: u32 = 0;
+        let mut tarrasque_count: u32 = 0;
+        let mut titan_count: u32 = 0;
+        let mut nephilim_count: u32 = 0;
+        let mut behemoth_count: u32 = 0;
+        let mut hydra_count: u32 = 0;
+        let mut juggernaut_count: u32 = 0;
+        let mut oni_count: u32 = 0;
+        let mut jotunn_count: u32 = 0;
+        let mut ettin_count: u32 = 0;
+        let mut cyclops_count: u32 = 0;
+        let mut giant_count: u32 = 0;
+        let mut nemean_lion_count: u32 = 0;
+        let mut berserker_count: u32 = 0;
+        let mut yeti_count: u32 = 0;
+        let mut golem_count: u32 = 0;
+        let mut ent_count: u32 = 0;
+        let mut troll_count: u32 = 0;
+        let mut bigfoot_count: u32 = 0;
+        let mut ogre_count: u32 = 0;
+        let mut orc_count: u32 = 0;
+        let mut skeleton_count: u32 = 0;
+        let mut total_beasts = 0;
+
+        let mut adventurer = ImplAdventurer::new(ItemId::Wand);
+        adventurer.xp = 200;
+
+        let mut adventurer_entropy: felt252 = 1;
+        loop {
+            if adventurer_entropy == 7500 {
+                break;
+            }
+            let (r, _) = AdventurerUtils::get_randomness(adventurer.xp, adventurer_entropy);
+
+            match AdventurerUtils::get_random_explore(r) {
+                ExploreResult::Beast(()) => {
+                    total_beasts += 1;
+                    let (beast, _seed) = adventurer.get_beast(adventurer_entropy);
+                    if beast.id == BeastId::Warlock {
+                        warlock_count += 1;
+                    } else if beast.id == BeastId::Typhon {
+                        typhon_count += 1;
+                    } else if beast.id == BeastId::Jiangshi {
+                        jiangshi_count += 1;
+                    } else if beast.id == BeastId::Anansi {
+                        anansi_count += 1;
+                    } else if beast.id == BeastId::Basilisk {
+                        basilisk_count += 1;
+                    } else if beast.id == BeastId::Gorgon {
+                        gorgon_count += 1;
+                    } else if beast.id == BeastId::Kitsune {
+                        kitsune_count += 1;
+                    } else if beast.id == BeastId::Lich {
+                        lich_count += 1;
+                    } else if beast.id == BeastId::Chimera {
+                        chimera_count += 1;
+                    } else if beast.id == BeastId::Wendigo {
+                        wendigo_count += 1;
+                    } else if beast.id == BeastId::Rakshasa {
+                        raksasa_count += 1;
+                    } else if beast.id == BeastId::Werewolf {
+                        werewolf_count += 1;
+                    } else if beast.id == BeastId::Banshee {
+                        banshee_count += 1;
+                    } else if beast.id == BeastId::Draugr {
+                        draugr_count += 1;
+                    } else if beast.id == BeastId::Vampire {
+                        vampire_count += 1;
+                    } else if beast.id == BeastId::Goblin {
+                        goblin_count += 1;
+                    } else if beast.id == BeastId::Ghoul {
+                        ghoul_count += 1;
+                    } else if beast.id == BeastId::Wraith {
+                        wraith_count += 1;
+                    } else if beast.id == BeastId::Sprite {
+                        sprite_count += 1;
+                    } else if beast.id == BeastId::Kappa {
+                        kappa_count += 1;
+                    } else if beast.id == BeastId::Fairy {
+                        fairy_count += 1;
+                    } else if beast.id == BeastId::Leprechaun {
+                        leprechaun_count += 1;
+                    } else if beast.id == BeastId::Kelpie {
+                        kelpie_count += 1;
+                    } else if beast.id == BeastId::Pixie {
+                        pixie_count += 1;
+                    } else if beast.id == BeastId::Gnome {
+                        gnome_count += 1;
+                    } else if beast.id == BeastId::Griffin {
+                        griffin_count += 1;
+                    } else if beast.id == BeastId::Manticore {
+                        manticore_count += 1;
+                    } else if beast.id == BeastId::Phoenix {
+                        phoenix_count += 1;
+                    } else if beast.id == BeastId::Dragon {
+                        dragon_count += 1;
+                    } else if beast.id == BeastId::Minotaur {
+                        minotaur_count += 1;
+                    } else if beast.id == BeastId::Qilin {
+                        qilin_count += 1;
+                    } else if beast.id == BeastId::Ammit {
+                        ammit_count += 1;
+                    } else if beast.id == BeastId::Nue {
+                        nue_count += 1;
+                    } else if beast.id == BeastId::Skinwalker {
+                        skinwalker_count += 1;
+                    } else if beast.id == BeastId::Chupacabra {
+                        chupacabra_count += 1;
+                    } else if beast.id == BeastId::Weretiger {
+                        weretiger_count += 1;
+                    } else if beast.id == BeastId::Wyvern {
+                        wyvern_count += 1;
+                    } else if beast.id == BeastId::Roc {
+                        roc_count += 1;
+                    } else if beast.id == BeastId::Harpy {
+                        harpy_count += 1;
+                    } else if beast.id == BeastId::Pegasus {
+                        pegasus_count += 1;
+                    } else if beast.id == BeastId::Hippogriff {
+                        hippogriff_count += 1;
+                    } else if beast.id == BeastId::Fenrir {
+                        fenrir_count += 1;
+                    } else if beast.id == BeastId::Jaguar {
+                        jaguar_count += 1;
+                    } else if beast.id == BeastId::Satori {
+                        satori_count += 1;
+                    } else if beast.id == BeastId::DireWolf {
+                        direwolf_count += 1;
+                    } else if beast.id == BeastId::Bear {
+                        bear_count += 1;
+                    } else if beast.id == BeastId::Wolf {
+                        wolf_count += 1;
+                    } else if beast.id == BeastId::Mantis {
+                        mantis_count += 1;
+                    } else if beast.id == BeastId::Spider {
+                        spider_count += 1;
+                    } else if beast.id == BeastId::Rat {
+                        rat_count += 1;
+                    } else if beast.id == BeastId::Kraken {
+                        kraken_count += 1;
+                    } else if beast.id == BeastId::Colossus {
+                        colossus_count += 1;
+                    } else if beast.id == BeastId::Balrog {
+                        balrog_count += 1;
+                    } else if beast.id == BeastId::Leviathan {
+                        leviathan_count += 1;
+                    } else if beast.id == BeastId::Tarrasque {
+                        tarrasque_count += 1;
+                    } else if beast.id == BeastId::Titan {
+                        titan_count += 1;
+                    } else if beast.id == BeastId::Nephilim {
+                        nephilim_count += 1;
+                    } else if beast.id == BeastId::Behemoth {
+                        behemoth_count += 1;
+                    } else if beast.id == BeastId::Hydra {
+                        hydra_count += 1;
+                    } else if beast.id == BeastId::Juggernaut {
+                        juggernaut_count += 1;
+                    } else if beast.id == BeastId::Oni {
+                        oni_count += 1;
+                    } else if beast.id == BeastId::Jotunn {
+                        jotunn_count += 1;
+                    } else if beast.id == BeastId::Ettin {
+                        ettin_count += 1;
+                    } else if beast.id == BeastId::Cyclops {
+                        cyclops_count += 1;
+                    } else if beast.id == BeastId::Giant {
+                        giant_count += 1;
+                    } else if beast.id == BeastId::NemeanLion {
+                        nemean_lion_count += 1;
+                    } else if beast.id == BeastId::Berserker {
+                        berserker_count += 1;
+                    } else if beast.id == BeastId::Yeti {
+                        yeti_count += 1;
+                    } else if beast.id == BeastId::Golem {
+                        golem_count += 1;
+                    } else if beast.id == BeastId::Ent {
+                        ent_count += 1;
+                    } else if beast.id == BeastId::Troll {
+                        troll_count += 1;
+                    } else if beast.id == BeastId::Bigfoot {
+                        bigfoot_count += 1;
+                    } else if beast.id == BeastId::Ogre {
+                        ogre_count += 1;
+                    } else if beast.id == BeastId::Orc {
+                        orc_count += 1;
+                    } else if beast.id == BeastId::Skeleton {
+                        skeleton_count += 1;
+                    }
+                },
+                ExploreResult::Obstacle(()) => {},
+                ExploreResult::Discovery(()) => {}
+            }
+
+            adventurer_entropy += 1;
+        };
+
+        // assert beasts distributions are reasonably uniform
+        let warlock_percentage = (warlock_count * 1000) / total_beasts;
+        assert(
+            warlock_percentage >= 7 && warlock_percentage <= 21, 'warlock distribution'
+        );
+
+        let typhon_percentage = (typhon_count * 1000) / total_beasts;
+        assert(
+            typhon_percentage >= 7 && typhon_percentage <= 21, 'typhon distribution'
+        );
+
+        let jiangshi_percentage = (jiangshi_count * 1000) / total_beasts;
+        assert(
+            jiangshi_percentage >= 7 && jiangshi_percentage <= 21, 'jiangshi distribution'
+        );
+
+        let anansi_percentage = (anansi_count * 1000) / total_beasts;
+        assert(
+            anansi_percentage >= 7 && anansi_percentage <= 21, 'anansi distribution'
+        );
+
+        let basilisk_percentage = (basilisk_count * 1000) / total_beasts;
+        assert(
+            basilisk_percentage >= 7 && basilisk_percentage <= 21, 'basilisk distribution'
+        );
+
+        let gorgon_percentage = (gorgon_count * 1000) / total_beasts;
+        assert(
+            gorgon_percentage >= 7 && gorgon_percentage <= 21, 'gorgon distribution'
+        );
+
+        let kitsune_percentage = (kitsune_count * 1000) / total_beasts;
+        assert(
+            kitsune_percentage >= 7 && kitsune_percentage <= 21, 'kitsune distribution'
+        );
+
+        let lich_percentage = (lich_count * 1000) / total_beasts;
+        assert(
+            lich_percentage >= 7 && lich_percentage <= 21, 'lich distribution'
+        );
+
+        let chimera_percentage = (chimera_count * 1000) / total_beasts;
+        assert(
+            chimera_percentage >= 7 && chimera_percentage <= 21, 'chimera distribution'
+        );
+
+        let wendigo_percentage = (wendigo_count * 1000) / total_beasts;
+        assert(
+            wendigo_percentage >= 7 && wendigo_percentage <= 21, 'wendigo distribution'
+        );
+
+        let raksasa_percentage = (raksasa_count * 1000) / total_beasts;
+        assert(
+            raksasa_percentage >= 7 && raksasa_percentage <= 21, 'raksasa distribution'
+        );
+
+        let werewolf_percentage = (werewolf_count * 1000) / total_beasts;
+        assert(
+            werewolf_percentage >= 7 && werewolf_percentage <= 21, 'werewolf distribution'
+        );
+
+        let banshee_percentage = (banshee_count * 1000) / total_beasts;
+        assert(
+            banshee_percentage >= 7 && banshee_percentage <= 21, 'banshee distribution'
+        );
+
+        let draugr_percentage = (draugr_count * 1000) / total_beasts;
+        assert(
+            draugr_percentage >= 7 && draugr_percentage <= 21, 'draugr distribution'
+        );
+
+        let vampire_percentage = (vampire_count * 1000) / total_beasts;
+        assert(
+            vampire_percentage >= 7 && vampire_percentage <= 21, 'vampire distribution'
+        );
+
+        let goblin_percentage = (goblin_count * 1000) / total_beasts;
+        assert(
+            goblin_percentage >= 7 && goblin_percentage <= 21, 'goblin distribution'
+        );
+
+        let ghoul_percentage = (ghoul_count * 1000) / total_beasts;
+        assert(
+            ghoul_percentage >= 7 && ghoul_percentage <= 21, 'ghoul distribution'
+        );
+
+        let wraith_percentage = (wraith_count * 1000) / total_beasts;
+        assert(
+            wraith_percentage >= 7 && wraith_percentage <= 21, 'wraith distribution'
+        );
+
+        let sprite_percentage = (sprite_count * 1000) / total_beasts;
+        assert(
+            sprite_percentage >= 7 && sprite_percentage <= 21, 'sprite distribution'
+        );
+
+        let kappa_percentage = (kappa_count * 1000) / total_beasts;
+        assert(
+            kappa_percentage >= 7 && kappa_percentage <= 21, 'kappa distribution'
+        );
+
+        let fairy_percentage = (fairy_count * 1000) / total_beasts;
+        assert(
+            fairy_percentage >= 7 && fairy_percentage <= 21, 'fairy distribution'
+        );
+
+        let leprechaun_percentage = (leprechaun_count * 1000) / total_beasts;
+        assert(
+            leprechaun_percentage >= 7 && leprechaun_percentage <= 21, 'leprechaun distribution'
+        );
+
+        let kelpie_percentage = (kelpie_count * 1000) / total_beasts;
+        assert(
+            kelpie_percentage >= 7 && kelpie_percentage <= 21, 'kelpie distribution'
+        );
+
+        let pixie_percentage = (pixie_count * 1000) / total_beasts;
+        assert(
+            pixie_percentage >= 7 && pixie_percentage <= 21, 'pixie distribution'
+        );
+
+        let gnome_percentage = (gnome_count * 1000) / total_beasts;
+        assert(
+            gnome_percentage >= 7 && gnome_percentage <= 21, 'gnome distribution'
+        );
+
+        let griffin_percentage = (griffin_count * 1000) / total_beasts;
+        assert(
+            griffin_percentage >= 7 && griffin_percentage <= 21, 'griffin distribution'
+        );
+
+        let manticore_percentage = (manticore_count * 1000) / total_beasts;
+        assert(
+            manticore_percentage >= 7 && manticore_percentage <= 21, 'manticore distribution'
+        );
+
+        let phoenix_percentage = (phoenix_count * 1000) / total_beasts;
+        assert(
+            phoenix_percentage >= 7 && phoenix_percentage <= 21, 'phoenix distribution'
+        );
+
+        let dragon_percentage = (dragon_count * 1000) / total_beasts;
+        assert(
+            dragon_percentage >= 7 && dragon_percentage <= 21, 'dragon distribution'
+        );
+
+        let minotaur_percentage = (minotaur_count * 1000) / total_beasts;
+        assert(
+            minotaur_percentage >= 7 && minotaur_percentage <= 21, 'minotaur distribution'
+        );
+
+        let qilin_percentage = (qilin_count * 1000) / total_beasts;
+        assert(
+            qilin_percentage >= 7 && qilin_percentage <= 21, 'qilin distribution'
+        );
+
+        let ammit_percentage = (ammit_count * 1000) / total_beasts;
+        assert(
+            ammit_percentage >= 7 && ammit_percentage <= 21, 'ammit distribution'
+        );
+
+        let nue_percentage = (nue_count * 1000) / total_beasts;
+        assert(
+            nue_percentage >= 7 && nue_percentage <= 21, 'nue distribution'
+        );
+
+        let skinwalker_percentage = (skinwalker_count * 1000) / total_beasts;
+        assert(
+            skinwalker_percentage >= 7 && skinwalker_percentage <= 21, 'skinwalker distribution'
+        );
+
+        let chupacabra_percentage = (chupacabra_count * 1000) / total_beasts;
+        assert(
+            chupacabra_percentage >= 7 && chupacabra_percentage <= 21, 'chupacabra distribution'
+        );
+
+        let weretiger_percentage = (weretiger_count * 1000) / total_beasts;
+        assert(
+            weretiger_percentage >= 7 && weretiger_percentage <= 21, 'weretiger distribution'
+        );
+
+        let wyvern_percentage = (wyvern_count * 1000) / total_beasts;
+        assert(
+            wyvern_percentage >= 7 && wyvern_percentage <= 21, 'wyvern distribution'
+        );
+
+        let roc_percentage = (roc_count * 1000) / total_beasts;
+        assert(
+            roc_percentage >= 7 && roc_percentage <= 21, 'roc distribution'
+        );
+
+        let harpy_percentage = (harpy_count * 1000) / total_beasts;
+        assert(
+            harpy_percentage >= 7 && harpy_percentage <= 21, 'harpy distribution'
+        );
+
+        let pegasus_percentage = (pegasus_count * 1000) / total_beasts;
+        assert(
+            pegasus_percentage >= 7 && pegasus_percentage <= 21, 'pegasus distribution'
+        );
+
+        let hippogriff_percentage = (hippogriff_count * 1000) / total_beasts;
+        assert(
+            hippogriff_percentage >= 7 && hippogriff_percentage <= 21, 'hippogriff distribution'
+        );
+
+        let fenrir_percentage = (fenrir_count * 1000) / total_beasts;
+        assert(
+            fenrir_percentage >= 7 && fenrir_percentage <= 21, 'fenrir distribution'
+        );
+
+        let jaguar_percentage = (jaguar_count * 1000) / total_beasts;
+        assert(
+            jaguar_percentage >= 7 && jaguar_percentage <= 21, 'jaguar distribution'
+        );
+
+        let satori_percentage = (satori_count * 1000) / total_beasts;
+        assert(
+            satori_percentage >= 7 && satori_percentage <= 21, 'satori distribution'
+        );
+
+        let direwolf_percentage = (direwolf_count * 1000) / total_beasts;
+        assert(
+            direwolf_percentage >= 7 && direwolf_percentage <= 21, 'direwolf distribution'
+        );
+
+        let bear_percentage = (bear_count * 1000) / total_beasts;
+        assert(
+            bear_percentage >= 7 && bear_percentage <= 21, 'bear distribution'
+        );
+
+        let wolf_percentage = (wolf_count * 1000) / total_beasts;
+        assert(
+            wolf_percentage >= 7 && wolf_percentage <= 21, 'wolf distribution'
+        );
+
+        let mantis_percentage = (mantis_count * 1000) / total_beasts;
+        assert(
+            mantis_percentage >= 7 && mantis_percentage <= 21, 'mantis distribution'
+        );
+
+        let spider_percentage = (spider_count * 1000) / total_beasts;
+        assert(
+            spider_percentage >= 7 && spider_percentage <= 21, 'spider distribution'
+        );
+
+        let rat_percentage = (rat_count * 1000) / total_beasts;
+        assert(
+            rat_percentage >= 7 && rat_percentage <= 21, 'rat distribution'
+        );
+
+        let kraken_percentage = (kraken_count * 1000) / total_beasts;
+        assert(
+            kraken_percentage >= 7 && kraken_percentage <= 21, 'kraken distribution'
+        );
+
+        let colossus_percentage = (colossus_count * 1000) / total_beasts;
+        assert(
+            colossus_percentage >= 7 && colossus_percentage <= 21, 'colossus distribution'
+        );
+
+        let balrog_percentage = (balrog_count * 1000) / total_beasts;
+        assert(
+            balrog_percentage >= 7 && balrog_percentage <= 21, 'balrog distribution'
+        );
+
+        let leviathan_percentage = (leviathan_count * 1000) / total_beasts;
+        assert(
+            leviathan_percentage >= 7 && leviathan_percentage <= 21, 'leviathan distribution'
+        );
+
+        let tarrasque_percentage = (tarrasque_count * 1000) / total_beasts;
+        assert(
+            tarrasque_percentage >= 7 && tarrasque_percentage <= 21, 'tarrasque distribution'
+        );
+
+        let titan_percentage = (titan_count * 1000) / total_beasts;
+        assert(
+            titan_percentage >= 7 && titan_percentage <= 21, 'titan distribution'
+        );
+
+        let nephilim_percentage = (nephilim_count * 1000) / total_beasts;
+        assert(
+            nephilim_percentage >= 7 && nephilim_percentage <= 21, 'nephilim distribution'
+        );
+
+        let behemoth_percentage = (behemoth_count * 1000) / total_beasts;
+        assert(
+            behemoth_percentage >= 7 && behemoth_percentage <= 21, 'behemoth distribution'
+        );
+
+        let hydra_percentage = (hydra_count * 1000) / total_beasts;
+        assert(
+            hydra_percentage >= 7 && hydra_percentage <= 21, 'hydra distribution'
+        );
+
+        let juggernaut_percentage = (juggernaut_count * 1000) / total_beasts;
+        assert(
+            juggernaut_percentage >= 7 && juggernaut_percentage <= 21, 'juggernaut distribution'
+        );
+
+        let oni_percentage = (oni_count * 1000) / total_beasts;
+        assert(
+            oni_percentage >= 7 && oni_percentage <= 21, 'oni distribution'
+        );
+
+        let jotunn_percentage = (jotunn_count * 1000) / total_beasts;
+        assert(
+            jotunn_percentage >= 7 && jotunn_percentage <= 21, 'jotunn distribution'
+        );
+
+        let ettin_percentage = (ettin_count * 1000) / total_beasts;
+        assert(
+            ettin_percentage >= 7 && ettin_percentage <= 21, 'ettin distribution'
+        );
+
+        let cyclops_percentage = (cyclops_count * 1000) / total_beasts;
+        assert(
+            cyclops_percentage >= 7 && cyclops_percentage <= 21, 'cyclops distribution'
+        );
+
+        let giant_percentage = (giant_count * 1000) / total_beasts;
+        assert(
+            giant_percentage >= 7 && giant_percentage <= 21, 'giant distribution'
+        );
+
+        let nemean_lion_percentage = (nemean_lion_count * 1000) / total_beasts;
+        assert(
+            nemean_lion_percentage >= 7 && nemean_lion_percentage <= 21, 'nemean_lion distribution'
+        );
+
+        let berserker_percentage = (berserker_count * 1000) / total_beasts;
+        assert(
+            berserker_percentage >= 7 && berserker_percentage <= 21, 'berserker distribution'
+        );
+
+        let yeti_percentage = (yeti_count * 1000) / total_beasts;
+        assert(
+            yeti_percentage >= 7 && yeti_percentage <= 21, 'yeti distribution'
+        );
+
+        let golem_percentage = (golem_count * 1000) / total_beasts;
+        assert(
+            golem_percentage >= 7 && golem_percentage <= 21, 'golem distribution'
+        );
+
+        let ent_percentage = (ent_count * 1000) / total_beasts;
+        assert(
+            ent_percentage >= 7 && ent_percentage <= 21, 'ent distribution'
+        );
+
+        let troll_percentage = (troll_count * 1000) / total_beasts;
+        assert(
+            troll_percentage >= 7 && troll_percentage <= 21, 'troll distribution'
+        );
+
+        let bigfoot_percentage = (bigfoot_count * 1000) / total_beasts;
+        assert(
+            bigfoot_percentage >= 7 && bigfoot_percentage <= 21, 'bigfoot distribution'
+        );
+
+        let ogre_percentage = (ogre_count * 1000) / total_beasts;
+        assert(
+            ogre_percentage >= 7 && ogre_percentage <= 21, 'ogre distribution'
+        );
+
+        let orc_percentage = (orc_count * 1000) / total_beasts;
+        assert(
+            orc_percentage >= 7 && orc_percentage <= 21, 'orc distribution'
+        );
+
+        let skeleton_percentage = (skeleton_count * 1000) / total_beasts;
+        assert(
+            skeleton_percentage >= 7 && skeleton_percentage <= 21, 'skeleton distribution'
+        );
     }
 
     #[test]
