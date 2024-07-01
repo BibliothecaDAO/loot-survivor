@@ -199,6 +199,15 @@ function getRandomness(xp: number, adventurerEntropy: bigint) {
   return { rnd1: r, rnd2: d };
 }
 
+function getBeastSeed(xp: number, adventurerEntropy: bigint) {
+  let params = [BigInt(xp), adventurerEntropy];
+
+  let poseidon = starknet.poseidonHashMany(params);
+  let d = poseidon / U128_MAX;
+
+  return d;
+}
+
 function getRandomnessWithHealth(
   xp: number,
   health: number,
@@ -361,7 +370,7 @@ function beastEncounter(
   rnd2: bigint,
   items?: Item[]
 ): Beast {
-  let seed = getRandomness(xp, adventurerEntropy).rnd1;
+  let seed = getBeastSeed(xp, adventurerEntropy);
 
   let beast_id = (seed % MAX_ID) + BigInt(1);
 
