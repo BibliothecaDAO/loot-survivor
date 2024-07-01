@@ -19,9 +19,9 @@ use super::{
             SILVER_RING_G20_LUCK_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, U128_MAX, U64_MAX,
             JEWELRY_BONUS_BEAST_GOLD_PERCENT, JEWELRY_BONUS_CRITICAL_HIT_PERCENT_PER_GREATNESS,
             JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS, NECKLACE_ARMOR_BONUS,
-            MINIMUM_DAMAGE_FROM_BEASTS, OBSTACLE_CRITICAL_HIT_CHANCE, BEAST_CRITICAL_HIT_CHANCE,
+            MINIMUM_DAMAGE_FROM_BEASTS, BEAST_CRITICAL_HIT_CHANCE,
             SILVER_RING_LUCK_BONUS_PER_GREATNESS, MINIMUM_DAMAGE_FROM_OBSTACLES,
-            MINIMUM_DAMAGE_TO_BEASTS, MAX_PACKABLE_BEAST_HEALTH,
+            MINIMUM_DAMAGE_TO_BEASTS, MAX_PACKABLE_BEAST_HEALTH, CRITICAL_HIT_LEVEL_MULTIPLIER
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
     },
@@ -872,6 +872,8 @@ impl ImplAdventurer of IAdventurer {
             specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
         };
 
+        let critical_hit_chance = ImplAdventurer::get_dynamic_critical_hit_chance(self.get_level());
+
         // calculate damage
         let mut combat_result = ImplCombat::calculate_damage(
             obstacle.combat_spec,
@@ -879,7 +881,7 @@ impl ImplAdventurer of IAdventurer {
             MINIMUM_DAMAGE_FROM_OBSTACLES,
             attacker_strength,
             beast_strength,
-            OBSTACLE_CRITICAL_HIT_CHANCE,
+            critical_hit_chance,
             entropy
         );
 
@@ -899,6 +901,15 @@ impl ImplAdventurer of IAdventurer {
 
         // return combat_result and jewelry_armor_bonus
         (combat_result, jewelry_armor_bonus)
+    }
+
+    fn get_dynamic_critical_hit_chance(level: u8) -> u8 {
+        let chance = level * CRITICAL_HIT_LEVEL_MULTIPLIER;
+        if (chance > 100) {
+            100
+        } else {
+            chance
+        }
     }
 
     /// @title Jewelry Armor Bonus Calculation
