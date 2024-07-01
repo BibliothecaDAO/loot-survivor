@@ -13,7 +13,7 @@ mod BeastSettings {
 
     // Controls minimum health for beasts
     const MINIMUM_HEALTH: u8 = 5;
-    const MAXIMUM_HEALTH: u16 = 511; // 2^9 - 1
+    const MAXIMUM_HEALTH: u16 = 1023; // 2^10 - 1
 
     // Controls the amount of gold received for slaying a beast
     // relative to XP. The current setting of 2 will result
