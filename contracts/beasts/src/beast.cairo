@@ -16,7 +16,7 @@ use super::constants::{
         STARTER_BEAST_HEALTH, MINIMUM_HEALTH, BEAST_SPECIAL_NAME_UNLOCK_LEVEL, MINIMUM_DAMAGE,
         STRENGTH_BONUS, MINIMUM_XP_REWARD, GOLD_REWARD_BASE_MINIMUM, GOLD_BASE_REWARD_DIVISOR,
         GOLD_REWARD_BONUS_DIVISOR, GOLD_REWARD_BONUS_MAX_MULTPLIER, STARTER_BEAST_LEVEL_THRESHOLD,
-        MAXIMUM_HEALTH
+        MAXIMUM_HEALTH, CRITICAL_HIT_LEVEL_MULTIPLIER, CRITICAL_HIT_AMBUSH_MULTIPLIER
     }
 };
 
@@ -198,6 +198,22 @@ impl ImplBeast of IBeast {
         }
     }
 
+    fn get_critical_hit_chance(adventurer_level: u8, is_ambush: bool) -> u8 {
+        let mut chance = adventurer_level.into() * CRITICAL_HIT_LEVEL_MULTIPLIER;
+
+        // critical hit chance is higher on ambush
+        if is_ambush {
+            chance = adventurer_level.into() * CRITICAL_HIT_AMBUSH_MULTIPLIER;
+        }
+
+        // cap chance at 100%
+        if chance > 100 {
+            100
+        } else {
+            chance.try_into().unwrap()
+        }
+    }
+
     #[inline(always)]
     fn is_t1(id: u8) -> bool {
         (id >= 1 && id <= 5) || (id >= 26 && id < 31) || (id >= 51 && id < 56)
@@ -242,7 +258,8 @@ mod tests {
                 STARTER_BEAST_HEALTH, MINIMUM_HEALTH, BEAST_SPECIAL_NAME_UNLOCK_LEVEL,
                 MINIMUM_DAMAGE, STRENGTH_BONUS, MINIMUM_XP_REWARD, GOLD_REWARD_BASE_MINIMUM,
                 GOLD_BASE_REWARD_DIVISOR, GOLD_REWARD_BONUS_DIVISOR,
-                GOLD_REWARD_BONUS_MAX_MULTPLIER, STARTER_BEAST_LEVEL_THRESHOLD, MAXIMUM_HEALTH
+                GOLD_REWARD_BONUS_MAX_MULTPLIER, STARTER_BEAST_LEVEL_THRESHOLD, MAXIMUM_HEALTH,
+                CRITICAL_HIT_LEVEL_MULTIPLIER, CRITICAL_HIT_AMBUSH_MULTIPLIER
             }
         }
     };
@@ -468,5 +485,59 @@ mod tests {
         beast.combat_spec.tier = Tier::T5(());
         let gold_reward = beast.get_gold_reward(entropy);
         assert(gold_reward == 8, 'lvl20 t5 max gold reward is 8');
+    }
+
+    #[test]
+    #[available_gas(3510)]
+    fn test_get_critical_hit_chance_gas() {
+        ImplBeast::get_critical_hit_chance(10, false);
+    }
+
+    #[test]
+    fn test_get_critical_hit_chance_no_ambush() {
+        let adventurer_level = 10;
+        let is_ambush = false;
+        let chance = ImplBeast::get_critical_hit_chance(adventurer_level, is_ambush);
+        assert(
+            chance == (adventurer_level.into() * CRITICAL_HIT_LEVEL_MULTIPLIER).try_into().unwrap(),
+            'crit hit chance no ambush'
+        );
+    }
+
+    #[test]
+    fn test_get_critical_hit_chance_with_ambush() {
+        let adventurer_level = 10;
+        let is_ambush = true;
+        let chance = ImplBeast::get_critical_hit_chance(adventurer_level, is_ambush);
+        assert(
+            chance == (adventurer_level.into() * CRITICAL_HIT_AMBUSH_MULTIPLIER)
+                .try_into()
+                .unwrap(),
+            'crit hit chance for ambush'
+        );
+    }
+
+    #[test]
+    fn test_get_critical_hit_chance_cap() {
+        let adventurer_level = 105;
+        let is_ambush = true;
+        let chance = ImplBeast::get_critical_hit_chance(adventurer_level, is_ambush);
+        assert(chance == 100, 'crit hit exceeded 100');
+    }
+
+    #[test]
+    fn test_get_critical_hit_chance_no_ambush_cap() {
+        let adventurer_level = 105;
+        let is_ambush = false;
+        let chance = ImplBeast::get_critical_hit_chance(adventurer_level, is_ambush);
+        assert(chance == 100, 'crit hit ambush exceeded 100');
+    }
+
+    #[test]
+    fn test_get_critical_hit_chance_mul_overflow() {
+        let adventurer_level = 255;
+        let is_ambush = false;
+        let chance = ImplBeast::get_critical_hit_chance(adventurer_level, is_ambush);
+        assert(chance == 100, 'crit hit ambush exceeded 100');
     }
 }

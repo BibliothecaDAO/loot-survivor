@@ -119,7 +119,8 @@ trait IGame<TContractState> {
     // fn minimum_damage_to_beasts(self: @TContractState) -> u8;
     // fn minimum_damage_from_beasts(self: @TContractState) -> u8;
     // fn minimum_damage_from_obstacles(self: @TContractState) -> u8;
-    // fn obstacle_critical_hit_chance(self: @TContractState) -> u8;
+    fn obstacle_critical_hit_chance(self: @TContractState, adventurer_id: felt252) -> u8;
+    fn beast_critical_hit_chance(self: @TContractState, adventurer_id: felt252, is_ambush: bool) -> u8;
     // fn stat_upgrades_per_level(self: @TContractState) -> u8;
     // fn beast_special_name_unlock_level(self: @TContractState) -> u16;
     // fn item_xp_multiplier_beasts(self: @TContractState) -> u16;

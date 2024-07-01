@@ -19,9 +19,9 @@ use super::{
             SILVER_RING_G20_LUCK_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, U128_MAX, U64_MAX,
             JEWELRY_BONUS_BEAST_GOLD_PERCENT, JEWELRY_BONUS_CRITICAL_HIT_PERCENT_PER_GREATNESS,
             JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS, NECKLACE_ARMOR_BONUS,
-            MINIMUM_DAMAGE_FROM_BEASTS, BEAST_CRITICAL_HIT_CHANCE,
-            SILVER_RING_LUCK_BONUS_PER_GREATNESS, MINIMUM_DAMAGE_FROM_OBSTACLES,
-            MINIMUM_DAMAGE_TO_BEASTS, MAX_PACKABLE_BEAST_HEALTH, CRITICAL_HIT_LEVEL_MULTIPLIER
+            MINIMUM_DAMAGE_FROM_BEASTS, SILVER_RING_LUCK_BONUS_PER_GREATNESS,
+            MINIMUM_DAMAGE_FROM_OBSTACLES, MINIMUM_DAMAGE_TO_BEASTS, MAX_PACKABLE_BEAST_HEALTH,
+            CRITICAL_HIT_LEVEL_MULTIPLIER
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
     },
@@ -793,7 +793,12 @@ impl ImplAdventurer of IAdventurer {
     // @param entropy Randomness input for the function's calculations.
     // @return A tuple containing the combat result and jewelry armor bonus.
     fn defend(
-        self: Adventurer, beast: Beast, armor: Item, armor_specials: SpecialPowers, entropy: u128,
+        self: Adventurer,
+        beast: Beast,
+        armor: Item,
+        armor_specials: SpecialPowers,
+        entropy: u128,
+        is_ambush: bool
     ) -> (CombatResult, u16) {
         // adventurer strength isn't used for defense
         let attacker_strength = 0;
@@ -810,6 +815,8 @@ impl ImplAdventurer of IAdventurer {
             specials: armor_specials
         };
 
+        let critical_hit_chance = ImplBeast::get_critical_hit_chance(self.get_level(), is_ambush);
+
         // calculate damage
         let mut combat_result = ImplCombat::calculate_damage(
             beast.combat_spec,
@@ -817,7 +824,7 @@ impl ImplAdventurer of IAdventurer {
             MINIMUM_DAMAGE_FROM_BEASTS,
             attacker_strength,
             beast_strength,
-            BEAST_CRITICAL_HIT_CHANCE,
+            critical_hit_chance,
             entropy
         );
 

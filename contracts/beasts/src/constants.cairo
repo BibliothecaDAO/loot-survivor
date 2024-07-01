@@ -46,6 +46,9 @@ mod BeastSettings {
     // controls at what level adventurers will discover random beasts
     // vs starter beasts which are always the same and maximally easy
     const STARTER_BEAST_LEVEL_THRESHOLD: u8 = 1;
+
+    const CRITICAL_HIT_LEVEL_MULTIPLIER: u16 = 1;
+    const CRITICAL_HIT_AMBUSH_MULTIPLIER: u16 = 3;
 }
 
 mod BeastId {

@@ -80,8 +80,7 @@ mod Game {
                 VITALITY_INSTANT_HEALTH_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, XP_FOR_DISCOVERIES,
                 STARTING_GOLD, STARTING_HEALTH, POTION_PRICE, MINIMUM_POTION_PRICE,
                 CHARISMA_POTION_DISCOUNT, CHARISMA_ITEM_DISCOUNT, MINIMUM_ITEM_PRICE,
-                MINIMUM_DAMAGE_TO_BEASTS, MINIMUM_DAMAGE_FROM_OBSTACLES,
-                OBSTACLE_CRITICAL_HIT_CHANCE, MAX_STAT_UPGRADES_AVAILABLE
+                MINIMUM_DAMAGE_TO_BEASTS, MINIMUM_DAMAGE_FROM_OBSTACLES, MAX_STAT_UPGRADES_AVAILABLE
             }
         },
         adventurer_utils::AdventurerUtils, leaderboard::{Score, Leaderboard},
@@ -462,6 +461,7 @@ mod Game {
                     start_entropy,
                     rnd1,
                     rnd2,
+                    false
                 );
 
                 // emit attacked by beast event
@@ -885,9 +885,16 @@ mod Game {
         // fn minimum_damage_from_obstacles(self: @ContractState) -> u8 {
         //     MINIMUM_DAMAGE_FROM_OBSTACLES
         // }
-        // fn obstacle_critical_hit_chance(self: @ContractState) -> u8 {
-        //     OBSTACLE_CRITICAL_HIT_CHANCE
-        // }
+        fn obstacle_critical_hit_chance(self: @ContractState, adventurer_id: felt252) -> u8 {
+            let adventurer = self._adventurer.read(adventurer_id);
+            ImplAdventurer::get_dynamic_critical_hit_chance(adventurer.get_level())
+        }
+        fn beast_critical_hit_chance(
+            self: @ContractState, adventurer_id: felt252, is_ambush: bool
+        ) -> u8 {
+            let adventurer = self._adventurer.read(adventurer_id);
+            ImplBeast::get_critical_hit_chance(adventurer.get_level(), is_ambush)
+        }
         // fn stat_upgrades_per_level(self: @ContractState) -> u8 {
         //     MAX_STAT_UPGRADES_AVAILABLE
         // }
@@ -1233,7 +1240,9 @@ mod Game {
                     REWARD_DISTRIBUTIONS_BP::CLIENT_PROVIDER, cost_to_play
                 ),
                 FIRST_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::FIRST_PLACE, cost_to_play),
-                SECOND_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::SECOND_PLACE, cost_to_play),
+                SECOND_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_BP::SECOND_PLACE, cost_to_play
+                ),
                 THIRD_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::THIRD_PLACE, cost_to_play)
             }
         } else {
@@ -1244,7 +1253,9 @@ mod Game {
                     REWARD_DISTRIBUTIONS_BP::CLIENT_PROVIDER, cost_to_play
                 ),
                 FIRST_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::FIRST_PLACE, cost_to_play),
-                SECOND_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::SECOND_PLACE, cost_to_play),
+                SECOND_PLACE: _calculate_payout(
+                    REWARD_DISTRIBUTIONS_BP::SECOND_PLACE, cost_to_play
+                ),
                 THIRD_PLACE: _calculate_payout(REWARD_DISTRIBUTIONS_BP::THIRD_PLACE, cost_to_play)
             }
         }
@@ -1533,10 +1544,10 @@ mod Game {
         adventurer.beast_health = beast.starting_health;
 
         // check if beast ambushed adventurer
-        let is_ambushed = adventurer.is_ambushed(beast_seed);
+        let is_ambush = adventurer.is_ambushed(beast_seed);
 
         // if adventurer was ambushed
-        if (is_ambushed) {
+        if (is_ambush) {
             // process beast attack
             let start_entropy = _load_adventurer_metadata(@self, adventurer_id).start_entropy;
             let beast_battle_details = _beast_attack(
@@ -1547,7 +1558,8 @@ mod Game {
                 beast_seed,
                 start_entropy,
                 entropy,
-                entropy
+                entropy,
+                is_ambush
             );
             __event_AmbushedByBeast(ref self, adventurer, adventurer_id, beast_battle_details);
             if (adventurer.health == 0) {
@@ -1808,6 +1820,7 @@ mod Game {
                 start_entropy,
                 rnd1,
                 rnd2,
+                false
             );
 
             // emit events
@@ -1869,6 +1882,7 @@ mod Game {
         start_entropy: u64,
         battle_entropy: u128,
         attack_location_rnd: u128,
+        is_ambush: bool
     ) -> BattleDetails {
         // beasts attack random location on adventurer
         let attack_location = AdventurerUtils::get_random_attack_location(
@@ -1883,7 +1897,7 @@ mod Game {
 
         // process beast attack
         let (combat_result, _jewlery_armor_bonus) = adventurer
-            .defend(beast, armor, armor_specials, battle_entropy);
+            .defend(beast, armor, armor_specials, battle_entropy, is_ambush);
 
         // deduct damage taken from adventurer's health
         adventurer.decrease_health(combat_result.total_damage);
@@ -1955,6 +1969,7 @@ mod Game {
                 start_entropy,
                 ambush_entropy,
                 ambush_entropy,
+                false
             );
 
             __event_FleeFailed(ref self, adventurer, adventurer_id, beast_seed, beast);
