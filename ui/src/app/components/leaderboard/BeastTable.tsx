@@ -53,7 +53,6 @@ const KilledBeastsTable = ({
     const matchingItem2 = adventurersInListData?.adventurers.find(
       (item2: Adventurer) => item2.id === item1.adventurerId
     );
-    console.log(matchingItem2);
 
     return {
       ...item1,
@@ -61,15 +60,13 @@ const KilledBeastsTable = ({
     };
   });
 
-  console.log(mergedBeasts);
-
   return (
     <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row justify-between w-full">
       <div className="relative flex flex-col w-full sm:mr-4 flex-grow-2 p-2 gap-2">
         {beasts?.length > 0 ? (
           <>
             <h4 className="text-2xl text-center sm:text-2xl m-0">
-              Top 10 Killed Beasts
+              Pragma Beast Leaderboard
             </h4>
             <table className="w-full sm:text-lg xl:text-xl border border-terminal-green">
               <thead className="border border-terminal-green">

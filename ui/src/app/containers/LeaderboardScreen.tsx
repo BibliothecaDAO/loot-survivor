@@ -49,7 +49,12 @@ export default function LeaderboardScreen() {
 
   const copiedKilledBeasts = killedBeastsData?.beasts.slice();
 
-  const sortedKilledBeastsArray = copiedKilledBeasts?.sort(
+  const filteredKilledBeasts = copiedKilledBeasts?.filter((beast: Beast) => {
+    const { tier } = getBeastData(beast?.beast!);
+    return tier === 1;
+  });
+
+  const sortedKilledBeastsArray = filteredKilledBeasts?.sort(
     (a: Beast, b: Beast) => {
       const { tier: aTier } = getBeastData(a.beast!);
       const aDifficulty = a.level! * (6 - aTier);
@@ -152,7 +157,7 @@ export default function LeaderboardScreen() {
               <p className="sm:text-2xl">{scores.length}</p>
             </div>
             <Button onClick={() => setShowKilledBeasts(!showKilledBeasts)}>
-              {showKilledBeasts ? "Scores" : "Killed Beasts"}
+              {showKilledBeasts ? "Scores" : "Pragma Beast Leaderboard"}
             </Button>
           </div>
           {showKilledBeasts ? (
