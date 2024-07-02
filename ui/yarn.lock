@@ -2325,6 +2325,13 @@
     "@typescript-eslint/types" "5.59.2"
     eslint-visitor-keys "^3.3.0"
 
+"@vercel/analytics@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@vercel/analytics/-/analytics-1.3.1.tgz#e2b1deac1b5d14fa2e4fe36186ac5054c6385ae4"
+  integrity sha512-xhSlYgAuJ6Q4WQGkzYTLmXwhYl39sWjoMA3nHxfkvG+WdBT25c563a7QhwwKivEOZtPJXifYHR1m2ihoisbWyA==
+  dependencies:
+    server-only "^0.0.1"
+
 "@walletconnect/core@2.12.2":
   version "2.12.2"
   resolved "https://registry.yarnpkg.com/@walletconnect/core/-/core-2.12.2.tgz#12bd568b90daed876e58ebcc098c12843a3321e6"
@@ -5645,6 +5652,11 @@ semver@^7.3.7:
   integrity sha512-+XC0AD/R7Q2mPSRuy2Id0+CGTZ98+8f+KvwirxOKIEyid+XSx6HbC63p+O4IndTHuX5Z+JxQ0TghCkO5Cg/2HA==
   dependencies:
     lru-cache "^6.0.0"
+
+server-only@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/server-only/-/server-only-0.0.1.tgz#0f366bb6afb618c37c9255a314535dc412cd1c9e"
+  integrity sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==
 
 set-cookie-parser@^2.4.8:
   version "2.6.0"

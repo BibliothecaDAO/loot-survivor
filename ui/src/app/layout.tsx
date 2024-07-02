@@ -15,6 +15,7 @@ import "@/app/globals.css";
 import { BurnerManager } from "@dojoengine/create-burner";
 import { RpcProvider } from "starknet";
 import Head from "@/app/head";
+import { Analytics } from "@vercel/analytics/react";
 
 type SetupResult = {
   config: {
@@ -80,7 +81,10 @@ export default function RootLayout({
             >
               <ControllerProvider>
                 <StarknetProvider network={network}>
-                  <DojoProvider value={setupResult}>{children}</DojoProvider>
+                  <DojoProvider value={setupResult}>
+                    {children}
+                    <Analytics />
+                  </DojoProvider>
                 </StarknetProvider>
               </ControllerProvider>
             </ApolloProvider>
