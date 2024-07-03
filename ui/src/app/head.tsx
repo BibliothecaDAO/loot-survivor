@@ -50,6 +50,10 @@ export default function Head() {
         name="googlebot"
         content="index, nofollow, noimageindex, max-video-preview:-1, max-image-preview:large, max-snippet:-1"
       />
+      {/* PWA */}
+      <link rel="manifest" href="/manifest.json" />
+      <meta name="theme-color" content="#33FF33" />
+      <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     </>
   );
 }
