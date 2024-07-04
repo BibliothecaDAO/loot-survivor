@@ -54,12 +54,13 @@ import useTransactionManager from "@/app/hooks/useTransactionManager";
 import { SpecialBeast } from "@/app/components/notifications/SpecialBeast";
 import Storage from "@/app/lib/storage";
 import Onboarding from "./containers/Onboarding";
-import TopUp from "./containers/TopUp";
 import useControls from "@/app/hooks/useControls";
 import { networkConfig } from "@/app/lib/networkConfig";
 import useNetworkAccount from "@/app/hooks/useNetworkAccount";
 import { useController } from "@/app/context/ControllerContext";
 import EncounterTable from "@/app/components/encounters/EncounterTable";
+import { ProfileDialog } from "@/app/components/profile/ProfileDialog";
+import TokenLoader from "@/app/components/animations/TokenLoader";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -92,11 +93,9 @@ export default function Main() {
 
 function Home() {
   const { connector } = useConnect();
-  const disconnected = useUIStore((state) => state.disconnected);
-  const setDisconnected = useUIStore((state) => state.setDisconnected);
   const network = useUIStore((state) => state.network);
   const onKatana = useUIStore((state) => state.onKatana);
-  const { account, address, status, isConnected } = useNetworkAccount();
+  const { account, address, isConnected } = useNetworkAccount();
   const isMuted = useUIStore((state) => state.isMuted);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
@@ -111,11 +110,13 @@ function Home() {
   const owner = account?.address ? padAddress(account.address) : "";
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
-  const topUpDialog = useUIStore((state) => state.topUpDialog);
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
   const setSpecialBeast = useUIStore((state) => state.setSpecialBeast);
+  const isMintingLords = useUIStore((state) => state.isMintingLords);
+  const isWithdrawing = useUIStore((state) => state.isWithdrawing);
   const setIsMintingLords = useUIStore((state) => state.setIsMintingLords);
+  const setIsWithdrawing = useUIStore((state) => state.setIsWithdrawing);
   const hash = useLoadingStore((state) => state.hash);
   const specialBeastDefeated = useUIStore(
     (state) => state.specialBeastDefeated
@@ -128,6 +129,7 @@ function Home() {
   const setAdventurerEntropy = useUIStore(
     (state) => state.setAdventurerEntropy
   );
+  const showProfile = useUIStore((state) => state.showProfile);
 
   const { contract: gameContract } = useContract({
     address: networkConfig[network!].gameAddress,
@@ -199,43 +201,53 @@ function Home() {
   const { data, refetch, resetData, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
 
-  const { spawn, explore, attack, flee, upgrade, multicall, mintLords } =
-    syscalls({
-      gameContract: gameContract!,
-      lordsContract: lordsContract!,
-      beastsContract: beastsContract!,
-      addTransaction,
-      queryData: data,
-      resetData,
-      setData,
-      adventurer: adventurer!,
-      addToCalls,
-      calls,
-      handleSubmitCalls,
-      startLoading,
-      stopLoading,
-      setTxHash,
-      setEquipItems,
-      setDropItems,
-      setDeathMessage,
-      showDeathDialog,
-      setScreen,
-      setAdventurer,
-      setStartOption,
-      ethBalance: ethBalance,
-      showTopUpDialog,
-      setTopUpAccount,
-      account: account!,
-      setSpecialBeastDefeated,
-      setSpecialBeast,
-      connector,
-      getEthBalance,
-      getBalances,
-      setIsMintingLords,
-      setEntropyReady,
-      rpc_addr: networkConfig[network!].rpcUrl,
-      network,
-    });
+  const {
+    spawn,
+    explore,
+    attack,
+    flee,
+    upgrade,
+    multicall,
+    mintLords,
+    withdraw,
+  } = syscalls({
+    gameContract: gameContract!,
+    ethContract: ethContract!,
+    lordsContract: lordsContract!,
+    beastsContract: beastsContract!,
+    addTransaction,
+    queryData: data,
+    resetData,
+    setData,
+    adventurer: adventurer!,
+    addToCalls,
+    calls,
+    handleSubmitCalls,
+    startLoading,
+    stopLoading,
+    setTxHash,
+    setEquipItems,
+    setDropItems,
+    setDeathMessage,
+    showDeathDialog,
+    setScreen,
+    setAdventurer,
+    setStartOption,
+    ethBalance: ethBalance,
+    showTopUpDialog,
+    setTopUpAccount,
+    account: account!,
+    setSpecialBeastDefeated,
+    setSpecialBeast,
+    connector,
+    getEthBalance,
+    getBalances,
+    setIsMintingLords,
+    setIsWithdrawing,
+    setEntropyReady,
+    rpc_addr: networkConfig[network!].rpcUrl,
+    network,
+  });
 
   const playState = useMemo(
     () => ({
@@ -434,12 +446,6 @@ function Home() {
     false,
   ];
 
-  useEffect(() => {
-    if (isConnected) {
-      setDisconnected(false);
-    }
-  }, [isConnected]);
-
   const adventurers = adventurersData?.adventurers;
 
   useEffect(() => {
@@ -555,30 +561,17 @@ function Home() {
     return () => clearInterval(interval); // Cleanup on component unmount
   }, [adventurer?.level]);
 
-  if (!isConnected && disconnected) {
-    return <WalletSelect />;
-  }
-
   return (
     <>
       <NetworkSwitchError network={network} isWrongNetwork={isWrongNetwork} />
+      {isMintingLords && <TokenLoader isToppingUpLords={isMintingLords} />}
+      {isWithdrawing && <TokenLoader isWithdrawing={isWithdrawing} />}
       {screen === "onboarding" ? (
         <Onboarding
           ethBalance={ethBalance}
           lordsBalance={lordsBalance}
           costToPlay={costToPlay!}
           mintLords={mintLords}
-        />
-      ) : status == "connected" && topUpDialog ? (
-        <TopUp
-          ethBalance={ethBalance}
-          lordsBalance={lordsBalance}
-          costToPlay={costToPlay!}
-          mintLords={mintLords}
-          gameContract={gameContract!}
-          lordsContract={lordsContract!}
-          ethContract={ethContract!}
-          showTopUpDialog={showTopUpDialog}
         />
       ) : (
         <>
@@ -681,6 +674,17 @@ function Home() {
                 {encounterTable && (
                   <div className="absolute top-0 right-0 sm:right-32 sm:top-32">
                     <EncounterTable />
+                  </div>
+                )}
+
+                {showProfile && (
+                  <div className="absolute flex items-center justify-center top-0 right-0 left-0 w-full h-full bg-black/50">
+                    <span className="w-full h-full bg-black/50" />
+                    <ProfileDialog
+                      withdraw={withdraw}
+                      ethBalance={ethBalance}
+                      lordsBalance={lordsBalance}
+                    />
                   </div>
                 )}
               </div>

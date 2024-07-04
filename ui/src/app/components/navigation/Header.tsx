@@ -26,14 +26,7 @@ import {
 } from "@/app/components/icons/Icons";
 import TransactionCart from "@/app/components/navigation/TransactionCart";
 import TransactionHistory from "@/app/components/navigation/TransactionHistory";
-import {
-  NullAdventurer,
-  Item,
-  NullItem,
-  UpgradeStats,
-  ZeroUpgrade,
-  Call,
-} from "@/app/types";
+import { Item, NullItem, UpgradeStats, ZeroUpgrade, Call } from "@/app/types";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { getApibaraStatus } from "@/app/api/api";
 import ApibaraStatus from "@/app/components/navigation/ApibaraStatus";
@@ -69,12 +62,8 @@ export default function Header({
   const [mintingLords, setMintingLords] = useState(false);
   const { account } = useNetworkAccount();
   const { connector } = useConnect();
-  const { disconnect } = useDisconnect();
   const [apibaraStatus, setApibaraStatus] = useState();
-  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
-  const resetData = useQueriesStore((state) => state.resetData);
 
-  const setDisconnected = useUIStore((state) => state.setDisconnected);
   const isMuted = useUIStore((state) => state.isMuted);
   const setIsMuted = useUIStore((state) => state.setIsMuted);
   const displayCart = useUIStore((state) => state.displayCart);
@@ -89,6 +78,7 @@ export default function Header({
   const vitBoostRemoved = useUIStore((state) => state.vitBoostRemoved);
   const handleOffboarded = useUIStore((state) => state.handleOffboarded);
   const setLoginScreen = useUIStore((state) => state.setLoginScreen);
+  const setShowProfile = useUIStore((state) => state.setShowProfile);
 
   const calls = useTransactionCartStore((state) => state.calls);
   const txInCart = calls.length > 0;
@@ -488,10 +478,7 @@ export default function Header({
               variant={"outline"}
               size={"sm"}
               onClick={() => {
-                disconnect();
-                resetData();
-                setAdventurer(NullAdventurer);
-                setDisconnected(true);
+                setShowProfile(true);
               }}
               className="xl:px-5 p-0"
             >
@@ -531,10 +518,7 @@ export default function Header({
               variant={"outline"}
               size={"sm"}
               onClick={() => {
-                disconnect();
-                resetData();
-                setAdventurer(NullAdventurer);
-                setDisconnected(true);
+                setShowProfile(true);
               }}
               className="xl:px-5"
             >
@@ -568,7 +552,6 @@ export default function Header({
         {account && displayHistory && (
           <TransactionHistory buttonRef={displayHistoryButtonRef} />
         )}
-        {mintingLords && <TokenLoader isToppingUpLords={mintingLords} />}
       </div>
     </div>
   );

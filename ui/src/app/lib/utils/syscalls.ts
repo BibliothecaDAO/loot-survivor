@@ -37,6 +37,7 @@ import { Network } from "@/app/hooks/useUIStore";
 
 export interface SyscallsProps {
   gameContract: Contract;
+  ethContract: Contract;
   lordsContract: Contract;
   beastsContract: Contract;
   addTransaction: ({ hash, metadata }: TransactionParams) => void;
@@ -91,6 +92,7 @@ export interface SyscallsProps {
   getEthBalance: () => Promise<void>;
   getBalances: () => Promise<void>;
   setIsMintingLords: (value: boolean) => void;
+  setIsWithdrawing: (value: boolean) => void;
   setEntropyReady: (value: boolean) => void;
   rpc_addr: string;
   network: Network;
@@ -170,6 +172,7 @@ function handleDrop(
 
 export function syscalls({
   gameContract,
+  ethContract,
   lordsContract,
   beastsContract,
   addTransaction,
@@ -200,6 +203,7 @@ export function syscalls({
   getEthBalance,
   getBalances,
   setIsMintingLords,
+  setIsWithdrawing,
   setEntropyReady,
   rpc_addr,
   network,
@@ -1434,6 +1438,63 @@ export function syscalls({
     }
   };
 
+  const withdraw = async (
+    adminAccountAddress: string,
+    account: AccountInterface,
+    ethBalance: bigint,
+    lordsBalance: bigint
+  ) => {
+    try {
+      setIsWithdrawing(true);
+
+      const transferEthTx = {
+        contractAddress: ethContract?.address ?? "",
+        entrypoint: "transfer",
+        calldata: [adminAccountAddress, ethBalance ?? "0x0", "0x0"],
+      };
+
+      const transferLordsTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "transfer",
+        calldata: [adminAccountAddress, lordsBalance ?? "0x0", "0x0"],
+      };
+
+      // const maxFee = getMaxFee(network!);
+
+      // const transferEthTx = {
+      //   contractAddress: ethContract?.address ?? "",
+      //   entrypoint: "transfer",
+      //   calldata: CallData.compile([
+      //     masterAccountAddress,
+      //     newEthBalance ?? "0x0",
+      //     "0x0",
+      //   ]),
+      // };
+
+      // If they have Lords also withdraw
+      const calls =
+        lordsBalance > BigInt(0)
+          ? [transferEthTx, transferLordsTx]
+          : [transferEthTx];
+
+      const { transaction_hash } = await account.execute(calls);
+
+      const result = await provider.waitForTransaction(transaction_hash, {
+        retryInterval: getWaitRetryInterval(network!),
+      });
+
+      if (!result) {
+        throw new Error("Transaction did not complete successfully.");
+      }
+
+      setIsWithdrawing(false);
+      getBalances();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
   return {
     spawn,
     explore,
@@ -1442,5 +1503,6 @@ export function syscalls({
     upgrade,
     multicall,
     mintLords,
+    withdraw,
   };
 }

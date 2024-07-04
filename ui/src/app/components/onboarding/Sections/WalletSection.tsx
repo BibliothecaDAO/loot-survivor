@@ -1,6 +1,6 @@
 import { Button } from "@/app/components/buttons/Button";
 import { CompleteIcon } from "@/app/components/icons/Icons";
-import { displayAddress, padAddress } from "@/app/lib/utils";
+import { displayAddress, padAddress, copyToClipboard } from "@/app/lib/utils";
 import { getWalletConnectors } from "@/app/lib/connectors";
 import { useConnect, useDisconnect } from "@starknet-react/core";
 import useNetworkAccount from "@/app/hooks/useNetworkAccount";
@@ -14,14 +14,6 @@ const WalletSection = ({ step }: WalletSectionProps) => {
   const { connectors, connect } = useConnect();
   const { disconnect } = useDisconnect();
   const walletConnectors = getWalletConnectors(connectors);
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch (err) {
-      console.error("Failed to copy text: ", err);
-    }
-  };
 
   return (
     <>
