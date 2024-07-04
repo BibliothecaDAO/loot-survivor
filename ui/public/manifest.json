@@ -1,7 +1,7 @@
 {
   "name": "Loot Survivor",
   "short_name": "LS",
-  "description": "Loot Survivor is the first Play2Die game from Realms on Starknet.",
+  "description": "Loot Survivor is a fully on-chain arcade dungeon crawler game on Starknet.",
   "start_url": "/",
   "display": "fullscreen",
   "background_color": "#100E0E",
