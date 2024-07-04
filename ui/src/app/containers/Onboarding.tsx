@@ -15,6 +15,7 @@ interface OnboardingProps {
   lordsBalance: bigint;
   costToPlay: bigint;
   mintLords: (lordsAmount: number) => Promise<void>;
+  getBalances: () => Promise<void>;
 }
 
 const Onboarding = ({
@@ -22,6 +23,7 @@ const Onboarding = ({
   lordsBalance,
   costToPlay,
   mintLords,
+  getBalances,
 }: OnboardingProps) => {
   const isMuted = useUIStore((state) => state.isMuted);
   const setIsMuted = useUIStore((state) => state.setIsMuted);
@@ -79,6 +81,7 @@ const Onboarding = ({
             mintLords={mintLords}
             setScreen={setScreen}
             setSection={setSection}
+            getBalances={getBalances}
           />
         )}
       </div>

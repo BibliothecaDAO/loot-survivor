@@ -568,6 +568,7 @@ function Home() {
           lordsBalance={lordsBalance}
           costToPlay={costToPlay!}
           mintLords={mintLords}
+          getBalances={getBalances}
         />
       ) : status == "connected" && topUpDialog ? (
         <TopUp

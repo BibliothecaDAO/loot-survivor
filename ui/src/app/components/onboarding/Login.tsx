@@ -17,6 +17,7 @@ interface LoginProps {
   mintLords: (lordsAmount: number) => Promise<void>;
   setScreen: (value: ScreenPage) => void;
   setSection: (value: Section) => void;
+  getBalances: () => Promise<void>;
 }
 
 const Login = ({
@@ -27,6 +28,7 @@ const Login = ({
   mintLords,
   setScreen,
   setSection,
+  getBalances,
 }: LoginProps) => {
   const { account } = useNetworkAccount();
   const [step, setStep] = useState(1);
@@ -48,6 +50,12 @@ const Login = ({
       setStep(1);
     }
   }, [account, checkEnoughEth, checkEnoughLords]);
+
+  useEffect(() => {
+    if (account) {
+      getBalances();
+    }
+  }, [account]);
 
   return (
     <>
