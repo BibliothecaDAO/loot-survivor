@@ -26,17 +26,24 @@ import {
 } from "@/app/components/icons/Icons";
 import TransactionCart from "@/app/components/navigation/TransactionCart";
 import TransactionHistory from "@/app/components/navigation/TransactionHistory";
-import { Item, NullItem, UpgradeStats, ZeroUpgrade, Call } from "@/app/types";
+import {
+  Item,
+  NullItem,
+  UpgradeStats,
+  ZeroUpgrade,
+  Call,
+  NullAdventurer,
+} from "@/app/types";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { getApibaraStatus } from "@/app/api/api";
 import ApibaraStatus from "@/app/components/navigation/ApibaraStatus";
-import TokenLoader from "@/app/components/animations/TokenLoader";
 import { checkCartridgeConnector } from "@/app/lib/connectors";
 import { networkConfig } from "@/app/lib/networkConfig";
 import useNetworkAccount from "@/app/hooks/useNetworkAccount";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { useController } from "@/app/context/ControllerContext";
 import { vitalityIncrease } from "@/app/lib/constants";
+import CartridgeConnector from "@cartridge/connector";
 
 export interface HeaderProps {
   multicall: (
@@ -59,10 +66,19 @@ export default function Header({
   gameContract,
   costToPlay,
 }: HeaderProps) {
-  const [mintingLords, setMintingLords] = useState(false);
-  const { account } = useNetworkAccount();
+  const { account, address } = useNetworkAccount();
+  const { disconnect } = useDisconnect();
+  const resetData = useQueriesStore((state) => state.resetData);
   const { connector } = useConnect();
   const [apibaraStatus, setApibaraStatus] = useState();
+
+  const cartridgeConnector = connector as unknown as CartridgeConnector;
+
+  const [username, setUsername] = useState<string>();
+  useEffect(() => {
+    if (!address) return;
+    cartridgeConnector.username()?.then((n) => setUsername(n));
+  }, [address, connector]);
 
   const isMuted = useUIStore((state) => state.isMuted);
   const setIsMuted = useUIStore((state) => state.setIsMuted);
@@ -109,6 +125,7 @@ export default function Header({
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const data = useQueriesStore((state) => state.data);
   const potionAmount = useUIStore((state) => state.potionAmount);
   const upgrades = useUIStore((state) => state.upgrades);
@@ -390,9 +407,7 @@ export default function Header({
                   )}&amount=0.001`;
                   window.open(avnuLords, "_blank");
                 } else {
-                  setMintingLords(true);
                   await mintLords(lordsGameCost * 25);
-                  setMintingLords(false);
                 }
               }}
               onMouseEnter={() => setShowLordsBuy(true)}
@@ -478,11 +493,22 @@ export default function Header({
               variant={"outline"}
               size={"sm"}
               onClick={() => {
-                setShowProfile(true);
+                if (checkCartridgeConnector(connector)) {
+                  setShowProfile(true);
+                } else {
+                  disconnect();
+                  resetData();
+                  setAdventurer(NullAdventurer);
+                  setNetwork(undefined);
+                }
               }}
               className="xl:px-5 p-0"
             >
-              {account ? displayAddress(account.address) : "Connect"}
+              {account
+                ? username
+                  ? username
+                  : displayAddress(account.address)
+                : "Connect"}
             </Button>
           </div>
           <Button
@@ -518,11 +544,22 @@ export default function Header({
               variant={"outline"}
               size={"sm"}
               onClick={() => {
-                setShowProfile(true);
+                if (checkCartridgeConnector(connector)) {
+                  setShowProfile(true);
+                } else {
+                  disconnect();
+                  resetData();
+                  setAdventurer(NullAdventurer);
+                  setNetwork(undefined);
+                }
               }}
               className="xl:px-5"
             >
-              {account ? displayAddress(account.address) : "Connect"}
+              {account
+                ? username
+                  ? username
+                  : displayAddress(account.address)
+                : "Connect"}
             </Button>
             {checkCartridge && (
               <div className="absolute top-0 right-0">
