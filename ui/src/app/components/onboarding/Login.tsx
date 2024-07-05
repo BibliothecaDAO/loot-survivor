@@ -8,6 +8,8 @@ import { ScreenPage } from "@/app/hooks/useUIStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import { ETH_PREFUND_AMOUNT } from "@/app/lib/constants";
 import useNetworkAccount from "@/app/hooks/useNetworkAccount";
+import { checkCartridgeConnector } from "@/app/lib/connectors";
+import { useConnect } from "@starknet-react/core";
 
 interface LoginProps {
   eth: number;
@@ -32,6 +34,7 @@ const Login = ({
 }: LoginProps) => {
   const { account } = useNetworkAccount();
   const [step, setStep] = useState(1);
+  const { connector } = useConnect();
 
   const { handleOnboarded, network, onMainnet } = useUIStore();
 
@@ -42,7 +45,10 @@ const Login = ({
     if (account && checkEnoughEth && checkEnoughLords) {
       setScreen("start");
       handleOnboarded();
-    } else if (account && checkEnoughEth) {
+    } else if (
+      account &&
+      (checkEnoughEth || checkCartridgeConnector(connector))
+    ) {
       setStep(3);
     } else if (account) {
       setStep(2);
