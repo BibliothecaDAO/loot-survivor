@@ -445,9 +445,8 @@ mod Game {
                 // get beast and beast seed
                 let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
 
-                // get two random numbers
-                let (rnd1, rnd2) = AdventurerUtils::get_randomness(
-                    adventurer.xp, adventurer_entropy
+                let (_, attack_location_rnd) = AdventurerUtils::get_randomness_with_health(
+                    adventurer.xp, adventurer.health, adventurer_entropy
                 );
 
                 // process beast attack
@@ -459,8 +458,8 @@ mod Game {
                     beast,
                     beast_seed,
                     start_entropy,
-                    rnd1,
-                    rnd2,
+                    attack_location_rnd,
+                    attack_location_rnd,
                     false
                 );
 
