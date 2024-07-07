@@ -353,7 +353,7 @@ mod Game {
             );
 
             // get beast and beast seed
-            let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
+            let (beast, beast_seed) = adventurer.get_beast(adventurer_id, adventurer_entropy);
 
             // get weapon details
             let weapon = ImplLoot::get_item(adventurer.equipment.weapon.id);
@@ -396,12 +396,12 @@ mod Game {
             _assert_ownership(@self, adventurer_id);
             _assert_not_dead(immutable_adventurer);
             _assert_in_battle(immutable_adventurer);
-            _assert_not_starter_beast(immutable_adventurer);
+            _assert_not_starter_beast(immutable_adventurer, messages::CANT_FLEE_STARTER_BEAST);
             _assert_dexterity_not_zero(immutable_adventurer);
             _assert_entropy_set(@self, adventurer_id);
 
             // get beast and beast seed
-            let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
+            let (beast, beast_seed) = adventurer.get_beast(adventurer_id, adventurer_entropy);
 
             // attempt to flee
             _flee(
@@ -453,7 +453,7 @@ mod Game {
             // if the adventurer is equipping an item during battle, the beast will counter attack
             if (adventurer.in_battle()) {
                 // get beast and beast seed
-                let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
+                let (beast, beast_seed) = adventurer.get_beast(adventurer_id, adventurer_entropy);
 
                 let (_, attack_location_rnd) = AdventurerUtils::get_randomness_with_health(
                     adventurer.xp, adventurer.health, adventurer_entropy
@@ -505,6 +505,7 @@ mod Game {
             _assert_ownership(@self, adventurer_id);
             _assert_not_dead(adventurer);
             assert(items.len() != 0, messages::NO_ITEMS);
+            _assert_not_starter_beast(adventurer, messages::CANT_DROP_DURING_STARTER_BEAST);
 
             // drop items
             _drop(@self, ref adventurer, ref bag, adventurer_id, items.clone());
@@ -1365,7 +1366,7 @@ mod Game {
         starting_weapon: u8,
         adventurer_entropy: felt252
     ) -> BattleDetails {
-        let beast_seed = adventurer.get_beast_seed(adventurer_entropy);
+        let beast_seed = adventurer_id.try_into().unwrap();
 
         // generate starter beast which will have weak armor against the adventurers starter weapon
         let starter_beast = ImplBeast::get_starter_beast(
@@ -1525,7 +1526,7 @@ mod Game {
         entropy: u128
     ) {
         // get beast and beast seed
-        let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
+        let (beast, beast_seed) = adventurer.get_beast(adventurer_id, adventurer_entropy);
 
         // init beast health (this is only info about beast that we store)
         adventurer.beast_health = beast.starting_health;
@@ -2544,9 +2545,10 @@ mod Game {
             messages::ITEM_DOES_NOT_EXIST
         );
     }
-    fn _assert_not_starter_beast(adventurer: Adventurer) {
-        assert(adventurer.get_level() > 1, messages::CANT_FLEE_STARTER_BEAST);
+    fn _assert_not_starter_beast(adventurer: Adventurer, message: felt252) {
+        assert(adventurer.get_level() > 1, message);
     }
+
     fn _assert_no_stat_upgrades_available(adventurer: Adventurer) {
         assert(adventurer.stat_upgrades_available == 0, messages::STAT_UPGRADES_AVAILABLE);
     }
@@ -2657,7 +2659,7 @@ mod Game {
         let adventurer_entropy = _get_adventurer_entropy(self, adventurer_id);
 
         // get beast and beast seed
-        let (beast, _) = adventurer.get_beast(adventurer_entropy);
+        let (beast, _) = adventurer.get_beast(adventurer_id, adventurer_entropy);
 
         // return beast
         beast

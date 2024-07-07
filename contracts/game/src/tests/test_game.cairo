@@ -238,8 +238,13 @@ mod tests {
         (game, lords, eth, golden_token, OWNER())
     }
 
-    fn add_adventurer_to_game(ref game: IGameDispatcher, golden_token_id: u256) {
-        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero', golden_token_id, 4000000000000000);
+    fn add_adventurer_to_game(
+        ref game: IGameDispatcher, golden_token_id: u256, starting_weapon: u8
+    ) {
+        game
+            .new_game(
+                INTERFACE_ID(), starting_weapon, 'loothero', golden_token_id, 4000000000000000
+            );
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
@@ -1278,15 +1283,6 @@ mod tests {
 
     #[test]
     #[available_gas(20000000)]
-    fn test_get_attacking_beast() {
-        let mut game = new_adventurer(1000, 1696201757);
-        let beast = game.get_attacking_beast(ADVENTURER_ID);
-        // our adventurer starts with a wand so the starter beast should be a troll
-        assert(beast.id == BeastId::Troll, 'starter beast should be troll');
-    }
-
-    #[test]
-    #[available_gas(20000000)]
     fn test_get_health() {
         let mut game = new_adventurer(1000, 1696201757);
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1667,14 +1663,14 @@ mod tests {
         let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
 
         // add a player to the game
-        add_adventurer_to_game(ref game, 0);
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
         // advance blockchain timestamp beyond terminal timestamp
         starknet::testing::set_block_timestamp(terminal_timestamp + 1);
 
         // try to start a new game
         // should panic with 'terminal time reached'
         // which test is annotated to expect
-        add_adventurer_to_game(ref game, 0);
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
     }
 
     #[test]
@@ -1686,14 +1682,14 @@ mod tests {
         let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
 
         // add a player to the game
-        add_adventurer_to_game(ref game, 0);
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
 
         // advance blockchain timestamp to max u64
         let max_u64_timestamp = 18446744073709551615;
         starknet::testing::set_block_timestamp(max_u64_timestamp);
 
         // verify we can still start a new game
-        add_adventurer_to_game(ref game, 0);
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
     }
 
     #[test]
@@ -1703,9 +1699,9 @@ mod tests {
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
         let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
-        add_adventurer_to_game(ref game, 1);
+        add_adventurer_to_game(ref game, 1, ItemId::Wand);
         testing::set_block_timestamp(starting_timestamp + DAY);
-        add_adventurer_to_game(ref game, 1);
+        add_adventurer_to_game(ref game, 1, ItemId::Wand);
     }
 
     #[test]
@@ -1717,7 +1713,7 @@ mod tests {
         let terminal_timestamp = 0;
         let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
         assert(game.can_play(1), 'should be able to play');
-        add_adventurer_to_game(ref game, golden_token_id);
+        add_adventurer_to_game(ref game, golden_token_id, ItemId::Wand);
         assert(!game.can_play(1), 'should not be able to play');
         testing::set_block_timestamp(starting_timestamp + DAY);
         assert(game.can_play(1), 'should be able to play again');
@@ -1734,7 +1730,7 @@ mod tests {
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
         let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
-        add_adventurer_to_game(ref game, golden_token_id);
+        add_adventurer_to_game(ref game, golden_token_id, ItemId::Wand);
     }
 
     #[test]
@@ -1746,13 +1742,148 @@ mod tests {
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
         let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
-        add_adventurer_to_game(ref game, golden_token_id);
+        add_adventurer_to_game(ref game, golden_token_id, ItemId::Wand);
 
         // roll blockchain forward 1 second less than a day
         testing::set_block_timestamp(starting_timestamp + (DAY - 1));
 
         // try to play again with golden token which should cause panic
-        add_adventurer_to_game(ref game, golden_token_id);
+        add_adventurer_to_game(ref game, golden_token_id, ItemId::Wand);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Cant drop during starter beast', 'ENTRYPOINT_FAILED'))]
+    fn test_no_dropping_starter_weapon_during_starter_beast() {
+        let mut game = new_adventurer(1000, 1696201757);
+
+        // try to drop starter weapon during starter beast battle
+        let mut drop_items = array![ItemId::Wand];
+        game.drop(ADVENTURER_ID, drop_items);
+    }
+
+    #[test]
+    fn test_drop_starter_item_after_starter_beast() {
+        let mut game = new_adventurer(1000, 1696201757);
+        game.attack(ADVENTURER_ID, true);
+
+        // try to drop starter weapon during starter beast battle
+        let mut drop_items = array![ItemId::Wand];
+        game.drop(ADVENTURER_ID, drop_items);
+    }
+
+    #[test]
+    fn test_different_starter_beasts() {
+        let starting_block = 364063;
+        let starting_timestamp = 1698678554;
+        let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, 0);
+        let mut game_count = game.get_game_count();
+        assert(game_count == 0, 'game count should be 0');
+
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game_count = game.get_game_count();
+        let starter_beast_game_one = game.get_attacking_beast(game_count).id;
+        assert(game_count == 1, 'game count should be 1');
+
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game_count = game.get_game_count();
+        let starter_beast_game_two = game.get_attacking_beast(game_count).id;
+        assert(game_count == 2, 'game count should be 2');
+
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game_count = game.get_game_count();
+        let starter_beast_game_three = game.get_attacking_beast(game_count).id;
+        assert(game_count == 3, 'game count should be 3');
+
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game_count = game.get_game_count();
+        let starter_beast_game_four = game.get_attacking_beast(game_count).id;
+        assert(game_count == 4, 'game count should be 4');
+
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game_count = game.get_game_count();
+        let starter_beast_game_five = game.get_attacking_beast(game_count).id;
+        assert(game_count == 5, 'game count should be 5');
+
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game_count = game.get_game_count();
+        let starter_beast_game_six = game.get_attacking_beast(game_count).id;
+        assert(game_count == 6, 'game count should be 6');
+
+        // assert all games starting with a Wand get a T5 Brute for starter beast
+        assert(
+            starter_beast_game_one >= BeastId::Troll && starter_beast_game_one <= BeastId::Skeleton,
+            'wrong starter beast game 1'
+        );
+        assert(
+            starter_beast_game_two >= BeastId::Troll && starter_beast_game_one <= BeastId::Skeleton,
+            'wrong starter beast game 2'
+        );
+        assert(
+            starter_beast_game_three >= BeastId::Troll
+                && starter_beast_game_one <= BeastId::Skeleton,
+            'wrong starter beast game 3'
+        );
+        assert(
+            starter_beast_game_four >= BeastId::Troll
+                && starter_beast_game_one <= BeastId::Skeleton,
+            'wrong starter beast game 4'
+        );
+        assert(
+            starter_beast_game_five >= BeastId::Troll
+                && starter_beast_game_one <= BeastId::Skeleton,
+            'wrong starter beast game 5'
+        );
+
+        // assert first five games are all unique
+        assert(starter_beast_game_one != starter_beast_game_two, 'same starter beast game 1 & 2');
+        assert(starter_beast_game_one != starter_beast_game_three, 'same starter beast game 1 & 3');
+        assert(starter_beast_game_one != starter_beast_game_four, 'same starter beast game 1 & 4');
+        assert(starter_beast_game_one != starter_beast_game_five, 'same starter beast game 1 & 5');
+        assert(starter_beast_game_two != starter_beast_game_three, 'same starter beast game 2 & 3');
+        assert(starter_beast_game_two != starter_beast_game_four, 'same starter beast game 2 & 4');
+        assert(starter_beast_game_two != starter_beast_game_five, 'same starter beast game 2 & 5');
+        assert(
+            starter_beast_game_three != starter_beast_game_four, 'same starter beast game 3 & 4'
+        );
+        assert(
+            starter_beast_game_three != starter_beast_game_five, 'same starter beast game 3 & 5'
+        );
+        assert(starter_beast_game_four != starter_beast_game_five, 'same starter beast game 4 & 5');
+
+        // sixth game wraps around and gets same beast as the first game
+        assert(starter_beast_game_one == starter_beast_game_six, 'game 1 and 6 should be same');
+
+        // Assert Book start gets T5 Brutes
+        add_adventurer_to_game(ref game, 0, ItemId::Book);
+        game_count = game.get_game_count();
+        let starter_beast_book_start = game.get_attacking_beast(game_count).id;
+        assert(game_count == 7, 'game count should be 7');
+        assert(
+            starter_beast_book_start >= BeastId::Troll
+                && starter_beast_book_start <= BeastId::Skeleton,
+            'wrong starter beast for book'
+        );
+
+        // Assert Club start gets T5 Hunter
+        add_adventurer_to_game(ref game, 0, ItemId::Club);
+        game_count = game.get_game_count();
+        let starter_beast_club_start = game.get_attacking_beast(game_count).id;
+        assert(game_count == 8, 'game count should be 8');
+        assert(
+            starter_beast_club_start >= BeastId::Bear && starter_beast_club_start <= BeastId::Rat,
+            'wrong starter beast for club'
+        );
+
+        // Assert Club start gets T5 Hunter
+        add_adventurer_to_game(ref game, 0, ItemId::ShortSword);
+        game_count = game.get_game_count();
+        let starter_beast_sword_start = game.get_attacking_beast(game_count).id;
+        assert(game_count == 9, 'game count should be 9');
+        assert(
+            starter_beast_sword_start >= BeastId::Fairy
+                && starter_beast_sword_start <= BeastId::Gnome,
+            'wrong starter beast for sword'
+        );
     }
 
     #[starknet::contract]
