@@ -26,7 +26,6 @@ trait IGame<TContractState> {
         weapon: u8,
         name: felt252,
         golden_token_id: u256,
-        interface_camel: bool,
         vrf_fee_limit: u128
     );
     fn explore(ref self: TContractState, adventurer_id: felt252, till_beast: bool);
@@ -129,6 +128,7 @@ trait IGame<TContractState> {
 
     // contract details
     fn owner_of(self: @TContractState, adventurer_id: felt252) -> ContractAddress;
+    fn get_game_count(self: @TContractState) -> felt252;
     fn get_dao_address(self: @TContractState) -> ContractAddress;
     fn get_pg_address(self: @TContractState) -> ContractAddress;
     fn get_lords_address(self: @TContractState) -> ContractAddress;

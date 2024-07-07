@@ -13,14 +13,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "arcade_account"
-version = "0.1.0"
-source = "git+https://github.com/BibliothecaDAO/arcade-account?branch=next#cb3a3c9ca4e56c0fcc89ec5e273b48e1f9050b5f"
-dependencies = [
- "openzeppelin",
-]
-
-[[package]]
 name = "beasts"
 version = "0.1.0"
 dependencies = [
@@ -36,8 +28,6 @@ name = "game"
 version = "0.1.0"
 dependencies = [
  "adventurer",
- "arcade_account",
- "golden_token",
  "loot",
  "market",
  "obstacles",
@@ -46,26 +36,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "golden_token"
-version = "0.1.0"
-source = "git+https://github.com/BibliothecaDAO/golden-token?branch=next#a9f644453fd097bfe68170f39bed1c8a5d0af73e"
-dependencies = [
- "arcade_account",
- "openzeppelin",
-]
-
-[[package]]
 name = "loot"
 version = "0.1.0"
 dependencies = [
  "combat",
-]
-
-[[package]]
-name = "lords"
-version = "0.1.0"
-dependencies = [
- "openzeppelin",
 ]
 
 [[package]]
@@ -85,10 +59,10 @@ dependencies = [
 
 [[package]]
 name = "openzeppelin"
-version = "0.9.0"
-source = "git+https://github.com/OpenZeppelin/cairo-contracts.git?tag=v0.9.0#364db5b1aecc1335d2e65db887291d19aa28937d"
+version = "0.13.0"
+source = "git+https://github.com/OpenZeppelin/cairo-contracts.git?tag=v0.13.0#978b4e75209da355667d8954d2450e32bd71fe49"
 
 [[package]]
 name = "pragma_lib"
 version = "1.0.0"
-source = "git+https://github.com/astraly-labs/pragma-lib#2eca9b70dc505788423da1eedbf2d65563cc3102"
+source = "git+https://github.com/astraly-labs/pragma-lib#fe9a46743254182ac331da488ccfc05e0185cdd0"

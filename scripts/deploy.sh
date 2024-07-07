@@ -39,7 +39,7 @@ game_class_hash=$(starkli declare --watch /workspaces/loot-survivor/target/dev/g
 lords_contract=$(starkli deploy --watch $lords_class_hash $lords_cairo_string $lords_cairo_string $initial_supply 0 $ACCOUNT_ADDRESS --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY --max-fee 0.01 2>/dev/null)
 
 # deploy game
-game_contract=$(starkli deploy --watch $game_class_hash $lords_contract $dao_address $pg_address $beasts_address $golden_token_address $terminal_timestamp $randomness_contract $randomness_rotation_interval $oracle_address $previous_first_place_address $previous_second_place_address $previous_third_place_address --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY --max-fee 0.01 2>/dev/null)
+game_contract=$(starkli deploy --watch $game_class_hash $lords_contract $eth_contract, $dao_address $pg_address $beasts_address $golden_token_address $terminal_timestamp $randomness_contract $randomness_rotation_interval $oracle_address $previous_first_place_address $previous_second_place_address $previous_third_place_address --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY --max-fee 0.01 2>/dev/null)
 
 # mint lords
 echo "minting lords"

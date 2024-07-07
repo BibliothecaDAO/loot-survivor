@@ -9,21 +9,18 @@ mod tests {
 
 #[starknet::contract]
 mod Game {
-    // TODO: TESTING CONFIGS 
-    // ADJUST THESE BEFORE DEPLOYMENT
     use core::starknet::SyscallResultTrait;
+    const ARCADE_ACCOUNT_ID: felt252 = 22227699753170493970302265346292000442692;
     const TEST_ENTROPY: u64 = 12303548;
     const MAINNET_CHAIN_ID: felt252 = 0x534e5f4d41494e;
     const SEPOLIA_CHAIN_ID: felt252 = 0x534e5f5345504f4c4941;
     const KATANA_CHAIN_ID: felt252 = 0x4b4154414e41;
     const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 200;
-    const SECONDS_IN_HOUR: u32 = 3600;
     const SECONDS_IN_DAY: u32 = 86400;
-    const SECONDS_IN_WEEK: u32 = 604800;
-    const PHASE2_START: u8 = 12;
-    const PHASE3_START: u8 = 24;
     const TARGET_PRICE_USD_CENTS: u16 = 300;
     const PRAGMA_LORDS_KEY: felt252 = 'LORDS/USD'; // felt252 conversion of "LORDS/USD"
+    const PRAGMA_PUBLISH_DELAY: u8 = 0;
+    const PRAGMA_NUM_WORDS: u8 = 1;
 
     use core::{
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
@@ -35,11 +32,7 @@ mod Game {
     };
 
     use openzeppelin::token::erc20::interface::{
-        IERC20Camel, IERC20CamelDispatcher, IERC20CamelDispatcherTrait, IERC20CamelLibraryDispatcher
-    };
-
-    use openzeppelin::introspection::interface::{
-        ISRC5Dispatcher, ISRC5DispatcherTrait, ISRC5CamelDispatcher, ISRC5CamelDispatcherTrait
+        IERC20Camel, IERC20Dispatcher, IERC20DispatcherTrait, IERC20CamelLibraryDispatcher
     };
 
     use openzeppelin::token::erc721::interface::{
@@ -49,13 +42,6 @@ mod Game {
     use pragma_lib::abi::{IRandomnessDispatcher, IRandomnessDispatcherTrait};
     use pragma_lib::abi::{IPragmaABIDispatcher, IPragmaABIDispatcherTrait};
     use pragma_lib::types::{AggregationMode, DataType, PragmaPricesResponse};
-
-    use arcade_account::{
-        account::interface::{
-            IMasterControl, IMasterControlDispatcher, IMasterControlDispatcherTrait
-        },
-        Account, ARCADE_ACCOUNT_ID
-    };
 
     use super::game::{
         interfaces::{IGame},
@@ -85,7 +71,6 @@ mod Game {
         },
         adventurer_utils::AdventurerUtils, leaderboard::{Score, Leaderboard},
     };
-    use openzeppelin::token::erc20::{interface::{IERC20Dispatcher, IERC20DispatcherTrait}};
 
     use market::{
         market::{ImplMarket, LootWithPrice, ItemPurchase},
@@ -111,6 +96,7 @@ mod Game {
         _genesis_timestamp: u64,
         _leaderboard: Leaderboard,
         _lords: ContractAddress,
+        _eth_address: ContractAddress,
         _owner: LegacyMap::<felt252, ContractAddress>,
         _golden_token_last_use: LegacyMap::<felt252, felt252>,
         _golden_token: ContractAddress,
@@ -158,10 +144,26 @@ mod Game {
         ClearedEntropy: ClearedEntropy
     }
 
+    // @title Constructor
+    // @notice Initializes the contract
+    // @param lords The address of the LORDS contract
+    // @param eth_address The address of the ETH contract
+    // @param dao The address of the DAO contract
+    // @param pg_address The address of the PG contract
+    // @param collectible_beasts The address of the collectible beasts contract
+    // @param golden_token_address The address of the golden token contract
+    // @param terminal_timestamp The timestamp at which the game is terminal
+    // @param randomness_contract_address The address of the randomness contract
+    // @param randomness_rotation_interval The interval at which the randomness contract rotates
+    // @param oracle_address The address of the price oracle contract
+    // @param previous_first_place The address of the previous first place
+    // @param previous_second_place The address of the previous second place
+    // @param previous_third_place The address of the previous third place
     #[constructor]
     fn constructor(
         ref self: ContractState,
         lords: ContractAddress,
+        eth_address: ContractAddress,
         dao: ContractAddress,
         pg_address: ContractAddress,
         collectible_beasts: ContractAddress,
@@ -176,6 +178,7 @@ mod Game {
     ) {
         // init storage
         self._lords.write(lords);
+        self._eth_address.write(eth_address);
         self._dao.write(dao);
         self._pg_address.write(pg_address);
         self._collectible_beasts.write(collectible_beasts);
@@ -225,8 +228,14 @@ mod Game {
                 'caller not vrf contract'
             );
 
-            // verify requestor is the game contract
-            assert(requestor_address == starknet::get_contract_address(), 'requestor is not self');
+            // Verify requestor on mainnet
+            // TODO: Figure out how to make this work for test with mock randomness contract
+            let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
+            if chain_id == MAINNET_CHAIN_ID {
+                assert(
+                    requestor_address == starknet::get_contract_address(), 'requestor is not self'
+                );
+            }
 
             let adventurer_entropy = *random_words.at(0);
             let adventurer_id = *calldata.at(0);
@@ -242,18 +251,19 @@ mod Game {
         /// @title New Game
         ///
         /// @notice Creates a new game of Loot Survivor
-        /// @dev The function asserts the provided weapon's validity, starts the game, and distributes rewards.
+        /// @dev Starts a new game of Loot Survivor with the provided weapon and name. If Golden Token ID is provided, attempts to process payment with the token. Otherwise, processes payment with $lords
         ///
         /// @param client_reward_address Address where client rewards should be sent.
         /// @param weapon A u8 representing the weapon to start the game with. Valid options are: {wand: 12, book: 17, short sword: 46, club: 76}
         /// @param name A u128 value representing the player's name.
+        /// @param golden_token_id A u256 representing the ID of the golden token.
+        /// @param vrf_fee_limit A u128 representing the VRF fee limit.
         fn new_game(
             ref self: ContractState,
             client_reward_address: ContractAddress,
             weapon: u8,
             name: felt252,
             golden_token_id: u256,
-            interface_camel: bool,
             vrf_fee_limit: u128
         ) {
             // assert game terminal time has not been reached
@@ -267,14 +277,14 @@ mod Game {
             if chain_id != KATANA_CHAIN_ID {
                 // process payment for game and distribute rewards
                 if (golden_token_id != 0) {
-                    _play_with_token(ref self, golden_token_id, interface_camel);
+                    _play_with_token(ref self, golden_token_id);
                 } else {
                     _process_payment_and_distribute_rewards(ref self, client_reward_address);
                 }
             }
 
             // start the game
-            _start_game(ref self, weapon, name, interface_camel, vrf_fee_limit);
+            _start_game(ref self, weapon, name, vrf_fee_limit);
         }
 
         /// @title Explore Function
@@ -845,6 +855,9 @@ mod Game {
         fn owner_of(self: @ContractState, adventurer_id: felt252) -> ContractAddress {
             self._owner.read(adventurer_id)
         }
+        fn get_game_count(self: @ContractState) -> felt252 {
+            self._game_counter.read()
+        }
         // fn starting_gold(self: @ContractState) -> u16 {
         //     STARTING_GOLD
         // }
@@ -1000,15 +1013,15 @@ mod Game {
     }
 
     fn request_randomness(
-        randomness_address: ContractAddress, seed: u64, adventurer_id: felt252, fee_limit: u128
+        self: @ContractState, seed: u64, adventurer_id: felt252, fee_limit: u128
     ) {
-        let publish_delay = 0;
-        let num_words = 1;
+        let eth_address = self._eth_address.read();
+        let randomness_address = self._randomness_contract_address.read();
+
         let calldata = array![adventurer_id];
-        let ETH_ADDRESS = 0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7;
 
         // Approve the randomness contract to transfer the callback fee
-        let eth_dispatcher = IERC20Dispatcher { contract_address: ETH_ADDRESS.try_into().unwrap() };
+        let eth_dispatcher = IERC20Dispatcher { contract_address: eth_address };
 
         eth_dispatcher.approve(randomness_address, (fee_limit + fee_limit / 5).into());
 
@@ -1020,8 +1033,8 @@ mod Game {
                 seed,
                 starknet::get_contract_address(),
                 fee_limit,
-                publish_delay,
-                num_words,
+                PRAGMA_PUBLISH_DELAY.into(),
+                PRAGMA_NUM_WORDS.into(),
                 calldata
             );
     }
@@ -1095,16 +1108,9 @@ mod Game {
         // if beast beast level is above collectible threshold
         if beast.combat_spec.level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK
             && chain_id != KATANA_CHAIN_ID {
-            // mint beast to the players Primary Account address instead of Arcade Account
+            // mint beast to owner of the adventurer
             let owner_address = self._owner.read(adventurer_id);
-            let primary_address = _get_primary_account_address(
-                @self,
-                owner_address,
-                _load_adventurer_metadata(@self, adventurer_id).interface_camel
-            );
-
-            // mint the beast
-            _mint_beast(@self, beast, primary_address);
+            _mint_beast(@self, beast, owner_address);
         }
     }
 
@@ -1200,8 +1206,8 @@ mod Game {
         IERC721Dispatcher { contract_address: self._golden_token.read() }
     }
 
-    fn _lords_dispatcher(ref self: ContractState) -> IERC20CamelDispatcher {
-        IERC20CamelDispatcher { contract_address: self._lords.read() }
+    fn _lords_dispatcher(ref self: ContractState) -> IERC20Dispatcher {
+        IERC20Dispatcher { contract_address: self._lords.read() }
     }
 
     fn _calculate_payout(bp: u256, price: u128) -> u256 {
@@ -1210,18 +1216,6 @@ mod Game {
 
     fn _get_cost_to_play(self: @ContractState) -> u128 {
         self._cost_to_play.read()
-    }
-
-    fn _age_of_game_weeks(contract: @ContractState) -> u64 {
-        let genesis_timestamp = contract._genesis_timestamp.read();
-        let current_timestamp = starknet::get_block_info().unbox().block_timestamp;
-        (current_timestamp - genesis_timestamp) / SECONDS_IN_WEEK.into()
-    }
-
-    fn _age_of_game_hours(contract: @ContractState) -> u64 {
-        let genesis_timestamp = contract._genesis_timestamp.read();
-        let current_timestamp = starknet::get_block_info().unbox().block_timestamp;
-        (current_timestamp - genesis_timestamp) / SECONDS_IN_HOUR.into()
     }
 
     fn _get_reward_distribution(self: @ContractState) -> Rewards {
@@ -1273,8 +1267,9 @@ mod Game {
         let mut second_place_address = self._owner.read(leaderboard.second.adventurer_id.into());
         let mut third_place_address = self._owner.read(leaderboard.third.adventurer_id.into());
 
-        // until we have three scores above 200 on the new contract
-        if leaderboard.third.xp < 200 {
+        // wait until we have three decent scores before rewarding players on new contract
+        // this removes incentive to quickly play and die
+        if leaderboard.third.xp < MINIMUM_SCORE_FOR_PAYOUTS {
             // pay out to the top scores on the game previous contract
             first_place_address = self._previous_first_place.read();
             second_place_address = self._previous_second_place.read();
@@ -1285,16 +1280,16 @@ mod Game {
         }
 
         if (rewards.BIBLIO != 0) {
-            _lords_dispatcher(ref self).transferFrom(caller, dao_address, rewards.BIBLIO);
+            _lords_dispatcher(ref self).transfer_from(caller, dao_address, rewards.BIBLIO);
         } else {
-            _lords_dispatcher(ref self).transferFrom(caller, pg_address, rewards.PG);
+            _lords_dispatcher(ref self).transfer_from(caller, pg_address, rewards.PG);
         }
 
-        _lords_dispatcher(ref self).transferFrom(caller, client_address, rewards.CLIENT_PROVIDER);
-        _lords_dispatcher(ref self).transferFrom(caller, first_place_address, rewards.FIRST_PLACE);
+        _lords_dispatcher(ref self).transfer_from(caller, client_address, rewards.CLIENT_PROVIDER);
+        _lords_dispatcher(ref self).transfer_from(caller, first_place_address, rewards.FIRST_PLACE);
         _lords_dispatcher(ref self)
-            .transferFrom(caller, second_place_address, rewards.SECOND_PLACE);
-        _lords_dispatcher(ref self).transferFrom(caller, third_place_address, rewards.THIRD_PLACE);
+            .transfer_from(caller, second_place_address, rewards.SECOND_PLACE);
+        _lords_dispatcher(ref self).transfer_from(caller, third_place_address, rewards.THIRD_PLACE);
 
         __event_RewardDistribution(
             ref self,
@@ -1324,13 +1319,7 @@ mod Game {
         );
     }
 
-    fn _start_game(
-        ref self: ContractState,
-        weapon: u8,
-        name: felt252,
-        interface_camel: bool,
-        vrf_fee_limit: u128
-    ) {
+    fn _start_game(ref self: ContractState, weapon: u8, name: felt252, vrf_fee_limit: u128) {
         // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._game_counter.read() + 1;
 
@@ -1341,7 +1330,7 @@ mod Game {
         let mut adventurer = ImplAdventurer::new(weapon);
 
         // create meta data for the adventurer
-        let adventurer_meta = ImplAdventurerMetadata::new(name, interface_camel);
+        let adventurer_meta = ImplAdventurerMetadata::new(name);
 
         // adventurer immediately gets ambushed by a starter beast
         let beast_battle_details = _starter_beast_ambush(
@@ -1351,9 +1340,8 @@ mod Game {
         // if we're not running on Katana, request randomness from VRF as soon as game starts
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
         if chain_id != KATANA_CHAIN_ID {
-            let randomness_address = self._randomness_contract_address.read();
             request_randomness(
-                randomness_address, adventurer_id.try_into().unwrap(), adventurer_id, vrf_fee_limit
+                @self, adventurer_id.try_into().unwrap(), adventurer_id, vrf_fee_limit
             );
         }
 
@@ -2496,7 +2484,7 @@ mod Game {
                     let randomness_address = self._randomness_contract_address.read();
 
                     // request new entropy
-                    request_randomness(randomness_address, seed, adventurer_id, max_callback_fee);
+                    request_randomness(@self, seed, adventurer_id, max_callback_fee);
 
                     // emit ClearedEntropy event to let clients know the contact is fetching new entropy
                     __event_ClearedEntropy(ref self, adventurer_id, randomness_address, seed);
@@ -2697,15 +2685,6 @@ mod Game {
         }
     }
 
-    fn _update_owner_to_primary_account(ref self: ContractState, adventurer_id: felt252) {
-        let interface_camel = _load_adventurer_metadata(@self, adventurer_id).interface_camel;
-        let owner_address = self._owner.read(adventurer_id);
-        let primary_address = _get_primary_account_address(@self, owner_address, interface_camel);
-        if primary_address != self._owner.read(adventurer_id) {
-            self._owner.write(adventurer_id, primary_address)
-        }
-    }
-
     // @title Update Leaderboard Function
     //
     // @param adventurer_id The unique identifier of the adventurer
@@ -2713,10 +2692,6 @@ mod Game {
     fn _update_leaderboard(
         ref self: ContractState, adventurer_id: felt252, adventurer: Adventurer
     ) {
-        // if player was using an Arcade Account (AA), update owner of their adventurer to their Primary Account (PA)
-        // so their rewards get distributed to their PA instead of AA
-        _update_owner_to_primary_account(ref self, adventurer_id);
-
         // get current leaderboard which will be mutated as part of this function
         let mut leaderboard = self._leaderboard.read();
 
@@ -3398,35 +3373,12 @@ mod Game {
         _last_usage(self, token_id) + SECONDS_IN_DAY.into() <= get_block_timestamp().into()
     }
 
-    fn _get_primary_account_address(
-        self: @ContractState, address: ContractAddress, interface_camel: bool
-    ) -> ContractAddress {
-        if interface_camel {
-            let account_camel = ISRC5CamelDispatcher { contract_address: address };
-            if account_camel.supportsInterface(ARCADE_ACCOUNT_ID) {
-                IMasterControlDispatcher { contract_address: address }.get_master_account()
-            } else {
-                address
-            }
-        } else {
-            let account_snake = ISRC5Dispatcher { contract_address: address };
-            if account_snake.supports_interface(ARCADE_ACCOUNT_ID) {
-                IMasterControlDispatcher { contract_address: address }.get_master_account()
-            } else {
-                address
-            }
-        }
-    }
-
-    fn _play_with_token(ref self: ContractState, token_id: u256, interface_camel: bool) {
+    fn _play_with_token(ref self: ContractState, token_id: u256) {
         assert(_can_play(@self, token_id), messages::CANNOT_PLAY_WITH_TOKEN);
-
+        // we use caller here because we don't have an adventurer id yet
         let golden_token = _golden_token_dispatcher(ref self);
-
-        // we use caller address here because we don't have an adventurer id yet
-        let address = get_caller_address();
-        let player = _get_primary_account_address(@self, address, interface_camel);
-        assert(golden_token.owner_of(token_id) == player, messages::NOT_OWNER_OF_TOKEN);
+        let golden_token_owner = golden_token.owner_of(token_id);
+        assert(golden_token_owner == get_caller_address(), messages::NOT_OWNER_OF_TOKEN);
 
         self
             ._golden_token_last_use
