@@ -255,3 +255,16 @@ trait IViewGame<TContractState> { // ------ View Functions ------
 // fn get_games_played_snapshot(self: @TContractState) -> GamesPlayedSnapshot;
 // fn can_play(self: @TContractState, golden_token_id: u256) -> bool;
 }
+
+
+#[starknet::interface]
+trait IERC721Metadata<TState> {
+    fn name(self: @TState) -> ByteArray;
+    fn symbol(self: @TState) -> ByteArray;
+    fn token_uri(self: @TState, token_id: u256) -> ByteArray;
+}
+
+#[starknet::interface]
+trait IERC721MetadataCamelOnly<TState> {
+    fn tokenURI(self: @TState, tokenId: u256) -> ByteArray;
+}

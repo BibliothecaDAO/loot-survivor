@@ -1,10 +1,12 @@
 mod game {
     mod constants;
     mod interfaces;
+    mod renderer;
 }
 mod tests {
     mod test_game;
     mod mock_randomness;
+    mod oz_constants;
 }
 
 #[starknet::contract]
@@ -38,6 +40,8 @@ mod Game {
     use openzeppelin::token::erc721::interface::{
         IERC721, IERC721Dispatcher, IERC721DispatcherTrait, IERC721LibraryDispatcher
     };
+
+
     use openzeppelin::token::erc721::{ERC721Component, ERC721HooksEmptyImpl};
 
     use openzeppelin::introspection::src5::SRC5Component;
@@ -50,12 +54,14 @@ mod Game {
     use pragma_lib::types::{AggregationMode, DataType, PragmaPricesResponse};
 
     use super::game::{
-        interfaces::{IGame},
+        interfaces::{IGame, IERC721Metadata, IERC721MetadataCamelOnly},
         constants::{
             messages, Rewards, REWARD_DISTRIBUTIONS_BP, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX,
             U128_MAX, STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS, MINIMUM_DAMAGE_FROM_BEASTS
-        }
+        },
+        renderer::{create_full_svg}
     };
+
     use loot::{
         loot::{ILoot, Loot, ImplLoot},
         constants::{ItemId, NamePrefixLength, NameSuffixLength, SUFFIX_UNLOCK_GREATNESS}
@@ -91,7 +97,9 @@ mod Game {
 
 
     #[abi(embed_v0)]
-    impl ERC721MixinImpl = ERC721Component::ERC721MixinImpl<ContractState>;
+    impl ERC721Impl = ERC721Component::ERC721Impl<ContractState>;
+    #[abi(embed_v0)]
+    impl ERC721CamelOnly = ERC721Component::ERC721CamelOnlyImpl<ContractState>;
     impl ERC721InternalImpl = ERC721Component::InternalImpl<ContractState>;
 
     #[storage]
@@ -3408,5 +3416,20 @@ mod Game {
 
     fn _last_usage(self: @ContractState, token_id: u256) -> u256 {
         self._golden_token_last_use.read(token_id.try_into().unwrap()).into()
+    }
+
+    #[abi(embed_v0)]
+    impl ERC721Metadata of IERC721Metadata<ContractState> {
+        fn name(self: @ContractState) -> ByteArray {
+            self.erc721.ERC721_name.read()
+        }
+
+        fn symbol(self: @ContractState) -> ByteArray {
+            self.erc721.ERC721_symbol.read()
+        }
+
+        fn token_uri(self: @ContractState, token_id: u256) -> ByteArray {
+            create_full_svg()
+        }
     }
 }
