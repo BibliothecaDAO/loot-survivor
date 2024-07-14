@@ -1,10 +1,12 @@
 mod game {
     mod constants;
     mod interfaces;
+    mod renderer;
 }
 mod tests {
     mod test_game;
     mod mock_randomness;
+    mod oz_constants;
 }
 
 #[starknet::contract]
@@ -39,17 +41,27 @@ mod Game {
         IERC721, IERC721Dispatcher, IERC721DispatcherTrait, IERC721LibraryDispatcher
     };
 
+
+    use openzeppelin::token::erc721::{ERC721Component, ERC721HooksEmptyImpl};
+
+    use openzeppelin::introspection::src5::SRC5Component;
+
+    component!(path: ERC721Component, storage: erc721, event: ERC721Event);
+    component!(path: SRC5Component, storage: src5, event: SRC5Event);
+
     use pragma_lib::abi::{IRandomnessDispatcher, IRandomnessDispatcherTrait};
     use pragma_lib::abi::{IPragmaABIDispatcher, IPragmaABIDispatcherTrait};
     use pragma_lib::types::{AggregationMode, DataType, PragmaPricesResponse};
 
     use super::game::{
-        interfaces::{IGame},
+        interfaces::{IGame, IERC721Metadata, IERC721MetadataCamelOnly},
         constants::{
             messages, Rewards, REWARD_DISTRIBUTIONS_BP, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX,
             U128_MAX, STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS, MINIMUM_DAMAGE_FROM_BEASTS
-        }
+        },
+        renderer::{create_full_svg}
     };
+
     use loot::{
         loot::{ILoot, Loot, ImplLoot},
         constants::{ItemId, NamePrefixLength, NameSuffixLength, SUFFIX_UNLOCK_GREATNESS}
@@ -83,6 +95,13 @@ mod Game {
     };
     use beasts::beast::{Beast, IBeast, ImplBeast};
 
+
+    #[abi(embed_v0)]
+    impl ERC721Impl = ERC721Component::ERC721Impl<ContractState>;
+    #[abi(embed_v0)]
+    impl ERC721CamelOnly = ERC721Component::ERC721CamelOnlyImpl<ContractState>;
+    impl ERC721InternalImpl = ERC721Component::InternalImpl<ContractState>;
+
     #[storage]
     struct Storage {
         _adventurer: LegacyMap::<felt252, Adventurer>,
@@ -109,6 +128,10 @@ mod Game {
         _previous_first_place: ContractAddress,
         _previous_second_place: ContractAddress,
         _previous_third_place: ContractAddress,
+        #[substorage(v0)]
+        erc721: ERC721Component::Storage,
+        #[substorage(v0)]
+        src5: SRC5Component::Storage,
     }
 
     #[event]
@@ -141,7 +164,11 @@ mod Game {
         RewardDistribution: RewardDistribution,
         PriceChangeEvent: PriceChangeEvent,
         ReceivedEntropy: ReceivedEntropy,
-        ClearedEntropy: ClearedEntropy
+        ClearedEntropy: ClearedEntropy,
+        #[flat]
+        ERC721Event: ERC721Component::Event,
+        #[flat]
+        SRC5Event: SRC5Component::Event,
     }
 
     // @title Constructor
@@ -853,9 +880,9 @@ mod Game {
         fn get_leaderboard(self: @ContractState) -> Leaderboard {
             self._leaderboard.read()
         }
-        fn owner_of(self: @ContractState, adventurer_id: felt252) -> ContractAddress {
-            self._owner.read(adventurer_id)
-        }
+        // fn owner_of(self: @ContractState, adventurer_id: felt252) -> ContractAddress {
+        //     self._owner.read(adventurer_id)
+        // }
         fn get_game_count(self: @ContractState) -> felt252 {
             self._game_counter.read()
         }
@@ -3389,5 +3416,20 @@ mod Game {
 
     fn _last_usage(self: @ContractState, token_id: u256) -> u256 {
         self._golden_token_last_use.read(token_id.try_into().unwrap()).into()
+    }
+
+    #[abi(embed_v0)]
+    impl ERC721Metadata of IERC721Metadata<ContractState> {
+        fn name(self: @ContractState) -> ByteArray {
+            self.erc721.ERC721_name.read()
+        }
+
+        fn symbol(self: @ContractState) -> ByteArray {
+            self.erc721.ERC721_symbol.read()
+        }
+
+        fn token_uri(self: @ContractState, token_id: u256) -> ByteArray {
+            create_full_svg()
+        }
     }
 }

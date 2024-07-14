@@ -36,10 +36,12 @@ mod tests {
         bag::{Bag, IBag}, adventurer_utils::AdventurerUtils
     };
     use beasts::constants::{BeastSettings, BeastId};
-    use openzeppelin::tests::utils::constants::{
+
+    use game::tests::oz_constants::{
         ZERO, OWNER, SPENDER, RECIPIENT, NAME, SYMBOL, DECIMALS, SUPPLY, VALUE, DATA, OPERATOR,
         OTHER, BASE_URI, TOKEN_ID
     };
+
     use openzeppelin::tests::utils;
     use openzeppelin::token::erc20::dual20::{DualCaseERC20, DualCaseERC20Trait};
     use openzeppelin::token::erc20::interface::{IERC20CamelDispatcher, IERC20CamelDispatcherTrait};
@@ -1921,7 +1923,7 @@ mod tests {
             recipient: ContractAddress
         ) {
             self.erc20.initializer(name, symbol);
-            self.erc20._mint(recipient, initial_supply);
+            self.erc20.mint(recipient, initial_supply);
         }
     }
 
@@ -1973,7 +1975,7 @@ mod tests {
             token_id: u256
         ) {
             self.erc721.initializer(name, symbol, base_uri);
-            self.erc721._mint(recipient, token_id);
+            self.erc721.mint(recipient, token_id);
         }
     }
 }

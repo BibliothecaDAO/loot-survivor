@@ -13,6 +13,58 @@ dependencies = [
 ]
 
 [[package]]
+name = "alexandria_bytes"
+version = "0.1.0"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git#0aa7cca8a1acb1f35cff32420614f7f58e38de5e"
+dependencies = [
+ "alexandria_data_structures",
+ "alexandria_math",
+]
+
+[[package]]
+name = "alexandria_data_structures"
+version = "0.2.0"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git#0aa7cca8a1acb1f35cff32420614f7f58e38de5e"
+dependencies = [
+ "alexandria_encoding",
+]
+
+[[package]]
+name = "alexandria_encoding"
+version = "0.1.0"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git#0aa7cca8a1acb1f35cff32420614f7f58e38de5e"
+dependencies = [
+ "alexandria_bytes",
+ "alexandria_math",
+ "alexandria_numeric",
+]
+
+[[package]]
+name = "alexandria_math"
+version = "0.2.0"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git#0aa7cca8a1acb1f35cff32420614f7f58e38de5e"
+dependencies = [
+ "alexandria_data_structures",
+]
+
+[[package]]
+name = "alexandria_numeric"
+version = "0.1.0"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git#0aa7cca8a1acb1f35cff32420614f7f58e38de5e"
+dependencies = [
+ "alexandria_math",
+ "alexandria_searching",
+]
+
+[[package]]
+name = "alexandria_searching"
+version = "0.1.0"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git#0aa7cca8a1acb1f35cff32420614f7f58e38de5e"
+dependencies = [
+ "alexandria_data_structures",
+]
+
+[[package]]
 name = "beasts"
 version = "0.1.0"
 dependencies = [
@@ -28,6 +80,7 @@ name = "game"
 version = "0.1.0"
 dependencies = [
  "adventurer",
+ "alexandria_encoding",
  "loot",
  "market",
  "obstacles",
@@ -59,8 +112,8 @@ dependencies = [
 
 [[package]]
 name = "openzeppelin"
-version = "0.13.0"
-source = "git+https://github.com/OpenZeppelin/cairo-contracts.git?tag=v0.13.0#978b4e75209da355667d8954d2450e32bd71fe49"
+version = "0.14.0"
+source = "git+https://github.com/OpenZeppelin/cairo-contracts.git?tag=v0.14.0#f091c4f51ddeb10297db984acae965328c5a4e5b"
 
 [[package]]
 name = "pragma_lib"
