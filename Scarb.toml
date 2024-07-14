@@ -14,7 +14,7 @@ description = "A fully onchain arcade dungeon crawler built on Starknet in conju
 homepage = "https://github.com/provable-games/loot-survivor"
 
 [workspace.dependencies]
-starknet = ">=2.5.3"
+starknet = ">=2.6.4"
 
 [workspace.tool.fmt]
 sort-module-level-items = true

@@ -38,6 +38,12 @@ mod Game {
     use openzeppelin::token::erc721::interface::{
         IERC721, IERC721Dispatcher, IERC721DispatcherTrait, IERC721LibraryDispatcher
     };
+    use openzeppelin::token::erc721::{ERC721Component, ERC721HooksEmptyImpl};
+
+    use openzeppelin::introspection::src5::SRC5Component;
+
+    component!(path: ERC721Component, storage: erc721, event: ERC721Event);
+    component!(path: SRC5Component, storage: src5, event: SRC5Event);
 
     use pragma_lib::abi::{IRandomnessDispatcher, IRandomnessDispatcherTrait};
     use pragma_lib::abi::{IPragmaABIDispatcher, IPragmaABIDispatcherTrait};
@@ -83,6 +89,11 @@ mod Game {
     };
     use beasts::beast::{Beast, IBeast, ImplBeast};
 
+
+    #[abi(embed_v0)]
+    impl ERC721MixinImpl = ERC721Component::ERC721MixinImpl<ContractState>;
+    impl ERC721InternalImpl = ERC721Component::InternalImpl<ContractState>;
+
     #[storage]
     struct Storage {
         _adventurer: LegacyMap::<felt252, Adventurer>,
@@ -109,6 +120,10 @@ mod Game {
         _previous_first_place: ContractAddress,
         _previous_second_place: ContractAddress,
         _previous_third_place: ContractAddress,
+        #[substorage(v0)]
+        erc721: ERC721Component::Storage,
+        #[substorage(v0)]
+        src5: SRC5Component::Storage,
     }
 
     #[event]
@@ -141,7 +156,11 @@ mod Game {
         RewardDistribution: RewardDistribution,
         PriceChangeEvent: PriceChangeEvent,
         ReceivedEntropy: ReceivedEntropy,
-        ClearedEntropy: ClearedEntropy
+        ClearedEntropy: ClearedEntropy,
+        #[flat]
+        ERC721Event: ERC721Component::Event,
+        #[flat]
+        SRC5Event: SRC5Component::Event,
     }
 
     // @title Constructor
@@ -853,9 +872,9 @@ mod Game {
         fn get_leaderboard(self: @ContractState) -> Leaderboard {
             self._leaderboard.read()
         }
-        fn owner_of(self: @ContractState, adventurer_id: felt252) -> ContractAddress {
-            self._owner.read(adventurer_id)
-        }
+        // fn owner_of(self: @ContractState, adventurer_id: felt252) -> ContractAddress {
+        //     self._owner.read(adventurer_id)
+        // }
         fn get_game_count(self: @ContractState) -> felt252 {
             self._game_counter.read()
         }
