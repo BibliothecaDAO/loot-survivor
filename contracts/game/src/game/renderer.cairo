@@ -1,6 +1,22 @@
-use core::clone::Clone;
-use core::option::OptionTrait;
 use alexandria_encoding::base64::{Base64Encoder, Base64Decoder, Base64UrlEncoder, Base64UrlDecoder};
+use adventurer::{
+    adventurer::{Adventurer, ImplAdventurer, IAdventurer}, stats::{Stats, ImplStats},
+    adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata},
+    equipment::{Equipment, EquipmentPacking}, adventurer_utils::{AdventurerUtils},
+    bag::{Bag, IBag, ImplBag},
+};
+use core::{
+    array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
+    clone::Clone, poseidon::poseidon_hash_span, option::OptionTrait, box::BoxTrait,
+    starknet::{
+        get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const,
+        get_block_timestamp, info::BlockInfo
+    },
+};
+use core::bytes_31::{
+    BYTES_IN_BYTES31, Bytes31Trait, one_shift_left_bytes_felt252, one_shift_left_bytes_u128,
+    POW_2_128, POW_2_8, U128IntoBytes31, U8IntoBytes31
+};
 
 fn logo() -> ByteArray {
     "<svg xmlns=\"http://www.w3.org/2000/svg\" fill='#3DEC00' viewBox=\"0 0 10 16\"><g><g><path d=\"M1 2V0h8v2h1v10H7v4H3v-4H0V2zm1 4v4h2v2h2v-2h2V6H6v4H4V6z\"/></g></g></svg>"
@@ -48,13 +64,17 @@ fn create_svg(internals: ByteArray) -> ByteArray {
     "<svg xmlns='http://www.w3.org/2000/svg' width='600' height='900'>" + internals + "</svg>"
 }
 
-fn create_full_svg() -> ByteArray {
+fn create_full_svg(adventurer: Adventurer, adventurerMetadata: AdventurerMetadata) -> ByteArray {
     let rect = create_rect();
 
     let logo_element = "<g transform='translate(25,25) scale(4)'>" + logo() + "</g>";
 
+    let mut named = "";
+
+    // named.append_word(adventurerMetadata.name, BYTES_IN_BYTES31);
+
     // Update text elements
-    let name = create_text("John Doe", "117", "117.136", "32", "middle");
+    let name = create_text(named, "117", "117.136", "32", "middle");
     let id = create_text("#1234", "123", "61.2273", "24", "middle");
     let level = create_text("LVL 42", "208.008", "61.2273", "24", "middle");
     let health = create_text("100/100 HP", "453.527", "58.2727", "20", "right");
@@ -129,81 +149,21 @@ fn create_full_svg() -> ByteArray {
 #[cfg(test)]
 mod tests {
     use core::array::ArrayTrait;
-    use super::{create_svg, create_rect, create_text, combine_elements, logo};
+    use super::{create_full_svg};
+    use adventurer::{
+        adventurer::{Adventurer, ImplAdventurer, IAdventurer}, stats::{Stats, ImplStats},
+        adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata},
+        equipment::{Equipment, EquipmentPacking}, adventurer_utils::{AdventurerUtils},
+        bag::{Bag, IBag, ImplBag}, item::{ImplItem, Item},
+    };
+
 
     #[test]
     fn print() {
-        let rect = create_rect();
+        let adventurer = ImplAdventurer::new(24);
 
-        let logo_element = "<g transform=\"translate(25,25) scale(4)\">" + logo() + "</g>";
+        let adventurer_metadata = ImplAdventurerMetadata::new('survivor');
 
-        // Update text elements
-        let name = create_text("John Doe", "117", "117.136", "32", "middle");
-        let id = create_text("#1234", "123", "61.2273", "24", "middle");
-        let level = create_text("LVL 42", "208.008", "61.2273", "24", "middle");
-        let health = create_text("100/100 HP", "453.527", "58.2727", "20", "right");
-        let gold = create_text("1000 GLD", "475.09", "93.2727", "20", "right");
-
-        // Stats
-        let str = create_text("8 STR", "511.672", "128.273", "20", "right");
-        let dex = create_text("8 DEX", "510.891", "163.273", "20", "right");
-        let int = create_text("7 INT", "517.766", "198.273", "20", "right");
-        let vit = create_text("5 VIT", "518.566", "233.273", "20", "right");
-        let wis = create_text("9 WIS", "512.863", "268.273", "20", "right");
-        let cha = create_text("10 CHA", "497.707", "303.273", "20", "right");
-        let luck = create_text("2 LUCK", "496.594", "338.273", "20", "right");
-
-        // Equipment sections
-        let equipped_header = create_text("Equipped", "30", "183.136", "32", "middle");
-        let bag_header = create_text("Bag", "30", "600.136", "32", "middle");
-
-        // Combine all elements
-        let mut elements = array![
-            rect,
-            logo_element,
-            name,
-            id,
-            level,
-            health,
-            gold,
-            str,
-            dex,
-            int,
-            vit,
-            wis,
-            cha,
-            luck,
-            equipped_header,
-            bag_header,
-            create_text("Katana lvl 10", "30", "233.227", "24", "middle"),
-            create_text("Helm lvl 20", "30", "272.227", "24", "middle"),
-            create_text("Gloves lvl 20", "30", "311.227", "24", "middle"),
-            create_text("Ring lvl 20", "30", "350.227", "24", "middle"),
-            create_text("Greaves lvl 20", "30", "389.227", "24", "middle"),
-            create_text("Sash lvl 10", "30", "428.227", "24", "middle"),
-            create_text("Boots lvl 10", "30", "467.227", "24", "middle"),
-            create_text("Necklace lvl 10", "30", "506.227", "24", "middle"),
-            create_text("Katana lvl 10", "30", "644.273", "20", "middle"),
-            create_text("Helm lvl 20", "30", "678.273", "20", "middle"),
-            create_text("Ring lvl 20", "30", "712.273", "20", "middle"),
-            create_text("Greaves lvl 20", "30", "746.273", "20", "middle"),
-            create_text("Sash lvl 10", "30", "780.273", "20", "middle"),
-            create_text("Boots lvl 10", "30", "814.273", "20", "middle"),
-            create_text("Necklace lvl 10", "30", "848.273", "20", "middle"),
-            create_text("Katana lvl 10", "311", "644.273", "20", "middle"),
-            create_text("Helm lvl 20", "311", "678.273", "20", "middle"),
-            create_text("Ring lvl 20", "311", "712.273", "20", "middle"),
-            create_text("Greaves lvl 20", "311", "746.273", "20", "middle"),
-            create_text("Sash lvl 10", "311", "780.273", "20", "middle"),
-            create_text("Boots lvl 10", "311", "814.273", "20", "middle"),
-            create_text("Necklace lvl 10", "311", "848.273", "20", "middle"),
-        ]
-            .span();
-
-        let internals = combine_elements(ref elements);
-
-        let svg = create_svg(internals);
-
-        println!("{}", svg);
+        let rect = create_full_svg(adventurer, adventurer_metadata);
     }
 }

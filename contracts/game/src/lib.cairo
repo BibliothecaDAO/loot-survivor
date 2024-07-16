@@ -3428,8 +3428,11 @@ mod Game {
             self.erc721.ERC721_symbol.read()
         }
 
-        fn token_uri(self: @ContractState, token_id: u256) -> ByteArray {
-            create_full_svg()
+        fn token_uri(self: @ContractState, adventurer_id: felt252) -> ByteArray {
+            create_full_svg(
+                _load_adventurer(self, adventurer_id),
+                _load_adventurer_metadata(self, adventurer_id)
+            )
         }
     }
 }

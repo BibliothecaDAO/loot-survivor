@@ -1,3 +1,5 @@
 {
-    "editor.wordWrap": "on"
+  "editor.wordWrap": "on",
+  "cairo1.enableLanguageServer": true,
+  "cairo1.enableScarb": true
 }
