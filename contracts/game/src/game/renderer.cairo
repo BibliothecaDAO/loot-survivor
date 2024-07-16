@@ -4,6 +4,21 @@ use adventurer::{
     adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata},
     equipment::{Equipment, EquipmentPacking}, adventurer_utils::{AdventurerUtils},
     bag::{Bag, IBag, ImplBag},
+    constants::{
+        adventurer_constants::{
+            STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_POTION_DISCOUNT,
+            MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, HEALTH_INCREASE_PER_VITALITY, MAX_GOLD,
+            MAX_STAT_UPGRADES_AVAILABLE, MAX_ADVENTURER_XP, MAX_ADVENTURER_BLOCKS,
+            ITEM_MAX_GREATNESS, ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT,
+            MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL, NECKLACE_G20_BONUS_STATS,
+            SILVER_RING_G20_LUCK_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, U128_MAX, U64_MAX,
+            JEWELRY_BONUS_BEAST_GOLD_PERCENT, JEWELRY_BONUS_CRITICAL_HIT_PERCENT_PER_GREATNESS,
+            JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS, NECKLACE_ARMOR_BONUS,
+            MINIMUM_DAMAGE_FROM_BEASTS, SILVER_RING_LUCK_BONUS_PER_GREATNESS,
+            MINIMUM_DAMAGE_FROM_OBSTACLES, MINIMUM_DAMAGE_TO_BEASTS, MAX_PACKABLE_BEAST_HEALTH,
+            CRITICAL_HIT_LEVEL_MULTIPLIER
+        },
+    },
 };
 use core::{
     array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
@@ -64,77 +79,112 @@ fn create_svg(internals: ByteArray) -> ByteArray {
     "<svg xmlns='http://www.w3.org/2000/svg' width='600' height='900'>" + internals + "</svg>"
 }
 
-fn create_full_svg(adventurer: Adventurer, adventurerMetadata: AdventurerMetadata) -> ByteArray {
+fn len(f: felt252) -> usize {
+    let mut f: u128 = f.try_into().unwrap();
+    let mut l = 0;
+    while f != 0 {
+        f = f / 256;
+        l += 1;
+    };
+    l
+}
+
+fn create_full_svg(
+    adventurer_id: felt252, adventurer: Adventurer, adventurerMetadata: AdventurerMetadata, bag: Bag
+) -> ByteArray {
     let rect = create_rect();
 
     let logo_element = "<g transform='translate(25,25) scale(4)'>" + logo() + "</g>";
 
-    let mut named = "";
-
-    // named.append_word(adventurerMetadata.name, BYTES_IN_BYTES31);
+    let mut _name = Default::default();
+    _name.append_word(adventurerMetadata.name, len(adventurerMetadata.name));
 
     // Update text elements
-    let name = create_text(named, "117", "117.136", "32", "middle");
-    let id = create_text("#1234", "123", "61.2273", "24", "middle");
-    let level = create_text("LVL 42", "208.008", "61.2273", "24", "middle");
-    let health = create_text("100/100 HP", "453.527", "58.2727", "20", "right");
-    let gold = create_text("1000 GLD", "475.09", "93.2727", "20", "right");
+    let name = create_text(_name, "117", "117.136", "32", "middle");
+    let id = create_text("#" + format!("{}", adventurer_id), "123", "61.2273", "24", "middle");
+    let level = create_text(
+        "LVL" + format!("{}", adventurer.get_level()), "208.008", "61.2273", "24", "middle"
+    );
+    let health = create_text(
+        format!("{}", adventurer.health)
+            + "/"
+            + format!("{}", adventurer.stats.vitality.into() * HEALTH_INCREASE_PER_VITALITY + 100)
+            + "HP",
+        "453.527",
+        "58.2727",
+        "20",
+        "right"
+    );
+    let gold = create_text(
+        format!("{}", adventurer.gold) + "GLD", "475.09", "93.2727", "20", "right"
+    );
 
     // Stats
-    let str = create_text("8 STR", "511.672", "128.273", "20", "right");
-    let dex = create_text("8 DEX", "510.891", "163.273", "20", "right");
-    let int = create_text("7 INT", "517.766", "198.273", "20", "right");
-    let vit = create_text("5 VIT", "518.566", "233.273", "20", "right");
-    let wis = create_text("9 WIS", "512.863", "268.273", "20", "right");
-    let cha = create_text("10 CHA", "497.707", "303.273", "20", "right");
-    let luck = create_text("2 LUCK", "496.594", "338.273", "20", "right");
+    let str = create_text(
+        format!("{} STR", adventurer.stats.strength), "511.672", "128.273", "20", "right"
+    );
+    let dex = create_text(
+        format!("{} DEX", adventurer.stats.dexterity), "510.891", "163.273", "20", "right"
+    );
+    let int = create_text(
+        format!("{} INT", adventurer.stats.intelligence), "517.766", "198.273", "20", "right"
+    );
+    let vit = create_text(
+        format!("{} VIT", adventurer.stats.vitality), "518.566", "233.273", "20", "right"
+    );
+    let wis = create_text(
+        format!("{} WIS", adventurer.stats.wisdom), "512.863", "268.273", "20", "right"
+    );
+    let cha = create_text(
+        format!("{} CHA", adventurer.stats.charisma), "497.707", "303.273", "20", "right"
+    );
+    let luck = create_text(
+        format!("{} LUCK", adventurer.equipment.calculate_luck(bag)),
+        "496.594",
+        "338.273",
+        "20",
+        "right"
+    );
 
     // Equipment sections
     let equipped_header = create_text("Equipped", "30", "183.136", "32", "middle");
     let bag_header = create_text("Bag", "30", "600.136", "32", "middle");
 
     // Combine all elements
-    let mut elements = array![
-        rect,
-        logo_element,
-        name,
-        id,
-        level,
-        health,
-        gold,
-        str,
-        dex,
-        int,
-        vit,
-        wis,
-        cha,
-        luck,
-        equipped_header,
-        bag_header,
-        create_text("Katana lvl 10", "30", "233.227", "24", "middle"),
-        create_text("Helm lvl 20", "30", "272.227", "24", "middle"),
-        create_text("Gloves lvl 20", "30", "311.227", "24", "middle"),
-        create_text("Ring lvl 20", "30", "350.227", "24", "middle"),
-        create_text("Greaves lvl 20", "30", "389.227", "24", "middle"),
-        create_text("Sash lvl 10", "30", "428.227", "24", "middle"),
-        create_text("Boots lvl 10", "30", "467.227", "24", "middle"),
-        create_text("Necklace lvl 10", "30", "506.227", "24", "middle"),
-        create_text("Katana lvl 10", "30", "644.273", "20", "middle"),
-        create_text("Helm lvl 20", "30", "678.273", "20", "middle"),
-        create_text("Ring lvl 20", "30", "712.273", "20", "middle"),
-        create_text("Greaves lvl 20", "30", "746.273", "20", "middle"),
-        create_text("Sash lvl 10", "30", "780.273", "20", "middle"),
-        create_text("Boots lvl 10", "30", "814.273", "20", "middle"),
-        create_text("Necklace lvl 10", "30", "848.273", "20", "middle"),
-        create_text("Katana lvl 10", "311", "644.273", "20", "middle"),
-        create_text("Helm lvl 20", "311", "678.273", "20", "middle"),
-        create_text("Ring lvl 20", "311", "712.273", "20", "middle"),
-        create_text("Greaves lvl 20", "311", "746.273", "20", "middle"),
-        create_text("Sash lvl 10", "311", "780.273", "20", "middle"),
-        create_text("Boots lvl 10", "311", "814.273", "20", "middle"),
-        create_text("Necklace lvl 10", "311", "848.273", "20", "middle"),
-    ]
-        .span();
+    let mut elements = array![rect, logo_element, name, id, level,// health,
+    // gold,
+    // str,
+    // dex,
+    // int,
+    // vit,
+    // wis,
+    // cha,
+    // luck,
+    // equipped_header,
+    // bag_header,
+    // create_text("Katana lvl 10", "30", "233.227", "24", "middle"),
+    // create_text("Helm lvl 20", "30", "272.227", "24", "middle"),
+    // create_text("Gloves lvl 20", "30", "311.227", "24", "middle"),
+    // create_text("Ring lvl 20", "30", "350.227", "24", "middle"),
+    // create_text("Greaves lvl 20", "30", "389.227", "24", "middle"),
+    // create_text("Sash lvl 10", "30", "428.227", "24", "middle"),
+    // create_text("Boots lvl 10", "30", "467.227", "24", "middle"),
+    // create_text("Necklace lvl 10", "30", "506.227", "24", "middle"),
+    // create_text("Katana lvl 10", "30", "644.273", "20", "middle"),
+    // create_text("Helm lvl 20", "30", "678.273", "20", "middle"),
+    // create_text("Ring lvl 20", "30", "712.273", "20", "middle"),
+    // create_text("Greaves lvl 20", "30", "746.273", "20", "middle"),
+    // create_text("Sash lvl 10", "30", "780.273", "20", "middle"),
+    // create_text("Boots lvl 10", "30", "814.273", "20", "middle"),
+    // create_text("Necklace lvl 10", "30", "848.273", "20", "middle"),
+    // create_text("Katana lvl 10", "311", "644.273", "20", "middle"),
+    // create_text("Helm lvl 20", "311", "678.273", "20", "middle"),
+    // create_text("Ring lvl 20", "311", "712.273", "20", "middle"),
+    // create_text("Greaves lvl 20", "311", "746.273", "20", "middle"),
+    // create_text("Sash lvl 10", "311", "780.273", "20", "middle"),
+    // create_text("Boots lvl 10", "311", "814.273", "20", "middle"),
+    // create_text("Necklace lvl 10", "311", "848.273", "20", "middle"),
+    ].span();
 
     let internals = combine_elements(ref elements);
 
@@ -164,6 +214,8 @@ mod tests {
 
         let adventurer_metadata = ImplAdventurerMetadata::new('survivor');
 
-        let rect = create_full_svg(adventurer, adventurer_metadata);
+        let bag = ImplBag::new();
+
+        let rect = create_full_svg(1, adventurer, adventurer_metadata, bag);
     }
 }

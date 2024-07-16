@@ -3430,8 +3430,10 @@ mod Game {
 
         fn token_uri(self: @ContractState, adventurer_id: felt252) -> ByteArray {
             create_full_svg(
+                adventurer_id,
                 _load_adventurer(self, adventurer_id),
-                _load_adventurer_metadata(self, adventurer_id)
+                _load_adventurer_metadata(self, adventurer_id),
+                _load_bag(self, adventurer_id)
             )
         }
     }
