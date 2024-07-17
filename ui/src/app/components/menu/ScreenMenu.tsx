@@ -90,7 +90,7 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
     <div className="flex justify-between sm:justify-start w-full">
       {buttonsData.map((buttonData, index) => (
         <Button
-          className="px-2.5 sm:px-3"
+          className="px-2.5 sm:px-3 h-10 w-16 sm:w-24"
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
           variant={buttonData.screen === screen ? "default" : "outline"}
@@ -104,8 +104,8 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
         </Button>
       ))}
       <Button
-        className="hidden sm:block px-2.5 sm:px-3"
-        variant={encounterTable ? "default" : "outline"}
+        className="hidden sm:block px-2.5 sm:px-3 shadow-lg"
+        variant={encounterTable ? "default" : "token"}
         onClick={() => showEncounterTable(!encounterTable)}
         disabled={hideEncounters}
       >

@@ -349,8 +349,8 @@ export default function Header({
       </div>
       <div className="flex flex-row items-center self-end sm:gap-1 self-center">
         <Button
-          className="sm:hidden px-2.5 sm:px-3"
-          variant={encounterTable ? "default" : "outline"}
+          className="sm:hidden px-2.5 sm:px-3 h-12 shadow-md"
+          variant="token"
           onClick={() => showEncounterTable(!encounterTable)}
         >
           Prescience
@@ -446,7 +446,7 @@ export default function Header({
           <>
             <span className="sm:hidden w-5 h-5 mx-2">
               <Button
-                variant={txInCart ? "default" : "outline"}
+                variant={"outline"}
                 size={"fill"}
                 ref={displayCartButtonRef}
                 onClick={() => {
