@@ -6,9 +6,10 @@ import { Network } from "@/app/hooks/useUIStore";
 interface SetupProps {
   rpcUrl: string;
   network: Network;
+  setCreateBurner: (createBurner: boolean) => void;
 }
 
-export async function setup({ rpcUrl, network }: SetupProps) {
+export async function setup({ rpcUrl, network, setCreateBurner }: SetupProps) {
   const dojoProvider = new RpcProvider({
     nodeUrl: rpcUrl,
   });
@@ -30,7 +31,9 @@ export async function setup({ rpcUrl, network }: SetupProps) {
     (network === "localKatana" || network === "katana")
   ) {
     try {
+      setCreateBurner(true);
       await burnerManager.create();
+      setCreateBurner(false);
     } catch (e) {
       console.error(e);
     }
