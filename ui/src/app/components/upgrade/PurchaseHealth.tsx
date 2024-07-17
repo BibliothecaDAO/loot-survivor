@@ -78,8 +78,8 @@ const PurchaseHealth = ({
   return (
     <div className="flex flex-col sm:flex-row gap-5 items-center">
       <span className="flex flex-row items-center">
-        <CoinIcon className="mt-1 w-8 h-8 sm:w-5 sm:h-5 fill-current text-terminal-yellow" />
-        <p className="text-xl sm:text-base text-terminal-yellow">
+        <CoinIcon className="mt-2 sm:mt-1 w-10 h-10 sm:w-8 sm:h-8 fill-current text-terminal-yellow" />
+        <p className="text-4xl sm:text-2xl text-terminal-yellow">
           {potionCost}
         </p>
       </span>
@@ -99,7 +99,7 @@ const PurchaseHealth = ({
           potionAmount === max
         }
         onClick={fillToMax}
-        size={"xxs"}
+        size={"xs"}
         className="hidden sm:block m-auto"
       >
         Fill to Max
@@ -111,7 +111,7 @@ const PurchaseHealth = ({
           potionAmount === max
         }
         onClick={fillToMax}
-        size={"sm"}
+        size={"lg"}
         className="sm:hidden m-auto"
       >
         Fill to Max
