@@ -390,7 +390,7 @@ fn create_metadata(
 
     let metadata = metadata.add_array("attributes", attributes).build();
 
-    format!("data:application/json;base64,{}", metadata)
+    format!("data:application/json;base64,{}", bytes_base64_encode(metadata))
 }
 
 
