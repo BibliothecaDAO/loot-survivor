@@ -42,7 +42,11 @@ const Login = ({
   const checkEnoughLords = lords > lordsGameCost;
 
   useEffect(() => {
-    if (account && checkEnoughEth && checkEnoughLords) {
+    if (
+      account &&
+      (checkEnoughEth || checkCartridgeConnector(connector)) &&
+      checkEnoughLords
+    ) {
       setScreen("start");
       handleOnboarded();
     } else if (
