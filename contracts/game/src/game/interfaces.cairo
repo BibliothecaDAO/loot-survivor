@@ -41,6 +41,7 @@ trait IGame<TContractState> {
         items: Array<ItemPurchase>,
     );
     fn update_cost_to_play(ref self: TContractState);
+    fn update_render_contract(ref self: TContractState, render_contract: ContractAddress);
     // ------ View Functions ------
 
     // // adventurer details

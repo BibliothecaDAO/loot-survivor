@@ -1,39 +1,14 @@
-use adventurer::item::IItemPrimitive;
-use alexandria_encoding::base64::{Base64Encoder, Base64Decoder, Base64UrlEncoder, Base64UrlDecoder};
+use alexandria_encoding::base64::Base64Encoder;
 use adventurer::{
-    adventurer::{Adventurer, ImplAdventurer, IAdventurer}, stats::{Stats, ImplStats},
-    adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata},
-    equipment::{Equipment, EquipmentPacking, ImplEquipment}, adventurer_utils::{AdventurerUtils},
-    bag::{Bag, IBag, ImplBag}, item::{Item, ImplItem, ItemPacking},
-    constants::{
-        adventurer_constants::{
-            STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_POTION_DISCOUNT,
-            MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, HEALTH_INCREASE_PER_VITALITY, MAX_GOLD,
-            MAX_STAT_UPGRADES_AVAILABLE, MAX_ADVENTURER_XP, MAX_ADVENTURER_BLOCKS,
-            ITEM_MAX_GREATNESS, ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT,
-            MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL, NECKLACE_G20_BONUS_STATS,
-            SILVER_RING_G20_LUCK_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, U128_MAX, U64_MAX,
-            JEWELRY_BONUS_BEAST_GOLD_PERCENT, JEWELRY_BONUS_CRITICAL_HIT_PERCENT_PER_GREATNESS,
-            JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS, NECKLACE_ARMOR_BONUS,
-            MINIMUM_DAMAGE_FROM_BEASTS, SILVER_RING_LUCK_BONUS_PER_GREATNESS,
-            MINIMUM_DAMAGE_FROM_OBSTACLES, MINIMUM_DAMAGE_TO_BEASTS, MAX_PACKABLE_BEAST_HEALTH,
-            CRITICAL_HIT_LEVEL_MULTIPLIER
-        },
-    },
+    adventurer::{Adventurer, ImplAdventurer},
+    adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata}, equipment::ImplEquipment,
+    bag::Bag, item::{Item, ImplItem},
+    constants::adventurer_constants::{HEALTH_INCREASE_PER_VITALITY, STARTING_HEALTH},
 };
 use loot::{loot::ImplLoot, constants::ImplItemNaming};
-use core::{
-    array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
-    clone::Clone, poseidon::poseidon_hash_span, option::OptionTrait, box::BoxTrait,
-    starknet::{
-        get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const,
-        get_block_timestamp, info::BlockInfo
-    },
-};
-use core::bytes_31::{
-    BYTES_IN_BYTES31, Bytes31Trait, one_shift_left_bytes_felt252, one_shift_left_bytes_u128,
-    POW_2_128, POW_2_8, U128IntoBytes31, U8IntoBytes31
-};
+use core::{array::{SpanTrait, ArrayTrait}, traits::Into, clone::Clone,};
+use game::game::encoding::{bytes_base64_encode, U256BytesUsedTraitImpl};
+use graffiti::json::JsonImpl;
 
 fn logo() -> ByteArray {
     "<svg xmlns=\"http://www.w3.org/2000/svg\" fill='#3DEC00' viewBox=\"0 0 10 16\"><g><g><path d=\"M1 2V0h8v2h1v10H7v4H3v-4H0V2zm1 4v4h2v2h2v-2h2V6H6v4H4V6z\"/></g></g></svg>"
@@ -149,7 +124,7 @@ fn generate_item(item: Item, entropy: u64) -> ByteArray {
     _item_prefix_1 + _item_prefix_2 + _item_name + _item_suffix
 }
 
-fn create_full_svg(
+fn create_metadata(
     adventurer_id: felt252, adventurer: Adventurer, adventurerMetadata: AdventurerMetadata, bag: Bag
 ) -> ByteArray {
     let rect = create_rect();
@@ -163,69 +138,220 @@ fn create_full_svg(
             U256BytesUsedTraitImpl::bytes_used(adventurerMetadata.name.into()).into()
         );
 
-    // Update text elements
-    let name = create_text(_name, "117", "117.136", "32", "middle", "left");
-    let id = create_text(format!("# {}", adventurer_id), "123", "61.2273", "24", "middle", "left");
-    let level = create_text(
-        format!("LVL {}", adventurer.get_level()), "228.008", "61.2273", "24", "middle", "end"
-    );
+    let _adventurer_id = format!("# {}", adventurer_id);
+    let _level = format!("LVL {}", adventurer.get_level());
+
     let stat_boosts = adventurer.equipment.get_stat_boosts(adventurerMetadata.start_entropy);
 
-    let health = create_text(
-        format!(
-            " {} / {} HP",
-            adventurer.health,
-            stat_boosts.vitality.into() * HEALTH_INCREASE_PER_VITALITY.into() + STARTING_HEALTH
-        ),
-        "570",
-        "58.2727",
-        "20",
-        "right",
-        "end"
+    let _health = format!(
+        " {} / {} HP",
+        adventurer.health,
+        stat_boosts.vitality.into() * HEALTH_INCREASE_PER_VITALITY.into() + STARTING_HEALTH
     );
 
-    let gold = create_text(
-        format!("{} GLD", adventurer.gold), "570", "93.2727", "20", "right", "end"
-    );
+    let _gold = format!("{} GLD", adventurer.gold);
+    let _str = format!("{} STR", stat_boosts.strength);
+    let _dex = format!("{} DEX", stat_boosts.dexterity);
+    let _int = format!("{} INT", stat_boosts.intelligence);
+    let _vit = format!("{} VIT", stat_boosts.vitality);
+    let _wis = format!("{} WIS", stat_boosts.wisdom);
+    let _cha = format!("{} CHA", stat_boosts.charisma);
+    let _luck = format!("{} LUCK", adventurer.equipment.calculate_luck(bag));
 
-    // Stats
-    let str = create_text(
-        format!("{} STR", stat_boosts.strength), "570", "128.273", "20", "right", "end"
+    // Equipped items
+    let _equiped_weapon = generate_item(
+        adventurer.equipment.weapon, adventurerMetadata.start_entropy
     );
-    let dex = create_text(
-        format!("{} DEX", stat_boosts.dexterity), "570", "163.273", "20", "right", "end"
+    let _equiped_chest = generate_item(
+        adventurer.equipment.chest, adventurerMetadata.start_entropy
     );
-    let int = create_text(
-        format!("{} INT", stat_boosts.intelligence), "570", "198.273", "20", "right", "end"
+    let _equiped_head = generate_item(adventurer.equipment.head, adventurerMetadata.start_entropy);
+    let _equiped_waist = generate_item(
+        adventurer.equipment.waist, adventurerMetadata.start_entropy
     );
-    let vit = create_text(
-        format!("{} VIT", stat_boosts.vitality), "570", "233.273", "20", "right", "end"
-    );
-    let wis = create_text(
-        format!("{} WIS", stat_boosts.wisdom), "570", "268.273", "20", "right", "end"
-    );
-    let cha = create_text(
-        format!("{} CHA", stat_boosts.charisma), "570", "303.273", "20", "right", "end"
-    );
-    let luck = create_text(
-        format!("{} LUCK", adventurer.equipment.calculate_luck(bag)),
-        "570",
-        "338.273",
-        "20",
-        "right",
-        "end"
-    );
+    let _equiped_foot = generate_item(adventurer.equipment.foot, adventurerMetadata.start_entropy);
+    let _equiped_hand = generate_item(adventurer.equipment.hand, adventurerMetadata.start_entropy);
+    let _equiped_neck = generate_item(adventurer.equipment.neck, adventurerMetadata.start_entropy);
+    let _equiped_ring = generate_item(adventurer.equipment.ring, adventurerMetadata.start_entropy);
 
-    // Equipment sections
-    let equipped_header = create_text("Equipped", "30", "183.136", "32", "middle", "right");
-    let bag_header = create_text("Bag", "30", "600.136", "32", "middle", "right");
+    // Bag items
+    let _bag_item_1 = generate_item(bag.item_1, adventurerMetadata.start_entropy);
+    let _bag_item_2 = generate_item(bag.item_2, adventurerMetadata.start_entropy);
+    let _bag_item_3 = generate_item(bag.item_3, adventurerMetadata.start_entropy);
+    let _bag_item_4 = generate_item(bag.item_4, adventurerMetadata.start_entropy);
+    let _bag_item_5 = generate_item(bag.item_5, adventurerMetadata.start_entropy);
+    let _bag_item_6 = generate_item(bag.item_6, adventurerMetadata.start_entropy);
+    let _bag_item_7 = generate_item(bag.item_7, adventurerMetadata.start_entropy);
+    let _bag_item_8 = generate_item(bag.item_8, adventurerMetadata.start_entropy);
+    let _bag_item_9 = generate_item(bag.item_9, adventurerMetadata.start_entropy);
+    let _bag_item_10 = generate_item(bag.item_10, adventurerMetadata.start_entropy);
+    let _bag_item_11 = generate_item(bag.item_11, adventurerMetadata.start_entropy);
+    let _bag_item_12 = generate_item(bag.item_12, adventurerMetadata.start_entropy);
+    let _bag_item_13 = generate_item(bag.item_13, adventurerMetadata.start_entropy);
+    let _bag_item_14 = generate_item(bag.item_14, adventurerMetadata.start_entropy);
+    let _bag_item_15 = generate_item(bag.item_15, adventurerMetadata.start_entropy);
 
     // Combine all elements
     let mut elements = array![
         rect,
         logo_element,
+        create_text(_name.clone(), "117", "117.136", "32", "middle", "left"),
+        create_text(_adventurer_id.clone(), "123", "61.2273", "24", "middle", "left"),
+        create_text(_level.clone(), "228.008", "61.2273", "24", "middle", "end"),
+        create_text(_health.clone(), "570", "58.2727", "20", "right", "end"),
+        create_text(_gold.clone(), "570", "93.2727", "20", "right", "end"),
+        create_text(_str.clone(), "570", "128.273", "20", "right", "end"),
+        create_text(_dex.clone(), "570", "163.273", "20", "right", "end"),
+        create_text(_int.clone(), "570", "198.273", "20", "right", "end"),
+        create_text(_vit.clone(), "570", "233.273", "20", "right", "end"),
+        create_text(_wis.clone(), "570", "268.273", "20", "right", "end"),
+        create_text(_cha.clone(), "570", "303.273", "20", "right", "end"),
+        create_text(_luck.clone(), "570", "338.273", "20", "right", "end"),
+        create_text("Equipped", "30", "183.136", "32", "middle", "right"),
+        create_text("Bag", "30", "600.136", "32", "middle", "right"),
+        create_text(_equiped_weapon.clone(), "30", "233.227", "24", "middle", "start"),
+        create_text(_equiped_chest.clone(), "30", "272.227", "24", "middle", "left"),
+        create_text(_equiped_head.clone(), "30", "311.227", "24", "middle", "left"),
+        create_text(_equiped_waist.clone(), "30", "350.227", "24", "middle", "left"),
+        create_text(_equiped_foot.clone(), "30", "389.227", "24", "middle", "left"),
+        create_text(_equiped_hand.clone(), "30", "428.227", "24", "middle", "left"),
+        create_text(_equiped_neck.clone(), "30", "467.227", "24", "middle", "left"),
+        create_text(_equiped_ring.clone(), "30", "506.227", "24", "middle", "left"),
+        create_text(_bag_item_1.clone(), "30", "644.273", "20", "middle", "left"),
+        create_text(_bag_item_2.clone(), "30", "678.273", "20", "middle", "left"),
+        create_text(_bag_item_3.clone(), "30", "712.273", "20", "middle", "left"),
+        create_text(_bag_item_4.clone(), "30", "746.273", "20", "middle", "left"),
+        create_text(_bag_item_5.clone(), "30", "780.273", "20", "middle", "left"),
+        create_text(_bag_item_6.clone(), "30", "814.273", "20", "middle", "left"),
+        create_text(_bag_item_7.clone(), "30", "848.273", "20", "middle", "left"),
+        create_text(_bag_item_8.clone(), "311", "644.273", "20", "middle", "left"),
+        create_text(_bag_item_9.clone(), "311", "678.273", "20", "middle", "left"),
+        create_text(_bag_item_10.clone(), "311", "712.273", "20", "middle", "left"),
+        create_text(_bag_item_11.clone(), "311", "746.273", "20", "middle", "left"),
+        create_text(_bag_item_12.clone(), "311", "780.273", "20", "middle", "left"),
+        create_text(_bag_item_13.clone(), "311", "814.273", "20", "middle", "left"),
+        create_text(_bag_item_14.clone(), "311", "848.273", "20", "middle", "left"),
+        create_text(_bag_item_15.clone(), "311", "878.273", "20", "middle", "left"),
+    ]
+        .span();
+
+    let image = create_svg(combine_elements(ref elements));
+
+    let base64_image = format!("data:image/svg+xml;base64,{}", bytes_base64_encode(image));
+
+    let mut metadata = JsonImpl::new()
+        .add("name", "Survivor" + "#" + _adventurer_id)
+        .add("description", "Loot Survivor Arcade")
+        .add("image", base64_image);
+
+    let name: ByteArray = JsonImpl::new().add("trait", "name").add("value", _name).build();
+    let level: ByteArray = JsonImpl::new().add("trait", "level").add("value", _level).build();
+    let health: ByteArray = JsonImpl::new().add("trait", "health").add("value", _health).build();
+    let gold: ByteArray = JsonImpl::new().add("trait", "gold").add("value", _gold).build();
+    let str: ByteArray = JsonImpl::new().add("trait", "strength").add("value", _str).build();
+    let dex: ByteArray = JsonImpl::new().add("trait", "dexterity").add("value", _dex).build();
+    let int: ByteArray = JsonImpl::new().add("trait", "intelligence").add("value", _int).build();
+    let vit: ByteArray = JsonImpl::new().add("trait", "vitality").add("value", _vit).build();
+    let wis: ByteArray = JsonImpl::new().add("trait", "wisdom").add("value", _wis).build();
+    let cha: ByteArray = JsonImpl::new().add("trait", "charisma").add("value", _cha).build();
+    let luck: ByteArray = JsonImpl::new().add("trait", "luck").add("value", _luck).build();
+
+    let equipped_weapon: ByteArray = JsonImpl::new()
+        .add("trait", "equipped_weapon")
+        .add("value", _equiped_weapon)
+        .build();
+    let equipped_chest: ByteArray = JsonImpl::new()
+        .add("trait", "equipped_chest")
+        .add("value", _equiped_chest)
+        .build();
+    let equipped_head: ByteArray = JsonImpl::new()
+        .add("trait", "equipped_head")
+        .add("value", _equiped_head)
+        .build();
+    let equipped_waist: ByteArray = JsonImpl::new()
+        .add("trait", "equipped_waist")
+        .add("value", _equiped_waist)
+        .build();
+    let equipped_foot: ByteArray = JsonImpl::new()
+        .add("trait", "equipped_foot")
+        .add("value", _equiped_foot)
+        .build();
+    let equipped_hand: ByteArray = JsonImpl::new()
+        .add("trait", "equipped_hand")
+        .add("value", _equiped_hand)
+        .build();
+    let equipped_neck: ByteArray = JsonImpl::new()
+        .add("trait", "equipped_neck")
+        .add("value", _equiped_neck)
+        .build();
+    let equipped_ring: ByteArray = JsonImpl::new()
+        .add("trait", "equipped_ring")
+        .add("value", _equiped_ring)
+        .build();
+
+    let bag_item_1: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_1")
+        .add("value", _bag_item_1)
+        .build();
+    let bag_item_2: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_2")
+        .add("value", _bag_item_2)
+        .build();
+    let bag_item_3: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_3")
+        .add("value", _bag_item_3)
+        .build();
+    let bag_item_4: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_4")
+        .add("value", _bag_item_4)
+        .build();
+    let bag_item_5: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_5")
+        .add("value", _bag_item_5)
+        .build();
+    let bag_item_6: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_6")
+        .add("value", _bag_item_6)
+        .build();
+    let bag_item_7: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_7")
+        .add("value", _bag_item_7)
+        .build();
+    let bag_item_8: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_8")
+        .add("value", _bag_item_8)
+        .build();
+    let bag_item_9: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_9")
+        .add("value", _bag_item_9)
+        .build();
+    let bag_item_10: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_10")
+        .add("value", _bag_item_10)
+        .build();
+    let bag_item_11: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_11")
+        .add("value", _bag_item_11)
+        .build();
+    let bag_item_12: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_12")
+        .add("value", _bag_item_12)
+        .build();
+    let bag_item_13: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_13")
+        .add("value", _bag_item_13)
+        .build();
+    let bag_item_14: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_14")
+        .add("value", _bag_item_14)
+        .build();
+    let bag_item_15: ByteArray = JsonImpl::new()
+        .add("trait", "bag_item_15")
+        .add("value", _bag_item_15)
+        .build();
+
+    let attributes = array![
         name,
-        id,
         level,
         health,
         gold,
@@ -236,203 +362,42 @@ fn create_full_svg(
         wis,
         cha,
         luck,
-        equipped_header,
-        bag_header,
-        create_text(
-            generate_item(adventurer.equipment.weapon, adventurerMetadata.start_entropy),
-            "30",
-            "233.227",
-            "24",
-            "middle",
-            "start"
-        ),
-        create_text(
-            generate_item(adventurer.equipment.chest, adventurerMetadata.start_entropy),
-            "30",
-            "272.227",
-            "24",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(adventurer.equipment.head, adventurerMetadata.start_entropy),
-            "30",
-            "311.227",
-            "24",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(adventurer.equipment.waist, adventurerMetadata.start_entropy),
-            "30",
-            "350.227",
-            "24",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(adventurer.equipment.foot, adventurerMetadata.start_entropy),
-            "30",
-            "389.227",
-            "24",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(adventurer.equipment.hand, adventurerMetadata.start_entropy),
-            "30",
-            "428.227",
-            "24",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(adventurer.equipment.neck, adventurerMetadata.start_entropy),
-            "30",
-            "467.227",
-            "24",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(adventurer.equipment.ring, adventurerMetadata.start_entropy),
-            "30",
-            "506.227",
-            "24",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_1, adventurerMetadata.start_entropy),
-            "30",
-            "644.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_2, adventurerMetadata.start_entropy),
-            "30",
-            "678.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_3, adventurerMetadata.start_entropy),
-            "30",
-            "712.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_4, adventurerMetadata.start_entropy),
-            "30",
-            "746.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_5, adventurerMetadata.start_entropy),
-            "30",
-            "780.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_6, adventurerMetadata.start_entropy),
-            "30",
-            "814.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_7, adventurerMetadata.start_entropy),
-            "30",
-            "848.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_8, adventurerMetadata.start_entropy),
-            "311",
-            "644.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_9, adventurerMetadata.start_entropy),
-            "311",
-            "678.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_10, adventurerMetadata.start_entropy),
-            "311",
-            "712.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_11, adventurerMetadata.start_entropy),
-            "311",
-            "746.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_12, adventurerMetadata.start_entropy),
-            "311",
-            "780.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_13, adventurerMetadata.start_entropy),
-            "311",
-            "814.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_14, adventurerMetadata.start_entropy),
-            "311",
-            "848.273",
-            "20",
-            "middle",
-            "left"
-        ),
-        create_text(
-            generate_item(bag.item_15, adventurerMetadata.start_entropy),
-            "311",
-            "878.273",
-            "20",
-            "middle",
-            "left"
-        ),
+        equipped_weapon,
+        equipped_chest,
+        equipped_head,
+        equipped_waist,
+        equipped_foot,
+        equipped_hand,
+        equipped_neck,
+        equipped_ring,
+        bag_item_1,
+        bag_item_2,
+        bag_item_3,
+        bag_item_4,
+        bag_item_5,
+        bag_item_6,
+        bag_item_7,
+        bag_item_8,
+        bag_item_9,
+        bag_item_10,
+        bag_item_11,
+        bag_item_12,
+        bag_item_13,
+        bag_item_14,
+        bag_item_15,
     ]
         .span();
 
-    create_svg(combine_elements(ref elements))
+    let metadata = metadata.add_array("attributes", attributes).build();
+
+    format!("data:application/json;base64,{}", metadata)
 }
 
 
 #[cfg(test)]
 mod tests {
     use core::array::ArrayTrait;
-    use super::{create_full_svg};
+    use super::{create_metadata};
     use adventurer::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, stats::{Stats, ImplStats},
         adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata},
@@ -449,95 +414,9 @@ mod tests {
 
         let bag = ImplBag::new();
 
-        let rect = create_full_svg(1, adventurer, adventurer_metadata, bag);
+        let rect = create_metadata(1, adventurer, adventurer_metadata, bag);
 
         println!("{}", rect);
     }
 }
 
-use keccak::{cairo_keccak, u128_split};
-use integer::{BoundedInt, u32_as_non_zero, U32TryIntoNonZero};
-trait BytesUsedTrait<T> {
-    /// Returns the number of bytes used to represent a `T` value.
-    /// # Arguments
-    /// * `self` - The value to check.
-    /// # Returns
-    /// The number of bytes used to represent the value.
-    fn bytes_used(self: T) -> u8;
-}
-
-impl U8BytesUsedTraitImpl of BytesUsedTrait<u8> {
-    fn bytes_used(self: u8) -> u8 {
-        if self == 0 {
-            return 0;
-        }
-
-        return 1;
-    }
-}
-
-impl USizeBytesUsedTraitImpl of BytesUsedTrait<usize> {
-    fn bytes_used(self: usize) -> u8 {
-        if self < 0x10000 { // 256^2
-            if self < 0x100 { // 256^1
-                if self == 0 {
-                    return 0;
-                } else {
-                    return 1;
-                };
-            }
-            return 2;
-        } else {
-            if self < 0x1000000 { // 256^3
-                return 3;
-            }
-            return 4;
-        }
-    }
-}
-
-impl U64BytesUsedTraitImpl of BytesUsedTrait<u64> {
-    fn bytes_used(self: u64) -> u8 {
-        if self <= BoundedInt::<u32>::max().into() { // 256^4
-            return BytesUsedTrait::<u32>::bytes_used(self.try_into().unwrap());
-        } else {
-            if self < 0x1000000000000 { // 256^6
-                if self < 0x10000000000 {
-                    if self < 0x100000000 {
-                        return 4;
-                    }
-                    return 5;
-                }
-                return 6;
-            } else {
-                if self < 0x100000000000000 { // 256^7
-                    return 7;
-                } else {
-                    return 8;
-                }
-            }
-        }
-    }
-}
-
-
-impl U128BytesTraitUsedImpl of BytesUsedTrait<u128> {
-    fn bytes_used(self: u128) -> u8 {
-        let (u64high, u64low) = u128_split(self);
-        if u64high == 0 {
-            return BytesUsedTrait::<u64>::bytes_used(u64low.try_into().unwrap());
-        } else {
-            return BytesUsedTrait::<u64>::bytes_used(u64high.try_into().unwrap()) + 8;
-        }
-    }
-}
-
-impl U256BytesUsedTraitImpl of BytesUsedTrait<u256> {
-    fn bytes_used(self: u256) -> u8 {
-        if self.high == 0 {
-            return BytesUsedTrait::<u128>::bytes_used(self.low.try_into().unwrap());
-        } else {
-            return BytesUsedTrait::<u128>::bytes_used(self.high.try_into().unwrap()) + 16;
-        }
-    }
-}

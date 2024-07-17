@@ -2,6 +2,8 @@ mod game {
     mod constants;
     mod interfaces;
     mod renderer;
+    mod encoding;
+    mod RenderContract;
 }
 mod tests {
     mod test_game;
@@ -11,6 +13,7 @@ mod tests {
 
 #[starknet::contract]
 mod Game {
+    use openzeppelin::token::erc721::erc721::ERC721Component::InternalTrait;
     use core::starknet::SyscallResultTrait;
     const ARCADE_ACCOUNT_ID: felt252 = 22227699753170493970302265346292000442692;
     const TEST_ENTROPY: u64 = 12303548;
@@ -59,7 +62,9 @@ mod Game {
             messages, Rewards, REWARD_DISTRIBUTIONS_BP, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX,
             U128_MAX, STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS, MINIMUM_DAMAGE_FROM_BEASTS
         },
-        renderer::{create_full_svg}
+        RenderContract::{
+            IRenderContract, IRenderContractDispatcher, IRenderContractDispatcherTrait
+        },
     };
 
     use loot::{
@@ -132,6 +137,7 @@ mod Game {
         erc721: ERC721Component::Storage,
         #[substorage(v0)]
         src5: SRC5Component::Storage,
+        _render_contract: ContractAddress,
     }
 
     #[event]
@@ -202,6 +208,7 @@ mod Game {
         previous_first_place: ContractAddress,
         previous_second_place: ContractAddress,
         previous_third_place: ContractAddress,
+        render_contract: ContractAddress
     ) {
         // init storage
         self._lords.write(lords);
@@ -217,6 +224,10 @@ mod Game {
         self._previous_first_place.write(previous_first_place);
         self._previous_second_place.write(previous_second_place);
         self._previous_third_place.write(previous_third_place);
+        self._render_contract.write(render_contract);
+
+        // TODO: Setting offchain uri here for later use, however it is not used in the current implementation
+        self.erc721.initializer("LootSurvivor", "LS", "https://token.lootsurvivor.io/");
 
         // On mainnet, set genesis timestamp to LSV1.0 genesis to preserve same reward distribution schedule for V1.1 
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
@@ -644,6 +655,11 @@ mod Game {
                         previous_price, new_price, lords_price, changer: get_caller_address()
                     }
                 );
+        }
+
+        fn update_render_contract(ref self: ContractState, render_contract: ContractAddress) {
+            // TODO: Add Permissions for this function
+            self._render_contract.write(render_contract);
         }
         // ------------------------------------------ //
         // ------------ View Functions -------------- //
@@ -3429,12 +3445,13 @@ mod Game {
         }
 
         fn token_uri(self: @ContractState, adventurer_id: felt252) -> ByteArray {
-            create_full_svg(
-                adventurer_id,
-                _load_adventurer(self, adventurer_id),
-                _load_adventurer_metadata(self, adventurer_id),
-                _load_bag(self, adventurer_id)
-            )
+            IRenderContractDispatcher { contract_address: self._render_contract.read() }
+                .token_uri(
+                    adventurer_id,
+                    _load_adventurer(self, adventurer_id),
+                    _load_adventurer_metadata(self, adventurer_id),
+                    _load_bag(self, adventurer_id)
+                )
         }
     }
 }

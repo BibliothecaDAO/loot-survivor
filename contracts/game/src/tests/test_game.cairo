@@ -95,6 +95,10 @@ mod tests {
         contract_address_const::<1>()
     }
 
+    fn RENDER_CONTRACT() -> ContractAddress {
+        contract_address_const::<1>()
+    }
+
     const PUBLIC_KEY: felt252 = 0x333333;
     const NEW_PUBKEY: felt252 = 0x789789;
     const SALT: felt252 = 123;
@@ -193,6 +197,7 @@ mod tests {
         calldata.append(PREV_FIRST_PLACE().into());
         calldata.append(PREV_SECOND_PLACE().into());
         calldata.append(PREV_THIRD_PLACE().into());
+        calldata.append(RENDER_CONTRACT().into());
 
         IGameDispatcher { contract_address: utils::deploy(Game::TEST_CLASS_HASH, calldata) }
     }
