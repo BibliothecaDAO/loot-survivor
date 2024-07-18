@@ -120,7 +120,6 @@ mod Game {
         _leaderboard: Leaderboard,
         _lords: ContractAddress,
         _eth_address: ContractAddress,
-        _owner: LegacyMap::<felt252, ContractAddress>,
         _golden_token_last_use: LegacyMap::<felt252, felt252>,
         _golden_token: ContractAddress,
         _cost_to_play: u128,
@@ -681,83 +680,83 @@ mod Game {
         fn get_bag(self: @ContractState, adventurer_id: felt252) -> Bag {
             _load_bag(self, adventurer_id)
         }
-        // fn get_items_on_market(self: @ContractState, adventurer_id: felt252) -> Array<u8> {
-        //     let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
-        //     _assert_upgrades_available(adventurer);
+        fn get_items_on_market(self: @ContractState, adventurer_id: felt252) -> Array<u8> {
+            let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
+            _assert_upgrades_available(adventurer);
 
-        //     let adventurer_entropy = _get_adventurer_entropy(self, adventurer_id);
-        //     _assert_entropy_set(self, adventurer_id);
+            let adventurer_entropy = _get_adventurer_entropy(self, adventurer_id);
+            _assert_entropy_set(self, adventurer_id);
 
-        //     _get_items_on_market(
-        //         self, adventurer_entropy, adventurer.xp, adventurer.stat_upgrades_available
-        //     )
-        // }
-        // fn get_items_on_market_by_slot(
-        //     self: @ContractState, adventurer_id: felt252, slot: u8
-        // ) -> Array<u8> {
-        //     let adventurer = _load_adventurer(self, adventurer_id);
-        //     _assert_upgrades_available(adventurer);
+            _get_items_on_market(
+                self, adventurer_entropy, adventurer.xp, adventurer.stat_upgrades_available
+            )
+        }
+        fn get_items_on_market_by_slot(
+            self: @ContractState, adventurer_id: felt252, slot: u8
+        ) -> Array<u8> {
+            let adventurer = _load_adventurer(self, adventurer_id);
+            _assert_upgrades_available(adventurer);
 
-        //     let adventurer_entropy = _get_adventurer_entropy(self, adventurer_id);
+            let adventurer_entropy = _get_adventurer_entropy(self, adventurer_id);
 
-        //     _get_items_on_market_by_slot(
-        //         self,
-        //         adventurer_entropy,
-        //         adventurer.xp,
-        //         adventurer.stat_upgrades_available,
-        //         ImplCombat::u8_to_slot(slot)
-        //     )
-        // }
-        // fn get_items_on_market_by_tier(
-        //     self: @ContractState, adventurer_id: felt252, tier: u8
-        // ) -> Array<u8> {
-        //     let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
-        //     _assert_upgrades_available(adventurer);
+            _get_items_on_market_by_slot(
+                self,
+                adventurer_entropy,
+                adventurer.xp,
+                adventurer.stat_upgrades_available,
+                ImplCombat::u8_to_slot(slot)
+            )
+        }
+        fn get_items_on_market_by_tier(
+            self: @ContractState, adventurer_id: felt252, tier: u8
+        ) -> Array<u8> {
+            let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
+            _assert_upgrades_available(adventurer);
 
-        //     let adventurer_entropy = _get_adventurer_entropy(self, adventurer_id);
+            let adventurer_entropy = _get_adventurer_entropy(self, adventurer_id);
 
-        //     if tier == 1 {
-        //         _get_items_on_market_by_tier(
-        //             self,
-        //             adventurer_entropy,
-        //             adventurer.xp,
-        //             adventurer.stat_upgrades_available,
-        //             Tier::T1(())
-        //         )
-        //     } else if tier == 2 {
-        //         _get_items_on_market_by_tier(
-        //             self,
-        //             adventurer_entropy,
-        //             adventurer.xp,
-        //             adventurer.stat_upgrades_available,
-        //             Tier::T2(())
-        //         )
-        //     } else if tier == 3 {
-        //         _get_items_on_market_by_tier(
-        //             self,
-        //             adventurer_entropy,
-        //             adventurer.xp,
-        //             adventurer.stat_upgrades_available,
-        //             Tier::T3(())
-        //         )
-        //     } else if tier == 4 {
-        //         _get_items_on_market_by_tier(
-        //             self,
-        //             adventurer_entropy,
-        //             adventurer.xp,
-        //             adventurer.stat_upgrades_available,
-        //             Tier::T4(())
-        //         )
-        //     } else {
-        //         _get_items_on_market_by_tier(
-        //             self,
-        //             adventurer_entropy,
-        //             adventurer.xp,
-        //             adventurer.stat_upgrades_available,
-        //             Tier::T5(())
-        //         )
-        //     }
-        // }
+            if tier == 1 {
+                _get_items_on_market_by_tier(
+                    self,
+                    adventurer_entropy,
+                    adventurer.xp,
+                    adventurer.stat_upgrades_available,
+                    Tier::T1(())
+                )
+            } else if tier == 2 {
+                _get_items_on_market_by_tier(
+                    self,
+                    adventurer_entropy,
+                    adventurer.xp,
+                    adventurer.stat_upgrades_available,
+                    Tier::T2(())
+                )
+            } else if tier == 3 {
+                _get_items_on_market_by_tier(
+                    self,
+                    adventurer_entropy,
+                    adventurer.xp,
+                    adventurer.stat_upgrades_available,
+                    Tier::T3(())
+                )
+            } else if tier == 4 {
+                _get_items_on_market_by_tier(
+                    self,
+                    adventurer_entropy,
+                    adventurer.xp,
+                    adventurer.stat_upgrades_available,
+                    Tier::T4(())
+                )
+            } else {
+                _get_items_on_market_by_tier(
+                    self,
+                    adventurer_entropy,
+                    adventurer.xp,
+                    adventurer.stat_upgrades_available,
+                    Tier::T5(())
+                )
+            }
+        }
 
         fn get_potion_price(self: @ContractState, adventurer_id: felt252) -> u16 {
             _get_potion_price(self, adventurer_id)
@@ -765,9 +764,9 @@ mod Game {
         fn get_item_price(self: @ContractState, adventurer_id: felt252, item_id: u8) -> u16 {
             _get_item_price(self, adventurer_id, item_id)
         }
-        // fn get_attacking_beast(self: @ContractState, adventurer_id: felt252) -> Beast {
-        //     _get_attacking_beast(self, adventurer_id)
-        // }
+        fn get_attacking_beast(self: @ContractState, adventurer_id: felt252) -> Beast {
+            _get_attacking_beast(self, adventurer_id)
+        }
         fn get_health(self: @ContractState, adventurer_id: felt252) -> u16 {
             _load_adventurer_no_boosts(self, adventurer_id).health
         }
@@ -780,9 +779,9 @@ mod Game {
         fn get_gold(self: @ContractState, adventurer_id: felt252) -> u16 {
             _load_adventurer_no_boosts(self, adventurer_id).gold
         }
-        // fn get_beast_health(self: @ContractState, adventurer_id: felt252) -> u16 {
-        //     _load_adventurer_no_boosts(self, adventurer_id).beast_health
-        // }
+        fn get_beast_health(self: @ContractState, adventurer_id: felt252) -> u16 {
+            _load_adventurer_no_boosts(self, adventurer_id).beast_health
+        }
         fn get_stat_upgrades_available(self: @ContractState, adventurer_id: felt252) -> u8 {
             _load_adventurer_no_boosts(self, adventurer_id).stat_upgrades_available
         }
@@ -799,30 +798,30 @@ mod Game {
             equipped_items.append(adventurer.equipment.ring);
             equipped_items
         }
-        // fn get_weapon_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
-        //     _load_adventurer_no_boosts(self, adventurer_id).equipment.weapon.get_greatness()
-        // }
-        // fn get_chest_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
-        //     _load_adventurer_no_boosts(self, adventurer_id).equipment.chest.get_greatness()
-        // }
-        // fn get_head_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
-        //     _load_adventurer_no_boosts(self, adventurer_id).equipment.head.get_greatness()
-        // }
-        // fn get_waist_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
-        //     _load_adventurer_no_boosts(self, adventurer_id).equipment.waist.get_greatness()
-        // }
-        // fn get_foot_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
-        //     _load_adventurer_no_boosts(self, adventurer_id).equipment.foot.get_greatness()
-        // }
-        // fn get_hand_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
-        //     _load_adventurer_no_boosts(self, adventurer_id).equipment.hand.get_greatness()
-        // }
-        // fn get_necklace_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
-        //     _load_adventurer_no_boosts(self, adventurer_id).equipment.neck.get_greatness()
-        // }
-        // fn get_ring_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
-        //     _load_adventurer_no_boosts(self, adventurer_id).equipment.ring.get_greatness()
-        // }
+        fn get_weapon_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
+            _load_adventurer_no_boosts(self, adventurer_id).equipment.weapon.get_greatness()
+        }
+        fn get_chest_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
+            _load_adventurer_no_boosts(self, adventurer_id).equipment.chest.get_greatness()
+        }
+        fn get_head_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
+            _load_adventurer_no_boosts(self, adventurer_id).equipment.head.get_greatness()
+        }
+        fn get_waist_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
+            _load_adventurer_no_boosts(self, adventurer_id).equipment.waist.get_greatness()
+        }
+        fn get_foot_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
+            _load_adventurer_no_boosts(self, adventurer_id).equipment.foot.get_greatness()
+        }
+        fn get_hand_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
+            _load_adventurer_no_boosts(self, adventurer_id).equipment.hand.get_greatness()
+        }
+        fn get_necklace_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
+            _load_adventurer_no_boosts(self, adventurer_id).equipment.neck.get_greatness()
+        }
+        fn get_ring_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
+            _load_adventurer_no_boosts(self, adventurer_id).equipment.ring.get_greatness()
+        }
         // fn get_base_stats(self: @ContractState, adventurer_id: felt252) -> Stats {
         //     _load_adventurer_no_boosts(self, adventurer_id).stats
         // }
@@ -895,9 +894,6 @@ mod Game {
         fn get_leaderboard(self: @ContractState) -> Leaderboard {
             self._leaderboard.read()
         }
-        // fn owner_of(self: @ContractState, adventurer_id: felt252) -> ContractAddress {
-        //     self._owner.read(adventurer_id)
-        // }
         fn get_game_count(self: @ContractState) -> felt252 {
             self._game_counter.read()
         }
@@ -1004,7 +1000,7 @@ mod Game {
             }
         } else if adventurer_level > 2 {
             let adventurer_state = AdventurerState {
-                owner: self._owner.read(adventurer_id),
+                owner: _get_owner(@self, adventurer_id),
                 adventurer_id,
                 adventurer_entropy,
                 adventurer
@@ -1033,7 +1029,7 @@ mod Game {
 
         // create adventurer state for UpgradesAvailable event
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let available_items = _get_items_on_market(
             @self, adventurer_entropy, adventurer.xp, adventurer.stat_upgrades_available
@@ -1152,8 +1148,7 @@ mod Game {
         if beast.combat_spec.level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK
             && chain_id != KATANA_CHAIN_ID {
             // mint beast to owner of the adventurer
-            let owner_address = self._owner.read(adventurer_id);
-            _mint_beast(@self, beast, owner_address);
+            _mint_beast(@self, beast, _get_owner(@self, adventurer_id));
         }
     }
 
@@ -1227,7 +1222,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
 
         let death_details = DeathDetails {
@@ -1306,9 +1301,9 @@ mod Game {
         let dao_address = self._dao.read();
         let pg_address = self._pg_address.read();
         let mut leaderboard = self._leaderboard.read();
-        let mut first_place_address = self._owner.read(leaderboard.first.adventurer_id.into());
-        let mut second_place_address = self._owner.read(leaderboard.second.adventurer_id.into());
-        let mut third_place_address = self._owner.read(leaderboard.third.adventurer_id.into());
+        let mut first_place_address = _get_owner(@self, leaderboard.first.adventurer_id.into());
+        let mut second_place_address = _get_owner(@self, leaderboard.second.adventurer_id.into());
+        let mut third_place_address = _get_owner(@self, leaderboard.third.adventurer_id.into());
 
         // wait until we have three decent scores before rewarding players on new contract
         // this removes incentive to quickly play and die
@@ -1391,8 +1386,7 @@ mod Game {
         // increment the adventurer id counter
         self._game_counter.write(adventurer_id);
 
-        // set caller as owner
-        self._owner.write(adventurer_id, get_caller_address());
+        self.erc721.mint(get_caller_address(), adventurer_id.into());
 
         // emit events 
         __event_StartGame(ref self, adventurer, adventurer_id, adventurer_meta);
@@ -2474,7 +2468,7 @@ mod Game {
         if (previous_level == 1) {
             // emit the leveled up event
             let adventurer_state = AdventurerState {
-                owner: self._owner.read(adventurer_id),
+                owner: _get_owner(@self, adventurer_id),
                 adventurer_id,
                 adventurer_entropy,
                 adventurer
@@ -2546,7 +2540,7 @@ mod Game {
             // get new entropy
             let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
             let adventurer_state = AdventurerState {
-                owner: self._owner.read(adventurer_id),
+                owner: _get_owner(@self, adventurer_id),
                 adventurer_id,
                 adventurer_entropy,
                 adventurer
@@ -2556,7 +2550,10 @@ mod Game {
         }
     }
     fn _assert_ownership(self: @ContractState, adventurer_id: felt252) {
-        assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);
+        assert(
+            self.erc721.ERC721_owners.read(adventurer_id.into()) == get_caller_address(),
+            messages::NOT_OWNER
+        );
     }
     fn _assert_in_battle(adventurer: Adventurer) {
         assert(adventurer.beast_health != 0, messages::NOT_IN_BATTLE);
@@ -2727,6 +2724,11 @@ mod Game {
         } else {
             false
         }
+    }
+
+    #[inline(always)]
+    fn _get_owner(self: @ContractState, adventurer_id: felt252) -> ContractAddress {
+        self.erc721.ERC721_owners.read(adventurer_id.into())
     }
 
     // @title Update Leaderboard Function
@@ -3065,7 +3067,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let adventurer_state_with_bag = AdventurerStateWithBag { adventurer_state, bag };
         self
@@ -3090,7 +3092,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
 
         let reveal_block = 0; // TODO: consider removing this
@@ -3103,7 +3105,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(DiscoveredGold { adventurer_state, amount });
     }
@@ -3113,7 +3115,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(DiscoveredHealth { adventurer_state, amount });
     }
@@ -3123,7 +3125,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(DiscoveredLoot { adventurer_state, item_id });
     }
@@ -3137,7 +3139,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
 
         let obstacle_event = ObstacleEvent { adventurer_state, obstacle_details, };
@@ -3158,7 +3160,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
 
         let discovered_beast_event = DiscoveredBeast {
@@ -3175,7 +3177,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(AttackedBeast { adventurer_state, beast_battle_details });
     }
@@ -3188,7 +3190,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(AttackedByBeast { adventurer_state, beast_battle_details });
     }
@@ -3201,7 +3203,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(AmbushedByBeast { adventurer_state, beast_battle_details });
     }
@@ -3220,7 +3222,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let slayed_beast_event = SlayedBeast {
             adventurer_state,
@@ -3245,7 +3247,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let flee_event = FleeEvent {
             adventurer_state, seed, id: beast.id, beast_specs: beast.combat_spec
@@ -3262,7 +3264,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let flee_event = FleeEvent {
             adventurer_state, seed, id: beast.id, beast_specs: beast.combat_spec
@@ -3281,7 +3283,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let adventurer_state_with_bag = AdventurerStateWithBag { adventurer_state, bag };
         self
@@ -3302,7 +3304,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let adventurer_state_with_bag = AdventurerStateWithBag { adventurer_state, bag };
         let equipped_items_event = EquippedItems {
@@ -3320,7 +3322,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let adventurer_state_with_bag = AdventurerStateWithBag { adventurer_state, bag };
         self.emit(DroppedItems { adventurer_state_with_bag, item_ids });
@@ -3334,7 +3336,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(ItemsLeveledUp { adventurer_state, items });
     }
@@ -3344,7 +3346,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(NewHighScore { adventurer_state, rank });
     }
@@ -3377,7 +3379,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         let adventurer_state_with_bag = AdventurerStateWithBag { adventurer_state, bag };
         self.emit(PurchasedItems { adventurer_state_with_bag, purchases });
@@ -3393,7 +3395,7 @@ mod Game {
     ) {
         let adventurer_entropy = _get_adventurer_entropy(@self, adventurer_id);
         let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id), adventurer_id, adventurer_entropy, adventurer
+            owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
         self.emit(PurchasedPotions { adventurer_state, quantity, cost, health, });
     }
@@ -3430,6 +3432,7 @@ mod Game {
         }
 
         fn token_uri(self: @ContractState, adventurer_id: felt252) -> ByteArray {
+            self.erc721._require_owned(adventurer_id.into());
             IRenderContractDispatcher { contract_address: self._render_contract.read() }
                 .token_uri(
                     adventurer_id,

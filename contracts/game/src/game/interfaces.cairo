@@ -66,42 +66,32 @@ trait IGame<TContractState> {
     fn get_equipped_items(self: @TContractState, adventurer_id: felt252) -> Array<Item>;
 
     // item stats
-    // fn get_weapon_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    // fn get_chest_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    // fn get_head_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    // fn get_waist_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    // fn get_foot_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    // fn get_hand_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    // fn get_necklace_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    // fn get_ring_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    fn get_weapon_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    fn get_chest_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    fn get_head_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    fn get_waist_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    fn get_foot_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    fn get_hand_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    fn get_necklace_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    fn get_ring_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
 
     // bag and specials
     fn get_bag(self: @TContractState, adventurer_id: felt252) -> Bag;
 
-    // // item details
-    // fn get_weapon_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_chest_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_head_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_waist_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_foot_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_hand_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_necklace_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_ring_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-
     // // market details
-    // fn get_items_on_market(self: @TContractState, adventurer_id: felt252) -> Array<u8>;
-    // fn get_items_on_market_by_slot(
-    //     self: @TContractState, adventurer_id: felt252, slot: u8
-    // ) -> Array<u8>;
-    // fn get_items_on_market_by_tier(
-    //     self: @TContractState, adventurer_id: felt252, tier: u8
-    // ) -> Array<u8>;
+    fn get_items_on_market(self: @TContractState, adventurer_id: felt252) -> Array<u8>;
+    fn get_items_on_market_by_slot(
+        self: @TContractState, adventurer_id: felt252, slot: u8
+    ) -> Array<u8>;
+    fn get_items_on_market_by_tier(
+        self: @TContractState, adventurer_id: felt252, tier: u8
+    ) -> Array<u8>;
     fn get_potion_price(self: @TContractState, adventurer_id: felt252) -> u16;
     fn get_item_price(self: @TContractState, adventurer_id: felt252, item_id: u8) -> u16;
 
     // beast details
-    // fn get_attacking_beast(self: @TContractState, adventurer_id: felt252) -> Beast;
-    // fn get_beast_health(self: @TContractState, adventurer_id: felt252) -> u16;
+    fn get_attacking_beast(self: @TContractState, adventurer_id: felt252) -> Beast;
+    fn get_beast_health(self: @TContractState, adventurer_id: felt252) -> u16;
     // fn get_beast_type(self: @TContractState, beast_id: u8) -> u8;
     // fn get_beast_tier(self: @TContractState, beast_id: u8) -> u8;
 
