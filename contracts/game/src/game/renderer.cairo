@@ -111,7 +111,7 @@ fn generate_item(item: Item, entropy: u64) -> ByteArray {
 
     if (item.id == 0) {
         ""
-    } else if (greatness > 20) {
+    } else if (greatness >= 15) {
         format!("G{} {} ", greatness, _item_name)
             + get_suffix_boost(ImplLoot::get_suffix(item.id, entropy))
     } else {
