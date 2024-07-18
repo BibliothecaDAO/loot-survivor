@@ -5,7 +5,7 @@ use adventurer::{
     bag::Bag, item::{Item, ImplItem},
     constants::adventurer_constants::{HEALTH_INCREASE_PER_VITALITY, STARTING_HEALTH},
 };
-use loot::{loot::ImplLoot, constants::ImplItemNaming};
+use loot::{loot::ImplLoot, constants::{ImplItemNaming, ItemSuffix}};
 use core::{array::{SpanTrait, ArrayTrait}, traits::Into, clone::Clone,};
 use game::game::encoding::{bytes_base64_encode, U256BytesUsedTraitImpl};
 use graffiti::json::JsonImpl;
@@ -63,50 +63,59 @@ fn create_svg(internals: ByteArray) -> ByteArray {
     "<svg xmlns='http://www.w3.org/2000/svg' width='600' height='900'>" + internals + "</svg>"
 }
 
+fn get_suffix_boost(suffix: u8) -> ByteArray {
+    if (suffix == ItemSuffix::of_Power) {
+        "(+3 STR)"
+    } else if (suffix == ItemSuffix::of_Giant) {
+        "(+3 VIT)"
+    } else if (suffix == ItemSuffix::of_Titans) {
+        "(+2 STR, +1 CHA)"
+    } else if (suffix == ItemSuffix::of_Skill) {
+        "(+3 DEX)"
+    } else if (suffix == ItemSuffix::of_Perfection) {
+        "(+1 STR, +1 DEX, +1 VIT)"
+    } else if (suffix == ItemSuffix::of_Brilliance) {
+        "(+3 INT)"
+    } else if (suffix == ItemSuffix::of_Enlightenment) {
+        "(+3 WIS)"
+    } else if (suffix == ItemSuffix::of_Protection) {
+        "(+2 VIT, +1 DEX)"
+    } else if (suffix == ItemSuffix::of_Anger) {
+        "(+2 STR, +1 DEX)"
+    } else if (suffix == ItemSuffix::of_Rage) {
+        "(+1 STR, +1 CHA, +1 WIS)"
+    } else if (suffix == ItemSuffix::of_Fury) {
+        "(+1 VIT, +1 CHA, +1 INT)"
+    } else if (suffix == ItemSuffix::of_Vitriol) {
+        "(+2 INT, +1 WIS)"
+    } else if (suffix == ItemSuffix::of_the_Fox) {
+        "(+2 DEX, +1 CHA)"
+    } else if (suffix == ItemSuffix::of_Detection) {
+        "(+2 WIS, +1 DEX)"
+    } else if (suffix == ItemSuffix::of_Reflection) {
+        "(+2 WIS, +1 INT)"
+    } else if (suffix == ItemSuffix::of_the_Twins) {
+        "(+3 CHA)"
+    } else {
+        ""
+    }
+}
+
 fn generate_item(item: Item, entropy: u64) -> ByteArray {
     let greatness = item.get_greatness();
-
-    let specials = ImplLoot::get_specials(item.id, greatness, entropy);
 
     let item_name = ImplItemNaming::item_id_to_string(item.id);
 
     let mut _item_name = Default::default();
     _item_name.append_word(item_name, U256BytesUsedTraitImpl::bytes_used(item_name.into()).into());
 
-    let mut _item_prefix_1 = Default::default();
-    _item_prefix_1
-        .append_word(
-            ImplItemNaming::prefix1_to_string(specials.special1),
-            U256BytesUsedTraitImpl::bytes_used(
-                ImplItemNaming::prefix1_to_string(specials.special1).into()
-            )
-                .into()
-        );
-
-    let mut _item_prefix_2 = Default::default();
-    _item_prefix_2
-        .append_word(
-            ImplItemNaming::prefix2_to_string(specials.special2),
-            U256BytesUsedTraitImpl::bytes_used(
-                ImplItemNaming::prefix1_to_string(specials.special2).into()
-            )
-                .into()
-        );
-
-    let mut _item_suffix = Default::default();
-    _item_suffix
-        .append_word(
-            ImplItemNaming::suffix_to_string(specials.special3),
-            U256BytesUsedTraitImpl::bytes_used(
-                ImplItemNaming::prefix1_to_string(specials.special3).into()
-            )
-                .into()
-        );
-
     if (item.id == 0) {
         ""
+    } else if (greatness > 20) {
+        format!("G{} {} ", greatness, _item_name)
+            + get_suffix_boost(ImplLoot::get_suffix(item.id, entropy))
     } else {
-        format!("G{} {}", greatness, _item_name)
+        format!("G{} {} ", greatness, _item_name)
     }
 }
 
@@ -185,7 +194,12 @@ fn create_metadata(
         create_text("# " + _adventurer_id.clone(), "123", "61.2273", "24", "middle", "left"),
         create_text("LVL " + _level.clone(), "228.008", "61.2273", "24", "middle", "end"),
         create_text(
-            _health.clone() + " / " + _max_health.clone(), "570", "58.2727", "20", "right", "end"
+            _health.clone() + " / " + _max_health.clone() + " HP",
+            "570",
+            "58.2727",
+            "20",
+            "right",
+            "end"
         ),
         create_text(_gold.clone() + " GLD", "570", "93.2727", "20", "right", "end"),
         create_text(_str.clone() + " STR", "570", "128.273", "20", "right", "end"),
@@ -197,29 +211,29 @@ fn create_metadata(
         create_text(_luck.clone() + " LUCK", "570", "338.273", "20", "right", "end"),
         create_text("Equipped", "30", "183.136", "32", "middle", "right"),
         create_text("Bag", "30", "600.136", "32", "middle", "right"),
-        create_text(_equiped_weapon.clone(), "30", "233.227", "24", "middle", "start"),
-        create_text(_equiped_chest.clone(), "30", "272.227", "24", "middle", "left"),
-        create_text(_equiped_head.clone(), "30", "311.227", "24", "middle", "left"),
-        create_text(_equiped_waist.clone(), "30", "350.227", "24", "middle", "left"),
-        create_text(_equiped_foot.clone(), "30", "389.227", "24", "middle", "left"),
-        create_text(_equiped_hand.clone(), "30", "428.227", "24", "middle", "left"),
-        create_text(_equiped_neck.clone(), "30", "467.227", "24", "middle", "left"),
-        create_text(_equiped_ring.clone(), "30", "506.227", "24", "middle", "left"),
-        create_text(_bag_item_1.clone(), "30", "644.273", "20", "middle", "left"),
-        create_text(_bag_item_2.clone(), "30", "678.273", "20", "middle", "left"),
-        create_text(_bag_item_3.clone(), "30", "712.273", "20", "middle", "left"),
-        create_text(_bag_item_4.clone(), "30", "746.273", "20", "middle", "left"),
-        create_text(_bag_item_5.clone(), "30", "780.273", "20", "middle", "left"),
-        create_text(_bag_item_6.clone(), "30", "814.273", "20", "middle", "left"),
-        create_text(_bag_item_7.clone(), "30", "848.273", "20", "middle", "left"),
-        create_text(_bag_item_8.clone(), "311", "644.273", "20", "middle", "left"),
-        create_text(_bag_item_9.clone(), "311", "678.273", "20", "middle", "left"),
-        create_text(_bag_item_10.clone(), "311", "712.273", "20", "middle", "left"),
-        create_text(_bag_item_11.clone(), "311", "746.273", "20", "middle", "left"),
-        create_text(_bag_item_12.clone(), "311", "780.273", "20", "middle", "left"),
-        create_text(_bag_item_13.clone(), "311", "814.273", "20", "middle", "left"),
-        create_text(_bag_item_14.clone(), "311", "848.273", "20", "middle", "left"),
-        create_text(_bag_item_15.clone(), "311", "878.273", "20", "middle", "left"),
+        create_text(_equiped_weapon.clone(), "30", "233.227", "21", "middle", "start"),
+        create_text(_equiped_chest.clone(), "30", "272.227", "21", "middle", "left"),
+        create_text(_equiped_head.clone(), "30", "311.227", "21", "middle", "left"),
+        create_text(_equiped_waist.clone(), "30", "350.227", "21", "middle", "left"),
+        create_text(_equiped_foot.clone(), "30", "389.227", "21", "middle", "left"),
+        create_text(_equiped_hand.clone(), "30", "428.227", "21", "middle", "left"),
+        create_text(_equiped_neck.clone(), "30", "467.227", "21", "middle", "left"),
+        create_text(_equiped_ring.clone(), "30", "506.227", "21", "middle", "left"),
+        create_text(_bag_item_1.clone(), "30", "644.273", "16", "middle", "left"),
+        create_text(_bag_item_2.clone(), "30", "678.273", "16", "middle", "left"),
+        create_text(_bag_item_3.clone(), "30", "712.273", "16", "middle", "left"),
+        create_text(_bag_item_4.clone(), "30", "746.273", "16", "middle", "left"),
+        create_text(_bag_item_5.clone(), "30", "780.273", "16", "middle", "left"),
+        create_text(_bag_item_6.clone(), "30", "814.273", "16", "middle", "left"),
+        create_text(_bag_item_7.clone(), "30", "848.273", "16", "middle", "left"),
+        create_text(_bag_item_8.clone(), "311", "644.273", "16", "middle", "left"),
+        create_text(_bag_item_9.clone(), "311", "678.273", "16", "middle", "left"),
+        create_text(_bag_item_10.clone(), "311", "712.273", "16", "middle", "left"),
+        create_text(_bag_item_11.clone(), "311", "746.273", "16", "middle", "left"),
+        create_text(_bag_item_12.clone(), "311", "780.273", "16", "middle", "left"),
+        create_text(_bag_item_13.clone(), "311", "814.273", "16", "middle", "left"),
+        create_text(_bag_item_14.clone(), "311", "848.273", "16", "middle", "left"),
+        create_text(_bag_item_15.clone(), "311", "878.273", "16", "middle", "left"),
     ]
         .span();
 
