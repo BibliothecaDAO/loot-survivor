@@ -138,25 +138,25 @@ fn create_metadata(
             U256BytesUsedTraitImpl::bytes_used(adventurerMetadata.name.into()).into()
         );
 
-    let _adventurer_id = format!("# {}", adventurer_id);
-    let _level = format!("LVL {}", adventurer.get_level());
+    let _adventurer_id = format!("{}", adventurer_id);
+    let _level = format!("{}", adventurer.get_level());
 
     let stat_boosts = adventurer.equipment.get_stat_boosts(adventurerMetadata.start_entropy);
 
-    let _health = format!(
-        " {} / {} HP",
-        adventurer.health,
-        stat_boosts.vitality.into() * HEALTH_INCREASE_PER_VITALITY.into() + STARTING_HEALTH
+    let _health = format!("{}", adventurer.health);
+
+    let _max_health = format!(
+        "{}", stat_boosts.vitality.into() * HEALTH_INCREASE_PER_VITALITY.into() + STARTING_HEALTH
     );
 
-    let _gold = format!("{} GLD", adventurer.gold);
-    let _str = format!("{} STR", stat_boosts.strength);
-    let _dex = format!("{} DEX", stat_boosts.dexterity);
-    let _int = format!("{} INT", stat_boosts.intelligence);
-    let _vit = format!("{} VIT", stat_boosts.vitality);
-    let _wis = format!("{} WIS", stat_boosts.wisdom);
-    let _cha = format!("{} CHA", stat_boosts.charisma);
-    let _luck = format!("{} LUCK", adventurer.equipment.calculate_luck(bag));
+    let _gold = format!("{}", adventurer.gold);
+    let _str = format!("{}", stat_boosts.strength);
+    let _dex = format!("{}", stat_boosts.dexterity);
+    let _int = format!("{}", stat_boosts.intelligence);
+    let _vit = format!("{}", stat_boosts.vitality);
+    let _wis = format!("{}", stat_boosts.wisdom);
+    let _cha = format!("{}", stat_boosts.charisma);
+    let _luck = format!("{}", adventurer.equipment.calculate_luck(bag));
 
     // Equipped items
     let _equiped_weapon = generate_item(
@@ -196,17 +196,19 @@ fn create_metadata(
         rect,
         logo_element,
         create_text(_name.clone(), "117", "117.136", "32", "middle", "left"),
-        create_text(_adventurer_id.clone(), "123", "61.2273", "24", "middle", "left"),
-        create_text(_level.clone(), "228.008", "61.2273", "24", "middle", "end"),
-        create_text(_health.clone(), "570", "58.2727", "20", "right", "end"),
-        create_text(_gold.clone(), "570", "93.2727", "20", "right", "end"),
-        create_text(_str.clone(), "570", "128.273", "20", "right", "end"),
-        create_text(_dex.clone(), "570", "163.273", "20", "right", "end"),
-        create_text(_int.clone(), "570", "198.273", "20", "right", "end"),
-        create_text(_vit.clone(), "570", "233.273", "20", "right", "end"),
-        create_text(_wis.clone(), "570", "268.273", "20", "right", "end"),
-        create_text(_cha.clone(), "570", "303.273", "20", "right", "end"),
-        create_text(_luck.clone(), "570", "338.273", "20", "right", "end"),
+        create_text("# " + _adventurer_id.clone(), "123", "61.2273", "24", "middle", "left"),
+        create_text("LVL " + _level.clone(), "228.008", "61.2273", "24", "middle", "end"),
+        create_text(
+            _health.clone() + " / " + _max_health.clone(), "570", "58.2727", "20", "right", "end"
+        ),
+        create_text(_gold.clone() + " GLD", "570", "93.2727", "20", "right", "end"),
+        create_text(_str.clone() + " STR", "570", "128.273", "20", "right", "end"),
+        create_text(_dex.clone() + " DEX", "570", "163.273", "20", "right", "end"),
+        create_text(_int.clone() + " INT", "570", "198.273", "20", "right", "end"),
+        create_text(_vit.clone() + " VIT", "570", "233.273", "20", "right", "end"),
+        create_text(_wis.clone() + " WIS", "570", "268.273", "20", "right", "end"),
+        create_text(_cha.clone() + " CHA", "570", "303.273", "20", "right", "end"),
+        create_text(_luck.clone() + " LUCK", "570", "338.273", "20", "right", "end"),
         create_text("Equipped", "30", "183.136", "32", "middle", "right"),
         create_text("Bag", "30", "600.136", "32", "middle", "right"),
         create_text(_equiped_weapon.clone(), "30", "233.227", "24", "middle", "start"),
@@ -240,7 +242,7 @@ fn create_metadata(
     let base64_image = format!("data:image/svg+xml;base64,{}", bytes_base64_encode(image));
 
     let mut metadata = JsonImpl::new()
-        .add("name", "Survivor" + "#" + _adventurer_id)
+        .add("name", "Survivor" + " #" + _adventurer_id)
         .add("description", "Loot Survivor Arcade")
         .add("image", base64_image);
 
