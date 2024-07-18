@@ -61,6 +61,7 @@ import { useController } from "@/app/context/ControllerContext";
 import EncounterTable from "@/app/components/encounters/EncounterTable";
 import { ProfileDialog } from "@/app/components/profile/ProfileDialog";
 import TokenLoader from "@/app/components/animations/TokenLoader";
+import CartridgeConnector from "@cartridge/connector";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -171,6 +172,30 @@ function Home() {
   const [accountChainId, setAccountChainId] = useState<
     constants.StarknetChainId | undefined
   >();
+  const setUsername = useUIStore((state) => state.setUsername);
+  const setIsController = useUIStore((state) => state.setIsController);
+  const setControllerAdmin = useUIStore((state) => state.setControllerAdmin);
+
+  useEffect(() => {
+    const init = async () => {
+      const username = await (
+        connector as unknown as CartridgeConnector
+      ).username();
+      const delegateAccount = await (
+        connector as unknown as CartridgeConnector
+      ).delegateAccount();
+      setUsername(username || "");
+      setControllerAdmin(delegateAccount!.toString() || "");
+    };
+    if (connector?.id.includes("cartridge")) {
+      setIsController(true);
+      init();
+    } else {
+      setIsController(false);
+      setControllerAdmin("");
+      setUsername("");
+    }
+  }, [connector]);
 
   const [ethBalance, setEthBalance] = useState<bigint>(BigInt(0));
   const [lordsBalance, setLordsBalance] = useState<bigint>(BigInt(0));
@@ -685,6 +710,8 @@ function Home() {
                       withdraw={withdraw}
                       ethBalance={ethBalance}
                       lordsBalance={lordsBalance}
+                      ethContractAddress={ethContract!.address}
+                      lordsContractAddress={lordsContract!.address}
                     />
                   </div>
                 )}

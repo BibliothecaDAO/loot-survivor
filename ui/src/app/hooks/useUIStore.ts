@@ -121,6 +121,12 @@ type State = {
   setChaBoostRemoved: (value: number) => void;
   showProfile: boolean;
   setShowProfile: (value: boolean) => void;
+  username: string;
+  setUsername: (value: string) => void;
+  isController: boolean;
+  setIsController: (value: boolean) => void;
+  controllerAdmin: string;
+  setControllerAdmin: (value: string) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -221,6 +227,12 @@ const useUIStore = create<State>((set) => ({
   setChaBoostRemoved: (value) => set({ chaBoostRemoved: value }),
   showProfile: false,
   setShowProfile: (value) => set({ showProfile: value }),
+  username: "",
+  setUsername: (value) => set({ username: value }),
+  isController: false,
+  setIsController: (value) => set({ isController: value }),
+  controllerAdmin: "",
+  setControllerAdmin: (value) => set({ controllerAdmin: value }),
 }));
 
 export default useUIStore;
