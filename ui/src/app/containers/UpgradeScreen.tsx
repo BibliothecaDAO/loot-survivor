@@ -229,7 +229,7 @@ export default function UpgradeScreen({
     const upgradeMenu = [
       {
         id: 1,
-        label: `Strength - ${adventurer?.strength} ${
+        label: `Strength - ${adventurer?.strength! + upgrades["Strength"]} ${
           upgrades["Strength"] > 0 ? ` (+${upgrades["Strength"]})` : ""
         }`,
         icon: <ArrowTargetIcon />,
@@ -239,7 +239,7 @@ export default function UpgradeScreen({
       },
       {
         id: 2,
-        label: `Dexterity - ${adventurer?.dexterity} ${
+        label: `Dexterity - ${adventurer?.dexterity! + upgrades["Dexterity"]} ${
           upgrades["Dexterity"] > 0 ? ` (+${upgrades["Dexterity"]})` : ""
         }`,
         icon: <CatIcon />,
@@ -249,7 +249,7 @@ export default function UpgradeScreen({
       },
       {
         id: 3,
-        label: `Vitality - ${adventurer?.vitality} ${
+        label: `Vitality - ${adventurer?.vitality! + upgrades["Vitality"]} ${
           upgrades["Vitality"] > 0 ? ` (+${upgrades["Vitality"]})` : ""
         }`,
         icon: <HeartVitalityIcon />,
@@ -259,7 +259,9 @@ export default function UpgradeScreen({
       },
       {
         id: 4,
-        label: `Intelligence - ${adventurer?.intelligence} ${
+        label: `Intelligence - ${
+          adventurer?.intelligence! + upgrades["Intelligence"]
+        } ${
           upgrades["Intelligence"] > 0 ? ` (+${upgrades["Intelligence"]})` : ""
         }`,
         icon: <LightbulbIcon />,
@@ -269,7 +271,7 @@ export default function UpgradeScreen({
       },
       {
         id: 5,
-        label: `Wisdom - ${adventurer?.wisdom} ${
+        label: `Wisdom - ${adventurer?.wisdom! + upgrades["Wisdom"]} ${
           upgrades["Wisdom"] > 0 ? ` (+${upgrades["Wisdom"]})` : ""
         }`,
         icon: <ScrollIcon />,
@@ -279,7 +281,7 @@ export default function UpgradeScreen({
       },
       {
         id: 6,
-        label: `Charisma - ${adventurer?.charisma} ${
+        label: `Charisma - ${adventurer?.charisma! + upgrades["Charisma"]} ${
           upgrades["Charisma"] > 0 ? ` (+${upgrades["Charisma"]})` : ""
         }`,
         icon: <CoinCharismaIcon />,
