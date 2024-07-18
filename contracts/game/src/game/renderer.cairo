@@ -10,7 +10,7 @@ use game::game::encoding::{bytes_base64_encode, U256BytesUsedTraitImpl};
 use graffiti::json::JsonImpl;
 
 fn logo() -> ByteArray {
-    "<svg xmlns=\"http://www.w3.org/2000/svg\" fill='#3DEC00' viewBox=\"0 0 10 16\"><g><g><path d=\"M1 2V0h8v2h1v10H7v4H3v-4H0V2zm1 4v4h2v2h2v-2h2V6H6v4H4V6z\"/></g></g></svg>"
+    "<path fill='#3DEC00' d=\"M1 2V0h8v2h1v10H7v4H3v-4H0V2zm1 4v4h2v2h2v-2h2V6H6v4H4V6z\"/>"
 }
 
 fn create_rect() -> ByteArray {
