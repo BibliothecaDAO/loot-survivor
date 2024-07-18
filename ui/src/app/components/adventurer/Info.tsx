@@ -7,7 +7,7 @@ import {
 } from "@/app/components/icons/Icons";
 import { ItemDisplay } from "@/app/components/adventurer/ItemDisplay";
 import LevelBar from "@/app/components/adventurer/LevelBar";
-import { getKeyFromValue } from "@/app/lib/utils";
+import { getItemData, getKeyFromValue } from "@/app/lib/utils";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import { Item } from "@/app/types";
@@ -41,6 +41,10 @@ export default function Info({
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
+  const equipItems = useUIStore((state) => state.equipItems);
+  const purchaseItems = useUIStore((state) => state.purchaseItems);
+
+  console.log(dropItems, equipItems);
 
   const gameData = new GameData();
 
@@ -51,6 +55,30 @@ export default function Info({
     : data.itemsByAdventurerQuery
     ? data.itemsByAdventurerQuery.items
     : [];
+
+  const filteredItems = items
+    .filter(
+      (item) =>
+        !dropItems.includes(getKeyFromValue(gameData.ITEMS, item.item!) ?? "")
+    )
+    .filter(
+      (item) =>
+        !purchaseItems.some((purchaseItem) => {
+          const { slot: equipSlot } = getItemData(
+            gameData.ITEMS[parseInt(purchaseItem.item)]
+          );
+          const { slot: heldSlot } = getItemData(item.item!);
+          return equipSlot === heldSlot && purchaseItem.equip === "1";
+        })
+    )
+    .filter(
+      (item) =>
+        !equipItems.includes(getKeyFromValue(gameData.ITEMS, item.item!) ?? "")
+    );
+  console.log(items);
+  console.log(filteredItems);
+  console.log(equipItems);
+  console.log(purchaseItems);
 
   const handleDropItems = (item: string) => {
     const newDropItems = [
@@ -75,14 +103,44 @@ export default function Info({
   };
 
   const attributes = [
-    { key: "STR", value: formatAdventurer.strength ?? 0 },
-    { key: "DEX", value: formatAdventurer.dexterity },
-    { key: "INT", value: formatAdventurer.intelligence ?? 0 },
-    { key: "VIT", value: formatAdventurer.vitality ?? 0 },
-    { key: "WIS", value: formatAdventurer.wisdom ?? 0 },
-    { key: "CHA", value: formatAdventurer.charisma ?? 0 },
-    { key: "LUCK", value: formatAdventurer.luck ?? 0 },
+    {
+      key: "STR",
+      value: (formatAdventurer.strength ?? 0) + upgrades["Strength"],
+      upgrade: upgrades["Strength"],
+    },
+    {
+      key: "DEX",
+      value: (formatAdventurer.dexterity ?? 0) + upgrades["Dexterity"],
+      upgrade: upgrades["Dexterity"],
+    },
+    {
+      key: "INT",
+      value: (formatAdventurer.intelligence ?? 0) + upgrades["Intelligence"],
+      upgrade: upgrades["Intelligence"],
+    },
+    {
+      key: "VIT",
+      value: (formatAdventurer.vitality ?? 0) + upgrades["Vitality"],
+      upgrade: upgrades["Vitality"],
+    },
+    {
+      key: "WIS",
+      value: (formatAdventurer.wisdom ?? 0) + upgrades["Wisdom"],
+      upgrade: upgrades["Wisdom"],
+    },
+    {
+      key: "CHA",
+      value: (formatAdventurer.charisma ?? 0) + upgrades["Charisma"],
+      upgrade: upgrades["Charisma"],
+    },
+    {
+      key: "LUCK",
+      value: formatAdventurer.luck ?? 0,
+      upgrade: upgrades["Luck"],
+    },
   ];
+
+  console.log(upgrades);
 
   const bodyParts = [
     "Weapon",
@@ -159,10 +217,15 @@ export default function Info({
               {attributes.map((attribute) => (
                 <div
                   key={attribute.key}
-                  className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black"
+                  className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black relative"
                 >
                   {attribute.key}
-                  <span className="pl-1">{attribute.value}</span>
+                  <span className="flex flex-row items-center">
+                    {attribute.upgrade > 0 && (
+                      <span className="text-xs">{`(+${attribute.upgrade})`}</span>
+                    )}
+                    <span className="pl-1">{attribute.value}</span>
+                  </span>
                 </div>
               ))}
             </div>
