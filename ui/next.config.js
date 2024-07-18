@@ -1,4 +1,5 @@
-/** @type {import('next').NextConfig} */
+const withPWA = require('next-pwa');
+
 const nextConfig = {
   experimental: {
     appDir: true,
@@ -13,4 +14,8 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withPWA({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  // Add any additional Workbox configuration here
+})(nextConfig);

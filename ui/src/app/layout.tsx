@@ -16,6 +16,7 @@ import { BurnerManager } from "@dojoengine/create-burner";
 import { RpcProvider } from "starknet";
 import Head from "@/app/head";
 import { Analytics } from "@vercel/analytics/react";
+import BurnerLoader from "@/app/components/animations/BurnerLoader";
 
 type SetupResult = {
   config: {
@@ -34,6 +35,7 @@ export default function RootLayout({
   const network = useUIStore((state) => state.network);
   const [introComplete, setIntroComplete] = useState(false);
   const [setupResult, setSetupResult] = useState<SetupResult | null>(null);
+  const [createBurner, setCreateBurner] = useState(false);
 
   const handleIntroComplete = () => {
     setIntroComplete(true);
@@ -45,6 +47,7 @@ export default function RootLayout({
         const result = await setup({
           rpcUrl: networkConfig[network].rpcUrl,
           network,
+          setCreateBurner,
         });
         setSetupResult(result);
       }
@@ -69,7 +72,10 @@ export default function RootLayout({
             className={`min-h-screen container mx-auto flex flex-col sm:pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
           >
             {introComplete ? (
-              <LoginIntro />
+              <>
+                <LoginIntro />
+                {createBurner && <BurnerLoader />}
+              </>
             ) : (
               <Intro onIntroComplete={handleIntroComplete} />
             )}

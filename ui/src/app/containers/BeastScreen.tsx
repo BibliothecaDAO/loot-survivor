@@ -363,12 +363,16 @@ export default function BeastScreen({
               Battle log with {beastData?.beast}
             </Button>
 
-            <Button
-              className="uppercase"
-              onClick={() => setShowFutures(!showFutures)}
-            >
-              Show Futures
-            </Button>
+            <>
+              {adventurer?.level! > 1 && (
+                <Button
+                  className="uppercase"
+                  onClick={() => setShowFutures(!showFutures)}
+                >
+                  Show Futures
+                </Button>
+              )}
+            </>
           </span>
         )}
 

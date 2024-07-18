@@ -4,9 +4,7 @@ members = [
     "contracts/beasts",
     "contracts/combat",
     "contracts/game",
-    "contracts/game_snapshot",
     "contracts/loot",
-    "contracts/lords",
     "contracts/market",
     "contracts/obstacles",
 ]
@@ -16,10 +14,7 @@ description = "A fully onchain arcade dungeon crawler built on Starknet in conju
 homepage = "https://github.com/provable-games/loot-survivor"
 
 [workspace.dependencies]
-starknet = ">=2.5.3"
-openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v0.9.0" }
-golden_token = { git = "https://github.com/BibliothecaDAO/golden-token", branch = "next" }
-arcade_account = { git = "https://github.com/BibliothecaDAO/arcade-account", branch = "next" }
+starknet = ">=2.6.4"
 
 [workspace.tool.fmt]
 sort-module-level-items = true

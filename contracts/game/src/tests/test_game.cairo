@@ -1,15 +1,5 @@
 #[cfg(test)]
 mod tests {
-    use debug::PrintTrait;
-    use arcade_account::{Account, TRANSACTION_VERSION};
-    use arcade_account::tests::utils::helper_contracts::{
-        ISimpleTestContractDispatcher, ISimpleTestContractDispatcherTrait, simple_test_contract,
-    };
-    use arcade_account::account::interface::{
-        IMasterControl, IMasterControlDispatcher, IMasterControlDispatcherTrait,
-        ArcadeAccountABIDispatcher, ArcadeAccountABIDispatcherTrait,
-        ArcadeAccountCamelABIDispatcher, ArcadeAccountCamelABIDispatcherTrait,
-    };
     use array::ArrayTrait;
     use core::{result::ResultTrait, traits::Into, array::SpanTrait, serde::Serde, clone::Clone};
     use option::OptionTrait;
@@ -19,10 +9,6 @@ mod tests {
     };
     use traits::TryInto;
     use box::BoxTrait;
-    use openzeppelin::token::erc20::interface::{
-        IERC20Camel, IERC20CamelDispatcher, IERC20CamelDispatcherTrait, IERC20CamelLibraryDispatcher
-    };
-    use openzeppelin::token::erc20::interface::IERC20;
     use market::market::{ImplMarket, LootWithPrice, ItemPurchase};
     use loot::{loot::{Loot, ImplLoot, ILoot}, constants::{ItemId}};
     use game::{
@@ -40,9 +26,6 @@ mod tests {
     use game::tests::mock_randomness::{
         MockRandomness, IMockRandomnessDispatcher, IMockRandomnessDispatcherTrait
     };
-    use openzeppelin::utils::serde::SerializedAppend;
-    use openzeppelin::presets::erc20::ERC20;
-    use openzeppelin::tests::utils;
     use combat::{constants::CombatEnums::{Slot, Tier}, combat::ImplCombat};
     use adventurer::{
         stats::Stats, adventurer_meta::{AdventurerMetadata},
@@ -54,16 +37,29 @@ mod tests {
     };
     use beasts::constants::{BeastSettings, BeastId};
 
-    use golden_token::GoldenToken::{
-        IGoldenToken, IGoldenTokenDispatcher, IGoldenTokenDispatcherTrait,
-        IGoldenTokenLibraryDispatcher
+    use game::tests::oz_constants::{
+        ZERO, OWNER, SPENDER, RECIPIENT, NAME, SYMBOL, DECIMALS, SUPPLY, VALUE, DATA, OPERATOR,
+        OTHER, BASE_URI, TOKEN_ID
     };
+
+    use openzeppelin::tests::utils;
+    use openzeppelin::token::erc20::dual20::{DualCaseERC20, DualCaseERC20Trait};
+    use openzeppelin::token::erc20::interface::{IERC20CamelDispatcher, IERC20CamelDispatcherTrait};
+    use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use openzeppelin::utils::serde::SerializedAppend;
+    use openzeppelin::token::erc721::dual721::{DualCaseERC721, DualCaseERC721Trait};
+    use openzeppelin::token::erc721::interface::IERC721_ID;
+    use openzeppelin::token::erc721::interface::{
+        IERC721CamelOnlyDispatcher, IERC721CamelOnlyDispatcherTrait
+    };
+    use openzeppelin::token::erc721::interface::{IERC721Dispatcher, IERC721DispatcherTrait};
+
+    use starknet::testing::set_caller_address;
+    use starknet::testing::set_contract_address;
 
     const ADVENTURER_ID: felt252 = 1;
     const MAX_LORDS: u256 = 10000000000000000000000000000000000000000;
     const APPROVE: u256 = 10000000000000000000000000000000000000000;
-    const NAME: felt252 = 111;
-    const SYMBOL: felt252 = 222;
     const DEFAULT_NO_GOLDEN_TOKEN: felt252 = 0;
     const DAY: u64 = 86400;
 
@@ -72,6 +68,10 @@ mod tests {
     }
 
     fn DAO() -> ContractAddress {
+        contract_address_const::<1>()
+    }
+
+    fn PG() -> ContractAddress {
         contract_address_const::<1>()
     }
 
@@ -91,8 +91,8 @@ mod tests {
         contract_address_const::<1>()
     }
 
-    fn OWNER() -> ContractAddress {
-        contract_address_const::<10>()
+    fn ORACLE_ADDRESS() -> ContractAddress {
+        contract_address_const::<1>()
     }
 
     const PUBLIC_KEY: felt252 = 0x333333;
@@ -107,10 +107,6 @@ mod tests {
         s: felt252
     }
 
-    fn AA_CLASS_HASH() -> felt252 {
-        Account::TEST_CLASS_HASH
-    }
-
     fn SIGNED_TX_DATA() -> SignedTransactionData {
         SignedTransactionData {
             private_key: 1234,
@@ -121,54 +117,51 @@ mod tests {
         }
     }
 
-    fn deploy_arcade_account(data: Option<@SignedTransactionData>) -> ContractAddress {
-        // Set the transaction version
-        testing::set_version(TRANSACTION_VERSION);
+    fn setup_lords() -> (DualCaseERC20, IERC20Dispatcher) {
+        let lords_name: ByteArray = "LORDS";
+        let lords_symbol: ByteArray = "LORDS";
+        let lords_supply: u256 = 10000000000000000000000000000000000000000;
 
         let mut calldata = array![];
-        let mut public_key = PUBLIC_KEY;
-
-        if data.is_some() {
-            // set public key
-            let _data = data.unwrap();
-            public_key = *_data.public_key;
-
-            // Set the signature and transaction hash
-            let mut signature = array![];
-            signature.append(*_data.r);
-            signature.append(*_data.s);
-            testing::set_signature(signature.span());
-            testing::set_transaction_hash(*_data.transaction_hash);
-        }
-
-        // add constructor parameters to calldata
-        Serde::serialize(@public_key, ref calldata);
-        Serde::serialize(@starknet::get_contract_address(), ref calldata);
-
-        // Deploy the account contract
-        utils::deploy(AA_CLASS_HASH(), calldata)
-    }
-
-    fn deploy_erc20() -> IERC20CamelDispatcher {
-        let mut calldata = array![];
-        calldata.append_serde(NAME);
-        calldata.append_serde(SYMBOL);
-        calldata.append_serde(MAX_LORDS);
+        calldata.append_serde(lords_name);
+        calldata.append_serde(lords_symbol);
+        calldata.append_serde(lords_supply);
         calldata.append_serde(OWNER());
-
-        IERC20CamelDispatcher { contract_address: utils::deploy(ERC20::TEST_CLASS_HASH, calldata) }
+        let target = utils::deploy(SnakeERC20Mock::TEST_CLASS_HASH, calldata);
+        (DualCaseERC20 { contract_address: target }, IERC20Dispatcher { contract_address: target })
     }
 
-    fn deploy_golden_token(eth: ContractAddress) -> IGoldenTokenDispatcher {
-        let mut calldata = ArrayTrait::new();
+    fn setup_eth() -> (DualCaseERC20, IERC20Dispatcher) {
+        let eth_name: ByteArray = "ETH";
+        let eth_symbol: ByteArray = "ETH";
+        let eth_supply: u256 = 10000000000000000000000000000000000000000;
 
-        calldata.append(SYMBOL);
-        calldata.append(OWNER().into());
-        calldata.append(DAO().into());
-        calldata.append(eth.into());
+        let mut calldata = array![];
+        calldata.append_serde(eth_name);
+        calldata.append_serde(eth_symbol);
+        calldata.append_serde(eth_supply);
+        calldata.append_serde(OWNER());
+        let target = utils::deploy(SnakeERC20Mock::TEST_CLASS_HASH, calldata);
+        (DualCaseERC20 { contract_address: target }, IERC20Dispatcher { contract_address: target })
+    }
 
-        let contract_address = utils::deploy(golden_token::GoldenToken::TEST_CLASS_HASH, calldata);
-        IGoldenTokenDispatcher { contract_address }
+    fn setup_golden_token() -> (DualCaseERC721, IERC721Dispatcher) {
+        let golden_token_name: ByteArray = "GOLDEN_TOKEN";
+        let golden_token_symbol: ByteArray = "GLDTKN";
+        let TOKEN_ID: u256 = 1;
+
+        let mut calldata = array![];
+        calldata.append_serde(golden_token_name);
+        calldata.append_serde(golden_token_symbol);
+        calldata.append_serde(BASE_URI());
+        calldata.append_serde(OWNER());
+        calldata.append_serde(TOKEN_ID);
+        set_contract_address(OWNER());
+        let target = utils::deploy(SnakeERC721Mock::TEST_CLASS_HASH, calldata);
+        (
+            DualCaseERC721 { contract_address: target },
+            IERC721Dispatcher { contract_address: target }
+        )
     }
 
     fn deploy_randomness() -> IMockRandomnessDispatcher {
@@ -180,41 +173,45 @@ mod tests {
 
     fn deploy_game(
         lords: ContractAddress,
+        eth: ContractAddress,
         golden_token: ContractAddress,
         terminal_block: u64,
         randomness: ContractAddress
     ) -> IGameDispatcher {
+        let vrf_level_interval = 3;
         let mut calldata = ArrayTrait::<felt252>::new();
         calldata.append(lords.into());
+        calldata.append(eth.into());
         calldata.append(DAO().into());
+        calldata.append(PG().into());
         calldata.append(COLLECTIBLE_BEASTS().into());
         calldata.append(golden_token.into());
         calldata.append(terminal_block.into());
         calldata.append(randomness.into());
-        let vrf_level_interval = 3;
         calldata.append(vrf_level_interval);
+        calldata.append(ORACLE_ADDRESS().into());
         calldata.append(PREV_FIRST_PLACE().into());
         calldata.append(PREV_SECOND_PLACE().into());
         calldata.append(PREV_THIRD_PLACE().into());
-        
 
         IGameDispatcher { contract_address: utils::deploy(Game::TEST_CLASS_HASH, calldata) }
     }
 
     fn setup(
         starting_block: u64, starting_timestamp: u64, terminal_block: u64
-    ) -> (IGameDispatcher, IERC20CamelDispatcher, IGoldenTokenDispatcher, ContractAddress) {
+    ) -> (IGameDispatcher, IERC20Dispatcher, IERC20Dispatcher, IERC721Dispatcher, ContractAddress) {
         testing::set_block_number(starting_block);
         testing::set_block_timestamp(starting_timestamp);
+        testing::set_contract_address(OWNER());
 
         // deploy lords, eth, and golden token
-        let lords = deploy_erc20();
+        let (_, lords) = setup_lords();
 
-        // deploy eth
-        let eth = deploy_erc20();
+        // deploy eth   
+        let (_, eth) = setup_eth();
 
         // deploy golden token
-        let golden_token = deploy_golden_token(eth.contract_address);
+        let (_, golden_token) = setup_golden_token();
 
         // randomness
         let randomness = deploy_randomness();
@@ -222,13 +219,11 @@ mod tests {
         // deploy game
         let game = deploy_game(
             lords.contract_address,
+            eth.contract_address,
             golden_token.contract_address,
             terminal_block,
             randomness.contract_address
         );
-
-        // set contract address (aka caller) to specific address
-        testing::set_contract_address(OWNER());
 
         // transfer lords to caller address and approve 
         lords.transfer(OWNER(), 100000000000000000000000000000000);
@@ -236,34 +231,21 @@ mod tests {
 
         // give golden token contract approval to access ETH
         eth.approve(golden_token.contract_address, APPROVE.into());
-        // open golden token open edition
-        golden_token.open();
-        // mint golden token
-        golden_token.mint();
 
-        let arcade_account = ArcadeAccountABIDispatcher {
-            contract_address: deploy_arcade_account(Option::None(()))
-        };
+        lords.transfer(OWNER(), 1000000000000000000000000);
 
-        let master_control_dispatcher = IMasterControlDispatcher {
-            contract_address: arcade_account.contract_address
-        };
-
-        master_control_dispatcher
-            .update_whitelisted_contracts(array![(game.contract_address, true)]);
-
-        lords.transfer(arcade_account.contract_address, 1000000000000000000000000);
-
-        testing::set_contract_address(arcade_account.contract_address);
+        testing::set_contract_address(OWNER());
         lords.approve(game.contract_address, APPROVE.into());
 
-        (game, lords, golden_token, arcade_account.contract_address)
+        (game, lords, eth, golden_token, OWNER())
     }
 
-    fn add_adventurer_to_game(ref game: IGameDispatcher, golden_token_id: u256) {
+    fn add_adventurer_to_game(
+        ref game: IGameDispatcher, golden_token_id: u256, starting_weapon: u8
+    ) {
         game
             .new_game(
-                INTERFACE_ID(), ItemId::Wand, 'loothero', golden_token_id, false, 4000000000000000
+                INTERFACE_ID(), starting_weapon, 'loothero', golden_token_id, 4000000000000000
             );
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -277,7 +259,7 @@ mod tests {
 
     fn new_adventurer(starting_block: u64, starting_time: u64) -> IGameDispatcher {
         let terminal_block = 0;
-        let (mut game, _, _, _) = setup(starting_block, starting_time, terminal_block);
+        let (mut game, _, _, _, _) = setup(starting_block, starting_time, terminal_block);
         let starting_weapon = ItemId::Wand;
         let name = 'abcdefghijklmno';
 
@@ -288,7 +270,6 @@ mod tests {
                 starting_weapon,
                 name,
                 DEFAULT_NO_GOLDEN_TOKEN.into(),
-                false,
                 4000000000000000
             );
 
@@ -305,27 +286,6 @@ mod tests {
             'wrong starter beast health '
         );
 
-        game
-    }
-
-    fn new_adventurer_lvl2_with_idle_penalty() -> IGameDispatcher {
-        // start game on block number 1
-        let mut game = new_adventurer(1000, 1696201757);
-
-        // fast forward chain to block number 400
-        testing::set_block_number(1002);
-
-        // double attack beast
-        // this will trigger idle penalty which will deal extra
-        // damage to adventurer
-        game.attack(ADVENTURER_ID, false);
-        game.attack(ADVENTURER_ID, false);
-
-        // assert starter beast is dead
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.beast_health == 0, 'should not be in battle');
-
-        // return game
         game
     }
 
@@ -616,10 +576,12 @@ mod tests {
         game
     }
 
-    fn new_adventurer_with_lords(starting_block: u64) -> (IGameDispatcher, IERC20CamelDispatcher) {
+    fn new_adventurer_with_lords(starting_block: u64) -> (IGameDispatcher, IERC20Dispatcher) {
         let starting_timestamp = 1;
         let terminal_timestamp = 0;
-        let (mut game, lords, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
+        let (mut game, lords, _, _, _) = setup(
+            starting_block, starting_timestamp, terminal_timestamp
+        );
         let starting_weapon = ItemId::Wand;
         let name = 'abcdefghijklmno';
 
@@ -630,7 +592,6 @@ mod tests {
                 starting_weapon,
                 name,
                 DEFAULT_NO_GOLDEN_TOKEN.into(),
-                false,
                 4000000000000000
             );
 
@@ -1311,19 +1272,15 @@ mod tests {
         let adventurer_level = game.get_adventurer(ADVENTURER_ID).get_level();
         assert(potion_price == POTION_PRICE * adventurer_level.into(), 'wrong lvl1 potion price');
 
-        let mut game = new_adventurer_lvl2(1000, 1696201757, 0);
+        // defeat starter beast and advance to level 2
+        game.attack(ADVENTURER_ID, false);
+
+        // get level 2 potion price
         let potion_price = game.get_potion_price(ADVENTURER_ID);
         let adventurer_level = game.get_adventurer(ADVENTURER_ID).get_level();
-        assert(potion_price == POTION_PRICE * adventurer_level.into(), 'wrong lvl2 potion price');
-    }
 
-    #[test]
-    #[available_gas(20000000)]
-    fn test_get_attacking_beast() {
-        let mut game = new_adventurer(1000, 1696201757);
-        let beast = game.get_attacking_beast(ADVENTURER_ID);
-        // our adventurer starts with a wand so the starter beast should be a troll
-        assert(beast.id == BeastId::Troll, 'starter beast should be troll');
+        // verify potion price
+        assert(potion_price == POTION_PRICE * adventurer_level.into(), 'wrong lvl2 potion price');
     }
 
     #[test]
@@ -1605,7 +1562,7 @@ mod tests {
         let original_charisma = adventurer.stats.charisma;
         let original_health = adventurer.health;
 
-        // potion purchases
+        // buy a potion
         let potions = 1;
 
         // item purchases
@@ -1613,8 +1570,6 @@ mod tests {
         let mut chests_armor_id = 0;
         let head_armor_on_market = @game.get_items_on_market_by_slot(ADVENTURER_ID, 3);
         let mut head_armor_id = 0;
-        let waist_armor_on_market = @game.get_items_on_market_by_slot(ADVENTURER_ID, 4);
-        let mut waist_armor_id = 0;
         let mut items_to_purchase = ArrayTrait::<ItemPurchase>::new();
 
         if chests_armor_on_market.len() > 0 {
@@ -1624,11 +1579,6 @@ mod tests {
         if head_armor_on_market.len() > 0 {
             head_armor_id = *head_armor_on_market.at(0);
             items_to_purchase.append(ItemPurchase { item_id: head_armor_id, equip: false });
-        }
-
-        if waist_armor_on_market.len() > 0 {
-            waist_armor_id = *waist_armor_on_market.at(0);
-            items_to_purchase.append(ItemPurchase { item_id: waist_armor_id, equip: false });
         }
 
         // stat upgrades
@@ -1655,11 +1605,6 @@ mod tests {
         if head_armor_id > 0 {
             assert(!adventurer.equipment.is_equipped(head_armor_id), 'head should not be equipped');
         }
-        if waist_armor_id > 0 {
-            assert(
-                !adventurer.equipment.is_equipped(waist_armor_id), 'waist should not be equipped'
-            );
-        }
     }
 
     fn _calculate_payout(bp: u256, price: u128) -> u256 {
@@ -1672,7 +1617,7 @@ mod tests {
         let (_, lords) = new_adventurer_with_lords(1000);
 
         // stage 0
-        assert(lords.balanceOf(DAO()) == COST_TO_PLAY.into(), 'wrong stage 1 balance');
+        assert(lords.balance_of(DAO()) == COST_TO_PLAY.into(), 'wrong stage 1 balance');
 
         // stage 1
         testing::set_block_number(1001 + BLOCKS_IN_A_WEEK * 2);
@@ -1680,7 +1625,7 @@ mod tests {
         // spawn new
 
         // DAO doesn't get anything more until stage 2
-        assert(lords.balanceOf(DAO()) == COST_TO_PLAY.into(), 'wrong stage 1 balance');
+        assert(lords.balance_of(DAO()) == COST_TO_PLAY.into(), 'wrong stage 1 balance');
 
         let mut _rewards = Rewards {
             BIBLIO: _calculate_payout(REWARD_DISTRIBUTIONS_BP::CREATOR, COST_TO_PLAY),
@@ -1694,7 +1639,7 @@ mod tests {
         };
     // week.FIRST_PLACE.print();
 
-    // assert(lords.balanceOf(DAO()) == COST_TO_PLAY, 'wrong DAO payout');
+    // assert(lords.balance_of(DAO()) == COST_TO_PLAY, 'wrong DAO payout');
     // assert(week.INTERFACE == 0, 'no payout in stage 1');
     // assert(week.FIRST_PLACE == _calculate_payout(
     //         REWARD_DISTRIBUTIONS_PHASE1_BP::FIRST_PLACE, cost_to_play
@@ -1717,17 +1662,17 @@ mod tests {
         let starting_block = 1;
         let starting_timestamp = 1;
         let terminal_timestamp = 100;
-        let (mut game, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
+        let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
 
         // add a player to the game
-        add_adventurer_to_game(ref game, 0);
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
         // advance blockchain timestamp beyond terminal timestamp
         starknet::testing::set_block_timestamp(terminal_timestamp + 1);
 
         // try to start a new game
         // should panic with 'terminal time reached'
         // which test is annotated to expect
-        add_adventurer_to_game(ref game, 0);
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
     }
 
     #[test]
@@ -1736,17 +1681,17 @@ mod tests {
         let starting_block = 1;
         let starting_timestamp = 1;
         let terminal_timestamp = 0;
-        let (mut game, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
+        let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
 
         // add a player to the game
-        add_adventurer_to_game(ref game, 0);
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
 
         // advance blockchain timestamp to max u64
         let max_u64_timestamp = 18446744073709551615;
         starknet::testing::set_block_timestamp(max_u64_timestamp);
 
         // verify we can still start a new game
-        add_adventurer_to_game(ref game, 0);
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
     }
 
     #[test]
@@ -1755,10 +1700,10 @@ mod tests {
         let starting_block = 364063;
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
-        let (mut game, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
-        add_adventurer_to_game(ref game, 1);
+        let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
+        add_adventurer_to_game(ref game, 1, ItemId::Wand);
         testing::set_block_timestamp(starting_timestamp + DAY);
-        add_adventurer_to_game(ref game, 1);
+        add_adventurer_to_game(ref game, 1, ItemId::Wand);
     }
 
     #[test]
@@ -1768,9 +1713,9 @@ mod tests {
         let starting_block = 364063;
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
-        let (mut game, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
+        let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
         assert(game.can_play(1), 'should be able to play');
-        add_adventurer_to_game(ref game, golden_token_id);
+        add_adventurer_to_game(ref game, golden_token_id, ItemId::Wand);
         assert(!game.can_play(1), 'should not be able to play');
         testing::set_block_timestamp(starting_timestamp + DAY);
         assert(game.can_play(1), 'should be able to play again');
@@ -1786,8 +1731,8 @@ mod tests {
         let starting_block = 364063;
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
-        let (mut game, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
-        add_adventurer_to_game(ref game, golden_token_id);
+        let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
+        add_adventurer_to_game(ref game, golden_token_id, ItemId::Wand);
     }
 
     #[test]
@@ -1798,13 +1743,239 @@ mod tests {
         let starting_block = 364063;
         let starting_timestamp = 1698678554;
         let terminal_timestamp = 0;
-        let (mut game, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
-        add_adventurer_to_game(ref game, golden_token_id);
+        let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, terminal_timestamp);
+        add_adventurer_to_game(ref game, golden_token_id, ItemId::Wand);
 
         // roll blockchain forward 1 second less than a day
         testing::set_block_timestamp(starting_timestamp + (DAY - 1));
 
         // try to play again with golden token which should cause panic
-        add_adventurer_to_game(ref game, golden_token_id);
+        add_adventurer_to_game(ref game, golden_token_id, ItemId::Wand);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Cant drop during starter beast', 'ENTRYPOINT_FAILED'))]
+    fn test_no_dropping_starter_weapon_during_starter_beast() {
+        let mut game = new_adventurer(1000, 1696201757);
+
+        // try to drop starter weapon during starter beast battle
+        let mut drop_items = array![ItemId::Wand];
+        game.drop(ADVENTURER_ID, drop_items);
+    }
+
+    #[test]
+    fn test_drop_starter_item_after_starter_beast() {
+        let mut game = new_adventurer(1000, 1696201757);
+        game.attack(ADVENTURER_ID, true);
+
+        // try to drop starter weapon during starter beast battle
+        let mut drop_items = array![ItemId::Wand];
+        game.drop(ADVENTURER_ID, drop_items);
+    }
+
+    #[test]
+    fn test_different_starter_beasts() {
+        let starting_block = 364063;
+        let starting_timestamp = 1698678554;
+        let (mut game, _, _, _, _) = setup(starting_block, starting_timestamp, 0);
+        let mut game_count = game.get_game_count();
+        assert(game_count == 0, 'game count should be 0');
+
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game_count = game.get_game_count();
+        let starter_beast_game_one = game.get_attacking_beast(game_count).id;
+        assert(game_count == 1, 'game count should be 1');
+
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game_count = game.get_game_count();
+        let starter_beast_game_two = game.get_attacking_beast(game_count).id;
+        assert(game_count == 2, 'game count should be 2');
+
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game_count = game.get_game_count();
+        let starter_beast_game_three = game.get_attacking_beast(game_count).id;
+        assert(game_count == 3, 'game count should be 3');
+
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game_count = game.get_game_count();
+        let starter_beast_game_four = game.get_attacking_beast(game_count).id;
+        assert(game_count == 4, 'game count should be 4');
+
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game_count = game.get_game_count();
+        let starter_beast_game_five = game.get_attacking_beast(game_count).id;
+        assert(game_count == 5, 'game count should be 5');
+
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game_count = game.get_game_count();
+        let starter_beast_game_six = game.get_attacking_beast(game_count).id;
+        assert(game_count == 6, 'game count should be 6');
+
+        // assert all games starting with a Wand get a T5 Brute for starter beast
+        assert(
+            starter_beast_game_one >= BeastId::Troll && starter_beast_game_one <= BeastId::Skeleton,
+            'wrong starter beast game 1'
+        );
+        assert(
+            starter_beast_game_two >= BeastId::Troll && starter_beast_game_one <= BeastId::Skeleton,
+            'wrong starter beast game 2'
+        );
+        assert(
+            starter_beast_game_three >= BeastId::Troll
+                && starter_beast_game_one <= BeastId::Skeleton,
+            'wrong starter beast game 3'
+        );
+        assert(
+            starter_beast_game_four >= BeastId::Troll
+                && starter_beast_game_one <= BeastId::Skeleton,
+            'wrong starter beast game 4'
+        );
+        assert(
+            starter_beast_game_five >= BeastId::Troll
+                && starter_beast_game_one <= BeastId::Skeleton,
+            'wrong starter beast game 5'
+        );
+
+        // assert first five games are all unique
+        assert(starter_beast_game_one != starter_beast_game_two, 'same starter beast game 1 & 2');
+        assert(starter_beast_game_one != starter_beast_game_three, 'same starter beast game 1 & 3');
+        assert(starter_beast_game_one != starter_beast_game_four, 'same starter beast game 1 & 4');
+        assert(starter_beast_game_one != starter_beast_game_five, 'same starter beast game 1 & 5');
+        assert(starter_beast_game_two != starter_beast_game_three, 'same starter beast game 2 & 3');
+        assert(starter_beast_game_two != starter_beast_game_four, 'same starter beast game 2 & 4');
+        assert(starter_beast_game_two != starter_beast_game_five, 'same starter beast game 2 & 5');
+        assert(
+            starter_beast_game_three != starter_beast_game_four, 'same starter beast game 3 & 4'
+        );
+        assert(
+            starter_beast_game_three != starter_beast_game_five, 'same starter beast game 3 & 5'
+        );
+        assert(starter_beast_game_four != starter_beast_game_five, 'same starter beast game 4 & 5');
+
+        // sixth game wraps around and gets same beast as the first game
+        assert(starter_beast_game_one == starter_beast_game_six, 'game 1 and 6 should be same');
+
+        // Assert Book start gets T5 Brutes
+        add_adventurer_to_game(ref game, 0, ItemId::Book);
+        game_count = game.get_game_count();
+        let starter_beast_book_start = game.get_attacking_beast(game_count).id;
+        assert(game_count == 7, 'game count should be 7');
+        assert(
+            starter_beast_book_start >= BeastId::Troll
+                && starter_beast_book_start <= BeastId::Skeleton,
+            'wrong starter beast for book'
+        );
+
+        // Assert Club start gets T5 Hunter
+        add_adventurer_to_game(ref game, 0, ItemId::Club);
+        game_count = game.get_game_count();
+        let starter_beast_club_start = game.get_attacking_beast(game_count).id;
+        assert(game_count == 8, 'game count should be 8');
+        assert(
+            starter_beast_club_start >= BeastId::Bear && starter_beast_club_start <= BeastId::Rat,
+            'wrong starter beast for club'
+        );
+
+        // Assert Club start gets T5 Hunter
+        add_adventurer_to_game(ref game, 0, ItemId::ShortSword);
+        game_count = game.get_game_count();
+        let starter_beast_sword_start = game.get_attacking_beast(game_count).id;
+        assert(game_count == 9, 'game count should be 9');
+        assert(
+            starter_beast_sword_start >= BeastId::Fairy
+                && starter_beast_sword_start <= BeastId::Gnome,
+            'wrong starter beast for sword'
+        );
+    }
+
+    #[starknet::contract]
+    mod SnakeERC20Mock {
+        use openzeppelin::token::erc20::{ERC20Component, ERC20HooksEmptyImpl};
+        use starknet::ContractAddress;
+
+        component!(path: ERC20Component, storage: erc20, event: ERC20Event);
+
+        #[abi(embed_v0)]
+        impl ERC20Impl = ERC20Component::ERC20Impl<ContractState>;
+        #[abi(embed_v0)]
+        impl ERC20MetadataImpl = ERC20Component::ERC20MetadataImpl<ContractState>;
+        impl InternalImpl = ERC20Component::InternalImpl<ContractState>;
+
+        #[storage]
+        struct Storage {
+            #[substorage(v0)]
+            erc20: ERC20Component::Storage
+        }
+
+        #[event]
+        #[derive(Drop, starknet::Event)]
+        enum Event {
+            #[flat]
+            ERC20Event: ERC20Component::Event
+        }
+
+        #[constructor]
+        fn constructor(
+            ref self: ContractState,
+            name: ByteArray,
+            symbol: ByteArray,
+            initial_supply: u256,
+            recipient: ContractAddress
+        ) {
+            self.erc20.initializer(name, symbol);
+            self.erc20.mint(recipient, initial_supply);
+        }
+    }
+
+    #[starknet::contract]
+    mod SnakeERC721Mock {
+        use openzeppelin::introspection::src5::SRC5Component;
+        use openzeppelin::token::erc721::{ERC721Component, ERC721HooksEmptyImpl};
+        use starknet::ContractAddress;
+
+        component!(path: ERC721Component, storage: erc721, event: ERC721Event);
+        component!(path: SRC5Component, storage: src5, event: SRC5Event);
+
+        // ERC721
+        #[abi(embed_v0)]
+        impl ERC721Impl = ERC721Component::ERC721Impl<ContractState>;
+        #[abi(embed_v0)]
+        impl ERC721MetadataImpl =
+            ERC721Component::ERC721MetadataImpl<ContractState>;
+        impl ERC721InternalImpl = ERC721Component::InternalImpl<ContractState>;
+
+        // SRC5
+        #[abi(embed_v0)]
+        impl SRC5Impl = SRC5Component::SRC5Impl<ContractState>;
+
+        #[storage]
+        struct Storage {
+            #[substorage(v0)]
+            erc721: ERC721Component::Storage,
+            #[substorage(v0)]
+            src5: SRC5Component::Storage
+        }
+
+        #[event]
+        #[derive(Drop, starknet::Event)]
+        enum Event {
+            #[flat]
+            ERC721Event: ERC721Component::Event,
+            #[flat]
+            SRC5Event: SRC5Component::Event
+        }
+
+        #[constructor]
+        fn constructor(
+            ref self: ContractState,
+            name: ByteArray,
+            symbol: ByteArray,
+            base_uri: ByteArray,
+            recipient: ContractAddress,
+            token_id: u256
+        ) {
+            self.erc721.initializer(name, symbol, base_uri);
+            self.erc721.mint(recipient, token_id);
+        }
     }
 }

@@ -13,11 +13,55 @@ dependencies = [
 ]
 
 [[package]]
-name = "arcade_account"
+name = "alexandria_bytes"
 version = "0.1.0"
-source = "git+https://github.com/BibliothecaDAO/arcade-account?branch=next#cb3a3c9ca4e56c0fcc89ec5e273b48e1f9050b5f"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git#0aa7cca8a1acb1f35cff32420614f7f58e38de5e"
 dependencies = [
- "openzeppelin",
+ "alexandria_data_structures",
+ "alexandria_math",
+]
+
+[[package]]
+name = "alexandria_data_structures"
+version = "0.2.0"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git#0aa7cca8a1acb1f35cff32420614f7f58e38de5e"
+dependencies = [
+ "alexandria_encoding",
+]
+
+[[package]]
+name = "alexandria_encoding"
+version = "0.1.0"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git#0aa7cca8a1acb1f35cff32420614f7f58e38de5e"
+dependencies = [
+ "alexandria_bytes",
+ "alexandria_math",
+ "alexandria_numeric",
+]
+
+[[package]]
+name = "alexandria_math"
+version = "0.2.0"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git#0aa7cca8a1acb1f35cff32420614f7f58e38de5e"
+dependencies = [
+ "alexandria_data_structures",
+]
+
+[[package]]
+name = "alexandria_numeric"
+version = "0.1.0"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git#0aa7cca8a1acb1f35cff32420614f7f58e38de5e"
+dependencies = [
+ "alexandria_math",
+ "alexandria_searching",
+]
+
+[[package]]
+name = "alexandria_searching"
+version = "0.1.0"
+source = "git+https://github.com/keep-starknet-strange/alexandria.git#0aa7cca8a1acb1f35cff32420614f7f58e38de5e"
+dependencies = [
+ "alexandria_data_structures",
 ]
 
 [[package]]
@@ -36,8 +80,7 @@ name = "game"
 version = "0.1.0"
 dependencies = [
  "adventurer",
- "arcade_account",
- "golden_token",
+ "alexandria_encoding",
  "loot",
  "market",
  "obstacles",
@@ -46,26 +89,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "golden_token"
-version = "0.1.0"
-source = "git+https://github.com/BibliothecaDAO/golden-token?branch=next#a9f644453fd097bfe68170f39bed1c8a5d0af73e"
-dependencies = [
- "arcade_account",
- "openzeppelin",
-]
-
-[[package]]
 name = "loot"
 version = "0.1.0"
 dependencies = [
  "combat",
-]
-
-[[package]]
-name = "lords"
-version = "0.1.0"
-dependencies = [
- "openzeppelin",
 ]
 
 [[package]]
@@ -85,10 +112,10 @@ dependencies = [
 
 [[package]]
 name = "openzeppelin"
-version = "0.9.0"
-source = "git+https://github.com/OpenZeppelin/cairo-contracts.git?tag=v0.9.0#364db5b1aecc1335d2e65db887291d19aa28937d"
+version = "0.14.0"
+source = "git+https://github.com/OpenZeppelin/cairo-contracts.git?tag=v0.14.0#f091c4f51ddeb10297db984acae965328c5a4e5b"
 
 [[package]]
 name = "pragma_lib"
 version = "1.0.0"
-source = "git+https://github.com/astraly-labs/pragma-lib#2eca9b70dc505788423da1eedbf2d65563cc3102"
+source = "git+https://github.com/astraly-labs/pragma-lib#fe9a46743254182ac331da488ccfc05e0185cdd0"

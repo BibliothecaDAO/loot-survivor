@@ -8,6 +8,8 @@ import { ScreenPage } from "@/app/hooks/useUIStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import { ETH_PREFUND_AMOUNT } from "@/app/lib/constants";
 import useNetworkAccount from "@/app/hooks/useNetworkAccount";
+import { checkCartridgeConnector } from "@/app/lib/connectors";
+import { useConnect } from "@starknet-react/core";
 
 interface LoginProps {
   eth: number;
@@ -17,6 +19,7 @@ interface LoginProps {
   mintLords: (lordsAmount: number) => Promise<void>;
   setScreen: (value: ScreenPage) => void;
   setSection: (value: Section) => void;
+  getBalances: () => Promise<void>;
 }
 
 const Login = ({
@@ -27,9 +30,11 @@ const Login = ({
   mintLords,
   setScreen,
   setSection,
+  getBalances,
 }: LoginProps) => {
   const { account } = useNetworkAccount();
   const [step, setStep] = useState(1);
+  const { connector } = useConnect();
 
   const { handleOnboarded, network, onMainnet } = useUIStore();
 
@@ -37,10 +42,17 @@ const Login = ({
   const checkEnoughLords = lords > lordsGameCost;
 
   useEffect(() => {
-    if (account && checkEnoughEth && checkEnoughLords) {
+    if (
+      account &&
+      (checkEnoughEth || checkCartridgeConnector(connector)) &&
+      checkEnoughLords
+    ) {
       setScreen("start");
       handleOnboarded();
-    } else if (account && checkEnoughEth) {
+    } else if (
+      account &&
+      (checkEnoughEth || checkCartridgeConnector(connector))
+    ) {
       setStep(3);
     } else if (account) {
       setStep(2);
@@ -48,6 +60,12 @@ const Login = ({
       setStep(1);
     }
   }, [account, checkEnoughEth, checkEnoughLords]);
+
+  useEffect(() => {
+    if (account) {
+      getBalances();
+    }
+  }, [account]);
 
   return (
     <>

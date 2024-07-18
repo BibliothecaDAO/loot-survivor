@@ -229,7 +229,9 @@ export default function UpgradeScreen({
     const upgradeMenu = [
       {
         id: 1,
-        label: `Strength - ${adventurer?.strength}`,
+        label: `Strength - ${adventurer?.strength} ${
+          upgrades["Strength"] > 0 ? ` (+${upgrades["Strength"]})` : ""
+        }`,
         icon: <ArrowTargetIcon />,
         value: "Strength",
         action: async () => setSelected("Strength"),
@@ -237,7 +239,9 @@ export default function UpgradeScreen({
       },
       {
         id: 2,
-        label: `Dexterity - ${adventurer?.dexterity}`,
+        label: `Dexterity - ${adventurer?.dexterity} ${
+          upgrades["Dexterity"] > 0 ? ` (+${upgrades["Dexterity"]})` : ""
+        }`,
         icon: <CatIcon />,
         value: "Dexterity",
         action: async () => setSelected("Dexterity"),
@@ -245,7 +249,9 @@ export default function UpgradeScreen({
       },
       {
         id: 3,
-        label: `Vitality - ${adventurer?.vitality}`,
+        label: `Vitality - ${adventurer?.vitality} ${
+          upgrades["Vitality"] > 0 ? ` (+${upgrades["Vitality"]})` : ""
+        }`,
         icon: <HeartVitalityIcon />,
         value: "Vitality",
         action: async () => setSelected("Vitality"),
@@ -253,7 +259,9 @@ export default function UpgradeScreen({
       },
       {
         id: 4,
-        label: `Intelligence - ${adventurer?.intelligence}`,
+        label: `Intelligence - ${adventurer?.intelligence} ${
+          upgrades["Intelligence"] > 0 ? ` (+${upgrades["Intelligence"]})` : ""
+        }`,
         icon: <LightbulbIcon />,
         value: "Intelligence",
         action: async () => setSelected("Intelligence"),
@@ -261,7 +269,9 @@ export default function UpgradeScreen({
       },
       {
         id: 5,
-        label: `Wisdom - ${adventurer?.wisdom}`,
+        label: `Wisdom - ${adventurer?.wisdom} ${
+          upgrades["Wisdom"] > 0 ? ` (+${upgrades["Wisdom"]})` : ""
+        }`,
         icon: <ScrollIcon />,
         value: "Wisdom",
         action: async () => setSelected("Wisdom"),
@@ -269,7 +279,9 @@ export default function UpgradeScreen({
       },
       {
         id: 6,
-        label: `Charisma - ${adventurer?.charisma}`,
+        label: `Charisma - ${adventurer?.charisma} ${
+          upgrades["Charisma"] > 0 ? ` (+${upgrades["Charisma"]})` : ""
+        }`,
         icon: <CoinCharismaIcon />,
         value: "Charisma",
         action: async () => setSelected("Charisma"),
@@ -500,6 +512,7 @@ export default function UpgradeScreen({
                 <div className="flex flex-col sm:justify-center text-terminal-green sm:h-1/4">
                   <div className="w-full flex flex-row gap-2 mx-auto border border-terminal-green justify-between">
                     <Button
+                      className="h-10 w-16 sm:h-auto sm:w-auto"
                       variant={"outline"}
                       onClick={() => setUpgradeScreen(upgradeScreen - 1)}
                       disabled={upgradeScreen == 1}
@@ -526,7 +539,7 @@ export default function UpgradeScreen({
                           : upgradeScreen == 3
                           ? "sm:hidden"
                           : "hidden"
-                      } w-full`}
+                      } w-11/12`}
                       onClick={() => {
                         handleSubmitUpgradeTx();
                         setUpgradeScreen(1);
@@ -548,7 +561,7 @@ export default function UpgradeScreen({
                           : upgradeScreen == 3
                           ? "hidden"
                           : ""
-                      }`}
+                      } h-10 w-16 sm:h-auto sm:w-auto`}
                       onClick={() => {
                         setUpgradeScreen(upgradeScreen + 1);
                       }}

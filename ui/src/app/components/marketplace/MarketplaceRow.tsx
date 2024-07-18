@@ -153,53 +153,48 @@ const MarketplaceRow = ({
       <td className="w-20 sm:w-32 text-center">
         {activeMenu === index ? (
           <div className="hidden sm:flex flex-row items-center justify-center gap-2">
-            <p>Equip?</p>
-            <div className="flex flex-col">
-              <Button
-                size={"xxxs"}
-                variant={"ghost"}
-                onClick={() => {
-                  const newPurchases = [
-                    ...purchaseItems,
-                    {
-                      item:
-                        getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
-                        "0",
-                      equip: "1",
-                    },
-                  ];
-                  setPurchaseItems(newPurchases);
-                  upgradeHandler(undefined, undefined, newPurchases);
-                  setActiveMenu(null);
-                }}
-              >
-                Yes
-              </Button>
-              <Button
-                size={"xxxs"}
-                variant={"ghost"}
-                onClick={() => {
-                  const newPurchases = [
-                    ...purchaseItems,
-                    {
-                      item:
-                        getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
-                        "0",
-                      equip: "0",
-                    },
-                  ];
-                  setPurchaseItems(newPurchases);
-                  upgradeHandler(undefined, undefined, newPurchases);
-                  setActiveMenu(null);
-                }}
-                disabled={bagFull}
-              >
-                No
-              </Button>
-            </div>
+            <Button
+              className="w-10"
+              variant={"contrast"}
+              onClick={() => {
+                const newPurchases = [
+                  ...purchaseItems,
+                  {
+                    item:
+                      getKeyFromValue(gameData.ITEMS, item?.item ?? "") ?? "0",
+                    equip: "1",
+                  },
+                ];
+                setPurchaseItems(newPurchases);
+                upgradeHandler(undefined, undefined, newPurchases);
+                setActiveMenu(null);
+              }}
+            >
+              Equip
+            </Button>
+            <Button
+              className="w-10"
+              variant={"contrast"}
+              onClick={() => {
+                const newPurchases = [
+                  ...purchaseItems,
+                  {
+                    item:
+                      getKeyFromValue(gameData.ITEMS, item?.item ?? "") ?? "0",
+                    equip: "0",
+                  },
+                ];
+                setPurchaseItems(newPurchases);
+                upgradeHandler(undefined, undefined, newPurchases);
+                setActiveMenu(null);
+              }}
+              disabled={bagFull}
+            >
+              Bag
+            </Button>
 
             <Button
-              size={"xxxs"}
+              className="text-8xl"
               variant={"ghost"}
               onClick={() => setActiveMenu(null)}
             >
@@ -211,6 +206,7 @@ const MarketplaceRow = ({
             onClick={() => {
               setActiveMenu(index);
             }}
+            className="h-10 w-16 sm:h-auto sm:w-auto"
             disabled={
               itemPrice > (adventurer?.gold ?? 0) ||
               !enoughGold ||

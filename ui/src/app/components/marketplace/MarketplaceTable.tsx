@@ -164,10 +164,11 @@ const MarketplaceTable = ({
               <div
                 className={`${
                   showEquipQ !== null ? "" : "hidden"
-                } w-full m-auto h-full flex flex-row items-center justify-center gap-2`}
+                } w-full m-auto h-full flex flex-col items-center justify-center gap-2 text-xl`}
               >
                 <p>{`Equip ${item?.item} ?`}</p>
                 <Button
+                  size="lg"
                   onClick={() => {
                     const newPurchases = [
                       ...purchaseItems,
@@ -183,9 +184,10 @@ const MarketplaceTable = ({
                     setShowEquipQ(null);
                   }}
                 >
-                  Yes
+                  Equip
                 </Button>
                 <Button
+                  size="lg"
                   onClick={() => {
                     const newPurchases = [
                       ...purchaseItems,
@@ -202,9 +204,10 @@ const MarketplaceTable = ({
                   }}
                   disabled={bagFull}
                 >
-                  No
+                  Add To Bag
                 </Button>
                 <Button
+                  size="lg"
                   onClick={() => {
                     setShowEquipQ(null);
                   }}

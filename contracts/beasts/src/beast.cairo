@@ -41,30 +41,22 @@ impl ImplBeast of IBeast {
     // the beast is chosen to be weak against the weapon type
     // @param starter_weapon_type: the type of weapon the adventurer starts with
     // @return: a beast that is weak against the weapon type
-    fn get_starter_beast(starter_weapon_type: Type, entropy: u128) -> Beast {
+    fn get_starter_beast(starter_weapon_type: Type, adventurer_id: u128) -> Beast {
         let mut beast_id: u8 = Gnome;
 
         match starter_weapon_type {
-            Type::None(()) => beast_id = Troll,
-            // if adventurer starts with a magical weapon, they start against T5 brute
+            Type::None(()) => { panic_with_felt252('weapon cannot be None'); },
             Type::Magic_or_Cloth(()) => {
-                let rnd_brute: u8 = (entropy % 5).try_into().unwrap() + Troll;
-                beast_id = rnd_brute
+                beast_id = (adventurer_id % 5).try_into().unwrap() + Troll;
             },
-            // if the adventurer starts with a bladed weapon, they start against T5 magical
             Type::Blade_or_Hide(()) => {
-                let rnd_magical: u8 = (entropy % 5).try_into().unwrap() + Fairy;
-                beast_id = rnd_magical
+                beast_id = (adventurer_id % 5).try_into().unwrap() + Fairy;
             },
-            // if the adventurer starts with a bludgeon weapon, they start against T5 hunter
             Type::Bludgeon_or_Metal(()) => {
-                let rnd_hunter: u8 = (entropy % 5).try_into().unwrap() + Bear;
-                beast_id = rnd_hunter
+                beast_id = (adventurer_id % 5).try_into().unwrap() + Bear;
             },
-            // starter weapon should never be a necklace or ring
-            // but cairo needs us to define all cases so just default to troll
-            Type::Necklace(()) => beast_id = Troll,
-            Type::Ring(()) => beast_id = Troll,
+            Type::Necklace(()) => { panic_with_felt252('weapon cannot be necklace'); },
+            Type::Ring(()) => { panic_with_felt252('weapon cannot be ring'); },
         }
 
         Beast {
@@ -420,9 +412,7 @@ mod tests {
         // test extremes
         let adventurer_level = 255; // max u8
         assert(
-            ImplBeast::get_starting_health(
-                adventurer_level, 1022
-            ) == MAXIMUM_HEALTH,
+            ImplBeast::get_starting_health(adventurer_level, 1022) == MAXIMUM_HEALTH,
             'beast health should be max'
         );
     }

@@ -8,10 +8,9 @@ loot = { path = "../loot" }
 adventurer = { path = "../adventurer" }
 market = { path = "../market" }
 obstacles = { path = "../obstacles" }
-openzeppelin.workspace = true
-golden_token.workspace = true
-arcade_account.workspace = true
 pragma_lib = { git = "https://github.com/astraly-labs/pragma-lib" }
+openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v0.14.0" }
+alexandria_encoding = { git = "https://github.com/keep-starknet-strange/alexandria.git" }
 
 [[target.starknet-contract]]
 allowed-libfuncs-list.name = "experimental"

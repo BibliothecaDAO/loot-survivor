@@ -26,7 +26,6 @@ trait IGame<TContractState> {
         weapon: u8,
         name: felt252,
         golden_token_id: u256,
-        interface_camel: bool,
         vrf_fee_limit: u128
     );
     fn explore(ref self: TContractState, adventurer_id: felt252, till_beast: bool);
@@ -120,7 +119,9 @@ trait IGame<TContractState> {
     // fn minimum_damage_from_beasts(self: @TContractState) -> u8;
     // fn minimum_damage_from_obstacles(self: @TContractState) -> u8;
     fn obstacle_critical_hit_chance(self: @TContractState, adventurer_id: felt252) -> u8;
-    fn beast_critical_hit_chance(self: @TContractState, adventurer_id: felt252, is_ambush: bool) -> u8;
+    fn beast_critical_hit_chance(
+        self: @TContractState, adventurer_id: felt252, is_ambush: bool
+    ) -> u8;
     // fn stat_upgrades_per_level(self: @TContractState) -> u8;
     // fn beast_special_name_unlock_level(self: @TContractState) -> u16;
     // fn item_xp_multiplier_beasts(self: @TContractState) -> u16;
@@ -128,7 +129,8 @@ trait IGame<TContractState> {
     // fn strength_bonus_damage(self: @TContractState) -> u8;
 
     // contract details
-    fn owner_of(self: @TContractState, adventurer_id: felt252) -> ContractAddress;
+    // fn owner_of(self: @TContractState, adventurer_id: felt252) -> ContractAddress;
+    fn get_game_count(self: @TContractState) -> felt252;
     fn get_dao_address(self: @TContractState) -> ContractAddress;
     fn get_pg_address(self: @TContractState) -> ContractAddress;
     fn get_lords_address(self: @TContractState) -> ContractAddress;
@@ -252,4 +254,17 @@ trait IViewGame<TContractState> { // ------ View Functions ------
 // fn get_cost_to_play(self: @TContractState) -> u128;
 // fn get_games_played_snapshot(self: @TContractState) -> GamesPlayedSnapshot;
 // fn can_play(self: @TContractState, golden_token_id: u256) -> bool;
+}
+
+
+#[starknet::interface]
+trait IERC721Metadata<TState> {
+    fn name(self: @TState) -> ByteArray;
+    fn symbol(self: @TState) -> ByteArray;
+    fn token_uri(self: @TState, token_id: u256) -> ByteArray;
+}
+
+#[starknet::interface]
+trait IERC721MetadataCamelOnly<TState> {
+    fn tokenURI(self: @TState, tokenId: u256) -> ByteArray;
 }
