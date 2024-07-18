@@ -103,25 +103,11 @@ fn generate_item(item: Item, entropy: u64) -> ByteArray {
                 .into()
         );
 
-    if (specials.special1 != 0) {
-        _item_prefix_1 = _item_prefix_1 + " ";
+    if (item.id == 0) {
+        ""
     } else {
-        _item_prefix_1 = "";
+        format!("G{} {}", greatness, _item_name)
     }
-
-    if (specials.special2 != 0) {
-        _item_prefix_2 = _item_prefix_2 + " ";
-    } else {
-        _item_prefix_2 = "";
-    }
-
-    if (specials.special3 != 0) {
-        _item_suffix = " " + _item_suffix;
-    } else {
-        _item_suffix = "";
-    }
-
-    _item_prefix_1 + _item_prefix_2 + _item_name + _item_suffix
 }
 
 fn create_metadata(
