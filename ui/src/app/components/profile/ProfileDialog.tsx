@@ -108,6 +108,7 @@ export const ProfileDialog = ({
                 onClick={() =>
                   withdraw(controllerAdmin, account!, ethBalance, lordsBalance)
                 }
+                disabled={controllerAdmin === "0"}
               >
                 Withdraw
               </Button>
