@@ -16,3 +16,4 @@ graffiti = { git = "https://github.com/ponderingdemocritus/graffiti", rev = "bc5
 [[target.starknet-contract]]
 allowed-libfuncs-list.name = "experimental"
 allowed-libfuncs = true
+casm = true

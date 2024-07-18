@@ -56,24 +56,24 @@ trait IGame<TContractState> {
     fn get_stat_upgrades_available(self: @TContractState, adventurer_id: felt252) -> u8;
 
     // adventurer stats (includes boost)
-    fn get_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
-    fn get_base_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
-    fn get_starting_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
-    fn equipment_specials_unlocked(self: @TContractState, adventurer_id: felt252) -> bool;
-    fn equipment_stat_boosts(self: @TContractState, adventurer_id: felt252) -> Stats;
+    // fn get_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
+    // fn get_base_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
+    // fn get_starting_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
+    // fn equipment_specials_unlocked(self: @TContractState, adventurer_id: felt252) -> bool;
+    // fn equipment_stat_boosts(self: @TContractState, adventurer_id: felt252) -> Stats;
 
     // // item details
     fn get_equipped_items(self: @TContractState, adventurer_id: felt252) -> Array<Item>;
 
     // item stats
-    fn get_weapon_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    fn get_chest_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    fn get_head_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    fn get_waist_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    fn get_foot_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    fn get_hand_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    fn get_necklace_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
-    fn get_ring_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    // fn get_weapon_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    // fn get_chest_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    // fn get_head_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    // fn get_waist_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    // fn get_foot_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    // fn get_hand_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    // fn get_necklace_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
+    // fn get_ring_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
 
     // bag and specials
     fn get_bag(self: @TContractState, adventurer_id: felt252) -> Bag;
@@ -89,21 +89,21 @@ trait IGame<TContractState> {
     // fn get_ring_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
 
     // // market details
-    fn get_items_on_market(self: @TContractState, adventurer_id: felt252) -> Array<u8>;
-    fn get_items_on_market_by_slot(
-        self: @TContractState, adventurer_id: felt252, slot: u8
-    ) -> Array<u8>;
-    fn get_items_on_market_by_tier(
-        self: @TContractState, adventurer_id: felt252, tier: u8
-    ) -> Array<u8>;
+    // fn get_items_on_market(self: @TContractState, adventurer_id: felt252) -> Array<u8>;
+    // fn get_items_on_market_by_slot(
+    //     self: @TContractState, adventurer_id: felt252, slot: u8
+    // ) -> Array<u8>;
+    // fn get_items_on_market_by_tier(
+    //     self: @TContractState, adventurer_id: felt252, tier: u8
+    // ) -> Array<u8>;
     fn get_potion_price(self: @TContractState, adventurer_id: felt252) -> u16;
     fn get_item_price(self: @TContractState, adventurer_id: felt252, item_id: u8) -> u16;
 
     // beast details
-    fn get_attacking_beast(self: @TContractState, adventurer_id: felt252) -> Beast;
-    fn get_beast_health(self: @TContractState, adventurer_id: felt252) -> u16;
-    fn get_beast_type(self: @TContractState, beast_id: u8) -> u8;
-    fn get_beast_tier(self: @TContractState, beast_id: u8) -> u8;
+    // fn get_attacking_beast(self: @TContractState, adventurer_id: felt252) -> Beast;
+    // fn get_beast_health(self: @TContractState, adventurer_id: felt252) -> u16;
+    // fn get_beast_type(self: @TContractState, beast_id: u8) -> u8;
+    // fn get_beast_tier(self: @TContractState, beast_id: u8) -> u8;
 
     // game settings
     // fn starting_gold(self: @TContractState) -> u16;
@@ -268,4 +268,14 @@ trait IERC721Metadata<TState> {
 #[starknet::interface]
 trait IERC721MetadataCamelOnly<TState> {
     fn tokenURI(self: @TState, adventurerId: felt252) -> ByteArray;
+}
+
+
+#[starknet::interface]
+trait ILeetLoot<T> {
+    fn mint(
+        ref self: T, to: ContractAddress, beast: u8, prefix: u8, suffix: u8, level: u16, health: u16
+    );
+    fn isMinted(self: @T, beast: u8, prefix: u8, suffix: u8) -> bool;
+    fn getMinter(self: @T) -> ContractAddress;
 }
