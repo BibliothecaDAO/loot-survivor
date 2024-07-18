@@ -102,16 +102,17 @@ fn get_suffix_boost(suffix: u8) -> ByteArray {
 }
 
 fn generate_item(item: Item, entropy: u64) -> ByteArray {
-    let greatness = item.get_greatness();
+    if item.id == 0 {
+        return "";
+    }
 
+    let greatness = item.get_greatness();
     let item_name = ImplItemNaming::item_id_to_string(item.id);
 
     let mut _item_name = Default::default();
     _item_name.append_word(item_name, U256BytesUsedTraitImpl::bytes_used(item_name.into()).into());
 
-    if (item.id == 0) {
-        ""
-    } else if (greatness >= 15) {
+    if (greatness >= 15) {
         format!("G{} {} ", greatness, _item_name)
             + get_suffix_boost(ImplLoot::get_suffix(item.id, entropy))
     } else {
