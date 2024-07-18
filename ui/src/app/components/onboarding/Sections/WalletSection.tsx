@@ -1,9 +1,10 @@
 import { Button } from "@/app/components/buttons/Button";
 import { CompleteIcon } from "@/app/components/icons/Icons";
-import { displayAddress, padAddress } from "@/app/lib/utils";
+import { displayAddress, padAddress, copyToClipboard } from "@/app/lib/utils";
 import { getWalletConnectors } from "@/app/lib/connectors";
 import { useConnect, useDisconnect } from "@starknet-react/core";
 import useNetworkAccount from "@/app/hooks/useNetworkAccount";
+import useUIStore from "@/app/hooks/useUIStore";
 
 interface WalletSectionProps {
   step: number;
@@ -14,14 +15,8 @@ const WalletSection = ({ step }: WalletSectionProps) => {
   const { connectors, connect } = useConnect();
   const { disconnect } = useDisconnect();
   const walletConnectors = getWalletConnectors(connectors);
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch (err) {
-      console.error("Failed to copy text: ", err);
-    }
-  };
+  const username = useUIStore((state) => state.username);
+  const isController = useUIStore((state) => state.isController);
 
   return (
     <>
@@ -31,7 +26,15 @@ const WalletSection = ({ step }: WalletSectionProps) => {
           {step > 1 && (
             <div className="absolute flex flex-col w-1/2 top-1/4 right-1/4 z-20 items-center text-xl text-center">
               <span className="flex gap-5 items-center">
-                <p>{displayAddress(address!)}</p>
+                <p>
+                  {isController ? (
+                    <span className="text-ellipsis overflow-hidden whitespace-nowrap max-w-[100px]">
+                      {username}
+                    </span>
+                  ) : (
+                    displayAddress(address!)
+                  )}
+                </p>
                 <Button onClick={() => copyToClipboard(padAddress(address!))}>
                   Copy
                 </Button>

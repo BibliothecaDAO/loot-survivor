@@ -3,11 +3,13 @@ import SpriteAnimation from "@/app/components/animations/SpriteAnimation";
 interface TokenLoaderProps {
   isToppingUpEth?: boolean;
   isToppingUpLords?: boolean;
+  isWithdrawing?: boolean;
 }
 
 export default function TokenLoader({
   isToppingUpEth,
   isToppingUpLords,
+  isWithdrawing,
 }: TokenLoaderProps) {
   return (
     <div className="fixed flex flex-col items-center sm:flex-row inset-0 bg-black z-50 sm:m-2 w-full h-full">

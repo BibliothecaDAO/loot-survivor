@@ -55,6 +55,7 @@ import Refresh from "public/icons/refresh.svg";
 import Settings from "public/icons/settings.svg";
 import Drop from "public/icons/drop.svg";
 import Complete from "public/icons/complete.svg";
+import Cartridge from "public/icons/cartridge.svg";
 
 const ClothIcon = Cloth;
 const HideIcon = Hide;
@@ -114,6 +115,7 @@ const QuestionMarkIcon = QuestionMark;
 const SettingsIcon = Settings;
 
 const CompleteIcon = Complete;
+const CartridgeIcon = Cartridge;
 
 export {
   ClothIcon,
@@ -172,4 +174,5 @@ export {
   ArcadeIcon,
   QuestionMarkIcon,
   CompleteIcon,
+  CartridgeIcon,
 };

@@ -592,3 +592,11 @@ export function formatLords(value: number): string {
 export const formatItemName = (name: string): string => {
   return name.replace(/([a-z])([A-Z])/g, "$1 $2");
 };
+
+export const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (err) {
+    console.error("Failed to copy text: ", err);
+  }
+};

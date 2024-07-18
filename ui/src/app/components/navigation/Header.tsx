@@ -23,21 +23,21 @@ import {
   CartIcon,
   SettingsIcon,
   GithubIcon,
+  CartridgeIcon,
 } from "@/app/components/icons/Icons";
 import TransactionCart from "@/app/components/navigation/TransactionCart";
 import TransactionHistory from "@/app/components/navigation/TransactionHistory";
 import {
-  NullAdventurer,
   Item,
   NullItem,
   UpgradeStats,
   ZeroUpgrade,
   Call,
+  NullAdventurer,
 } from "@/app/types";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { getApibaraStatus } from "@/app/api/api";
 import ApibaraStatus from "@/app/components/navigation/ApibaraStatus";
-import TokenLoader from "@/app/components/animations/TokenLoader";
 import { checkCartridgeConnector } from "@/app/lib/connectors";
 import { networkConfig } from "@/app/lib/networkConfig";
 import useNetworkAccount from "@/app/hooks/useNetworkAccount";
@@ -66,15 +66,13 @@ export default function Header({
   gameContract,
   costToPlay,
 }: HeaderProps) {
-  const [mintingLords, setMintingLords] = useState(false);
   const { account } = useNetworkAccount();
-  const { connector } = useConnect();
   const { disconnect } = useDisconnect();
-  const [apibaraStatus, setApibaraStatus] = useState();
-  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const resetData = useQueriesStore((state) => state.resetData);
+  const { connector } = useConnect();
+  const [apibaraStatus, setApibaraStatus] = useState();
+  const username = useUIStore((state) => state.username);
 
-  const setDisconnected = useUIStore((state) => state.setDisconnected);
   const isMuted = useUIStore((state) => state.isMuted);
   const setIsMuted = useUIStore((state) => state.setIsMuted);
   const displayCart = useUIStore((state) => state.displayCart);
@@ -89,6 +87,7 @@ export default function Header({
   const vitBoostRemoved = useUIStore((state) => state.vitBoostRemoved);
   const handleOffboarded = useUIStore((state) => state.handleOffboarded);
   const setLoginScreen = useUIStore((state) => state.setLoginScreen);
+  const setShowProfile = useUIStore((state) => state.setShowProfile);
 
   const calls = useTransactionCartStore((state) => state.calls);
   const txInCart = calls.length > 0;
@@ -119,6 +118,7 @@ export default function Header({
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const data = useQueriesStore((state) => state.data);
   const potionAmount = useUIStore((state) => state.potionAmount);
   const upgrades = useUIStore((state) => state.upgrades);
@@ -374,7 +374,7 @@ export default function Header({
           {onMainnet ? "Play on Testnet" : "Play on Mainnet"}
         </Button>
         {!onKatana && (
-          <>
+          <div className="hidden sm:flex flex-row">
             <Button
               size={"xs"}
               variant={"outline"}
@@ -400,9 +400,7 @@ export default function Header({
                   )}&amount=0.001`;
                   window.open(avnuLords, "_blank");
                 } else {
-                  setMintingLords(true);
                   await mintLords(lordsGameCost * 25);
-                  setMintingLords(false);
                 }
               }}
               onMouseEnter={() => setShowLordsBuy(true)}
@@ -425,7 +423,7 @@ export default function Header({
                 )}
               </span>
             </Button>
-          </>
+          </div>
         )}
         <Button
           size={"xs"}
@@ -488,14 +486,28 @@ export default function Header({
               variant={"outline"}
               size={"sm"}
               onClick={() => {
-                disconnect();
-                resetData();
-                setAdventurer(NullAdventurer);
-                setDisconnected(true);
+                if (!onKatana) {
+                  setShowProfile(true);
+                } else {
+                  disconnect();
+                  resetData();
+                  setAdventurer(NullAdventurer);
+                  setNetwork(undefined);
+                }
               }}
-              className="xl:px-5 p-0"
+              className="xl:px-5 p-0 hover:bg-terminal-green hover:text-terminal-black"
             >
-              {account ? displayAddress(account.address) : "Connect"}
+              {account ? (
+                username ? (
+                  <span className="text-ellipsis overflow-hidden whitespace-nowrap max-w-[100px]">
+                    {username}
+                  </span>
+                ) : (
+                  displayAddress(account.address)
+                )
+              ) : (
+                "Connect"
+              )}
             </Button>
           </div>
           <Button
@@ -531,27 +543,32 @@ export default function Header({
               variant={"outline"}
               size={"sm"}
               onClick={() => {
-                disconnect();
-                resetData();
-                setAdventurer(NullAdventurer);
-                setDisconnected(true);
+                if (!onKatana) {
+                  setShowProfile(true);
+                } else {
+                  disconnect();
+                  resetData();
+                  setAdventurer(NullAdventurer);
+                  setNetwork(undefined);
+                }
               }}
-              className="xl:px-5"
+              className="xl:px-5 hover:bg-terminal-green hover:text-terminal-black"
             >
-              {account ? displayAddress(account.address) : "Connect"}
+              {account ? (
+                username ? (
+                  <span className="text-ellipsis overflow-hidden whitespace-nowrap max-w-[100px]">
+                    {username}
+                  </span>
+                ) : (
+                  displayAddress(account.address)
+                )
+              ) : (
+                "Connect"
+              )}
             </Button>
             {checkCartridge && (
               <div className="absolute top-0 right-0">
-                <svg viewBox="0 0 24 24" className="w-6 h-6">
-                  <path
-                    d="M8.45902 10.4506H15.4672V8.68029H8.46078C8.46078 8.86117 8.45902 10.4673 8.45902 10.4506Z"
-                    fill="currentColor"
-                  />
-                  <path
-                    d="M20.3231 6.80379L16.0408 4.99643C15.7594 4.85895 15.4523 4.782 15.1394 4.77051H8.86057C8.54749 4.78202 8.24026 4.85897 7.95857 4.99643L3.67686 6.80379C3.46971 6.90946 3.2964 7.07143 3.17675 7.27118C3.05709 7.47094 2.99591 7.70042 3.00021 7.93338V15.164C3.00021 15.3899 3.00021 15.6158 3.22556 15.8418L4.57827 17.1973C4.80362 17.4232 4.97279 17.4232 5.25433 17.4232H8.35191C8.35191 17.6174 8.35191 19.247 8.35191 19.2294H15.6744V17.4208H8.35776V15.6158H5.02897C4.80362 15.6158 4.80362 15.3899 4.80362 15.3899V6.80379C4.80362 6.80379 4.80362 6.57787 5.02897 6.57787H18.9716C19.197 6.57787 19.197 6.80379 19.197 6.80379V15.3899C19.197 15.3899 19.197 15.6158 18.9716 15.6158H15.6762V17.4232H18.7463C19.0278 17.4232 19.197 17.4232 19.4223 17.1973L20.7744 15.8418C20.9998 15.6158 20.9998 15.3899 20.9998 15.164V7.93338C21.004 7.70043 20.9428 7.47098 20.8232 7.27124C20.7035 7.0715 20.5302 6.90951 20.3231 6.80379Z"
-                    fill="currentColor"
-                  />
-                </svg>
+                <CartridgeIcon className="w-5 h-5 fill-current" />
               </div>
             )}
           </div>
@@ -568,7 +585,6 @@ export default function Header({
         {account && displayHistory && (
           <TransactionHistory buttonRef={displayHistoryButtonRef} />
         )}
-        {mintingLords && <TokenLoader isToppingUpLords={mintingLords} />}
       </div>
     </div>
   );
