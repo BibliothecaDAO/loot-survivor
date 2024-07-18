@@ -2,8 +2,7 @@ use alexandria_encoding::base64::Base64Encoder;
 use adventurer::{
     adventurer::{Adventurer, ImplAdventurer},
     adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata}, equipment::ImplEquipment,
-    bag::Bag, item::{Item, ImplItem},
-    constants::adventurer_constants::{HEALTH_INCREASE_PER_VITALITY, STARTING_HEALTH},
+    bag::Bag, item::{Item, ImplItem}, adventurer_utils::{AdventurerUtils},
 };
 use loot::{loot::ImplLoot, constants::{ImplItemNaming, ItemSuffix}};
 use core::{array::{SpanTrait, ArrayTrait}, traits::Into, clone::Clone,};
@@ -137,22 +136,18 @@ fn create_metadata(
     let _adventurer_id = format!("{}", adventurer_id);
     let _level = format!("{}", adventurer.get_level());
 
-    let stat_boosts = adventurer.equipment.get_stat_boosts(adventurerMetadata.start_entropy);
-
     let _health = format!("{}", adventurer.health);
 
-    let _max_health = format!(
-        "{}", stat_boosts.vitality.into() * HEALTH_INCREASE_PER_VITALITY.into() + STARTING_HEALTH
-    );
+    let _max_health = format!("{}", AdventurerUtils::get_max_health(adventurer.stats.vitality));
 
     let _gold = format!("{}", adventurer.gold);
-    let _str = format!("{}", stat_boosts.strength);
-    let _dex = format!("{}", stat_boosts.dexterity);
-    let _int = format!("{}", stat_boosts.intelligence);
-    let _vit = format!("{}", stat_boosts.vitality);
-    let _wis = format!("{}", stat_boosts.wisdom);
-    let _cha = format!("{}", stat_boosts.charisma);
-    let _luck = format!("{}", adventurer.equipment.calculate_luck(bag));
+    let _str = format!("{}", adventurer.stats.strength);
+    let _dex = format!("{}", adventurer.stats.dexterity);
+    let _int = format!("{}", adventurer.stats.intelligence);
+    let _vit = format!("{}", adventurer.stats.vitality);
+    let _wis = format!("{}", adventurer.stats.wisdom);
+    let _cha = format!("{}", adventurer.stats.charisma);
+    let _luck = format!("{}", adventurer.stats.luck);
 
     // Equipped items
     let _equiped_weapon = generate_item(
