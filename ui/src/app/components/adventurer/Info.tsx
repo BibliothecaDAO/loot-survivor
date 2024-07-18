@@ -44,8 +44,6 @@ export default function Info({
   const equipItems = useUIStore((state) => state.equipItems);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
 
-  console.log(dropItems, equipItems);
-
   const gameData = new GameData();
 
   const items = profileExists
@@ -56,29 +54,80 @@ export default function Info({
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  const filteredItems = items
-    .filter(
-      (item) =>
-        !dropItems.includes(getKeyFromValue(gameData.ITEMS, item.item!) ?? "")
-    )
-    .filter(
-      (item) =>
-        !purchaseItems.some((purchaseItem) => {
-          const { slot: equipSlot } = getItemData(
-            gameData.ITEMS[parseInt(purchaseItem.item)]
-          );
-          const { slot: heldSlot } = getItemData(item.item!);
-          return equipSlot === heldSlot && purchaseItem.equip === "1";
-        })
-    )
-    .filter(
-      (item) =>
-        !equipItems.includes(getKeyFromValue(gameData.ITEMS, item.item!) ?? "")
-    );
-  console.log(items);
-  console.log(filteredItems);
-  console.log(equipItems);
-  console.log(purchaseItems);
+  const filteredDrops = items.filter(
+    (item) =>
+      !dropItems.includes(getKeyFromValue(gameData.ITEMS, item.item!) ?? "")
+  );
+
+  const updatePurchaseEquips = filteredDrops.flatMap((item) => {
+    if (purchaseItems.length > 0) {
+      const replaceItem = purchaseItems.find((pItem) => {
+        const { slot: equipSlot } = getItemData(
+          gameData.ITEMS[parseInt(pItem.item)]
+        );
+        const { slot: heldSlot } = getItemData(item.item!);
+        return equipSlot === heldSlot && pItem.equip === "1";
+      });
+      if (replaceItem) {
+        return [
+          { ...item, equipped: false },
+          {
+            item: gameData.ITEMS[parseInt(replaceItem.item)],
+            adventurerId: formatAdventurer.id,
+            owner: true,
+            equipped: true,
+            ownerAddress: formatAdventurer.owner,
+            xp: 0,
+            special1: undefined,
+            special2: undefined,
+            special3: undefined,
+            isAvailable: false,
+            purchasedTime: new Date(),
+            timestamp: new Date(),
+          },
+        ];
+      }
+    }
+
+    return [item];
+  });
+
+  const updateEquips = updatePurchaseEquips.map((item) => {
+    const replaceItem = equipItems.find((eItem) => {
+      const { slot: equipSlot } = getItemData(gameData.ITEMS[parseInt(eItem)]);
+      const { slot: heldSlot } = getItemData(item.item!);
+      return equipSlot === heldSlot;
+    });
+    if (replaceItem) {
+      if (item.equipped) {
+        return { ...item, equipped: false };
+      } else {
+        return { ...item, equipped: true };
+      }
+    }
+
+    return item;
+  });
+
+  const finalItems = [
+    ...updateEquips,
+    ...purchaseItems
+      .filter((pItem) => pItem.equip === "1")
+      .map((pItem) => ({
+        item: gameData.ITEMS[parseInt(pItem.item)],
+        adventurerId: formatAdventurer.id,
+        owner: true,
+        equipped: true,
+        ownerAddress: formatAdventurer.owner,
+        xp: 0,
+        special1: undefined,
+        special2: undefined,
+        special3: undefined,
+        isAvailable: false,
+        purchasedTime: new Date(),
+        timestamp: new Date(),
+      })),
+  ];
 
   const handleDropItems = (item: string) => {
     const newDropItems = [
@@ -139,8 +188,6 @@ export default function Info({
       upgrade: upgrades["Luck"],
     },
   ];
-
-  console.log(upgrades);
 
   const bodyParts = [
     "Weapon",
@@ -239,11 +286,10 @@ export default function Info({
             {bodyParts.map((part) => (
               <ItemDisplay
                 item={
-                  items.find(
-                    (item: Item) =>
-                      item.item === formatAdventurer[part.toLowerCase()] &&
-                      item.equipped
-                  ) || NullItem
+                  finalItems.find((item: Item) => {
+                    const { slot } = getItemData(item.item!);
+                    return slot === part && item.equipped;
+                  }) || NullItem
                 }
                 itemSlot={part}
                 handleDrop={handleDropItems}
