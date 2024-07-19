@@ -239,112 +239,115 @@ fn create_metadata(
 
     let mut metadata = JsonImpl::new()
         .add("name", "Survivor" + " #" + _adventurer_id)
-        .add("description", "Loot Survivor Arcade")
+        .add(
+            "description",
+            "An NFT representing a game of Loot Survivor. These can be used to transfer game ownership, gift a game of Loot Survivor, and also change the address that player rewards are dispursed to. This NFT also serves as a simple, fully onchain viewer for your survivor stats."
+        )
         .add("image", base64_image);
 
-    let name: ByteArray = JsonImpl::new().add("trait", "name").add("value", _name).build();
-    let level: ByteArray = JsonImpl::new().add("trait", "level").add("value", _level).build();
-    let health: ByteArray = JsonImpl::new().add("trait", "health").add("value", _health).build();
-    let gold: ByteArray = JsonImpl::new().add("trait", "gold").add("value", _gold).build();
-    let str: ByteArray = JsonImpl::new().add("trait", "strength").add("value", _str).build();
-    let dex: ByteArray = JsonImpl::new().add("trait", "dexterity").add("value", _dex).build();
-    let int: ByteArray = JsonImpl::new().add("trait", "intelligence").add("value", _int).build();
-    let vit: ByteArray = JsonImpl::new().add("trait", "vitality").add("value", _vit).build();
-    let wis: ByteArray = JsonImpl::new().add("trait", "wisdom").add("value", _wis).build();
-    let cha: ByteArray = JsonImpl::new().add("trait", "charisma").add("value", _cha).build();
-    let luck: ByteArray = JsonImpl::new().add("trait", "luck").add("value", _luck).build();
+    let name: ByteArray = JsonImpl::new().add("trait", "Name").add("value", _name).build();
+    let level: ByteArray = JsonImpl::new().add("trait", "Level").add("value", _level).build();
+    let health: ByteArray = JsonImpl::new().add("trait", "Health").add("value", _health).build();
+    let gold: ByteArray = JsonImpl::new().add("trait", "Gold").add("value", _gold).build();
+    let str: ByteArray = JsonImpl::new().add("trait", "Strength").add("value", _str).build();
+    let dex: ByteArray = JsonImpl::new().add("trait", "Dexterity").add("value", _dex).build();
+    let int: ByteArray = JsonImpl::new().add("trait", "Intelligence").add("value", _int).build();
+    let vit: ByteArray = JsonImpl::new().add("trait", "Vitality").add("value", _vit).build();
+    let wis: ByteArray = JsonImpl::new().add("trait", "Wisdom").add("value", _wis).build();
+    let cha: ByteArray = JsonImpl::new().add("trait", "Charisma").add("value", _cha).build();
+    let luck: ByteArray = JsonImpl::new().add("trait", "Luck").add("value", _luck).build();
 
     let equipped_weapon: ByteArray = JsonImpl::new()
-        .add("trait", "equipped_weapon")
+        .add("trait", "Weapon")
         .add("value", _equiped_weapon)
         .build();
     let equipped_chest: ByteArray = JsonImpl::new()
-        .add("trait", "equipped_chest")
+        .add("trait", "Chest Armor")
         .add("value", _equiped_chest)
         .build();
     let equipped_head: ByteArray = JsonImpl::new()
-        .add("trait", "equipped_head")
+        .add("trait", "Head Armor")
         .add("value", _equiped_head)
         .build();
     let equipped_waist: ByteArray = JsonImpl::new()
-        .add("trait", "equipped_waist")
+        .add("trait", "Waist Armor")
         .add("value", _equiped_waist)
         .build();
     let equipped_foot: ByteArray = JsonImpl::new()
-        .add("trait", "equipped_foot")
+        .add("trait", "Foot Armor")
         .add("value", _equiped_foot)
         .build();
     let equipped_hand: ByteArray = JsonImpl::new()
-        .add("trait", "equipped_hand")
+        .add("trait", "Hand Armor")
         .add("value", _equiped_hand)
         .build();
     let equipped_neck: ByteArray = JsonImpl::new()
-        .add("trait", "equipped_neck")
+        .add("trait", "Necklace")
         .add("value", _equiped_neck)
         .build();
     let equipped_ring: ByteArray = JsonImpl::new()
-        .add("trait", "equipped_ring")
+        .add("trait", "Ring")
         .add("value", _equiped_ring)
         .build();
 
     let bag_item_1: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_1")
+        .add("trait", "Bag Item 1")
         .add("value", _bag_item_1)
         .build();
     let bag_item_2: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_2")
+        .add("trait", "Bag Item 2")
         .add("value", _bag_item_2)
         .build();
     let bag_item_3: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_3")
+        .add("trait", "Bag Item 3")
         .add("value", _bag_item_3)
         .build();
     let bag_item_4: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_4")
+        .add("trait", "Bag Item 4")
         .add("value", _bag_item_4)
         .build();
     let bag_item_5: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_5")
+        .add("trait", "Bag Item 5")
         .add("value", _bag_item_5)
         .build();
     let bag_item_6: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_6")
+        .add("trait", "Bag Item 6")
         .add("value", _bag_item_6)
         .build();
     let bag_item_7: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_7")
+        .add("trait", "Bag Item 7")
         .add("value", _bag_item_7)
         .build();
     let bag_item_8: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_8")
+        .add("trait", "Bag Item 8")
         .add("value", _bag_item_8)
         .build();
     let bag_item_9: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_9")
+        .add("trait", "Bag Item 9")
         .add("value", _bag_item_9)
         .build();
     let bag_item_10: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_10")
+        .add("trait", "Bag Item 10")
         .add("value", _bag_item_10)
         .build();
     let bag_item_11: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_11")
+        .add("trait", "Bag Item 11")
         .add("value", _bag_item_11)
         .build();
     let bag_item_12: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_12")
+        .add("trait", "Bag Item 12")
         .add("value", _bag_item_12)
         .build();
     let bag_item_13: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_13")
+        .add("trait", "Bag Item 13")
         .add("value", _bag_item_13)
         .build();
     let bag_item_14: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_14")
+        .add("trait", "Bag Item 14")
         .add("value", _bag_item_14)
         .build();
     let bag_item_15: ByteArray = JsonImpl::new()
-        .add("trait", "bag_item_15")
+        .add("trait", "Bag Item 15")
         .add("value", _bag_item_15)
         .build();
 
