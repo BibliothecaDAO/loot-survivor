@@ -226,7 +226,7 @@ mod Game {
         self._default_renderer.write(render_contract);
 
         // TODO: Setting offchain uri here for later use, however it is not used in the current implementation
-        self.erc721.initializer("Adventurer", "ADVTR", "https://token.lootsurvivor.io/");
+        self.erc721.initializer("Survivor", "LSVR", "https://token.lootsurvivor.io/");
 
         // On mainnet, set genesis timestamp to LSV1.0 genesis to preserve same reward distribution schedule for V1.1 
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
