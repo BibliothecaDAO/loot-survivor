@@ -9,16 +9,6 @@ use adventurer::{
 
 #[starknet::interface]
 trait IGame<TContractState> {
-    fn get_randomness_address(self: @TContractState) -> ContractAddress;
-
-    fn receive_random_words(
-        ref self: TContractState,
-        requestor_address: ContractAddress,
-        request_id: u64,
-        random_words: Span<felt252>,
-        calldata: Array<felt252>
-    );
-
     // ------ Game Actions ------
     fn new_game(
         ref self: TContractState,
@@ -26,7 +16,8 @@ trait IGame<TContractState> {
         weapon: u8,
         name: felt252,
         golden_token_id: u256,
-        vrf_fee_limit: u128
+        vrf_fee_limit: u128,
+        custom_renderer: ContractAddress
     );
     fn explore(ref self: TContractState, adventurer_id: felt252, till_beast: bool);
     fn attack(ref self: TContractState, adventurer_id: felt252, to_the_death: bool);
@@ -40,10 +31,20 @@ trait IGame<TContractState> {
         stat_upgrades: Stats,
         items: Array<ItemPurchase>,
     );
+    fn receive_random_words(
+        ref self: TContractState,
+        requestor_address: ContractAddress,
+        request_id: u64,
+        random_words: Span<felt252>,
+        calldata: Array<felt252>
+    );
     fn update_cost_to_play(ref self: TContractState);
+    fn set_custom_renderer(
+        ref self: TContractState, adventurer_id: felt252, render_contract: ContractAddress
+    );
     // ------ View Functions ------
 
-    // // adventurer details
+    // adventurer details
     fn get_adventurer(self: @TContractState, adventurer_id: felt252) -> Adventurer;
     fn get_adventurer_entropy(self: @TContractState, adventurer_id: felt252) -> felt252;
     fn get_adventurer_no_boosts(self: @TContractState, adventurer_id: felt252) -> Adventurer;
@@ -55,11 +56,11 @@ trait IGame<TContractState> {
     fn get_stat_upgrades_available(self: @TContractState, adventurer_id: felt252) -> u8;
 
     // adventurer stats (includes boost)
-    fn get_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
-    fn get_base_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
-    fn get_starting_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
-    fn equipment_specials_unlocked(self: @TContractState, adventurer_id: felt252) -> bool;
-    fn equipment_stat_boosts(self: @TContractState, adventurer_id: felt252) -> Stats;
+    // fn get_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
+    // fn get_base_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
+    // fn get_starting_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
+    // fn equipment_specials_unlocked(self: @TContractState, adventurer_id: felt252) -> bool;
+    // fn equipment_stat_boosts(self: @TContractState, adventurer_id: felt252) -> Stats;
 
     // // item details
     fn get_equipped_items(self: @TContractState, adventurer_id: felt252) -> Array<Item>;
@@ -77,16 +78,6 @@ trait IGame<TContractState> {
     // bag and specials
     fn get_bag(self: @TContractState, adventurer_id: felt252) -> Bag;
 
-    // // item details
-    // fn get_weapon_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_chest_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_head_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_waist_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_foot_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_hand_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_necklace_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-    // fn get_ring_specials(self: @TContractState, adventurer_id: felt252) -> ItemSpecials;
-
     // // market details
     fn get_items_on_market(self: @TContractState, adventurer_id: felt252) -> Array<u8>;
     fn get_items_on_market_by_slot(
@@ -101,8 +92,8 @@ trait IGame<TContractState> {
     // beast details
     fn get_attacking_beast(self: @TContractState, adventurer_id: felt252) -> Beast;
     fn get_beast_health(self: @TContractState, adventurer_id: felt252) -> u16;
-    fn get_beast_type(self: @TContractState, beast_id: u8) -> u8;
-    fn get_beast_tier(self: @TContractState, beast_id: u8) -> u8;
+    // fn get_beast_type(self: @TContractState, beast_id: u8) -> u8;
+    // fn get_beast_tier(self: @TContractState, beast_id: u8) -> u8;
 
     // game settings
     // fn starting_gold(self: @TContractState) -> u16;
@@ -137,6 +128,9 @@ trait IGame<TContractState> {
     fn get_leaderboard(self: @TContractState) -> Leaderboard;
     fn get_cost_to_play(self: @TContractState) -> u128;
     fn can_play(self: @TContractState, golden_token_id: u256) -> bool;
+    fn get_randomness_address(self: @TContractState) -> ContractAddress;
+    fn uses_custom_renderer(self: @TContractState, adventurer_id: felt252) -> bool;
+    fn get_custom_renderer(self: @TContractState, adventurer_id: felt252) -> ContractAddress;
 }
 
 
@@ -261,10 +255,20 @@ trait IViewGame<TContractState> { // ------ View Functions ------
 trait IERC721Metadata<TState> {
     fn name(self: @TState) -> ByteArray;
     fn symbol(self: @TState) -> ByteArray;
-    fn token_uri(self: @TState, token_id: u256) -> ByteArray;
+    fn token_uri(self: @TState, adventurer_id: u256) -> ByteArray;
 }
 
 #[starknet::interface]
 trait IERC721MetadataCamelOnly<TState> {
-    fn tokenURI(self: @TState, tokenId: u256) -> ByteArray;
+    fn tokenURI(self: @TState, adventurerId: felt252) -> ByteArray;
+}
+
+
+#[starknet::interface]
+trait ILeetLoot<T> {
+    fn mint(
+        ref self: T, to: ContractAddress, beast: u8, prefix: u8, suffix: u8, level: u16, health: u16
+    );
+    fn isMinted(self: @T, beast: u8, prefix: u8, suffix: u8) -> bool;
+    fn getMinter(self: @T) -> ContractAddress;
 }

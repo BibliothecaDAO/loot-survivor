@@ -11,7 +11,9 @@ obstacles = { path = "../obstacles" }
 pragma_lib = { git = "https://github.com/astraly-labs/pragma-lib" }
 openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v0.14.0" }
 alexandria_encoding = { git = "https://github.com/keep-starknet-strange/alexandria.git" }
+graffiti = { git = "https://github.com/ponderingdemocritus/graffiti", rev = "bc569531791dbc71c6cd8d9bc154c34eedad31fe" }
 
 [[target.starknet-contract]]
 allowed-libfuncs-list.name = "experimental"
 allowed-libfuncs = true
+casm = true

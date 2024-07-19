@@ -274,6 +274,18 @@ impl ImplEquipment of IEquipment {
         }
         stats
     }
+
+    // @notice gets stat boosts based on item specials
+    // @param item_id The ID of the item to get stat boosts for.
+    // @param start_entropy The start entropy to use for getting item specials.
+    // @return Returns the stat boosts for the item.
+    fn get_item_boost(item_id: u8, start_entropy: u64) -> Stats {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
+        };
+        stats.apply_suffix_boost(ImplLoot::get_suffix(item_id, start_entropy));
+        stats
+    }
 }
 
 const TWO_POW_21: u256 = 0x200000;
@@ -1125,5 +1137,36 @@ mod tests {
         assert(adventurer.equipment.weapon.xp == 0, 'weapon should start with 0xp');
         adventurer.equipment.increase_item_xp_at_slot(Slot::Weapon(()), 0);
         assert(adventurer.equipment.weapon.xp == 0, 'weapon should still have 0xp');
+    }
+
+    #[test]
+    #[available_gas(61360)]
+    fn test_get_item_boost_gas() {
+        ImplEquipment::get_item_boost(1, 0);
+    }
+
+    #[test]
+    fn test_get_item_boost() {
+        let item_id = ItemId::Wand;
+        let mut start_entropy = 0;
+        let stats = ImplEquipment::get_item_boost(item_id, start_entropy);
+
+        assert(stats.strength == 0, 'STR should be 0');
+        assert(stats.dexterity == 0, 'DEX should be 0');
+        assert(stats.vitality == 0, 'VIT should be 0');
+        assert(stats.charisma == 0, 'CHA should be 0');
+        assert(stats.intelligence == 3, 'INT should be 3');
+        assert(stats.wisdom == 0, 'WIS should be 0');
+        assert(stats.luck == 0, 'LUK should be 0');
+
+        start_entropy = 1;
+        let stats = ImplEquipment::get_item_boost(item_id, start_entropy);
+        assert(stats.strength == 0, 'STR should be 0');
+        assert(stats.dexterity == 1, 'DEX should be 1');
+        assert(stats.vitality == 2, 'VIT should be 2');
+        assert(stats.charisma == 0, 'CHA should be 0');
+        assert(stats.intelligence == 0, 'INT should be 0');
+        assert(stats.wisdom == 0, 'WIS should be 0');
+        assert(stats.luck == 0, 'LUK should be 0');
     }
 }

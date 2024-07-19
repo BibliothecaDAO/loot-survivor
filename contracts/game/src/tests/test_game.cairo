@@ -95,6 +95,14 @@ mod tests {
         contract_address_const::<1>()
     }
 
+    fn RENDER_CONTRACT() -> ContractAddress {
+        contract_address_const::<1>()
+    }
+
+    fn ZERO_ADDRESS() -> ContractAddress {
+        contract_address_const::<0>()
+    }
+
     const PUBLIC_KEY: felt252 = 0x333333;
     const NEW_PUBKEY: felt252 = 0x789789;
     const SALT: felt252 = 123;
@@ -193,6 +201,7 @@ mod tests {
         calldata.append(PREV_FIRST_PLACE().into());
         calldata.append(PREV_SECOND_PLACE().into());
         calldata.append(PREV_THIRD_PLACE().into());
+        calldata.append(RENDER_CONTRACT().into());
 
         IGameDispatcher { contract_address: utils::deploy(Game::TEST_CLASS_HASH, calldata) }
     }
@@ -245,7 +254,12 @@ mod tests {
     ) {
         game
             .new_game(
-                INTERFACE_ID(), starting_weapon, 'loothero', golden_token_id, 4000000000000000
+                INTERFACE_ID(),
+                starting_weapon,
+                'loothero',
+                golden_token_id,
+                4000000000000000,
+                ZERO_ADDRESS()
             );
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -270,7 +284,8 @@ mod tests {
                 starting_weapon,
                 name,
                 DEFAULT_NO_GOLDEN_TOKEN.into(),
-                4000000000000000
+                4000000000000000,
+                ZERO_ADDRESS()
             );
 
         // get adventurer state
@@ -391,190 +406,190 @@ mod tests {
         game
     }
 
-    fn new_adventurer_lvl6_equipped(stat: u8) -> IGameDispatcher {
-        let mut game = new_adventurer_lvl5(stat);
+    // fn new_adventurer_lvl6_equipped(stat: u8) -> IGameDispatcher {
+    //     let mut game = new_adventurer_lvl5(stat);
 
-        let weapon_inventory = @game
-            .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Weapon(())));
-        let chest_inventory = @game
-            .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Chest(())));
-        let head_inventory = @game
-            .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Head(())));
-        let waist_inventory = @game
-            .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Waist(())));
-        let foot_inventory = @game
-            .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Foot(())));
-        let hand_inventory = @game
-            .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Hand(())));
+    //     let weapon_inventory = @game
+    //         .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Weapon(())));
+    //     let chest_inventory = @game
+    //         .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Chest(())));
+    //     let head_inventory = @game
+    //         .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Head(())));
+    //     let waist_inventory = @game
+    //         .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Waist(())));
+    //     let foot_inventory = @game
+    //         .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Foot(())));
+    //     let hand_inventory = @game
+    //         .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Hand(())));
 
-        let purchase_weapon_id = *weapon_inventory.at(0);
-        let purchase_chest_id = *chest_inventory.at(2);
-        let purchase_head_id = *head_inventory.at(2);
-        let purchase_waist_id = *waist_inventory.at(0);
-        let purchase_foot_id = *foot_inventory.at(0);
-        let purchase_hand_id = *hand_inventory.at(0);
+    //     let purchase_weapon_id = *weapon_inventory.at(0);
+    //     let purchase_chest_id = *chest_inventory.at(2);
+    //     let purchase_head_id = *head_inventory.at(2);
+    //     let purchase_waist_id = *waist_inventory.at(0);
+    //     let purchase_foot_id = *foot_inventory.at(0);
+    //     let purchase_hand_id = *hand_inventory.at(0);
 
-        let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
-        shopping_cart.append(ItemPurchase { item_id: purchase_weapon_id, equip: true });
-        shopping_cart.append(ItemPurchase { item_id: purchase_chest_id, equip: true });
-        shopping_cart.append(ItemPurchase { item_id: purchase_head_id, equip: true });
-        shopping_cart.append(ItemPurchase { item_id: purchase_waist_id, equip: true });
-        shopping_cart.append(ItemPurchase { item_id: purchase_foot_id, equip: true });
-        shopping_cart.append(ItemPurchase { item_id: purchase_hand_id, equip: true });
+    //     let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
+    //     shopping_cart.append(ItemPurchase { item_id: purchase_weapon_id, equip: true });
+    //     shopping_cart.append(ItemPurchase { item_id: purchase_chest_id, equip: true });
+    //     shopping_cart.append(ItemPurchase { item_id: purchase_head_id, equip: true });
+    //     shopping_cart.append(ItemPurchase { item_id: purchase_waist_id, equip: true });
+    //     shopping_cart.append(ItemPurchase { item_id: purchase_foot_id, equip: true });
+    //     shopping_cart.append(ItemPurchase { item_id: purchase_hand_id, equip: true });
 
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(
-            adventurer.equipment.weapon.id == purchase_weapon_id, 'new weapon should be equipped'
-        );
-        assert(adventurer.equipment.chest.id == purchase_chest_id, 'new chest should be equipped');
-        assert(adventurer.equipment.head.id == purchase_head_id, 'new head should be equipped');
-        assert(adventurer.equipment.waist.id == purchase_waist_id, 'new waist should be equipped');
-        assert(adventurer.equipment.foot.id == purchase_foot_id, 'new foot should be equipped');
-        assert(adventurer.equipment.hand.id == purchase_hand_id, 'new hand should be equipped');
-        assert(adventurer.gold < STARTING_GOLD, 'items should not be free');
+    //     let adventurer = game.get_adventurer(ADVENTURER_ID);
+    //     assert(
+    //         adventurer.equipment.weapon.id == purchase_weapon_id, 'new weapon should be equipped'
+    //     );
+    //     assert(adventurer.equipment.chest.id == purchase_chest_id, 'new chest should be equipped');
+    //     assert(adventurer.equipment.head.id == purchase_head_id, 'new head should be equipped');
+    //     assert(adventurer.equipment.waist.id == purchase_waist_id, 'new waist should be equipped');
+    //     assert(adventurer.equipment.foot.id == purchase_foot_id, 'new foot should be equipped');
+    //     assert(adventurer.equipment.hand.id == purchase_hand_id, 'new hand should be equipped');
+    //     assert(adventurer.gold < STARTING_GOLD, 'items should not be free');
 
-        // upgrade stats
+    //     // upgrade stats
 
-        let stat_upgrades = Stats {
-            strength: stat,
-            dexterity: 0,
-            vitality: 0,
-            intelligence: 0,
-            wisdom: 0,
-            charisma: 1,
-            luck: 0
-        };
-        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+    //     let stat_upgrades = Stats {
+    //         strength: stat,
+    //         dexterity: 0,
+    //         vitality: 0,
+    //         intelligence: 0,
+    //         wisdom: 0,
+    //         charisma: 1,
+    //         luck: 0
+    //     };
+    //     game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
-        // go explore
-        game.explore(ADVENTURER_ID, true);
+    //     // go explore
+    //     game.explore(ADVENTURER_ID, true);
 
-        // verify adventurer is now level 6
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.get_level() == 6, 'adventurer should be lvl 6');
+    //     // verify adventurer is now level 6
+    //     let adventurer = game.get_adventurer(ADVENTURER_ID);
+    //     assert(adventurer.get_level() == 6, 'adventurer should be lvl 6');
 
-        game
-    }
+    //     game
+    // }
 
-    fn new_adventurer_lvl7_equipped(stat: u8) -> IGameDispatcher {
-        let mut game = new_adventurer_lvl6_equipped(stat);
-        let shopping_cart = ArrayTrait::<ItemPurchase>::new();
-        let stat_upgrades = Stats {
-            strength: stat,
-            dexterity: 0,
-            vitality: 0,
-            intelligence: 0,
-            wisdom: 0,
-            charisma: 1,
-            luck: 0
-        };
-        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+    // fn new_adventurer_lvl7_equipped(stat: u8) -> IGameDispatcher {
+    //     let mut game = new_adventurer_lvl6_equipped(stat);
+    //     let shopping_cart = ArrayTrait::<ItemPurchase>::new();
+    //     let stat_upgrades = Stats {
+    //         strength: stat,
+    //         dexterity: 0,
+    //         vitality: 0,
+    //         intelligence: 0,
+    //         wisdom: 0,
+    //         charisma: 1,
+    //         luck: 0
+    //     };
+    //     game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
-        // go explore
-        game.explore(ADVENTURER_ID, true);
+    //     // go explore
+    //     game.explore(ADVENTURER_ID, true);
 
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.get_level() == 7, 'adventurer should be lvl 7');
+    //     let adventurer = game.get_adventurer(ADVENTURER_ID);
+    //     assert(adventurer.get_level() == 7, 'adventurer should be lvl 7');
 
-        game
-    }
+    //     game
+    // }
 
-    fn new_adventurer_lvl8_equipped(stat: u8) -> IGameDispatcher {
-        let mut game = new_adventurer_lvl7_equipped(stat);
-        let shopping_cart = ArrayTrait::<ItemPurchase>::new();
-        let stat_upgrades = Stats {
-            strength: stat,
-            dexterity: 0,
-            vitality: 0,
-            intelligence: 0,
-            wisdom: 0,
-            charisma: 1,
-            luck: 0
-        };
-        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+    // fn new_adventurer_lvl8_equipped(stat: u8) -> IGameDispatcher {
+    //     let mut game = new_adventurer_lvl7_equipped(stat);
+    //     let shopping_cart = ArrayTrait::<ItemPurchase>::new();
+    //     let stat_upgrades = Stats {
+    //         strength: stat,
+    //         dexterity: 0,
+    //         vitality: 0,
+    //         intelligence: 0,
+    //         wisdom: 0,
+    //         charisma: 1,
+    //         luck: 0
+    //     };
+    //     game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
-        // go explore
-        game.explore(ADVENTURER_ID, true);
+    //     // go explore
+    //     game.explore(ADVENTURER_ID, true);
 
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.get_level() == 8, 'adventurer should be lvl 8');
+    //     let adventurer = game.get_adventurer(ADVENTURER_ID);
+    //     assert(adventurer.get_level() == 8, 'adventurer should be lvl 8');
 
-        game
-    }
+    //     game
+    // }
 
-    fn new_adventurer_lvl9_equipped(stat: u8) -> IGameDispatcher {
-        let mut game = new_adventurer_lvl8_equipped(stat);
-        let shopping_cart = ArrayTrait::<ItemPurchase>::new();
-        let stat_upgrades = Stats {
-            strength: stat,
-            dexterity: 0,
-            vitality: 0,
-            intelligence: 0,
-            wisdom: 0,
-            charisma: 1,
-            luck: 0
-        };
-        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+    // fn new_adventurer_lvl9_equipped(stat: u8) -> IGameDispatcher {
+    //     let mut game = new_adventurer_lvl8_equipped(stat);
+    //     let shopping_cart = ArrayTrait::<ItemPurchase>::new();
+    //     let stat_upgrades = Stats {
+    //         strength: stat,
+    //         dexterity: 0,
+    //         vitality: 0,
+    //         intelligence: 0,
+    //         wisdom: 0,
+    //         charisma: 1,
+    //         luck: 0
+    //     };
+    //     game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
-        // go explore
-        game.explore(ADVENTURER_ID, true);
+    //     // go explore
+    //     game.explore(ADVENTURER_ID, true);
 
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.get_level() == 9, 'adventurer should be lvl 9');
+    //     let adventurer = game.get_adventurer(ADVENTURER_ID);
+    //     assert(adventurer.get_level() == 9, 'adventurer should be lvl 9');
 
-        game
-    }
+    //     game
+    // }
 
-    fn new_adventurer_lvl10_equipped(stat: u8) -> IGameDispatcher {
-        let mut game = new_adventurer_lvl9_equipped(stat);
-        let shopping_cart = ArrayTrait::<ItemPurchase>::new();
-        let stat_upgrades = Stats {
-            strength: stat,
-            dexterity: 0,
-            vitality: 0,
-            intelligence: 0,
-            wisdom: 0,
-            charisma: 1,
-            luck: 0
-        };
-        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+    // fn new_adventurer_lvl10_equipped(stat: u8) -> IGameDispatcher {
+    //     let mut game = new_adventurer_lvl9_equipped(stat);
+    //     let shopping_cart = ArrayTrait::<ItemPurchase>::new();
+    //     let stat_upgrades = Stats {
+    //         strength: stat,
+    //         dexterity: 0,
+    //         vitality: 0,
+    //         intelligence: 0,
+    //         wisdom: 0,
+    //         charisma: 1,
+    //         luck: 0
+    //     };
+    //     game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
-        // go explore
-        game.explore(ADVENTURER_ID, true);
-        game.flee(ADVENTURER_ID, false);
-        game.explore(ADVENTURER_ID, true);
-        game.explore(ADVENTURER_ID, true);
+    //     // go explore
+    //     game.explore(ADVENTURER_ID, true);
+    //     game.flee(ADVENTURER_ID, false);
+    //     game.explore(ADVENTURER_ID, true);
+    //     game.explore(ADVENTURER_ID, true);
 
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.get_level() == 10, 'adventurer should be lvl 10');
+    //     let adventurer = game.get_adventurer(ADVENTURER_ID);
+    //     assert(adventurer.get_level() == 10, 'adventurer should be lvl 10');
 
-        game
-    }
+    //     game
+    // }
 
-    fn new_adventurer_lvl11_equipped(stat: u8) -> IGameDispatcher {
-        let mut game = new_adventurer_lvl10_equipped(stat);
-        let shopping_cart = ArrayTrait::<ItemPurchase>::new();
-        let stat_upgrades = Stats {
-            strength: stat,
-            dexterity: 0,
-            vitality: 0,
-            intelligence: 0,
-            wisdom: 0,
-            charisma: 1,
-            luck: 0
-        };
-        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+    // fn new_adventurer_lvl11_equipped(stat: u8) -> IGameDispatcher {
+    //     let mut game = new_adventurer_lvl10_equipped(stat);
+    //     let shopping_cart = ArrayTrait::<ItemPurchase>::new();
+    //     let stat_upgrades = Stats {
+    //         strength: stat,
+    //         dexterity: 0,
+    //         vitality: 0,
+    //         intelligence: 0,
+    //         wisdom: 0,
+    //         charisma: 1,
+    //         luck: 0
+    //     };
+    //     game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
-        // go explore
-        game.explore(ADVENTURER_ID, true);
-        game.explore(ADVENTURER_ID, true);
-        game.explore(ADVENTURER_ID, true);
+    //     // go explore
+    //     game.explore(ADVENTURER_ID, true);
+    //     game.explore(ADVENTURER_ID, true);
+    //     game.explore(ADVENTURER_ID, true);
 
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.get_level() == 11, 'adventurer should be lvl 11');
+    //     let adventurer = game.get_adventurer(ADVENTURER_ID);
+    //     assert(adventurer.get_level() == 11, 'adventurer should be lvl 11');
 
-        game
-    }
+    //     game
+    // }
 
     fn new_adventurer_with_lords(starting_block: u64) -> (IGameDispatcher, IERC20Dispatcher) {
         let starting_timestamp = 1;
@@ -592,7 +607,8 @@ mod tests {
                 starting_weapon,
                 name,
                 DEFAULT_NO_GOLDEN_TOKEN.into(),
-                4000000000000000
+                4000000000000000,
+                ZERO_ADDRESS()
             );
 
         // get adventurer state
