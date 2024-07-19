@@ -5,7 +5,7 @@ import {
   starkscan,
   jsonRpcProvider,
 } from "@starknet-react/core";
-import { sepolia } from "@starknet-react/chains";
+import { mainnet, sepolia } from "@starknet-react/chains";
 import { Chain } from "@starknet-react/chains";
 import { connectors } from "@/app/lib/connectors";
 import { networkConfig } from "./lib/networkConfig";
@@ -29,10 +29,11 @@ export function StarknetProvider({
       autoConnect={
         network === "mainnet" || network === "sepolia" ? true : false
       }
-      chains={[sepolia]}
+      chains={network == "mainnet" ? [mainnet] : [sepolia]}
       connectors={connectors(
         networkConfig[network!].gameAddress,
-        networkConfig[network!].lordsAddress
+        networkConfig[network!].lordsAddress,
+        network
       )}
       explorer={starkscan}
       provider={jsonRpcProvider({ rpc })}

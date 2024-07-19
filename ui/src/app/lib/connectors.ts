@@ -2,7 +2,8 @@ import { Connector } from "@starknet-react/core";
 import { InjectedConnector } from "starknetkit/injected";
 import CartridgeConnector from "@cartridge/connector";
 import { shortString } from "starknet";
-// import { WebWalletConnector } from "starknetkit/webwallet";
+import { WebWalletConnector } from "starknetkit/webwallet";
+import { Network } from "@/app/hooks/useUIStore";
 
 export const checkArcadeConnector = (connector?: Connector) => {
   return typeof connector?.id === "string" && connector?.id.includes("0x");
@@ -34,24 +35,21 @@ export const providerInterfaceCamel = (provider: string) => {
   }
 };
 
-// export function argentWebWalletUrl() {
-//   switch (process.env.NEXT_PUBLIC_NETWORK) {
-//     case "goerli":
-//       return "https://web.hydrogen.argent47.net";
-//     case "mainnet":
-//       return "https://web.argent.xyz/";
-//     default:
-//       return "https://web.hydrogen.argent47.net";
-//   }
-// }
+export function argentWebWalletUrl(network: Network) {
+  switch (network) {
+    case "sepolia":
+      return "https://web.hydrogen.argent47.net";
+    case "mainnet":
+      return "https://web.argent.xyz/";
+    default:
+      return "https://web.hydrogen.argent47.net";
+  }
+}
 
-// export function argentWebWalletUrl() {
-//   return "https://web.hydrogen.argent47.net";
-// }
-
-// export const argentWebWalletConnector = new WebWalletConnector({
-//   url: argentWebWalletUrl(),
-// });
+export const argentWebWalletConnector = (network: Network) =>
+  new WebWalletConnector({
+    url: argentWebWalletUrl(network),
+  });
 
 const cartridgeConnector = (gameAddress: string, lordsAddress: string) =>
   new CartridgeConnector(
@@ -101,9 +99,13 @@ const cartridgeConnector = (gameAddress: string, lordsAddress: string) =>
     }
   ) as never as Connector;
 
-export const connectors = (gameAddress: string, lordsAddress: string) => [
+export const connectors = (
+  gameAddress: string,
+  lordsAddress: string,
+  network: Network
+) => [
   cartridgeConnector(gameAddress, lordsAddress),
+  argentWebWalletConnector(network),
   new InjectedConnector({ options: { id: "braavos", name: "Braavos" } }),
   new InjectedConnector({ options: { id: "argentX", name: "Argent X" } }),
-  // argentWebWalletConnector,
 ];
