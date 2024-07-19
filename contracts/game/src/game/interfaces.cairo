@@ -16,7 +16,8 @@ trait IGame<TContractState> {
         weapon: u8,
         name: felt252,
         golden_token_id: u256,
-        vrf_fee_limit: u128
+        vrf_fee_limit: u128,
+        custom_renderer: ContractAddress
     );
     fn explore(ref self: TContractState, adventurer_id: felt252, till_beast: bool);
     fn attack(ref self: TContractState, adventurer_id: felt252, to_the_death: bool);
@@ -38,7 +39,9 @@ trait IGame<TContractState> {
         calldata: Array<felt252>
     );
     fn update_cost_to_play(ref self: TContractState);
-    fn update_render_contract(ref self: TContractState, render_contract: ContractAddress);
+    fn set_custom_renderer(
+        ref self: TContractState, adventurer_id: felt252, render_contract: ContractAddress
+    );
     // ------ View Functions ------
 
     // adventurer details
@@ -126,6 +129,8 @@ trait IGame<TContractState> {
     fn get_cost_to_play(self: @TContractState) -> u128;
     fn can_play(self: @TContractState, golden_token_id: u256) -> bool;
     fn get_randomness_address(self: @TContractState) -> ContractAddress;
+    fn uses_custom_renderer(self: @TContractState, adventurer_id: felt252) -> bool;
+    fn get_custom_renderer(self: @TContractState, adventurer_id: felt252) -> ContractAddress;
 }
 
 

@@ -99,6 +99,10 @@ mod tests {
         contract_address_const::<1>()
     }
 
+    fn ZERO_ADDRESS() -> ContractAddress {
+        contract_address_const::<0>()
+    }
+
     const PUBLIC_KEY: felt252 = 0x333333;
     const NEW_PUBKEY: felt252 = 0x789789;
     const SALT: felt252 = 123;
@@ -250,7 +254,12 @@ mod tests {
     ) {
         game
             .new_game(
-                INTERFACE_ID(), starting_weapon, 'loothero', golden_token_id, 4000000000000000
+                INTERFACE_ID(),
+                starting_weapon,
+                'loothero',
+                golden_token_id,
+                4000000000000000,
+                ZERO_ADDRESS()
             );
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -275,7 +284,8 @@ mod tests {
                 starting_weapon,
                 name,
                 DEFAULT_NO_GOLDEN_TOKEN.into(),
-                4000000000000000
+                4000000000000000,
+                ZERO_ADDRESS()
             );
 
         // get adventurer state
@@ -597,7 +607,8 @@ mod tests {
                 starting_weapon,
                 name,
                 DEFAULT_NO_GOLDEN_TOKEN.into(),
-                4000000000000000
+                4000000000000000,
+                ZERO_ADDRESS()
             );
 
         // get adventurer state

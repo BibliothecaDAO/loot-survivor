@@ -21,6 +21,7 @@ eth_contract=0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7
 previous_first_place_address=0x02cd97240db3f679de98a729ae91eb996cab9fd92a9a578df11a72f49be1c356
 previous_second_place_address=0x045fcd9bccf4b510cf5d32c0adc2a826b1e535ec7d2989324bbb3a15d10e25ab
 previous_third_place_address=0x07a1d33e49fdeb6cd02e9eb92e5a32b9f308d766b3293147e64815998e744240
+custom_renderer=0x0
 
 # Source env vars
 ENV_FILE="/workspaces/loot-survivor/.env"
@@ -56,7 +57,7 @@ starkli invoke --watch $eth_contract transfer $game_contract 50000000000000000 0
 
 # start new game
 echo "starting new game"
-starkli invoke --watch $game_contract new_game $client_reward_address $starting_weapon $player_name $golden_token_id $interface_camel $vrf_fee_limit --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY --max-fee 0.01 2>/dev/null
+starkli invoke --watch $game_contract new_game $client_reward_address $starting_weapon $player_name $golden_token_id $interface_camel $vrf_fee_limit $custom_renderer --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY --max-fee 0.01 2>/dev/null
 
 #output contracts and export contract vars
 echo "game contract: " $game_contract

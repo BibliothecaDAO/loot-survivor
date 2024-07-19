@@ -135,7 +135,8 @@ mod Game {
         erc721: ERC721Component::Storage,
         #[substorage(v0)]
         src5: SRC5Component::Storage,
-        _render_contract: ContractAddress,
+        _default_renderer: ContractAddress,
+        _custom_renderer: LegacyMap::<felt252, ContractAddress>,
     }
 
     #[event]
@@ -222,7 +223,7 @@ mod Game {
         self._previous_first_place.write(previous_first_place);
         self._previous_second_place.write(previous_second_place);
         self._previous_third_place.write(previous_third_place);
-        self._render_contract.write(render_contract);
+        self._default_renderer.write(render_contract);
 
         // TODO: Setting offchain uri here for later use, however it is not used in the current implementation
         self.erc721.initializer("LootSurvivor", "LS", "https://token.lootsurvivor.io/");
@@ -294,13 +295,15 @@ mod Game {
         /// @param name A u128 value representing the player's name.
         /// @param golden_token_id A u256 representing the ID of the golden token.
         /// @param vrf_fee_limit A u128 representing the VRF fee limit.
+        /// @param custom_renderer A ContractAddress to use for rendering the NFT. Provide 0 to use the default renderer.
         fn new_game(
             ref self: ContractState,
             client_reward_address: ContractAddress,
             weapon: u8,
             name: felt252,
             golden_token_id: u256,
-            vrf_fee_limit: u128
+            vrf_fee_limit: u128,
+            custom_renderer: ContractAddress
         ) {
             // assert game terminal time has not been reached
             _assert_terminal_time_not_reached(@self);
@@ -320,7 +323,7 @@ mod Game {
             }
 
             // start the game
-            _start_game(ref self, weapon, name, vrf_fee_limit);
+            _start_game(ref self, weapon, name, vrf_fee_limit, custom_renderer);
         }
 
         /// @title Explore Function
@@ -655,10 +658,19 @@ mod Game {
                 );
         }
 
-        fn update_render_contract(ref self: ContractState, render_contract: ContractAddress) {
-            // TODO: Add Permissions for this function
-            self._render_contract.write(render_contract);
+        /// @title Set Custom Renderer
+        ///
+        /// @notice Allows an adventurer to set a custom renderer for their NFT.
+        ///
+        /// @param adventurer_id A felt252 representing the unique ID of the adventurer.
+        /// @param render_contract A ContractAddress to use for rendering the NFT. Provide 0 to switch back to default renderer.
+        fn set_custom_renderer(
+            ref self: ContractState, adventurer_id: felt252, render_contract: ContractAddress
+        ) {
+            assert(_get_owner(@self, adventurer_id) == get_caller_address(), messages::NOT_OWNER);
+            self._custom_renderer.write(adventurer_id, render_contract);
         }
+
         // ------------------------------------------ //
         // ------------ View Functions -------------- //
         // ------------------------------------------ //
@@ -670,6 +682,12 @@ mod Game {
         }
         fn get_randomness_address(self: @ContractState) -> ContractAddress {
             self._randomness_contract_address.read()
+        }
+        fn uses_custom_renderer(self: @ContractState, adventurer_id: felt252) -> bool {
+            !self._custom_renderer.read(adventurer_id).is_zero()
+        }
+        fn get_custom_renderer(self: @ContractState, adventurer_id: felt252) -> ContractAddress {
+            self._custom_renderer.read(adventurer_id)
         }
         fn get_adventurer_no_boosts(self: @ContractState, adventurer_id: felt252) -> Adventurer {
             _load_adventurer_no_boosts(self, adventurer_id)
@@ -1357,7 +1375,13 @@ mod Game {
         );
     }
 
-    fn _start_game(ref self: ContractState, weapon: u8, name: felt252, vrf_fee_limit: u128) {
+    fn _start_game(
+        ref self: ContractState,
+        weapon: u8,
+        name: felt252,
+        vrf_fee_limit: u128,
+        custom_renderer: ContractAddress
+    ) {
         // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._game_counter.read() + 1;
 
@@ -1385,6 +1409,11 @@ mod Game {
 
         // increment the adventurer id counter
         self._game_counter.write(adventurer_id);
+
+        // set custom renderer if provided
+        if !custom_renderer.is_zero() {
+            self._custom_renderer.write(adventurer_id, custom_renderer);
+        }
 
         self.erc721.mint(get_caller_address(), adventurer_id.into());
 
@@ -3433,7 +3462,14 @@ mod Game {
 
         fn token_uri(self: @ContractState, adventurer_id: felt252) -> ByteArray {
             self.erc721._require_owned(adventurer_id.into());
-            IRenderContractDispatcher { contract_address: self._render_contract.read() }
+
+            // use custom renderer if available
+            let mut renderer_contract = self._custom_renderer.read(adventurer_id);
+            if renderer_contract.is_zero() {
+                renderer_contract = self._default_renderer.read();
+            }
+
+            IRenderContractDispatcher { contract_address: renderer_contract }
                 .token_uri(
                     adventurer_id,
                     _load_adventurer(self, adventurer_id),
