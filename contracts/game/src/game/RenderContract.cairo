@@ -4,7 +4,7 @@ use adventurer::{adventurer::{Adventurer}, adventurer_meta::{AdventurerMetadata}
 trait IRenderContract<TContractState> {
     fn token_uri(
         self: @TContractState,
-        adventurer_id: felt252,
+        adventurer_id: u256,
         adventurer: Adventurer,
         adventurerMetadata: AdventurerMetadata,
         bag: Bag
@@ -23,12 +23,12 @@ mod RenderContract {
     impl Render of super::IRenderContract<ContractState> {
         fn token_uri(
             self: @ContractState,
-            adventurer_id: felt252,
+            adventurer_id: u256,
             adventurer: Adventurer,
             adventurerMetadata: AdventurerMetadata,
             bag: Bag
         ) -> ByteArray {
-            create_metadata(adventurer_id, adventurer, adventurerMetadata, bag)
+            create_metadata(adventurer_id.try_into().unwrap(), adventurer, adventurerMetadata, bag)
         }
     }
 }

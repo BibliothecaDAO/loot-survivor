@@ -255,7 +255,7 @@ trait IViewGame<TContractState> { // ------ View Functions ------
 trait IERC721Metadata<TState> {
     fn name(self: @TState) -> ByteArray;
     fn symbol(self: @TState) -> ByteArray;
-    fn token_uri(self: @TState, adventurer_id: felt252) -> ByteArray;
+    fn token_uri(self: @TState, adventurer_id: u256) -> ByteArray;
 }
 
 #[starknet::interface]

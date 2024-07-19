@@ -3460,11 +3460,13 @@ mod Game {
             self.erc721.ERC721_symbol.read()
         }
 
-        fn token_uri(self: @ContractState, adventurer_id: felt252) -> ByteArray {
-            self.erc721._require_owned(adventurer_id.into());
+        fn token_uri(self: @ContractState, adventurer_id: u256) -> ByteArray {
+            self.erc721._require_owned(adventurer_id);
+
+            let adventurer_id_felt = adventurer_id.try_into().unwrap();
 
             // use custom renderer if available
-            let mut renderer_contract = self._custom_renderer.read(adventurer_id);
+            let mut renderer_contract = self._custom_renderer.read(adventurer_id_felt);
             if renderer_contract.is_zero() {
                 renderer_contract = self._default_renderer.read();
             }
@@ -3472,9 +3474,9 @@ mod Game {
             IRenderContractDispatcher { contract_address: renderer_contract }
                 .token_uri(
                     adventurer_id,
-                    _load_adventurer(self, adventurer_id),
-                    _load_adventurer_metadata(self, adventurer_id),
-                    _load_bag(self, adventurer_id)
+                    _load_adventurer(self, adventurer_id_felt),
+                    _load_adventurer_metadata(self, adventurer_id_felt),
+                    _load_bag(self, adventurer_id_felt)
                 )
         }
     }
