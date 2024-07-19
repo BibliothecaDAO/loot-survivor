@@ -187,8 +187,8 @@ fn create_metadata(
         rect,
         logo_element,
         create_text(_name.clone(), "117", "117.136", "32", "middle", "left"),
-        create_text("# " + _adventurer_id.clone(), "123", "61.2273", "24", "middle", "left"),
-        create_text("LVL " + _level.clone(), "228.008", "61.2273", "24", "middle", "end"),
+        create_text("#" + _adventurer_id.clone(), "123", "61.2273", "24", "middle", "left"),
+        create_text("LVL " + _level.clone(), "235", "61.2273", "24", "middle", "end"),
         create_text(
             _health.clone() + " / " + _max_health.clone() + " HP",
             "570",

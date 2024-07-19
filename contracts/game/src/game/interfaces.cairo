@@ -9,16 +9,6 @@ use adventurer::{
 
 #[starknet::interface]
 trait IGame<TContractState> {
-    fn get_randomness_address(self: @TContractState) -> ContractAddress;
-
-    fn receive_random_words(
-        ref self: TContractState,
-        requestor_address: ContractAddress,
-        request_id: u64,
-        random_words: Span<felt252>,
-        calldata: Array<felt252>
-    );
-
     // ------ Game Actions ------
     fn new_game(
         ref self: TContractState,
@@ -40,11 +30,18 @@ trait IGame<TContractState> {
         stat_upgrades: Stats,
         items: Array<ItemPurchase>,
     );
+    fn receive_random_words(
+        ref self: TContractState,
+        requestor_address: ContractAddress,
+        request_id: u64,
+        random_words: Span<felt252>,
+        calldata: Array<felt252>
+    );
     fn update_cost_to_play(ref self: TContractState);
     fn update_render_contract(ref self: TContractState, render_contract: ContractAddress);
     // ------ View Functions ------
 
-    // // adventurer details
+    // adventurer details
     fn get_adventurer(self: @TContractState, adventurer_id: felt252) -> Adventurer;
     fn get_adventurer_entropy(self: @TContractState, adventurer_id: felt252) -> felt252;
     fn get_adventurer_no_boosts(self: @TContractState, adventurer_id: felt252) -> Adventurer;
@@ -128,6 +125,7 @@ trait IGame<TContractState> {
     fn get_leaderboard(self: @TContractState) -> Leaderboard;
     fn get_cost_to_play(self: @TContractState) -> u128;
     fn can_play(self: @TContractState, golden_token_id: u256) -> bool;
+    fn get_randomness_address(self: @TContractState) -> ContractAddress;
 }
 
 
