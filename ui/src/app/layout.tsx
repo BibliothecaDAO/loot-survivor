@@ -62,6 +62,7 @@ export default function RootLayout({
         suppressHydrationWarning={false}
         className="min-h-screen overflow-hidden text-terminal-green bg-conic-to-br to-terminal-black from-terminal-black bezel-container"
       >
+        <Analytics />
         <img
           src="/crt_green_mask.png"
           alt="crt green mask"
@@ -87,10 +88,7 @@ export default function RootLayout({
             >
               <ControllerProvider>
                 <StarknetProvider network={network}>
-                  <DojoProvider value={setupResult}>
-                    {children}
-                    <Analytics />
-                  </DojoProvider>
+                  <DojoProvider value={setupResult}>{children}</DojoProvider>
                 </StarknetProvider>
               </ControllerProvider>
             </ApolloProvider>
