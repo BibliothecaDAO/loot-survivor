@@ -1,5 +1,6 @@
 use starknet::{StorePacking};
-use loot::constants::ItemId;
+use loot::constants::{ItemId, SUFFIX_UNLOCK_GREATNESS};
+
 use super::{adventurer::{Adventurer, ImplAdventurer}, item::{Item, ImplItem, ItemPacking}};
 
 // Bag is used for storing gear not equipped to the adventurer
@@ -437,6 +438,45 @@ impl ImplBag of IBag {
         };
         total_greatness
     }
+
+    // @notice checks if the bag has any items with specials.
+    // @param self The Bag to check for specials.
+    // @return Returns true if bag has specials, false otherwise.
+    fn has_specials(self: Bag) -> bool {
+        if (self.item_1.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_2.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_3.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_4.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_5.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_6.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_7.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_8.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_9.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_10.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_11.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_12.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_13.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_14.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else if (self.item_15.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
+            true
+        } else {
+            false
+        }
+    }
 }
 const TWO_POW_21: u256 = 0x200000;
 const TWO_POW_16: u256 = 0x10000;
@@ -461,7 +501,7 @@ const TWO_POW_240: u256 = 0x1000000000000000000000000000000000000000000000000000
 #[cfg(test)]
 mod tests {
     use adventurer::{bag::{Bag, ImplBag, IBag, BagPacking}, item::{Item}};
-    use loot::{constants::ItemId};
+    use loot::constants::{ItemId, SUFFIX_UNLOCK_GREATNESS};
 
     #[test]
     #[available_gas(97530)]
@@ -1196,5 +1236,77 @@ mod tests {
         // this should panic with 'item not in bag'
         // which this test is annotated to expect
         bag.remove_item(255);
+    }
+
+    #[test]
+    fn test_has_specials() {
+        let suffix_unlock_xp = (SUFFIX_UNLOCK_GREATNESS * SUFFIX_UNLOCK_GREATNESS).into();
+        let special_item = Item { id: 1, xp: suffix_unlock_xp };
+        let normal_item = Item { id: 2, xp: suffix_unlock_xp - 1 };
+
+        let bag_with_specials = Bag {
+            item_1: special_item,
+            item_2: normal_item,
+            item_3: normal_item,
+            item_4: normal_item,
+            item_5: normal_item,
+            item_6: normal_item,
+            item_7: normal_item,
+            item_8: normal_item,
+            item_9: normal_item,
+            item_10: normal_item,
+            item_11: normal_item,
+            item_12: normal_item,
+            item_13: normal_item,
+            item_14: normal_item,
+            item_15: normal_item,
+            mutated: false,
+        };
+
+        let bag_without_specials = Bag {
+            item_1: normal_item,
+            item_2: normal_item,
+            item_3: normal_item,
+            item_4: normal_item,
+            item_5: normal_item,
+            item_6: normal_item,
+            item_7: normal_item,
+            item_8: normal_item,
+            item_9: normal_item,
+            item_10: normal_item,
+            item_11: normal_item,
+            item_12: normal_item,
+            item_13: normal_item,
+            item_14: normal_item,
+            item_15: normal_item,
+            mutated: false,
+        };
+
+        assert(bag_with_specials.has_specials(), 'Bag should have specials');
+        assert(!bag_without_specials.has_specials(), 'Bag should not have specials');
+    }
+
+    #[test]
+    fn test_has_specials_empty_bag() {
+        let empty_bag = Bag {
+            item_1: Item { id: 0, xp: 0 },
+            item_2: Item { id: 0, xp: 0 },
+            item_3: Item { id: 0, xp: 0 },
+            item_4: Item { id: 0, xp: 0 },
+            item_5: Item { id: 0, xp: 0 },
+            item_6: Item { id: 0, xp: 0 },
+            item_7: Item { id: 0, xp: 0 },
+            item_8: Item { id: 0, xp: 0 },
+            item_9: Item { id: 0, xp: 0 },
+            item_10: Item { id: 0, xp: 0 },
+            item_11: Item { id: 0, xp: 0 },
+            item_12: Item { id: 0, xp: 0 },
+            item_13: Item { id: 0, xp: 0 },
+            item_14: Item { id: 0, xp: 0 },
+            item_15: Item { id: 0, xp: 0 },
+            mutated: false,
+        };
+
+        assert!(!empty_bag.has_specials(), "Empty bag should not have specials");
     }
 }

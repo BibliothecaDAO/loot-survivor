@@ -241,49 +241,49 @@ impl ImplEquipment of IEquipment {
 
     // @notice gets stat boosts based on item specials
     // @param self The Equipment to get stat boosts for.
-    // @param start_entropy The start entropy to use for getting item specials.
+    // @param specials_seed The seed to use for generating item specials.
     // @return Returns the stat boosts for the equipment.
-    fn get_stat_boosts(self: Equipment, start_entropy: u64) -> Stats {
+    fn get_stat_boosts(self: Equipment, specials_seed: felt252) -> Stats {
         let mut stats = Stats {
             strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
         };
 
         if (self.weapon.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.weapon.id, start_entropy));
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.weapon.id, specials_seed));
         }
         if (self.chest.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.chest.id, start_entropy));
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.chest.id, specials_seed));
         }
         if (self.head.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.head.id, start_entropy));
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.head.id, specials_seed));
         }
         if (self.waist.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.waist.id, start_entropy));
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.waist.id, specials_seed));
         }
         if (self.foot.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.foot.id, start_entropy));
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.foot.id, specials_seed));
         }
         if (self.hand.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.hand.id, start_entropy));
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.hand.id, specials_seed));
         }
         if (self.neck.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.neck.id, start_entropy));
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.neck.id, specials_seed));
         }
         if (self.ring.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
-            stats.apply_suffix_boost(ImplLoot::get_suffix(self.ring.id, start_entropy));
+            stats.apply_suffix_boost(ImplLoot::get_suffix(self.ring.id, specials_seed));
         }
         stats
     }
 
     // @notice gets stat boosts based on item specials
     // @param item_id The ID of the item to get stat boosts for.
-    // @param start_entropy The start entropy to use for getting item specials.
+    // @param specials_seed The seed to use for generating item specials.
     // @return Returns the stat boosts for the item.
-    fn get_item_boost(item_id: u8, start_entropy: u64) -> Stats {
+    fn get_item_boost(item_id: u8, specials_seed: felt252) -> Stats {
         let mut stats = Stats {
             strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
         };
-        stats.apply_suffix_boost(ImplLoot::get_suffix(item_id, start_entropy));
+        stats.apply_suffix_boost(ImplLoot::get_suffix(item_id, specials_seed));
         stats
     }
 }
@@ -1140,7 +1140,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(61360)]
+    #[available_gas(70290)]
     fn test_get_item_boost_gas() {
         ImplEquipment::get_item_boost(1, 0);
     }

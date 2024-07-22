@@ -49,6 +49,7 @@ struct Adventurer {
     stats: Stats, // 30 bits
     equipment: Equipment, // 128 bits
     mutated: bool, // not packed
+    awaiting_item_specials: bool, // not packed
 }
 
 impl AdventurerPacking of StorePacking<Adventurer, felt252> {
@@ -97,6 +98,7 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
             stats: StatsPacking::unpack(stats.try_into().unwrap()),
             equipment: EquipmentPacking::unpack(equipment.try_into().unwrap()),
             mutated: false, // This field is not packed/unpacked
+            awaiting_item_specials: false
         }
     }
 }
@@ -130,6 +132,7 @@ impl ImplAdventurer of IAdventurer {
             beast_health: BeastSettings::STARTER_BEAST_HEALTH,
             stat_upgrades_available: 0,
             mutated: false,
+            awaiting_item_specials: false
         }
     }
 
@@ -749,7 +752,10 @@ impl ImplAdventurer of IAdventurer {
 
     #[inline(always)]
     fn can_explore(self: Adventurer) -> bool {
-        self.health != 0 && self.beast_health == 0 && self.stat_upgrades_available == 0
+        self.health != 0
+            && self.beast_health == 0
+            && self.stat_upgrades_available == 0
+            && !self.awaiting_item_specials
     }
 
 
@@ -1047,7 +1053,8 @@ mod tests {
             equipment,
             beast_health: MAX_PACKABLE_BEAST_HEALTH,
             stat_upgrades_available: MAX_STAT_UPGRADES_AVAILABLE,
-            mutated: false
+            mutated: false,
+            awaiting_item_specials: false
         };
         let unpacked: Adventurer = AdventurerPacking::unpack(AdventurerPacking::pack(adventurer));
         assert(adventurer.health == unpacked.health, 'health');
@@ -1086,7 +1093,8 @@ mod tests {
             },
             beast_health: MAX_PACKABLE_BEAST_HEALTH,
             stat_upgrades_available: MAX_STAT_UPGRADES_AVAILABLE,
-            mutated: false
+            mutated: false,
+            awaiting_item_specials: false
         };
         let packed = AdventurerPacking::pack(adventurer);
         let unpacked: Adventurer = AdventurerPacking::unpack(packed);
@@ -3682,7 +3690,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(510840)]
+    #[available_gas(582280)]
     fn test_get_and_apply_stats() {
         let mut adventurer = Adventurer {
             health: 100,
@@ -3710,6 +3718,7 @@ mod tests {
             beast_health: 20,
             stat_upgrades_available: 0,
             mutated: false,
+            awaiting_item_specials: false
         };
 
         let stat_boosts = adventurer.equipment.get_stat_boosts(1);
@@ -3814,6 +3823,7 @@ mod tests {
             beast_health: 20,
             stat_upgrades_available: 0,
             mutated: false,
+            awaiting_item_specials: false
         };
 
         let boost_stats = Stats {
@@ -3859,6 +3869,7 @@ mod tests {
             beast_health: 20,
             stat_upgrades_available: 0,
             mutated: false,
+            awaiting_item_specials: false
         };
 
         let boost_stats = Stats {
@@ -3903,6 +3914,7 @@ mod tests {
             beast_health: 20,
             stat_upgrades_available: 0,
             mutated: false,
+            awaiting_item_specials: false
         };
 
         let boost_stats = Stats {

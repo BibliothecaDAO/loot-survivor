@@ -60,19 +60,25 @@ impl LootPacking of StorePacking<Loot, felt252> {
     }
 }
 
+const TWO_POW_64: u256 = 0x10000000000000000;
+
 #[generate_trait]
 impl ImplLoot of ILoot {
     // generate_naming_seed generates a seed for naming an item.
     // @param self The item.
-    // @param entropy The entropy.
+    // @param seed The seed to use for generating the item special names
     // @return The naming seed.
     #[inline(always)]
-    fn generate_naming_seed(item_id: u8, entropy: u64) -> u64 {
+    fn generate_naming_seed(item_id: u8, seed: felt252) -> u64 {
+        let (_, r) = integer::U256DivRem::div_rem(seed.into(), TWO_POW_64.try_into().unwrap());
+
+        let name_seed_u64 = r.try_into().unwrap();
+
         let mut item_entropy = 1;
-        if (u64_overflowing_add(entropy, item_id.into()).is_ok()) {
-            item_entropy = entropy + item_id.into();
+        if (u64_overflowing_add(name_seed_u64, item_id.into()).is_ok()) {
+            item_entropy = name_seed_u64 + item_id.into();
         } else {
-            item_entropy = entropy - item_id.into();
+            item_entropy = name_seed_u64 - item_id.into();
         }
 
         let rnd = item_entropy % NUM_ITEMS.into();
@@ -82,33 +88,33 @@ impl ImplLoot of ILoot {
 
     // get_prefix1 returns the name prefix of an item (Agony, Apocalypse, Armageddon, etc)
     // @param self The item.
-    // @param entropy The entropy.
-    // @return The name prefix id.
+    // @param seed The seed for generating the prefix
+    // @return The first part of the prefix for the item
     #[inline(always)]
-    fn get_prefix1(item_id: u8, entropy: u64) -> u8 {
-        (ImplLoot::generate_naming_seed(item_id, entropy) % NamePrefixLength.into() + 1)
+    fn get_prefix1(item_id: u8, seed: felt252) -> u8 {
+        (ImplLoot::generate_naming_seed(item_id, seed) % NamePrefixLength.into() + 1)
             .try_into()
             .unwrap()
     }
 
     // get_prefix2 returns the name suffix of an item (Bane, Root, Bite, etc)
     // @param self The item.
-    // @param entropy The entropy.
-    // @return The name suffix id.
+    // @param seed The seed for generating the prefix
+    // @return The second part of the prefix for the item
     #[inline(always)]
-    fn get_prefix2(item_id: u8, entropy: u64) -> u8 {
-        (ImplLoot::generate_naming_seed(item_id, entropy) % NameSuffixLength.into() + 1)
+    fn get_prefix2(item_id: u8, seed: felt252) -> u8 {
+        (ImplLoot::generate_naming_seed(item_id, seed) % NameSuffixLength.into() + 1)
             .try_into()
             .unwrap()
     }
 
     // @notice gets the item suffix of an item (of_Power, of_Giant, of_Titans, etc)
     // @param item_id the id of the item to get special1 for
-    // @param entropy The entropy for randomness
-    // @return u8 special1 for the item
+    // @param seed The seed for generating the suffix
+    // @return u8 the suffix for the item
     #[inline(always)]
-    fn get_suffix(item_id: u8, entropy: u64) -> u8 {
-        (ImplLoot::generate_naming_seed(item_id, entropy) % ItemSuffixLength.into() + 1)
+    fn get_suffix(item_id: u8, seed: felt252) -> u8 {
+        (ImplLoot::generate_naming_seed(item_id, seed) % ItemSuffixLength.into() + 1)
             .try_into()
             .unwrap()
     }
@@ -118,18 +124,16 @@ impl ImplLoot of ILoot {
     // @param greatness the greatness of the item
     // @param start_entropy the entropy to use for randomness
     // @return the specials of the item
-    fn get_specials(id: u8, greatness: u8, start_entropy: u64) -> SpecialPowers {
+    fn get_specials(id: u8, greatness: u8, seed: felt252) -> SpecialPowers {
         if greatness < SUFFIX_UNLOCK_GREATNESS {
             SpecialPowers { special1: 0, special2: 0, special3: 0 }
         } else if greatness < PREFIXES_UNLOCK_GREATNESS {
-            SpecialPowers {
-                special1: ImplLoot::get_suffix(id, start_entropy), special2: 0, special3: 0,
-            }
+            SpecialPowers { special1: ImplLoot::get_suffix(id, seed), special2: 0, special3: 0, }
         } else {
             SpecialPowers {
-                special1: ImplLoot::get_suffix(id, start_entropy),
-                special2: ImplLoot::get_prefix1(id, start_entropy),
-                special3: ImplLoot::get_prefix2(id, start_entropy),
+                special1: ImplLoot::get_suffix(id, seed),
+                special2: ImplLoot::get_prefix1(id, seed),
+                special3: ImplLoot::get_prefix2(id, seed),
             }
         }
     }
@@ -1069,75 +1073,75 @@ mod tests {
             }
 
             // verify Warhammers are part of set1
-            let warhammer_suffix = ImplLoot::get_suffix(ItemId::Warhammer, i);
+            let warhammer_suffix = ImplLoot::get_suffix(ItemId::Warhammer, i.into());
             assert(is_special1_set1(warhammer_suffix), 'invalid warhammer suffix');
 
             // verify quarterstaffs are part of set2
-            let quarterstaff_suffix = ImplLoot::get_suffix(ItemId::Quarterstaff, i);
+            let quarterstaff_suffix = ImplLoot::get_suffix(ItemId::Quarterstaff, i.into());
             assert(is_special1_set2(quarterstaff_suffix), 'invalid quarterstaff suffix');
 
             // verify mauls are part of set1
-            let maul_suffix = ImplLoot::get_suffix(ItemId::Maul, i);
+            let maul_suffix = ImplLoot::get_suffix(ItemId::Maul, i.into());
             assert(is_special1_set1(maul_suffix), 'invalid maul suffix');
 
             // verify maces are part of set2
-            let mace_suffix = ImplLoot::get_suffix(ItemId::Mace, i);
+            let mace_suffix = ImplLoot::get_suffix(ItemId::Mace, i.into());
             assert(is_special1_set2(mace_suffix), 'invalid mace suffix');
 
             // verify clubs are part of set2
-            let club_suffix = ImplLoot::get_suffix(ItemId::Club, i);
+            let club_suffix = ImplLoot::get_suffix(ItemId::Club, i.into());
             assert(is_special1_set1(club_suffix), 'invalid club suffix');
 
             // verify katanas are part of set1
-            let katana_suffix = ImplLoot::get_suffix(ItemId::Katana, i);
+            let katana_suffix = ImplLoot::get_suffix(ItemId::Katana, i.into());
             assert(is_special1_set2(katana_suffix), 'invalid katana suffix');
 
             // verify falchions are part of set2
-            let falchion_suffix = ImplLoot::get_suffix(ItemId::Falchion, i);
+            let falchion_suffix = ImplLoot::get_suffix(ItemId::Falchion, i.into());
             assert(is_special1_set1(falchion_suffix), 'invalid falchion suffix');
 
             // verify scimitars are part of set1
-            let scimitar_suffix = ImplLoot::get_suffix(ItemId::Scimitar, i);
+            let scimitar_suffix = ImplLoot::get_suffix(ItemId::Scimitar, i.into());
             assert(is_special1_set2(scimitar_suffix), 'invalid scimitar suffix');
 
             // verify long swords are part of set2
-            let long_sword_suffix = ImplLoot::get_suffix(ItemId::LongSword, i);
+            let long_sword_suffix = ImplLoot::get_suffix(ItemId::LongSword, i.into());
             assert(is_special1_set1(long_sword_suffix), 'invalid long sword suffix');
 
             // verify short swords are part of set1
-            let short_sword_suffix = ImplLoot::get_suffix(ItemId::ShortSword, i);
+            let short_sword_suffix = ImplLoot::get_suffix(ItemId::ShortSword, i.into());
             assert(is_special1_set2(short_sword_suffix), 'invalid short sword suffix');
 
             // verify ghost wands are part of set2
-            let ghost_wand_suffix = ImplLoot::get_suffix(ItemId::GhostWand, i);
+            let ghost_wand_suffix = ImplLoot::get_suffix(ItemId::GhostWand, i.into());
             assert(is_special1_set1(ghost_wand_suffix), 'invalid ghost wand suffix');
 
             // verify grave wands are part of set1
-            let grave_wand_suffix = ImplLoot::get_suffix(ItemId::GraveWand, i);
+            let grave_wand_suffix = ImplLoot::get_suffix(ItemId::GraveWand, i.into());
             assert(is_special1_set2(grave_wand_suffix), 'invalid grave wand suffix');
 
             // verify bone wands are part of set2
-            let bone_wand_suffix = ImplLoot::get_suffix(ItemId::BoneWand, i);
+            let bone_wand_suffix = ImplLoot::get_suffix(ItemId::BoneWand, i.into());
             assert(is_special1_set1(bone_wand_suffix), 'invalid bone wand suffix');
 
             // verify wands are part of set1
-            let wand_suffix = ImplLoot::get_suffix(ItemId::Wand, i);
+            let wand_suffix = ImplLoot::get_suffix(ItemId::Wand, i.into());
             assert(is_special1_set2(wand_suffix), 'invalid wand suffix');
 
             // verify grimoires are part of set2
-            let grimoire_suffix = ImplLoot::get_suffix(ItemId::Grimoire, i);
+            let grimoire_suffix = ImplLoot::get_suffix(ItemId::Grimoire, i.into());
             assert(is_special1_set1(grimoire_suffix), 'invalid grimoire suffix');
 
             // verify chronicles are part of set1
-            let chronicle_suffix = ImplLoot::get_suffix(ItemId::Chronicle, i);
+            let chronicle_suffix = ImplLoot::get_suffix(ItemId::Chronicle, i.into());
             assert(is_special1_set2(chronicle_suffix), 'invalid chronicle suffix');
 
             // verify tomes are part of set2
-            let tome_suffix = ImplLoot::get_suffix(ItemId::Tome, i);
+            let tome_suffix = ImplLoot::get_suffix(ItemId::Tome, i.into());
             assert(is_special1_set1(tome_suffix), 'invalid tome suffix');
 
             // verify books are part of set1
-            let book_suffix = ImplLoot::get_suffix(ItemId::Book, i);
+            let book_suffix = ImplLoot::get_suffix(ItemId::Book, i.into());
             assert(is_special1_set2(book_suffix), 'invalid book suffix');
 
             // increment counter
@@ -1162,108 +1166,109 @@ mod tests {
 
             // Warhammers are always 'X Bane'
             assert(
-                ImplLoot::get_prefix2(ItemId::Warhammer, i) == ItemNameSuffix::Bane,
+                ImplLoot::get_prefix2(ItemId::Warhammer, i.into()) == ItemNameSuffix::Bane,
                 'warhammer should be bane'
             );
 
             // Quarterstaffs are always 'X Root'
             assert(
-                ImplLoot::get_prefix2(ItemId::Quarterstaff, i) == ItemNameSuffix::Root,
+                ImplLoot::get_prefix2(ItemId::Quarterstaff, i.into()) == ItemNameSuffix::Root,
                 'quarterstaff should be root'
             );
 
             // Mauls are always 'X Bite'
             assert(
-                ImplLoot::get_prefix2(ItemId::Maul, i) == ItemNameSuffix::Bite,
+                ImplLoot::get_prefix2(ItemId::Maul, i.into()) == ItemNameSuffix::Bite,
                 'maul should be bite'
             );
 
             // Maces are always 'X Song'
             assert(
-                ImplLoot::get_prefix2(ItemId::Mace, i) == ItemNameSuffix::Song,
+                ImplLoot::get_prefix2(ItemId::Mace, i.into()) == ItemNameSuffix::Song,
                 'mace should be song'
             );
 
             // Clubs are always 'X Roar'
             assert(
-                ImplLoot::get_prefix2(ItemId::Club, i) == ItemNameSuffix::Roar,
+                ImplLoot::get_prefix2(ItemId::Club, i.into()) == ItemNameSuffix::Roar,
                 'club should be roar'
             );
 
             // Katanas are always 'X Grasp'
             assert(
-                ImplLoot::get_prefix2(ItemId::Katana, i) == ItemNameSuffix::Grasp,
+                ImplLoot::get_prefix2(ItemId::Katana, i.into()) == ItemNameSuffix::Grasp,
                 'katana should be grasp'
             );
 
             // Falchions are always 'X Instrument'
             assert(
-                ImplLoot::get_prefix2(ItemId::Falchion, i) == ItemNameSuffix::Instrument,
+                ImplLoot::get_prefix2(ItemId::Falchion, i.into()) == ItemNameSuffix::Instrument,
                 'falchion should be instrument'
             );
 
             // Scimitars are always 'X Glow'
             assert(
-                ImplLoot::get_prefix2(ItemId::Scimitar, i) == ItemNameSuffix::Glow,
+                ImplLoot::get_prefix2(ItemId::Scimitar, i.into()) == ItemNameSuffix::Glow,
                 'scimitar should be glow'
             );
 
             // Long Swords are always 'X Bender'
             assert(
-                ImplLoot::get_prefix2(ItemId::LongSword, i) == ItemNameSuffix::Bender,
+                ImplLoot::get_prefix2(ItemId::LongSword, i.into()) == ItemNameSuffix::Bender,
                 'long sword should be bender'
             );
 
             // Short Swords are always 'X Shadow'
             assert(
-                ImplLoot::get_prefix2(ItemId::ShortSword, i) == ItemNameSuffix::Shadow,
+                ImplLoot::get_prefix2(ItemId::ShortSword, i.into()) == ItemNameSuffix::Shadow,
                 'short sword should be shadow'
             );
 
             // Ghost Wands are always 'X Whisper'
             assert(
-                ImplLoot::get_prefix2(ItemId::GhostWand, i) == ItemNameSuffix::Whisper,
+                ImplLoot::get_prefix2(ItemId::GhostWand, i.into()) == ItemNameSuffix::Whisper,
                 'ghost wand should be whisper'
             );
 
             // Grave Wands are always 'X Shout'
             assert(
-                ImplLoot::get_prefix2(ItemId::GraveWand, i) == ItemNameSuffix::Shout,
+                ImplLoot::get_prefix2(ItemId::GraveWand, i.into()) == ItemNameSuffix::Shout,
                 'grave wand should be shout'
             );
 
             // Bone Wands are always 'X Growl'
             assert(
-                ImplLoot::get_prefix2(ItemId::BoneWand, i) == ItemNameSuffix::Growl,
+                ImplLoot::get_prefix2(ItemId::BoneWand, i.into()) == ItemNameSuffix::Growl,
                 'bone wand should be growl'
             );
 
             // Wands are always 'X Tear'
             assert(
-                ImplLoot::get_prefix2(ItemId::Wand, i) == ItemNameSuffix::Tear,
+                ImplLoot::get_prefix2(ItemId::Wand, i.into()) == ItemNameSuffix::Tear,
                 'wand should be tear'
             );
 
             // Grimoires are always 'X Peak'
             assert(
-                ImplLoot::get_prefix2(ItemId::Grimoire, i) == ItemNameSuffix::Peak,
+                ImplLoot::get_prefix2(ItemId::Grimoire, i.into()) == ItemNameSuffix::Peak,
                 'grimoire should be peak'
             );
 
             // Chronicles are always 'X Form'
             assert(
-                ImplLoot::get_prefix2(ItemId::Chronicle, i) == ItemNameSuffix::Form,
+                ImplLoot::get_prefix2(ItemId::Chronicle, i.into()) == ItemNameSuffix::Form,
                 'chronicle should be form'
             );
 
             // Tomes are always 'X Sun'
             assert(
-                ImplLoot::get_prefix2(ItemId::Tome, i) == ItemNameSuffix::Sun, 'tome should be sun'
+                ImplLoot::get_prefix2(ItemId::Tome, i.into()) == ItemNameSuffix::Sun,
+                'tome should be sun'
             );
 
             // Books are always 'X Moon'
             assert(
-                ImplLoot::get_prefix2(ItemId::Book, i) == ItemNameSuffix::Moon,
+                ImplLoot::get_prefix2(ItemId::Book, i.into()) == ItemNameSuffix::Moon,
                 'book should be moon'
             );
 
@@ -1271,19 +1276,19 @@ mod tests {
             //
             // Divine Robes are always {X Bane, X Song, X Instrument, X Shadow, X Growl, X Form} (set 1)
             assert(
-                is_special3_set1(ImplLoot::get_prefix2(ItemId::DivineRobe, i)),
+                is_special3_set1(ImplLoot::get_prefix2(ItemId::DivineRobe, i.into())),
                 'invalid divine robe name suffix'
             );
 
             // Chain Mail is always {X Root, X Roar, X Glow, X Whisper, X Tear, X Sun} (set 2)
             assert(
-                is_special3_set2(ImplLoot::get_prefix2(ItemId::ChainMail, i)),
+                is_special3_set2(ImplLoot::get_prefix2(ItemId::ChainMail, i.into())),
                 'invalid chain mail name suffix'
             );
 
             // Demon Husks are always {X Bite, X Grasp, X Bender, X Shout, X Peak, X Moon} (set 3)
             assert(
-                is_special3_set3(ImplLoot::get_prefix2(ItemId::DemonHusk, i)),
+                is_special3_set3(ImplLoot::get_prefix2(ItemId::DemonHusk, i.into())),
                 'invalid demon husk name suffix'
             );
             //
@@ -1292,19 +1297,19 @@ mod tests {
             //
             // Ancient Helms use name suffix set 1
             assert(
-                is_special3_set1(ImplLoot::get_prefix2(ItemId::AncientHelm, i)),
+                is_special3_set1(ImplLoot::get_prefix2(ItemId::AncientHelm, i.into())),
                 'invalid war cap name suffix'
             );
 
             // Crown uses name suffix set 2
             assert(
-                is_special3_set2(ImplLoot::get_prefix2(ItemId::Crown, i)),
+                is_special3_set2(ImplLoot::get_prefix2(ItemId::Crown, i.into())),
                 'invalid crown name suffix'
             );
 
             // Divine Hood uses name suffix set 3
             assert(
-                is_special3_set3(ImplLoot::get_prefix2(ItemId::DivineHood, i)),
+                is_special3_set3(ImplLoot::get_prefix2(ItemId::DivineHood, i.into())),
                 'invalid divine hood name suffix'
             );
 
@@ -1313,19 +1318,19 @@ mod tests {
             //
             // Ornate Belt uses name suffix set 1
             assert(
-                is_special3_set1(ImplLoot::get_prefix2(ItemId::OrnateBelt, i)),
+                is_special3_set1(ImplLoot::get_prefix2(ItemId::OrnateBelt, i.into())),
                 'invalid ornate belt suffix'
             );
 
             // Brightsilk Sash uses name suffix set 2
             assert(
-                is_special3_set2(ImplLoot::get_prefix2(ItemId::BrightsilkSash, i)),
+                is_special3_set2(ImplLoot::get_prefix2(ItemId::BrightsilkSash, i.into())),
                 'invalid brightsilk sash suffix'
             );
 
             // Hard Leather Belt uses name set 3
             assert(
-                is_special3_set3(ImplLoot::get_prefix2(ItemId::HardLeatherBelt, i)),
+                is_special3_set3(ImplLoot::get_prefix2(ItemId::HardLeatherBelt, i.into())),
                 'wrong hard leather belt suffix'
             );
 
@@ -1334,19 +1339,19 @@ mod tests {
             //
             // Holy Graves uses name suffix set 1
             assert(
-                is_special3_set1(ImplLoot::get_prefix2(ItemId::HolyGreaves, i)),
+                is_special3_set1(ImplLoot::get_prefix2(ItemId::HolyGreaves, i.into())),
                 'invalid holy greaves suffix'
             );
 
             // Heavy Boots use name suffix set 2
             assert(
-                is_special3_set2(ImplLoot::get_prefix2(ItemId::HeavyBoots, i)),
+                is_special3_set2(ImplLoot::get_prefix2(ItemId::HeavyBoots, i.into())),
                 'invalid heavy boots suffix'
             );
 
             // Silk Slippers use name suffix set 3
             assert(
-                is_special3_set3(ImplLoot::get_prefix2(ItemId::SilkSlippers, i)),
+                is_special3_set3(ImplLoot::get_prefix2(ItemId::SilkSlippers, i.into())),
                 'invalid silk slippers suffix'
             );
 
@@ -1355,19 +1360,19 @@ mod tests {
             //
             // Holy Gauntlets use name suffix set 1
             assert(
-                is_special3_set1(ImplLoot::get_prefix2(ItemId::HolyGauntlets, i)),
+                is_special3_set1(ImplLoot::get_prefix2(ItemId::HolyGauntlets, i.into())),
                 'invalid holy gauntlets suffix'
             );
 
             // Linen Gloves use name suffix set 2
             assert(
-                is_special3_set2(ImplLoot::get_prefix2(ItemId::LinenGloves, i)),
+                is_special3_set2(ImplLoot::get_prefix2(ItemId::LinenGloves, i.into())),
                 'invalid linen gloves suffix'
             );
 
             // Hard Leather Gloves use name suffix set 3
             assert(
-                is_special3_set3(ImplLoot::get_prefix2(ItemId::HardLeatherGloves, i)),
+                is_special3_set3(ImplLoot::get_prefix2(ItemId::HardLeatherGloves, i.into())),
                 'invalid hard lthr gloves suffix'
             );
 
@@ -1376,19 +1381,19 @@ mod tests {
             //
             // Neckalce uses name suffix set 1
             assert(
-                is_special3_set1(ImplLoot::get_prefix2(ItemId::Necklace, i)),
+                is_special3_set1(ImplLoot::get_prefix2(ItemId::Necklace, i.into())),
                 'invalid Necklace name suffix'
             );
 
             // Amulets use name suffix set 2
             assert(
-                is_special3_set2(ImplLoot::get_prefix2(ItemId::Amulet, i)),
+                is_special3_set2(ImplLoot::get_prefix2(ItemId::Amulet, i.into())),
                 'invalid amulet name suffix'
             );
 
             // Pendants use name suffix set 3
             assert(
-                is_special3_set3(ImplLoot::get_prefix2(ItemId::Pendant, i)),
+                is_special3_set3(ImplLoot::get_prefix2(ItemId::Pendant, i.into())),
                 'invalid pendant name suffix'
             );
 
@@ -1418,390 +1423,390 @@ mod tests {
 
             // verify warhammer uses set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::Warhammer, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::Warhammer, i.into())),
                 'invalid warhammer prefix'
             );
 
             // verify quarterstaff uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::Quarterstaff, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::Quarterstaff, i.into())),
                 'invalid quarterstaff prefix'
             );
 
             // verify maul uses set3
-            assert(is_special2_set3(ImplLoot::get_prefix1(ItemId::Maul, i)), 'invalid maul prefix');
+            assert(is_special2_set3(ImplLoot::get_prefix1(ItemId::Maul, i.into())), 'invalid maul prefix');
 
             // verify mace uses set1
-            assert(is_special2_set1(ImplLoot::get_prefix1(ItemId::Mace, i)), 'invalid mace prefix');
+            assert(is_special2_set1(ImplLoot::get_prefix1(ItemId::Mace, i.into())), 'invalid mace prefix');
 
             // verify club uses set2
-            assert(is_special2_set2(ImplLoot::get_prefix1(ItemId::Club, i)), 'invalid club prefix');
+            assert(is_special2_set2(ImplLoot::get_prefix1(ItemId::Club, i.into())), 'invalid club prefix');
 
             // verify katana uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::Katana, i)), 'invalid katana prefix'
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::Katana, i.into())), 'invalid katana prefix'
             );
 
             // verify falchion uses set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::Falchion, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::Falchion, i.into())),
                 'invalid falchion prefix'
             );
 
             // verify scimitar uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::Scimitar, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::Scimitar, i.into())),
                 'invalid scimitar prefix'
             );
 
             // verify long sword uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::LongSword, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::LongSword, i.into())),
                 'invalid long sword prefix'
             );
 
             // verify short sword uses set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::ShortSword, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::ShortSword, i.into())),
                 'invalid short sword prefix'
             );
 
             // verify ghost wand uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::GhostWand, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::GhostWand, i.into())),
                 'invalid ghost wand prefix'
             );
 
             // verify grave wand uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::GraveWand, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::GraveWand, i.into())),
                 'invalid grave wand prefix'
             );
 
             // verify bone wand uses set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::BoneWand, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::BoneWand, i.into())),
                 'invalid bone wand prefix'
             );
 
             // verify wand uses set2
-            assert(is_special2_set2(ImplLoot::get_prefix1(ItemId::Wand, i)), 'invalid wand prefix');
+            assert(is_special2_set2(ImplLoot::get_prefix1(ItemId::Wand, i.into())), 'invalid wand prefix');
 
             // verify grimoire uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::Grimoire, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::Grimoire, i.into())),
                 'invalid grimoire prefix'
             );
 
             // verify chronicle uses set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::Chronicle, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::Chronicle, i.into())),
                 'invalid chronicle prefix'
             );
 
             // verify tome uses set2
-            assert(is_special2_set2(ImplLoot::get_prefix1(ItemId::Tome, i)), 'invalid tome prefix');
+            assert(is_special2_set2(ImplLoot::get_prefix1(ItemId::Tome, i.into())), 'invalid tome prefix');
 
             // verify book uses set3
-            assert(is_special2_set3(ImplLoot::get_prefix1(ItemId::Book, i)), 'invalid book prefix');
+            assert(is_special2_set3(ImplLoot::get_prefix1(ItemId::Book, i.into())), 'invalid book prefix');
 
             // verify divine robe uses set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::DivineRobe, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::DivineRobe, i.into())),
                 'invalid divine robe prefix'
             );
 
             // verify silk robe uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::SilkRobe, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::SilkRobe, i.into())),
                 'invalid silk robe prefix'
             );
 
             // verify linen robe uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::LinenRobe, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::LinenRobe, i.into())),
                 'invalid linen robe prefix'
             );
 
             // verify robe uses set1
-            assert(is_special2_set1(ImplLoot::get_prefix1(ItemId::Robe, i)), 'invalid robe prefix');
+            assert(is_special2_set1(ImplLoot::get_prefix1(ItemId::Robe, i.into())), 'invalid robe prefix');
 
             // verify shirt uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::Shirt, i)), 'invalid shirt prefix'
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::Shirt, i.into())), 'invalid shirt prefix'
             );
 
             // verify demon husk uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::DemonHusk, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::DemonHusk, i.into())),
                 'invalid demon husk prefix'
             );
 
             // verify dragonskin armor uses set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::DragonskinArmor, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::DragonskinArmor, i.into())),
                 'invalid dragonskin armor prefix'
             );
 
             // verify studded leather armor uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::StuddedLeatherArmor, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::StuddedLeatherArmor, i.into())),
                 'invalid studded leather prefix'
             );
 
             // verify hard leather armor uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::HardLeatherArmor, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::HardLeatherArmor, i.into())),
                 'invalid hard leather prefix'
             );
 
             // verify leather armor uses set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::LeatherArmor, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::LeatherArmor, i.into())),
                 'invalid leather armor prefix'
             );
 
             // verify holy chestplate uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::HolyChestplate, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::HolyChestplate, i.into())),
                 'invalid holy chestplate prefix'
             );
 
             // verify ornate chestplate uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::OrnateChestplate, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::OrnateChestplate, i.into())),
                 'invalid ornte chestplate prefix'
             );
 
             // verify plate mail uses set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::PlateMail, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::PlateMail, i.into())),
                 'invalid plate mail prefix'
             );
 
             // verify chain mail uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::ChainMail, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::ChainMail, i.into())),
                 'invalid chain mail prefix'
             );
 
             // verify ring mail uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::RingMail, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::RingMail, i.into())),
                 'invalid ring mail prefix'
             );
 
             // assert ancient helm uses set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::AncientHelm, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::AncientHelm, i.into())),
                 'invalid ancient helm prefix'
             );
 
             // assert ornate helm uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::OrnateHelm, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::OrnateHelm, i.into())),
                 'invalid ornate helm prefix'
             );
 
             // assert great helm uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::GreatHelm, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::GreatHelm, i.into())),
                 'invalid great helm prefix'
             );
 
             // assert full helm uses set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::FullHelm, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::FullHelm, i.into())),
                 'invalid full helm prefix'
             );
 
             // assert helm uses set2
-            assert(is_special2_set2(ImplLoot::get_prefix1(ItemId::Helm, i)), 'invalid helm prefix');
+            assert(is_special2_set2(ImplLoot::get_prefix1(ItemId::Helm, i.into())), 'invalid helm prefix');
 
             // assert demon crown uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::DemonCrown, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::DemonCrown, i.into())),
                 'invalid demon crown prefix'
             );
 
             // assert dragons crown uses set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::DragonsCrown, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::DragonsCrown, i.into())),
                 'invalid dragons crown prefix'
             );
 
             // assert war cap uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::WarCap, i)), 'invalid war cap prefix'
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::WarCap, i.into())), 'invalid war cap prefix'
             );
 
             // assert leather cap uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::LeatherCap, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::LeatherCap, i.into())),
                 'invalid leather cap prefix'
             );
 
             // assert cap uses set1
-            assert(is_special2_set1(ImplLoot::get_prefix1(ItemId::Cap, i)), 'invalid cap prefix');
+            assert(is_special2_set1(ImplLoot::get_prefix1(ItemId::Cap, i.into())), 'invalid cap prefix');
 
             // assert crown uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::Crown, i)), 'invalid crown prefix'
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::Crown, i.into())), 'invalid crown prefix'
             );
 
             // assert divine hood uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::DivineHood, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::DivineHood, i.into())),
                 'invalid divine hood prefix'
             );
 
             // assert silk hood uses set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::SilkHood, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::SilkHood, i.into())),
                 'invalid silk hood prefix'
             );
 
             // assert linen hood uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::LinenHood, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::LinenHood, i.into())),
                 'invalid linen hood prefix'
             );
 
             // assert hood uses set3
-            assert(is_special2_set3(ImplLoot::get_prefix1(ItemId::Hood, i)), 'invalid hood prefix');
+            assert(is_special2_set3(ImplLoot::get_prefix1(ItemId::Hood, i.into())), 'invalid hood prefix');
 
             // assert ornate belt is set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::OrnateBelt, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::OrnateBelt, i.into())),
                 'invalid ornate belt prefix'
             );
 
             // assert war belt is set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::WarBelt, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::WarBelt, i.into())),
                 'invalid war belt prefix'
             );
 
             // assert plated belt is set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::PlatedBelt, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::PlatedBelt, i.into())),
                 'invalid plated belt prefix'
             );
 
             // assert mesh belt is set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::MeshBelt, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::MeshBelt, i.into())),
                 'invalid mesh belt prefix'
             );
 
             // assert heavy belt is set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::HeavyBelt, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::HeavyBelt, i.into())),
                 'invalid heavy belt prefix'
             );
 
             // assert demonhide belt is set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::DemonhideBelt, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::DemonhideBelt, i.into())),
                 'invalid demonhide belt prefix'
             );
 
             // assert dragonskin belt is set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::DragonskinBelt, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::DragonskinBelt, i.into())),
                 'invalid dragonskin belt prefix'
             );
 
             // assert studded leather belt is set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::StuddedLeatherBelt, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::StuddedLeatherBelt, i.into())),
                 'invalid studded lthr blt prefix'
             );
 
             // assert hard leather belt is set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::HardLeatherBelt, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::HardLeatherBelt, i.into())),
                 'invalid hard leather blt prefix'
             );
 
             // assert leather belt is set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::LeatherBelt, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::LeatherBelt, i.into())),
                 'invalid leather belt prefix'
             );
 
             // assert brightsilk sash is set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::BrightsilkSash, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::BrightsilkSash, i.into())),
                 'invalid brightsilk sash prefix'
             );
 
             // assert silk sash is set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::SilkSash, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::SilkSash, i.into())),
                 'invalid silk sash prefix'
             );
 
             // assert wool sash is set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::WoolSash, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::WoolSash, i.into())),
                 'invalid wool sash prefix'
             );
 
             // assert linen sash is set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::LinenSash, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::LinenSash, i.into())),
                 'invalid linen sash prefix'
             );
 
             // assert sash is set3
-            assert(is_special2_set3(ImplLoot::get_prefix1(ItemId::Sash, i)), 'invalid sash prefix');
+            assert(is_special2_set3(ImplLoot::get_prefix1(ItemId::Sash, i.into())), 'invalid sash prefix');
 
             // assert holy greaves is set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::HolyGreaves, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::HolyGreaves, i.into())),
                 'invalid holy greaves prefix'
             );
 
             // assert ornate greaves is set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::OrnateGreaves, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::OrnateGreaves, i.into())),
                 'invalid ornate greaves prefix'
             );
 
             // assert greaves is set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::Greaves, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::Greaves, i.into())),
                 'invalid greaves prefix'
             );
 
             // assert chain boots is set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::ChainBoots, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::ChainBoots, i.into())),
                 'invalid chain boots prefix'
             );
 
             // assert heavy boots is set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::HeavyBoots, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::HeavyBoots, i.into())),
                 'invalid heavy boots prefix'
             );
 
             // assert demonhide boots is set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::DemonhideBoots, i)),
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::DemonhideBoots, i.into())),
                 'invalid demonhide boots prefix'
             );
 
             // assert dragonskin boots is set1
             assert(
-                is_special2_set1(ImplLoot::get_prefix1(ItemId::DragonskinBoots, i)),
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::DragonskinBoots, i.into())),
                 'invalid dragonskin boots prefix'
             );
 
             // assert studded leather boots is set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::StuddedLeatherBoots, i)),
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::StuddedLeatherBoots, i.into())),
                 'invalid stdded lthr boots prfix'
             );
 
