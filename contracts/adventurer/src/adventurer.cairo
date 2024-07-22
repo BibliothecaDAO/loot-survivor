@@ -50,6 +50,7 @@ struct Adventurer {
     equipment: Equipment, // 128 bits
     mutated: bool, // not packed
     awaiting_item_specials: bool, // not packed
+    delay_stat_reveal: bool, // not packed
 }
 
 impl AdventurerPacking of StorePacking<Adventurer, felt252> {
@@ -98,7 +99,8 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
             stats: StatsPacking::unpack(stats.try_into().unwrap()),
             equipment: EquipmentPacking::unpack(equipment.try_into().unwrap()),
             mutated: false, // This field is not packed/unpacked
-            awaiting_item_specials: false
+            awaiting_item_specials: false,
+            delay_stat_reveal: false
         }
     }
 }
@@ -112,8 +114,9 @@ impl ImplAdventurer of IAdventurer {
     /// initializes various character stats and items with default and provided values.
     ///
     /// @param starting_item The ID of the starting weapon item.
+    /// @param delay_stat_reveal Whether to delay the stat reveal.
     /// @return An Adventurer struct initialized with default and provided values.
-    fn new(starting_item: u8) -> Adventurer {
+    fn new(starting_item: u8, delay_stat_reveal: bool) -> Adventurer {
         Adventurer {
             health: STARTING_HEALTH,
             xp: 0,
@@ -132,7 +135,8 @@ impl ImplAdventurer of IAdventurer {
             beast_health: BeastSettings::STARTER_BEAST_HEALTH,
             stat_upgrades_available: 0,
             mutated: false,
-            awaiting_item_specials: false
+            awaiting_item_specials: false,
+            delay_stat_reveal: delay_stat_reveal
         }
     }
 

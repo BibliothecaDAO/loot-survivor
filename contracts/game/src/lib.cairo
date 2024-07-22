@@ -323,7 +323,8 @@ mod Game {
             name: felt252,
             golden_token_id: u256,
             vrf_fee_limit: u128,
-            custom_renderer: ContractAddress
+            custom_renderer: ContractAddress,
+            delay_stat_reveal: bool
         ) {
             // assert game terminal time has not been reached
             _assert_terminal_time_not_reached(@self);
@@ -343,7 +344,7 @@ mod Game {
             }
 
             // start the game
-            _start_game(ref self, weapon, name, vrf_fee_limit, custom_renderer);
+            _start_game(ref self, weapon, name, vrf_fee_limit, custom_renderer, delay_stat_reveal);
         }
 
         /// @title Explore Function
@@ -1426,7 +1427,8 @@ mod Game {
         weapon: u8,
         name: felt252,
         vrf_fee_limit: u128,
-        custom_renderer: ContractAddress
+        custom_renderer: ContractAddress,
+        delay_stat_reveal: bool
     ) {
         // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._game_counter.read() + 1;
@@ -1435,7 +1437,7 @@ mod Game {
         let basic_entropy = _get_basic_entropy(adventurer_id, 1);
 
         // generate a new adventurer using the provided started weapon
-        let mut adventurer = ImplAdventurer::new(weapon);
+        let mut adventurer = ImplAdventurer::new(weapon, delay_stat_reveal);
 
         // create meta data for the adventurer
         let adventurer_meta = ImplAdventurerMetadata::new(name);
@@ -1445,9 +1447,9 @@ mod Game {
             ref adventurer, adventurer_id, weapon, basic_entropy
         );
 
-        // if we're not running on Katana, request randomness from VRF as soon as game starts
+        // if we're not running on Katana and delay_stat_reveal is false, request randomness from VRF as soon as game starts
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
-        if chain_id != KATANA_CHAIN_ID {
+        if chain_id != KATANA_CHAIN_ID && !delay_stat_reveal {
             request_randomness(
                 @self, adventurer_id.try_into().unwrap(), adventurer_id, vrf_fee_limit, 0
             );
@@ -2600,10 +2602,18 @@ mod Game {
                         ref self, ref adventurer, adventurer_id, adventurer_entropy
                     );
                 } else {
-                    // emit the leveled up event
-                    __event_AdventurerLeveledUp(
+                    if (adventurer.delay_stat_reveal) {
+                        request_randomness(
+                            @self, adventurer_id.try_into().unwrap(), adventurer_id, 0
+                        );
+                    }
+                    else {
+
+                        // emit the leveled up event
+                        __event_AdventurerLeveledUp(
                         ref self, adventurer_state, previous_level, new_level
                     );
+                    }
                 }
             }
         } else if (new_level > previous_level) {
@@ -2620,12 +2630,11 @@ mod Game {
                 if chain_id != KATANA_CHAIN_ID {
                     // zero out adventurer entropy
                     self._adventurer_entropy.write(adventurer_id, 0);
-                    let max_callback_fee = 10000000000000000;
                     let seed = adventurer.get_vrf_seed(adventurer_id, adventurer_entropy);
                     let randomness_address = self._randomness_contract_address.read();
 
                     // request new entropy
-                    request_randomness(@self, seed, adventurer_id, max_callback_fee, 0);
+                    request_randomness(@self, seed, adventurer_id, 0);
 
                     // emit ClearedEntropy event to let clients know the contact is fetching new entropy
                     __event_ClearedEntropy(ref self, adventurer_id, randomness_address, seed);
