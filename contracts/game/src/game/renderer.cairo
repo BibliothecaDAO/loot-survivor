@@ -9,14 +9,26 @@ use core::{array::{SpanTrait, ArrayTrait}, traits::Into, clone::Clone,};
 use game::game::encoding::{bytes_base64_encode, U256BytesUsedTraitImpl};
 use graffiti::json::JsonImpl;
 
+// @notice Generates the LS logo svg
+// @return The generated LS logo
 fn logo() -> ByteArray {
     "<path fill='#3DEC00' d=\"M1 2V0h8v2h1v10H7v4H3v-4H0V2zm1 4v4h2v2h2v-2h2V6H6v4H4V6z\"/>"
 }
 
+// @notice Generates a rect element
+// @return The generated rect element
 fn create_rect() -> ByteArray {
     "<rect x='0.5' y='0.5' width='599' height='899' rx='27.5' fill='black' stroke='#3DEC00'/>"
 }
 
+// @notice Generates a text element
+// @param text The text to generate a string for
+// @param x The x coordinate of the text
+// @param y The y coordinate of the text
+// @param fontsize The font size of the text
+// @param baseline The baseline of the text
+// @param text_anchor The text anchor of the text
+// @return The generated text element
 fn create_text(
     text: ByteArray,
     x: ByteArray,
@@ -40,6 +52,9 @@ fn create_text(
         + "</text>"
 }
 
+// @notice Combines elements into a single string
+// @param elements The elements to combine
+// @return The combined elements
 fn combine_elements(ref elements: Span<ByteArray>) -> ByteArray {
     let mut count: u8 = 1;
 
@@ -58,10 +73,16 @@ fn combine_elements(ref elements: Span<ByteArray>) -> ByteArray {
     combined
 }
 
+// @notice Generates an SVG string for adventurer token uri
+// @param internals The internals of the SVG
+// @return The generated SVG string
 fn create_svg(internals: ByteArray) -> ByteArray {
     "<svg xmlns='http://www.w3.org/2000/svg' width='600' height='900'>" + internals + "</svg>"
 }
 
+// @notice Generates a suffix boost string for adventurer token uri
+// @param suffix The suffix to generate a string for
+// @return The generated suffix boost string
 fn get_suffix_boost(suffix: u8) -> ByteArray {
     if (suffix == ItemSuffix::of_Power) {
         "(+3 STR)"
@@ -100,7 +121,11 @@ fn get_suffix_boost(suffix: u8) -> ByteArray {
     }
 }
 
-fn generate_item(item: Item, entropy: u64) -> ByteArray {
+// @notice Generates an item string for adventurer token uri
+// @param item The item to generate a string for
+// @param item_specials_seed The seed used to generate item specials
+// @return The generated item string
+fn generate_item(item: Item, item_specials_seed: felt252) -> ByteArray {
     if item.id == 0 {
         return "";
     }
@@ -113,14 +138,25 @@ fn generate_item(item: Item, entropy: u64) -> ByteArray {
 
     if (greatness >= 15) {
         format!("G{} {} ", greatness, _item_name)
-            + get_suffix_boost(ImplLoot::get_suffix(item.id, entropy))
+            + get_suffix_boost(ImplLoot::get_suffix(item.id, item_specials_seed))
     } else {
         format!("G{} {} ", greatness, _item_name)
     }
 }
 
+// @notice Generates adventurer metadata for the adventurer token uri
+// @param adventurer_id The adventurer's ID
+// @param adventurer The adventurer
+// @param adventurerMetadata The adventurer's metadata
+// @param bag The adventurer's bag
+// @param item_specials_seed The seed used to generate item specials
+// @return The generated adventurer metadata
 fn create_metadata(
-    adventurer_id: felt252, adventurer: Adventurer, adventurerMetadata: AdventurerMetadata, bag: Bag
+    adventurer_id: felt252,
+    adventurer: Adventurer,
+    adventurerMetadata: AdventurerMetadata,
+    bag: Bag,
+    item_specials_seed: felt252
 ) -> ByteArray {
     let rect = create_rect();
 
@@ -150,37 +186,31 @@ fn create_metadata(
     let _luck = format!("{}", adventurer.stats.luck);
 
     // Equipped items
-    let _equiped_weapon = generate_item(
-        adventurer.equipment.weapon, adventurerMetadata.start_entropy
-    );
-    let _equiped_chest = generate_item(
-        adventurer.equipment.chest, adventurerMetadata.start_entropy
-    );
-    let _equiped_head = generate_item(adventurer.equipment.head, adventurerMetadata.start_entropy);
-    let _equiped_waist = generate_item(
-        adventurer.equipment.waist, adventurerMetadata.start_entropy
-    );
-    let _equiped_foot = generate_item(adventurer.equipment.foot, adventurerMetadata.start_entropy);
-    let _equiped_hand = generate_item(adventurer.equipment.hand, adventurerMetadata.start_entropy);
-    let _equiped_neck = generate_item(adventurer.equipment.neck, adventurerMetadata.start_entropy);
-    let _equiped_ring = generate_item(adventurer.equipment.ring, adventurerMetadata.start_entropy);
+    let _equiped_weapon = generate_item(adventurer.equipment.weapon, item_specials_seed);
+    let _equiped_chest = generate_item(adventurer.equipment.chest, item_specials_seed);
+    let _equiped_head = generate_item(adventurer.equipment.head, item_specials_seed);
+    let _equiped_waist = generate_item(adventurer.equipment.waist, item_specials_seed);
+    let _equiped_foot = generate_item(adventurer.equipment.foot, item_specials_seed);
+    let _equiped_hand = generate_item(adventurer.equipment.hand, item_specials_seed);
+    let _equiped_neck = generate_item(adventurer.equipment.neck, item_specials_seed);
+    let _equiped_ring = generate_item(adventurer.equipment.ring, item_specials_seed);
 
     // Bag items
-    let _bag_item_1 = generate_item(bag.item_1, adventurerMetadata.start_entropy);
-    let _bag_item_2 = generate_item(bag.item_2, adventurerMetadata.start_entropy);
-    let _bag_item_3 = generate_item(bag.item_3, adventurerMetadata.start_entropy);
-    let _bag_item_4 = generate_item(bag.item_4, adventurerMetadata.start_entropy);
-    let _bag_item_5 = generate_item(bag.item_5, adventurerMetadata.start_entropy);
-    let _bag_item_6 = generate_item(bag.item_6, adventurerMetadata.start_entropy);
-    let _bag_item_7 = generate_item(bag.item_7, adventurerMetadata.start_entropy);
-    let _bag_item_8 = generate_item(bag.item_8, adventurerMetadata.start_entropy);
-    let _bag_item_9 = generate_item(bag.item_9, adventurerMetadata.start_entropy);
-    let _bag_item_10 = generate_item(bag.item_10, adventurerMetadata.start_entropy);
-    let _bag_item_11 = generate_item(bag.item_11, adventurerMetadata.start_entropy);
-    let _bag_item_12 = generate_item(bag.item_12, adventurerMetadata.start_entropy);
-    let _bag_item_13 = generate_item(bag.item_13, adventurerMetadata.start_entropy);
-    let _bag_item_14 = generate_item(bag.item_14, adventurerMetadata.start_entropy);
-    let _bag_item_15 = generate_item(bag.item_15, adventurerMetadata.start_entropy);
+    let _bag_item_1 = generate_item(bag.item_1, item_specials_seed);
+    let _bag_item_2 = generate_item(bag.item_2, item_specials_seed);
+    let _bag_item_3 = generate_item(bag.item_3, item_specials_seed);
+    let _bag_item_4 = generate_item(bag.item_4, item_specials_seed);
+    let _bag_item_5 = generate_item(bag.item_5, item_specials_seed);
+    let _bag_item_6 = generate_item(bag.item_6, item_specials_seed);
+    let _bag_item_7 = generate_item(bag.item_7, item_specials_seed);
+    let _bag_item_8 = generate_item(bag.item_8, item_specials_seed);
+    let _bag_item_9 = generate_item(bag.item_9, item_specials_seed);
+    let _bag_item_10 = generate_item(bag.item_10, item_specials_seed);
+    let _bag_item_11 = generate_item(bag.item_11, item_specials_seed);
+    let _bag_item_12 = generate_item(bag.item_12, item_specials_seed);
+    let _bag_item_13 = generate_item(bag.item_13, item_specials_seed);
+    let _bag_item_14 = generate_item(bag.item_14, item_specials_seed);
+    let _bag_item_15 = generate_item(bag.item_15, item_specials_seed);
 
     // Combine all elements
     let mut elements = array![
@@ -415,7 +445,7 @@ mod tests {
 
         let bag = ImplBag::new();
 
-        let rect = create_metadata(1, adventurer, adventurer_metadata, bag);
+        let rect = create_metadata(1, adventurer, adventurer_metadata, bag, 1);
 
         println!("{}", rect);
     }

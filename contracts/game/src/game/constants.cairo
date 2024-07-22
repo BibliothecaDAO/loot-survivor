@@ -38,6 +38,7 @@ mod messages {
     const STARTING_ENTROPY_IS_VALID: felt252 = 'starting entropy is valid';
     const VALID_BLOCK_HASH_UNAVAILABLE: felt252 = 'valid hash not yet available';
     const ADVENTURER_ENTROPY_NOT_SET: felt252 = 'adventurer entropy not set';
+    const WAITING_FOR_ITEM_SPECIALS: felt252 = 'waiting for item specials';
 }
 
 // TODO: Update for mainnet

@@ -60,6 +60,7 @@ trait IGame<TContractState> {
     // fn get_base_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
     // fn get_starting_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
     // fn equipment_specials_unlocked(self: @TContractState, adventurer_id: felt252) -> bool;
+    fn get_item_specials_seed(self: @TContractState, adventurer_id: felt252) -> felt252;
     // fn equipment_stat_boosts(self: @TContractState, adventurer_id: felt252) -> Stats;
 
     // // item details

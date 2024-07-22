@@ -66,21 +66,6 @@ impl AdventurerUtils of IAdventurerUtils {
         }
     }
 
-    // @notice Generates special entropy for an item based on provided entropy and item ID
-    // @param entropy The entropy used to generate the special entropy
-    // @param item_id The ID of the item used in generating the special entropy
-    // @return A tuple of u128 types which represent the special entropy of the item
-    fn generate_item_special_entropy(entropy: u128, item_id: u8) -> (u128, u128) {
-        let mut hash_span = ArrayTrait::<felt252>::new();
-        hash_span.append(entropy.into());
-        hash_span.append(item_id.into());
-        let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
-        let (d, r) = integer::U256DivRem::div_rem(
-            poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
-        );
-        (r.try_into().unwrap(), d.try_into().unwrap())
-    }
-
     // TODO: Need to refactor this and apply_suffix_boost to ensure they
     // stay insync. I think the design used for AdventurerClass in adventurer_meta
     // is good. 

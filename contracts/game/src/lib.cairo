@@ -26,6 +26,7 @@ mod Game {
     const PRAGMA_LORDS_KEY: felt252 = 'LORDS/USD'; // felt252 conversion of "LORDS/USD"
     const PRAGMA_PUBLISH_DELAY: u8 = 0;
     const PRAGMA_NUM_WORDS: u8 = 1;
+    const PRAGMA_MAX_CALLBACK_FEE: u64 = 1000000000000000;
 
     use core::{
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
@@ -99,7 +100,6 @@ mod Game {
     };
     use beasts::beast::{Beast, IBeast, ImplBeast};
 
-
     #[abi(embed_v0)]
     impl ERC721Impl = ERC721Component::ERC721Impl<ContractState>;
     #[abi(embed_v0)]
@@ -125,6 +125,7 @@ mod Game {
         _cost_to_play: u128,
         _terminal_timestamp: u64,
         _adventurer_entropy: LegacyMap::<felt252, felt252>,
+        _item_specials_seed: LegacyMap::<felt252, felt252>,
         _randomness_contract_address: ContractAddress,
         _randomness_rotation_interval: u8,
         _oracle_address: ContractAddress,
@@ -170,6 +171,8 @@ mod Game {
         PriceChangeEvent: PriceChangeEvent,
         ReceivedEntropy: ReceivedEntropy,
         ClearedEntropy: ClearedEntropy,
+        RequestedItemSpecialsSeed: RequestedItemSpecialsSeed,
+        ReceivedItemSpecialsSeed: ReceivedItemSpecialsSeed,
         #[flat]
         ERC721Event: ERC721Component::Event,
         #[flat]
@@ -276,13 +279,30 @@ mod Game {
 
             let adventurer_entropy = *random_words.at(0);
             let adventurer_id = *calldata.at(0);
+            let is_specials_entropy = *calldata.at(1);
 
             // get adventurer
             let mut adventurer = _load_adventurer(@self, adventurer_id);
 
-            process_vrf_randomness(
-                ref self, requestor_address, ref adventurer, adventurer_id, adventurer_entropy
-            );
+            if is_specials_entropy == 0 {
+                process_vrf_randomness(
+                    ref self,
+                    requestor_address,
+                    ref adventurer,
+                    adventurer_id,
+                    adventurer_entropy,
+                    request_id
+                );
+            } else {
+                process_item_specials_randomness(
+                    ref self,
+                    requestor_address,
+                    adventurer,
+                    adventurer_id,
+                    adventurer_entropy,
+                    request_id
+                );
+            }
         }
 
         /// @title New Game
@@ -347,6 +367,9 @@ mod Game {
             _assert_no_stat_upgrades_available(immutable_adventurer);
             _assert_not_in_battle(immutable_adventurer);
             _assert_entropy_set(@self, adventurer_id);
+            _assert_not_awaiting_item_specials(
+                @self, adventurer_id, immutable_adventurer, bag.clone()
+            );
 
             // go explore 
             _explore(
@@ -388,7 +411,7 @@ mod Game {
             let weapon_specials = ImplLoot::get_specials(
                 adventurer.equipment.weapon.id,
                 adventurer.equipment.weapon.get_greatness(),
-                start_entropy
+                self.get_item_specials_seed(adventurer_id)
             );
 
             // get beast and beast seed
@@ -589,6 +612,9 @@ mod Game {
             _assert_not_in_battle(immutable_adventurer);
             _assert_valid_stat_selection(immutable_adventurer, stat_upgrades);
             _assert_entropy_set(@self, adventurer_id);
+            _assert_not_awaiting_item_specials(
+                @self, adventurer_id, immutable_adventurer, bag.clone()
+            );
 
             // get number of stat upgrades available before we use them
             let pre_upgrade_stat_points = adventurer.stat_upgrades_available;
@@ -803,6 +829,9 @@ mod Game {
         fn get_stat_upgrades_available(self: @ContractState, adventurer_id: felt252) -> u8 {
             _load_adventurer_no_boosts(self, adventurer_id).stat_upgrades_available
         }
+        fn get_item_specials_seed(self: @ContractState, adventurer_id: felt252) -> felt252 {
+            self._item_specials_seed.read(adventurer_id)
+        }
         fn get_equipped_items(self: @ContractState, adventurer_id: felt252) -> Array<Item> {
             let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
             let mut equipped_items = ArrayTrait::<Item>::new();
@@ -993,15 +1022,32 @@ mod Game {
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
 
+    fn process_item_specials_randomness(
+        ref self: ContractState,
+        requestor_address: ContractAddress,
+        adventurer: Adventurer,
+        adventurer_id: felt252,
+        item_specials_seed: felt252,
+        request_id: u64
+    ) {
+        self._item_specials_seed.write(adventurer_id, item_specials_seed);
+        _event_ReceivedItemSpecialsSeed(
+            ref self, adventurer_id, requestor_address, item_specials_seed, request_id
+        );
+    }
+
     fn process_vrf_randomness(
         ref self: ContractState,
         requestor_address: ContractAddress,
         ref adventurer: Adventurer,
         adventurer_id: felt252,
         adventurer_entropy: felt252,
+        request_id: u64
     ) {
         self._adventurer_entropy.write(adventurer_id, adventurer_entropy);
-        __event_ReceivedEntropy(ref self, adventurer_id, requestor_address, adventurer_entropy);
+        __event_ReceivedEntropy(
+            ref self, adventurer_id, requestor_address, adventurer_entropy, request_id
+        );
 
         let adventurer_level = adventurer.get_level();
 
@@ -1070,12 +1116,12 @@ mod Game {
     }
 
     fn request_randomness(
-        self: @ContractState, seed: u64, adventurer_id: felt252, fee_limit: u128
+        self: @ContractState, seed: u64, adventurer_id: felt252, fee_limit: u128, item_specials: u8
     ) {
         let eth_address = self._eth_address.read();
         let randomness_address = self._randomness_contract_address.read();
 
-        let calldata = array![adventurer_id];
+        let calldata = array![adventurer_id, item_specials.into()];
 
         // Approve the randomness contract to transfer the callback fee
         let eth_dispatcher = IERC20Dispatcher { contract_address: eth_address };
@@ -1403,7 +1449,7 @@ mod Game {
         let chain_id = starknet::get_execution_info().unbox().tx_info.unbox().chain_id;
         if chain_id != KATANA_CHAIN_ID {
             request_randomness(
-                @self, adventurer_id.try_into().unwrap(), adventurer_id, vrf_fee_limit
+                @self, adventurer_id.try_into().unwrap(), adventurer_id, vrf_fee_limit, 0
             );
         }
 
@@ -1746,10 +1792,10 @@ mod Game {
                 let updated_item = _process_item_level_up(
                     ref self,
                     ref adventurer,
+                    adventurer_id,
                     adventurer.equipment.get_item_at_slot(ImplLoot::get_slot(item.id)),
                     previous_level,
                     new_level,
-                    start_entropy
                 );
 
                 // add item to list of items that leveled up to be emitted in event
@@ -1765,10 +1811,10 @@ mod Game {
     fn _process_item_level_up(
         ref self: ContractState,
         ref adventurer: Adventurer,
+        adventurer_id: felt252,
         item: Item,
         previous_level: u8,
         new_level: u8,
-        start_entropy: u64
     ) -> ItemLeveledUp {
         // init specials with no specials
         let mut specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
@@ -1786,21 +1832,47 @@ mod Game {
 
         // if specials were unlocked
         if (suffix_unlocked || prefixes_unlocked) {
-            // apply them and record the new specials so we can include them in event
-
-            specials = ImplLoot::get_specials(item.id, item.get_greatness(), start_entropy);
-
             // if item received a suffix as part of the level up
             if (suffix_unlocked) {
-                // apply the item stat boosts so that subsequent events include this information
-                adventurer.stats.apply_suffix_boost(specials.special1);
+                // get item specials seed
+                let item_specials_seed = self.get_item_specials_seed(adventurer_id);
 
-                // check if the suffix provided a vitality boost
-                let vitality_boost = AdventurerUtils::get_vitality_item_boost(specials.special1);
-                if (vitality_boost != 0) {
-                    // if so, adventurer gets health
-                    let health_amount = vitality_boost.into() * VITALITY_INSTANT_HEALTH_BONUS;
-                    adventurer.increase_health(health_amount);
+                // if we don't have item specials seed yet
+                if item_specials_seed == 0 {
+                    // we need to request it but only once and it's possible multiple items are
+                    // reaching g15+ at the same time so we use a flag to ensure we only request for first item
+                    if !adventurer.awaiting_item_specials {
+                        adventurer.awaiting_item_specials = true;
+
+                        _event_RequestedItemSpecialsSeed(
+                            ref self, adventurer_id, self._randomness_contract_address.read()
+                        );
+                        request_randomness(
+                            @self,
+                            adventurer_id.try_into().unwrap(),
+                            adventurer_id,
+                            PRAGMA_MAX_CALLBACK_FEE.into(),
+                            1
+                        );
+                    }
+                } else {
+                    // apply them and record the new specials so we can include them in event
+
+                    specials =
+                        ImplLoot::get_specials(item.id, item.get_greatness(), item_specials_seed);
+
+                    // apply the item stat boosts so that subsequent events include this information
+                    adventurer.stats.apply_suffix_boost(specials.special1);
+
+                    // check if the suffix provided a vitality boost
+                    let vitality_boost = AdventurerUtils::get_vitality_item_boost(
+                        specials.special1
+                    );
+                    if (vitality_boost != 0) {
+                        // if so, adventurer gets health
+                        let health_amount = vitality_boost.into() * VITALITY_INSTANT_HEALTH_BONUS;
+                        adventurer.increase_health(health_amount);
+                    }
                 }
             }
         }
@@ -1946,7 +2018,9 @@ mod Game {
         let armor = adventurer.equipment.get_item_at_slot(attack_location);
 
         // get armor specials
-        let armor_specials = ImplLoot::get_specials(armor.id, armor.get_greatness(), start_entropy);
+        let armor_specials = ImplLoot::get_specials(
+            armor.id, armor.get_greatness(), self.get_item_specials_seed(adventurer_id)
+        );
 
         // process beast attack
         let (combat_result, _jewlery_armor_bonus) = adventurer
@@ -2431,16 +2505,14 @@ mod Game {
     fn _apply_item_stat_boost(
         self: @ContractState, ref adventurer: Adventurer, adventurer_id: felt252, item: Item
     ) {
-        let start_entropy = _load_adventurer_metadata(self, adventurer_id).start_entropy;
-        let item_suffix = ImplLoot::get_suffix(item.id, start_entropy);
+        let item_suffix = ImplLoot::get_suffix(item.id, self.get_item_specials_seed(adventurer_id));
         adventurer.stats.apply_suffix_boost(item_suffix);
     }
 
     fn _remove_item_stat_boost(
         self: @ContractState, ref adventurer: Adventurer, adventurer_id: felt252, item: Item
     ) {
-        let start_entropy = _load_adventurer_metadata(self, adventurer_id).start_entropy;
-        let item_suffix = ImplLoot::get_suffix(item.id, start_entropy);
+        let item_suffix = ImplLoot::get_suffix(item.id, self.get_item_specials_seed(adventurer_id));
         adventurer.stats.remove_suffix_boost(item_suffix);
 
         // if the adventurer's health is now above the max health due to a change in Vitality
@@ -2455,8 +2527,9 @@ mod Game {
         self: @ContractState, ref adventurer: Adventurer, adventurer_id: felt252
     ) {
         if adventurer.equipment.has_specials() {
-            let start_entropy = _load_adventurer_metadata(self, adventurer_id).start_entropy;
-            let item_stat_boosts = adventurer.equipment.get_stat_boosts(start_entropy);
+            let item_stat_boosts = adventurer
+                .equipment
+                .get_stat_boosts(self.get_item_specials_seed(adventurer_id));
             adventurer.stats.apply_stats(item_stat_boosts);
         }
     }
@@ -2465,8 +2538,9 @@ mod Game {
         self: @ContractState, ref adventurer: Adventurer, adventurer_id: felt252
     ) {
         if adventurer.equipment.has_specials() {
-            let start_entropy = _load_adventurer_metadata(self, adventurer_id).start_entropy;
-            let item_stat_boosts = adventurer.equipment.get_stat_boosts(start_entropy);
+            let item_stat_boosts = adventurer
+                .equipment
+                .get_stat_boosts(self.get_item_specials_seed(adventurer_id));
             adventurer.stats.remove_stats(item_stat_boosts);
         }
     }
@@ -2515,7 +2589,8 @@ mod Game {
                     starknet::get_contract_address(),
                     ref adventurer,
                     adventurer_id,
-                    _get_basic_entropy(adventurer_id, adventurer.xp)
+                    _get_basic_entropy(adventurer_id, adventurer.xp),
+                    0
                 );
             } else {
                 // if we already have adventurer entropy from VRF
@@ -2550,7 +2625,7 @@ mod Game {
                     let randomness_address = self._randomness_contract_address.read();
 
                     // request new entropy
-                    request_randomness(@self, seed, adventurer_id, max_callback_fee);
+                    request_randomness(@self, seed, adventurer_id, max_callback_fee, 0);
 
                     // emit ClearedEntropy event to let clients know the contact is fetching new entropy
                     __event_ClearedEntropy(ref self, adventurer_id, randomness_address, seed);
@@ -2561,7 +2636,8 @@ mod Game {
                         starknet::get_contract_address(),
                         ref adventurer,
                         adventurer_id,
-                        _get_basic_entropy(adventurer_id, adventurer.xp)
+                        _get_basic_entropy(adventurer_id, adventurer.xp),
+                        0
                     );
                 }
             }
@@ -2671,6 +2747,20 @@ mod Game {
             self._adventurer_entropy.read(adventurer_id) != 0, messages::ADVENTURER_ENTROPY_NOT_SET
         );
     }
+
+    fn _assert_not_awaiting_item_specials(
+        self: @ContractState, adventurer_id: felt252, adventurer: Adventurer, bag: Bag
+    ) {
+        // check if any of the equipped items are greatness/level 15 or higher
+        if adventurer.equipment.has_specials() || bag.has_specials() {
+            // assert we have the item specials seed
+            assert(
+                self._item_specials_seed.read(adventurer_id) != 0,
+                messages::WAITING_FOR_ITEM_SPECIALS
+            );
+        }
+    }
+
     #[inline(always)]
     fn _get_items_on_market(
         self: @ContractState,
@@ -3057,7 +3147,22 @@ mod Game {
     struct ReceivedEntropy {
         adventurer_id: felt252,
         vrf_address: ContractAddress,
-        rnd: felt252
+        rnd: felt252,
+        request_id: u64
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct RequestedItemSpecialsSeed {
+        adventurer_id: felt252,
+        vrf_address: ContractAddress,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct ReceivedItemSpecialsSeed {
+        adventurer_id: felt252,
+        vrf_address: ContractAddress,
+        seed: felt252,
+        request_id: u64
     }
 
     #[derive(Drop, Serde)]
@@ -3083,9 +3188,27 @@ mod Game {
         self.emit(ClearedEntropy { adventurer_id, vrf_address, seed });
     }
     fn __event_ReceivedEntropy(
-        ref self: ContractState, adventurer_id: felt252, vrf_address: ContractAddress, rnd: felt252
+        ref self: ContractState,
+        adventurer_id: felt252,
+        vrf_address: ContractAddress,
+        rnd: felt252,
+        request_id: u64
     ) {
-        self.emit(ReceivedEntropy { adventurer_id, vrf_address, rnd });
+        self.emit(ReceivedEntropy { adventurer_id, vrf_address, rnd, request_id });
+    }
+    fn _event_RequestedItemSpecialsSeed(
+        ref self: ContractState, adventurer_id: felt252, vrf_address: ContractAddress
+    ) {
+        self.emit(RequestedItemSpecialsSeed { adventurer_id, vrf_address });
+    }
+    fn _event_ReceivedItemSpecialsSeed(
+        ref self: ContractState,
+        adventurer_id: felt252,
+        vrf_address: ContractAddress,
+        seed: felt252,
+        request_id: u64
+    ) {
+        self.emit(ReceivedItemSpecialsSeed { adventurer_id, vrf_address, seed, request_id });
     }
     fn __event_AdventurerUpgraded(
         ref self: ContractState,
@@ -3476,7 +3599,8 @@ mod Game {
                     adventurer_id,
                     _load_adventurer(self, adventurer_id_felt),
                     _load_adventurer_metadata(self, adventurer_id_felt),
-                    _load_bag(self, adventurer_id_felt)
+                    _load_bag(self, adventurer_id_felt),
+                    self.get_item_specials_seed(adventurer_id_felt)
                 )
         }
     }
