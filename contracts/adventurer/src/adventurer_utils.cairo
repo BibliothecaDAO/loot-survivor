@@ -113,7 +113,6 @@ impl AdventurerUtils of IAdventurerUtils {
     //
     // @return The maximum health as a u16. If the total health would exceed the maximum possible health, 
     //         then this value is capped to MAX_ADVENTURER_HEALTH.
-    #[inline(always)]
     fn get_max_health(vitality: u8) -> u16 {
         // Calculate vitality boost, casting to u16 to prevent overflow during multiplication
         let vitality_boost: u16 = (vitality.into() * HEALTH_INCREASE_PER_VITALITY.into());

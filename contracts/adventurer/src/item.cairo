@@ -41,26 +41,25 @@ impl ImplItem of IItemPrimitive {
     // @notice checks if the item is a jewelery
     // @param self the Item to check
     // @return bool: true if the item is a jewelery, false otherwise
-    #[inline(always)]
     fn is_jewlery(self: Item) -> bool {
         if (self.id == ItemId::BronzeRing) {
-            return true;
+            true
         } else if (self.id == ItemId::SilverRing) {
-            return true;
+            true
         } else if (self.id == ItemId::GoldRing) {
-            return true;
+            true
         } else if (self.id == ItemId::PlatinumRing) {
-            return true;
+            true
         } else if (self.id == ItemId::TitaniumRing) {
-            return true;
+            true
         } else if (self.id == ItemId::Necklace) {
-            return true;
+            true
         } else if (self.id == ItemId::Amulet) {
-            return true;
+            true
         } else if (self.id == ItemId::Pendant) {
-            return true;
+            true
         } else {
-            return false;
+            false
         }
     }
 

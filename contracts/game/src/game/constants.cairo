@@ -39,6 +39,7 @@ mod messages {
     const VALID_BLOCK_HASH_UNAVAILABLE: felt252 = 'valid hash not yet available';
     const ADVENTURER_ENTROPY_NOT_SET: felt252 = 'adventurer entropy not set';
     const WAITING_FOR_ITEM_SPECIALS: felt252 = 'waiting for item specials';
+    const FETCHING_ETH_PRICE_ERROR: felt252 = 'error fetching eth price';
 }
 
 // TODO: Update for mainnet

@@ -16,7 +16,6 @@ trait IGame<TContractState> {
         weapon: u8,
         name: felt252,
         golden_token_id: u256,
-        vrf_fee_limit: u128,
         custom_renderer: ContractAddress
     );
     fn explore(ref self: TContractState, adventurer_id: felt252, till_beast: bool);
@@ -42,6 +41,7 @@ trait IGame<TContractState> {
     fn set_custom_renderer(
         ref self: TContractState, adventurer_id: felt252, render_contract: ContractAddress
     );
+    fn increase_vrf_allowance(ref self: TContractState, adventurer_id: felt252, amount: u128);
     // ------ View Functions ------
 
     // adventurer details
@@ -132,6 +132,7 @@ trait IGame<TContractState> {
     fn get_randomness_address(self: @TContractState) -> ContractAddress;
     fn uses_custom_renderer(self: @TContractState, adventurer_id: felt252) -> bool;
     fn get_custom_renderer(self: @TContractState, adventurer_id: felt252) -> ContractAddress;
+    fn get_player_vrf_allowance(self: @TContractState, adventurer_id: felt252) -> u128;
 }
 
 

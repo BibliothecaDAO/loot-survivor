@@ -125,7 +125,6 @@ impl ImplBag of IBag {
     // @param self The instance of the Bag
     // @param item_id The id of the item to be retrieved
     // @return The item from the bag with the specified id
-    #[inline(always)]
     fn get_item(self: Bag, item_id: u8) -> Item {
         if self.item_1.id == item_id {
             self.item_1
@@ -287,7 +286,6 @@ impl ImplBag of IBag {
     // @dev A bag is considered full if all item slots are occupied (id of the item is non-zero)
     // @param self The instance of the Bag
     // @return A boolean value indicating whether the bag is full
-    #[inline(always)]
     fn is_full(self: Bag) -> bool {
         if self.item_1.id == 0 {
             false
@@ -330,7 +328,6 @@ impl ImplBag of IBag {
     // @param self The Bag object in which to search for the item
     // @param item The id of the item to search for
     // @return A bool indicating whether the item is present in the bag
-    #[inline(always)]
     fn contains(self: Bag, item_id: u8) -> (bool, Item) {
         assert(item_id != 0, 'Item ID cannot be 0');
         if self.item_1.id == item_id {
@@ -540,7 +537,7 @@ mod tests {
         assert(jewelry_greatness == 9, 'bagged jewlwery greatness is 9');
     }
     #[test]
-    #[available_gas(107010)]
+    #[available_gas(43900)]
     fn test_get_jewelry_gas() {
         let katana = Item { id: ItemId::Katana, xp: 1 };
         let demon_crown = Item { id: ItemId::DemonCrown, xp: 2 };
@@ -576,7 +573,6 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(47910)]
     fn test_get_jewelry() {
         let katana = Item { id: ItemId::Katana, xp: 1 };
         let demon_crown = Item { id: ItemId::DemonCrown, xp: 2 };
@@ -617,7 +613,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item ID cannot be 0',))]
-    #[available_gas(6900)]
+    #[available_gas(7500)]
     fn test_contains_invalid_zero() {
         let katana = Item { id: ItemId::Katana, xp: 1 };
         let demon_crown = Item { id: ItemId::DemonCrown, xp: 2 };
@@ -650,7 +646,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(73500)]
+    #[available_gas(84500)]
     fn test_contains() {
         let katana = Item { id: ItemId::Katana, xp: 1 };
         let demon_crown = Item { id: ItemId::DemonCrown, xp: 2 };
@@ -951,7 +947,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(59500)]
+    #[available_gas(70600)]
     fn test_is_full_gas() {
         // start with full bag
         let mut bag = Bag {
@@ -1031,7 +1027,6 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item not in bag',))]
-    #[available_gas(7820)]
     fn test_get_item_not_in_bag() {
         let item_1 = Item { id: 11, xp: 0 };
         let item_2 = Item { id: 12, xp: 0 };
@@ -1072,7 +1067,33 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(101000)]
+    #[available_gas(9000)]
+    fn test_get_item_gas() {
+        let item = Item { id: 11, xp: 0 };
+
+        let bag = Bag {
+            item_1: item,
+            item_2: item,
+            item_3: item,
+            item_4: item,
+            item_5: item,
+            item_6: item,
+            item_7: item,
+            item_8: item,
+            item_9: item,
+            item_10: item,
+            item_11: item,
+            item_12: item,
+            item_13: item,
+            item_14: item,
+            item_15: item,
+            mutated: false,
+        };
+
+        bag.get_item(11);
+    }
+
+    #[test]
     fn test_get_item() {
         let item_1 = Item { id: 11, xp: 0 };
         let item_2 = Item { id: 12, xp: 0 };
@@ -1156,7 +1177,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(12440)]
+    #[available_gas(14940)]
     fn test_remove_item_gas() {
         let mut bag = Bag {
             item_1: Item { id: 1, xp: 0 },

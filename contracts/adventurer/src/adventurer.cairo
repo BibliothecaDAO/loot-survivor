@@ -407,7 +407,6 @@ impl ImplAdventurer of IAdventurer {
     // @param self: Equipment to calculate luck for
     // @param bag: Bag to calculate luck for
     // @return The adventurer's luck.
-    #[inline(always)]
     fn calculate_luck(self: Equipment, bag: Bag) -> u8 {
         let equipped_necklace_luck = self.neck.get_greatness();
         let equipped_ring_luck = self.ring.get_greatness();
@@ -573,7 +572,6 @@ impl ImplAdventurer of IAdventurer {
     // @dev This function checks if the adventurer has a given item equipped
     // @param item_id The id of the item to check
     // @return A boolean indicating if the item is equipped by the adventurer. Returns true if the item is equipped, false otherwise.
-    #[inline(always)]
     fn is_equipped(self: Equipment, item_id: u8) -> bool {
         if (self.weapon.id == item_id) {
             true
