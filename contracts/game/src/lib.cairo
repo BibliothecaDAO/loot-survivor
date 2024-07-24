@@ -334,7 +334,7 @@ mod Game {
             name: felt252,
             golden_token_id: u256,
             custom_renderer: ContractAddress
-        ) {
+        ) -> felt252 {
             // assert game terminal time has not been reached
             _assert_terminal_time_not_reached(@self);
 
@@ -356,7 +356,7 @@ mod Game {
             }
 
             // start the game
-            _start_game(ref self, weapon, name, custom_renderer);
+            _start_game(ref self, weapon, name, custom_renderer)
         }
 
         /// @title Explore Function
@@ -1057,7 +1057,6 @@ mod Game {
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
 
-
     /// @title Process Item Specials Randomness
     /// @notice Processes the randomness for item specials and emits an event.
     /// @dev This function is called when the randomness for item specials is received.
@@ -1577,7 +1576,7 @@ mod Game {
     /// @param custom_renderer A ContractAddress representing the address of the custom renderer.
     fn _start_game(
         ref self: ContractState, weapon: u8, name: felt252, custom_renderer: ContractAddress
-    ) {
+    ) -> felt252 {
         // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._game_counter.read() + 1;
 
@@ -1617,6 +1616,9 @@ mod Game {
 
         _save_adventurer_metadata(ref self, adventurer_id, adventurer_meta);
         _save_adventurer_no_boosts(ref self, adventurer, adventurer_id);
+
+        // return the adventurer id
+        adventurer_id
     }
 
     /// @title Starter Beast Ambush
@@ -2640,7 +2642,6 @@ mod Game {
     // ------------ Helper Functions ------------ //
     // ------------------------------------------ //
 
-
     /// @title Load Player Assets
     /// @notice Loads the player's assets and returns the adventurer, adventurer entropy, and bag.
     /// @dev This function is called when the player's assets are loaded.
@@ -2765,7 +2766,7 @@ mod Game {
         let starting_stats = _load_adventurer_metadata(self, adventurer_id).starting_stats;
         adventurer.stats.remove_stats(starting_stats);
     }
-    
+
     /// @title Load Adventurer Metadata
     /// @notice Loads the adventurer metadata and returns the adventurer metadata.
     /// @dev This function is called when the adventurer metadata is loaded.
