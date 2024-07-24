@@ -8,6 +8,7 @@ const MAX_PACKABLE_BEAST_HEALTH: u16 = 1023; // 10 bits
 const MAX_ADVENTURER_XP: u16 = 32767; // 15 bits
 const MAX_GOLD: u16 = 511; // 9 bits
 const MAX_STAT_UPGRADES_AVAILABLE: u8 = 15; // 4 bits
+const MAX_PACKABLE_BATTLE_ACTION_COUNT: u8 = 255; // 8 bits
 
 const ITEM_MAX_XP: u16 = 400;
 

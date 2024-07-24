@@ -530,9 +530,8 @@ mod Game {
                 // get beast and beast seed
                 let (beast, beast_seed) = adventurer.get_beast(adventurer_id, adventurer_entropy);
 
-                let (_, attack_location_rnd) = AdventurerUtils::get_randomness_with_health(
-                    adventurer.xp, adventurer.health, adventurer_entropy
-                );
+                let (critical_hit_rnd, attack_location_rnd) = adventurer
+                    .get_battle_randomness(adventurer_entropy);
 
                 // process beast attack
                 let start_entropy = _load_adventurer_metadata(@self, adventurer_id).start_entropy;
@@ -543,7 +542,7 @@ mod Game {
                     beast,
                     beast_seed,
                     start_entropy,
-                    attack_location_rnd,
+                    critical_hit_rnd,
                     attack_location_rnd,
                     false
                 );
@@ -1242,18 +1241,24 @@ mod Game {
     /// @param self A reference to the ContractState object.
     /// @param adventurer A reference to the adventurer.
     /// @param adventurer_id A felt252 representing the unique ID of the adventurer.
+    /// @param beast A reference to the Beast object.
+    /// @param beast_seed A u128 representing the seed of the beast.
+    /// @param damage_dealt A u16 representing the damage dealt to the beast.
+    /// @param critical_hit A boolean representing whether the attack was a critical hit.
     fn _process_beast_death(
         ref self: ContractState,
         ref adventurer: Adventurer,
         adventurer_id: felt252,
         beast: Beast,
         beast_seed: u128,
-        attack_rnd_2: u128,
         damage_dealt: u16,
         critical_hit: bool
     ) {
         // zero out beast health
         adventurer.beast_health = 0;
+
+        // reset battle action count to reset battle randomness
+        adventurer.battle_action_count = 0;
 
         // get gold reward and increase adventurers gold
         let gold_earned = beast.get_gold_reward();
@@ -2099,12 +2104,11 @@ mod Game {
         fight_to_the_death: bool,
     ) {
         // get two random numbers using adventurer xp and health as part of entropy
-        let (rnd1, rnd2) = AdventurerUtils::get_randomness_with_health(
-            adventurer.xp, adventurer.health, adventurer_entropy
-        );
+        let (critical_hit_rnd, attack_location_rnd) = adventurer
+            .get_battle_randomness(adventurer_entropy);
 
         // attack beast and get combat result that provides damage breakdown
-        let combat_result = adventurer.attack(weapon_combat_spec, beast, rnd1);
+        let combat_result = adventurer.attack(weapon_combat_spec, beast, critical_hit_rnd);
 
         // provide critical hit as a boolean for events
         let is_critical_hit = combat_result.critical_hit_bonus > 0;
@@ -2118,7 +2122,6 @@ mod Game {
                 adventurer_id,
                 beast,
                 beast_seed,
-                rnd2,
                 combat_result.total_damage,
                 is_critical_hit
             );
@@ -2134,8 +2137,8 @@ mod Game {
                 beast,
                 beast_seed,
                 start_entropy,
-                rnd1,
-                rnd2,
+                critical_hit_rnd,
+                attack_location_rnd,
                 false
             );
 
@@ -2252,9 +2255,7 @@ mod Game {
         flee_to_the_death: bool
     ) {
         // get flee and ambush entropy seeds
-        let (flee_entropy, ambush_entropy) = AdventurerUtils::get_randomness_with_health(
-            adventurer.xp, adventurer.health, adventurer_entropy
-        );
+        let (flee_entropy, ambush_entropy) = adventurer.get_battle_randomness(adventurer_entropy);
 
         // attempt to flee
         let fled = ImplBeast::attempt_flee(
@@ -2265,6 +2266,9 @@ mod Game {
         if (fled) {
             // set beast health to zero to denote adventurer is no longer in battle
             adventurer.beast_health = 0;
+
+            // set battle action count to zero to reset battle randomness
+            adventurer.battle_action_count = 0;
 
             // increment adventurer xp by one to change adventurer entropy state
             let (previous_level, new_level) = adventurer.increase_adventurer_xp(1);
@@ -2288,7 +2292,7 @@ mod Game {
                 beast,
                 beast_seed,
                 start_entropy,
-                ambush_entropy,
+                flee_entropy,
                 ambush_entropy,
                 false
             );

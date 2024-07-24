@@ -48,6 +48,7 @@ struct Adventurer {
     stat_upgrades_available: u8, // 4 bits
     stats: Stats, // 30 bits
     equipment: Equipment, // 128 bits
+    battle_action_count: u8, // 8 bits
     mutated: bool, // not packed
     awaiting_item_specials: bool, // not packed
 }
@@ -69,7 +70,8 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
             + value.beast_health.into() * TWO_POW_34
             + value.stat_upgrades_available.into() * TWO_POW_44
             + StatsPacking::pack(value.stats).into() * TWO_POW_48
-            + EquipmentPacking::pack(value.equipment).into() * TWO_POW_78)
+            + EquipmentPacking::pack(value.equipment).into() * TWO_POW_78
+            + value.battle_action_count.into() * TWO_POW_206)
             .try_into()
             .unwrap()
     }
@@ -87,7 +89,12 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
             packed, TWO_POW_4.try_into().unwrap()
         );
         let (packed, stats) = integer::U256DivRem::div_rem(packed, TWO_POW_30.try_into().unwrap());
-        let (_, equipment) = integer::U256DivRem::div_rem(packed, TWO_POW_128.try_into().unwrap());
+        let (packed, equipment) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_128.try_into().unwrap()
+        );
+        let (_, battle_action_count) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_8.try_into().unwrap()
+        );
 
         Adventurer {
             health: health.try_into().unwrap(),
@@ -97,6 +104,7 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
             stat_upgrades_available: stat_upgrades_available.try_into().unwrap(),
             stats: StatsPacking::unpack(stats.try_into().unwrap()),
             equipment: EquipmentPacking::unpack(equipment.try_into().unwrap()),
+            battle_action_count: battle_action_count.try_into().unwrap(),
             mutated: false, // This field is not packed/unpacked
             awaiting_item_specials: false
         }
@@ -131,6 +139,7 @@ impl ImplAdventurer of IAdventurer {
             },
             beast_health: BeastSettings::STARTER_BEAST_HEALTH,
             stat_upgrades_available: 0,
+            battle_action_count: 0,
             mutated: false,
             awaiting_item_specials: false
         }
@@ -977,6 +986,7 @@ impl ImplAdventurer of IAdventurer {
 }
 
 const TWO_POW_4: u256 = 0x10;
+const TWO_POW_8: u256 = 0x100;
 const TWO_POW_9: u256 = 0x200;
 const TWO_POW_10: u256 = 0x400;
 const TWO_POW_15: u256 = 0x8000;
@@ -986,6 +996,7 @@ const TWO_POW_34: u256 = 0x400000000;
 const TWO_POW_44: u256 = 0x100000000000;
 const TWO_POW_48: u256 = 0x1000000000000;
 const TWO_POW_78: u256 = 0x40000000000000000000;
+const TWO_POW_206: u256 = 0x4000000000000000000000000000000000000000000000000000;
 const TWO_POW_128: u256 = 0x100000000000000000000000000000000;
 
 // ---------------------------
@@ -1015,7 +1026,7 @@ mod tests {
                 MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT, MAX_BLOCK_COUNT,
                 SILVER_RING_G20_LUCK_BONUS, JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS,
                 NECKLACE_ARMOR_BONUS, SILVER_RING_LUCK_BONUS_PER_GREATNESS,
-                MAX_PACKABLE_BEAST_HEALTH,
+                MAX_PACKABLE_BEAST_HEALTH, MAX_PACKABLE_BATTLE_ACTION_COUNT
             },
             discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
         }
@@ -1051,6 +1062,7 @@ mod tests {
             equipment,
             beast_health: MAX_PACKABLE_BEAST_HEALTH,
             stat_upgrades_available: MAX_STAT_UPGRADES_AVAILABLE,
+            battle_action_count: MAX_PACKABLE_BATTLE_ACTION_COUNT,
             mutated: false,
             awaiting_item_specials: false
         };
@@ -1065,6 +1077,9 @@ mod tests {
         );
         assert(adventurer.stats == unpacked.stats, 'wrong unpacked stats');
         assert(adventurer.equipment == unpacked.equipment, 'equipment mistmatch');
+        assert(
+            adventurer.battle_action_count == unpacked.battle_action_count, 'battle_action_count'
+        );
 
         let adventurer = Adventurer {
             health: MAX_ADVENTURER_HEALTH,
@@ -1091,6 +1106,7 @@ mod tests {
             },
             beast_health: MAX_PACKABLE_BEAST_HEALTH,
             stat_upgrades_available: MAX_STAT_UPGRADES_AVAILABLE,
+            battle_action_count: MAX_PACKABLE_BATTLE_ACTION_COUNT,
             mutated: false,
             awaiting_item_specials: false
         };
@@ -3715,6 +3731,7 @@ mod tests {
             },
             beast_health: 20,
             stat_upgrades_available: 0,
+            battle_action_count: 0,
             mutated: false,
             awaiting_item_specials: false
         };
@@ -3820,6 +3837,7 @@ mod tests {
             },
             beast_health: 20,
             stat_upgrades_available: 0,
+            battle_action_count: 0,
             mutated: false,
             awaiting_item_specials: false
         };
@@ -3866,6 +3884,7 @@ mod tests {
             },
             beast_health: 20,
             stat_upgrades_available: 0,
+            battle_action_count: 0,
             mutated: false,
             awaiting_item_specials: false
         };
@@ -3911,6 +3930,7 @@ mod tests {
             },
             beast_health: 20,
             stat_upgrades_available: 0,
+            battle_action_count: 0,
             mutated: false,
             awaiting_item_specials: false
         };
