@@ -5,60 +5,45 @@ use super::stats::{Stats, StatsPacking, ImplStats};
 
 #[derive(Drop, Copy, Serde)]
 struct AdventurerMetadata {
-    start_entropy: u64, // 64 bits in storage
-    starting_stats: Stats, // 24 bits in storage
-    name: felt252, // 162 bits in storage
+    birth_date: u64, // 64 bits in storage
+    death_date: u64, // 64 bits in storage
+    delay_stat_reveal: bool, // 1 bit in storage
 }
 
 impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
     fn pack(value: AdventurerMetadata) -> felt252 {
-        // we don't use StatsPacking here because we only want to use 4 bits per stat
-        (value.start_entropy.into()
-            + value.starting_stats.strength.into() * TWO_POW_64
-            + value.starting_stats.dexterity.into() * TWO_POW_68
-            + value.starting_stats.vitality.into() * TWO_POW_72
-            + value.starting_stats.intelligence.into() * TWO_POW_76
-            + value.starting_stats.wisdom.into() * TWO_POW_80
-            + value.starting_stats.charisma.into() * TWO_POW_84
-            + value.name.into() * TWO_POW_88)
+        let mut delay_stat_reveal = 0;
+        if value.delay_stat_reveal {
+            delay_stat_reveal = 1;
+        }
+
+        (value.birth_date.into()
+            + value.death_date.into() * TWO_POW_64
+            + delay_stat_reveal.into() * TWO_POW_128)
             .try_into()
             .unwrap()
     }
     fn unpack(value: felt252) -> AdventurerMetadata {
         let packed = value.into();
-        let (packed, start_entropy) = integer::U256DivRem::div_rem(
+        let (packed, birth_date) = integer::U256DivRem::div_rem(
             packed, TWO_POW_64.try_into().unwrap()
         );
-        let (packed, strength) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_4.try_into().unwrap()
+        let (packed, death_date) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_64.try_into().unwrap()
         );
-        let (packed, dexterity) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_4.try_into().unwrap()
+        let (_, delay_stat_reveal) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_1.try_into().unwrap()
         );
-        let (packed, vitality) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_4.try_into().unwrap()
-        );
-        let (packed, intelligence) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_4.try_into().unwrap()
-        );
-        let (packed, wisdom) = integer::U256DivRem::div_rem(packed, TWO_POW_4.try_into().unwrap());
-        let (packed, charisma) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_4.try_into().unwrap()
-        );
-        let (_, name) = integer::U256DivRem::div_rem(packed, TWO_POW_163.try_into().unwrap());
+
+        let mut delay_stat_reveal_bool = false;
+        if delay_stat_reveal == 1 {
+            delay_stat_reveal_bool = true;
+        }
 
         AdventurerMetadata {
-            start_entropy: start_entropy.try_into().unwrap(),
-            starting_stats: Stats {
-                strength: strength.try_into().unwrap(),
-                dexterity: dexterity.try_into().unwrap(),
-                vitality: vitality.try_into().unwrap(),
-                intelligence: intelligence.try_into().unwrap(),
-                wisdom: wisdom.try_into().unwrap(),
-                charisma: charisma.try_into().unwrap(),
-                luck: 0
-            },
-            name: name.try_into().unwrap(),
+            birth_date: birth_date.try_into().unwrap(),
+            death_date: death_date.try_into().unwrap(),
+            delay_stat_reveal: delay_stat_reveal_bool,
         }
     }
 }
@@ -67,10 +52,11 @@ impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
 impl ImplAdventurerMetadata of IAdventurerMetadata {
     // @notice: Creates a new AdventurerMetadata struct
     // @dev: AdventurerMetadata is initialized without any starting stats
-    // @param name: The name of the adventurer
+    // @param birth_date: The start time of the adventurer
+    // @param delay_reveal: Whether the adventurer should delay reveal
     // @return: The newly created AdventurerMetadata struct
-    fn new(name: felt252) -> AdventurerMetadata {
-        AdventurerMetadata { name, start_entropy: 0, starting_stats: ImplStats::new() }
+    fn new(birth_date: u64, delay_stat_reveal: bool) -> AdventurerMetadata {
+        AdventurerMetadata { birth_date, death_date: 0, delay_stat_reveal }
     }
 
     // @notice: Generates a start entropy for the adventurer
@@ -86,17 +72,8 @@ impl ImplAdventurerMetadata of IAdventurerMetadata {
 }
 
 const TWO_POW_1: u256 = 0x2;
-const TWO_POW_4: u256 = 0x10;
 const TWO_POW_64: u256 = 0x10000000000000000;
-const TWO_POW_68: u256 = 0x100000000000000000;
-const TWO_POW_72: u256 = 0x1000000000000000000;
-const TWO_POW_76: u256 = 0x10000000000000000000;
-const TWO_POW_80: u256 = 0x100000000000000000000;
-const TWO_POW_84: u256 = 0x1000000000000000000000;
-const TWO_POW_88: u256 = 0x10000000000000000000000;
-const TWO_POW_89: u256 = 0x20000000000000000000000;
-const TWO_POW_163: u256 = 0x800000000000000000000000000000000000000;
-
+const TWO_POW_128: u256 = 0x100000000000000000000000000000000;
 const U64_MAX: u64 = 18446744073709551615;
 
 #[cfg(test)]
@@ -104,72 +81,20 @@ const U64_MAX: u64 = 18446744073709551615;
 #[available_gas(1187400)]
 fn test_adventurer_metadata_packing() {
     // max value case
-    let max_u64 = 0xffffffffffffffff;
-    let max_name_length = 'abcdefghijklmnopqrs';
-
-    let max_starting_stats = Stats {
-        strength: 15,
-        dexterity: 15,
-        vitality: 15,
-        intelligence: 15,
-        wisdom: 15,
-        charisma: 15,
-        luck: 0
-    };
-
     let meta = AdventurerMetadata {
-        start_entropy: max_u64, starting_stats: max_starting_stats, name: max_name_length,
+        birth_date: U64_MAX, death_date: U64_MAX, delay_stat_reveal: true,
     };
-
     let packed = PackingAdventurerMetadata::pack(meta);
     let unpacked: AdventurerMetadata = PackingAdventurerMetadata::unpack(packed);
-    assert(meta.name == unpacked.name, 'name should be max');
-    assert(meta.start_entropy == unpacked.start_entropy, 'sblock should be max u64');
-    assert(
-        meta.starting_stats.strength == unpacked.starting_stats.strength, 'strength should be max'
-    );
-    assert(
-        meta.starting_stats.dexterity == unpacked.starting_stats.dexterity,
-        'dexterity should be max'
-    );
-    assert(
-        meta.starting_stats.vitality == unpacked.starting_stats.vitality, 'vitality should be max'
-    );
-    assert(
-        meta.starting_stats.intelligence == unpacked.starting_stats.intelligence,
-        'intelligence should be max'
-    );
-    assert(meta.starting_stats.wisdom == unpacked.starting_stats.wisdom, 'wisdom should be max');
-    assert(
-        meta.starting_stats.charisma == unpacked.starting_stats.charisma, 'charisma should be max'
-    );
+    assert(meta.birth_date == unpacked.birth_date, 'start time should be max u64');
+    assert(meta.death_date == unpacked.death_date, 'end time should be max u64');
+    assert(meta.delay_stat_reveal == unpacked.delay_stat_reveal, 'delay reveal should be true');
 
     // zero case
-    let zero_starting_stats = Stats {
-        strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
-    };
-    let meta = AdventurerMetadata {
-        start_entropy: 0, starting_stats: zero_starting_stats, name: 0
-    };
+    let meta = AdventurerMetadata { birth_date: 0, death_date: 0, delay_stat_reveal: false };
     let packed = PackingAdventurerMetadata::pack(meta);
     let unpacked: AdventurerMetadata = PackingAdventurerMetadata::unpack(packed);
-    assert(unpacked.name == 0, 'name should be 0');
-    assert(unpacked.start_entropy == 0, 'entropy should be 0');
-    assert(
-        meta.starting_stats.strength == unpacked.starting_stats.strength, 'strength should be 0'
-    );
-    assert(
-        meta.starting_stats.dexterity == unpacked.starting_stats.dexterity, 'dexterity should be 0'
-    );
-    assert(
-        meta.starting_stats.vitality == unpacked.starting_stats.vitality, 'vitality should be 0'
-    );
-    assert(
-        meta.starting_stats.intelligence == unpacked.starting_stats.intelligence,
-        'intelligence should be 0'
-    );
-    assert(meta.starting_stats.wisdom == unpacked.starting_stats.wisdom, 'wisdom should be 0');
-    assert(
-        meta.starting_stats.charisma == unpacked.starting_stats.charisma, 'charisma should be 0'
-    );
+    assert(unpacked.birth_date == 0, 'start time should be 0');
+    assert(unpacked.death_date == 0, 'end time should be 0');
+    assert(unpacked.delay_stat_reveal == false, 'delay reveal should be false');
 }

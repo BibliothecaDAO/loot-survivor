@@ -6,6 +6,7 @@ trait IRenderContract<TContractState> {
         self: @TContractState,
         adventurer_id: u256,
         adventurer: Adventurer,
+        adventurer_name: felt252,
         adventurerMetadata: AdventurerMetadata,
         bag: Bag,
         item_specials_seed: felt252
@@ -26,6 +27,7 @@ mod RenderContract {
             self: @ContractState,
             adventurer_id: u256,
             adventurer: Adventurer,
+            adventurer_name: felt252,
             adventurerMetadata: AdventurerMetadata,
             bag: Bag,
             item_specials_seed: felt252
@@ -33,6 +35,7 @@ mod RenderContract {
             create_metadata(
                 adventurer_id.try_into().unwrap(),
                 adventurer,
+                adventurer_name,
                 adventurerMetadata,
                 bag,
                 item_specials_seed

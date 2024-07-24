@@ -333,13 +333,89 @@ impl ImplStats of IStat {
         assert(amount <= self.charisma, 'charisma underflow');
         self.charisma -= amount;
     }
+
+    /// @notice Apply starting stats to the adventurer.
+    /// @param self The adventurer.
+    /// @param entropy Randomness input for the stat application.
+    /// @param starting_stat_count The number of starting stats to apply.
+    fn apply_starting_stats(ref self: Stats, entropy: u256, starting_stat_count: u8) {
+        let mut random_stats = ImplStats::generate_random_stats(entropy);
+
+        assert(starting_stat_count.into() <= random_stats.len(), 'stat count out of bounds');
+
+        let mut i = 0;
+        loop {
+            if i == starting_stat_count.into() {
+                break;
+            }
+            let random_u8 = *random_stats.at(i);
+            let random_stat_index = random_u8 % 6;
+            if random_stat_index == 0 {
+                self.strength += 1;
+            } else if random_stat_index == 1 {
+                self.dexterity += 1;
+            } else if random_stat_index == 2 {
+                self.vitality += 1;
+            } else if random_stat_index == 3 {
+                self.charisma += 1;
+            } else if random_stat_index == 4 {
+                self.intelligence += 1;
+            } else if random_stat_index == 5 {
+                self.wisdom += 1;
+            } else {
+                panic_with_felt252('stat out of range');
+            }
+
+            i += 1;
+        };
+    }
+
+    // @notice generates random array of stats from a u256 value
+    // @param value: value to convert
+    // @return Array<u8>: u8 array
+    fn generate_random_stats(value: u256) -> Array<u8> {
+        let mut result = ArrayTrait::<u8>::new();
+        result.append((value & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_8) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_16) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_24) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_32) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_40) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_48) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_56) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_64) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_72) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_80) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_88) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_96) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_104) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_112) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_120) & MASK_8).try_into().unwrap());
+        result
+    }
 }
 
+const MASK_8: u256 = 0xFF;
 const TWO_POW_5: u256 = 0x20;
+const TWO_POW_8: u256 = 0x100;
 const TWO_POW_10: u256 = 0x400;
 const TWO_POW_15: u256 = 0x8000;
+const TWO_POW_16: u256 = 0x10000;
 const TWO_POW_20: u256 = 0x100000;
+const TWO_POW_24: u256 = 0x1000000;
 const TWO_POW_25: u256 = 0x2000000;
+const TWO_POW_32: u256 = 0x100000000;
+const TWO_POW_40: u256 = 0x10000000000;
+const TWO_POW_48: u256 = 0x1000000000000;
+const TWO_POW_56: u256 = 0x100000000000000;
+const TWO_POW_64: u256 = 0x10000000000000000;
+const TWO_POW_72: u256 = 0x1000000000000000000;
+const TWO_POW_80: u256 = 0x100000000000000000000;
+const TWO_POW_88: u256 = 0x10000000000000000000000;
+const TWO_POW_96: u256 = 0x1000000000000000000000000;
+const TWO_POW_104: u256 = 0x100000000000000000000000000;
+const TWO_POW_112: u256 = 0x10000000000000000000000000000;
+const TWO_POW_120: u256 = 0x1000000000000000000000000000000;
 
 // ---------------------------
 // ---------- Tests ----------
@@ -485,5 +561,137 @@ mod tests {
         // u8 overflow case
         stat.overflow_protected_stat_increase(255);
         assert(stat == MAX_STAT_VALUE, 'stat should not overflow');
+    }
+
+    #[test]
+    #[available_gas(249718)]
+    fn test_apply_starting_stats_gas() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
+        };
+        stats.apply_starting_stats(0, 9);
+    }
+
+    #[test]
+    #[should_panic(expected: ('stat count out of bounds',))]
+    fn test_apply_starting_stats_too_many_stats() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
+        };
+        stats.apply_starting_stats(0, 17);
+    }
+
+    #[test]
+    fn test_apply_starting_stats() {
+        // Test case 1: Basic functionality
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
+        };
+        let entropy = 0x123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef;
+        stats.apply_starting_stats(entropy, 6);
+        assert(
+            stats.strength
+                + stats.dexterity
+                + stats.vitality
+                + stats.charisma
+                + stats.intelligence
+                + stats.wisdom == 6,
+            'Total stats should be 6'
+        );
+
+        // Test case 2: Zero starting stats
+        let mut stats2 = Stats {
+            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
+        };
+        stats2.apply_starting_stats(entropy, 0);
+        assert(
+            stats2.strength
+                + stats2.dexterity
+                + stats2.vitality
+                + stats2.charisma
+                + stats2.intelligence
+                + stats2.wisdom == 0,
+            'No stats should be applied'
+        );
+
+        // Test case 3: Maximum starting stats
+        let mut stats3 = Stats {
+            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
+        };
+        stats3.apply_starting_stats(entropy, 16);
+        assert(
+            stats3.strength
+                + stats3.dexterity
+                + stats3.vitality
+                + stats3.charisma
+                + stats3.intelligence
+                + stats3.wisdom == 16,
+            'Total stats should be 16'
+        );
+
+        // Test case 4: Different entropy produces different stat distribution
+        let mut stats4 = Stats {
+            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
+        };
+        let mut stats5 = Stats {
+            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
+        };
+        stats4.apply_starting_stats(1, 6);
+        stats5.apply_starting_stats(2, 6);
+        assert(stats4 != stats5, 'Stats should be different');
+    }
+
+    #[test]
+    #[available_gas(1448412)]
+    fn test_generate_random_stats() {
+        // zero case
+        let value = 0;
+        let values = ImplStats::generate_random_stats(value);
+        let mut i = 0;
+        loop {
+            if i == values.len() {
+                break;
+            }
+
+            let value = *values.at(i);
+            assert(value == 0, 'all values should be 0');
+            i += 1;
+        };
+
+        // max u128 case
+        let value = 0xffffffffffffffffffffffffffffffff;
+        let values = ImplStats::generate_random_stats(value);
+        let mut i = 0;
+        loop {
+            if i == values.len() {
+                break;
+            }
+
+            let value = *values.at(i);
+            assert(value == 255, 'all values should be 1');
+            i += 1;
+        };
+
+        // random case
+        let value =
+            0b00000110110100110000110010010111000001000110111100110010001111010010000001111110000110100111101100010101000000001111111101100101;
+
+        let values = ImplStats::generate_random_stats(value);
+        assert(*values.at(15) == 6, 'rand15 should be 6');
+        assert(*values.at(14) == 211, 'rand14 should be 211');
+        assert(*values.at(13) == 12, 'rand13 should be 12');
+        assert(*values.at(12) == 151, 'rand12 should be 151');
+        assert(*values.at(11) == 4, 'rand11 should be 4');
+        assert(*values.at(10) == 111, 'rand10 should be 111');
+        assert(*values.at(9) == 50, 'rand9 should be 50');
+        assert(*values.at(8) == 61, 'rand8 should be 61');
+        assert(*values.at(7) == 32, 'rand7 should be 32');
+        assert(*values.at(6) == 126, 'rand6 should be 126');
+        assert(*values.at(5) == 26, 'rand5 should be 26');
+        assert(*values.at(4) == 123, 'rand4 should be 123');
+        assert(*values.at(3) == 21, 'rand3 should be 21');
+        assert(*values.at(2) == 0, 'rand2 should be 0');
+        assert(*values.at(1) == 255, 'rand1 should be 255');
+        assert(*values.at(0) == 101, 'rand0 should be 101');
     }
 }

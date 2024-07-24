@@ -16,6 +16,7 @@ trait IGame<TContractState> {
         weapon: u8,
         name: felt252,
         golden_token_id: u256,
+        delay_reveal: bool,
         custom_renderer: ContractAddress
     ) -> felt252;
     fn explore(ref self: TContractState, adventurer_id: felt252, till_beast: bool);
@@ -37,15 +38,19 @@ trait IGame<TContractState> {
         random_words: Span<felt252>,
         calldata: Array<felt252>
     );
-    fn update_cost_to_play(ref self: TContractState);
+    fn update_cost_to_play(ref self: TContractState) -> u128;
     fn set_custom_renderer(
         ref self: TContractState, adventurer_id: felt252, render_contract: ContractAddress
     );
     fn increase_vrf_allowance(ref self: TContractState, adventurer_id: felt252, amount: u128);
+    fn update_adventurer_name(ref self: TContractState, adventurer_id: felt252, name: felt252);
+    fn slay_expired_adventurers(ref self: TContractState, adventurer_ids: Array<felt252>);
+
     // ------ View Functions ------
 
     // adventurer details
     fn get_adventurer(self: @TContractState, adventurer_id: felt252) -> Adventurer;
+    fn get_adventurer_name(self: @TContractState, adventurer_id: felt252) -> felt252;
     fn get_adventurer_entropy(self: @TContractState, adventurer_id: felt252) -> felt252;
     fn get_adventurer_no_boosts(self: @TContractState, adventurer_id: felt252) -> Adventurer;
     fn get_adventurer_meta(self: @TContractState, adventurer_id: felt252) -> AdventurerMetadata;

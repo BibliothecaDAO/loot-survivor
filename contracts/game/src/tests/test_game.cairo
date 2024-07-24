@@ -30,7 +30,8 @@ mod tests {
     use adventurer::{
         stats::Stats, adventurer_meta::{AdventurerMetadata},
         constants::adventurer_constants::{
-            STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH, MAX_BLOCK_COUNT
+            STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH, MAX_BLOCK_COUNT,
+            MINIMUM_POTION_PRICE
         },
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, item::{Item, ImplItem},
         bag::{Bag, IBag}, adventurer_utils::AdventurerUtils
@@ -257,7 +258,10 @@ mod tests {
     fn add_adventurer_to_game(
         ref game: IGameDispatcher, golden_token_id: u256, starting_weapon: u8
     ) {
-        game.new_game(INTERFACE_ID(), starting_weapon, 'loothero', golden_token_id, ZERO_ADDRESS());
+        game
+            .new_game(
+                INTERFACE_ID(), starting_weapon, 'loothero', golden_token_id, false, ZERO_ADDRESS()
+            );
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
@@ -281,16 +285,19 @@ mod tests {
                 starting_weapon,
                 name,
                 DEFAULT_NO_GOLDEN_TOKEN.into(),
+                false,
                 ZERO_ADDRESS()
             );
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let adventurer_name = game.get_adventurer_name(ADVENTURER_ID);
         let adventurer_meta_data = game.get_adventurer_meta(ADVENTURER_ID);
 
         // verify starting weapon
         assert(adventurer.equipment.weapon.id == starting_weapon, 'wrong starting weapon');
-        assert(adventurer_meta_data.name == name, 'wrong player name');
+        assert(adventurer_name == name, 'wrong player name');
+        assert(adventurer_meta_data.birth_date == starting_time, 'wrong birth date');
         assert(adventurer.xp == 0, 'should start with 0 xp');
         assert(
             adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
@@ -603,16 +610,19 @@ mod tests {
                 starting_weapon,
                 name,
                 DEFAULT_NO_GOLDEN_TOKEN.into(),
+                false,
                 ZERO_ADDRESS()
             );
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let adventurer_name = game.get_adventurer_name(ADVENTURER_ID);
         let adventurer_meta_data = game.get_adventurer_meta(ADVENTURER_ID);
 
         // verify starting weapon
         assert(adventurer.equipment.weapon.id == starting_weapon, 'wrong starting weapon');
-        assert(adventurer_meta_data.name == name, 'wrong player name');
+        assert(adventurer_name == name, 'wrong player name');
+        assert(adventurer_meta_data.birth_date == starting_timestamp, 'wrong birth date');
         assert(adventurer.xp == 0, 'should start with 0 xp');
         assert(
             adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
@@ -1223,7 +1233,7 @@ mod tests {
 
         // get number of potions required to reach full health
         let potions_to_full_health: u8 = (POTION_HEALTH_AMOUNT
-            / (AdventurerUtils::get_max_health(adventurer.stats.vitality) - adventurer.health))
+            / (adventurer.stats.get_max_health() - adventurer.health))
             .try_into()
             .unwrap();
 
@@ -1276,8 +1286,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(100000000)]
-    fn test_get_potion_price() {
+    fn test_get_potion_price_underflow() {
         let mut game = new_adventurer(1000, 1696201757);
         let potion_price = game.get_potion_price(ADVENTURER_ID);
         let adventurer_level = game.get_adventurer(ADVENTURER_ID).get_level();
@@ -1288,11 +1297,15 @@ mod tests {
 
         // get level 2 potion price
         let potion_price = game.get_potion_price(ADVENTURER_ID);
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let mut adventurer = game.get_adventurer(ADVENTURER_ID);
         let adventurer_level = adventurer.get_level();
 
         // verify potion price
-        assert(potion_price == (POTION_PRICE * adventurer_level.into()) - adventurer.stats.charisma.into(), 'wrong lvl2 potion price');
+        assert(
+            potion_price == (POTION_PRICE * adventurer_level.into())
+                - adventurer.stats.charisma.into(),
+            'wrong lvl2 potion price'
+        );
     }
 
     #[test]

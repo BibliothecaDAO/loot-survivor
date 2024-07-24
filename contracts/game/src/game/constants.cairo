@@ -14,7 +14,8 @@ mod messages {
     const BLOCK_NUMBER_ERROR: felt252 = 'Too soon update';
     const DEAD_ADVENTURER: felt252 = 'Adventurer is dead';
     const HEALTH_FULL: felt252 = 'Health already full';
-    const ADVENTURER_NOT_IDLE: felt252 = 'Adventurer is not idle';
+    const ADVENTURER_NOT_EXPIRED: felt252 = 'Adventurer not expired';
+    const GAME_EXPIRED: felt252 = 'Game has expired';
     const ONE_EXPLORE_PER_BLOCK: felt252 = 'One explore per block';
     const INSUFFICIENT_STAT_UPGRADES: felt252 = 'insufficient stat upgrades';
     const TOO_MANY_ITEMS: felt252 = 'Too many items';

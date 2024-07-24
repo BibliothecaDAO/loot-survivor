@@ -477,14 +477,14 @@ impl ImplAdventurer of IAdventurer {
     #[inline(always)]
     fn increase_health(ref self: Adventurer, amount: u16) {
         if (u16_overflowing_add(self.health, amount).is_ok()) {
-            if (self.health + amount <= AdventurerUtils::get_max_health(self.stats.vitality)) {
+            if (self.health + amount <= self.stats.get_max_health()) {
                 self.health += amount;
                 return;
             }
         }
 
         // fall through is to set health to max health
-        self.health = AdventurerUtils::get_max_health(self.stats.vitality)
+        self.health = self.stats.get_max_health()
     }
 
     // @notice Decreases health of Adventurer with underflow protection.
@@ -982,6 +982,23 @@ impl ImplAdventurer of IAdventurer {
 
         // if execution reaches here, the necklace provides a bonus for the armor type
         base_armor * (self.get_greatness() * NECKLACE_ARMOR_BONUS).into() / 100
+    }
+
+    fn get_max_health(self: Stats) -> u16 {
+        // Calculate vitality boost, casting to u16 to prevent overflow during multiplication
+        let vitality_boost: u16 = (self.vitality.into() * HEALTH_INCREASE_PER_VITALITY.into());
+
+        // Check if health calculation would result in overflow
+        if (u16_overflowing_add(STARTING_HEALTH, vitality_boost).is_ok()) {
+            // If it does not cause overflow, check if health + vitality boost is within maximum allowed health
+            if (STARTING_HEALTH + vitality_boost <= MAX_ADVENTURER_HEALTH) {
+                // if it is, return full boost
+                return (STARTING_HEALTH + vitality_boost);
+            }
+        }
+
+        // In the case of potential overflow or exceeding max adventurer health, return max adventurer health
+        MAX_ADVENTURER_HEALTH
     }
 }
 
