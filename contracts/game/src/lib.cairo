@@ -33,6 +33,7 @@ mod Game {
     const PRAGMA_PUBLISH_DELAY: u8 = 0;
     const PRAGMA_NUM_WORDS: u8 = 1;
     const GAME_EXPIRY_DAYS: u8 = 10;
+    const OBITUARY_EXPIRY_DAYS: u8 = 10;
 
     use core::{
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
@@ -117,6 +118,7 @@ mod Game {
         _adventurer: LegacyMap::<felt252, Adventurer>,
         _adventurer_meta: LegacyMap::<felt252, AdventurerMetadata>,
         _adventurer_name: LegacyMap::<felt252, felt252>,
+        _adventurer_obituary: LegacyMap::<felt252, ByteArray>,
         _bag: LegacyMap::<felt252, Bag>,
         _collectible_beasts: ContractAddress,
         _dao: ContractAddress,
@@ -182,6 +184,7 @@ mod Game {
         RequestedItemSpecialsSeed: RequestedItemSpecialsSeed,
         ReceivedItemSpecialsSeed: ReceivedItemSpecialsSeed,
         UpdatedAdventurerName: UpdatedAdventurerName,
+        SetAdventurerObituary: SetAdventurerObituary,
         #[flat]
         ERC721Event: ERC721Component::Event,
         #[flat]
@@ -752,6 +755,34 @@ mod Game {
             self.emit(UpdatedAdventurerName { adventurer_id, name });
         }
 
+        fn set_adventurer_obituary(
+            ref self: ContractState, adventurer_id: felt252, obituary: ByteArray
+        ) {
+            // assert caller owners adventurer
+            _assert_ownership(@self, adventurer_id);
+
+            // asset adventurer is dead
+            let adventurer = _load_adventurer_no_boosts(@self, adventurer_id);
+            _assert_is_dead(adventurer);
+
+            // assert obituary has not already been set
+            assert(
+                self._adventurer_obituary.read(adventurer_id).len() == 0,
+                messages::OBITUARY_ALREADY_SET
+            );
+
+            // assert OBITUARY_EXPIRY_DAYS have not passed since adventurer's death
+            let death_date = _load_adventurer_metadata(@self, adventurer_id).death_date;
+            let expiry_date = death_date + (OBITUARY_EXPIRY_DAYS.into() * SECONDS_IN_DAY.into());
+            assert(expiry_date > get_block_timestamp(), messages::OBITUARY_WINDOW_CLOSED);
+
+            // set adventurer obituary
+            self._adventurer_obituary.write(adventurer_id, obituary.clone());
+
+            // emit obituary set event
+            self.emit(SetAdventurerObituary { adventurer_id, obituary });
+        }
+
         fn slay_expired_adventurers(ref self: ContractState, adventurer_ids: Array<felt252>) {
             let mut adventurer_index: u32 = 0;
             loop {
@@ -764,7 +795,6 @@ mod Game {
             }
         }
 
-
         // ------------------------------------------ //
         // ------------ View Functions -------------- //
         // ------------------------------------------ //
@@ -773,6 +803,9 @@ mod Game {
         }
         fn get_adventurer_name(self: @ContractState, adventurer_id: felt252) -> felt252 {
             self._adventurer_name.read(adventurer_id)
+        }
+        fn get_adventurer_obituary(self: @ContractState, adventurer_id: felt252) -> ByteArray {
+            self._adventurer_obituary.read(adventurer_id)
         }
         fn get_adventurer_entropy(self: @ContractState, adventurer_id: felt252) -> felt252 {
             self._adventurer_entropy.read(adventurer_id)
@@ -1428,6 +1461,8 @@ mod Game {
             killed_by_beast: beast_id, killed_by_obstacle: obstacle_id, killed_by_old_age,
         };
 
+        _set_adventurer_death_date(ref self, adventurer_id);
+
         __event_AdventurerDied(ref self, AdventurerDied { adventurer_state, death_details });
 
         // and adventurer got a top score
@@ -1435,6 +1470,12 @@ mod Game {
             // update the leaderboard
             _update_leaderboard(ref self, adventurer_id, adventurer);
         }
+    }
+
+    fn _set_adventurer_death_date(ref self: ContractState, adventurer_id: felt252) {
+        let mut adventurer_meta = self._adventurer_meta.read(adventurer_id);
+        adventurer_meta.death_date = get_block_timestamp();
+        self._adventurer_meta.write(adventurer_id, adventurer_meta);
     }
 
     fn _golden_token_dispatcher(ref self: ContractState) -> IERC721Dispatcher {
@@ -3045,6 +3086,9 @@ mod Game {
     fn _assert_not_dead(self: Adventurer) {
         assert(self.health != 0, messages::DEAD_ADVENTURER);
     }
+    fn _assert_is_dead(self: Adventurer) {
+        assert(self.health == 0, messages::ADVENTURER_IS_ALIVE);
+    }
     fn _is_expired(self: @ContractState, adventurer_id: felt252,) -> bool {
         let current_time = get_block_timestamp();
         let birth_date = _load_adventurer_metadata(self, adventurer_id).birth_date;
@@ -3532,6 +3576,12 @@ mod Game {
     struct UpdatedAdventurerName {
         adventurer_id: felt252,
         name: felt252,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct SetAdventurerObituary {
+        adventurer_id: felt252,
+        obituary: ByteArray,
     }
 
     #[derive(Drop, Serde)]

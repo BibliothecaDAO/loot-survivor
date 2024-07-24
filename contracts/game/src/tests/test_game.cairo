@@ -2109,4 +2109,188 @@ mod tests {
             self.erc721.mint(recipient, token_id);
         }
     }
+
+    #[test]
+    fn test_set_adventurer_obituary() {
+        // Setup
+        let starting_block = 1000;
+        let starting_time = 1696201757;
+        let (mut game, _, _, _, _) = setup(starting_block, starting_time, 0);
+
+        // Create a new adventurer
+        let adventurer_id = 1;
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+
+        // defeat starter beast
+        game.attack(adventurer_id, false);
+
+        // don't buy anything from market
+        let shopping_cart = ArrayTrait::<ItemPurchase>::new();
+        let stat_upgrades = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+        };
+        game.upgrade(adventurer_id, 0, stat_upgrades, shopping_cart.clone());
+        game.explore(adventurer_id, true);
+        game.attack(adventurer_id, true);
+        game.explore(adventurer_id, true);
+        game.upgrade(adventurer_id, 0, stat_upgrades, shopping_cart.clone());
+
+        let death_date = starting_time + 1000;
+        testing::set_block_timestamp(death_date);
+        game.explore(adventurer_id, true);
+
+        let mut metadata = game.get_adventurer_meta(adventurer_id);
+        assert(metadata.death_date == death_date, 'Death date not set correctly');
+
+        // Set obituary
+        let obituary: ByteArray = "Brave adventurer fell to a mighty beast";
+        game.set_adventurer_obituary(adventurer_id, obituary.clone());
+
+        // Verify obituary was set
+        let stored_obituary = game.get_adventurer_obituary(adventurer_id);
+        assert(obituary == stored_obituary, 'Obituary not set correctly');
+    }
+
+    #[test]
+    #[should_panic(expected: ('obituary already set', 'ENTRYPOINT_FAILED'))]
+    fn test_set_adventurer_obituary_twice() {
+        // Setup
+        let starting_block = 1000;
+        let starting_time = 1696201757;
+        let (mut game, _, _, _, _) = setup(starting_block, starting_time, 0);
+
+        // Create a new adventurer
+        let adventurer_id = 1;
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+
+        // defeat starter beast
+        game.attack(adventurer_id, false);
+
+        // don't buy anything from market
+        let shopping_cart = ArrayTrait::<ItemPurchase>::new();
+        let stat_upgrades = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+        };
+        game.upgrade(adventurer_id, 0, stat_upgrades, shopping_cart.clone());
+        game.explore(adventurer_id, true);
+        game.attack(adventurer_id, true);
+        game.explore(adventurer_id, true);
+        game.upgrade(adventurer_id, 0, stat_upgrades, shopping_cart.clone());
+
+        let death_date = starting_time + 1000;
+        testing::set_block_timestamp(death_date);
+        game.explore(adventurer_id, true);
+
+        let mut metadata = game.get_adventurer_meta(adventurer_id);
+        assert(metadata.death_date == death_date, 'Death date not set correctly');
+
+        // Set obituary
+        let obituary: ByteArray = "Brave adventurer fell to a mighty beast";
+        game.set_adventurer_obituary(adventurer_id, obituary.clone());
+
+        // Attempt to set obituary again
+        // should panic
+        let obituary_two: ByteArray = "Brave adventurer fell to a mighty obstacle";
+        game.set_adventurer_obituary(adventurer_id, obituary_two.clone());
+    }
+
+    #[test]
+    #[should_panic(expected: ('obituary window closed', 'ENTRYPOINT_FAILED'))]
+    fn test_set_adventurer_obituary_after_window_closed() {
+        // Setup
+        let starting_block = 1000;
+        let starting_time = 1696201757;
+        let (mut game, _, _, _, _) = setup(starting_block, starting_time, 0);
+
+        // Create a new adventurer
+        let adventurer_id = 1;
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+
+        // defeat starter beast
+        game.attack(adventurer_id, false);
+
+        // don't buy anything from market
+        let shopping_cart = ArrayTrait::<ItemPurchase>::new();
+        let stat_upgrades = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+        };
+        game.upgrade(adventurer_id, 0, stat_upgrades, shopping_cart.clone());
+        game.explore(adventurer_id, true);
+        game.attack(adventurer_id, true);
+        game.explore(adventurer_id, true);
+        game.upgrade(adventurer_id, 0, stat_upgrades, shopping_cart.clone());
+
+        let death_date = starting_time + 1000;
+        testing::set_block_timestamp(death_date);
+        game.explore(adventurer_id, true);
+
+        let mut metadata = game.get_adventurer_meta(adventurer_id);
+        assert(metadata.death_date == death_date, 'Death date not set correctly');
+
+        // increase the blockchain to 1s past the obituary window
+        testing::set_block_timestamp(
+            death_date + (Game::OBITUARY_EXPIRY_DAYS.into() * Game::SECONDS_IN_DAY.into()) + 1
+        );
+
+        // attempt to set obituary
+        // should panic
+        let obituary: ByteArray = "Brave adventurer fell to a mighty beast";
+        game.set_adventurer_obituary(adventurer_id, obituary.clone());
+    }
+
+    #[test]
+    #[should_panic(expected: ('Adventurer is still alive', 'ENTRYPOINT_FAILED'))]
+    fn test_set_adventurer_obituary_still_alive() {
+        // Setup
+        let starting_block = 1000;
+        let starting_time = 1696201757;
+        let (mut game, _, _, _, _) = setup(starting_block, starting_time, 0);
+
+        // Create a new adventurer
+        let adventurer_id = 1;
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+
+        // defeat starter beast
+        game.attack(adventurer_id, false);
+
+        // attempt to set obituary
+        // should panic
+        let obituary: ByteArray = "Brave adventurer fell to a mighty beast";
+        game.set_adventurer_obituary(adventurer_id, obituary.clone());
+    }
+
+    #[test]
+    fn test_dead_adventurer_metadata() {
+        // Setup
+        let starting_block = 1000;
+        let starting_time = 1696201757;
+        let (mut game, _, _, _, _) = setup(starting_block, starting_time, 0);
+
+        // Create a new adventurer
+        let adventurer_id = 1;
+        add_adventurer_to_game(ref game, 0, ItemId::Wand);
+
+        // defeat starter beast
+        game.attack(adventurer_id, false);
+
+        // don't buy anything from market
+        let shopping_cart = ArrayTrait::<ItemPurchase>::new();
+        let stat_upgrades = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+        };
+        game.upgrade(adventurer_id, 0, stat_upgrades, shopping_cart.clone());
+        game.explore(adventurer_id, true);
+        game.attack(adventurer_id, true);
+        game.explore(adventurer_id, true);
+        game.upgrade(adventurer_id, 0, stat_upgrades, shopping_cart.clone());
+
+        let death_date = starting_time + 1000;
+        testing::set_block_timestamp(death_date);
+        game.explore(adventurer_id, true);
+
+        // check adventurer metadata to ensure birth date and death date are correct
+        let mut metadata = game.get_adventurer_meta(adventurer_id);
+        assert(metadata.death_date == death_date, 'Death date not set correctly');
+        assert(metadata.birth_date == starting_time, 'Birth date not set correctly');
+    }
 }

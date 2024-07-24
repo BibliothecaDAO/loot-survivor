@@ -13,6 +13,7 @@ mod messages {
     const STAT_UPGRADES_AVAILABLE: felt252 = 'Stat upgrade available';
     const BLOCK_NUMBER_ERROR: felt252 = 'Too soon update';
     const DEAD_ADVENTURER: felt252 = 'Adventurer is dead';
+    const ADVENTURER_IS_ALIVE: felt252 = 'Adventurer is still alive';
     const HEALTH_FULL: felt252 = 'Health already full';
     const ADVENTURER_NOT_EXPIRED: felt252 = 'Adventurer not expired';
     const GAME_EXPIRED: felt252 = 'Game has expired';
@@ -41,6 +42,8 @@ mod messages {
     const ADVENTURER_ENTROPY_NOT_SET: felt252 = 'adventurer entropy not set';
     const WAITING_FOR_ITEM_SPECIALS: felt252 = 'waiting for item specials';
     const FETCHING_ETH_PRICE_ERROR: felt252 = 'error fetching eth price';
+    const OBITUARY_ALREADY_SET: felt252 = 'obituary already set';
+    const OBITUARY_WINDOW_CLOSED: felt252 = 'obituary window closed';
 }
 
 // TODO: Update for mainnet

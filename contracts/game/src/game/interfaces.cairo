@@ -44,6 +44,7 @@ trait IGame<TContractState> {
     );
     fn increase_vrf_allowance(ref self: TContractState, adventurer_id: felt252, amount: u128);
     fn update_adventurer_name(ref self: TContractState, adventurer_id: felt252, name: felt252);
+    fn set_adventurer_obituary(ref self: TContractState, adventurer_id: felt252, obituary: ByteArray);
     fn slay_expired_adventurers(ref self: TContractState, adventurer_ids: Array<felt252>);
 
     // ------ View Functions ------
@@ -51,6 +52,7 @@ trait IGame<TContractState> {
     // adventurer details
     fn get_adventurer(self: @TContractState, adventurer_id: felt252) -> Adventurer;
     fn get_adventurer_name(self: @TContractState, adventurer_id: felt252) -> felt252;
+    fn get_adventurer_obituary(self: @TContractState, adventurer_id: felt252) -> ByteArray;
     fn get_adventurer_entropy(self: @TContractState, adventurer_id: felt252) -> felt252;
     fn get_adventurer_no_boosts(self: @TContractState, adventurer_id: felt252) -> Adventurer;
     fn get_adventurer_meta(self: @TContractState, adventurer_id: felt252) -> AdventurerMetadata;
