@@ -17,7 +17,6 @@ export default function Head() {
         sizes="16x16"
         href="/favicon-16x16.png"
       />
-      <meta property="og:site_name" content="Loot Survivor" />
       <meta
         name="description"
         content="Loot Survivor is a fully on-chain arcade dungeon crawler game on Starknet."
@@ -51,12 +50,6 @@ export default function Head() {
       <meta
         name="twitter:image"
         content="https://lootsurvivor.io/scenes/intro/beast.png"
-      />
-      {/* Robots data */}
-      <meta name="robots" content="noindex, follow, nocache" />
-      <meta
-        name="googlebot"
-        content="index, nofollow, noimageindex, max-video-preview:-1, max-image-preview:large, max-snippet:-1"
       />
       {/* PWA */}
       <link rel="manifest" href="/manifest.json" />
