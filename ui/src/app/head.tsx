@@ -50,7 +50,7 @@ export default function Head() {
       <meta name="twitter:player:height" content="680" />
       <meta
         name="twitter:image"
-        content="https://survivor.realms.world/scenes/intro/beast.png"
+        content="https://lootsurvivor.io/scenes/intro/beast.png"
       />
       {/* Robots data */}
       <meta name="robots" content="noindex, follow, nocache" />
