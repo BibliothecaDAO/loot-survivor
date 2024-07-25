@@ -47,7 +47,7 @@ export default function Head() {
       <meta name="twitter:site" content="@LootSurvivor" />
       <meta name="twitter:player" content="https://lootsurvivor.io/" />
       <meta name="twitter:player:width" content="360" />
-      <meta name="twitter:player:height" content="560" />
+      <meta name="twitter:player:height" content="680" />
       <meta
         name="twitter:image"
         content="https://survivor.realms.world/scenes/intro/beast.png"
