@@ -28,10 +28,10 @@ export default function Head() {
         property="og:description"
         content="Loot Survivor is a fully on-chain arcade dungeon crawler game on Starknet."
       />
-      <meta property="og:url" content="https://survivor.realms.world" />
+      <meta property="og:url" content="https://lootsurvivor.io" />
       <meta
         property="og:image"
-        content="https://survivor.realms.world/scenes/intro/beast.png"
+        content="https://lootsurvivor.io/scenes/intro/beast.png"
       />
       <meta property="og:image:width" content="800" />
       <meta property="og:image:height" content="600" />
