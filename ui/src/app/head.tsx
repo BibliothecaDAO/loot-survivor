@@ -28,30 +28,30 @@ export default function Head() {
         property="og:description"
         content="Loot Survivor is a fully on-chain arcade dungeon crawler game on Starknet."
       />
-      <meta property="og:url" content="https://survivor.realms.world" />
+      <meta property="og:url" content="https://lootsurvivor.io" />
       <meta
         property="og:image"
-        content="https://survivor.realms.world/scenes/intro/beast.png"
+        content="https://lootsurvivor.io/scenes/intro/beast.png"
       />
       <meta property="og:image:width" content="800" />
       <meta property="og:image:height" content="600" />
       <meta property="og:image:alt" content="Loot Survivor Beast" />
 
       {/* Twitter Card data */}
-      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:card" content="player" />
       <meta name="twitter:title" content="Loot Survivor" />
       <meta
         name="twitter:description"
         content="Loot Survivor is a fully on-chain arcade dungeon crawler game on Starknet."
       />
-      <meta name="twitter:site:id" content="1467726470533754880" />
-      <meta name="twitter:creator" content="@bibliothecadao" />
-      <meta name="twitter:creator:id" content="1467726470533754880" />
+      <meta name="twitter:site" content="@LootSurvivor" />
+      <meta name="twitter:player" content="https://lootsurvivor.io" />
+      <meta name="twitter:player:width" content="360" />
+      <meta name="twitter:player:height" content="680" />
       <meta
         name="twitter:image"
         content="https://survivor.realms.world/scenes/intro/beast.png"
       />
-
       {/* Robots data */}
       <meta name="robots" content="noindex, follow, nocache" />
       <meta
