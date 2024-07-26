@@ -1,5 +1,5 @@
-use integer::{u16_sqrt, u16_overflowing_add};
 use core::{option::OptionTrait, starknet::StorePacking, traits::{TryInto, Into}};
+use integer::{u16_sqrt, u16_overflowing_add};
 use loot::loot::{ItemId};
 
 const MAX_GREATNESS: u8 = 20;

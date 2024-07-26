@@ -1,8 +1,6 @@
 // a randomised deterministic marketplace
 use traits::{TryInto, Into};
 use array::{ArrayTrait, SpanTrait};
-use option::OptionTrait;
-use core::clone::Clone;
 use poseidon::poseidon_hash_span;
 use integer::u256_try_as_non_zero;
 
@@ -50,12 +48,12 @@ impl ImplMarket of IMarket {
     // @param adventurer_xp The xp of the adventurer used for randomness.
     // @param adventurer_stat_points The stat points of the adventurer used for market size
     // @return An array of items that are available on the market.
-    fn get_market_items(
+    fn get_available_items(
         adventurer_entropy: felt252, adventurer_xp: u16, adventurer_stat_points: u8
     ) -> Array<u8> {
         let market_size = ImplMarket::get_market_size(adventurer_stat_points);
         if market_size >= NUM_ITEMS.into() {
-            return ImplMarket::all_loot_items();
+            return ImplMarket::get_all_items();
         }
 
         let (seed, offset) = ImplMarket::get_market_seed_and_offset(
@@ -188,17 +186,109 @@ impl ImplMarket of IMarket {
         }
     }
 
-    // TODO: Use new cairo array init syntax instead of loop
-    fn all_loot_items() -> Array<u8> {
+    fn get_all_items() -> Array<u8> {
         let mut all_items = ArrayTrait::<u8>::new();
-        let mut item_id: u8 = 1;
-        loop {
-            if item_id > NUM_ITEMS {
-                break;
-            }
-            all_items.append(item_id);
-            item_id += 1;
-        };
+        all_items.append(1);
+        all_items.append(2);
+        all_items.append(3);
+        all_items.append(4);
+        all_items.append(5);
+        all_items.append(6);
+        all_items.append(7);
+        all_items.append(8);
+        all_items.append(9);
+        all_items.append(10);
+        all_items.append(11);
+        all_items.append(12);
+        all_items.append(13);
+        all_items.append(14);
+        all_items.append(15);
+        all_items.append(16);
+        all_items.append(17);
+        all_items.append(18);
+        all_items.append(19);
+        all_items.append(20);
+        all_items.append(21);
+        all_items.append(22);
+        all_items.append(23);
+        all_items.append(24);
+        all_items.append(25);
+        all_items.append(26);
+        all_items.append(27);
+        all_items.append(28);
+        all_items.append(29);
+        all_items.append(30);
+        all_items.append(31);
+        all_items.append(32);
+        all_items.append(33);
+        all_items.append(34);
+        all_items.append(35);
+        all_items.append(36);
+        all_items.append(37);
+        all_items.append(38);
+        all_items.append(39);
+        all_items.append(40);
+        all_items.append(41);
+        all_items.append(42);
+        all_items.append(43);
+        all_items.append(44);
+        all_items.append(45);
+        all_items.append(46);
+        all_items.append(47);
+        all_items.append(48);
+        all_items.append(49);
+        all_items.append(50);
+        all_items.append(51);
+        all_items.append(52);
+        all_items.append(53);
+        all_items.append(54);
+        all_items.append(55);
+        all_items.append(56);
+        all_items.append(57);
+        all_items.append(58);
+        all_items.append(59);
+        all_items.append(60);
+        all_items.append(61);
+        all_items.append(62);
+        all_items.append(63);
+        all_items.append(64);
+        all_items.append(65);
+        all_items.append(66);
+        all_items.append(67);
+        all_items.append(68);
+        all_items.append(69);
+        all_items.append(70);
+        all_items.append(71);
+        all_items.append(72);
+        all_items.append(73);
+        all_items.append(74);
+        all_items.append(75);
+        all_items.append(76);
+        all_items.append(77);
+        all_items.append(78);
+        all_items.append(79);
+        all_items.append(80);
+        all_items.append(81);
+        all_items.append(82);
+        all_items.append(83);
+        all_items.append(84);
+        all_items.append(85);
+        all_items.append(86);
+        all_items.append(87);
+        all_items.append(88);
+        all_items.append(89);
+        all_items.append(90);
+        all_items.append(91);
+        all_items.append(92);
+        all_items.append(93);
+        all_items.append(94);
+        all_items.append(95);
+        all_items.append(96);
+        all_items.append(97);
+        all_items.append(98);
+        all_items.append(99);
+        all_items.append(100);
+        all_items.append(101);
         all_items
     }
 
@@ -313,41 +403,41 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(1240000)]
-    fn test_get_market_items_gas_small_market() {
+    #[available_gas(361880)]
+    fn test_get_available_items_gas_small_market() {
         let adventurer_entropy = 12345;
         let adventurer_xp = 24;
         let adventurer_stats_points = 1;
-        ImplMarket::get_market_items(adventurer_entropy, adventurer_xp, adventurer_stats_points);
+        ImplMarket::get_available_items(adventurer_entropy, adventurer_xp, adventurer_stats_points);
     }
 
     #[test]
-    #[available_gas(4500000)]
-    fn test_get_market_items_gas_large_market() {
+    #[available_gas(1302470)]
+    fn test_get_available_items_gas_large_market() {
         let adventurer_entropy = 12345;
         let adventurer_xp = 24;
         let adventurer_stats_points = 4;
-        ImplMarket::get_market_items(adventurer_entropy, adventurer_xp, adventurer_stats_points);
+        ImplMarket::get_available_items(adventurer_entropy, adventurer_xp, adventurer_stats_points);
     }
 
     #[test]
-    #[available_gas(670000)]
-    fn test_get_market_items_gas_xlarge_market() {
+    #[available_gas(24010)]
+    fn test_get_available_items_gas_xlarge_market() {
         let adventurer_entropy = 12345;
         let adventurer_xp = 24;
         let adventurer_stats_points = 10;
-        ImplMarket::get_market_items(adventurer_entropy, adventurer_xp, adventurer_stats_points);
+        ImplMarket::get_available_items(adventurer_entropy, adventurer_xp, adventurer_stats_points);
     }
 
     #[test]
     #[available_gas(5700000)]
-    fn test_get_market_items_check_duplicates() {
+    fn test_get_available_items_check_duplicates() {
         let adventurer_entropy = 12345;
         let adventurer_xp = 24;
         let adventurer_stats_points = 1;
 
         // get items from the market
-        let market_items = ImplMarket::get_market_items(
+        let market_items = ImplMarket::get_available_items(
             adventurer_entropy, adventurer_xp, adventurer_stats_points
         );
 
@@ -375,12 +465,12 @@ mod tests {
 
     #[test]
     #[available_gas(4500000)]
-    fn test_get_market_items_count() {
+    fn test_get_available_items_count() {
         let adventurer_entropy = 12345;
         let adventurer_xp = 2;
         let adventurer_stats_points = 1;
 
-        let items = ImplMarket::get_market_items(
+        let items = ImplMarket::get_available_items(
             adventurer_entropy, adventurer_xp, adventurer_stats_points
         );
         assert(
@@ -389,7 +479,7 @@ mod tests {
         );
 
         let adventurer_stats_points = 2;
-        let items = ImplMarket::get_market_items(
+        let items = ImplMarket::get_available_items(
             adventurer_entropy, adventurer_xp, adventurer_stats_points
         );
         assert(
@@ -398,7 +488,7 @@ mod tests {
         );
 
         let adventurer_stats_points = 10;
-        let items = ImplMarket::get_market_items(
+        let items = ImplMarket::get_available_items(
             adventurer_entropy, adventurer_xp, adventurer_stats_points
         );
         assert(items.len() == NUM_ITEMS.into(), 'incorrect number of items');
@@ -412,7 +502,7 @@ mod tests {
         let adventurer_xp = 24;
         let adventurer_stats_points = 1;
 
-        let mut items_on_market = ImplMarket::get_market_items(
+        let mut items_on_market = ImplMarket::get_available_items(
             adventurer_entropy, adventurer_xp, adventurer_stats_points
         );
 
@@ -465,12 +555,12 @@ mod tests {
 
     #[test]
     #[available_gas(15500000)]
-    fn test_get_market_items_ownership() {
+    fn test_get_available_items_ownership() {
         let adventurer_entropy = 12345;
         let adventurer_xp = 24;
         let adventurer_stats_points = 1;
 
-        let items = @ImplMarket::get_market_items(
+        let items = @ImplMarket::get_available_items(
             adventurer_entropy, adventurer_xp, adventurer_stats_points
         );
         assert(items.len() == NUMBER_OF_ITEMS_PER_LEVEL.into(), 'incorrect number of items');
@@ -500,12 +590,12 @@ mod tests {
 
     #[test]
     #[available_gas(198000000)]
-    fn test_get_market_items_ownership_multi_level4() {
+    fn test_get_available_items_ownership_multi_level4() {
         let adventurer_entropy = 12345;
         let adventurer_xp = 24;
         let adventurer_stats_points = 4;
 
-        let items = @ImplMarket::get_market_items(
+        let items = @ImplMarket::get_available_items(
             adventurer_entropy, adventurer_xp, adventurer_stats_points
         );
         assert(
@@ -538,12 +628,12 @@ mod tests {
 
     #[test]
     #[available_gas(8000000)]
-    fn test_get_market_items_ownership_multi_level8() {
+    fn test_get_available_items_ownership_multi_level8() {
         let adventurer_entropy = 12345;
         let adventurer_xp = 24;
         let adventurer_stats_points = 8;
 
-        let items = @ImplMarket::get_market_items(
+        let items = @ImplMarket::get_available_items(
             adventurer_entropy, adventurer_xp, adventurer_stats_points
         );
         assert(items.len() == NUM_ITEMS.into(), 'incorrect number of items');
@@ -623,6 +713,28 @@ mod tests {
             // assert market offset is within range of items
             assert(market_offset != 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
             i += 1;
+        };
+    }
+
+    #[test]
+    #[available_gas(20700)]
+    fn test_get_all_items_gas() {
+        ImplMarket::get_all_items();
+    }
+
+    #[test]
+    fn test_get_all_items() {
+        let items = ImplMarket::get_all_items();
+        assert(items.len() == NUM_ITEMS.into(), 'incorrect number of items');
+        // verify item array contains numbers 1 through 101
+        let mut item_count: u32 = 0;
+        loop {
+            if item_count == NUM_ITEMS.into() {
+                break;
+            }
+            let item_id = *items.at(item_count);
+            assert(item_id.into() == item_count + 1, 'item id out of range');
+            item_count += 1;
         };
     }
 }

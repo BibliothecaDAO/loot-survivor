@@ -1,9 +1,9 @@
-use core::starknet::StorePacking;
-use super::item::{Item, ImplItem, ItemPacking};
-use loot::loot::ImplLoot;
-use loot::constants::SUFFIX_UNLOCK_GREATNESS;
-use combat::constants::CombatEnums::Slot;
 use adventurer::stats::{Stats, ImplStats};
+use combat::constants::CombatEnums::Slot;
+use core::starknet::StorePacking;
+use loot::constants::SUFFIX_UNLOCK_GREATNESS;
+use loot::loot::ImplLoot;
+use super::item::{Item, ImplItem, ItemPacking};
 
 #[derive(Drop, Copy, Serde, PartialEq)]
 struct Equipment { // 128 bits
@@ -302,12 +302,12 @@ const TWO_POW_112: u256 = 0x10000000000000000000000000000;
 // ---------------------------
 #[cfg(test)]
 mod tests {
-    use super::{Equipment, ImplEquipment, EquipmentPacking, Item};
-    use super::super::adventurer::ImplAdventurer;
-    use loot::constants::ItemId;
-    use adventurer::stats::Stats;
     use adventurer::item::{MAX_ITEM_XP, MAX_PACKABLE_XP, MAX_PACKABLE_ITEM_ID};
+    use adventurer::stats::Stats;
     use combat::constants::CombatEnums::Slot;
+    use loot::constants::ItemId;
+    use super::super::adventurer::ImplAdventurer;
+    use super::{Equipment, ImplEquipment, EquipmentPacking, Item};
 
     #[test]
     #[available_gas(1447420)]

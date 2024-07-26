@@ -53,7 +53,7 @@ impl ImplObstacle of IObstacle {
     fn get_tier(id: u8) -> Tier {
         if ImplObstacle::is_t1(id) {
             return Tier::T1(());
-        } else if ImplObstacle::is_t2(id){
+        } else if ImplObstacle::is_t2(id) {
             return Tier::T2(());
         } else if ImplObstacle::is_t3(id) {
             return Tier::T3(());

@@ -1,7 +1,8 @@
 use keccak::{cairo_keccak, u128_split};
 use integer::{BoundedInt, u32_as_non_zero, U32TryIntoNonZero};
 
-fn get_base64_char_set() -> Array<u8> {
+#[inline(always)]
+fn get_base64_char_set() -> Span<u8> {
     let mut result = array![
         'A',
         'B',
@@ -64,16 +65,15 @@ fn get_base64_char_set() -> Array<u8> {
         '6',
         '7',
         '8',
-        '9'
+        '9',
+        '+',
+        '/'
     ];
-    result
+    result.span()
 }
 
 fn bytes_base64_encode(_bytes: ByteArray) -> ByteArray {
-    let mut char_set = get_base64_char_set();
-    char_set.append('+');
-    char_set.append('/');
-    encode_bytes(_bytes, char_set.span())
+    encode_bytes(_bytes, get_base64_char_set())
 }
 
 

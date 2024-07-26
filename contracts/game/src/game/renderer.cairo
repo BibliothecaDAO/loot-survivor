@@ -2,7 +2,7 @@ use alexandria_encoding::base64::Base64Encoder;
 use adventurer::{
     adventurer::{Adventurer, ImplAdventurer},
     adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata}, equipment::ImplEquipment,
-    bag::Bag, item::{Item, ImplItem}, adventurer_utils::{AdventurerUtils},
+    bag::Bag, item::{Item, ImplItem},
 };
 use loot::{loot::ImplLoot, constants::{ImplItemNaming, ItemSuffix}};
 use core::{array::{SpanTrait, ArrayTrait}, traits::Into, clone::Clone,};
@@ -434,8 +434,7 @@ mod tests {
     use adventurer::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, stats::{Stats, ImplStats},
         adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata},
-        equipment::{Equipment, EquipmentPacking}, adventurer_utils::{AdventurerUtils},
-        bag::{Bag, IBag, ImplBag}, item::{ImplItem, Item},
+        equipment::{Equipment, EquipmentPacking}, bag::{Bag, IBag, ImplBag}, item::{ImplItem, Item},
     };
 
 

@@ -1,7 +1,7 @@
 use core::integer::u256_try_as_non_zero;
 use starknet::{StorePacking};
-use traits::{TryInto, Into};
 use super::stats::{Stats, StatsPacking, ImplStats};
+use traits::{TryInto, Into};
 
 #[derive(Drop, Copy, Serde)]
 struct AdventurerMetadata {

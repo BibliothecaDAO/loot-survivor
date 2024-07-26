@@ -1,5 +1,5 @@
-use core::{option::OptionTrait, starknet::{StorePacking}, traits::{TryInto, Into}};
 use core::integer::u8_overflowing_add;
+use core::{option::OptionTrait, starknet::{StorePacking}, traits::{TryInto, Into}};
 use loot::constants::ItemSuffix;
 
 const MAX_STAT_VALUE: u8 = 31;
@@ -65,16 +65,18 @@ impl StatsPacking of StorePacking<Stats, felt252> {
 
 #[generate_trait]
 impl ImplStats of IStat {
+
+    /// @notice Creates a new Stats instance with all stats set to 0.
+    /// @return A new Stats instance with all stats set to 0.
     fn new() -> Stats {
         Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         }
     }
 
-    // @notice applies stat boosts to adventurer
-    // @param self The Adventurer to apply stat boosts to.
-    // @param stats The stat boosts to apply to the adventurer.
-    // @dev overflow protection is handled further up the stack
+    /// @notice applies stat boosts to adventurer
+    /// @param self The Adventurer to apply stat boosts to.
+    /// @param stats The stat boosts to apply to the adventurer.
     #[inline(always)]
     fn apply_stats(ref self: Stats, stats: Stats) {
         self.increase_strength(stats.strength);
@@ -88,7 +90,6 @@ impl ImplStats of IStat {
     // @notice removes stat boosts from adventurer
     // @param self The Stats to remove stat boosts from.
     // @param stats The stat boosts to remove from the adventurer.
-    // @dev underflow protection is handled further up the stack
     #[inline(always)]
     fn remove_stats(ref self: Stats, stats: Stats) {
         self.decrease_strength(stats.strength);
@@ -224,60 +225,45 @@ impl ImplStats of IStat {
     }
 
     // @notice Increase the Adventurer's strength stat.
-    // @dev The function will add the specified amount to the strength stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the strength stat.
     #[inline(always)]
     fn increase_strength(ref self: Stats, amount: u8) {
-        self.strength.overflow_protected_stat_increase(amount)
+        self.strength += amount;
     }
 
     // @notice Increase the Adventurer's dexterity stat.
-    // @dev The function will add the specified amount to the dexterity stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the dexterity stat.
     #[inline(always)]
     fn increase_dexterity(ref self: Stats, amount: u8) {
-        self.dexterity.overflow_protected_stat_increase(amount)
+        self.dexterity += amount;
     }
 
     // @notice Increase the Adventurer's vitality stat.
-    // @dev The function will add the specified amount to the vitality stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the vitality stat.
     #[inline(always)]
     fn increase_vitality(ref self: Stats, amount: u8) {
-        self.vitality.overflow_protected_stat_increase(amount)
+        self.vitality += amount;
     }
 
     // @notice Increase the Adventurer's intelligence stat.
-    // @dev The function will add the specified amount to the intelligence stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the intelligence stat.
     #[inline(always)]
     fn increase_intelligence(ref self: Stats, amount: u8) {
-        self.intelligence.overflow_protected_stat_increase(amount)
+        self.intelligence += amount;
     }
 
     // @notice Increase the Adventurer's wisdom stat.
-    // @dev The function will add the specified amount to the wisdom stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the wisdom stat.
     #[inline(always)]
     fn increase_wisdom(ref self: Stats, amount: u8) {
-        self.wisdom.overflow_protected_stat_increase(amount)
+        self.wisdom += amount;
     }
 
     // @notice Increase the Adventurer's charisma stat.
-    // @dev The function will add the specified amount to the charisma stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the charisma stat.
     #[inline(always)]
     fn increase_charisma(ref self: Stats, amount: u8) {
-        self.charisma.overflow_protected_stat_increase(amount)
-    }
-
-    #[inline(always)]
-    fn overflow_protected_stat_increase(ref self: u8, amount: u8) {
-        if (u8_overflowing_add(self, amount).is_ok()) {
-            self += amount
-        } else {
-            self = MAX_STAT_VALUE
-        }
+        self.charisma += amount;
     }
 
     // @notice Decrease the Adventurer's strength stat.
@@ -550,20 +536,6 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(30000)]
-    fn test_overflow_protected_stat_increase() {
-        let mut stat: u8 = 1;
-
-        // base case
-        stat.overflow_protected_stat_increase(1);
-        assert(stat == 2, 'stat should increase by 1');
-
-        // u8 overflow case
-        stat.overflow_protected_stat_increase(255);
-        assert(stat == MAX_STAT_VALUE, 'stat should not overflow');
-    }
-
-    #[test]
     #[available_gas(249718)]
     fn test_apply_starting_stats_gas() {
         let mut stats = Stats {
@@ -693,5 +665,379 @@ mod tests {
         assert(*values.at(2) == 0, 'rand2 should be 0');
         assert(*values.at(1) == 255, 'rand1 should be 255');
         assert(*values.at(0) == 101, 'rand0 should be 101');
+    }
+
+    #[test]
+    fn test_apply_stats_all_positive() {
+        let mut base_stats = Stats {
+            strength: 5, dexterity: 5, vitality: 5, intelligence: 5, wisdom: 5, charisma: 5, luck: 0
+        };
+        let apply_stats = Stats {
+            strength: 2, dexterity: 3, vitality: 1, intelligence: 4, wisdom: 2, charisma: 3, luck: 0
+        };
+
+        base_stats.apply_stats(apply_stats);
+
+        assert(base_stats.strength == 7, 'strength should be 7');
+        assert(base_stats.dexterity == 8, 'dexterity should be 8');
+        assert(base_stats.vitality == 6, 'vitality should be 6');
+        assert(base_stats.intelligence == 9, 'intelligence should be 9');
+        assert(base_stats.wisdom == 7, 'wisdom should be 7');
+        assert(base_stats.charisma == 8, 'charisma should be 8');
+        assert(base_stats.luck == 0, 'luck should remain 0');
+    }
+
+    #[test]
+    fn test_apply_stats_some_zero() {
+        let mut base_stats = Stats {
+            strength: 5, dexterity: 5, vitality: 5, intelligence: 5, wisdom: 5, charisma: 5, luck: 0
+        };
+        let apply_stats = Stats {
+            strength: 0, dexterity: 3, vitality: 0, intelligence: 4, wisdom: 0, charisma: 2, luck: 0
+        };
+
+        base_stats.apply_stats(apply_stats);
+
+        assert(base_stats.strength == 5, 'strength should remain 5');
+        assert(base_stats.dexterity == 8, 'dexterity should be 8');
+        assert(base_stats.vitality == 5, 'vitality should remain 5');
+        assert(base_stats.intelligence == 9, 'intelligence should be 9');
+        assert(base_stats.wisdom == 5, 'wisdom should remain 5');
+        assert(base_stats.charisma == 7, 'charisma should be 7');
+        assert(base_stats.luck == 0, 'luck should remain 0');
+    }
+
+    #[test]
+    fn test_apply_stats_all_zero() {
+        let mut base_stats = Stats {
+            strength: 5, dexterity: 5, vitality: 5, intelligence: 5, wisdom: 5, charisma: 5, luck: 0
+        };
+        let apply_stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+
+        base_stats.apply_stats(apply_stats);
+
+        assert(base_stats.strength == 5, 'strength should remain 5');
+        assert(base_stats.dexterity == 5, 'dexterity should remain 5');
+        assert(base_stats.vitality == 5, 'vitality should remain 5');
+        assert(base_stats.intelligence == 5, 'intelligence should remain 5');
+        assert(base_stats.wisdom == 5, 'wisdom should remain 5');
+        assert(base_stats.charisma == 5, 'charisma should remain 5');
+        assert(base_stats.luck == 0, 'luck should remain 0');
+    }
+
+    #[test]
+    #[available_gas(1470)]
+    fn test_increase_strength_gas() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_strength(1);
+    }
+
+    #[test]
+    #[available_gas(1470)]
+    fn test_increase_dexterity_gas() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_dexterity(1);
+    }
+
+    #[test]
+    #[available_gas(1470)]
+    fn test_increase_vitality_gas() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_vitality(1);
+    }
+
+    #[test]
+    #[available_gas(1470)]
+    fn test_increase_intelligence_gas() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_intelligence(1);
+    }
+
+    #[test]
+    #[available_gas(1470)]
+    fn test_increase_wisdom_gas() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_wisdom(1);
+    }
+
+    #[test]
+    #[available_gas(1470)]
+    fn test_increase_charisma_gas() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_charisma(1);
+    }
+
+    #[test]
+    fn test_increase_strength() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        // basic case
+        stats.increase_strength(1);
+        assert(stats.strength == 1, 'strength should be 1');
+        // exceed max stat case
+        stats.increase_strength(50);
+        assert(stats.strength == 51, 'strength should be 51');
+    }
+
+    #[test]
+    fn test_increase_dexterity() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        // basic case
+        stats.increase_dexterity(1);
+        assert(stats.dexterity == 1, 'dexterity should be 1');
+        // overflow case
+        stats.increase_dexterity(50);
+        assert(stats.dexterity == 51, 'dexterity should be 51');
+    }
+
+    #[test]
+    fn test_increase_vitality() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        // basic case
+        stats.increase_vitality(1);
+        assert(stats.vitality == 1, 'vitality should be 1');
+        // overflow case
+        stats.increase_vitality(50);
+        assert(stats.vitality == 51, 'vitality should be 51');
+    }
+
+    #[test]
+    fn test_increase_intelligence() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        // basic case
+        stats.increase_intelligence(1);
+        assert(stats.intelligence == 1, 'intelligence should be 1');
+        // overflow case
+        stats.increase_intelligence(50);
+        assert(stats.intelligence == 51, 'intelligence should be 51');
+    }
+
+    #[test]
+    fn test_increase_wisdom() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        // basic case
+        stats.increase_wisdom(1);
+        assert(stats.wisdom == 1, 'wisdom should be 1');
+        // overflow case
+        stats.increase_wisdom(50);
+        assert(stats.wisdom == 51, 'wisdom should be 51');
+    }
+
+    #[test]
+    fn test_increase_charisma() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        // basic case
+        stats.increase_charisma(1);
+        assert(stats.charisma == 1, 'charisma should be 1');
+        // overflow case
+        stats.increase_charisma(50);
+        assert(stats.charisma == 51, 'charisma should be 51');
+    }
+
+    #[test]
+    #[available_gas(2440)]
+    fn test_decrease_strength_gas() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.decrease_strength(0);
+    }
+
+    #[test]
+    #[available_gas(2440)]
+    fn test_decrease_dexterity_gas() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.decrease_dexterity(0);
+    }
+
+    #[test]
+    #[available_gas(2440)]
+    fn test_decrease_vitality_gas() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.decrease_vitality(0);
+    }
+
+    #[test]
+    #[available_gas(2440)]
+    fn test_decrease_intelligence_gas() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.decrease_intelligence(0);
+    }
+
+    #[test]
+    #[available_gas(2440)]
+    fn test_decrease_wisdom_gas() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.decrease_wisdom(0);
+    }
+
+    #[test]
+    #[available_gas(2440)]
+    fn test_decrease_charisma_gas() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.decrease_charisma(0);
+    }
+
+    #[test]
+    fn test_decrease_strength() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_strength(2);
+        assert(stats.strength == 2, 'strength should be 2');
+        stats.decrease_strength(1);
+        assert(stats.strength == 1, 'strength should be 1');
+    }
+
+    #[test]
+    #[should_panic(expected: ('strength underflow',))]
+    fn test_decrease_strength_underflow() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_strength(5);
+        stats.decrease_strength(6);
+    }
+
+    #[test]
+    fn test_decrease_dexterity() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_dexterity(2);
+        assert(stats.dexterity == 2, 'dexterity should be 2');
+        stats.decrease_dexterity(1);
+        assert(stats.dexterity == 1, 'dexterity should be 1');
+    }
+
+    #[test]
+    #[should_panic(expected: ('dexterity underflow',))]
+    fn test_decrease_dexterity_underflow() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_dexterity(5);
+        stats.decrease_dexterity(6);
+    }
+
+    #[test]
+    fn test_decrease_vitality() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_vitality(2);
+        assert(stats.vitality == 2, 'vitality should be 2');
+        stats.decrease_vitality(1);
+        assert(stats.vitality == 1, 'vitality should be 1');
+    }
+
+    #[test]
+    #[should_panic(expected: ('vitality underflow',))]
+    fn test_decrease_vitality_underflow() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_vitality(5);
+        stats.decrease_vitality(6);
+    }
+
+    #[test]
+    fn test_decrease_intelligence() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_intelligence(2);
+        assert(stats.intelligence == 2, 'intelligence should be 2');
+        stats.decrease_intelligence(1);
+        assert(stats.intelligence == 1, 'intelligence should be 1');
+    }
+
+    #[test]
+    #[should_panic(expected: ('intelligence underflow',))]
+    fn test_decrease_intelligence_underflow() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_intelligence(5);
+        stats.decrease_intelligence(6);
+    }
+
+
+    #[test]
+    fn test_decrease_wisdom() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_wisdom(2);
+        assert(stats.wisdom == 2, 'wisdom should be 2');
+        stats.decrease_wisdom(1);
+        assert(stats.wisdom == 1, 'wisdom should be 1');
+    }
+
+    #[test]
+    #[should_panic(expected: ('wisdom underflow',))]
+    fn test_decrease_wisdom_underflow() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_wisdom(5);
+        stats.decrease_wisdom(6);
+    }
+
+
+    #[test]
+    fn test_decrease_charisma() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_charisma(2);
+        assert(stats.charisma == 2, 'charisma should be 2');
+        stats.decrease_charisma(1);
+        assert(stats.charisma == 1, 'charisma should be 1');
+    }
+
+    #[test]
+    #[should_panic(expected: ('charisma underflow',))]
+    fn test_decrease_charisma_underflow() {
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        stats.increase_charisma(5);
+        stats.decrease_charisma(6);
     }
 }

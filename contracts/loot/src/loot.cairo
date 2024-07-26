@@ -1434,17 +1434,27 @@ mod tests {
             );
 
             // verify maul uses set3
-            assert(is_special2_set3(ImplLoot::get_prefix1(ItemId::Maul, i.into())), 'invalid maul prefix');
+            assert(
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::Maul, i.into())),
+                'invalid maul prefix'
+            );
 
             // verify mace uses set1
-            assert(is_special2_set1(ImplLoot::get_prefix1(ItemId::Mace, i.into())), 'invalid mace prefix');
+            assert(
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::Mace, i.into())),
+                'invalid mace prefix'
+            );
 
             // verify club uses set2
-            assert(is_special2_set2(ImplLoot::get_prefix1(ItemId::Club, i.into())), 'invalid club prefix');
+            assert(
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::Club, i.into())),
+                'invalid club prefix'
+            );
 
             // verify katana uses set3
             assert(
-                is_special2_set3(ImplLoot::get_prefix1(ItemId::Katana, i.into())), 'invalid katana prefix'
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::Katana, i.into())),
+                'invalid katana prefix'
             );
 
             // verify falchion uses set1
@@ -1490,7 +1500,10 @@ mod tests {
             );
 
             // verify wand uses set2
-            assert(is_special2_set2(ImplLoot::get_prefix1(ItemId::Wand, i.into())), 'invalid wand prefix');
+            assert(
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::Wand, i.into())),
+                'invalid wand prefix'
+            );
 
             // verify grimoire uses set3
             assert(
@@ -1505,10 +1518,16 @@ mod tests {
             );
 
             // verify tome uses set2
-            assert(is_special2_set2(ImplLoot::get_prefix1(ItemId::Tome, i.into())), 'invalid tome prefix');
+            assert(
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::Tome, i.into())),
+                'invalid tome prefix'
+            );
 
             // verify book uses set3
-            assert(is_special2_set3(ImplLoot::get_prefix1(ItemId::Book, i.into())), 'invalid book prefix');
+            assert(
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::Book, i.into())),
+                'invalid book prefix'
+            );
 
             // verify divine robe uses set1
             assert(
@@ -1529,11 +1548,15 @@ mod tests {
             );
 
             // verify robe uses set1
-            assert(is_special2_set1(ImplLoot::get_prefix1(ItemId::Robe, i.into())), 'invalid robe prefix');
+            assert(
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::Robe, i.into())),
+                'invalid robe prefix'
+            );
 
             // verify shirt uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::Shirt, i.into())), 'invalid shirt prefix'
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::Shirt, i.into())),
+                'invalid shirt prefix'
             );
 
             // verify demon husk uses set3
@@ -1621,7 +1644,10 @@ mod tests {
             );
 
             // assert helm uses set2
-            assert(is_special2_set2(ImplLoot::get_prefix1(ItemId::Helm, i.into())), 'invalid helm prefix');
+            assert(
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::Helm, i.into())),
+                'invalid helm prefix'
+            );
 
             // assert demon crown uses set3
             assert(
@@ -1637,7 +1663,8 @@ mod tests {
 
             // assert war cap uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::WarCap, i.into())), 'invalid war cap prefix'
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::WarCap, i.into())),
+                'invalid war cap prefix'
             );
 
             // assert leather cap uses set3
@@ -1647,11 +1674,14 @@ mod tests {
             );
 
             // assert cap uses set1
-            assert(is_special2_set1(ImplLoot::get_prefix1(ItemId::Cap, i.into())), 'invalid cap prefix');
+            assert(
+                is_special2_set1(ImplLoot::get_prefix1(ItemId::Cap, i.into())), 'invalid cap prefix'
+            );
 
             // assert crown uses set2
             assert(
-                is_special2_set2(ImplLoot::get_prefix1(ItemId::Crown, i.into())), 'invalid crown prefix'
+                is_special2_set2(ImplLoot::get_prefix1(ItemId::Crown, i.into())),
+                'invalid crown prefix'
             );
 
             // assert divine hood uses set3
@@ -1673,7 +1703,10 @@ mod tests {
             );
 
             // assert hood uses set3
-            assert(is_special2_set3(ImplLoot::get_prefix1(ItemId::Hood, i.into())), 'invalid hood prefix');
+            assert(
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::Hood, i.into())),
+                'invalid hood prefix'
+            );
 
             // assert ornate belt is set1
             assert(
@@ -1760,7 +1793,10 @@ mod tests {
             );
 
             // assert sash is set3
-            assert(is_special2_set3(ImplLoot::get_prefix1(ItemId::Sash, i.into())), 'invalid sash prefix');
+            assert(
+                is_special2_set3(ImplLoot::get_prefix1(ItemId::Sash, i.into())),
+                'invalid sash prefix'
+            );
 
             // assert holy greaves is set1
             assert(

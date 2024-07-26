@@ -1,5 +1,5 @@
-use starknet::{StorePacking};
 use loot::constants::{ItemId, SUFFIX_UNLOCK_GREATNESS};
+use starknet::{StorePacking};
 
 use super::{adventurer::{Adventurer, ImplAdventurer}, item::{Item, ImplItem, ItemPacking}};
 

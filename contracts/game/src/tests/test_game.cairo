@@ -34,7 +34,7 @@ mod tests {
             MINIMUM_POTION_PRICE
         },
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, item::{Item, ImplItem},
-        bag::{Bag, IBag}, adventurer_utils::AdventurerUtils
+        bag::{Bag, IBag}
     };
     use beasts::constants::{BeastSettings, BeastId};
 
@@ -413,17 +413,17 @@ mod tests {
     //     let mut game = new_adventurer_lvl5(stat);
 
     //     let weapon_inventory = @game
-    //         .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Weapon(())));
+    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Weapon(())));
     //     let chest_inventory = @game
-    //         .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Chest(())));
+    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Chest(())));
     //     let head_inventory = @game
-    //         .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Head(())));
+    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Head(())));
     //     let waist_inventory = @game
-    //         .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Waist(())));
+    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Waist(())));
     //     let foot_inventory = @game
-    //         .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Foot(())));
+    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Foot(())));
     //     let hand_inventory = @game
-    //         .get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Hand(())));
+    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Hand(())));
 
     //     let purchase_weapon_id = *weapon_inventory.at(0);
     //     let purchase_chest_id = *chest_inventory.at(2);
@@ -803,7 +803,7 @@ mod tests {
         let mut game = new_adventurer(1000, 1696201757);
 
         // get valid item from market
-        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let market_items = @game.get_market(ADVENTURER_ID);
         let item_id = *market_items.at(0);
 
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
@@ -825,7 +825,7 @@ mod tests {
         let mut game = new_adventurer_lvl2(1000, 1696201757, 0);
 
         // get valid item from market
-        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let market_items = @game.get_market(ADVENTURER_ID);
         let item_id = *market_items.at(0);
         let mut shoppping_cart = ArrayTrait::<ItemPurchase>::new();
 
@@ -845,16 +845,15 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item already owned', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(62000000)]
     fn test_buy_duplicate_item_equipped() {
         // start new game on level 2 so we have access to the market
         let mut game = new_adventurer_lvl2(1000, 1696201757, 0);
 
         // get items from market
-        let market_items = @game.get_items_on_market_by_tier(ADVENTURER_ID, 5);
+        let market_items = @game.get_market(ADVENTURER_ID);
 
         // get first item on the market
-        let item_id = *market_items.at(0);
+        let item_id = *market_items.at(1);
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
         shopping_cart.append(ItemPurchase { item_id: item_id, equip: true });
         shopping_cart.append(ItemPurchase { item_id: item_id, equip: true });
@@ -875,7 +874,7 @@ mod tests {
         let mut game = new_adventurer_lvl2(1000, 1696201757, 0);
 
         // get items from market
-        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let market_items = @game.get_market(ADVENTURER_ID);
 
         // try to buy same item but equip one and put one in bag
         let item_id = *market_items.at(0);
@@ -907,7 +906,7 @@ mod tests {
     #[available_gas(65000000)]
     fn test_buy_and_bag_item() {
         let mut game = new_adventurer_lvl2(1000, 1696201757, 0);
-        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let market_items = @game.get_market(ADVENTURER_ID);
         let item_id = *market_items.at(0);
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
         shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
@@ -926,7 +925,7 @@ mod tests {
         let mut game = new_adventurer_lvl2(1000, 1696201757, 0);
 
         // get items from market
-        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let market_items = @game.get_market(ADVENTURER_ID);
 
         let mut purchased_weapon: u8 = 0;
         let mut purchased_chest: u8 = 0;
@@ -1066,13 +1065,12 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(92000000)]
     fn test_equip() {
         // start game on level 2 so we have access to the market
         let mut game = new_adventurer_lvl2(1002, 1696201757, 0);
 
         // get items from market
-        let market_items = @game.get_items_on_market_by_tier(ADVENTURER_ID, 5);
+        let market_items = @game.get_market(ADVENTURER_ID);
 
         let mut purchased_weapon: u8 = 0;
         let mut purchased_chest: u8 = 0;
@@ -1097,27 +1095,27 @@ mod tests {
             // if the item is a weapon and we haven't purchased a weapon yet
             // and the item is a tier 4 or 5 item
             // repeat this for everything
-            if (item_slot == Slot::Weapon(()) && purchased_weapon == 0 && item_id != 12) {
+            if (item_slot == Slot::Weapon(()) && item_tier == Tier::T5(()) && purchased_weapon == 0 && item_id != 12) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_weapon = item_id;
-            } else if (item_slot == Slot::Chest(()) && purchased_chest == 0) {
+            } else if (item_slot == Slot::Chest(()) && item_tier == Tier::T5(()) && purchased_chest == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_chest = item_id;
-            } else if (item_slot == Slot::Head(()) && purchased_head == 0) {
+            } else if (item_slot == Slot::Head(()) && item_tier == Tier::T5(()) && purchased_head == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_head = item_id;
-            } else if (item_slot == Slot::Waist(()) && purchased_waist == 0) {
+            } else if (item_slot == Slot::Waist(()) && item_tier == Tier::T5(()) && purchased_waist == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_waist = item_id;
-            } else if (item_slot == Slot::Foot(()) && purchased_foot == 0) {
+            } else if (item_slot == Slot::Foot(()) && item_tier == Tier::T5(()) && purchased_foot == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_foot = item_id;
-            } else if (item_slot == Slot::Hand(()) && purchased_hand == 0) {
+            } else if (item_slot == Slot::Hand(()) && item_tier == Tier::T5(()) && purchased_hand == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_hand = item_id;
@@ -1470,7 +1468,7 @@ mod tests {
         let mut game = new_adventurer_lvl2(1000, 1696201757, 0);
 
         // get items from market
-        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let market_items = @game.get_market(ADVENTURER_ID);
 
         // get first item on the market
         let purchased_item_id = *market_items.at(0);
@@ -1590,21 +1588,15 @@ mod tests {
         // buy a potion
         let potions = 1;
 
-        // item purchases
-        let chests_armor_on_market = @game.get_items_on_market_by_slot(ADVENTURER_ID, 2);
-        let mut chests_armor_id = 0;
-        let head_armor_on_market = @game.get_items_on_market_by_slot(ADVENTURER_ID, 3);
-        let mut head_armor_id = 0;
+        // buy two items
+        let market_inventory = @game.get_market(ADVENTURER_ID);
         let mut items_to_purchase = ArrayTrait::<ItemPurchase>::new();
-
-        if chests_armor_on_market.len() > 0 {
-            chests_armor_id = *chests_armor_on_market.at(1);
-            items_to_purchase.append(ItemPurchase { item_id: chests_armor_id, equip: true });
-        }
-        if head_armor_on_market.len() > 0 {
-            head_armor_id = *head_armor_on_market.at(1);
-            items_to_purchase.append(ItemPurchase { item_id: head_armor_id, equip: false });
-        }
+        let purchase_and_equip = ItemPurchase { item_id: *market_inventory.at(1), equip: true };
+        let purchase_and_not_equip = ItemPurchase {
+            item_id: *market_inventory.at(2), equip: false
+        };
+        items_to_purchase.append(purchase_and_equip);
+        items_to_purchase.append(purchase_and_not_equip);
 
         // stat upgrades
         let stat_upgrades = Stats {
@@ -1624,12 +1616,14 @@ mod tests {
         // assert stat point was used
         assert(adventurer.stat_upgrades_available == 0, 'should have used stat point');
         // assert adventurer has the purchased items
-        if chests_armor_id > 0 {
-            assert(adventurer.equipment.is_equipped(chests_armor_id), 'chest should be equipped');
-        }
-        if head_armor_id > 0 {
-            assert(!adventurer.equipment.is_equipped(head_armor_id), 'head should not be equipped');
-        }
+        assert(
+            adventurer.equipment.is_equipped(purchase_and_equip.item_id),
+            'purchase should be equipped'
+        );
+        assert(
+            !adventurer.equipment.is_equipped(purchase_and_not_equip.item_id),
+            'purchase should not be equipped'
+        );
     }
 
     fn _calculate_payout(bp: u256, price: u128) -> u256 {

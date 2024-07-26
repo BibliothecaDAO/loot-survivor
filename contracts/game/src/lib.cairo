@@ -93,7 +93,7 @@ mod Game {
                 MINIMUM_DAMAGE_TO_BEASTS, MINIMUM_DAMAGE_FROM_OBSTACLES, MAX_STAT_UPGRADES_AVAILABLE
             }
         },
-        adventurer_utils::AdventurerUtils, leaderboard::{Score, Leaderboard},
+        leaderboard::{Score, Leaderboard},
     };
 
     use market::{
@@ -433,7 +433,7 @@ mod Game {
             let weapon_specials = ImplLoot::get_specials(
                 adventurer.equipment.weapon.id,
                 adventurer.equipment.weapon.get_greatness(),
-                self.get_item_specials_seed(adventurer_id)
+                self._item_specials_seed.read(adventurer_id)
             );
 
             // get beast and beast seed
@@ -645,8 +645,17 @@ mod Game {
             // get number of stat upgrades available before we use them
             let pre_upgrade_stat_points = adventurer.stat_upgrades_available;
 
+            // reset stat upgrades available
+            adventurer.stat_upgrades_available = 0;
+
             // upgrade adventurer's stats
-            _upgrade_stats(@self, ref adventurer, stat_upgrades);
+            adventurer.stats.apply_stats(stat_upgrades);
+
+            // if adventurer upgraded vitality
+            if stat_upgrades.vitality != 0 {
+                // apply health boost
+                adventurer.apply_vitality_health_boost(stat_upgrades.vitality);
+            }
 
             // if the player is buying items, process purchases
             if (items.len() != 0) {
@@ -687,7 +696,6 @@ mod Game {
 
             _save_adventurer(ref self, ref adventurer, adventurer_id);
         }
-
         /// @title Update Cost to Play
         /// @notice Updates the cost to play the game based on the current price of LORDS.
         /// @dev This function fetches the current price of LORDS from the oracle and recalculates the cost to play the game.
@@ -831,82 +839,14 @@ mod Game {
         fn get_bag(self: @ContractState, adventurer_id: felt252) -> Bag {
             _load_bag(self, adventurer_id)
         }
-        fn get_items_on_market(self: @ContractState, adventurer_id: felt252) -> Array<u8> {
+        fn get_market(self: @ContractState, adventurer_id: felt252) -> Array<u8> {
             let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
             _assert_upgrades_available(adventurer);
 
             let adventurer_entropy = _get_adventurer_entropy(self, adventurer_id);
             _assert_entropy_set(self, adventurer_id);
 
-            _get_items_on_market(
-                self, adventurer_entropy, adventurer.xp, adventurer.stat_upgrades_available
-            )
-        }
-        fn get_items_on_market_by_slot(
-            self: @ContractState, adventurer_id: felt252, slot: u8
-        ) -> Array<u8> {
-            let adventurer = _load_adventurer(self, adventurer_id);
-            _assert_upgrades_available(adventurer);
-
-            let adventurer_entropy = _get_adventurer_entropy(self, adventurer_id);
-
-            _get_items_on_market_by_slot(
-                self,
-                adventurer_entropy,
-                adventurer.xp,
-                adventurer.stat_upgrades_available,
-                ImplCombat::u8_to_slot(slot)
-            )
-        }
-        fn get_items_on_market_by_tier(
-            self: @ContractState, adventurer_id: felt252, tier: u8
-        ) -> Array<u8> {
-            let adventurer = _load_adventurer_no_boosts(self, adventurer_id);
-            _assert_upgrades_available(adventurer);
-
-            let adventurer_entropy = _get_adventurer_entropy(self, adventurer_id);
-
-            if tier == 1 {
-                _get_items_on_market_by_tier(
-                    self,
-                    adventurer_entropy,
-                    adventurer.xp,
-                    adventurer.stat_upgrades_available,
-                    Tier::T1(())
-                )
-            } else if tier == 2 {
-                _get_items_on_market_by_tier(
-                    self,
-                    adventurer_entropy,
-                    adventurer.xp,
-                    adventurer.stat_upgrades_available,
-                    Tier::T2(())
-                )
-            } else if tier == 3 {
-                _get_items_on_market_by_tier(
-                    self,
-                    adventurer_entropy,
-                    adventurer.xp,
-                    adventurer.stat_upgrades_available,
-                    Tier::T3(())
-                )
-            } else if tier == 4 {
-                _get_items_on_market_by_tier(
-                    self,
-                    adventurer_entropy,
-                    adventurer.xp,
-                    adventurer.stat_upgrades_available,
-                    Tier::T4(())
-                )
-            } else {
-                _get_items_on_market_by_tier(
-                    self,
-                    adventurer_entropy,
-                    adventurer.xp,
-                    adventurer.stat_upgrades_available,
-                    Tier::T5(())
-                )
-            }
+            _get_market(adventurer_entropy, adventurer.xp, adventurer.stat_upgrades_available)
         }
 
         fn get_potion_price(self: @ContractState, adventurer_id: felt252) -> u16 {
@@ -1216,8 +1156,8 @@ mod Game {
             };
 
             // get market items based on new adventurer entropy 
-            let available_items = _get_items_on_market(
-                @self, adventurer_entropy, adventurer.xp, adventurer.stat_upgrades_available
+            let available_items = _get_market(
+                adventurer_entropy, adventurer.xp, adventurer.stat_upgrades_available
             );
 
             // emit upgrades available event 
@@ -1251,8 +1191,8 @@ mod Game {
         let adventurer_state = AdventurerState {
             owner: _get_owner(@self, adventurer_id), adventurer_id, adventurer_entropy, adventurer
         };
-        let available_items = _get_items_on_market(
-            @self, adventurer_entropy, adventurer.xp, adventurer.stat_upgrades_available
+        let available_items = _get_market(
+            adventurer_entropy, adventurer.xp, adventurer.stat_upgrades_available
         );
 
         // emit UpgradesAvailable event
@@ -1739,7 +1679,7 @@ mod Game {
             damage: STARTER_BEAST_ATTACK_DAMAGE,
             critical_hit: false,
             location: ImplCombat::slot_to_u8(
-                AdventurerUtils::get_random_attack_location(adventurer_entropy)
+                ImplAdventurer::get_random_attack_location(adventurer_entropy)
             ),
         }
     }
@@ -1761,10 +1701,10 @@ mod Game {
         explore_till_beast: bool
     ) {
         // generate randomenss for exploration
-        let (rnd1, rnd2) = AdventurerUtils::get_randomness(adventurer.xp, adventurer_entropy);
+        let (rnd1, rnd2) = ImplAdventurer::get_randomness(adventurer.xp, adventurer_entropy);
 
         // go exploring
-        match AdventurerUtils::get_random_explore(rnd1) {
+        match ImplAdventurer::get_random_explore(rnd1) {
             ExploreResult::Beast(()) => {
                 _beast_encounter(ref self, ref adventurer, adventurer_entropy, adventurer_id, rnd2);
             },
@@ -1949,7 +1889,7 @@ mod Game {
         let obstacle = adventurer.get_random_obstacle(entropy);
 
         // get a random attack location for the obstacle
-        let damage_slot = AdventurerUtils::get_random_attack_location(entropy.into());
+        let damage_slot = ImplAdventurer::get_random_attack_location(entropy.into());
 
         // get armor at the location being attacked
         let armor = adventurer.equipment.get_item_at_slot(damage_slot);
@@ -2112,7 +2052,7 @@ mod Game {
             // if item received a suffix as part of the level up
             if (suffix_unlocked) {
                 // get item specials seed
-                let item_specials_seed = self.get_item_specials_seed(adventurer_id);
+                let item_specials_seed = self._item_specials_seed.read(adventurer_id);
 
                 // if we don't have item specials seed yet
                 if item_specials_seed == 0 {
@@ -2138,9 +2078,7 @@ mod Game {
                     adventurer.stats.apply_suffix_boost(specials.special1);
 
                     // check if the suffix provided a vitality boost
-                    let vitality_boost = AdventurerUtils::get_vitality_item_boost(
-                        specials.special1
-                    );
+                    let vitality_boost = ImplAdventurer::get_vitality_item_boost(specials.special1);
                     if (vitality_boost != 0) {
                         // if so, adventurer gets health
                         let health_amount = vitality_boost.into() * VITALITY_INSTANT_HEALTH_BONUS;
@@ -2279,7 +2217,7 @@ mod Game {
         is_ambush: bool
     ) -> BattleDetails {
         // beasts attack random location on adventurer
-        let attack_location = AdventurerUtils::get_random_attack_location(
+        let attack_location = ImplAdventurer::get_random_attack_location(
             attack_location_rnd.into()
         );
 
@@ -2288,7 +2226,7 @@ mod Game {
 
         // get armor specials
         let armor_specials = ImplLoot::get_specials(
-            armor.id, armor.get_greatness(), self.get_item_specials_seed(adventurer_id)
+            armor.id, armor.get_greatness(), self._item_specials_seed.read(adventurer_id)
         );
 
         // process beast attack
@@ -2652,36 +2590,6 @@ mod Game {
         __event_PurchasedPotions(ref self, adventurer, adventurer_id, quantity, cost, health);
     }
 
-    /// @title Upgrade Stats
-    /// @notice Upgrades the stats of the adventurer.
-    /// @dev This function is called when the adventurer upgrades their stats.
-    /// @param self A reference to the ContractState object.
-    /// @param adventurer A reference to the adventurer.
-    /// @param stat_upgrades A Stats struct representing the stats to be upgraded.
-    fn _upgrade_stats(self: @ContractState, ref adventurer: Adventurer, stat_upgrades: Stats) {
-        if stat_upgrades.strength != 0 {
-            adventurer.stats.increase_strength(stat_upgrades.strength);
-        }
-        if stat_upgrades.dexterity != 0 {
-            adventurer.stats.increase_dexterity(stat_upgrades.dexterity);
-        }
-        if stat_upgrades.vitality != 0 {
-            adventurer.stats.increase_vitality(stat_upgrades.vitality);
-            adventurer
-                .increase_health(VITALITY_INSTANT_HEALTH_BONUS * stat_upgrades.vitality.into());
-        }
-        if stat_upgrades.intelligence != 0 {
-            adventurer.stats.increase_intelligence(stat_upgrades.intelligence);
-        }
-        if stat_upgrades.wisdom != 0 {
-            adventurer.stats.increase_wisdom(stat_upgrades.wisdom);
-        }
-        if stat_upgrades.charisma != 0 {
-            adventurer.stats.increase_charisma(stat_upgrades.charisma);
-        }
-        adventurer.stat_upgrades_available = 0;
-    }
-
     /// @title Buy Item
     /// @notice Buys an item with the item price adjusted for adventurer's charisma.
     /// @dev This function is called when the adventurer buys an item.
@@ -2810,6 +2718,7 @@ mod Game {
     /// @param self A reference to the ContractState object.
     /// @param adventurer_id A felt252 representing the unique ID of the adventurer.
     /// @return The bag.
+    #[inline(always)]
     fn _load_bag(self: @ContractState, adventurer_id: felt252) -> Bag {
         self._bag.read(adventurer_id)
     }
@@ -2847,7 +2756,9 @@ mod Game {
     fn _apply_item_stat_boost(
         self: @ContractState, ref adventurer: Adventurer, adventurer_id: felt252, item: Item
     ) {
-        let item_suffix = ImplLoot::get_suffix(item.id, self.get_item_specials_seed(adventurer_id));
+        let item_suffix = ImplLoot::get_suffix(
+            item.id, self._item_specials_seed.read(adventurer_id)
+        );
         adventurer.stats.apply_suffix_boost(item_suffix);
     }
 
@@ -2861,7 +2772,9 @@ mod Game {
     fn _remove_item_stat_boost(
         self: @ContractState, ref adventurer: Adventurer, adventurer_id: felt252, item: Item
     ) {
-        let item_suffix = ImplLoot::get_suffix(item.id, self.get_item_specials_seed(adventurer_id));
+        let item_suffix = ImplLoot::get_suffix(
+            item.id, self._item_specials_seed.read(adventurer_id)
+        );
         adventurer.stats.remove_suffix_boost(item_suffix);
 
         // if the adventurer's health is now above the max health due to a change in Vitality
@@ -2884,7 +2797,7 @@ mod Game {
         if adventurer.equipment.has_specials() {
             let item_stat_boosts = adventurer
                 .equipment
-                .get_stat_boosts(self.get_item_specials_seed(adventurer_id));
+                .get_stat_boosts(self._item_specials_seed.read(adventurer_id));
             adventurer.stats.apply_stats(item_stat_boosts);
         }
     }
@@ -2901,7 +2814,7 @@ mod Game {
         if adventurer.equipment.has_specials() {
             let item_stat_boosts = adventurer
                 .equipment
-                .get_stat_boosts(self.get_item_specials_seed(adventurer_id));
+                .get_stat_boosts(self._item_specials_seed.read(adventurer_id));
             adventurer.stats.remove_stats(item_stat_boosts);
         }
     }
@@ -3155,35 +3068,10 @@ mod Game {
         }
     }
 
-    fn _get_items_on_market(
-        self: @ContractState,
-        adventurer_entropy: felt252,
-        adventurer_xp: u16,
-        adventurer_stat_points: u8
+    fn _get_market(
+        adventurer_entropy: felt252, adventurer_xp: u16, adventurer_stat_points: u8
     ) -> Array<u8> {
-        ImplMarket::get_market_items(adventurer_entropy, adventurer_xp, adventurer_stat_points)
-    }
-    fn _get_items_on_market_by_slot(
-        self: @ContractState,
-        adventurer_entropy: felt252,
-        adventurer_xp: u16,
-        adventurer_stat_points: u8,
-        slot: Slot
-    ) -> Array<u8> {
-        ImplMarket::get_items_by_slot(
-            adventurer_entropy, adventurer_xp, adventurer_stat_points, slot
-        )
-    }
-    fn _get_items_on_market_by_tier(
-        self: @ContractState,
-        adventurer_entropy: felt252,
-        adventurer_xp: u16,
-        adventurer_stat_points: u8,
-        tier: Tier
-    ) -> Array<u8> {
-        ImplMarket::get_items_by_tier(
-            adventurer_entropy, adventurer_xp, adventurer_stat_points, tier
-        )
+        ImplMarket::get_available_items(adventurer_entropy, adventurer_xp, adventurer_stat_points)
     }
 
     fn _get_potion_price(self: @ContractState, adventurer_id: felt252) -> u16 {
@@ -4029,7 +3917,7 @@ mod Game {
                     _load_adventurer_name(self, adventurer_id_felt),
                     _load_adventurer_metadata(self, adventurer_id_felt),
                     _load_bag(self, adventurer_id_felt),
-                    self.get_item_specials_seed(adventurer_id_felt)
+                    self._item_specials_seed.read(adventurer_id_felt)
                 )
         }
     }
