@@ -2,10 +2,12 @@ import asyncio
 from typing import List, NewType, Optional, Dict
 import base64
 import ssl
+import json
 
 import strawberry
 import aiohttp_cors
 from aiohttp import web
+import aioredis
 from pymongo import MongoClient
 from strawberry.aiohttp.views import GraphQLView
 from indexer.utils import felt_to_str, str_to_felt, get_key_by_value
@@ -368,6 +370,17 @@ class U256ValueFilter:
     gt: Optional[U256Value] = None
     gte: Optional[U256Value] = None
 
+    def to_dict(self):
+        return {
+            "eq": serialize_u256(self.eq) if self.eq else None,
+            "_in": [serialize_u256(v) for v in self._in] if self._in else None,
+            "notIn": [serialize_u256(v) for v in self.notIn] if self.notIn else None,
+            "lt": serialize_u256(self.lt) if self.lt else None,
+            "lte": serialize_u256(self.lte) if self.lte else None,
+            "gt": serialize_u256(self.gt) if self.gt else None,
+            "gte": serialize_u256(self.gte) if self.gte else None,
+        }
+
 
 @strawberry.input
 class StringFilter:
@@ -382,6 +395,22 @@ class StringFilter:
     startsWith: Optional[StringValue] = None
     endsWith: Optional[StringValue] = None
 
+    def to_dict(self):
+        return {
+            "eq": serialize_string(self.eq) if self.eq else None,
+            "_in": [serialize_string(v) for v in self._in] if self._in else None,
+            "notIn": [serialize_string(v) for v in self.notIn] if self.notIn else None,
+            "lt": serialize_string(self.lt) if self.lt else None,
+            "lte": serialize_string(self.lte) if self.lte else None,
+            "gt": serialize_string(self.gt) if self.gt else None,
+            "gte": serialize_string(self.gte) if self.gte else None,
+            "contains": serialize_string(self.contains) if self.contains else None,
+            "startsWith": (
+                serialize_string(self.startsWith) if self.startsWith else None
+            ),
+            "endsWith": serialize_string(self.endsWith) if self.endsWith else None,
+        }
+
 
 @strawberry.input
 class HexValueFilter:
@@ -392,6 +421,17 @@ class HexValueFilter:
     lte: Optional[HexValue] = None
     gt: Optional[HexValue] = None
     gte: Optional[HexValue] = None
+
+    def to_dict(self):
+        return {
+            "eq": serialize_hex(self.eq) if self.eq else None,
+            "_in": [serialize_hex(v) for v in self._in] if self._in else None,
+            "notIn": [serialize_hex(v) for v in self.notIn] if self.notIn else None,
+            "lt": serialize_hex(self.lt) if self.lt else None,
+            "lte": serialize_hex(self.lte) if self.lte else None,
+            "gt": serialize_hex(self.gt) if self.gt else None,
+            "gte": serialize_hex(self.gte) if self.gte else None,
+        }
 
 
 @strawberry.input
@@ -404,6 +444,17 @@ class FeltValueFilter:
     gt: Optional[FeltValue] = None
     gte: Optional[FeltValue] = None
 
+    def to_dict(self):
+        return {
+            "eq": serialize_felt(self.eq) if self.eq else None,
+            "_in": [serialize_felt(v) for v in self._in] if self._in else None,
+            "notIn": [serialize_felt(v) for v in self.notIn] if self.notIn else None,
+            "lt": serialize_felt(self.lt) if self.lt else None,
+            "lte": serialize_felt(self.lte) if self.lte else None,
+            "gt": serialize_felt(self.gt) if self.gt else None,
+            "gte": serialize_felt(self.gte) if self.gte else None,
+        }
+
 
 @strawberry.input
 class DateTimeFilter:
@@ -414,6 +465,17 @@ class DateTimeFilter:
     lte: Optional[str] = None
     gt: Optional[str] = None
     gte: Optional[str] = None
+
+    def to_dict(self):
+        return {
+            "eq": self.eq,
+            "_in": self._in,
+            "notIn": self.notIn,
+            "lt": self.lt,
+            "lte": self.lte,
+            "gt": self.gt,
+            "gte": self.gte,
+        }
 
 
 @strawberry.input
@@ -426,6 +488,17 @@ class IntFilter:
     gt: Optional[int] = None
     gte: Optional[int] = None
 
+    def to_dict(self):
+        return {
+            "eq": self.eq,
+            "_in": self._in,
+            "notIn": self.notIn,
+            "lt": self.lt,
+            "lte": self.lte,
+            "gt": self.gt,
+            "gte": self.gte,
+        }
+
 
 @strawberry.input
 class FloatFilter:
@@ -437,10 +510,26 @@ class FloatFilter:
     gt: Optional[float] = None
     gte: Optional[float] = None
 
+    def to_dict(self):
+        return {
+            "eq": self.eq,
+            "_in": self._in,
+            "notIn": self.notIn,
+            "lt": self.lt,
+            "lte": self.lte,
+            "gt": self.gt,
+            "gte": self.gte,
+        }
+
 
 @strawberry.input
 class BooleanFilter:
     eq: Optional[bool] = None
+
+    def to_dict(self):
+        return {
+            "eq": self.eq,
+        }
 
 
 @strawberry.input
@@ -456,6 +545,20 @@ class ClassFilter:
     startsWith: Optional[ClassValue] = None
     endsWith: Optional[ClassValue] = None
 
+    def to_dict(self):
+        return {
+            "eq": serialize_class(self.eq) if self.eq else None,
+            "_in": [serialize_class(v) for v in self._in] if self._in else None,
+            "notIn": [serialize_class(v) for v in self.notIn] if self.notIn else None,
+            "lt": serialize_class(self.lt) if self.lt else None,
+            "lte": serialize_class(self.lte) if self.lte else None,
+            "gt": serialize_class(self.gt) if self.gt else None,
+            "gte": serialize_class(self.gte) if self.gte else None,
+            "contains": serialize_class(self.contains) if self.contains else None,
+            "startsWith": serialize_class(self.startsWith) if self.startsWith else None,
+            "endsWith": serialize_class(self.endsWith) if self.endsWith else None,
+        }
+
 
 @strawberry.input
 class BeastFilter:
@@ -469,6 +572,20 @@ class BeastFilter:
     contains: Optional[BeastValue] = None
     startsWith: Optional[BeastValue] = None
     endsWith: Optional[BeastValue] = None
+
+    def to_dict(self):
+        return {
+            "eq": serialize_beast(self.eq) if self.eq else None,
+            "_in": [serialize_beast(v) for v in self._in] if self._in else None,
+            "notIn": [serialize_beast(v) for v in self.notIn] if self.notIn else None,
+            "lt": serialize_beast(self.lt) if self.lt else None,
+            "lte": serialize_beast(self.lte) if self.lte else None,
+            "gt": serialize_beast(self.gt) if self.gt else None,
+            "gte": serialize_beast(self.gte) if self.gte else None,
+            "contains": serialize_beast(self.contains) if self.contains else None,
+            "startsWith": serialize_beast(self.startsWith) if self.startsWith else None,
+            "endsWith": serialize_beast(self.endsWith) if self.endsWith else None,
+        }
 
 
 @strawberry.input
@@ -484,6 +601,34 @@ class AdventurerStatusFilter:
     startsWith: Optional[AdventurerStatusValue] = None
     endsWith: Optional[AdventurerStatusValue] = None
 
+    def to_dict(self):
+        return {
+            "eq": serialize_adventurer_status(self.eq) if self.eq else None,
+            "_in": (
+                [serialize_adventurer_status(v) for v in self._in] if self._in else None
+            ),
+            "notIn": (
+                [serialize_adventurer_status(v) for v in self.notIn]
+                if self.notIn
+                else None
+            ),
+            "lt": serialize_adventurer_status(self.lt) if self.lt else None,
+            "lte": serialize_adventurer_status(self.lte) if self.lte else None,
+            "gt": serialize_adventurer_status(self.gt) if self.gt else None,
+            "gte": serialize_adventurer_status(self.gte) if self.gte else None,
+            "contains": (
+                serialize_adventurer_status(self.contains) if self.contains else None
+            ),
+            "startsWith": (
+                serialize_adventurer_status(self.startsWith)
+                if self.startsWith
+                else None
+            ),
+            "endsWith": (
+                serialize_adventurer_status(self.endsWith) if self.endsWith else None
+            ),
+        }
+
 
 @strawberry.input
 class DiscoveryFilter:
@@ -497,6 +642,24 @@ class DiscoveryFilter:
     contains: Optional[DiscoveryValue] = None
     startsWith: Optional[DiscoveryValue] = None
     endsWith: Optional[DiscoveryValue] = None
+
+    def to_dict(self):
+        return {
+            "eq": serialize_discovery(self.eq) if self.eq else None,
+            "_in": [serialize_discovery(v) for v in self._in] if self._in else None,
+            "notIn": (
+                [serialize_discovery(v) for v in self.notIn] if self.notIn else None
+            ),
+            "lt": serialize_discovery(self.lt) if self.lt else None,
+            "lte": serialize_discovery(self.lte) if self.lte else None,
+            "gt": serialize_discovery(self.gt) if self.gt else None,
+            "gte": serialize_discovery(self.gte) if self.gte else None,
+            "contains": serialize_discovery(self.contains) if self.contains else None,
+            "startsWith": (
+                serialize_discovery(self.startsWith) if self.startsWith else None
+            ),
+            "endsWith": serialize_discovery(self.endsWith) if self.endsWith else None,
+        }
 
 
 @strawberry.input
@@ -512,6 +675,28 @@ class SubDiscoveryFilter:
     startsWith: Optional[SubDiscoveryValue] = None
     endsWith: Optional[SubDiscoveryValue] = None
 
+    def to_dict(self):
+        return {
+            "eq": serialize_sub_discovery(self.eq) if self.eq else None,
+            "_in": [serialize_sub_discovery(v) for v in self._in] if self._in else None,
+            "notIn": (
+                [serialize_sub_discovery(v) for v in self.notIn] if self.notIn else None
+            ),
+            "lt": serialize_sub_discovery(self.lt) if self.lt else None,
+            "lte": serialize_sub_discovery(self.lte) if self.lte else None,
+            "gt": serialize_sub_discovery(self.gt) if self.gt else None,
+            "gte": serialize_sub_discovery(self.gte) if self.gte else None,
+            "contains": (
+                serialize_sub_discovery(self.contains) if self.contains else None
+            ),
+            "startsWith": (
+                serialize_sub_discovery(self.startsWith) if self.startsWith else None
+            ),
+            "endsWith": (
+                serialize_sub_discovery(self.endsWith) if self.endsWith else None
+            ),
+        }
+
 
 @strawberry.input
 class ObstacleFilter:
@@ -526,10 +711,33 @@ class ObstacleFilter:
     startsWith: Optional[ObstacleValue] = None
     endsWith: Optional[ObstacleValue] = None
 
+    def to_dict(self):
+        return {
+            "eq": serialize_obstacle(self.eq) if self.eq else None,
+            "_in": [serialize_obstacle(v) for v in self._in] if self._in else None,
+            "notIn": (
+                [serialize_obstacle(v) for v in self.notIn] if self.notIn else None
+            ),
+            "lt": serialize_obstacle(self.lt) if self.lt else None,
+            "lte": serialize_obstacle(self.lte) if self.lte else None,
+            "gt": serialize_obstacle(self.gt) if self.gt else None,
+            "gte": serialize_obstacle(self.gte) if self.gte else None,
+            "contains": serialize_obstacle(self.contains) if self.contains else None,
+            "startsWith": (
+                serialize_obstacle(self.startsWith) if self.startsWith else None
+            ),
+            "endsWith": serialize_obstacle(self.endsWith) if self.endsWith else None,
+        }
+
 
 @strawberry.input
 class AttackerFilter:
     eq: Optional[AttackerValue] = None
+
+    def to_dict(self):
+        return {
+            "eq": serialize_attacker(self.eq) if self.eq else None,
+        }
 
 
 @strawberry.input
@@ -545,6 +753,20 @@ class ItemFilter:
     startsWith: Optional[ItemValue] = None
     endsWith: Optional[ItemValue] = None
 
+    def to_dict(self):
+        return {
+            "eq": serialize_item(self.eq) if self.eq else None,
+            "_in": [serialize_item(v) for v in self._in] if self._in else None,
+            "notIn": [serialize_item(v) for v in self.notIn] if self.notIn else None,
+            "lt": serialize_item(self.lt) if self.lt else None,
+            "lte": serialize_item(self.lte) if self.lte else None,
+            "gt": serialize_item(self.gt) if self.gt else None,
+            "gte": serialize_item(self.gte) if self.gte else None,
+            "contains": serialize_item(self.contains) if self.contains else None,
+            "startsWith": serialize_item(self.startsWith) if self.startsWith else None,
+            "endsWith": serialize_item(self.endsWith) if self.endsWith else None,
+        }
+
 
 @strawberry.input
 class MaterialFilter:
@@ -558,6 +780,24 @@ class MaterialFilter:
     contains: Optional[MaterialValue] = None
     startsWith: Optional[MaterialValue] = None
     endsWith: Optional[MaterialValue] = None
+
+    def to_dict(self):
+        return {
+            "eq": serialize_material(self.eq) if self.eq else None,
+            "_in": [serialize_material(v) for v in self._in] if self._in else None,
+            "notIn": (
+                [serialize_material(v) for v in self.notIn] if self.notIn else None
+            ),
+            "lt": serialize_material(self.lt) if self.lt else None,
+            "lte": serialize_material(self.lte) if self.lte else None,
+            "gt": serialize_material(self.gt) if self.gt else None,
+            "gte": serialize_material(self.gte) if self.gte else None,
+            "contains": serialize_material(self.contains) if self.contains else None,
+            "startsWith": (
+                serialize_material(self.startsWith) if self.startsWith else None
+            ),
+            "endsWith": serialize_material(self.endsWith) if self.endsWith else None,
+        }
 
 
 @strawberry.input
@@ -573,6 +813,24 @@ class TypeFilter:
     startsWith: Optional[TypeValue] = None
     endsWith: Optional[TypeValue] = None
 
+    def to_dict(self):
+        return {
+            "eq": serialize_item_type(self.eq) if self.eq else None,
+            "_in": [serialize_item_type(v) for v in self._in] if self._in else None,
+            "notIn": (
+                [serialize_item_type(v) for v in self.notIn] if self.notIn else None
+            ),
+            "lt": serialize_item_type(self.lt) if self.lt else None,
+            "lte": serialize_item_type(self.lte) if self.lte else None,
+            "gt": serialize_item_type(self.gt) if self.gt else None,
+            "gte": serialize_item_type(self.gte) if self.gte else None,
+            "contains": serialize_item_type(self.contains) if self.contains else None,
+            "startsWith": (
+                serialize_item_type(self.startsWith) if self.startsWith else None
+            ),
+            "endsWith": serialize_item_type(self.endsWith) if self.endsWith else None,
+        }
+
 
 @strawberry.input
 class Special1Filter:
@@ -586,6 +844,24 @@ class Special1Filter:
     contains: Optional[Special1Value] = None
     startsWith: Optional[Special1Value] = None
     endsWith: Optional[Special1Value] = None
+
+    def to_dict(self):
+        return {
+            "eq": serialize_special_1(self.eq) if self.eq else None,
+            "_in": [serialize_special_1(v) for v in self._in] if self._in else None,
+            "notIn": (
+                [serialize_special_1(v) for v in self.notIn] if self.notIn else None
+            ),
+            "lt": serialize_special_1(self.lt) if self.lt else None,
+            "lte": serialize_special_1(self.lte) if self.lte else None,
+            "gt": serialize_special_1(self.gt) if self.gt else None,
+            "gte": serialize_special_1(self.gte) if self.gte else None,
+            "contains": serialize_special_1(self.contains) if self.contains else None,
+            "startsWith": (
+                serialize_special_1(self.startsWith) if self.startsWith else None
+            ),
+            "endsWith": serialize_special_1(self.endsWith) if self.endsWith else None,
+        }
 
 
 @strawberry.input
@@ -601,6 +877,24 @@ class Special2Filter:
     startsWith: Optional[Special2Value] = None
     endsWith: Optional[Special2Value] = None
 
+    def to_dict(self):
+        return {
+            "eq": serialize_special_2(self.eq) if self.eq else None,
+            "_in": [serialize_special_2(v) for v in self._in] if self._in else None,
+            "notIn": (
+                [serialize_special_2(v) for v in self.notIn] if self.notIn else None
+            ),
+            "lt": serialize_special_2(self.lt) if self.lt else None,
+            "lte": serialize_special_2(self.lte) if self.lte else None,
+            "gt": serialize_special_2(self.gt) if self.gt else None,
+            "gte": serialize_special_2(self.gte) if self.gte else None,
+            "contains": serialize_special_2(self.contains) if self.contains else None,
+            "startsWith": (
+                serialize_special_2(self.startsWith) if self.startsWith else None
+            ),
+            "endsWith": serialize_special_2(self.endsWith) if self.endsWith else None,
+        }
+
 
 @strawberry.input
 class Special3Filter:
@@ -614,6 +908,24 @@ class Special3Filter:
     contains: Optional[Special3Value] = None
     startsWith: Optional[Special3Value] = None
     endsWith: Optional[Special3Value] = None
+
+    def to_dict(self):
+        return {
+            "eq": serialize_special_3(self.eq) if self.eq else None,
+            "_in": [serialize_special_3(v) for v in self._in] if self._in else None,
+            "notIn": (
+                [serialize_special_3(v) for v in self.notIn] if self.notIn else None
+            ),
+            "lt": serialize_special_3(self.lt) if self.lt else None,
+            "lte": serialize_special_3(self.lte) if self.lte else None,
+            "gt": serialize_special_3(self.gt) if self.gt else None,
+            "gte": serialize_special_3(self.gte) if self.gte else None,
+            "contains": serialize_special_3(self.contains) if self.contains else None,
+            "startsWith": (
+                serialize_special_3(self.startsWith) if self.startsWith else None
+            ),
+            "endsWith": serialize_special_3(self.endsWith) if self.endsWith else None,
+        }
 
 
 @strawberry.input
@@ -629,6 +941,24 @@ class StatusFilter:
     startsWith: Optional[StatusValue] = None
     endsWith: Optional[StatusValue] = None
 
+    def to_dict(self):
+        return {
+            "eq": serialize_item_status(self.eq) if self.eq else None,
+            "_in": [serialize_item_status(v) for v in self._in] if self._in else None,
+            "notIn": (
+                [serialize_item_status(v) for v in self.notIn] if self.notIn else None
+            ),
+            "lt": serialize_item_status(self.lt) if self.lt else None,
+            "lte": serialize_item_status(self.lte) if self.lte else None,
+            "gt": serialize_item_status(self.gt) if self.gt else None,
+            "gte": serialize_item_status(self.gte) if self.gte else None,
+            "contains": serialize_item_status(self.contains) if self.contains else None,
+            "startsWith": (
+                serialize_item_status(self.startsWith) if self.startsWith else None
+            ),
+            "endsWith": serialize_item_status(self.endsWith) if self.endsWith else None,
+        }
+
 
 @strawberry.input
 class SlotFilter:
@@ -643,11 +973,31 @@ class SlotFilter:
     startsWith: Optional[SlotValue] = None
     endsWith: Optional[SlotValue] = None
 
+    def to_dict(self):
+        return {
+            "eq": serialize_slot(self.eq) if self.eq else None,
+            "_in": [serialize_slot(v) for v in self._in] if self._in else None,
+            "notIn": [serialize_slot(v) for v in self.notIn] if self.notIn else None,
+            "lt": serialize_slot(self.lt) if self.lt else None,
+            "lte": serialize_slot(self.lte) if self.lte else None,
+            "gt": serialize_slot(self.gt) if self.gt else None,
+            "gte": serialize_slot(self.gte) if self.gte else None,
+            "contains": serialize_slot(self.contains) if self.contains else None,
+            "startsWith": serialize_slot(self.startsWith) if self.startsWith else None,
+            "endsWith": serialize_slot(self.endsWith) if self.endsWith else None,
+        }
+
 
 @strawberry.input
 class OrderByInput:
     asc: Optional[bool] = False
     desc: Optional[bool] = False
+
+    def to_dict(self):
+        return {
+            "asc": self.asc,
+            "desc": self.desc,
+        }
 
 
 @strawberry.input
@@ -683,12 +1033,57 @@ class AdventurersFilter:
     lastUpdatedTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
 
+    def to_dict(self):
+        return {
+            "id": self.id.to_dict() if self.id else None,
+            "entropy": self.entropy.to_dict() if self.entropy else None,
+            "owner": self.owner.to_dict() if self.owner else None,
+            "name": self.name.to_dict() if self.name else None,
+            "health": self.health.to_dict() if self.health else None,
+            "strength": self.strength.to_dict() if self.strength else None,
+            "dexterity": self.dexterity.to_dict() if self.dexterity else None,
+            "vitality": self.vitality.to_dict() if self.vitality else None,
+            "intelligence": self.intelligence.to_dict() if self.intelligence else None,
+            "wisdom": self.wisdom.to_dict() if self.wisdom else None,
+            "charisma": self.charisma.to_dict() if self.charisma else None,
+            "luck": self.luck.to_dict() if self.luck else None,
+            "xp": self.xp.to_dict() if self.xp else None,
+            "weapon": self.weapon.to_dict() if self.weapon else None,
+            "chest": self.chest.to_dict() if self.chest else None,
+            "head": self.head.to_dict() if self.head else None,
+            "waist": self.waist.to_dict() if self.waist else None,
+            "foot": self.foot.to_dict() if self.foot else None,
+            "hand": self.hand.to_dict() if self.hand else None,
+            "neck": self.neck.to_dict() if self.neck else None,
+            "ring": self.ring.to_dict() if self.ring else None,
+            "beastHealth": self.beastHealth.to_dict() if self.beastHealth else None,
+            "statUpgrades": self.statUpgrades.to_dict() if self.statUpgrades else None,
+            "startEntropy": self.startEntropy.to_dict() if self.startEntropy else None,
+            "revealBlock": self.revealBlock.to_dict() if self.revealBlock else None,
+            "actionsPerBlock": (
+                self.actionsPerBlock.to_dict() if self.actionsPerBlock else None
+            ),
+            "gold": self.gold.to_dict() if self.gold else None,
+            "createdTime": self.createdTime.to_dict() if self.createdTime else None,
+            "lastUpdatedTime": (
+                self.lastUpdatedTime.to_dict() if self.lastUpdatedTime else None
+            ),
+            "timestamp": self.timestamp.to_dict() if self.timestamp else None,
+        }
+
 
 @strawberry.input
 class ScoresFilter:
     adventurerId: Optional[FeltValueFilter] = None
     timestamp: Optional[DateTimeFilter] = None
     totalPayout: Optional[U256ValueFilter] = None
+
+    def to_dict(self):
+        return {
+            "adventurerId": self.adventurerId.to_dict() if self.adventurerId else None,
+            "timestamp": self.timestamp.to_dict() if self.timestamp else None,
+            "totalPayout": self.totalPayout.to_dict() if self.totalPayout else None,
+        }
 
 
 @strawberry.input
@@ -717,6 +1112,49 @@ class DiscoveriesFilter:
     timestamp: Optional[DateTimeFilter] = None
     txHash: Optional[HexValueFilter] = None
 
+    def to_dict(self):
+        return {
+            "adventurerId": self.adventurerId.to_dict() if self.adventurerId else None,
+            "adventurerHealth": (
+                self.adventurerHealth.to_dict() if self.adventurerHealth else None
+            ),
+            "disoveryType": self.disoveryType.to_dict() if self.disoveryType else None,
+            "subDiscoveryType": (
+                self.subDiscoveryType.to_dict() if self.subDiscoveryType else None
+            ),
+            "outputAmount": self.outputAmount.to_dict() if self.outputAmount else None,
+            "obstacle": self.obstacle.to_dict() if self.obstacle else None,
+            "obstacleLevel": (
+                self.obstacleLevel.to_dict() if self.obstacleLevel else None
+            ),
+            "dodgedObstacle": (
+                self.dodgedObstacle.to_dict() if self.dodgedObstacle else None
+            ),
+            "damageTaken": self.damageTaken.to_dict() if self.damageTaken else None,
+            "damageLocation": (
+                self.damageLocation.to_dict() if self.damageLocation else None
+            ),
+            "xpEarnedAdventurer": (
+                self.xpEarnedAdventurer.to_dict() if self.xpEarnedAdventurer else None
+            ),
+            "xpEarnedItems": (
+                self.xpEarnedItems.to_dict() if self.xpEarnedItems else None
+            ),
+            "entity": self.entity.to_dict() if self.entity else None,
+            "entityLevel": self.entityLevel.to_dict() if self.entityLevel else None,
+            "entityHealth": self.entityHealth.to_dict() if self.entityHealth else None,
+            "special1": self.special1.to_dict() if self.special1 else None,
+            "special2": self.special2.to_dict() if self.special2 else None,
+            "special3": self.special3.to_dict() if self.special3 else None,
+            "seed": self.seed.to_dict() if self.seed else None,
+            "ambushed": self.ambushed.to_dict() if self.ambushed else None,
+            "discoveryTime": (
+                self.discoveryTime.to_dict() if self.discoveryTime else None
+            ),
+            "timestamp": self.timestamp.to_dict() if self.timestamp else None,
+            "txHash": self.txHash.to_dict() if self.txHash else None,
+        }
+
 
 @strawberry.input
 class BeastsFilter:
@@ -732,6 +1170,24 @@ class BeastsFilter:
     createdTime: Optional[DateTimeFilter] = None
     lastUpdatedTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
+
+    def to_dict(self):
+        return {
+            "beast": self.beast.to_dict() if self.beast else None,
+            "adventurerId": self.adventurerId.to_dict() if self.adventurerId else None,
+            "seed": self.seed.to_dict() if self.seed else None,
+            "special1": self.special1.to_dict() if self.special1 else None,
+            "special2": self.special2.to_dict() if self.special2 else None,
+            "special3": self.special3.to_dict() if self.special3 else None,
+            "health": self.health.to_dict() if self.health else None,
+            "level": self.level.to_dict() if self.level else None,
+            "slainOnTime": self.slainOnTime.to_dict() if self.slainOnTime else None,
+            "createdTime": self.createdTime.to_dict() if self.createdTime else None,
+            "lastUpdatedTime": (
+                self.lastUpdatedTime.to_dict() if self.lastUpdatedTime else None
+            ),
+            "timestamp": self.timestamp.to_dict() if self.timestamp else None,
+        }
 
 
 @strawberry.input
@@ -758,6 +1214,41 @@ class BattlesFilter:
     discoveryTime: Optional[DateTimeFilter] = None
     blockTime: Optional[DateTimeFilter] = None
 
+    def to_dict(self):
+        return {
+            "adventurerId": self.adventurerId.to_dict() if self.adventurerId else None,
+            "adventurerHealth": (
+                self.adventurerHealth.to_dict() if self.adventurerHealth else None
+            ),
+            "beast": self.beast.to_dict() if self.beast else None,
+            "beastHealth": self.beastHealth.to_dict() if self.beastHealth else None,
+            "beastLevel": self.beastLevel.to_dict() if self.beastLevel else None,
+            "special1": self.special1.to_dict() if self.special1 else None,
+            "special2": self.special2.to_dict() if self.special2 else None,
+            "special3": self.special3.to_dict() if self.special3 else None,
+            "seed": self.seed.to_dict() if self.seed else None,
+            "attacker": self.attacker.to_dict() if self.attacker else None,
+            "fled": self.fled.to_dict() if self.fled else None,
+            "damageDealt": self.damageDealt.to_dict() if self.damageDealt else None,
+            "criticalHit": self.criticalHit.to_dict() if self.criticalHit else None,
+            "damageTaken": self.damageTaken.to_dict() if self.damageTaken else None,
+            "damageLocation": (
+                self.damageLocation.to_dict() if self.damageLocation else None
+            ),
+            "xpEarnedAdventurer": (
+                self.xpEarnedAdventurer.to_dict() if self.xpEarnedAdventurer else None
+            ),
+            "xpEarnedItems": (
+                self.xpEarnedItems.to_dict() if self.xpEarnedItems else None
+            ),
+            "goldEarned": self.goldEarned.to_dict() if self.goldEarned else None,
+            "txHash": self.txHash.to_dict() if self.txHash else None,
+            "discoveryTime": (
+                self.discoveryTime.to_dict() if self.discoveryTime else None
+            ),
+            "blockTime": self.blockTime.to_dict() if self.blockTime else None,
+        }
+
 
 @strawberry.input
 class ItemsFilter:
@@ -773,6 +1264,24 @@ class ItemsFilter:
     xp: Optional[FeltValueFilter] = None
     isAvailable: Optional[BooleanFilter] = None
     timestamp: Optional[DateTimeFilter] = None
+
+    def to_dict(self):
+        return {
+            "item": self.item.to_dict() if self.item else None,
+            "adventurerId": self.adventurerId.to_dict() if self.adventurerId else None,
+            "ownerAddress": self.ownerAddress.to_dict() if self.ownerAddress else None,
+            "owner": self.owner.to_dict() if self.owner else None,
+            "equipped": self.equipped.to_dict() if self.equipped else None,
+            "purchasedTime": (
+                self.purchasedTime.to_dict() if self.purchasedTime else None
+            ),
+            "special1": self.special1.to_dict() if self.special1 else None,
+            "special2": self.special2.to_dict() if self.special2 else None,
+            "special3": self.special3.to_dict() if self.special3 else None,
+            "xp": self.xp.to_dict() if self.xp else None,
+            "isAvailable": self.isAvailable.to_dict() if self.isAvailable else None,
+            "timestamp": self.timestamp.to_dict() if self.timestamp else None,
+        }
 
 
 @strawberry.input
@@ -809,12 +1318,58 @@ class AdventurersOrderByInput:
     lastUpdatedTime: Optional[OrderByInput] = None
     timestamp: Optional[OrderByInput] = None
 
+    def to_dict(self):
+        return {
+            "id": self.id.to_dict() if self.id else None,
+            "entropy": self.entropy.to_dict() if self.entropy else None,
+            "owner": self.owner.to_dict() if self.owner else None,
+            "name": self.name.to_dict() if self.name else None,
+            "health": self.health.to_dict() if self.health else None,
+            "level": self.level.to_dict() if self.level else None,
+            "strength": self.strength.to_dict() if self.strength else None,
+            "dexterity": self.dexterity.to_dict() if self.dexterity else None,
+            "vitality": self.vitality.to_dict() if self.vitality else None,
+            "intelligence": self.intelligence.to_dict() if self.intelligence else None,
+            "wisdom": self.wisdom.to_dict() if self.wisdom else None,
+            "charisma": self.charisma.to_dict() if self.charisma else None,
+            "luck": self.luck.to_dict() if self.luck else None,
+            "xp": self.xp.to_dict() if self.xp else None,
+            "weapon": self.weapon.to_dict() if self.weapon else None,
+            "chest": self.chest.to_dict() if self.chest else None,
+            "head": self.head.to_dict() if self.head else None,
+            "waist": self.waist.to_dict() if self.waist else None,
+            "foot": self.foot.to_dict() if self.foot else None,
+            "hand": self.hand.to_dict() if self.hand else None,
+            "neck": self.neck.to_dict() if self.neck else None,
+            "ring": self.ring.to_dict() if self.ring else None,
+            "beastHealth": self.beastHealth.to_dict() if self.beastHealth else None,
+            "statUpgrades": self.statUpgrades.to_dict() if self.statUpgrades else None,
+            "startEntropy": self.startEntropy.to_dict() if self.startEntropy else None,
+            "revealBlock": self.revealBlock.to_dict() if self.revealBlock else None,
+            "actionsPerBlock": (
+                self.actionsPerBlock.to_dict() if self.actionsPerBlock else None
+            ),
+            "gold": self.gold.to_dict() if self.gold else None,
+            "createdTime": self.createdTime.to_dict() if self.createdTime else None,
+            "lastUpdatedTime": (
+                self.lastUpdatedTime.to_dict() if self.lastUpdatedTime else None
+            ),
+            "timestamp": self.timestamp.to_dict() if self.timestamp else None,
+        }
+
 
 @strawberry.input
 class ScoresOrderByInput:
     adventurerId: Optional[OrderByInput] = None
     timestamp: Optional[OrderByInput] = None
     totalPayout: Optional[OrderByInput] = None
+
+    def to_dict(self):
+        return {
+            "adventurerId": self.adventurerId.to_dict() if self.adventurerId else None,
+            "timestamp": self.timestamp.to_dict() if self.timestamp else None,
+            "totalPayout": self.totalPayout.to_dict() if self.totalPayout else None,
+        }
 
 
 @strawberry.input
@@ -843,6 +1398,49 @@ class DiscoveriesOrderByInput:
     seed: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
 
+    def to_dict(self):
+        return {
+            "adventurerId": self.adventurerId.to_dict() if self.adventurerId else None,
+            "adventurerHealth": (
+                self.adventurerHealth.to_dict() if self.adventurerHealth else None
+            ),
+            "disoveryType": self.disoveryType.to_dict() if self.disoveryType else None,
+            "subDiscoveryType": (
+                self.subDiscoveryType.to_dict() if self.subDiscoveryType else None
+            ),
+            "outputAmount": self.outputAmount.to_dict() if self.outputAmount else None,
+            "obstacle": self.obstacle.to_dict() if self.obstacle else None,
+            "obstacleLevel": (
+                self.obstacleLevel.to_dict() if self.obstacleLevel else None
+            ),
+            "dodgedObstacle": (
+                self.dodgedObstacle.to_dict() if self.dodgedObstacle else None
+            ),
+            "damageTaken": self.damageTaken.to_dict() if self.damageTaken else None,
+            "damageLocation": (
+                self.damageLocation.to_dict() if self.damageLocation else None
+            ),
+            "xpEarnedAdventurer": (
+                self.xpEarnedAdventurer.to_dict() if self.xpEarnedAdventurer else None
+            ),
+            "xpEarnedItems": (
+                self.xpEarnedItems.to_dict() if self.xpEarnedItems else None
+            ),
+            "entity": self.entity.to_dict() if self.entity else None,
+            "entityLevel": self.entityLevel.to_dict() if self.entityLevel else None,
+            "entityHealth": self.entityHealth.to_dict() if self.entityHealth else None,
+            "special1": self.special1.to_dict() if self.special1 else None,
+            "special2": self.special2.to_dict() if self.special2 else None,
+            "special3": self.special3.to_dict() if self.special3 else None,
+            "ambushed": self.ambushed.to_dict() if self.ambushed else None,
+            "discoveryTime": (
+                self.discoveryTime.to_dict() if self.discoveryTime else None
+            ),
+            "timestamp": self.timestamp.to_dict() if self.timestamp else None,
+            "seed": self.seed.to_dict() if self.seed else None,
+            "txHash": self.txHash.to_dict() if self.txHash else None,
+        }
+
 
 @strawberry.input
 class BeastsOrderByInput:
@@ -858,6 +1456,24 @@ class BeastsOrderByInput:
     createdTime: Optional[OrderByInput] = None
     lastUpdatedTime: Optional[OrderByInput] = None
     timestamp: Optional[OrderByInput] = None
+
+    def to_dict(self):
+        return {
+            "beast": self.beast.to_dict() if self.beast else None,
+            "adventurerId": self.adventurerId.to_dict() if self.adventurerId else None,
+            "seed": self.seed.to_dict() if self.seed else None,
+            "special1": self.special1.to_dict() if self.special1 else None,
+            "special2": self.special2.to_dict() if self.special2 else None,
+            "special3": self.special3.to_dict() if self.special3 else None,
+            "health": self.health.to_dict() if self.health else None,
+            "level": self.level.to_dict() if self.level else None,
+            "slainOnTime": self.slainOnTime.to_dict() if self.slainOnTime else None,
+            "createdTime": self.createdTime.to_dict() if self.createdTime else None,
+            "lastUpdatedTime": (
+                self.lastUpdatedTime.to_dict() if self.lastUpdatedTime else None
+            ),
+            "timestamp": self.timestamp.to_dict() if self.timestamp else None,
+        }
 
 
 @strawberry.input
@@ -885,6 +1501,42 @@ class BattlesOrderByInput:
     blockTime: Optional[OrderByInput] = None
     timestamp: Optional[OrderByInput] = None
 
+    def to_dict(self):
+        return {
+            "adventurerId": self.adventurerId.to_dict() if self.adventurerId else None,
+            "adventurerHealth": (
+                self.adventurerHealth.to_dict() if self.adventurerHealth else None
+            ),
+            "beast": self.beast.to_dict() if self.beast else None,
+            "beastHealth": self.beastHealth.to_dict() if self.beastHealth else None,
+            "beastLevel": self.beastLevel.to_dict() if self.beastLevel else None,
+            "special1": self.special1.to_dict() if self.special1 else None,
+            "special2": self.special2.to_dict() if self.special2 else None,
+            "special3": self.special3.to_dict() if self.special3 else None,
+            "seed": self.seed.to_dict() if self.seed else None,
+            "attacker": self.attacker.to_dict() if self.attacker else None,
+            "fled": self.fled.to_dict() if self.fled else None,
+            "damageDealt": self.damageDealt.to_dict() if self.damageDealt else None,
+            "criticalHit": self.criticalHit.to_dict() if self.criticalHit else None,
+            "damageTaken": self.damageTaken.to_dict() if self.damageTaken else None,
+            "damageLocation": (
+                self.damageLocation.to_dict() if self.damageLocation else None
+            ),
+            "xpEarnedAdventurer": (
+                self.xpEarnedAdventurer.to_dict() if self.xpEarnedAdventurer else None
+            ),
+            "xpEarnedItems": (
+                self.xpEarnedItems.to_dict() if self.xpEarnedItems else None
+            ),
+            "goldEarned": self.goldEarned.to_dict() if self.goldEarned else None,
+            "txHash": self.txHash.to_dict() if self.txHash else None,
+            "discoveryTime": (
+                self.discoveryTime.to_dict() if self.discoveryTime else None
+            ),
+            "blockTime": self.blockTime.to_dict() if self.blockTime else None,
+            "timestamp": self.timestamp.to_dict() if self.timestamp else None,
+        }
+
 
 @strawberry.input
 class ItemsOrderByInput:
@@ -900,6 +1552,24 @@ class ItemsOrderByInput:
     xp: Optional[OrderByInput] = None
     isAvailable: Optional[OrderByInput] = None
     timestamp: Optional[OrderByInput] = None
+
+    def to_dict(self):
+        return {
+            "item": self.item.to_dict() if self.item else None,
+            "adventurerId": self.adventurerId.to_dict() if self.adventurerId else None,
+            "ownerAddress": self.ownerAddress.to_dict() if self.ownerAddress else None,
+            "owner": self.owner.to_dict() if self.owner else None,
+            "equipped": self.equipped.to_dict() if self.equipped else None,
+            "purchasedTime": (
+                self.purchasedTime.to_dict() if self.purchasedTime else None
+            ),
+            "special1": self.special1.to_dict() if self.special1 else None,
+            "special2": self.special2.to_dict() if self.special2 else None,
+            "special3": self.special3.to_dict() if self.special3 else None,
+            "xp": self.xp.to_dict() if self.xp else None,
+            "isAvailable": self.isAvailable.to_dict() if self.isAvailable else None,
+            "timestamp": self.timestamp.to_dict() if self.timestamp else None,
+        }
 
 
 @strawberry.type
@@ -1260,7 +1930,7 @@ def process_filters(obj, prefix=None):
     return filters
 
 
-def get_adventurers(
+async def get_adventurers(
     info,
     where: Optional[AdventurersFilter] = {},
     limit: Optional[int] = 10,
@@ -1268,6 +1938,20 @@ def get_adventurers(
     orderBy: Optional[AdventurersOrderByInput] = {},
 ) -> List[Adventurer]:
     db = info.context["db"]
+    redis = info.context["redis"]
+
+    # Convert custom filter objects to dictionaries
+    where_dict = where.to_dict() if where else {}
+    orderBy_dict = orderBy.to_dict() if orderBy else {}
+
+    # Create a unique cache key based on the query parameters
+    cache_key = f"adventurers:{json.dumps(where_dict)}:{limit}:{skip}:{json.dumps(orderBy_dict)}"
+    cached_result = await redis.get(cache_key)
+
+    cached_result = await redis.get(cache_key)
+    if cached_result:
+        cached_result = cached_result.decode("utf-8")  # Decode the byte string
+        return [Adventurer.from_mongo(item) for item in json.loads(cached_result)]
 
     filter = {"_cursor.to": None}
 
@@ -1312,10 +1996,15 @@ def get_adventurers(
         db["adventurers"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
     )
 
-    return [Adventurer.from_mongo(t) for t in query]
+    result = [Adventurer.from_mongo(t) for t in query]
+
+    # Cache the result
+    await redis.set(cache_key, json.dumps([item.__dict__ for item in result]), ex=60)
+
+    return result
 
 
-def get_scores(
+async def get_scores(
     info,
     where: Optional[ScoresFilter] = {},
     limit: Optional[int] = 10,
@@ -1323,6 +2012,21 @@ def get_scores(
     orderBy: Optional[ScoresOrderByInput] = {},
 ) -> List[Score]:
     db = info.context["db"]
+    redis = info.context["redis"]
+
+    # Convert custom filter objects to dictionaries
+    where_dict = where.to_dict() if where else {}
+    orderBy_dict = orderBy.to_dict() if orderBy else {}
+
+    # Create a unique cache key based on the query parameters
+    cache_key = (
+        f"scores:{json.dumps(where_dict)}:{limit}:{skip}:{json.dumps(orderBy_dict)}"
+    )
+    cached_result = await redis.get(cache_key)
+
+    if cached_result:
+        cached_result = cached_result.decode("utf-8")  # Decode the byte string
+        return [Score.from_mongo(item) for item in json.loads(cached_result)]
 
     filter = {"_cursor.to": None}
 
@@ -1357,10 +2061,15 @@ def get_scores(
 
     query = db["scores"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
 
-    return [Score.from_mongo(t) for t in query]
+    result = [Score.from_mongo(t) for t in query]
+
+    # Cache the result
+    await redis.set(cache_key, json.dumps([item.__dict__ for item in result]), ex=60)
+
+    return result
 
 
-def get_discoveries(
+async def get_discoveries(
     info,
     where: Optional[DiscoveriesFilter] = {},
     limit: Optional[int] = 10,
@@ -1368,6 +2077,19 @@ def get_discoveries(
     orderBy: Optional[DiscoveriesOrderByInput] = {},
 ) -> List[Discovery]:
     db = info.context["db"]
+    redis = info.context["redis"]
+
+    # Convert custom filter objects to dictionaries
+    where_dict = where.to_dict() if where else {}
+    orderBy_dict = orderBy.to_dict() if orderBy else {}
+
+    # Create a unique cache key based on the query parameters
+    cache_key = f"discoveries:{json.dumps(where_dict)}:{limit}:{skip}:{json.dumps(orderBy_dict)}"
+    cached_result = await redis.get(cache_key)
+
+    if cached_result:
+        cached_result = cached_result.decode("utf-8")  # Decode the byte string
+        return [Discovery.from_mongo(item) for item in json.loads(cached_result)]
 
     filter = {"cursor.to": None}
 
@@ -1407,10 +2129,15 @@ def get_discoveries(
         db["discoveries"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
     )
 
-    return [Discovery.from_mongo(t) for t in query]
+    result = [Discovery.from_mongo(t) for t in query]
+
+    # Cache the result
+    await redis.set(cache_key, json.dumps([item.__dict__ for item in result]), ex=60)
+
+    return result
 
 
-def get_beasts(
+async def get_beasts(
     info,
     where: Optional[BeastsFilter] = {},
     limit: Optional[int] = 10,
@@ -1418,6 +2145,21 @@ def get_beasts(
     orderBy: Optional[BeastsOrderByInput] = {},
 ) -> List[Discovery]:
     db = info.context["db"]
+    redis = info.context["redis"]
+
+    # Convert custom filter objects to dictionaries
+    where_dict = where.to_dict() if where else {}
+    orderBy_dict = orderBy.to_dict() if orderBy else {}
+
+    # Create a unique cache key based on the query parameters
+    cache_key = (
+        f"beasts:{json.dumps(where_dict)}:{limit}:{skip}:{json.dumps(orderBy_dict)}"
+    )
+    cached_result = await redis.get(cache_key)
+
+    if cached_result:
+        cached_result = cached_result.decode("utf-8")  # Decode the byte string
+        return [Beast.from_mongo(item) for item in json.loads(cached_result)]
 
     filter = {"_cursor.to": None}
 
@@ -1456,10 +2198,15 @@ def get_beasts(
 
     query = db["beasts"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
 
-    return [Beast.from_mongo(t) for t in query]
+    result = [Beast.from_mongo(t) for t in query]
+
+    # Cache the result
+    await redis.set(cache_key, json.dumps([item.__dict__ for item in result]), ex=60)
+
+    return result
 
 
-def get_battles(
+async def get_battles(
     info,
     where: Optional[BattlesFilter] = {},
     limit: Optional[int] = 10,
@@ -1467,6 +2214,21 @@ def get_battles(
     orderBy: Optional[BattlesOrderByInput] = {},
 ) -> List[Battle]:
     db = info.context["db"]
+    redis = info.context["redis"]
+
+    # Convert custom filter objects to dictionaries
+    where_dict = where.to_dict() if where else {}
+    orderBy_dict = orderBy.to_dict() if orderBy else {}
+
+    # Create a unique cache key based on the query parameters
+    cache_key = (
+        f"battles:{json.dumps(where_dict)}:{limit}:{skip}:{json.dumps(orderBy_dict)}"
+    )
+    cached_result = await redis.get(cache_key)
+
+    if cached_result:
+        cached_result = cached_result.decode("utf-8")  # Decode the byte string
+        return [Battle.from_mongo(item) for item in json.loads(cached_result)]
 
     filter = {"_cursor.to": None}
 
@@ -1501,10 +2263,15 @@ def get_battles(
 
     query = db["battles"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
 
-    return [Battle.from_mongo(t) for t in query]
+    result = [Battle.from_mongo(t) for t in query]
+
+    # Cache the result
+    await redis.set(cache_key, json.dumps([item.__dict__ for item in result]), ex=60)
+
+    return result
 
 
-def get_items(
+async def get_items(
     info,
     where: Optional[ItemsFilter] = {},
     limit: Optional[int] = 10,
@@ -1512,6 +2279,21 @@ def get_items(
     orderBy: Optional[ItemsOrderByInput] = {},
 ) -> List[Item]:
     db = info.context["db"]
+    redis = info.context["redis"]
+
+    # Convert custom filter objects to dictionaries
+    where_dict = where.to_dict() if where else {}
+    orderBy_dict = orderBy.to_dict() if orderBy else {}
+
+    # Create a unique cache key based on the query parameters
+    cache_key = (
+        f"items:{json.dumps(where_dict)}:{limit}:{skip}:{json.dumps(orderBy_dict)}"
+    )
+    cached_result = await redis.get(cache_key)
+
+    if cached_result:
+        cached_result = cached_result.decode("utf-8")  # Decode the byte string
+        return [Item.from_mongo(item) for item in json.loads(cached_result)]
 
     filter = {"_cursor.to": None}
 
@@ -1543,9 +2325,15 @@ def get_items(
             sort_var = key
             sort_dir = -1
             break
+
     query = db["items"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
 
-    return [Item.from_mongo(t) for t in query]
+    result = [Item.from_mongo(t) for t in query]
+
+    # Cache the result
+    await redis.set(cache_key, json.dumps([item.__dict__ for item in result]), ex=60)
+
+    return result
 
 
 @strawberry.type
@@ -1559,21 +2347,24 @@ class Query:
 
 
 class IndexerGraphQLView(GraphQLView):
-    def __init__(self, db, **kwargs):
+    def __init__(self, db, redis, **kwargs):
         super().__init__(**kwargs)
         self._db = db
+        self._redis = redis
 
     async def get_context(self, _request, _response):
-        return {"db": self._db}
+        return {"db": self._db, "redis": self._redis}
 
 
-async def run_graphql_api(mongo=None, port="8080"):
+async def run_graphql_api(mongo=None, redis_url="redis://redis", port="8080"):
     mongo = MongoClient(mongo)
     db_name = "mongo".replace("-", "_")
     db = mongo[db_name]
 
+    redis = await aioredis.from_url(redis_url)
+
     schema = strawberry.Schema(query=Query)
-    view = IndexerGraphQLView(db, schema=schema)
+    view = IndexerGraphQLView(db, redis, schema=schema)
 
     app = web.Application()
 
@@ -1597,19 +2388,17 @@ async def run_graphql_api(mongo=None, port="8080"):
         },
     )
 
-
-
     runner = web.AppRunner(app)
     await runner.setup()
 
     # Comment out with path to your certs if deploying with SSL support
-    #ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-    #ssl_context.load_cert_chain(
-        #"/etc/letsencrypt/live/fullchain.pem",
-        #"/etc/letsencrypt/live/privkey.pem",
+    # ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    # ssl_context.load_cert_chain(
+    # "/etc/letsencrypt/live/fullchain.pem",
+    # "/etc/letsencrypt/live/privkey.pem",
     # )
-    #site = web.TCPSite(runner, "0.0.0.0", int(port), ssl_context=ssl_context)
-    
+    # site = web.TCPSite(runner, "0.0.0.0", int(port), ssl_context=ssl_context)
+
     site = web.TCPSite(runner, "0.0.0.0", int(port))
     await site.start()
 

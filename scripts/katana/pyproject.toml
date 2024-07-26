@@ -16,6 +16,7 @@ aiohttp = "^3.8.4"
 aiohttp-cors = "^0.7.0"
 starknet-py = {version = "^0.17.0a0", allow-prereleases = true}
 apibara = "0.7.3a5"
+aioredis = "^2.0.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"
