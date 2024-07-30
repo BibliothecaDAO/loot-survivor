@@ -1,11 +1,6 @@
 use core::{option::OptionTrait, starknet::StorePacking, traits::{TryInto, Into}};
-use integer::{u16_sqrt, u16_overflowing_add};
+use integer::{u16_sqrt};
 use loot::loot::{ItemId};
-
-const MAX_GREATNESS: u8 = 20;
-const MAX_PACKABLE_ITEM_ID: u8 = 127;
-const MAX_PACKABLE_XP: u16 = 511;
-const MAX_ITEM_XP: u16 = 400;
 
 #[derive(Drop, Copy, PartialEq, Serde)]
 struct Item { // 21 storage bits
@@ -14,16 +9,22 @@ struct Item { // 21 storage bits
 }
 
 impl ItemPacking of StorePacking<Item, felt252> {
+    /// @notice Packs an Item into a felt252
+    /// @param value: The Item to pack
+    /// @return felt252: The packed Item
     fn pack(value: Item) -> felt252 {
         assert(value.id <= MAX_PACKABLE_ITEM_ID, 'item id pack overflow');
         assert(value.xp <= MAX_PACKABLE_XP, 'item xp pack overflow');
         (value.id.into() + value.xp.into() * TWO_POW_7).try_into().unwrap()
     }
 
+    /// @notice Unpacks a felt252 into an Item
+    /// @param value: The felt252 to unpack
+    /// @return Item: The unpacked Item
     fn unpack(value: felt252) -> Item {
         let packed = value.into();
-        let (packed, id) = integer::U256DivRem::div_rem(packed, TWO_POW_7.try_into().unwrap());
-        let (_, xp) = integer::U256DivRem::div_rem(packed, TWO_POW_9.try_into().unwrap());
+        let (packed, id) = integer::U256DivRem::div_rem(packed, TWO_POW_7_Z);
+        let (_, xp) = integer::U256DivRem::div_rem(packed, TWO_POW_9_Z);
 
         Item { id: id.try_into().unwrap(), xp: xp.try_into().unwrap() }
     }
@@ -31,16 +32,16 @@ impl ItemPacking of StorePacking<Item, felt252> {
 
 #[generate_trait]
 impl ImplItem of IItemPrimitive {
-    // @notice creates a new Item with the given id
-    // @param item_id the id of the item
-    // @return the new Item
+    /// @notice creates a new Item with the given id
+    /// @param item_id the id of the item
+    /// @return the new Item
     fn new(item_id: u8) -> Item {
         Item { id: item_id, xp: 0 }
     }
 
-    // @notice checks if the item is a jewelery
-    // @param self the Item to check
-    // @return bool: true if the item is a jewelery, false otherwise
+    /// @notice checks if the item is a jewelery
+    /// @param self the Item to check
+    /// @return bool: true if the item is a jewelery, false otherwise
     fn is_jewlery(self: Item) -> bool {
         if (self.id == ItemId::BronzeRing) {
             true
@@ -63,32 +64,30 @@ impl ImplItem of IItemPrimitive {
         }
     }
 
-    // @notice increases the xp of an item
-    // @param self the Item to increase the xp of
-    // @param amount the amount to increase the xp by
-    // @return (u8, u8): the previous level and the new level
+    /// @notice increases the xp of an item
+    /// @param item: the Item to increase the xp of
+    /// @param amount: the amount to increase the xp by
+    /// @return (u8, u8): the previous level and the new level
     #[inline(always)]
-    fn increase_xp(ref self: Item, amount: u16) -> (u8, u8) {
-        let previous_level = self.get_greatness();
-        if (u16_overflowing_add(self.xp, amount).is_ok()) {
-            if (self.xp + amount > MAX_ITEM_XP) {
-                self.xp = MAX_ITEM_XP;
-            } else {
-                self.xp += amount;
-            }
+    fn increase_xp(ref item: Item, amount: u16) -> (u8, u8) {
+        let previous_level = item.get_greatness();
+        let new_xp = item.xp + amount;
+        if (new_xp > MAX_ITEM_XP) {
+            item.xp = MAX_ITEM_XP;
         } else {
-            self.xp = MAX_ITEM_XP;
+            item.xp = new_xp;
         }
-        let new_level = self.get_greatness();
+
+        let new_level = item.get_greatness();
         (previous_level, new_level)
     }
 
-    // @notice gets the greatness of an item
-    // @param self the Item to get the greatness of
-    // @return u8: the greatness of the item
+    /// @notice gets the greatness of an item
+    /// @param self the Item to get the greatness of
+    /// @return u8: the greatness of the item
     #[inline(always)]
     fn get_greatness(self: Item) -> u8 {
-        if (self.xp == 0) {
+        if self.xp == 0 {
             1
         } else {
             let level = u16_sqrt(self.xp);
@@ -102,7 +101,12 @@ impl ImplItem of IItemPrimitive {
 }
 
 const TWO_POW_7: u256 = 0x80;
-const TWO_POW_9: u256 = 0x200;
+const TWO_POW_7_Z: NonZero<u256> = 0x80;
+const TWO_POW_9_Z: NonZero<u256> = 0x200;
+const MAX_GREATNESS: u8 = 20;
+const MAX_PACKABLE_ITEM_ID: u8 = 127;
+const MAX_PACKABLE_XP: u16 = 511;
+const MAX_ITEM_XP: u16 = 400;
 
 // ---------------------------
 // ---------- Tests ----------
@@ -330,5 +334,11 @@ mod tests {
         item.xp = 65535;
         let greatness = item.get_greatness();
         assert(greatness == 20, 'greatness should be 20');
+    }
+
+    #[test]
+    fn test_increase_xp_gas() {
+        let mut item = Item { id: 1, xp: 10 };
+        ImplItem::increase_xp(ref item, 20);
     }
 }

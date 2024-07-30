@@ -125,7 +125,7 @@ fn get_suffix_boost(suffix: u8) -> ByteArray {
 // @param item The item to generate a string for
 // @param item_specials_seed The seed used to generate item specials
 // @return The generated item string
-fn generate_item(item: Item, item_specials_seed: felt252) -> ByteArray {
+fn generate_item(item: Item, item_specials_seed: u16) -> ByteArray {
     if item.id == 0 {
         return "";
     }
@@ -159,7 +159,7 @@ fn create_metadata(
     adventurer_name: felt252,
     adventurerMetadata: AdventurerMetadata,
     bag: Bag,
-    item_specials_seed: felt252
+    item_specials_seed: u16
 ) -> ByteArray {
     let rect = create_rect();
 

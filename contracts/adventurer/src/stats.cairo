@@ -5,10 +5,10 @@ use loot::constants::ItemSuffix;
 const MAX_STAT_VALUE: u8 = 31;
 
 #[derive(Drop, Copy, Serde, PartialEq)]
-struct Stats { // 30 storage bits
-    strength: u8, // 5 bits each
+struct Stats { // 30 bits total
+    strength: u8,
     dexterity: u8,
-    vitality: u8,
+    vitality: u8, // 5 bits per stat
     intelligence: u8,
     wisdom: u8,
     charisma: u8,
@@ -16,6 +16,9 @@ struct Stats { // 30 storage bits
 }
 
 impl StatsPacking of StorePacking<Stats, felt252> {
+    /// @notice packs the stats into a felt252
+    /// @param value the Stats to pack
+    /// @return the packed Stats
     fn pack(value: Stats) -> felt252 {
         assert(value.strength <= MAX_STAT_VALUE, 'strength pack overflow');
         assert(value.dexterity <= MAX_STAT_VALUE, 'dexterity pack overflow');
@@ -34,22 +37,17 @@ impl StatsPacking of StorePacking<Stats, felt252> {
             .unwrap()
     }
 
+    /// @notice unpacks the stats from a felt252
+    /// @param value the felt252 to unpack
+    /// @return the unpacked Stats
     fn unpack(value: felt252) -> Stats {
         let packed = value.into();
-        let (packed, strength) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_5.try_into().unwrap()
-        );
-        let (packed, dexterity) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_5.try_into().unwrap()
-        );
-        let (packed, vitality) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_5.try_into().unwrap()
-        );
-        let (packed, intelligence) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_5.try_into().unwrap()
-        );
-        let (packed, wisdom) = integer::U256DivRem::div_rem(packed, TWO_POW_5.try_into().unwrap());
-        let (_, charisma) = integer::U256DivRem::div_rem(packed, TWO_POW_5.try_into().unwrap());
+        let (packed, strength) = integer::U256DivRem::div_rem(packed, TWO_POW_5_NZ);
+        let (packed, dexterity) = integer::U256DivRem::div_rem(packed, TWO_POW_5_NZ);
+        let (packed, vitality) = integer::U256DivRem::div_rem(packed, TWO_POW_5_NZ);
+        let (packed, intelligence) = integer::U256DivRem::div_rem(packed, TWO_POW_5_NZ);
+        let (packed, wisdom) = integer::U256DivRem::div_rem(packed, TWO_POW_5_NZ);
+        let (_, charisma) = integer::U256DivRem::div_rem(packed, TWO_POW_5_NZ);
 
         Stats {
             strength: strength.try_into().unwrap(),
@@ -65,7 +63,6 @@ impl StatsPacking of StorePacking<Stats, felt252> {
 
 #[generate_trait]
 impl ImplStats of IStat {
-
     /// @notice Creates a new Stats instance with all stats set to 0.
     /// @return A new Stats instance with all stats set to 0.
     fn new() -> Stats {
@@ -87,9 +84,9 @@ impl ImplStats of IStat {
         self.increase_wisdom(stats.wisdom);
     }
 
-    // @notice removes stat boosts from adventurer
-    // @param self The Stats to remove stat boosts from.
-    // @param stats The stat boosts to remove from the adventurer.
+    /// @notice removes stat boosts from adventurer
+    /// @param self The Stats to remove stat boosts from.
+    /// @param stats The stat boosts to remove from the adventurer.
     #[inline(always)]
     fn remove_stats(ref self: Stats, stats: Stats) {
         self.decrease_strength(stats.strength);
@@ -172,9 +169,9 @@ impl ImplStats of IStat {
         }
     }
 
-    // @notice Removes a specified suffix boost from an adventurer's stats.
-    // @param self The instance of the Stats struct which contains the adventurer's stats.
-    // @param suffix The suffix to be removed from the adventurer's stats.
+    /// @notice removes stat boosts from adventurer
+    /// @param self The Stats to remove stat boosts from.
+    /// @param suffix The suffix to remove from the adventurer's stats.
     fn remove_suffix_boost(ref self: Stats, suffix: u8) {
         if (suffix == ItemSuffix::of_Power) {
             self.decrease_strength(3);
@@ -224,184 +221,166 @@ impl ImplStats of IStat {
         }
     }
 
-    // @notice Increase the Adventurer's strength stat.
-    // @param amount The amount to be added to the strength stat.
+    /// @notice increases the strength stat
+    /// @param self The Stats to increase the strength stat of.
+    /// @param amount The amount to increase the strength stat by.
     #[inline(always)]
     fn increase_strength(ref self: Stats, amount: u8) {
         self.strength += amount;
     }
 
-    // @notice Increase the Adventurer's dexterity stat.
-    // @param amount The amount to be added to the dexterity stat.
+    /// @notice increases the dexterity stat
+    /// @param self The Stats to increase the dexterity stat of.
+    /// @param amount The amount to increase the dexterity stat by.
     #[inline(always)]
     fn increase_dexterity(ref self: Stats, amount: u8) {
         self.dexterity += amount;
     }
 
-    // @notice Increase the Adventurer's vitality stat.
-    // @param amount The amount to be added to the vitality stat.
+    /// @notice increases the vitality stat
+    /// @param self The Stats to increase the vitality stat of.
+    /// @param amount The amount to increase the vitality stat by.
     #[inline(always)]
     fn increase_vitality(ref self: Stats, amount: u8) {
         self.vitality += amount;
     }
 
-    // @notice Increase the Adventurer's intelligence stat.
-    // @param amount The amount to be added to the intelligence stat.
+    /// @notice increases the intelligence stat
+    /// @param self The Stats to increase the intelligence stat of.
+    /// @param amount The amount to increase the intelligence stat by.
     #[inline(always)]
     fn increase_intelligence(ref self: Stats, amount: u8) {
         self.intelligence += amount;
     }
 
-    // @notice Increase the Adventurer's wisdom stat.
-    // @param amount The amount to be added to the wisdom stat.
+    /// @notice increases the wisdom stat
+    /// @param self The Stats to increase the wisdom stat of.
+    /// @param amount The amount to increase the wisdom stat by.
     #[inline(always)]
     fn increase_wisdom(ref self: Stats, amount: u8) {
         self.wisdom += amount;
     }
 
-    // @notice Increase the Adventurer's charisma stat.
-    // @param amount The amount to be added to the charisma stat.
+    /// @notice increases the charisma stat
+    /// @param self The Stats to increase the charisma stat of.
+    /// @param amount The amount to increase the charisma stat by.
     #[inline(always)]
     fn increase_charisma(ref self: Stats, amount: u8) {
         self.charisma += amount;
     }
 
-    // @notice Decrease the Adventurer's strength stat.
-    // @dev The function will subtract the specified amount from the strength stat without allowing it to fall below 0.
-    // @param amount The amount to be subtracted from the strength stat.
+    /// @notice decreases the strength stat
+    /// @param self The Stats to decrease the strength stat of.
+    /// @param amount The amount to decrease the strength stat by.
     #[inline(always)]
     fn decrease_strength(ref self: Stats, amount: u8) {
         assert(amount <= self.strength, 'strength underflow');
         self.strength -= amount;
     }
 
-    // @notice Decrease the Adventurer's dexterity stat.
-    // @dev The function will subtract the specified amount from the dexterity stat without allowing it to fall below 0.
-    // @param amount The amount to be deducted from the dexterity stat.
+    /// @notice decreases the dexterity stat
+    /// @param self The Stats to decrease the dexterity stat of.
+    /// @param amount The amount to decrease the dexterity stat by.
     #[inline(always)]
     fn decrease_dexterity(ref self: Stats, amount: u8) {
         assert(amount <= self.dexterity, 'dexterity underflow');
         self.dexterity -= amount;
     }
 
-    // @notice Decrease the Adventurer's vitality stat.
-    // @dev The function will subtract the specified amount from the vitality stat without allowing it to fall below 0.
-    // @param amount The amount to be deducted from the vitality stat.
+    /// @notice decreases the vitality stat
+    /// @param self The Stats to decrease the vitality stat of.
+    /// @param amount The amount to decrease the vitality stat by.
     #[inline(always)]
     fn decrease_vitality(ref self: Stats, amount: u8) {
         assert(amount <= self.vitality, 'vitality underflow');
         self.vitality -= amount;
     }
 
-    // @notice Decrease the Adventurer's intelligence stat.
-    // @dev The function will subtract the specified amount from the intelligence stat without allowing it to fall below 0.
-    // @param amount The amount to be deducted from the intelligence stat.
+    /// @notice decreases the intelligence stat
+    /// @param self The Stats to decrease the intelligence stat of.
+    /// @param amount The amount to decrease the intelligence stat by.
     #[inline(always)]
     fn decrease_intelligence(ref self: Stats, amount: u8) {
         assert(amount <= self.intelligence, 'intelligence underflow');
         self.intelligence -= amount;
     }
 
-    // @notice Decrease the Adventurer's wisdom stat.
-    // @dev The function will subtract the specified amount from the wisdom stat without allowing it to fall below 0.
-    // @param amount The amount to be deducted from the wisdom stat.
+    /// @notice decreases the wisdom stat
+    /// @param self The Stats to decrease the wisdom stat of.
+    /// @param amount The amount to decrease the wisdom stat by.
     #[inline(always)]
     fn decrease_wisdom(ref self: Stats, amount: u8) {
         assert(amount <= self.wisdom, 'wisdom underflow');
         self.wisdom -= amount;
     }
 
-    // @notice Decrease the Adventurer's charisma stat.
-    // @dev The function will subtract the specified amount from the charisma stat without allowing it to fall below 0.
-    // @param amount The amount to be deducted from the charisma stat.
+    /// @notice decreases the charisma stat
+    /// @param self The Stats to decrease the charisma stat of.
+    /// @param amount The amount to decrease the charisma stat by.
     #[inline(always)]
     fn decrease_charisma(ref self: Stats, amount: u8) {
         assert(amount <= self.charisma, 'charisma underflow');
         self.charisma -= amount;
     }
 
-    /// @notice Apply starting stats to the adventurer.
-    /// @param self The adventurer.
-    /// @param entropy Randomness input for the stat application.
-    /// @param starting_stat_count The number of starting stats to apply.
-    fn apply_starting_stats(ref self: Stats, entropy: u256, starting_stat_count: u8) {
-        let mut random_stats = ImplStats::generate_random_stats(entropy);
-
-        assert(starting_stat_count.into() <= random_stats.len(), 'stat count out of bounds');
-
-        let mut i = 0;
-        loop {
-            if i == starting_stat_count.into() {
-                break;
-            }
-            let random_u8 = *random_stats.at(i);
-            let random_stat_index = random_u8 % 6;
-            if random_stat_index == 0 {
-                self.strength += 1;
-            } else if random_stat_index == 1 {
-                self.dexterity += 1;
-            } else if random_stat_index == 2 {
-                self.vitality += 1;
-            } else if random_stat_index == 3 {
-                self.charisma += 1;
-            } else if random_stat_index == 4 {
-                self.intelligence += 1;
-            } else if random_stat_index == 5 {
-                self.wisdom += 1;
-            } else {
-                panic_with_felt252('stat out of range');
-            }
-
-            i += 1;
+    /// @notice Generates starting stats for the Adventurer.
+    /// @param seed The seed to generate the stats from.
+    /// @return The starting stats.
+    fn generate_starting_stats(seed: u64) -> Stats {
+        let (entropy, stat1) = integer::u64_safe_divmod(seed, SIX_NZ);
+        let (entropy, stat2) = integer::u64_safe_divmod(entropy, SIX_NZ);
+        let (entropy, stat3) = integer::u64_safe_divmod(entropy, SIX_NZ);
+        let (entropy, stat4) = integer::u64_safe_divmod(entropy, SIX_NZ);
+        let (entropy, stat5) = integer::u64_safe_divmod(entropy, SIX_NZ);
+        let (entropy, stat6) = integer::u64_safe_divmod(entropy, SIX_NZ);
+        let (entropy, stat7) = integer::u64_safe_divmod(entropy, SIX_NZ);
+        let (entropy, stat8) = integer::u64_safe_divmod(entropy, SIX_NZ);
+        let (_, stat9) = integer::u64_safe_divmod(entropy, SIX_NZ);
+        let mut stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         };
+        stats.apply_stat(stat1.try_into().unwrap());
+        stats.apply_stat(stat2.try_into().unwrap());
+        stats.apply_stat(stat3.try_into().unwrap());
+        stats.apply_stat(stat4.try_into().unwrap());
+        stats.apply_stat(stat5.try_into().unwrap());
+        stats.apply_stat(stat6.try_into().unwrap());
+        stats.apply_stat(stat7.try_into().unwrap());
+        stats.apply_stat(stat8.try_into().unwrap());
+        stats.apply_stat(stat9.try_into().unwrap());
+        stats
     }
 
-    // @notice generates random array of stats from a u256 value
-    // @param value: value to convert
-    // @return Array<u8>: u8 array
-    fn generate_random_stats(value: u256) -> Array<u8> {
-        let mut result = ArrayTrait::<u8>::new();
-        result.append((value & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_8) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_16) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_24) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_32) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_40) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_48) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_56) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_64) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_72) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_80) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_88) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_96) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_104) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_112) & MASK_8).try_into().unwrap());
-        result.append(((value / TWO_POW_120) & MASK_8).try_into().unwrap());
-        result
+    /// @notice applies a stat to the adventurer
+    /// @param self The Stats to apply the stat to.
+    /// @param stat The stat to apply.
+    #[inline(always)]
+    fn apply_stat(ref self: Stats, stat: u8) {
+        if (stat == 0) {
+            self.strength += 1
+        } else if (stat == 1) {
+            self.dexterity += 1
+        } else if (stat == 2) {
+            self.vitality += 1
+        } else if (stat == 3) {
+            self.intelligence += 1
+        } else if (stat == 4) {
+            self.wisdom += 1
+        } else if (stat == 5) {
+            self.charisma += 1
+        } else {
+            panic_with_felt252('stat out of range');
+        }
     }
 }
 
-const MASK_8: u256 = 0xFF;
+const SIX_NZ: NonZero<u64> = 6;
 const TWO_POW_5: u256 = 0x20;
-const TWO_POW_8: u256 = 0x100;
+const TWO_POW_5_NZ: NonZero<u256> = 0x20;
 const TWO_POW_10: u256 = 0x400;
 const TWO_POW_15: u256 = 0x8000;
-const TWO_POW_16: u256 = 0x10000;
 const TWO_POW_20: u256 = 0x100000;
-const TWO_POW_24: u256 = 0x1000000;
 const TWO_POW_25: u256 = 0x2000000;
-const TWO_POW_32: u256 = 0x100000000;
-const TWO_POW_40: u256 = 0x10000000000;
-const TWO_POW_48: u256 = 0x1000000000000;
-const TWO_POW_56: u256 = 0x100000000000000;
-const TWO_POW_64: u256 = 0x10000000000000000;
-const TWO_POW_72: u256 = 0x1000000000000000000;
-const TWO_POW_80: u256 = 0x100000000000000000000;
-const TWO_POW_88: u256 = 0x10000000000000000000000;
-const TWO_POW_96: u256 = 0x1000000000000000000000000;
-const TWO_POW_104: u256 = 0x100000000000000000000000000;
-const TWO_POW_112: u256 = 0x10000000000000000000000000000;
-const TWO_POW_120: u256 = 0x1000000000000000000000000000000;
 
 // ---------------------------
 // ---------- Tests ----------
@@ -536,135 +515,9 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(249718)]
-    fn test_apply_starting_stats_gas() {
-        let mut stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
-        };
-        stats.apply_starting_stats(0, 9);
-    }
-
-    #[test]
-    #[should_panic(expected: ('stat count out of bounds',))]
-    fn test_apply_starting_stats_too_many_stats() {
-        let mut stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
-        };
-        stats.apply_starting_stats(0, 17);
-    }
-
-    #[test]
-    fn test_apply_starting_stats() {
-        // Test case 1: Basic functionality
-        let mut stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
-        };
-        let entropy = 0x123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef;
-        stats.apply_starting_stats(entropy, 6);
-        assert(
-            stats.strength
-                + stats.dexterity
-                + stats.vitality
-                + stats.charisma
-                + stats.intelligence
-                + stats.wisdom == 6,
-            'Total stats should be 6'
-        );
-
-        // Test case 2: Zero starting stats
-        let mut stats2 = Stats {
-            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
-        };
-        stats2.apply_starting_stats(entropy, 0);
-        assert(
-            stats2.strength
-                + stats2.dexterity
-                + stats2.vitality
-                + stats2.charisma
-                + stats2.intelligence
-                + stats2.wisdom == 0,
-            'No stats should be applied'
-        );
-
-        // Test case 3: Maximum starting stats
-        let mut stats3 = Stats {
-            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
-        };
-        stats3.apply_starting_stats(entropy, 16);
-        assert(
-            stats3.strength
-                + stats3.dexterity
-                + stats3.vitality
-                + stats3.charisma
-                + stats3.intelligence
-                + stats3.wisdom == 16,
-            'Total stats should be 16'
-        );
-
-        // Test case 4: Different entropy produces different stat distribution
-        let mut stats4 = Stats {
-            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
-        };
-        let mut stats5 = Stats {
-            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
-        };
-        stats4.apply_starting_stats(1, 6);
-        stats5.apply_starting_stats(2, 6);
-        assert(stats4 != stats5, 'Stats should be different');
-    }
-
-    #[test]
-    #[available_gas(1448412)]
-    fn test_generate_random_stats() {
-        // zero case
-        let value = 0;
-        let values = ImplStats::generate_random_stats(value);
-        let mut i = 0;
-        loop {
-            if i == values.len() {
-                break;
-            }
-
-            let value = *values.at(i);
-            assert(value == 0, 'all values should be 0');
-            i += 1;
-        };
-
-        // max u128 case
-        let value = 0xffffffffffffffffffffffffffffffff;
-        let values = ImplStats::generate_random_stats(value);
-        let mut i = 0;
-        loop {
-            if i == values.len() {
-                break;
-            }
-
-            let value = *values.at(i);
-            assert(value == 255, 'all values should be 1');
-            i += 1;
-        };
-
-        // random case
-        let value =
-            0b00000110110100110000110010010111000001000110111100110010001111010010000001111110000110100111101100010101000000001111111101100101;
-
-        let values = ImplStats::generate_random_stats(value);
-        assert(*values.at(15) == 6, 'rand15 should be 6');
-        assert(*values.at(14) == 211, 'rand14 should be 211');
-        assert(*values.at(13) == 12, 'rand13 should be 12');
-        assert(*values.at(12) == 151, 'rand12 should be 151');
-        assert(*values.at(11) == 4, 'rand11 should be 4');
-        assert(*values.at(10) == 111, 'rand10 should be 111');
-        assert(*values.at(9) == 50, 'rand9 should be 50');
-        assert(*values.at(8) == 61, 'rand8 should be 61');
-        assert(*values.at(7) == 32, 'rand7 should be 32');
-        assert(*values.at(6) == 126, 'rand6 should be 126');
-        assert(*values.at(5) == 26, 'rand5 should be 26');
-        assert(*values.at(4) == 123, 'rand4 should be 123');
-        assert(*values.at(3) == 21, 'rand3 should be 21');
-        assert(*values.at(2) == 0, 'rand2 should be 0');
-        assert(*values.at(1) == 255, 'rand1 should be 255');
-        assert(*values.at(0) == 101, 'rand0 should be 101');
+    fn test_generate_starting_stats_gas() {
+        let seed = 12345_u64;
+        ImplStats::generate_starting_stats(seed);
     }
 
     #[test]

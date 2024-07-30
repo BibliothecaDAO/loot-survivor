@@ -1,5 +1,5 @@
 mod DiscoveryEnums {
-    #[derive(Copy, Drop, PartialEq)]
+    #[derive(Copy, Drop, Serde, PartialEq)]
     enum ExploreResult {
         Beast,
         Obstacle,

@@ -18,9 +18,6 @@ golden_token_id="0 0"
 interface_camel=0
 vrf_fee_limit=5000000000000000
 eth_contract=0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7
-previous_first_place_address=0x02cd97240db3f679de98a729ae91eb996cab9fd92a9a578df11a72f49be1c356
-previous_second_place_address=0x045fcd9bccf4b510cf5d32c0adc2a826b1e535ec7d2989324bbb3a15d10e25ab
-previous_third_place_address=0x07a1d33e49fdeb6cd02e9eb92e5a32b9f308d766b3293147e64815998e744240
 custom_renderer=0x0
 
 # Source env vars
@@ -41,7 +38,7 @@ game_class_hash=$(starkli declare --watch /workspaces/loot-survivor/target/dev/g
 renderer_contract=$(starkli deploy --watch $renderer_class_hash --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY --max-fee 0.01 2>/dev/null)
 
 # deploy game
-game_contract=$(starkli deploy --watch $game_class_hash $lords_contract $eth_contract $dao_address $pg_address $beasts_address $golden_token_address $terminal_timestamp $randomness_contract $randomness_rotation_interval $oracle_address $previous_first_place_address $previous_second_place_address $previous_third_place_address $renderer_contract --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY --max-fee 0.01 2>/dev/null)
+game_contract=$(starkli deploy --watch $game_class_hash $lords_contract $eth_contract $dao_address $pg_address $beasts_address $golden_token_address $terminal_timestamp $randomness_contract $randomness_rotation_interval $oracle_address $renderer_contract --account $STARKNET_ACCOUNT --private-key $PRIVATE_KEY --max-fee 0.01 2>/dev/null)
 
 # mint lords
 echo "minting lords"

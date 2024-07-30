@@ -1,6 +1,6 @@
 // Starting Setting
-const STARTING_GOLD: u16 = 25;
-const STARTING_HEALTH: u16 = 100;
+const STARTING_GOLD: u8 = 25;
+const STARTING_HEALTH: u8 = 100;
 
 // Adventurer Max Values
 const MAX_ADVENTURER_HEALTH: u16 = 1023; // 10 bits
@@ -13,14 +13,14 @@ const MAX_PACKABLE_BATTLE_ACTION_COUNT: u8 = 255; // 8 bits
 const ITEM_MAX_XP: u16 = 400;
 
 // Potion Settings
-const POTION_PRICE: u16 = 1;
-const POTION_HEALTH_AMOUNT: u16 = 10;
-const MINIMUM_POTION_PRICE: u16 = 1;
-const CHARISMA_POTION_DISCOUNT: u16 = 2;
+const BASE_POTION_PRICE: u8 = 1;
+const POTION_HEALTH_AMOUNT: u8 = 10;
+const MINIMUM_POTION_PRICE: u8 = 1;
+const CHARISMA_POTION_DISCOUNT: u8 = 2;
 
 // Item Settings
-const CHARISMA_ITEM_DISCOUNT: u16 = 1;
-const MINIMUM_ITEM_PRICE: u16 = 1;
+const CHARISMA_ITEM_DISCOUNT: u8 = 1;
+const MINIMUM_ITEM_PRICE: u8 = 1;
 const ITEM_MAX_GREATNESS: u8 = 20;
 const MAX_GREATNESS_STAT_BONUS: u8 = 1;
 const NECKLACE_G20_BONUS_STATS: u8 = 1;
@@ -33,8 +33,8 @@ const JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS: u8 = 3;
 const NECKLACE_ARMOR_BONUS: u8 = 3;
 
 // Stat Settings
-const HEALTH_INCREASE_PER_VITALITY: u16 = 15;
-const VITALITY_INSTANT_HEALTH_BONUS: u16 = 15;
+const HEALTH_INCREASE_PER_VITALITY: u8 = 15;
+const VITALITY_INSTANT_HEALTH_BONUS: u8 = 15;
 
 // Combat Settings
 const MINIMUM_DAMAGE_TO_BEASTS: u8 = 4;
@@ -44,32 +44,16 @@ const CRITICAL_HIT_LEVEL_MULTIPLIER: u8 = 3;
 
 // Misc Settings
 const MAX_ADVENTURER_BLOCKS: u16 = 512; // 2^9
-const BEAST_SPECIAL_NAME_LEVEL_UNLOCK: u16 = 19;
-const XP_FOR_DISCOVERIES: u16 = 1;
+const BEAST_SPECIAL_NAME_LEVEL_UNLOCK: u8 = 19;
+const XP_FOR_DISCOVERIES: u8 = 1;
 
 // controls how much faster items level up compared to the player
-const ITEM_XP_MULTIPLIER_BEASTS: u16 = 2;
-const ITEM_XP_MULTIPLIER_OBSTACLES: u16 = 1;
+const ITEM_XP_MULTIPLIER_BEASTS: u8 = 2;
+const ITEM_XP_MULTIPLIER_OBSTACLES: u8 = 1;
 
-// Maximum number of blocks we can keep track of on the Adventurer
-// this is used for calculating idle damage penalty
-const MAX_BLOCK_COUNT: u64 = 512;
-
-mod StatisticIndex {
-    const STRENGTH: u8 = 0;
-    const DEXTERITY: u8 = 1;
-    const VITALITY: u8 = 2;
-    const INTELLIGENCE: u8 = 3;
-    const WISDOM: u8 = 4;
-    const CHARISMA: u8 = 5;
-}
-
-const U128_MAX: u128 = 340282366920938463463374607431768211455;
-const U64_MAX: u64 = 18446744073709551615;
-const MAX_U128_PRIME: u128 = 340282366920938463463374607431768211383;
-
-const TWO_POW_8: u128 = 0x100;
-const TWO_POW_40: u128 = 0x10000000000;
-
-const MASK_8: u128 = 0xff;
-const MASK_32: u128 = 0xffffffff;
+const TWO_POW_64_NZ: NonZero<u128> = 0x10000000000000000;
+const TWO_POW_32_NZ: NonZero<u64> = 0x100000000;
+const TWO_POW_32: u64 = 0x100000000;
+const TWO_POW_16_NZ: NonZero<u32> = 0x10000;
+const TWO_POW_16: u256 = 0x10000;
+const TWO_POW_8_NZ_U16: NonZero<u16> = 0x100;

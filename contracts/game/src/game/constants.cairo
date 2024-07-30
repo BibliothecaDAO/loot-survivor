@@ -1,3 +1,22 @@
+const COST_TO_PLAY: u128 = 50000000000000000000;
+const MINIMUM_DAMAGE_FROM_BEASTS: u8 = 2;
+const MAINNET_CHAIN_ID: felt252 = 0x534e5f4d41494e;
+const SEPOLIA_CHAIN_ID: felt252 = 0x534e5f5345504f4c4941;
+const KATANA_CHAIN_ID: felt252 = 0x4b4154414e41;
+const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 50;
+const SECONDS_IN_DAY: u32 = 86400;
+const TARGET_PRICE_USD_CENTS: u16 = 300;
+const VRF_COST_PER_GAME: u32 = 100000000; // 1$ with 8 decimals
+const VRF_MAX_CALLBACK_MAINNET: u32 = 5000000; // $0.05
+const VRF_MAX_CALLBACK_TESTNET: u32 = 100000000; // 1$ with 8 decimals
+const PRAGMA_LORDS_KEY: felt252 = 'LORDS/USD'; // felt252 conversion of "LORDS/USD"
+const PRAGMA_PUBLISH_DELAY: u8 = 0;
+const PRAGMA_NUM_WORDS: u8 = 1;
+const GAME_EXPIRY_DAYS: u8 = 10;
+const OBITUARY_EXPIRY_DAYS: u8 = 10;
+const MAX_U64: u64 = 0xffffffffffffffff;
+const STARTER_BEAST_ATTACK_DAMAGE: u16 = 10;
+
 mod messages {
     const NOT_ENOUGH_GOLD: felt252 = 'Not enough gold';
     const ITEM_DOES_NOT_EXIST: felt252 = 'Market item does not exist';
@@ -39,22 +58,13 @@ mod messages {
     const GAME_ALREADY_STARTED: felt252 = 'game already started';
     const STARTING_ENTROPY_IS_VALID: felt252 = 'starting entropy is valid';
     const VALID_BLOCK_HASH_UNAVAILABLE: felt252 = 'valid hash not yet available';
-    const ADVENTURER_ENTROPY_NOT_SET: felt252 = 'adventurer entropy not set';
+    const LEVEL_SEED_NOT_SET: felt252 = 'level seed not set';
     const WAITING_FOR_ITEM_SPECIALS: felt252 = 'waiting for item specials';
     const FETCHING_ETH_PRICE_ERROR: felt252 = 'error fetching eth price';
     const OBITUARY_ALREADY_SET: felt252 = 'obituary already set';
     const OBITUARY_WINDOW_CLOSED: felt252 = 'obituary window closed';
+    const INVALID_ITEM_ID: felt252 = 'invalid item id';
 }
-
-// TODO: Update for mainnet
-const BLOCKS_IN_A_WEEK: u64 = 1000;
-const COST_TO_PLAY: u128 = 25000000000000000000;
-const NUM_STARTING_STATS: u8 = 9;
-const MINIMUM_DAMAGE_FROM_BEASTS: u8 = 2;
-const MAINNET_REVEAL_DELAY_BLOCKS: u8 = 11;
-
-const U64_MAX: u64 = 18446744073709551615;
-const U128_MAX: u128 = 340282366920938463463374607431768211455;
 
 #[derive(Drop, Copy)]
 struct Rewards {
@@ -74,4 +84,3 @@ mod REWARD_DISTRIBUTIONS_BP {
     const CREATOR: u256 = 200;
 }
 
-const STARTER_BEAST_ATTACK_DAMAGE: u16 = 10;

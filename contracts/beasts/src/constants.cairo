@@ -1,64 +1,21 @@
 mod BeastSettings {
-    // Controls the health of the first beast in the game
-    const STARTER_BEAST_HEALTH: u16 = 3;
-
-    // Controls the level of the first beast in the game
-    const STARTER_BEAST_LEVEL: u16 = 1;
-
-    // Controls the minimum damage
-    const MINIMUM_DAMAGE: u16 = 2;
-
-    // Controls the strength boost for beasts
-    const STRENGTH_BONUS: u16 = 0;
-
-    // Controls minimum health for beasts
-    const MINIMUM_HEALTH: u8 = 5;
+    const STARTER_BEAST_HEALTH: u8 = 3;
     const MAXIMUM_HEALTH: u16 = 1023; // 2^10 - 1
-
-    // Controls the amount of gold received for slaying a beast
-    // relative to XP. The current setting of 2 will result
-    // in adventurers receiving a base gold reward of 1/2 XP when
-    // slaying beasts. Set this value to 1 to increase gold reward
-    // increase it to lower gold reward. Note, unlike XP, the amount
-    // of gold received after slaying a beast includes a random bonus
-    // between 0%-100%
-    const GOLD_BASE_REWARD_DIVISOR: u16 = 2;
-
-    // controls the size of the base gold reward bonus. The higher
-    // this number, the smaller the base gold bonus will be. With the
-    // setting at 5, the gold reward bonus base is 20% of the earned
-    // xp
-    const GOLD_REWARD_BONUS_DIVISOR: u16 = 4;
-
-    // controls the range of the gold bonus when slaying beasts
-    // the higher this number the wider the range of the gold bonus
-    const GOLD_REWARD_BONUS_MAX_MULTPLIER: u128 = 4;
-
-    // control the minimum base gold reward. Note the bonus
-    // will be applied to this so even when the minimun is used
-    // the actual amount may be slightly higher based on bonus
-    const GOLD_REWARD_BASE_MINIMUM: u16 = 4;
-
     const MINIMUM_XP_REWARD: u16 = 4;
-
-    const BEAST_SPECIAL_NAME_UNLOCK_LEVEL: u8 = 15;
-
-    // controls at what level adventurers will discover random beasts
-    // vs starter beasts which are always the same and maximally easy
-    const STARTER_BEAST_LEVEL_THRESHOLD: u8 = 1;
-
-    const CRITICAL_HIT_LEVEL_MULTIPLIER: u16 = 1;
-    const CRITICAL_HIT_AMBUSH_MULTIPLIER: u16 = 3;
+    const CRITICAL_HIT_LEVEL_MULTIPLIER: u8 = 1;
+    const CRITICAL_HIT_AMBUSH_MULTIPLIER: u8 = 3;
 
     mod GOLD_MULTIPLIER {
-        const T1: u16 = 5; // 5 * level
-        const T2: u16 = 4; // 4 * level
-        const T3: u16 = 3; // 3 * level
-        const T4: u16 = 2; // 2 * level
-        const T5: u16 = 1; // 1 * level
+        const T1: u8 = 5; // 5 * level
+        const T2: u8 = 4; // 4 * level
+        const T3: u8 = 3; // 3 * level
+        const T4: u8 = 2; // 2 * level
+        const T5: u8 = 1; // 1 * level
     }
 
-    const GOLD_REWARD_DIVISOR: u16 = 2;
+    const GOLD_REWARD_DIVISOR: u8 = 2;
+    const MAX_SPECIAL2: u8 = 69;
+    const MAX_SPECIAL3: u8 = 18;
 }
 
 mod BeastId {

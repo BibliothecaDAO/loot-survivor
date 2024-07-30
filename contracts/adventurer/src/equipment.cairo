@@ -5,12 +5,15 @@ use loot::constants::SUFFIX_UNLOCK_GREATNESS;
 use loot::loot::ImplLoot;
 use super::item::{Item, ImplItem, ItemPacking};
 
+/// @notice The Equipment struct
+/// @dev The equipment struct is used to store the adventurer's equipment
+/// @dev The equipment struct is packed into a felt252
 #[derive(Drop, Copy, Serde, PartialEq)]
 struct Equipment { // 128 bits
-    weapon: Item, // 16 bits per item
+    weapon: Item,
     chest: Item,
     head: Item,
-    waist: Item,
+    waist: Item, // 16 bits per item
     foot: Item,
     hand: Item,
     neck: Item,
@@ -18,6 +21,9 @@ struct Equipment { // 128 bits
 }
 
 impl EquipmentPacking of StorePacking<Equipment, felt252> {
+    /// @notice Packs an Equipment into a felt252
+    /// @param value: The Equipment to pack
+    /// @return felt252: The packed Equipment
     fn pack(value: Equipment) -> felt252 {
         (ItemPacking::pack(value.weapon).into()
             + ItemPacking::pack(value.chest).into() * TWO_POW_16
@@ -31,16 +37,19 @@ impl EquipmentPacking of StorePacking<Equipment, felt252> {
             .unwrap()
     }
 
+    /// @notice Unpacks a felt252 into an Equipment
+    /// @param value: The felt252 value to unpack
+    /// @return Equipment: The unpacked Equipment
     fn unpack(value: felt252) -> Equipment {
         let packed = value.into();
-        let (packed, weapon) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
-        let (packed, chest) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
-        let (packed, head) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
-        let (packed, waist) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
-        let (packed, foot) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
-        let (packed, hand) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
-        let (packed, neck) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
-        let (_, ring) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, weapon) = integer::U256DivRem::div_rem(packed, TWO_POW_16_NZ);
+        let (packed, chest) = integer::U256DivRem::div_rem(packed, TWO_POW_16_NZ);
+        let (packed, head) = integer::U256DivRem::div_rem(packed, TWO_POW_16_NZ);
+        let (packed, waist) = integer::U256DivRem::div_rem(packed, TWO_POW_16_NZ);
+        let (packed, foot) = integer::U256DivRem::div_rem(packed, TWO_POW_16_NZ);
+        let (packed, hand) = integer::U256DivRem::div_rem(packed, TWO_POW_16_NZ);
+        let (packed, neck) = integer::U256DivRem::div_rem(packed, TWO_POW_16_NZ);
+        let (_, ring) = integer::U256DivRem::div_rem(packed, TWO_POW_16_NZ);
 
         Equipment {
             weapon: ItemPacking::unpack(weapon.try_into().unwrap()),
@@ -57,6 +66,8 @@ impl EquipmentPacking of StorePacking<Equipment, felt252> {
 
 #[generate_trait]
 impl ImplEquipment of IEquipment {
+    /// @notice Creates a new Equipment
+    /// @return Equipment: The new Equipment
     fn new() -> Equipment {
         Equipment {
             weapon: ImplItem::new(0),
@@ -70,9 +81,9 @@ impl ImplEquipment of IEquipment {
         }
     }
 
-    // @notice Adds an item to the adventurer's equipment.
-    // @dev The type of the item determines which equipment slot it goes into.
-    // @param item The item to be added to the adventurer's equipment.
+    /// @notice Equips an item to the adventurer
+    /// @param self: The Equipment to equip the item to
+    /// @param item: The item to equip
     #[inline(always)]
     fn equip(ref self: Equipment, item: Item) {
         let slot = ImplLoot::get_slot(item.id);
@@ -89,81 +100,81 @@ impl ImplEquipment of IEquipment {
         }
     }
 
-    // @notice Equips the adventurer with a weapon. 
-    // @dev The function asserts that the given item is a weapon before adding it to the adventurer's weapon slot.
-    // @param item The weapon to be added to the adventurer's equipment.
+    /// @notice Equips a weapon to the adventurer
+    /// @param self: The Equipment to equip the weapon to
+    /// @param item: The weapon to equip
     #[inline(always)]
     fn equip_weapon(ref self: Equipment, item: Item) {
-        assert(ImplLoot::get_slot(item.id) == Slot::Weapon(()), 'Item is not weapon');
+        assert(ImplLoot::get_slot(item.id) == Slot::Weapon, 'Item is not weapon');
         self.weapon = item
     }
 
-    // @notice Equips the adventurer with a chest armor. 
-    // @dev The function asserts that the given item is a chest armor before adding it to the adventurer's chest slot.
-    // @param item The chest armor to be added to the adventurer's equipment.
+    /// @notice Equips a chest armor to the adventurer
+    /// @param self: The Equipment to equip the chest armor to
+    /// @param item: The chest armor to equip
     #[inline(always)]
     fn equip_chest_armor(ref self: Equipment, item: Item) {
-        assert(ImplLoot::get_slot(item.id) == Slot::Chest(()), 'Item is not chest armor');
+        assert(ImplLoot::get_slot(item.id) == Slot::Chest, 'Item is not chest armor');
         self.chest = item
     }
 
-    // @notice Equips the adventurer with a head armor. 
-    // @dev The function asserts that the given item is a head armor before adding it to the adventurer's head slot.
-    // @param item The head armor to be added to the adventurer's equipment.
+    /// @notice Equips a head armor to the adventurer
+    /// @param self: The Equipment to equip the head armor to
+    /// @param item: The head armor to equip
     #[inline(always)]
     fn equip_head_armor(ref self: Equipment, item: Item) {
-        assert(ImplLoot::get_slot(item.id) == Slot::Head(()), 'Item is not head armor');
+        assert(ImplLoot::get_slot(item.id) == Slot::Head, 'Item is not head armor');
         self.head = item
     }
 
-    // @notice Equips the adventurer with a waist armor. 
-    // @dev The function asserts that the given item is a waist armor before adding it to the adventurer's waist slot.
-    // @param item The waist armor to be added to the adventurer's equipment.
+    /// @notice Equips a waist armor to the adventurer
+    /// @param self: The Equipment to equip the waist armor to
+    /// @param item: The waist armor to equip
     #[inline(always)]
     fn equip_waist_armor(ref self: Equipment, item: Item) {
-        assert(ImplLoot::get_slot(item.id) == Slot::Waist(()), 'Item is not waist armor');
+        assert(ImplLoot::get_slot(item.id) == Slot::Waist, 'Item is not waist armor');
         self.waist = item
     }
 
-    // @notice Equips the adventurer with a foot armor. 
-    // @dev The function asserts that the given item is a foot armor before adding it to the adventurer's foot slot.
-    // @param item The foot armor to be added to the adventurer's equipment.
+    /// @notice Equips a foot armor to the adventurer
+    /// @param self: The Equipment to equip the foot armor to
+    /// @param item: The foot armor to equip
     #[inline(always)]
     fn equip_foot_armor(ref self: Equipment, item: Item) {
-        assert(ImplLoot::get_slot(item.id) == Slot::Foot(()), 'Item is not foot armor');
+        assert(ImplLoot::get_slot(item.id) == Slot::Foot, 'Item is not foot armor');
         self.foot = item
     }
 
-    // @notice Equips the adventurer with a hand armor. 
-    // @dev The function asserts that the given item is a hand armor before adding it to the adventurer's hand slot.
-    // @param item The hand armor to be added to the adventurer's equipment.
+    /// @notice Equips a hand armor to the adventurer
+    /// @param self: The Equipment to equip the hand armor to
+    /// @param item: The hand armor to equip
     #[inline(always)]
     fn equip_hand_armor(ref self: Equipment, item: Item) {
-        assert(ImplLoot::get_slot(item.id) == Slot::Hand(()), 'Item is not hand armor');
+        assert(ImplLoot::get_slot(item.id) == Slot::Hand, 'Item is not hand armor');
         self.hand = item
     }
 
-    // @notice Equips the adventurer with a necklace. 
-    // @dev The function asserts that the given item is a necklace before adding it to the adventurer's neck slot.
-    // @param item The necklace to be added to the adventurer's equipment.
+    /// @notice Equips a necklace to the adventurer
+    /// @param self: The Equipment to equip the necklace to
+    /// @param item: The necklace to equip
     #[inline(always)]
     fn equip_necklace(ref self: Equipment, item: Item) {
-        assert(ImplLoot::get_slot(item.id) == Slot::Neck(()), 'Item is not necklace');
+        assert(ImplLoot::get_slot(item.id) == Slot::Neck, 'Item is not necklace');
         self.neck = item
     }
 
-    // @notice Equips the adventurer with a ring. 
-    // @dev The function asserts that the given item is a ring before adding it to the adventurer's ring slot.
-    // @param item The ring to be added to the adventurer's equipment.
+    /// @notice Equips a ring to the adventurer
+    /// @param self: The Equipment to equip the ring to
+    /// @param item: The ring to equip
     #[inline(always)]
     fn equip_ring(ref self: Equipment, item: Item) {
-        assert(ImplLoot::get_slot(item.id) == Slot::Ring(()), 'Item is not a ring');
+        assert(ImplLoot::get_slot(item.id) == Slot::Ring, 'Item is not a ring');
         self.ring = item;
     }
 
-    // @dev This function allows an adventurer to drop an item they have equipped.
-    // @notice The function only works if the item is currently equipped by the adventurer. It removes the item from the adventurer's equipment and replaces it with a blank item.
-    // @param item_id The ID of the item to be dropped. The function will assert if the item is not currently equipped.
+    /// @notice Drops an item from the adventurer
+    /// @param self: The Equipment to drop the item from
+    /// @param item_id: The ID of the item to drop
     #[inline(always)]
     fn drop(ref self: Equipment, item_id: u8) {
         if self.weapon.id == item_id {
@@ -195,28 +206,28 @@ impl ImplEquipment of IEquipment {
         }
     }
 
-    // @notice increases the xp of an item at a given slot
-    // @param self the Equipment to increase item xp for
-    // @param slot the Slot to increase item xp for
-    // @param amount the amount of xp to increase the item by
-    // @return (u8, u8): a tuple containing the previous and new level of the item
+    /// @notice Increases the xp of an item at a given slot
+    /// @param self: The Equipment to increase the item xp for
+    /// @param slot: The Slot to increase the item xp for
+    /// @param amount: The amount of xp to increase the item by
+    /// @return (u8, u8): a tuple containing the previous and new level of the item
     fn increase_item_xp_at_slot(ref self: Equipment, slot: Slot, amount: u16) -> (u8, u8) {
         match slot {
             Slot::None(()) => (0, 0),
-            Slot::Weapon(()) => self.weapon.increase_xp(amount),
-            Slot::Chest(()) => self.chest.increase_xp(amount),
-            Slot::Head(()) => self.head.increase_xp(amount),
-            Slot::Waist(()) => self.waist.increase_xp(amount),
-            Slot::Foot(()) => self.foot.increase_xp(amount),
-            Slot::Hand(()) => self.hand.increase_xp(amount),
-            Slot::Neck(()) => self.neck.increase_xp(amount),
-            Slot::Ring(()) => self.ring.increase_xp(amount),
+            Slot::Weapon(()) => ImplItem::increase_xp(ref self.weapon, amount),
+            Slot::Chest(()) => ImplItem::increase_xp(ref self.chest, amount),
+            Slot::Head(()) => ImplItem::increase_xp(ref self.head, amount),
+            Slot::Waist(()) => ImplItem::increase_xp(ref self.waist, amount),
+            Slot::Foot(()) => ImplItem::increase_xp(ref self.foot, amount),
+            Slot::Hand(()) => ImplItem::increase_xp(ref self.hand, amount),
+            Slot::Neck(()) => ImplItem::increase_xp(ref self.neck, amount),
+            Slot::Ring(()) => ImplItem::increase_xp(ref self.ring, amount),
         }
     }
 
-    // @notice checks if the adventurer has any items with special names.
-    // @param self The Equipment to check for item specials.
-    // @return Returns true if equipment has item specials, false otherwise.
+    /// @notice Checks if the adventurer has any items with special names
+    /// @param self: The Equipment to check for item specials
+    /// @return bool: True if equipment has item specials, false otherwise
     fn has_specials(self: Equipment) -> bool {
         if (self.weapon.get_greatness() >= SUFFIX_UNLOCK_GREATNESS) {
             true
@@ -239,11 +250,11 @@ impl ImplEquipment of IEquipment {
         }
     }
 
-    // @notice gets stat boosts based on item specials
-    // @param self The Equipment to get stat boosts for.
-    // @param specials_seed The seed to use for generating item specials.
-    // @return Returns the stat boosts for the equipment.
-    fn get_stat_boosts(self: Equipment, specials_seed: felt252) -> Stats {
+    /// @notice Gets stat boosts based on item specials
+    /// @param self: The Equipment to get stat boosts for
+    /// @param specials_seed: The seed to use for generating item specials
+    /// @return Stats: The stat boosts for the equipment
+    fn get_stat_boosts(self: Equipment, specials_seed: u16) -> Stats {
         let mut stats = Stats {
             strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
         };
@@ -274,22 +285,10 @@ impl ImplEquipment of IEquipment {
         }
         stats
     }
-
-    // @notice gets stat boosts based on item specials
-    // @param item_id The ID of the item to get stat boosts for.
-    // @param specials_seed The seed to use for generating item specials.
-    // @return Returns the stat boosts for the item.
-    fn get_item_boost(item_id: u8, specials_seed: felt252) -> Stats {
-        let mut stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, charisma: 0, intelligence: 0, wisdom: 0, luck: 0
-        };
-        stats.apply_suffix_boost(ImplLoot::get_suffix(item_id, specials_seed));
-        stats
-    }
 }
 
-const TWO_POW_21: u256 = 0x200000;
 const TWO_POW_16: u256 = 0x10000;
+const TWO_POW_16_NZ: NonZero<u256> = 0x10000;
 const TWO_POW_32: u256 = 0x100000000;
 const TWO_POW_48: u256 = 0x1000000000000;
 const TWO_POW_64: u256 = 0x10000000000000000;
@@ -1137,36 +1136,5 @@ mod tests {
         assert(adventurer.equipment.weapon.xp == 0, 'weapon should start with 0xp');
         adventurer.equipment.increase_item_xp_at_slot(Slot::Weapon(()), 0);
         assert(adventurer.equipment.weapon.xp == 0, 'weapon should still have 0xp');
-    }
-
-    #[test]
-    #[available_gas(70290)]
-    fn test_get_item_boost_gas() {
-        ImplEquipment::get_item_boost(1, 0);
-    }
-
-    #[test]
-    fn test_get_item_boost() {
-        let item_id = ItemId::Wand;
-        let mut start_entropy = 0;
-        let stats = ImplEquipment::get_item_boost(item_id, start_entropy);
-
-        assert(stats.strength == 0, 'STR should be 0');
-        assert(stats.dexterity == 0, 'DEX should be 0');
-        assert(stats.vitality == 0, 'VIT should be 0');
-        assert(stats.charisma == 0, 'CHA should be 0');
-        assert(stats.intelligence == 3, 'INT should be 3');
-        assert(stats.wisdom == 0, 'WIS should be 0');
-        assert(stats.luck == 0, 'LUK should be 0');
-
-        start_entropy = 1;
-        let stats = ImplEquipment::get_item_boost(item_id, start_entropy);
-        assert(stats.strength == 0, 'STR should be 0');
-        assert(stats.dexterity == 1, 'DEX should be 1');
-        assert(stats.vitality == 2, 'VIT should be 2');
-        assert(stats.charisma == 0, 'CHA should be 0');
-        assert(stats.intelligence == 0, 'INT should be 0');
-        assert(stats.wisdom == 0, 'WIS should be 0');
-        assert(stats.luck == 0, 'LUK should be 0');
     }
 }
