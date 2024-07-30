@@ -6,6 +6,7 @@ struct AdventurerMetadata {
     death_date: u64, // 64 bits in storage
     level_seed: u64, // 64 bits in storage
     item_specials_seed: u16, // 16 bits in storage
+    rank_at_death: u8, // 2 bits in storage
     delay_stat_reveal: bool, // 1 bit in storage
 }
 
@@ -24,7 +25,8 @@ impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
             + value.death_date.into() * TWO_POW_64
             + value.level_seed.into() * TWO_POW_128
             + value.item_specials_seed.into() * TWO_POW_192
-            + delay_stat_reveal * TWO_POW_208)
+            + value.rank_at_death.into() * TWO_POW_208
+            + delay_stat_reveal * TWO_POW_210)
             .try_into()
             .unwrap()
     }
@@ -39,16 +41,18 @@ impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
         let (packed, death_date) = integer::U256DivRem::div_rem(packed, TWO_POW_64_NZ);
         let (packed, level_seed) = integer::U256DivRem::div_rem(packed, TWO_POW_64_NZ);
         let (packed, item_specials_seed) = integer::U256DivRem::div_rem(packed, TWO_POW_16_NZ);
+        let (packed, rank_at_death) = integer::U256DivRem::div_rem(packed, TWO_POW_2_NZ);
         let (_, delay_stat_reveal_u256) = integer::U256DivRem::div_rem(packed, TWO_POW_1_NZ);
 
-        let delay_stat_reveal = delay_stat_reveal_u256 != 0;
         let birth_date = birth_date.try_into().unwrap();
         let death_date = death_date.try_into().unwrap();
         let level_seed = level_seed.try_into().unwrap();
+        let delay_stat_reveal = delay_stat_reveal_u256 != 0;
+        let rank_at_death = rank_at_death.try_into().unwrap();
         let item_specials_seed = item_specials_seed.try_into().unwrap();
 
         AdventurerMetadata {
-            birth_date, death_date, level_seed, item_specials_seed, delay_stat_reveal,
+            birth_date, death_date, level_seed, item_specials_seed, rank_at_death, delay_stat_reveal
         }
     }
 }
@@ -62,12 +66,18 @@ impl ImplAdventurerMetadata of IAdventurerMetadata {
     /// @return: The newly created AdventurerMetadata struct
     fn new(birth_date: u64, delay_stat_reveal: bool) -> AdventurerMetadata {
         AdventurerMetadata {
-            birth_date, death_date: 0, level_seed: 0, item_specials_seed: 0, delay_stat_reveal
+            birth_date,
+            death_date: 0,
+            level_seed: 0,
+            item_specials_seed: 0,
+            rank_at_death: 0,
+            delay_stat_reveal
         }
     }
 }
 
 const TWO_POW_1: u256 = 0x2;
+const TWO_POW_2_NZ: NonZero<u256> = 0x4;
 const TWO_POW_1_NZ: NonZero<u256> = 0x2;
 const TWO_POW_16: u256 = 0x10000;
 const TWO_POW_16_NZ: NonZero<u256> = 0x10000;
@@ -76,7 +86,7 @@ const TWO_POW_64_NZ: NonZero<u256> = 0x10000000000000000;
 const TWO_POW_128: u256 = 0x100000000000000000000000000000000;
 const TWO_POW_192: u256 = 0x1000000000000000000000000000000000000000000000000;
 const TWO_POW_208: u256 = 0x10000000000000000000000000000000000000000000000000000;
-
+const TWO_POW_210: u256 = 0x40000000000000000000000000000000000000000000000000000;
 // ---------------------------
 // ---------- Tests ----------
 // ---------------------------
@@ -85,15 +95,17 @@ mod tests {
     use super::{AdventurerMetadata, PackingAdventurerMetadata, ImplAdventurerMetadata};
     const U64_MAX: u64 = 0xffffffffffffffff;
     const U16_MAX: u16 = 0xffff;
+    const U2_MAX: u8 = 0x3;
 
     #[test]
-    #[available_gas(111090)]
+    #[available_gas(135530)]
     fn test_adventurer_metadata_pack_unpack_gas() {
         let meta = AdventurerMetadata {
             birth_date: U64_MAX,
             death_date: U64_MAX,
             level_seed: U64_MAX,
             item_specials_seed: U16_MAX,
+            rank_at_death: U2_MAX,
             delay_stat_reveal: true,
         };
         PackingAdventurerMetadata::unpack(PackingAdventurerMetadata::pack(meta));
@@ -107,6 +119,7 @@ mod tests {
             death_date: U64_MAX,
             level_seed: U64_MAX,
             item_specials_seed: U16_MAX,
+            rank_at_death: U2_MAX,
             delay_stat_reveal: true,
         };
         let packed = PackingAdventurerMetadata::pack(meta);
@@ -118,6 +131,7 @@ mod tests {
             meta.item_specials_seed == unpacked.item_specials_seed,
             'item specials should be max u16'
         );
+        assert(meta.rank_at_death == unpacked.rank_at_death, 'rank at death should be max u2');
         assert(meta.delay_stat_reveal == unpacked.delay_stat_reveal, 'delay reveal should be true');
 
         // zero case
@@ -126,6 +140,7 @@ mod tests {
             death_date: 0,
             level_seed: 0,
             item_specials_seed: 0,
+            rank_at_death: 0,
             delay_stat_reveal: false
         };
         let packed = PackingAdventurerMetadata::pack(meta);
@@ -134,6 +149,7 @@ mod tests {
         assert(unpacked.death_date == 0, 'end time should be 0');
         assert(unpacked.level_seed == 0, 'level seed should be 0');
         assert(unpacked.item_specials_seed == 0, 'item specials seed should be 0');
+        assert(unpacked.rank_at_death == 0, 'rank at death should be 0');
         assert(unpacked.delay_stat_reveal == false, 'delay reveal should be false');
     }
 
@@ -151,6 +167,7 @@ mod tests {
         assert(meta.death_date == 0, 'end time should be 0');
         assert(meta.level_seed == 0, 'level seed should be 0');
         assert(meta.item_specials_seed == 0, 'item specials seed should be 0');
+        assert(meta.rank_at_death == 0, 'rank at death should be 0');
         assert(meta.delay_stat_reveal == false, 'delay reveal should be false');
     }
 }

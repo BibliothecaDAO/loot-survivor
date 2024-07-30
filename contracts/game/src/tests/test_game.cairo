@@ -2225,4 +2225,138 @@ mod tests {
         assert(metadata.death_date == death_date, 'Death date not set correctly');
         assert(metadata.birth_date == starting_time, 'Birth date not set correctly');
     }
+
+    #[test]
+    fn test_adventurer_death_ranking() {
+        // Setup
+        let shopping_cart = ArrayTrait::<ItemPurchase>::new();
+        let stat_upgrades = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+        };
+        let starting_block = 1000;
+        let mut current_block_time = 1696201757;
+        let (mut game, _, _, _, _) = setup(starting_block, current_block_time, 0);
+
+        // Create a new adventurer
+        current_block_time += 777;
+        let player1_birth_date = current_block_time;
+        testing::set_block_timestamp(current_block_time);
+        let player1 = add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game.attack(player1, false);
+        game.upgrade(player1, 0, stat_upgrades, shopping_cart.clone());
+        game.explore(player1, true);
+        current_block_time += 1000;
+        let player1_death_date = current_block_time; 
+        testing::set_block_timestamp(current_block_time);
+        game.attack(player1, true);
+
+        // assert adventurer metadata and leaderboard
+        let player1_metadata = game.get_adventurer_meta(player1);
+        let leaderboard = game.get_leaderboard();
+        assert(player1_metadata.birth_date == player1_birth_date, 'Birth date not set correctly');
+        assert(player1_metadata.death_date == player1_death_date, 'Death date not set correctly');
+        assert(player1_metadata.rank_at_death == 1, 'Rank at death not set correctly');
+        assert(leaderboard.first.adventurer_id.into() == player1, 'player1 should be 1st place');
+
+        // introduce second player (new top score)
+        current_block_time += 777;
+        let player2_birth_date = current_block_time;
+        testing::set_block_timestamp(current_block_time);
+        let player2 = add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game.attack(player2, false);
+        game.upgrade(player2, 1, stat_upgrades, shopping_cart.clone());
+        game.explore(player2, true);
+        current_block_time += 777;
+        let player2_death_date = current_block_time;
+        testing::set_block_timestamp(current_block_time);
+        game.upgrade(player2, 1, stat_upgrades, shopping_cart.clone());
+        game.explore(player2, true);
+        game.attack(player2, true);
+
+        // assert adventurer metadata and leaderboard
+        let player1_metadata = game.get_adventurer_meta(player1);
+        let player2_metadata = game.get_adventurer_meta(player2);
+        let leaderboard = game.get_leaderboard();
+        assert(player2_metadata.birth_date == player2_birth_date, 'Birth date not set correctly');
+        assert(player2_metadata.death_date == player2_death_date, 'Death date not set correctly');
+        assert(player2_metadata.rank_at_death == 1, 'P2 should be death rank 1');
+        assert(player1_metadata.rank_at_death == 1, 'P1 should be death rank 1');
+        assert(leaderboard.first.adventurer_id.into() == player2, 'P2 should be 1st on LB');
+        assert(leaderboard.second.adventurer_id.into() == player1, 'P1 should be 2nd on LB');
+
+        // introduce third player (new top score)
+        current_block_time += 777;
+        let player3_birth_date = current_block_time;
+        testing::set_block_timestamp(current_block_time);
+        let player3 = add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game.attack(player3, false);
+        let stat_upgrades = Stats {
+            strength: 0, dexterity: 1, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        };
+        game.upgrade(player3, 1, stat_upgrades, shopping_cart.clone());
+        game.explore(player3, true);
+        game.flee(player3, true);
+        game.explore(player3, true);
+        game.upgrade(player3, 0, stat_upgrades, shopping_cart.clone());
+        game.explore(player3, true);
+        game.upgrade(player3, 0, stat_upgrades, shopping_cart.clone());
+        game.explore(player3, true);
+        game.attack(player3, true);
+        game.explore(player3, true);
+        game.upgrade(player3, 0, stat_upgrades, shopping_cart.clone());
+        game.explore(player3, true);
+        current_block_time += 777;
+        let player3_death_date = current_block_time;
+        testing::set_block_timestamp(current_block_time);
+        game.attack(player3, true);
+
+        // assert adventurer metadata and leaderboard
+        let player3_metadata = game.get_adventurer_meta(player3);
+        let player2_metadata = game.get_adventurer_meta(player2);
+        let player1_metadata = game.get_adventurer_meta(player1);
+        let leaderboard = game.get_leaderboard();
+        assert(player3_metadata.death_date == player3_death_date, 'P3 death date not set correctly');
+        assert(player3_metadata.birth_date == player3_birth_date, 'P3 birth date not set correctly');
+        assert(player3_metadata.rank_at_death == 1, 'P3 should be death rank 1');
+        assert(player2_metadata.rank_at_death == 1, 'P2 should be death rank 1');
+        assert(player1_metadata.rank_at_death == 1, 'P1 should be death rank 1');
+        assert(leaderboard.first.adventurer_id.into() == player3, 'P3 should be 1st on LB');
+        assert(leaderboard.second.adventurer_id.into() == player2, 'P2 should be 2nd on LB');
+        assert(leaderboard.third.adventurer_id.into() == player1, 'P1 should be 3rd on LB');
+
+        // introduce fourth player (2nd place finish)
+        current_block_time += 777;
+        let player4_birth_date = current_block_time;
+        testing::set_block_timestamp(current_block_time);
+        let player4 = add_adventurer_to_game(ref game, 0, ItemId::Wand);
+        game.attack(player4, false);
+        game.upgrade(player4, 0, stat_upgrades, shopping_cart.clone());
+        game.explore(player4, true);
+        game.upgrade(player4, 0, stat_upgrades, shopping_cart.clone());
+        game.explore(player4, true);
+        game.attack(player4, true);
+        game.explore(player4, true);
+        game.upgrade(player4, 0, stat_upgrades, shopping_cart.clone());
+        game.explore(player4, true);
+        current_block_time += 777;
+        let player4_death_date = current_block_time;
+        testing::set_block_timestamp(current_block_time);
+        game.attack(player4, true);
+
+        // assert adventurer metadata and leaderboard
+        let player1_metadata = game.get_adventurer_meta(player1);
+        let player2_metadata = game.get_adventurer_meta(player2);
+        let player3_metadata = game.get_adventurer_meta(player3);
+        let player4_metadata = game.get_adventurer_meta(player4);
+        let leaderboard = game.get_leaderboard();
+        assert(player4_metadata.birth_date == player4_birth_date, 'P4 birth date not set correctly');
+        assert(player4_metadata.death_date == player4_death_date, 'P4 death date not set correctly');
+        assert(player4_metadata.rank_at_death == 2, 'P4 should be death rank 2');
+        assert(player3_metadata.rank_at_death == 1, 'P3 should be death rank 1');
+        assert(player2_metadata.rank_at_death == 1, 'P2 should be death rank 1');
+        assert(player1_metadata.rank_at_death == 1, 'P1 should be death rank 1');
+        assert(leaderboard.first.adventurer_id.into() == player3, 'P3 should be 1st on LB');
+        assert(leaderboard.second.adventurer_id.into() == player4, 'P4 should be 2nd on LB');
+        assert(leaderboard.third.adventurer_id.into() == player2, 'P2 should be 3rd on LB');
+    }
 }

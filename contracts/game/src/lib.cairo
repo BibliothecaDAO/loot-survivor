@@ -804,6 +804,10 @@ mod Game {
             self.emit(UpdatedAdventurerName { adventurer_id, name });
         }
 
+        /// @title Set Adventurer Obituary
+        /// @notice Allows an adventurer to set their obituary.
+        /// @param adventurer_id A felt252 representing the unique ID of the adventurer.
+        /// @param obituary A ByteArray representing the obituary of the adventurer.
         fn set_adventurer_obituary(
             ref self: ContractState, adventurer_id: felt252, obituary: ByteArray
         ) {
@@ -832,6 +836,9 @@ mod Game {
             self.emit(SetAdventurerObituary { adventurer_id, obituary });
         }
 
+        /// @title Slay Expired Adventurers
+        /// @notice Slay all expired adventurers.
+        /// @dev This function is called daily to slay all expired adventurers.
         fn slay_expired_adventurers(ref self: ContractState, adventurer_ids: Array<felt252>) {
             let mut adventurer_index: u32 = 0;
             loop {
@@ -934,6 +941,20 @@ mod Game {
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
 
+    /// @title Set Adventurer Rank at Death (internal)
+    /// @notice Allows an adventurer to set their rank at death.
+    /// @param adventurer_id A felt252 representing the unique ID of the adventurer.
+    /// @param rank_at_death A u8 representing the rank at death of the adventurer.
+    fn _record_adventurer_rank_at_death(ref self: ContractState, adventurer_id: felt252, rank_at_death: u8) {
+        let mut adventurer_meta = _load_adventurer_metadata(@self, adventurer_id);
+        adventurer_meta.rank_at_death = rank_at_death;
+        self._adventurer_meta.write(adventurer_id, adventurer_meta);
+    }
+
+    /// @title Slay Expired Adventurers (internal)
+    /// @notice Slay all expired adventurers.
+    /// @dev This function is called daily to slay all expired adventurers.
+    /// @param adventurer_id A felt252 representing the unique ID of the adventurer.
     fn _slay_expired_adventurer(ref self: ContractState, adventurer_id: felt252) {
         // unpack adventurer from storage (no need for stat boosts)
         let mut adventurer = _load_adventurer_no_boosts(@self, adventurer_id);
@@ -954,7 +975,7 @@ mod Game {
         _save_adventurer_no_boosts(ref self, adventurer, adventurer_id);
     }
 
-    /// @title Process Item Specials Randomness
+    /// @title Process Item Specials Randomness (internal)
     /// @notice Processes the randomness for item specials and emits an event.
     /// @dev This function is called when the randomness for item specials is received.
     /// @param adventurer_id A felt252 representing the unique ID of the adventurer.
@@ -3075,6 +3096,9 @@ mod Game {
             leaderboard.third = player_score;
             player_rank = 3;
         }
+
+        // store rank at death so this can be used for future onchain fun
+        _record_adventurer_rank_at_death(ref self, adventurer_id, player_rank);
 
         // emit new high score event
         __event_NewHighScore(ref self, adventurer_id, adventurer, player_rank);
