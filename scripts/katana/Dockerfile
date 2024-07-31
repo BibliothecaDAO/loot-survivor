@@ -32,7 +32,7 @@ RUN /root/.local/bin/scarb build
 
 # Install starkli v0.3.3
 RUN curl https://get.starkli.sh | bash
-RUN /root/.starkli/bin/starkliup -v 0.3.3
+RUN /root/.starkli/bin/starkliup -v 0.2.9
 
 # Install DOJO
 RUN curl -L https://install.dojoengine.org | bash
