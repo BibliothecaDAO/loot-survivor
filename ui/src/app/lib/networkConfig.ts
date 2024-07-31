@@ -2,7 +2,7 @@ export const networkConfig = {
   sepolia: {
     rpcUrl:
       "https://starknet-sepolia.blastapi.io/5ef61753-e7c1-4593-bc62-97fdf96f8de5",
-    lsGQLURL: "http://localhost:8080/graphql",
+    lsGQLURL: "https://ls-indexer-sepolia.provable.games/graphql",
     tokensGQLURL: "https://testnet.realms.world/api/graphql",
     ethAddress:
       "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
