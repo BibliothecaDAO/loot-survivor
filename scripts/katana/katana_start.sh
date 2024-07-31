@@ -28,9 +28,6 @@ terminal_timestamp=0
 randomness_contract=0
 randomness_rotation_interval=1
 oracle_address=0
-previous_first_place_address=0
-previous_second_place_address=0
-previous_third_place_address=0
 
 # extract account details from katana logs
 output=$(head -n 1 ~/katana.log | jq -r '.fields.message | fromjson | .accounts[0] | .[0], .[-1].private_key')
@@ -46,7 +43,7 @@ starkli account fetch --force --output /katana/starkli_account $account_address
 game_class_hash=$(starkli declare --watch /root/loot-survivor/target/dev/game_Game.contract_class.json --private-key $private_key --compiler-version 2.6.2 2>/dev/null)
 
 # deploy contract
-game_contract=$(starkli deploy --watch $game_class_hash $lords_address $eth_address $dao_address $pg_address $beasts_address $golden_token_address $terminal_timestamp $randomness_contract $randomness_rotation_interval $oracle_address $previous_first_place_address $previous_second_place_address $previous_third_place_address --private-key $private_key --max-fee 0.01 2>/dev/null)
+game_contract=$(starkli deploy --watch $game_class_hash $lords_address $eth_address $dao_address $pg_address $beasts_address $golden_token_address $terminal_timestamp $randomness_contract $randomness_rotation_interval $oracle_address --private-key $private_key --max-fee 0.01 2>/dev/null)
 
 # Export game_contract and private key and publish to .bashrc
 export game_contract
