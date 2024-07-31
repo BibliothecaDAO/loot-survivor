@@ -7,6 +7,13 @@ import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { NullAdventurer, FormData } from "@/app/types";
 import useUIStore from "@/app/hooks/useUIStore";
+import useCustomQuery from "@/app/hooks/useCustomQuery";
+import {
+  getAdventurersByOwnerCount,
+  getAliveAdventurersCount,
+} from "@/app/hooks/graphql/queries";
+import { indexAddress, padAddress } from "@/app/lib/utils";
+import useNetworkAccount from "@/app/hooks/useNetworkAccount";
 
 interface AdventurerScreenProps {
   spawn: (
@@ -39,12 +46,38 @@ export default function AdventurerScreen({
 }: AdventurerScreenProps) {
   const [activeMenu, setActiveMenu] = useState(0);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
-  const adventurers = useQueriesStore(
-    (state) => state.data.adventurersByOwnerQuery?.adventurers || []
-  );
   const resetData = useQueriesStore((state) => state.resetData);
   const startOption = useUIStore((state) => state.startOption);
   const setStartOption = useUIStore((state) => state.setStartOption);
+  const network = useUIStore((state) => state.network);
+  const { account } = useNetworkAccount();
+  const owner = account?.address ? padAddress(account.address) : "";
+
+  const adventurersByOwnerCountData = useCustomQuery(
+    network,
+    "adventurersByOwnerCountQuery",
+    getAdventurersByOwnerCount,
+    {
+      owner: indexAddress(owner),
+    },
+    owner === ""
+  );
+
+  const aliveAdventurersByOwnerCountData = useCustomQuery(
+    network,
+    "aliveAdventurersByOwnerCountQuery",
+    getAliveAdventurersCount,
+    {
+      owner: indexAddress(owner),
+    },
+    owner === ""
+  );
+
+  const adventurersByOwnerCount =
+    adventurersByOwnerCountData?.countTotalAdventurers;
+
+  const aliveAdventurersByOwnerCount =
+    aliveAdventurersByOwnerCountData?.countAliveAdventurers;
 
   const menu = [
     {
@@ -65,12 +98,12 @@ export default function AdventurerScreen({
       action: () => {
         setStartOption("choose adventurer");
       },
-      disabled: adventurers.length == 0,
+      disabled: adventurersByOwnerCount == 0,
     },
   ];
 
   useEffect(() => {
-    if (adventurers.length == 0) {
+    if (adventurersByOwnerCount == 0) {
       setStartOption("create adventurer");
     }
   }, []);
@@ -111,9 +144,10 @@ export default function AdventurerScreen({
           <AdventurersList
             isActive={activeMenu == 2}
             onEscape={() => setActiveMenu(0)}
-            adventurers={adventurers}
             handleSwitchAdventurer={handleSwitchAdventurer}
             gameContract={gameContract}
+            adventurersCount={adventurersByOwnerCount}
+            aliveAdventurersCount={aliveAdventurersByOwnerCount}
           />
         </div>
       )}

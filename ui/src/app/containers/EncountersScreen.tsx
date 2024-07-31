@@ -1,18 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { DiscoveryDisplay } from "@/app/components/actions/DiscoveryDisplay";
 import { BattleDisplay } from "@/app/components/beast/BattleDisplay";
 import LootIconLoader from "@/app/components/icons/Loader";
 import { Button } from "@/app/components/buttons/Button";
-import { Battle, Discovery } from "@/app/types";
 import { processBeastName } from "@/app/lib/utils";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import {
-  getBattlesByAdventurer,
-  getDiscoveries,
+  getDiscoveriesAndBattlesByAdventurerPaginated,
+  getDiscoveryBattleCount,
 } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
-import { networkConfig } from "@/app/lib/networkConfig";
 import useUIStore from "@/app/hooks/useUIStore";
 
 export interface EncountersProps {
@@ -26,56 +24,37 @@ export interface EncountersProps {
  */
 export default function EncountersScreen({ profile }: EncountersProps) {
   const { adventurer } = useAdventurerStore();
-  const { data, isLoading } = useQueriesStore();
+  const { isLoading } = useQueriesStore();
   const network = useUIStore((state) => state.network);
   const encountersPerPage = 10;
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [loadingData, setLoadingData] = useState(true);
-  const [sortedCombined, setSortedCombined] = useState<Battle[] | Discovery[]>(
-    []
-  );
+  const skip = (currentPage - 1) * encountersPerPage;
 
-  const discoveriesData = useCustomQuery(
-    networkConfig[network!].lsGQLURL!,
-    "discoveriesQuery",
-    getDiscoveries,
-    {
-      id: profile ? profile : adventurer?.id ?? 0,
-    }
-  );
-
-  const battlesData = useCustomQuery(
-    networkConfig[network!].lsGQLURL!,
-    "battlesByAdventurerQuery",
-    getBattlesByAdventurer,
+  const discoveryBattleCountData = useCustomQuery(
+    network,
+    "discoveryBattleCountsQuery",
+    getDiscoveryBattleCount,
     {
       adventurerId: profile ? profile : adventurer?.id ?? 0,
     }
   );
 
-  useEffect(() => {
-    if (data) {
-      setLoadingData(true);
+  const discoveryBattleCount =
+    discoveryBattleCountData?.countDiscoveriesAndBattles;
 
-      const discoveries = discoveriesData?.discoveries
-        ? discoveriesData?.discoveries
-        : [];
-
-      const battles = battlesData?.battles ? battlesData?.battles : [];
-
-      const combined = [...discoveries, ...battles];
-      const sorted = combined.sort((a: any, b: any) => {
-        const dateA = new Date(a.timestamp);
-        const dateB = new Date(b.timestamp);
-        return dateB.getTime() - dateA.getTime();
-      });
-
-      setSortedCombined(sorted);
-      setLoadingData(false);
+  const discoveriesAndBattlesData = useCustomQuery(
+    network,
+    "discoveriesAndBattlesByAdventurerQuery",
+    getDiscoveriesAndBattlesByAdventurerPaginated,
+    {
+      adventurerId: profile ? profile : adventurer?.id ?? 0,
+      skip: skip,
     }
-  }, [discoveriesData, battlesData, data]); // Runs whenever 'data' changes
+  );
 
-  const totalPages = Math.ceil(sortedCombined.length / encountersPerPage);
+  const encounters = discoveriesAndBattlesData?.discoveriesAndBattles ?? [];
+
+  const totalPages = Math.ceil(discoveryBattleCount / encountersPerPage);
 
   const handleClick = (newPage: number): void => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -83,39 +62,34 @@ export default function EncountersScreen({ profile }: EncountersProps) {
     }
   };
 
-  const displayEncounters = sortedCombined.slice(
-    (currentPage - 1) * encountersPerPage,
-    currentPage * encountersPerPage
-  );
-
   return (
     <div className="flex flex-col items-center mx-auto text-sm sm:text-xl xl:h-[500px] xl:overflow-y-auto 2xl:h-full 2xl:overflow-hidden w-full">
       {adventurer?.id || profile ? (
         <>
-          {displayEncounters.length > 0 ? (
+          {discoveryBattleCount > 0 ? (
             <>
               <h3 className="text-center">
                 {profile ? "Encounters" : "Your Encounters"}
               </h3>
-              {(isLoading.latestDiscoveriesQuery || loadingData) && (
-                <LootIconLoader />
-              )}
+              {(isLoading.latestDiscoveriesQuery ||
+                !discoveriesAndBattlesData) && <LootIconLoader />}
               <div className="flex flex-col items-center gap-2 overflow-auto default-scroll">
-                {displayEncounters.map((encounter: any, index: number) => {
+                {encounters.map((encounter: any, index: number) => {
+                  const formatEncounter = encounter.data;
                   return (
                     <div
                       className="w-full p-1 sm:p-2 text-left border border-terminal-green"
                       key={index}
                     >
-                      {encounter.hasOwnProperty("discoveryType") ? (
-                        <DiscoveryDisplay discoveryData={encounter} />
+                      {formatEncounter.hasOwnProperty("discoveryType") ? (
+                        <DiscoveryDisplay discoveryData={formatEncounter} />
                       ) : (
                         <BattleDisplay
-                          battleData={encounter}
+                          battleData={formatEncounter}
                           beastName={processBeastName(
-                            encounter?.beast,
-                            encounter?.special2,
-                            encounter?.special3
+                            formatEncounter?.beast,
+                            formatEncounter?.special2,
+                            formatEncounter?.special3
                           )}
                         />
                       )}
@@ -127,7 +101,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
           ) : (
             <p className="text-lg">You have not yet made any encounters!</p>
           )}
-          {sortedCombined.length > 10 && (
+          {discoveryBattleCount > 10 && (
             <div className="flex justify-center mt-8">
               <Button
                 variant={"outline"}

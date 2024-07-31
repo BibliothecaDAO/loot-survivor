@@ -323,6 +323,26 @@ export default function UpgradeScreen({
   setChaBoostRemoved(chaBoostRemoved);
 
   useEffect(() => {
+    const chaBoostRemoved = calculateChaBoostRemoved(
+      purchaseItems,
+      adventurer!,
+      adventurerItems,
+      equipItems,
+      dropItems
+    );
+    setChaBoostRemoved(chaBoostRemoved);
+
+    const vitBoostRemoved = calculateVitBoostRemoved(
+      purchaseItems,
+      adventurer!,
+      adventurerItems,
+      equipItems,
+      dropItems
+    );
+    setVitBoostRemoved(vitBoostRemoved);
+  }, [purchaseItems, adventurer, adventurerItems, equipItems, dropItems]);
+
+  useEffect(() => {
     setTotalVitality((adventurer?.vitality ?? 0) + selectedVitality);
     setTotalCharisma(
       (adventurer?.charisma ?? 0) + selectedCharisma - chaBoostRemoved
@@ -494,7 +514,7 @@ export default function UpgradeScreen({
     if (healthOverflow) {
       setPotionAmount(Math.max(potionAmount - vitBoostRemoved, 0));
     }
-  }, [newMaxHealth]);
+  }, [vitBoostRemoved]);
 
   return (
     <>

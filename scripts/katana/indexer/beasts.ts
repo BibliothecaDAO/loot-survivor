@@ -14,6 +14,9 @@ import {
 } from "./utils/events.ts";
 import { insertBeast, updateBeastHealth } from "./utils/helpers.ts";
 import { MONGO_CONNECTION_STRING } from "./utils/constants.ts";
+import { GameData } from "./utils/data.ts";
+
+const gameData = new GameData();
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
@@ -59,6 +62,8 @@ export default function transform({ header, events }: Block) {
             seed: value.seed,
             health: value.adventurerState.adventurer.beastHealth,
             level: value.beastSpec.level,
+            tier: gameData.BEAST_TIERS[value.id],
+            type: gameData.BEAST_TYPES[value.id],
             special1: value.beastSpec.specials.special1,
             special2: value.beastSpec.specials.special2,
             special3: value.beastSpec.specials.special3,
@@ -80,6 +85,8 @@ export default function transform({ header, events }: Block) {
             seed: value.seed,
             health: value.adventurerState.adventurer.beastHealth,
             level: value.beastSpec.level,
+            tier: gameData.BEAST_TIERS[value.id],
+            type: gameData.BEAST_TYPES[value.id],
             special1: value.beastSpec.specials.special1,
             special2: value.beastSpec.specials.special2,
             special3: value.beastSpec.specials.special3,

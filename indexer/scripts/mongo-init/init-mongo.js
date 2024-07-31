@@ -19,6 +19,7 @@ db.adventurers.createIndex({ "xp": -1 });
 db.battles.createIndex({ "_cursor.to": 1, "adventurerId": 1 });
 db.battles.createIndex({ "_cursor.from": 1 });
 db.battles.createIndex({ "_cursor.to": 1 });
+db.battles.createIndex({ "timestamp": -1 });
 
 // beasts
 db.beasts.createIndex({ "_cursor.to": 1, "adventurerId": 1 });
@@ -29,6 +30,7 @@ db.beasts.createIndex({ "_cursor.to": 1 });
 db.discoveries.createIndex({ "_cursor.to": 1, "adventurerId": 1 });
 db.discoveries.createIndex({ "_cursor.from": 1 });
 db.discoveries.createIndex({ "_cursor.to": 1 });
+db.discoveries.createIndex({ "timestamp": -1 });
 
 // scores
 db.scores.createIndex({ "_cursor.to": 1, "adventurerId": 1 });

@@ -132,7 +132,10 @@ export const InventoryCard = ({
             <span>Greatness {calculateLevel(item?.xp ?? 0)}</span>
             <button
               onClick={() => handleEquipItems(item?.item ?? "")}
-              disabled={equipItems.includes(itemId)}
+              disabled={
+                equipItems.includes(itemId) ||
+                item?.item === adventurer![itemSlot.toLowerCase()]
+              }
               className="bg-terminal-green text-terminal-black px-1 sm:p-1 uppercase disabled:bg-terminal-black disabled:text-terminal-green"
             >
               <p className="text-xxs sm:text-xs">Equip</p>

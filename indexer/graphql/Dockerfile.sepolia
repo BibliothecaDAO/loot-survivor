@@ -11,4 +11,4 @@ RUN python3 -m pip install pycryptodome
 RUN poetry config virtualenvs.create false
 RUN poetry install
 
-ENTRYPOINT [ "indexer", "graphql", "--mongo", "mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@54.157.59.41:27017", "--port", "8080" ]
+ENTRYPOINT [ "indexer", "graphql", "--mongo", "mongodb://mongo:mongo@host.docker.internal:27017", "--port", "8080", "--allowed-origin", "https://sepolia.lootsurvivor.io" ]

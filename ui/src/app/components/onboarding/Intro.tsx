@@ -17,7 +17,14 @@ const Intro = () => {
 
   const { play: clickPlay } = useUiSounds(soundSelector.click);
 
-  const network = process.env.NEXT_PUBLIC_NETWORK;
+  let network = "";
+
+  if (process.env.NEXT_PUBLIC_NETWORK === "development") {
+    network = "sepolia";
+  } else {
+    network = process.env.NEXT_PUBLIC_NETWORK!;
+  }
+
   return (
     <div className="min-h-screen container flex flex-col items-center">
       <Button

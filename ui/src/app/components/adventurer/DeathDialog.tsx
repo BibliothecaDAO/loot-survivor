@@ -1,15 +1,14 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import ReactDOMServer from "react-dom/server"; // Import this to convert ReactElement to string
 import TwitterShareButton from "@/app/components/buttons/TwitterShareButtons";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { Button } from "@/app/components/buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
-import { getRankFromList, getOrdinalSuffix } from "@/app/lib/utils";
-import { getAdventurerByXP } from "@/app/hooks/graphql/queries";
+import { getOrdinalSuffix } from "@/app/lib/utils";
+import { getAdventurerRank } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
-import { NullAdventurer, Adventurer } from "@/app/types";
-import { useQueriesStore, AdventurersResult } from "@/app/hooks/useQueryStore";
+import { NullAdventurer } from "@/app/types";
 import GlitchEffect from "@/app/components/animations/GlitchEffect";
 import PixelatedImage from "@/app/components/animations/PixelatedImage";
 import { getDeathMessageByRank } from "@/app/lib/utils";
@@ -17,7 +16,6 @@ import { networkConfig } from "@/app/lib/networkConfig";
 
 export const DeathDialog = () => {
   const messageRef = useRef<HTMLSpanElement>(null);
-  const [rank, setRank] = useState<number | null>(null);
   const [twitterDeathMessage, setTwitterDeathMessage] = useState<
     string | undefined
   >();
@@ -30,42 +28,19 @@ export const DeathDialog = () => {
   const network = useUIStore((state) => state.network);
   const [imageLoading, setImageLoading] = useState(false);
 
-  const { refetch, setData } = useQueriesStore();
-
-  useCustomQuery(
-    networkConfig[network!].lsGQLURL!,
-    "adventurersByXPQuery",
-    getAdventurerByXP,
-    undefined
+  const rankVariables = useMemo(
+    () => ({ adventurerId: adventurer?.id, adventurerXp: adventurer?.xp }),
+    [adventurer?.id, adventurer?.xp]
   );
 
-  const handleSortXp = (xpData: AdventurersResult) => {
-    const copiedAdventurersByXpData = xpData?.adventurers.slice();
+  const adventurerRankData = useCustomQuery(
+    network,
+    "adventurerRankQuery",
+    getAdventurerRank,
+    rankVariables
+  );
 
-    const sortedAdventurersByXPArray = copiedAdventurersByXpData?.sort(
-      (a: Adventurer, b: Adventurer) => (b.xp ?? 0) - (a.xp ?? 0)
-    );
-
-    const sortedAdventurersByXP = { adventurers: sortedAdventurersByXPArray };
-    return sortedAdventurersByXP;
-  };
-
-  useEffect(() => {
-    refetch("adventurersByXPQuery", undefined)
-      .then((adventurersByXPdata) => {
-        const sortedAdventurersByXP = handleSortXp(adventurersByXPdata);
-        setData("adventurersByXPQuery", sortedAdventurersByXP);
-        const rank = getRankFromList(
-          adventurer?.id ?? 0,
-          sortedAdventurersByXP?.adventurers ?? []
-        );
-        setRank(rank + 1);
-      })
-      .catch((error) => {
-        console.error("Error refetching data:", error);
-        setRank(null); // Set rank to null or a default value in case of error
-      });
-  }, []);
+  const adventurerRank = adventurerRankData?.adventurerRank?.rank;
 
   // Utility function to strip HTML tags
   const stripHtmlTags = (html: string) => {
@@ -85,11 +60,11 @@ export const DeathDialog = () => {
 
   return (
     <>
-      {rank !== null && (
+      {adventurerRank !== null && (
         <div className="top-0 left-0 fixed text-center h-full w-full z-40">
           <PixelatedImage
             src={"/scenes/intro/skulls.png"}
-            pixelSize={rank <= 100 ? 10 : 20}
+            pixelSize={adventurerRank <= 100 ? 10 : 20}
             setImageLoading={setImageLoading}
             fill={true}
           />
@@ -99,16 +74,16 @@ export const DeathDialog = () => {
           {!imageLoading && (
             <div className="flex flex-col gap-4 sm:gap-10 items-center justify-center z-10 p-10 sm:p-20 h-full">
               <div className="flex flex-col gap-5 items-center justify-center z-10 self-center ">
-                {rank! <= 3 &&
-                  rank! > 0 &&
-                  (rank === 1 ? (
+                {adventurerRank! <= 3 &&
+                  adventurerRank! > 0 &&
+                  (adventurerRank === 1 ? (
                     <h1 className="text-6xl animate-pulseFast">
                       NEW HIGH SCORE
                     </h1>
                   ) : (
                     <h1 className="text-6xl animate-pulseFast">TOP 3 SCORES</h1>
                   ))}
-                {rank! <= 50 ? (
+                {adventurerRank! <= 50 ? (
                   <GlitchEffect />
                 ) : (
                   <h1 className="text-red-500 text-6xl">YOU DIED!</h1>
@@ -121,7 +96,7 @@ export const DeathDialog = () => {
                 </span>
                 <span className="flex flex-col gap-2 text-lg sm:text-4xl">
                   <span className="text-terminal-yellow">
-                    {getDeathMessageByRank(rank!)}
+                    {getDeathMessageByRank(adventurerRank!)}
                   </span>{" "}
                   <span className="text-4xl">
                     <span className="text-terminal-yellow">
@@ -129,7 +104,7 @@ export const DeathDialog = () => {
                     </span>{" "}
                     died{" "}
                     <span className="text-terminal-yellow">
-                      {getOrdinalSuffix(rank! ?? 0)}
+                      {getOrdinalSuffix(adventurerRank! ?? 0)}
                     </span>{" "}
                     with{" "}
                     <span className="text-terminal-yellow">
@@ -144,7 +119,7 @@ export const DeathDialog = () => {
               </div>
               <TwitterShareButton
                 text={`RIP ${adventurer?.name}, who died at ${getOrdinalSuffix(
-                  rank! ?? 0
+                  adventurerRank! ?? 0
                 )} place on #LootSurvivor with ${
                   adventurer?.xp
                 } XP.\n\nGravestone bears the inscription:\n\n"${twitterDeathMessage}"🪦\n\nEnter here and try to survive: ${

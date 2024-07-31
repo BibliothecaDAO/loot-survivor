@@ -169,47 +169,12 @@ const GOLDEN_TOKEN_FRAGMENT = `
   }
 `;
 
-const getAdventurer = gql`
-  ${ADVENTURERS_FRAGMENT}
-  query getAdventurer($owner: HexValue) {
-    adventurers(where: { owner: { eq: $owner } }) {
-      ...AdventurerFields
-    }
-  }
-`;
-
-const getDiscoveries = gql`
-  ${DISCOVERIES_FRAGMENT}
-  query getDiscoveries($id: FeltValue) {
-    discoveries(
-      where: { adventurerId: { eq: $id } }
-      limit: 1000000
-      orderBy: { timestamp: { desc: true } }
-    ) {
-      ...DiscoveryFields
-    }
-  }
-`;
-
 const getLatestDiscoveries = gql`
   ${DISCOVERIES_FRAGMENT}
   query getLatestDiscoveries($id: FeltValue) {
     discoveries(
       where: { adventurerId: { eq: $id } }
       limit: 10
-      orderBy: { timestamp: { desc: true } }
-    ) {
-      ...DiscoveryFields
-    }
-  }
-`;
-
-const getLastDiscovery = gql`
-  ${DISCOVERIES_FRAGMENT}
-  query get_last_discovery($adventurerId: FeltValue) {
-    discoveries(
-      where: { adventurerId: { eq: $adventurerId } }
-      limit: 1
       orderBy: { timestamp: { desc: true } }
     ) {
       ...DiscoveryFields
@@ -230,30 +195,27 @@ const getLastBeastDiscovery = gql`
   }
 `;
 
-const getDiscoveryByTxHash = gql`
-  ${DISCOVERIES_FRAGMENT}
-  query get_discovery($txHash: HexValue) {
-    discoveries(where: { txHash: { eq: $txHash } }) {
-      ...DiscoveryFields
-    }
-  }
-`;
-
-const getItems = gql`
-  ${ITEMS_FRAGMENT}
-  query get_items {
-    items {
-      ...ItemFields
-    }
-  }
-`;
-
 const getAdventurersByOwner = gql`
   ${ADVENTURERS_FRAGMENT}
-  query get_adventurers_by_owner($owner: HexValue) {
-    adventurers(where: { owner: { eq: $owner } }, limit: 10000000) {
+  query get_adventurers_by_owner(
+    $owner: HexValue
+    $skip: Int
+    $health: FeltValue
+  ) {
+    adventurers(
+      where: { owner: { eq: $owner }, health: { gte: $health } }
+      limit: 10
+      skip: $skip
+      orderBy: { id: { asc: true } }
+    ) {
       ...AdventurerFields
     }
+  }
+`;
+
+const getAdventurersByOwnerCount = gql`
+  query get_adventurers_by_owner_count($owner: HexValue) {
+    countTotalAdventurers(owner: $owner)
   }
 `;
 
@@ -269,18 +231,19 @@ const getAdventurerById = gql`
 const getAdventurersInList = gql`
   ${ADVENTURERS_FRAGMENT}
   query get_adventurer_by_id($ids: [FeltValue!]) {
-    adventurers(where: { id: { In: $ids } }, limit: 10000000) {
+    adventurers(where: { id: { In: $ids } }, limit: 10) {
       ...AdventurerFields
     }
   }
 `;
 
-const getAdventurersInListByXp = gql`
+const getDeadAdventurersByXPPaginated = gql`
   ${ADVENTURERS_FRAGMENT}
-  query get_adventurer_by_id_order_xp($ids: [FeltValue!]) {
+  query get_dead_adventurers_by_xp_paginated($skip: Int) {
     adventurers(
-      where: { id: { In: $ids } }
-      limit: 10000000
+      where: { health: { eq: 0 } }
+      limit: 10
+      skip: $skip
       orderBy: { xp: { desc: true } }
     ) {
       ...AdventurerFields
@@ -288,28 +251,15 @@ const getAdventurersInListByXp = gql`
   }
 `;
 
-const getAdventurerByGold = gql`
+const getAliveAdventurersByXPPaginated = gql`
   ${ADVENTURERS_FRAGMENT}
-  query get_adventurer_by_gold {
-    adventurers(orderBy: { gold: { desc: true } }, limit: 10000000) {
-      ...AdventurerFields
-    }
-  }
-`;
-
-const getAdventurerByXP = gql`
-  ${ADVENTURERS_FRAGMENT}
-  query get_adventurer_by_xp {
-    adventurers(orderBy: { xp: { desc: true } }, limit: 10000000) {
-      ...AdventurerFields
-    }
-  }
-`;
-
-const getAdventurersByXPPaginated = gql`
-  ${ADVENTURERS_FRAGMENT}
-  query get_adventurer_by_xp_paginated($skip: Int) {
-    adventurers(limit: 10, skip: $skip, orderBy: { xp: { desc: true } }) {
+  query get_alive_adventurers_by_xp_paginated($skip: Int) {
+    adventurers(
+      where: { health: { notIn: [0] } }
+      limit: 10
+      skip: $skip
+      orderBy: { xp: { desc: true } }
+    ) {
       ...AdventurerFields
     }
   }
@@ -337,43 +287,73 @@ const getBeast = gql`
 const getKilledBeasts = gql`
   ${BEASTS_FRAGMENT}
   query get_killed_beasts {
-    beasts(where: { health: { eq: 0 } }, limit: 10000000) {
+    beasts(
+      where: { health: { eq: 0 }, tier: { eq: 1 } }
+      limit: 10
+      orderBy: { level: { desc: true } }
+    ) {
       ...BeastFields
     }
   }
 `;
 
-const getBeastsByAdventurer = gql`
-  ${DISCOVERIES_FRAGMENT}
-  query get_beast_by_id($id: FeltValue) {
-    discoveries(where: { adventurerId: { eq: $id } }) {
-      ...DiscoveryFields
-    }
-  }
-`;
-
-const getLatestBattlesByAdventurer = gql`
-  ${BATTLES_FRAGMENT}
-  query get_latest_battles($adventurerId: FeltValue) {
-    battles(
+const getDiscoveriesAndBattlesByAdventurerPaginated = gql`
+  query getDiscoveryBattleCount($adventurerId: FeltValue, $skip: Int) {
+    discoveriesAndBattles(
       limit: 10
-      orderBy: { timestamp: { desc: true } }
+      skip: $skip
       where: { adventurerId: { eq: $adventurerId } }
     ) {
-      ...BattleFields
-    }
-  }
-`;
-
-const getBattlesByAdventurer = gql`
-  ${BATTLES_FRAGMENT}
-  query get_battles($adventurerId: FeltValue) {
-    battles(
-      limit: 1000000
-      orderBy: { timestamp: { desc: true } }
-      where: { adventurerId: { eq: $adventurerId } }
-    ) {
-      ...BattleFields
+      data {
+        ... on Discovery {
+          adventurerId
+          adventurerHealth
+          discoveryType
+          subDiscoveryType
+          outputAmount
+          obstacle
+          obstacleLevel
+          dodgedObstacle
+          damageTaken
+          damageLocation
+          xpEarnedAdventurer
+          xpEarnedItems
+          entity
+          entityLevel
+          entityHealth
+          special1
+          special2
+          special3
+          seed
+          ambushed
+          discoveryTime
+          txHash
+          timestamp
+        }
+        ... on Battle {
+          adventurerId
+          adventurerHealth
+          beast
+          beastHealth
+          beastLevel
+          special1
+          special2
+          special3
+          seed
+          attacker
+          fled
+          damageDealt
+          damageTaken
+          criticalHit
+          damageLocation
+          xpEarnedAdventurer
+          xpEarnedItems
+          goldEarned
+          txHash
+          blockTime
+          timestamp
+        }
+      }
     }
   }
 `;
@@ -398,40 +378,6 @@ const getBattlesByBeast = gql`
   }
 `;
 
-const getLastBattleByAdventurer = gql`
-  ${BATTLES_FRAGMENT}
-  query get_latest_battle_by_adventurer($adventurerId: FeltValue) {
-    battles(
-      limit: 1
-      where: { adventurerId: { eq: $adventurerId } }
-      orderBy: { timestamp: { desc: true } }
-    ) {
-      ...BattleFields
-    }
-  }
-`;
-
-const getBattleByTxHash = gql`
-  ${BATTLES_FRAGMENT}
-  query get_latest_battle_by_tx($txHash: HexValue) {
-    battles(
-      where: { txHash: { eq: $txHash } }
-      orderBy: { timestamp: { asc: true } }
-    ) {
-      ...BattleFields
-    }
-  }
-`;
-
-const getItemsByTokenId = gql`
-  ${ITEMS_FRAGMENT}
-  query get_items($item: ItemValue) {
-    items(where: { item: { eq: $item } }) {
-      ...ItemFields
-    }
-  }
-`;
-
 const getLatestMarketItems = gql`
   ${ITEMS_FRAGMENT}
   query get_latest_market_items($id: FeltValue) {
@@ -449,27 +395,9 @@ const getItemsByAdventurer = gql`
   query get_items_by_adventurer($id: FeltValue) {
     items(
       where: { adventurerId: { eq: $id }, owner: { eq: true } }
-      limit: 10000000
+      limit: 101
     ) {
       ...ItemFields
-    }
-  }
-`;
-
-const getItemsByOwner = gql`
-  ${ITEMS_FRAGMENT}
-  query get_items_by_owner($owner: HexValue) {
-    items(where: { owner: { eq: $owner } }, limit: 10000000) {
-      ...ItemFields
-    }
-  }
-`;
-
-const getTopScores = gql`
-  ${SCORES_FRAGMENT}
-  query get_top_scores {
-    scores(limit: 10000000) {
-      ...ScoreFields
     }
   }
 `;
@@ -477,7 +405,7 @@ const getTopScores = gql`
 const getScoresInList = gql`
   ${SCORES_FRAGMENT}
   query get_top_scores($ids: [FeltValue!]) {
-    scores(where: { adventurerId: { In: $ids } }, limit: 10000000) {
+    scores(where: { adventurerId: { In: $ids } }, limit: 10) {
       ...ScoreFields
     }
   }
@@ -489,7 +417,7 @@ const getGoldenTokensByOwner = gql`
     getERC721Tokens(
       contract_address: $contractAddress
       cursor: 0
-      limit: 10000
+      limit: 101
       owner: $owner
     ) {
       ...GoldenTokenFields
@@ -497,34 +425,53 @@ const getGoldenTokensByOwner = gql`
   }
 `;
 
+const getAdventurerCounts = gql`
+  query getAdventurerCounts {
+    countAliveAdventurers
+    countDeadAdventurers
+    countTotalAdventurers
+  }
+`;
+
+const getAliveAdventurersCount = gql`
+  query getAliveAdventurersCount($owner: HexValue) {
+    countAliveAdventurers(owner: $owner)
+  }
+`;
+
+const getDiscoveryBattleCount = gql`
+  query getDiscoveryBattleCount($adventurerId: Int) {
+    countDiscoveriesAndBattles(adventurerId: $adventurerId)
+  }
+`;
+
+const getAdventurerRank = gql`
+  query getAdventurerRank($adventurerId: Int!, $adventurerXp: Int!) {
+    adventurerRank(adventurerId: $adventurerId, adventurerXp: $adventurerXp) {
+      rank
+    }
+  }
+`;
+
 export {
-  getAdventurer,
-  getDiscoveries,
   getLatestDiscoveries,
-  getLastDiscovery,
   getLastBeastDiscovery,
-  getDiscoveryByTxHash,
   getAdventurersByOwner,
+  getAdventurersByOwnerCount,
   getAdventurerById,
   getAdventurersInList,
-  getAdventurersInListByXp,
-  getAdventurerByGold,
-  getBeastsByAdventurer,
   getBeast,
   getKilledBeasts,
-  getLatestBattlesByAdventurer,
   getBattlesByBeast,
-  getLastBattleByAdventurer,
-  getBattlesByAdventurer,
-  getBattleByTxHash,
-  getItems,
-  getItemsByTokenId,
+  getDiscoveriesAndBattlesByAdventurerPaginated,
   getLatestMarketItems,
-  getItemsByOwner,
   getItemsByAdventurer,
-  getAdventurerByXP,
-  getAdventurersByXPPaginated,
-  getTopScores,
+  getDeadAdventurersByXPPaginated,
+  getAliveAdventurersByXPPaginated,
   getScoresInList,
   getGoldenTokensByOwner,
+  getAdventurerCounts,
+  getAliveAdventurersCount,
+  getDiscoveryBattleCount,
+  getAdventurerRank,
 };

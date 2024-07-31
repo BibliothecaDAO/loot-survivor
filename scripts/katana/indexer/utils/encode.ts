@@ -11,11 +11,11 @@ export function encodeIntAsBytes(n: bigint): string {
   return arrayBufferToBase64(arr.buffer);
 }
 
-export function checkExistsInt(val: bigint): string | null {
-  if (val === BigInt(0)) {
+export function checkExistsInt(val: any): any | null {
+  if (val === 0) {
     return null;
   } else {
-    return encodeIntAsBytes(val);
+    return val;
   }
 }
 
@@ -27,4 +27,12 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
     binary += String.fromCharCode(bytes[i]);
   }
   return btoa(binary);
+}
+
+export function getLevelFromXp(val: any): any | null {
+  if (val === 0) {
+    return 1;
+  } else {
+    return Math.floor(Math.sqrt(val));
+  }
 }

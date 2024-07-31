@@ -45,6 +45,7 @@ import {
 } from "./utils/events.ts";
 import { insertAdventurer, updateAdventurer } from "./utils/helpers.ts";
 import { MONGO_CONNECTION_STRING } from "./utils/constants.ts";
+import { getLevelFromXp } from "./utils/encode.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
@@ -108,6 +109,7 @@ export default function transform({ header, events }: Block) {
             entropy: as.adventurerEntropy,
             health: as.adventurer.health,
             xp: as.adventurer.xp,
+            level: getLevelFromXp(as.adventurer.xp),
             strength: as.adventurer.stats.strength,
             dexterity: as.adventurer.stats.dexterity,
             vitality: as.adventurer.stats.vitality,

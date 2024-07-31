@@ -20,7 +20,7 @@ export function StarknetProvider({
 }) {
   function rpc(_chain: Chain) {
     return {
-      nodeUrl: networkConfig[network!].rpcUrl,
+      nodeUrl: networkConfig[network!].rpcUrl!,
     };
   }
 

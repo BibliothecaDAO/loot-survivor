@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Contract } from "starknet";
 import { Adventurer, NullAdventurer, NullItem } from "@/app/types";
 import {
@@ -54,80 +55,88 @@ export default function Info({
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  const filteredDrops = items.filter(
-    (item) =>
-      !dropItems.includes(getKeyFromValue(gameData.ITEMS, item.item!) ?? "")
-  );
+  const filteredItems = useMemo(() => {
+    const filteredDrops = items.filter(
+      (item) =>
+        !dropItems.includes(getKeyFromValue(gameData.ITEMS, item.item!) ?? "")
+    );
 
-  const updatePurchaseEquips = filteredDrops.flatMap((item) => {
-    if (purchaseItems.length > 0) {
-      const replaceItem = purchaseItems.find((pItem) => {
+    const updatePurchaseEquips = filteredDrops.flatMap((item) => {
+      if (purchaseItems.length > 0) {
+        const replaceItems = purchaseItems.filter((pItem) => {
+          const { slot: equipSlot } = getItemData(
+            gameData.ITEMS[parseInt(pItem.item)]
+          );
+          const { slot: heldSlot } = getItemData(item.item!);
+          return equipSlot === heldSlot && pItem.equip === "1";
+        });
+        if (replaceItems.length > 0) {
+          return [
+            { ...item, equipped: false },
+            {
+              item: gameData.ITEMS[
+                parseInt(replaceItems[replaceItems.length - 1].item)
+              ],
+              adventurerId: formatAdventurer.id,
+              owner: true,
+              equipped: true,
+              ownerAddress: formatAdventurer.owner,
+              xp: 0,
+              special1: undefined,
+              special2: undefined,
+              special3: undefined,
+              isAvailable: false,
+              purchasedTime: new Date(),
+              timestamp: new Date(),
+            },
+          ];
+        }
+      }
+
+      return [item];
+    });
+
+    const updateEquips = updatePurchaseEquips.map((item) => {
+      const replaceItem = equipItems.find((eItem) => {
         const { slot: equipSlot } = getItemData(
-          gameData.ITEMS[parseInt(pItem.item)]
+          gameData.ITEMS[parseInt(eItem)]
         );
         const { slot: heldSlot } = getItemData(item.item!);
-        return equipSlot === heldSlot && pItem.equip === "1";
+        return equipSlot === heldSlot;
       });
       if (replaceItem) {
-        return [
-          { ...item, equipped: false },
-          {
-            item: gameData.ITEMS[parseInt(replaceItem.item)],
-            adventurerId: formatAdventurer.id,
-            owner: true,
-            equipped: true,
-            ownerAddress: formatAdventurer.owner,
-            xp: 0,
-            special1: undefined,
-            special2: undefined,
-            special3: undefined,
-            isAvailable: false,
-            purchasedTime: new Date(),
-            timestamp: new Date(),
-          },
-        ];
+        if (item.equipped) {
+          return { ...item, equipped: false };
+        } else {
+          if (item.item === gameData.ITEMS[parseInt(replaceItem)]) {
+            return { ...item, equipped: true };
+          }
+        }
       }
-    }
 
-    return [item];
-  });
-
-  const updateEquips = updatePurchaseEquips.map((item) => {
-    const replaceItem = equipItems.find((eItem) => {
-      const { slot: equipSlot } = getItemData(gameData.ITEMS[parseInt(eItem)]);
-      const { slot: heldSlot } = getItemData(item.item!);
-      return equipSlot === heldSlot;
+      return item;
     });
-    if (replaceItem) {
-      if (item.equipped) {
-        return { ...item, equipped: false };
-      } else {
-        return { ...item, equipped: true };
-      }
-    }
 
-    return item;
-  });
-
-  const finalItems = [
-    ...updateEquips,
-    ...purchaseItems
-      .filter((pItem) => pItem.equip === "1")
-      .map((pItem) => ({
-        item: gameData.ITEMS[parseInt(pItem.item)],
-        adventurerId: formatAdventurer.id,
-        owner: true,
-        equipped: true,
-        ownerAddress: formatAdventurer.owner,
-        xp: 0,
-        special1: undefined,
-        special2: undefined,
-        special3: undefined,
-        isAvailable: false,
-        purchasedTime: new Date(),
-        timestamp: new Date(),
-      })),
-  ];
+    return [
+      ...updateEquips,
+      ...purchaseItems
+        .filter((pItem) => pItem.equip === "1")
+        .map((pItem) => ({
+          item: gameData.ITEMS[parseInt(pItem.item)],
+          adventurerId: formatAdventurer.id,
+          owner: true,
+          equipped: true,
+          ownerAddress: formatAdventurer.owner,
+          xp: 0,
+          special1: undefined,
+          special2: undefined,
+          special3: undefined,
+          isAvailable: false,
+          purchasedTime: new Date(),
+          timestamp: new Date(),
+        })),
+    ];
+  }, [items, dropItems, equipItems, purchaseItems]);
 
   const handleDropItems = (item: string) => {
     const newDropItems = [
@@ -286,7 +295,7 @@ export default function Info({
             {bodyParts.map((part) => (
               <ItemDisplay
                 item={
-                  finalItems.find((item: Item) => {
+                  filteredItems.find((item: Item) => {
                     const { slot } = getItemData(item.item!);
                     return slot === part && item.equipped;
                   }) || NullItem

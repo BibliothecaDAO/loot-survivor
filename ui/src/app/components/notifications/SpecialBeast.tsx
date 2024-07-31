@@ -27,7 +27,6 @@ export const SpecialBeast = ({ beastsContract }: SpecialBeastProps) => {
 
   const fetchBeast = async () => {
     const image = await fetchBeastImage(
-      networkConfig[network!].rpcUrl,
       beastsContract?.address ?? "",
       specialBeast?.tokenId ?? 0
     );

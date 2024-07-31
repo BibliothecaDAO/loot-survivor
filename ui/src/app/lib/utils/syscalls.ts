@@ -1,10 +1,10 @@
-import { ReactElement, JSXElementConstructor } from "react";
+import { ReactElement, JSXElementConstructor, useMemo } from "react";
 import {
   InvokeTransactionReceiptResponse,
   Contract,
   AccountInterface,
   RevertedTransactionReceiptResponse,
-  Provider,
+  ProviderInterface,
 } from "starknet";
 import { GameData } from "@/app/lib/data/GameData";
 import {
@@ -94,7 +94,7 @@ export interface SyscallsProps {
   setIsMintingLords: (value: boolean) => void;
   setIsWithdrawing: (value: boolean) => void;
   setEntropyReady: (value: boolean) => void;
-  rpc_addr: string;
+  provider: ProviderInterface;
   network: Network;
 }
 
@@ -170,7 +170,7 @@ function handleDrop(
   return droppedItems;
 }
 
-export function syscalls({
+export function createSyscalls({
   gameContract,
   ethContract,
   lordsContract,
@@ -205,14 +205,10 @@ export function syscalls({
   setIsMintingLords,
   setIsWithdrawing,
   setEntropyReady,
-  rpc_addr,
+  provider,
   network,
 }: SyscallsProps) {
   const gameData = new GameData();
-
-  const provider = new Provider({
-    nodeUrl: rpc_addr!,
-  });
 
   const onKatana = network === "localKatana" || network === "katana";
 
@@ -629,12 +625,6 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });
-        const deadAdventurerIndex =
-          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
-            (adventurer: Adventurer) =>
-              adventurer.id == adventurerDiedEvent.data[0].id
-          );
-        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
         setAdventurer(adventurerDiedEvent.data[0]);
         const killedByObstacle =
           reversedDiscoveries[0]?.discoveryType == "Obstacle" &&
@@ -855,12 +845,6 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });
-        const deadAdventurerIndex =
-          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
-            (adventurer: Adventurer) =>
-              adventurer.id == adventurerDiedEvent.data[0].id
-          );
-        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
         setAdventurer(adventurerDiedEvent.data[0]);
         const killedByBeast = battles.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
@@ -1015,12 +999,6 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });
-        const deadAdventurerIndex =
-          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
-            (adventurer: Adventurer) =>
-              adventurer.id == adventurerDiedEvent.data[0].id
-          );
-        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
         setAdventurer(adventurerDiedEvent.data[0]);
         const killedByBeast = battles.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
@@ -1357,12 +1335,6 @@ export function syscalls({
           setData("adventurerByIdQuery", {
             adventurers: [adventurerDiedEvent.data[0]],
           });
-          const deadAdventurerIndex =
-            queryData.adventurersByOwnerQuery?.adventurers.findIndex(
-              (adventurer: Adventurer) =>
-                adventurer.id == adventurerDiedEvent.data[0].id
-            );
-          setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
           setAdventurer(adventurerDiedEvent.data[0]);
           const killedByBeast = battles.some(
             (battle) =>
@@ -1494,7 +1466,6 @@ export function syscalls({
       throw error;
     }
   };
-
   return {
     spawn,
     explore,
@@ -1505,4 +1476,9 @@ export function syscalls({
     mintLords,
     withdraw,
   };
+}
+
+// Then, create a custom Hook that uses the syscalls function
+export function useSyscalls(props: SyscallsProps) {
+  return useMemo(() => createSyscalls(props), [props]);
 }

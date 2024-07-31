@@ -81,53 +81,16 @@ def simulate_adventurer_getter():
     """
 
     leaderboard_query = """
-        query get_adventurer_by_xp {
-            adventurers(orderBy: { xp: { desc: true } }, limit: 10000000) {
+        query get_dead_adventurers_by_xp_paginated {
+            adventurers(
+            where: { health: { eq: 0 } }
+            limit: 10
+            skip: 0
+            orderBy: { xp: { desc: true } }
+            ) {
                 id
-                owner
-                entropy
-                name
-                health
-                strength
-                dexterity
-                vitality
-                intelligence
-                wisdom
-                charisma
-                luck
-                xp
-                weapon
-                chest
-                head
-                waist
-                foot
-                hand
-                neck
-                ring
-                beastHealth
-                statUpgrades
-                startEntropy
-                revealBlock
-                gold
-                createdTime
-                lastUpdatedTime
-                timestamp
             }
         }
-    """
-
-    # Generate a list of adventurer IDs from 1 to 10000
-    adventurer_ids = list(range(1, 10001))
-    adventurer_ids_str = ", ".join(map(str, adventurer_ids))
-
-    score_query = f"""
-        query get_top_scores {{
-            scores(where: {{ adventurerId: {{ In: [{adventurer_ids_str}] }} }}, limit: 10000000) {{
-                adventurerId
-                timestamp
-                totalPayout
-            }}
-        }}
     """
 
     requests.post(url, json={"query": leaderboard_query})
