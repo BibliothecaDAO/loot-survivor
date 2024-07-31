@@ -229,8 +229,10 @@ mod Game {
 
         // give VRF provider approval for all ETH in the contract since the only
         // reason ETH will be in the contract is to cover VRF costs
-        let eth_dispatcher = IERC20Dispatcher { contract_address: eth_address };
-        eth_dispatcher.approve(randomness_contract_address, BoundedInt::max());
+        if chain_id == MAINNET_CHAIN_ID || chain_id == SEPOLIA_CHAIN_ID {
+            let eth_dispatcher = IERC20Dispatcher { contract_address: eth_address };
+            eth_dispatcher.approve(randomness_contract_address, BoundedInt::max());
+        }
     }
 
     // ------------------------------------------ //
@@ -945,7 +947,9 @@ mod Game {
     /// @notice Allows an adventurer to set their rank at death.
     /// @param adventurer_id A felt252 representing the unique ID of the adventurer.
     /// @param rank_at_death A u8 representing the rank at death of the adventurer.
-    fn _record_adventurer_rank_at_death(ref self: ContractState, adventurer_id: felt252, rank_at_death: u8) {
+    fn _record_adventurer_rank_at_death(
+        ref self: ContractState, adventurer_id: felt252, rank_at_death: u8
+    ) {
         let mut adventurer_meta = _load_adventurer_metadata(@self, adventurer_id);
         adventurer_meta.rank_at_death = rank_at_death;
         self._adventurer_meta.write(adventurer_id, adventurer_meta);
@@ -1651,7 +1655,8 @@ mod Game {
         );
 
         // Grant adventurer XP to progress entropy
-        let (previous_level, new_level) = adventurer.increase_adventurer_xp(XP_FOR_DISCOVERIES.into());
+        let (previous_level, new_level) = adventurer
+            .increase_adventurer_xp(XP_FOR_DISCOVERIES.into());
 
         // handle discovery type
         match discovery_type {
