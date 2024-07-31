@@ -58,7 +58,7 @@ services:
     restart: always
     command:
       - run
-      - --allow-env=/katana/katana/.env
+      - --allow-env=/katana/.env
       - /data/indexer/adventurers.ts
     volumes:
       - ./:/data/
@@ -77,7 +77,7 @@ services:
     restart: always
     command:
       - run
-      - --allow-env=/katana/katana/.env
+      - --allow-env=/katana/.env
       - /data/indexer/battles.ts
     volumes:
       - ./:/data/
@@ -96,7 +96,7 @@ services:
     restart: always
     command:
       - run
-      - --allow-env=/katana/katana/.env
+      - --allow-env=/katana/.env
       - /data/indexer/beasts.ts
     volumes:
       - ./:/data/
@@ -115,7 +115,7 @@ services:
     restart: always
     command:
       - run
-      - --allow-env=/katana/katana/.env
+      - --allow-env=/katana/.env
       - /data/indexer/discoveries.ts
     volumes:
       - ./:/data/
@@ -134,7 +134,7 @@ services:
     restart: always
     command:
       - run
-      - --allow-env=/katana/katana/.env
+      - --allow-env=/katana/.env
       - /data/indexer/items.ts
     volumes:
       - ./:/data/
@@ -153,7 +153,7 @@ services:
     restart: always
     command:
       - run
-      - --allow-env=/katana/katana/.env
+      - --allow-env=/katana/.env
       - /data/indexer/scores.ts
     volumes:
       - ./:/data/
