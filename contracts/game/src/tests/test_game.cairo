@@ -417,17 +417,17 @@ mod tests {
     //     let mut game = new_adventurer_lvl5(stat);
 
     //     let weapon_inventory = @game
-    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Weapon(())));
+    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Weapon));
     //     let chest_inventory = @game
-    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Chest(())));
+    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Chest));
     //     let head_inventory = @game
-    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Head(())));
+    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Head));
     //     let waist_inventory = @game
-    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Waist(())));
+    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Waist));
     //     let foot_inventory = @game
-    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Foot(())));
+    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Foot));
     //     let hand_inventory = @game
-    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Hand(())));
+    //         .get_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Hand));
 
     //     let purchase_weapon_id = *weapon_inventory.at(0);
     //     let purchase_chest_id = *chest_inventory.at(2);
@@ -797,9 +797,9 @@ mod tests {
                 match result.pop_front() {
                     Option::Some(outcome) => {
                         match outcome {
-                            ExploreResult::Beast(()) => beasts += 1,
-                            ExploreResult::Obstacle(()) => obstacles += 1,
-                            ExploreResult::Discovery(()) => discoveries += 1,
+                            ExploreResult::Beast => beasts += 1,
+                            ExploreResult::Obstacle => obstacles += 1,
+                            ExploreResult::Discovery => discoveries += 1,
                         }
                     },
                     Option::None(_) => { break; }
@@ -1006,10 +1006,7 @@ mod tests {
 
         let mut purchased_weapon: u8 = 0;
         let mut purchased_chest: u8 = 0;
-        let mut purchased_head: u8 = 0;
         let mut purchased_waist: u8 = 0;
-        let mut purchased_foot: u8 = 0;
-        let mut purchased_hand: u8 = 0;
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
 
         let mut i: u32 = 0;
@@ -1020,7 +1017,7 @@ mod tests {
             let market_item_id = *market_items.at(i);
             let market_item_tier = ImplLoot::get_tier(market_item_id);
 
-            if (market_item_tier != Tier::T5(()) && market_item_tier != Tier::T4(())) {
+            if (market_item_tier != Tier::T5 && market_item_tier != Tier::T4) {
                 i += 1;
                 continue;
             }
@@ -1030,26 +1027,15 @@ mod tests {
             // if the item is a weapon and we haven't purchased a weapon yet
             // and the item is a tier 4 or 5 item
             // repeat this for everything
-            if (market_item_slot == Slot::Weapon(())
-                && purchased_weapon == 0
-                && market_item_id != 12) {
+            if (market_item_slot == Slot::Weapon && purchased_weapon == 0 && market_item_id != 12) {
                 shopping_cart.append(ItemPurchase { item_id: market_item_id, equip: true });
                 purchased_weapon = market_item_id;
-            } else if (market_item_slot == Slot::Chest(()) && purchased_chest == 0) {
+            } else if (market_item_slot == Slot::Chest && purchased_chest == 0) {
                 shopping_cart.append(ItemPurchase { item_id: market_item_id, equip: true });
                 purchased_chest = market_item_id;
-            } else if (market_item_slot == Slot::Head(()) && purchased_head == 0) {
-                shopping_cart.append(ItemPurchase { item_id: market_item_id, equip: true });
-                purchased_head = market_item_id;
-            } else if (market_item_slot == Slot::Waist(()) && purchased_waist == 0) {
+            } else if (market_item_slot == Slot::Waist && purchased_waist == 0) {
                 shopping_cart.append(ItemPurchase { item_id: market_item_id, equip: false });
                 purchased_waist = market_item_id;
-            } else if (market_item_slot == Slot::Foot(()) && purchased_foot == 0) {
-                shopping_cart.append(ItemPurchase { item_id: market_item_id, equip: false });
-                purchased_foot = market_item_id;
-            } else if (market_item_slot == Slot::Hand(()) && purchased_hand == 0) {
-                shopping_cart.append(ItemPurchase { item_id: market_item_id, equip: false });
-                purchased_hand = market_item_id;
             }
             i += 1;
         };
@@ -1156,7 +1142,6 @@ mod tests {
         let mut purchased_foot: u8 = 0;
         let mut purchased_hand: u8 = 0;
         let mut purchased_ring: u8 = 0;
-        let mut purchased_necklace: u8 = 0;
         let mut purchased_items = ArrayTrait::<u8>::new();
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
 
@@ -1172,53 +1157,39 @@ mod tests {
             // if the item is a weapon and we haven't purchased a weapon yet
             // and the item is a tier 4 or 5 item
             // repeat this for everything
-            if (item_slot == Slot::Weapon(())
-                && item_tier == Tier::T5(())
+            if (item_slot == Slot::Weapon
+                && (item_tier == Tier::T5 || item_tier == Tier::T4)
                 && purchased_weapon == 0
                 && item_id != 12) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_weapon = item_id;
-            } else if (item_slot == Slot::Chest(())
-                && item_tier == Tier::T5(())
+            } else if (item_slot == Slot::Chest
+                && (item_tier == Tier::T5 || item_tier == Tier::T4)
                 && purchased_chest == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_chest = item_id;
-            } else if (item_slot == Slot::Head(())
-                && item_tier == Tier::T5(())
-                && purchased_head == 0) {
+            } else if (item_slot == Slot::Head && item_tier == Tier::T5 && purchased_head == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_head = item_id;
-            } else if (item_slot == Slot::Waist(())
-                && item_tier == Tier::T5(())
-                && purchased_waist == 0) {
+            } else if (item_slot == Slot::Waist && item_tier == Tier::T5 && purchased_waist == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_waist = item_id;
-            } else if (item_slot == Slot::Foot(())
-                && item_tier == Tier::T5(())
-                && purchased_foot == 0) {
+            } else if (item_slot == Slot::Foot && item_tier == Tier::T5 && purchased_foot == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_foot = item_id;
-            } else if (item_slot == Slot::Hand(())
-                && item_tier == Tier::T5(())
-                && purchased_hand == 0) {
+            } else if (item_slot == Slot::Hand && item_tier == Tier::T5 && purchased_hand == 0) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_hand = item_id;
-            } else if (item_slot == Slot::Ring(())
-                && purchased_ring == 0
-                && item_tier == Tier::T3(())) {
+            } else if (item_slot == Slot::Ring && purchased_ring == 0 && item_tier == Tier::T3) {
                 purchased_items.append(item_id);
                 shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
                 purchased_ring = item_id;
-            } else if (item_slot == Slot::Neck(()) && purchased_necklace == 0) {
-                purchased_items.append(item_id);
-                shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
-                purchased_necklace = item_id;
             }
             i += 1;
         };
@@ -2246,7 +2217,7 @@ mod tests {
         game.upgrade(player1, 0, stat_upgrades, shopping_cart.clone());
         game.explore(player1, true);
         current_block_time += 1000;
-        let player1_death_date = current_block_time; 
+        let player1_death_date = current_block_time;
         testing::set_block_timestamp(current_block_time);
         game.attack(player1, true);
 
@@ -2315,8 +2286,12 @@ mod tests {
         let player2_metadata = game.get_adventurer_meta(player2);
         let player1_metadata = game.get_adventurer_meta(player1);
         let leaderboard = game.get_leaderboard();
-        assert(player3_metadata.death_date == player3_death_date, 'P3 death date not set correctly');
-        assert(player3_metadata.birth_date == player3_birth_date, 'P3 birth date not set correctly');
+        assert(
+            player3_metadata.death_date == player3_death_date, 'P3 death date not set correctly'
+        );
+        assert(
+            player3_metadata.birth_date == player3_birth_date, 'P3 birth date not set correctly'
+        );
         assert(player3_metadata.rank_at_death == 1, 'P3 should be death rank 1');
         assert(player2_metadata.rank_at_death == 1, 'P2 should be death rank 1');
         assert(player1_metadata.rank_at_death == 1, 'P1 should be death rank 1');
@@ -2349,8 +2324,12 @@ mod tests {
         let player3_metadata = game.get_adventurer_meta(player3);
         let player4_metadata = game.get_adventurer_meta(player4);
         let leaderboard = game.get_leaderboard();
-        assert(player4_metadata.birth_date == player4_birth_date, 'P4 birth date not set correctly');
-        assert(player4_metadata.death_date == player4_death_date, 'P4 death date not set correctly');
+        assert(
+            player4_metadata.birth_date == player4_birth_date, 'P4 birth date not set correctly'
+        );
+        assert(
+            player4_metadata.death_date == player4_death_date, 'P4 death date not set correctly'
+        );
         assert(player4_metadata.rank_at_death == 2, 'P4 should be death rank 2');
         assert(player3_metadata.rank_at_death == 1, 'P3 should be death rank 1');
         assert(player2_metadata.rank_at_death == 1, 'P2 should be death rank 1');
