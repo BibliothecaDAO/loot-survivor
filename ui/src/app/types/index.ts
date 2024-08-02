@@ -31,8 +31,11 @@ export interface Adventurer {
   ring?: string; // Ring of the adventure
   beastHealth?: number; // Beast health adventurer is engaging
   statUpgrades?: number; // Stat upgrades adventurer has
-  startEntropy?: string; // The entropy when the adventurer was minted
-  revealBlock?: number; // The next block number that the game entropy rotates from spawn
+  birthDate?: number; // Birth date of the adventurer
+  deathDate?: number; // Death date of the adventurer
+  goldenTokenId?: number; // Golden token ID of the adventurer
+  customRenderer?: string; // Custom renderer of the adventurer
+  battleActionCount?: number; // Battle action count of the adventurer
   gold?: number; // Gold adventurer has
   createdTime?: Date; // Block time the adventurer was created
   lastUpdatedTime?: Date; // Block time the adventurer was last updated
@@ -506,4 +509,12 @@ export type BlockData = {
 export type IsIdleResult = {
   0: boolean;
   1: bigint;
+};
+
+export type PragmaPrice = {
+  decimals: bigint;
+  expiration_timestamp: any;
+  last_updated_timestamp: bigint;
+  num_sources_aggregated: bigint;
+  price: bigint;
 };

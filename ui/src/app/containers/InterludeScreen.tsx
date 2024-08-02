@@ -3,7 +3,11 @@ import Hints from "@/app/components/interlude/Hints";
 import { EntropyCountDown } from "@/app/components/CountDown";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 
-export default function InterludeScreen() {
+interface InterludeScreenProps {
+  type: string;
+}
+
+export default function InterludeScreen({ type }: InterludeScreenProps) {
   const [countDownExpired, setCountDownExpired] = useState(false);
   const [nextEntropyTime, setNextEntropyTime] = useState<number | null>(null);
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -19,7 +23,9 @@ export default function InterludeScreen() {
         <div className="h-1/4 flex items-center justify-center">
           <span className="flex flex-col gap-1 items-center justify-center">
             <p className="text-2xl">
-              Generating Verifiable Randomness for Level {adventurer?.level}
+              {type === "level"
+                ? `Generating Verifiable Randomness for Level ${adventurer?.level}`
+                : "Generating Verifiable Randomness for Item Unlocks"}
             </p>
             {!countDownExpired ? (
               <EntropyCountDown

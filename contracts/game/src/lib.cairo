@@ -208,7 +208,7 @@ mod Game {
         self._default_renderer.write(render_contract);
 
         // TODO: Setting offchain uri here for later use, however it is not used in the current implementation
-        self.erc721.initializer("Survivor", "LSVR", "https://token.lootsurvivor.io/");
+        self.erc721.initializer("Loot Survivor", "LSVR", "https://token.lootsurvivor.io/");
 
         // On mainnet, set genesis timestamp to LSV1.0 genesis to preserve same reward distribution schedule for V1.1 
         let chain_id = get_tx_info().unbox().chain_id;
@@ -229,8 +229,10 @@ mod Game {
 
         // give VRF provider approval for all ETH in the contract since the only
         // reason ETH will be in the contract is to cover VRF costs
-        let eth_dispatcher = IERC20Dispatcher { contract_address: eth_address };
-        eth_dispatcher.approve(randomness_contract_address, BoundedInt::max());
+        if chain_id == MAINNET_CHAIN_ID || chain_id == SEPOLIA_CHAIN_ID {
+            let eth_dispatcher = IERC20Dispatcher { contract_address: eth_address };
+            eth_dispatcher.approve(randomness_contract_address, BoundedInt::max());
+        }
     }
 
     // ------------------------------------------ //
@@ -578,7 +580,7 @@ mod Game {
                 );
 
                 // get randomness for combat
-                let (_, critical_hit_rnd, attack_location_rnd, _) =
+                let (_, _, beast_crit_hit_rnd, attack_location_rnd) =
                     ImplAdventurer::get_battle_randomness(
                     adventurer.xp, adventurer.battle_action_count, level_seed
                 );
@@ -593,7 +595,7 @@ mod Game {
                     adventurer_id,
                     beast,
                     beast_seed,
-                    critical_hit_rnd,
+                    beast_crit_hit_rnd,
                     attack_location_rnd,
                     false
                 );
@@ -885,7 +887,8 @@ mod Game {
             _load_bag(self, adventurer_id)
         }
         fn get_market(self: @ContractState, adventurer_id: felt252) -> Array<u8> {
-            _get_market(self, adventurer_id)
+            let adventurer = _load_adventurer(self, adventurer_id);
+            _get_market(self, adventurer_id, adventurer.stat_upgrades_available)
         }
 
         fn get_potion_price(self: @ContractState, adventurer_id: felt252) -> u16 {
@@ -945,7 +948,9 @@ mod Game {
     /// @notice Allows an adventurer to set their rank at death.
     /// @param adventurer_id A felt252 representing the unique ID of the adventurer.
     /// @param rank_at_death A u8 representing the rank at death of the adventurer.
-    fn _record_adventurer_rank_at_death(ref self: ContractState, adventurer_id: felt252, rank_at_death: u8) {
+    fn _record_adventurer_rank_at_death(
+        ref self: ContractState, adventurer_id: felt252, rank_at_death: u8
+    ) {
         let mut adventurer_meta = _load_adventurer_metadata(@self, adventurer_id);
         adventurer_meta.rank_at_death = rank_at_death;
         self._adventurer_meta.write(adventurer_id, adventurer_meta);
@@ -1651,7 +1656,8 @@ mod Game {
         );
 
         // Grant adventurer XP to progress entropy
-        let (previous_level, new_level) = adventurer.increase_adventurer_xp(XP_FOR_DISCOVERIES.into());
+        let (previous_level, new_level) = adventurer
+            .increase_adventurer_xp(XP_FOR_DISCOVERIES.into());
 
         // handle discovery type
         match discovery_type {
@@ -2053,7 +2059,8 @@ mod Game {
         fight_to_the_death: bool,
     ) {
         // get randomness for combat
-        let (_, critical_hit_rnd, attack_location_rnd, _) = ImplAdventurer::get_battle_randomness(
+        let (_, adventurer_crit_hit_rnd, beast_crit_hit_rnd, attack_location_rnd) =
+            ImplAdventurer::get_battle_randomness(
             adventurer.xp, adventurer.battle_action_count, level_seed
         );
 
@@ -2061,7 +2068,7 @@ mod Game {
         adventurer.increment_battle_action_count();
 
         // attack beast and get combat result that provides damage breakdown
-        let combat_result = adventurer.attack(weapon_combat_spec, beast, critical_hit_rnd);
+        let combat_result = adventurer.attack(weapon_combat_spec, beast, adventurer_crit_hit_rnd);
 
         // provide critical hit as a boolean for events
         let is_critical_hit = combat_result.critical_hit_bonus > 0;
@@ -2089,7 +2096,7 @@ mod Game {
                 adventurer_id,
                 beast,
                 beast_seed,
-                critical_hit_rnd,
+                beast_crit_hit_rnd,
                 attack_location_rnd,
                 false
             );
@@ -2204,7 +2211,7 @@ mod Game {
         flee_to_the_death: bool
     ) {
         // get randomness for flee and ambush
-        let (flee_rnd, critical_hit_rnd, attack_location_rnd, _) =
+        let (flee_rnd, _, beast_crit_hit_rnd, attack_location_rnd) =
             ImplAdventurer::get_battle_randomness(
             adventurer.xp, adventurer.battle_action_count, level_seed
         );
@@ -2245,7 +2252,7 @@ mod Game {
                 adventurer_id,
                 beast,
                 beast_seed,
-                critical_hit_rnd,
+                beast_crit_hit_rnd,
                 attack_location_rnd,
                 false
             );
@@ -2441,7 +2448,7 @@ mod Game {
         items_to_purchase: Array<ItemPurchase>,
     ) -> (Array<LootWithPrice>, Array<u8>, Array<u8>) {
         // get adventurer entropy
-        let market_inventory = _get_market(self, adventurer_id);
+        let market_inventory = _get_market(self, adventurer_id, stat_upgrades_available);
 
         // mutable array for returning items that need to be equipped as part of this purchase
         let mut unequipped_items = ArrayTrait::<u8>::new();
@@ -2977,13 +2984,13 @@ mod Game {
         }
     }
 
-    fn _get_market(self: @ContractState, adventurer_id: felt252) -> Array<u8> {
-        let adventurer = _load_adventurer(self, adventurer_id);
-
+    fn _get_market(
+        self: @ContractState, adventurer_id: felt252, stat_upgrades_available: u8
+    ) -> Array<u8> {
         let market_seed = _get_level_seed(self, adventurer_id);
         assert(market_seed != 0, messages::LEVEL_SEED_NOT_SET);
 
-        let market_size = ImplMarket::get_market_size(adventurer.stat_upgrades_available);
+        let market_size = ImplMarket::get_market_size(stat_upgrades_available);
         ImplMarket::get_available_items(market_seed, market_size)
     }
 
@@ -3059,6 +3066,19 @@ mod Game {
     #[inline(always)]
     fn _get_owner(self: @ContractState, adventurer_id: felt252) -> ContractAddress {
         self.erc721.ERC721_owners.read(adventurer_id.into())
+    }
+
+    fn _get_rank(self: @ContractState, adventurer_id: felt252) -> u8 {
+        let leaderboard = self._leaderboard.read();
+        if (leaderboard.first.adventurer_id == adventurer_id.try_into().unwrap()) {
+            1
+        } else if (leaderboard.second.adventurer_id == adventurer_id.try_into().unwrap()) {
+            2
+        } else if (leaderboard.third.adventurer_id == adventurer_id.try_into().unwrap()) {
+            3
+        } else {
+            0
+        }
     }
 
     /// @title Update Leaderboard
@@ -3783,7 +3803,7 @@ mod Game {
         let adventurer_state = AdventurerState {
             owner: _get_owner(@self, adventurer_id), adventurer_id, level_seed, adventurer
         };
-        let items = _get_market(@self, adventurer_id);
+        let items = _get_market(@self, adventurer_id, adventurer.stat_upgrades_available);
         self.emit(UpgradesAvailable { adventurer_state, items });
     }
 
@@ -3864,6 +3884,7 @@ mod Game {
             let adventurer_metadata = _load_adventurer_metadata(self, adventurer_id_felt);
             let bag = _load_bag(self, adventurer_id_felt);
             let item_specials_seed = _get_item_specials_seed(self, adventurer_id_felt);
+            let current_rank = _get_rank(self, adventurer_id_felt);
 
             IRenderContractDispatcher { contract_address: renderer_contract }
                 .token_uri(
@@ -3872,7 +3893,9 @@ mod Game {
                     adventurer_name,
                     adventurer_metadata,
                     bag,
-                    item_specials_seed
+                    item_specials_seed,
+                    adventurer_metadata.rank_at_death,
+                    current_rank,
                 )
         }
     }

@@ -352,6 +352,7 @@ const ItemSuffixLength: u8 = 16; // requires 4 bits
 
 const NUM_ITEMS: u8 = 101;
 const NUM_ITEMS_NZ: NonZero<u64> = 101;
+const NUM_ITEMS_NZ_MINUS_ONE: NonZero<u64> = 100;
 const SUFFIX_UNLOCK_GREATNESS: u8 = 15;
 const PREFIXES_UNLOCK_GREATNESS: u8 = 19;
 

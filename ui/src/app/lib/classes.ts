@@ -28,8 +28,11 @@ export class AdventurerClass implements Adventurer {
   ring?: string; // Ring of the adventure
   beastHealth?: number; // Beast health adventurer is engaging
   statUpgrades?: number; // Stat upgrades adventurer has
-  startEntropy?: string; // The block number the adventurer was minted
-  revealBlock?: number; // The next block number that the game entropy rotates from spawn
+  birthDate?: number; // Birth date of the adventurer
+  deathDate?: number; // Death date of the adventurer
+  goldenTokenId?: number; // Golden token ID of the adventurer
+  customRenderer?: string; // Custom renderer of the adventurer
+  battleActionCount?: number; // Battle action count of the adventurer
   gold?: number; // Gold adventurer has
   createdTime?: Date; // Block time the adventurer was created
   lastUpdatedTime?: Date; // Block time the adventurer was last updated
@@ -60,8 +63,11 @@ export class AdventurerClass implements Adventurer {
       ring,
       beastHealth,
       statUpgrades,
-      startEntropy,
-      revealBlock,
+      birthDate,
+      deathDate,
+      goldenTokenId,
+      customRenderer,
+      battleActionCount,
       gold,
       createdTime,
       lastUpdatedTime,
@@ -95,8 +101,11 @@ export class AdventurerClass implements Adventurer {
     this.ring = ring;
     this.beastHealth = beastHealth;
     this.statUpgrades = statUpgrades;
-    this.startEntropy = startEntropy;
-    this.revealBlock = revealBlock;
+    this.birthDate = birthDate;
+    this.deathDate = deathDate;
+    this.goldenTokenId = goldenTokenId;
+    this.customRenderer = customRenderer;
+    this.battleActionCount = battleActionCount;
     this.gold = gold;
     this.createdTime = createdTime;
     this.lastUpdatedTime = lastUpdatedTime;

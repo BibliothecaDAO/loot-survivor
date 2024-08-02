@@ -48,6 +48,8 @@ export const NEW_HIGH_SCORE = eventKey("NewHighScore");
 export const REWARD_DISTRIBUTION = eventKey("RewardDistribution");
 export const GAME_ENTROPY_ROTATED = eventKey("GameEntropyRotatedEvent");
 
+export const TRANSFER = eventKey("Transfer");
+
 export const parseStats = combineParsers({
   strength: { index: 0, parser: parseU8 },
   dexterity: { index: 1, parser: parseU8 },
@@ -94,13 +96,15 @@ export const parseAdventurer = combineParsers({
   statsUpgradesAvailable: { index: 4, parser: parseU8 },
   stats: { index: 5, parser: parseStats },
   equipment: { index: 6, parser: parseEquipment },
-  mutated: { index: 7, parser: parseBoolean },
+  battleActionCount: { index: 7, parser: parseU16 },
+  mutated: { index: 8, parser: parseBoolean },
+  awaitingItemSpecials: { index: 9, parser: parseBoolean },
 });
 
 export const parseAdventurerState = combineParsers({
   owner: { index: 0, parser: parseFelt252 },
   adventurerId: { index: 1, parser: parseFelt252 },
-  adventurerEntropy: { index: 2, parser: parseFelt252 },
+  entropy: { index: 2, parser: parseFelt252 },
   adventurer: { index: 3, parser: parseAdventurer },
 });
 
@@ -174,16 +178,19 @@ export const parseAdventurerDied = combineParsers({
 });
 
 export const parseAdventurerMetadata = combineParsers({
-  startEntropy: { index: 0, parser: parseU128 },
-  startingStats: { index: 1, parser: parseStats },
-  interfaceCamel: { index: 2, parser: parseBoolean },
-  name: { index: 3, parser: parseU128 },
+  birthDate: { index: 0, parser: parseU64 },
+  deathDate: { index: 1, parser: parseU64 },
+  adventurerEntropy: { index: 2, parser: parseU64 },
+  itemSpecialsSeed: { index: 3, parser: parseU16 },
+  rankAtDeath: { index: 4, parser: parseU8 },
+  delayStatReveal: { index: 5, parser: parseBoolean },
 });
-
 export const parseStartGame = combineParsers({
   adventurerState: { index: 0, parser: parseAdventurerState },
   adventurerMeta: { index: 1, parser: parseAdventurerMetadata },
-  revealBlock: { index: 2, parser: parseU64 },
+  name: { index: 2, parser: parseFelt252 },
+  goldenTokenId: { index: 3, parser: parseU256 },
+  customRenderer: { index: 4, parser: parseFelt252 },
 });
 
 export const parseBag = combineParsers({
@@ -356,4 +363,10 @@ export const parseGameEntropyRotated = combineParsers({
   newBlockTimestamp: { index: 6, parser: parseU64 },
   newNextRotationBlock: { index: 7, parser: parseU64 },
   blocksPerHour: { index: 8, parser: parseU64 },
+});
+
+export const parseTransfer = combineParsers({
+  fromAddress: { index: 0, parser: parseFelt252 },
+  toAddress: { index: 1, parser: parseFelt252 },
+  tokenId: { index: 2, parser: parseU256 },
 });

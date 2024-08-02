@@ -600,3 +600,21 @@ export const copyToClipboard = async (text: string) => {
     console.error("Failed to copy text: ", err);
   }
 };
+
+export const DataType = {
+  SpotEntry: (pairId: string) => ({
+    variant: "SpotEntry",
+    activeVariant: () => "SpotEntry",
+    unwrap: () => pairId,
+  }),
+  FutureEntry: (pairId: string, expirationTimestamp: string) => ({
+    variant: "FutureEntry",
+    activeVariant: () => "FutureEntry",
+    unwrap: () => [pairId, expirationTimestamp],
+  }),
+  GenericEntry: (key: string) => ({
+    variant: "GenericEntry",
+    activeVariant: () => "GenericEntry",
+    unwrap: () => key,
+  }),
+};

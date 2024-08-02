@@ -20,19 +20,22 @@ import {
   Beast,
   SpecialBeast,
   Discovery,
+  PragmaPrice,
 } from "@/app/types";
-import { getKeyFromValue, stringToFelt, indexAddress } from "@/app/lib/utils";
+import {
+  getKeyFromValue,
+  stringToFelt,
+  indexAddress,
+  DataType,
+} from "@/app/lib/utils";
 import { parseEvents } from "@/app/lib/utils/parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
 import { Connector } from "@starknet-react/core";
-import {
-  checkArcadeConnector,
-  providerInterfaceCamel,
-} from "@/app/lib/connectors";
+import { checkArcadeConnector } from "@/app/lib/connectors";
 import { QueryData, QueryKey } from "@/app/hooks/useQueryStore";
 import { AdventurerClass } from "@/app/lib/classes";
 import { ScreenPage } from "@/app/hooks/useUIStore";
-import { getWaitRetryInterval, VRF_FEE_LIMIT } from "@/app/lib/constants";
+import { getWaitRetryInterval } from "@/app/lib/constants";
 import { Network } from "@/app/hooks/useUIStore";
 
 export interface SyscallsProps {
@@ -40,6 +43,8 @@ export interface SyscallsProps {
   ethContract: Contract;
   lordsContract: Contract;
   beastsContract: Contract;
+  pragmaContract: Contract;
+  rendererContractAddress: string;
   addTransaction: ({ hash, metadata }: TransactionParams) => void;
   queryData: QueryData;
   resetData: (queryKey?: QueryKey) => void;
@@ -94,6 +99,7 @@ export interface SyscallsProps {
   setIsMintingLords: (value: boolean) => void;
   setIsWithdrawing: (value: boolean) => void;
   setEntropyReady: (value: boolean) => void;
+  setFetchUnlocksEntropy: (value: boolean) => void;
   provider: ProviderInterface;
   network: Network;
 }
@@ -175,6 +181,8 @@ export function createSyscalls({
   ethContract,
   lordsContract,
   beastsContract,
+  pragmaContract,
+  rendererContractAddress,
   addTransaction,
   account,
   queryData,
@@ -205,6 +213,7 @@ export function createSyscalls({
   setIsMintingLords,
   setIsWithdrawing,
   setEntropyReady,
+  setFetchUnlocksEntropy,
   provider,
   network,
 }: SyscallsProps) {
@@ -268,16 +277,6 @@ export function createSyscalls({
     revenueAddress: string,
     costToPlay?: number
   ) => {
-    const interfaceCamel = onKatana
-      ? "0"
-      : providerInterfaceCamel(connector!.id);
-
-    const approveLordsSpendingTx = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", costToPlay!.toString(), "0"],
-    }; // Approve dynamic LORDS to be spent each time spawn is called based on the get_cost_to_play
-
     const mintAdventurerTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "new_game",
@@ -287,25 +286,42 @@ export function createSyscalls({
         stringToFelt(formData.name).toString(),
         goldenTokenId,
         "0",
-        interfaceCamel,
-        VRF_FEE_LIMIT.toString(),
+        "0", // delay_stat_reveal
+        rendererContractAddress,
       ],
     };
 
     addToCalls(mintAdventurerTx);
 
-    const payWithLordsCalls = [
-      ...calls,
-      approveLordsSpendingTx,
-      mintAdventurerTx,
-    ];
+    let spawnCalls = [...calls, mintAdventurerTx];
 
-    const payWithGoldenTokenCalls = [...calls, mintAdventurerTx];
+    if (!onKatana && goldenTokenId === "0") {
+      const result = await pragmaContract.call("get_data_median", [
+        DataType.SpotEntry("19514442401534788"),
+      ]);
+      const dollarToWei = BigInt(1) * BigInt(10) ** BigInt(18);
+      const ethToWei = (result as PragmaPrice).price / BigInt(10) ** BigInt(8);
+      const dollarPrice = dollarToWei / ethToWei;
 
-    const spawnCalls =
-      goldenTokenId === "0" && !onKatana
-        ? payWithLordsCalls
-        : payWithGoldenTokenCalls;
+      const approvePragmaEthSpendingTx = {
+        contractAddress: ethContract?.address ?? "",
+        entrypoint: "approve",
+        calldata: [gameContract?.address ?? "", dollarPrice!.toString(), "0"],
+      };
+
+      const approveLordsSpendingTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "approve",
+        calldata: [gameContract?.address ?? "", costToPlay!.toString(), "0"],
+      };
+
+      spawnCalls = [
+        ...calls,
+        approvePragmaEthSpendingTx,
+        approveLordsSpendingTx,
+        mintAdventurerTx,
+      ];
+    }
 
     startLoading(
       "Create",
@@ -419,7 +435,11 @@ export function createSyscalls({
     const exploreTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "explore",
-      calldata: [adventurer?.id?.toString() ?? "", till_beast ? "1" : "0"],
+      calldata: [
+        adventurer?.id?.toString() ?? "",
+        // "0",
+        till_beast ? "1" : "0",
+      ],
     };
     addToCalls(exploreTx);
 
@@ -559,6 +579,7 @@ export function createSyscalls({
                   "special1",
                   ownedItemIndex
                 );
+                setFetchUnlocksEntropy(true);
               }
               if (itemLeveled.prefixesUnlocked) {
                 setData(
@@ -801,6 +822,7 @@ export function createSyscalls({
                 "special1",
                 ownedItemIndex
               );
+              setFetchUnlocksEntropy(true);
             }
             if (itemLeveled.prefixesUnlocked) {
               setData(
@@ -898,7 +920,11 @@ export function createSyscalls({
     const fleeTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "flee",
-      calldata: [adventurer?.id?.toString() ?? "", tillDeath ? "1" : "0"],
+      calldata: [
+        adventurer?.id?.toString() ?? "",
+        // "0",
+        tillDeath ? "1" : "0",
+      ],
     };
     addToCalls(fleeTx);
 
@@ -1143,7 +1169,7 @@ export function createSyscalls({
         }
         for (let unequippedItem of equippedItemsEvent.data[2]) {
           let item = purchasedItems.find(
-            (item) => item.item === unequippedItem
+            (item) => gameData.ITEMS[parseInt(item.item)] === unequippedItem
           );
           if (item) {
             item.equipped = false;

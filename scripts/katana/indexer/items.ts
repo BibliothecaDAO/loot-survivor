@@ -27,8 +27,14 @@ import {
   parseDiscoveredLoot,
   EQUIPMENT_CHANGED,
   parseEquipmentChanged,
+  TRANSFER,
+  parseTransfer,
 } from "./utils/events.ts";
-import { insertItem, updateItemsXP } from "./utils/helpers.ts";
+import {
+  insertItem,
+  updateItemsOwner,
+  updateItemsXP,
+} from "./utils/helpers.ts";
 import { checkExistsInt } from "./utils/encode.ts";
 import { GameData } from "./utils/data.ts";
 import { MONGO_CONNECTION_STRING } from "./utils/constants.ts";
@@ -388,6 +394,15 @@ export default function transform({ header, events }: Block) {
             },
           },
         };
+      }
+      case TRANSFER: {
+        const { value } = parseTransfer(event.data, 0);
+        console.log("TRANSFER", "->", "ITEMS UPDATES");
+        return updateItemsOwner({
+          adventurerId: value.toAddress,
+          newOwner: value.fromAddress,
+          timestamp: new Date().toISOString(),
+        });
       }
       default: {
         console.warn("Unknown event", event.keys[0]);

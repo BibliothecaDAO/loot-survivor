@@ -46,6 +46,7 @@ import Game from "@/app/abi/Game.json";
 import Lords from "@/app/abi/Lords.json";
 import EthBalanceFragment from "@/app/abi/EthBalanceFragment.json";
 import Beasts from "@/app/abi/Beasts.json";
+import Pragma from "@/app/abi/Pragma.json";
 import ScreenMenu from "@/app/components/menu/ScreenMenu";
 import { checkArcadeConnector } from "@/app/lib/connectors";
 import Header from "@/app/components/navigation/Header";
@@ -62,6 +63,9 @@ import EncounterTable from "@/app/components/encounters/EncounterTable";
 import { ProfileDialog } from "@/app/components/profile/ProfileDialog";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import CartridgeConnector from "@cartridge/connector";
+import { VRF_WAIT_TIME } from "@/app/lib/constants";
+import { GameData } from "@/app/lib/data/GameData";
+import InterludeScreen from "@/app/containers/InterludeScreen";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -132,6 +136,8 @@ function Home() {
     (state) => state.setAdventurerEntropy
   );
   const showProfile = useUIStore((state) => state.showProfile);
+  const itemEntropy = useUIStore((state) => state.itemEntropy);
+  const setItemEntropy = useUIStore((state) => state.setItemEntropy);
 
   const { contract: gameContract } = useContract({
     address: networkConfig[network!].gameAddress,
@@ -148,6 +154,10 @@ function Home() {
   const { contract: beastsContract } = useContract({
     address: networkConfig[network!].beastsAddress,
     abi: Beasts,
+  });
+  const { contract: pragmaContract } = useContract({
+    address: networkConfig[network!].pragmaAddress,
+    abi: Pragma,
   });
 
   const { addTransaction } = useTransactionManager();
@@ -168,7 +178,12 @@ function Home() {
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const setStartOption = useUIStore((state) => state.setStartOption);
+  const entropyReady = useUIStore((state) => state.entropyReady);
   const setEntropyReady = useUIStore((state) => state.setEntropyReady);
+  const fetchUnlocksEntropy = useUIStore((state) => state.fetchUnlocksEntropy);
+  const setFetchUnlocksEntropy = useUIStore(
+    (state) => state.setFetchUnlocksEntropy
+  );
   const adventurerEntropy = useUIStore((state) => state.adventurerEntropy);
   const [accountChainId, setAccountChainId] = useState<
     constants.StarknetChainId | undefined
@@ -197,6 +212,8 @@ function Home() {
       setUsername("");
     }
   }, [connector]);
+
+  const gameData = new GameData();
 
   const ethBalanceRef = useRef(BigInt(0));
   const lordsBalanceRef = useRef(BigInt(0));
@@ -240,6 +257,8 @@ function Home() {
     ethContract: ethContract!,
     lordsContract: lordsContract!,
     beastsContract: beastsContract!,
+    pragmaContract: pragmaContract!,
+    rendererContractAddress: networkConfig[network!].rendererAddress,
     addTransaction,
     queryData: data,
     resetData,
@@ -270,6 +289,7 @@ function Home() {
     setIsMintingLords,
     setIsWithdrawing,
     setEntropyReady,
+    setFetchUnlocksEntropy,
     provider,
     network,
   });
@@ -555,9 +575,11 @@ function Home() {
   useEffect(() => {
     const fetchEntropy = async () => {
       if (adventurer?.id) {
-        const entropy = await gameContract!.call("get_adventurer_entropy", [
-          adventurer?.id!,
-        ]);
+        const adventurerMeta: any = await gameContract!.call(
+          "get_adventurer_meta",
+          [adventurer?.id!]
+        );
+        const entropy = adventurerMeta.level_seed;
         if (entropy !== BigInt(0)) {
           setAdventurerEntropy(BigInt(entropy.toString()));
           setEntropyReady(true);
@@ -570,13 +592,71 @@ function Home() {
     fetchEntropy();
 
     // Set up the interval to call the function every 5 seconds
-    const interval = setInterval(fetchEntropy, 5000);
+    const interval = setInterval(fetchEntropy, VRF_WAIT_TIME);
 
     return () => clearInterval(interval); // Cleanup on component unmount
   }, [adventurer?.level]);
 
+  const fetchItemSpecials = async () => {
+    if (entropyReady || onKatana) {
+      const marketItems = (await gameContract!.call("get_market", [
+        adventurer?.id!,
+      ])) as string[];
+      const itemData = [];
+      for (let item of marketItems) {
+        itemData.unshift({
+          item: gameData.ITEMS[parseInt(item)],
+          adventurerId: adventurer?.id,
+          owner: false,
+          equipped: false,
+          ownerAddress: adventurer?.owner,
+          xp: 0,
+          special1: null,
+          special2: null,
+          special3: null,
+          isAvailable: false,
+          purchasedTime: null,
+          timestamp: new Date(),
+        });
+      }
+      setData("latestMarketItemsQuery", {
+        items: itemData,
+      });
+    }
+  };
+
+  useEffect(() => {
+    const fetchEntropy = async () => {
+      if (adventurer?.id && fetchUnlocksEntropy) {
+        const entropy = await gameContract!.call("get_item_entropy", [
+          adventurer?.id!,
+        ]);
+        if (entropy !== BigInt(0)) {
+          setFetchUnlocksEntropy(false);
+          setItemEntropy(BigInt(entropy.toString()));
+          fetchItemSpecials();
+          clearInterval(interval);
+        }
+      }
+    };
+
+    // Call the function immediately
+    if (itemEntropy === BigInt(0)) {
+      fetchEntropy();
+    }
+
+    // Set up the interval to call the function every 5 seconds
+    const interval = setInterval(fetchEntropy, VRF_WAIT_TIME);
+
+    return () => clearInterval(interval); // Cleanup on component unmount
+  }, [fetchUnlocksEntropy]);
+
   return (
     <>
+      {((!entropyReady && hasStatUpgrades) || fetchUnlocksEntropy) &&
+        !onKatana && (
+          <InterludeScreen type={fetchUnlocksEntropy ? "item" : "level"} />
+        )}
       <NetworkSwitchError network={network} isWrongNetwork={isWrongNetwork} />
       {isMintingLords && <TokenLoader isToppingUpLords={isMintingLords} />}
       {isWithdrawing && <TokenLoader isWithdrawing={isWithdrawing} />}

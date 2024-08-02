@@ -31,6 +31,7 @@ export const itemMinimumPrice = 1;
 export const potionCharismaDiscount = 2;
 export const potionBasePrice = 2;
 export const VRF_FEE_LIMIT = 5000000000000000; // 0.005 ETH
+export const VRF_WAIT_TIME = 4000;
 export const vitalityIncrease = 15;
 
 // UI PARAMS

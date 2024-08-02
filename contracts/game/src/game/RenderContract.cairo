@@ -9,7 +9,9 @@ trait IRenderContract<TContractState> {
         adventurer_name: felt252,
         adventurerMetadata: AdventurerMetadata,
         bag: Bag,
-        item_specials_seed: u16
+        item_specials_seed: u16,
+        rank_at_death: u8,
+        current_rank: u8,
     ) -> ByteArray;
 }
 
@@ -30,7 +32,9 @@ mod RenderContract {
             adventurer_name: felt252,
             adventurerMetadata: AdventurerMetadata,
             bag: Bag,
-            item_specials_seed: u16
+            item_specials_seed: u16,
+            rank_at_death: u8,
+            current_rank: u8,
         ) -> ByteArray {
             create_metadata(
                 adventurer_id.try_into().unwrap(),
@@ -38,7 +42,9 @@ mod RenderContract {
                 adventurer_name,
                 adventurerMetadata,
                 bag,
-                item_specials_seed
+                item_specials_seed,
+                rank_at_death,
+                current_rank,
             )
         }
     }

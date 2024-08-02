@@ -764,7 +764,7 @@ impl ImplLoot of ILoot {
             Slot::Waist(()) => ItemSlotLength::SlotItemsLengthWaist,
             Slot::Foot(()) => ItemSlotLength::SlotItemsLengthFoot,
             Slot::Hand(()) => ItemSlotLength::SlotItemsLengthHand,
-            Slot::Neck(()) => ItemSlotLength::SlotItemsLengthHand,
+            Slot::Neck(()) => ItemSlotLength::SlotItemsLengthNeck,
             Slot::Ring(()) => ItemSlotLength::SlotItemsLengthRing,
         }
     }
@@ -1011,7 +1011,7 @@ mod tests {
         loot::{ImplLoot, ILoot, Loot},
         constants::{
             NamePrefixLength, ItemNameSuffix, ItemId, ItemNamePrefix, NameSuffixLength,
-            ItemSuffixLength, ItemSuffix, NUM_ITEMS,
+            ItemSuffixLength, ItemSuffix, NUM_ITEMS,ItemSlotLength
         },
         utils::{
             NameUtils::{
@@ -3657,5 +3657,60 @@ mod tests {
         assert(item.tier == Tier::None(()), 'item is tier none');
         assert(item.slot == Slot::None(()), 'item is slot none');
         assert(item.item_type == Type::None(()), 'item is type none');
+    }
+
+    #[test]
+    fn test_get_slot_length() {
+        // None
+        assert(ImplLoot::get_slot_length(Slot::None(())) == 0, 'None slot should return 0');
+
+        // Weapon
+        assert(
+            ImplLoot::get_slot_length(Slot::Weapon(())) == ItemSlotLength::SlotItemsLengthWeapon,
+            'Incorrect weapon slot length'
+        );
+
+        // Chest
+        assert(
+            ImplLoot::get_slot_length(Slot::Chest(())) == ItemSlotLength::SlotItemsLengthChest,
+            'Incorrect chest slot length'
+        );
+
+        // Head
+        assert(
+            ImplLoot::get_slot_length(Slot::Head(())) == ItemSlotLength::SlotItemsLengthHead,
+            'Incorrect head slot length'
+        );
+
+        // Waist
+        assert(
+            ImplLoot::get_slot_length(Slot::Waist(())) == ItemSlotLength::SlotItemsLengthWaist,
+            'Incorrect waist slot length'
+        );
+
+        // Foot
+        assert(
+            ImplLoot::get_slot_length(Slot::Foot(())) == ItemSlotLength::SlotItemsLengthFoot,
+            'Incorrect foot slot length'
+        );
+
+        // Hand
+        assert(
+            ImplLoot::get_slot_length(Slot::Hand(())) == ItemSlotLength::SlotItemsLengthHand,
+            'Incorrect hand slot length'
+        );
+
+        // Neck
+        assert(
+            ImplLoot::get_slot_length(Slot::Neck(())) == ItemSlotLength::SlotItemsLengthNeck,
+            'Incorrect neck slot length'
+        );
+
+        // Ring
+        assert(
+            ImplLoot::get_slot_length(Slot::Ring(())) == ItemSlotLength::SlotItemsLengthRing,
+            'Incorrect ring slot length'
+        );
+
     }
 }

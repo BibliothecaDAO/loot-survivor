@@ -9,10 +9,12 @@ type u16 = number;
 type u8 = number;
 
 type AdventurerMetadata = {
-  startEntropy: string;
-  startingStats: Stats;
-  interfaceCamel: boolean;
-  name: u128;
+  birthDate: u64;
+  deathDate: u64;
+  adventurerEntropy: u64;
+  itemSpecialsSeed: u16;
+  rankAtDeath: u8;
+  delayStatReveal: boolean;
 };
 
 type Stats = {
@@ -49,7 +51,9 @@ type Adventurer = {
   statUpgradesAvailable: u8;
   stats: Stats;
   equipment: Equipment;
+  battleActionCount: u8;
   mutated: boolean;
+  awaitingItemSpecials: boolean;
 };
 
 type Bag = {
@@ -144,7 +148,9 @@ type AdventurerStateWithBag = {
 export type StartGameEvent = {
   adventurerState: AdventurerState;
   adventurerMeta: AdventurerMetadata;
-  revealBlock: u64;
+  name: number;
+  goldenTokenId: number;
+  customRenderer: ContractAddress;
 };
 
 export type DiscoveredHealthEvent = {

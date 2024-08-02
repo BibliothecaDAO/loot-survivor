@@ -1,5 +1,5 @@
 import { parseAdventurerState } from "./events.ts";
-import { encodeIntAsBytes, checkExistsInt, getLevelFromXp } from "./encode.ts";
+import { checkExistsInt, getLevelFromXp } from "./encode.ts";
 
 export function insertAdventurer({
   id,
@@ -15,6 +15,7 @@ export function insertAdventurer({
   wisdom,
   charisma,
   gold,
+  actions,
   weapon,
   chest,
   head,
@@ -26,8 +27,10 @@ export function insertAdventurer({
   beastHealth,
   statUpgrades,
   name,
-  startEntropy,
-  revealBlock,
+  birthDate,
+  deathDate,
+  goldenTokenId,
+  customRenderer,
   createdTime,
   lastUpdatedTime,
   timestamp,
@@ -53,6 +56,7 @@ export function insertAdventurer({
         wisdom: parseInt(wisdom),
         charisma: parseInt(charisma),
         gold: parseInt(gold),
+        battleActionCount: parseInt(actions),
         weapon: checkExistsInt(parseInt(weapon)),
         chest: checkExistsInt(parseInt(chest)),
         head: checkExistsInt(parseInt(head)),
@@ -64,8 +68,10 @@ export function insertAdventurer({
         beastHealth: parseInt(beastHealth),
         statUpgrades: parseInt(statUpgrades),
         name: checkExistsInt(parseInt(name)),
-        startEntropy: parseInt(startEntropy),
-        revealBlock: parseInt(revealBlock),
+        birthDate: parseInt(birthDate),
+        deathDate: parseInt(deathDate),
+        goldenTokenId: checkExistsInt(parseInt(goldenTokenId)),
+        customRenderer: checkExistsInt(parseInt(customRenderer)),
         createdTime: createdTime,
         lastUpdatedTime: lastUpdatedTime,
         timestamp,
@@ -173,7 +179,7 @@ export function updateAdventurer({
     update: {
       $set: {
         ...entity,
-        entropy: BigInt(adventurerState.adventurerEntropy).toString(16),
+        entropy: BigInt(adventurerState.entropy).toString(16),
         health: adventurer.health,
         xp: adventurer.xp,
         level: getLevelFromXp(adventurer.xp),
@@ -185,6 +191,7 @@ export function updateAdventurer({
         charisma: adventurer.stats.charisma,
         luck: adventurer.stats.luck,
         gold: adventurer.gold,
+        battleActionCount: adventurer.battleActionCount,
         weapon: checkExistsInt(adventurer.equipment.weapon.id),
         chest: checkExistsInt(adventurer.equipment.chest.id),
         head: checkExistsInt(adventurer.equipment.head.id),
@@ -196,6 +203,27 @@ export function updateAdventurer({
         beastHealth: adventurer.beastHealth,
         statUpgrades: adventurer.statsUpgradesAvailable,
         lastUpdatedTime: timestamp,
+        timestamp,
+      },
+    },
+  };
+}
+
+export function updateAdventurerOwner({
+  adventurerId,
+  newOwner,
+  timestamp,
+}: any) {
+  const entity = {
+    id: checkExistsInt(BigInt(adventurerId)),
+  };
+
+  return {
+    entity,
+    update: {
+      $set: {
+        ...entity,
+        owner: checkExistsInt(BigInt(newOwner)),
         timestamp,
       },
     },
@@ -545,6 +573,23 @@ export function insertHighScore({ adventurerId, timestamp, totalPayout }: any) {
         ...entity,
         timestamp,
         totalPayout: totalPayout,
+      },
+    },
+  };
+}
+
+export function updateItemsOwner({ adventurerId, timestamp, newOwner }: any) {
+  const entity = {
+    adventurerId: checkExistsInt(parseInt(adventurerId)),
+  };
+
+  return {
+    entity,
+    update: {
+      $set: {
+        ...entity,
+        ownerAddress: checkExistsInt(BigInt(newOwner).toString(16)),
+        timestamp,
       },
     },
   };

@@ -14,9 +14,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    console.log(rpcUrl);
-    console.log(rpcKey);
-
     const response = await fetch(`${rpcUrl}/${rpcKey}`, {
       method: "POST",
       headers: {
