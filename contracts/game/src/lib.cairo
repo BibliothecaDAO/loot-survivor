@@ -208,7 +208,7 @@ mod Game {
         self._default_renderer.write(render_contract);
 
         // TODO: Setting offchain uri here for later use, however it is not used in the current implementation
-        self.erc721.initializer("Survivor", "LSVR", "https://token.lootsurvivor.io/");
+        self.erc721.initializer("Loot Survivor", "LSVR", "https://token.lootsurvivor.io/");
 
         // On mainnet, set genesis timestamp to LSV1.0 genesis to preserve same reward distribution schedule for V1.1 
         let chain_id = get_tx_info().unbox().chain_id;
@@ -3068,6 +3068,19 @@ mod Game {
         self.erc721.ERC721_owners.read(adventurer_id.into())
     }
 
+    fn _get_rank(self: @ContractState, adventurer_id: felt252) -> u8 {
+        let leaderboard = self._leaderboard.read();
+        if (leaderboard.first.adventurer_id == adventurer_id.try_into().unwrap()) {
+            1
+        } else if (leaderboard.second.adventurer_id == adventurer_id.try_into().unwrap()) {
+            2
+        } else if (leaderboard.third.adventurer_id == adventurer_id.try_into().unwrap()) {
+            3
+        } else {
+            0
+        }
+    }
+
     /// @title Update Leaderboard
     /// @notice Updates the leaderboard and emits an event.
     /// @dev This function is called when the leaderboard is updated.
@@ -3871,6 +3884,7 @@ mod Game {
             let adventurer_metadata = _load_adventurer_metadata(self, adventurer_id_felt);
             let bag = _load_bag(self, adventurer_id_felt);
             let item_specials_seed = _get_item_specials_seed(self, adventurer_id_felt);
+            let current_rank = _get_rank(self, adventurer_id_felt);
 
             IRenderContractDispatcher { contract_address: renderer_contract }
                 .token_uri(
@@ -3879,7 +3893,9 @@ mod Game {
                     adventurer_name,
                     adventurer_metadata,
                     bag,
-                    item_specials_seed
+                    item_specials_seed,
+                    adventurer_metadata.rank_at_death,
+                    current_rank,
                 )
         }
     }
