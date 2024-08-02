@@ -887,7 +887,8 @@ mod Game {
             _load_bag(self, adventurer_id)
         }
         fn get_market(self: @ContractState, adventurer_id: felt252) -> Array<u8> {
-            _get_market(self, adventurer_id)
+            let adventurer = _load_adventurer(self, adventurer_id);
+            _get_market(self, adventurer_id, adventurer.stat_upgrades_available)
         }
 
         fn get_potion_price(self: @ContractState, adventurer_id: felt252) -> u16 {
@@ -2446,7 +2447,7 @@ mod Game {
         items_to_purchase: Array<ItemPurchase>,
     ) -> (Array<LootWithPrice>, Array<u8>, Array<u8>) {
         // get adventurer entropy
-        let market_inventory = _get_market(self, adventurer_id);
+        let market_inventory = _get_market(self, adventurer_id, stat_upgrades_available);
 
         // mutable array for returning items that need to be equipped as part of this purchase
         let mut unequipped_items = ArrayTrait::<u8>::new();
@@ -2982,13 +2983,13 @@ mod Game {
         }
     }
 
-    fn _get_market(self: @ContractState, adventurer_id: felt252) -> Array<u8> {
-        let adventurer = _load_adventurer(self, adventurer_id);
-
+    fn _get_market(
+        self: @ContractState, adventurer_id: felt252, stat_upgrades_available: u8
+    ) -> Array<u8> {
         let market_seed = _get_level_seed(self, adventurer_id);
         assert(market_seed != 0, messages::LEVEL_SEED_NOT_SET);
 
-        let market_size = ImplMarket::get_market_size(adventurer.stat_upgrades_available);
+        let market_size = ImplMarket::get_market_size(stat_upgrades_available);
         ImplMarket::get_available_items(market_seed, market_size)
     }
 
@@ -3788,7 +3789,7 @@ mod Game {
         let adventurer_state = AdventurerState {
             owner: _get_owner(@self, adventurer_id), adventurer_id, level_seed, adventurer
         };
-        let items = _get_market(@self, adventurer_id);
+        let items = _get_market(@self, adventurer_id, adventurer.stat_upgrades_available);
         self.emit(UpgradesAvailable { adventurer_state, items });
     }
 
