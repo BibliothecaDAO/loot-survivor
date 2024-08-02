@@ -42,8 +42,14 @@ import {
   parseDiscoveredBeast,
   DISCOVERED_LOOT,
   parseDiscoveredLoot,
+  TRANSFER,
+  parseTransfer,
 } from "./utils/events.ts";
-import { insertAdventurer, updateAdventurer } from "./utils/helpers.ts";
+import {
+  insertAdventurer,
+  updateAdventurer,
+  updateAdventurerOwner,
+} from "./utils/helpers.ts";
 import { MONGO_CONNECTION_STRING } from "./utils/constants.ts";
 import { getLevelFromXp } from "./utils/encode.ts";
 
@@ -75,6 +81,7 @@ const filter = {
     { fromAddress: GAME, keys: [FLEE_SUCCEEDED] },
     { fromAddress: GAME, keys: [ITEMS_LEVELED_UP] },
     { fromAddress: GAME, keys: [UPGRADES_AVAILABLE] },
+    { fromAddress: GAME, keys: [ADVENTURER_UPGRADED] },
   ],
 };
 
@@ -106,7 +113,7 @@ export default function transform({ header, events }: Block) {
           insertAdventurer({
             id: as.adventurerId,
             owner: as.owner,
-            entropy: as.adventurerEntropy,
+            entropy: am.adventurerEntropy,
             health: as.adventurer.health,
             xp: as.adventurer.xp,
             level: getLevelFromXp(as.adventurer.xp),
@@ -118,6 +125,7 @@ export default function transform({ header, events }: Block) {
             charisma: as.adventurer.stats.charisma,
             luck: as.adventurer.stats.luck,
             gold: as.adventurer.gold,
+            battleActionCount: as.adventurer.battleActionCount,
             weapon: as.adventurer.equipment.weapon.id,
             chest: as.adventurer.equipment.chest.id,
             head: as.adventurer.equipment.head.id,
@@ -128,9 +136,11 @@ export default function transform({ header, events }: Block) {
             ring: as.adventurer.equipment.ring.id,
             beastHealth: as.adventurer.beastHealth,
             statUpgrades: as.adventurer.statsUpgradesAvailable,
-            name: am.name,
-            startEntropy: am.startEntropy,
-            revealBlock: value.revealBlock,
+            name: value.name,
+            birthDate: am.birthDate,
+            deathDate: am.deathDate,
+            goldenTokenId: value.goldenTokenId,
+            customRenderer: value.customRenderer,
             createdTime: new Date().toISOString(),
             lastUpdatedTime: new Date().toISOString(),
             timestamp: new Date().toISOString(),
@@ -324,6 +334,17 @@ export default function transform({ header, events }: Block) {
           updateAdventurer({
             timestamp: new Date().toISOString(),
             adventurerState: value.adventurerState,
+          }),
+        ];
+      }
+      case TRANSFER: {
+        console.log("TRANSFER", "->", "ADVENTURER UPDATES");
+        const { value } = parseTransfer(event.data, 0);
+        return [
+          updateAdventurerOwner({
+            adventurerId: value.tokenId,
+            newOwner: value.toAddress,
+            timestamp: new Date().toISOString(),
           }),
         ];
       }

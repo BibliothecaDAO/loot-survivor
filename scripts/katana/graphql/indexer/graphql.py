@@ -1023,8 +1023,11 @@ class AdventurersFilter:
     ring: Optional[FeltValueFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     statUpgrades: Optional[FeltValueFilter] = None
-    startEntropy: Optional[FeltValueFilter] = None
-    revealBlock: Optional[FeltValueFilter] = None
+    birthDate: Optional[OrderByInput] = None
+    deathDate: Optional[OrderByInput] = None
+    goldenTokenId: Optional[OrderByInput] = None
+    customRenderer: Optional[OrderByInput] = None
+    battleActionCount: Optional[OrderByInput] = None
     actionsPerBlock: Optional[FeltValueFilter] = None
     gold: Optional[FeltValueFilter] = None
     createdTime: Optional[OrderByInput] = None
@@ -1045,8 +1048,8 @@ class AdventurersFilter:
             "wisdom": self.wisdom.to_dict() if self.wisdom else None,
             "charisma": self.charisma.to_dict() if self.charisma else None,
             "luck": self.luck.to_dict() if self.luck else None,
-            "level": self.level.to_dict() if self.level else None,
             "xp": self.xp.to_dict() if self.xp else None,
+            "level": self.level.to_dict() if self.level else None,
             "weapon": self.weapon.to_dict() if self.weapon else None,
             "chest": self.chest.to_dict() if self.chest else None,
             "head": self.head.to_dict() if self.head else None,
@@ -1057,10 +1060,16 @@ class AdventurersFilter:
             "ring": self.ring.to_dict() if self.ring else None,
             "beastHealth": self.beastHealth.to_dict() if self.beastHealth else None,
             "statUpgrades": self.statUpgrades.to_dict() if self.statUpgrades else None,
-            "startEntropy": self.startEntropy.to_dict() if self.startEntropy else None,
-            "revealBlock": self.revealBlock.to_dict() if self.revealBlock else None,
-            "actionsPerBlock": (
-                self.actionsPerBlock.to_dict() if self.actionsPerBlock else None
+            "birthDate": self.birthDate.to_dict() if self.birthDate else None,
+            "deathDate": self.deathDate.to_dict() if self.deathDate else None,
+            "goldenTokenId": (
+                self.goldenTokenId.to_dict() if self.goldenTokenId else None
+            ),
+            "customRenderer": (
+                self.customRenderer.to_dict() if self.customRenderer else None
+            ),
+            "battleActionCount": (
+                self.battleActionCount.to_dict() if self.battleActionCount else None
             ),
             "gold": self.gold.to_dict() if self.gold else None,
             "createdTime": self.createdTime.to_dict() if self.createdTime else None,
@@ -1319,9 +1328,11 @@ class AdventurersOrderByInput:
     ring: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     statUpgrades: Optional[OrderByInput] = None
-    startEntropy: Optional[OrderByInput] = None
-    revealBlock: Optional[OrderByInput] = None
-    actionsPerBlock: Optional[OrderByInput] = None
+    birthDate: Optional[OrderByInput] = None
+    deathDate: Optional[OrderByInput] = None
+    goldenTokenId: Optional[OrderByInput] = None
+    customRenderer: Optional[OrderByInput] = None
+    battleActionCount: Optional[OrderByInput] = None
     gold: Optional[OrderByInput] = None
     createdTime: Optional[OrderByInput] = None
     lastUpdatedTime: Optional[OrderByInput] = None
@@ -1334,7 +1345,6 @@ class AdventurersOrderByInput:
             "owner": self.owner.to_dict() if self.owner else None,
             "name": self.name.to_dict() if self.name else None,
             "health": self.health.to_dict() if self.health else None,
-            "level": self.level.to_dict() if self.level else None,
             "strength": self.strength.to_dict() if self.strength else None,
             "dexterity": self.dexterity.to_dict() if self.dexterity else None,
             "vitality": self.vitality.to_dict() if self.vitality else None,
@@ -1343,6 +1353,7 @@ class AdventurersOrderByInput:
             "charisma": self.charisma.to_dict() if self.charisma else None,
             "luck": self.luck.to_dict() if self.luck else None,
             "xp": self.xp.to_dict() if self.xp else None,
+            "level": self.level.to_dict() if self.level else None,
             "weapon": self.weapon.to_dict() if self.weapon else None,
             "chest": self.chest.to_dict() if self.chest else None,
             "head": self.head.to_dict() if self.head else None,
@@ -1353,10 +1364,16 @@ class AdventurersOrderByInput:
             "ring": self.ring.to_dict() if self.ring else None,
             "beastHealth": self.beastHealth.to_dict() if self.beastHealth else None,
             "statUpgrades": self.statUpgrades.to_dict() if self.statUpgrades else None,
-            "startEntropy": self.startEntropy.to_dict() if self.startEntropy else None,
-            "revealBlock": self.revealBlock.to_dict() if self.revealBlock else None,
-            "actionsPerBlock": (
-                self.actionsPerBlock.to_dict() if self.actionsPerBlock else None
+            "birthDate": self.birthDate.to_dict() if self.birthDate else None,
+            "deathDate": self.deathDate.to_dict() if self.deathDate else None,
+            "goldenTokenId": (
+                self.goldenTokenId.to_dict() if self.goldenTokenId else None
+            ),
+            "customRenderer": (
+                self.customRenderer.to_dict() if self.customRenderer else None
+            ),
+            "battleActionCount": (
+                self.battleActionCount.to_dict() if self.battleActionCount else None
             ),
             "gold": self.gold.to_dict() if self.gold else None,
             "createdTime": self.createdTime.to_dict() if self.createdTime else None,
@@ -1617,8 +1634,11 @@ class Adventurer:
     ring: Optional[ItemValue]
     beastHealth: Optional[FeltValue]
     statUpgrades: Optional[FeltValue]
-    startEntropy: Optional[FeltValue]
-    revealBlock: Optional[FeltValue]
+    birthDate: Optional[str]
+    deathDate: Optional[str]
+    goldenTokenId: Optional[FeltValue]
+    customRenderer: Optional[FeltValue]
+    battleActionCount: Optional[FeltValue]
     gold: Optional[FeltValue]
     createdTime: Optional[str]
     lastUpdatedTime: Optional[str]
@@ -1651,8 +1671,11 @@ class Adventurer:
             ring=data["ring"],
             beastHealth=data["beastHealth"],
             statUpgrades=data["statUpgrades"],
-            startEntropy=data["startEntropy"],
-            revealBlock=data["revealBlock"],
+            birthDate=data["birthDate"],
+            deathDate=data["deathDate"],
+            goldenTokenId=data["goldenTokenId"],
+            customRenderer=data["customRenderer"],
+            battleActionCount=data["battleActionCount"],
             gold=data["gold"],
             createdTime=data["createdTime"],
             lastUpdatedTime=data["lastUpdatedTime"],

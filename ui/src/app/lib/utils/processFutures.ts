@@ -3,7 +3,10 @@ import { calculateLevel, formatItemName, getKeyFromValue } from ".";
 import { GameData } from "../data/GameData";
 
 const MAX_ID = BigInt(75);
-const U128_MAX = BigInt("340282366920938463463374607431768211455");
+const TWO_POW_64_NZ = BigInt("18446744073709551616");
+const TWO_POW_32_NZ = BigInt("4294967296");
+const TWO_POW_16_NZ = BigInt("65536");
+const TWO_POW_8_NZ = BigInt("256");
 
 interface Beast {
   encounter: string;
@@ -16,7 +19,7 @@ interface Beast {
   dodgeRoll: number;
   nextXp: number;
   specialName: string;
-  criticalMultiplier: number;
+  isCritical: boolean;
   damage: number;
 }
 
@@ -31,7 +34,7 @@ interface Encounter {
   dodgeRoll?: number;
   nextXp: number;
   specialName?: string;
-  criticalMultiplier?: number;
+  isCritical?: boolean;
   damage?: number;
 }
 
@@ -68,10 +71,25 @@ export function beastEncounters(
   xpList.forEach((xp) => {
     const level = BigInt(Math.floor(Math.sqrt(xp)));
 
-    let { rnd2 } = getRandomness(xp, adventurerEntropy);
+    let { rnd1, rnd3, rnd4, rnd5, rnd6, rnd7 } = getRandomness(
+      xp,
+      adventurerEntropy
+    );
 
     beasts.push({
-      ...beastEncounter(adventurerEntropy, level, xp, rnd2),
+      ...beastEncounter(
+        adventurerEntropy,
+        level,
+        xp,
+        rnd1,
+        rnd3,
+        rnd4,
+        rnd5,
+        rnd6,
+        rnd7,
+        rnd5, // use same entropy for crit hit, initial attack location, and beast specials
+        rnd6
+      ),
       adventurerLevel: Math.floor(Math.sqrt(xp)),
       xp: xp,
     });
@@ -175,56 +193,131 @@ function getNextEncounter(
   items?: Item[],
   hasBeast?: boolean
 ): Encounter {
-  let { rnd1, rnd2 } = getRandomness(xp, adventurerEntropy);
+  let { rnd1, rnd3, rnd4, rnd5, rnd6, rnd7, rnd8 } = getRandomness(
+    xp,
+    adventurerEntropy
+  );
   const level = BigInt(Math.floor(Math.sqrt(xp)));
 
-  let encounter = Number(rnd1 % BigInt(3));
+  let encounter = Number(rnd8 % BigInt(3));
 
   if (hasBeast || encounter === 0) {
-    return beastEncounter(adventurerEntropy, level, xp, rnd2, items);
+    return beastEncounter(
+      adventurerEntropy,
+      level,
+      xp,
+      rnd1,
+      rnd3,
+      rnd4,
+      rnd5,
+      rnd6,
+      rnd7,
+      rnd5, // use same entropy for crit hit, initial attack location, and beast specials
+      rnd6
+    ); // to create some fun organic lore for the beast special names, items);
   } else if (encounter === 1) {
-    return obstacleEncounter(level, rnd2, xp, items);
+    return obstacleEncounter(level, rnd1, rnd4, rnd5, rnd6, rnd7, xp, items);
   } else {
-    return discoveryEncounter(level, rnd2, xp);
+    return discoveryEncounter(level, rnd5, rnd6, rnd7, xp);
   }
 }
 
-function getRandomness(xp: number, adventurerEntropy: bigint) {
+function getLower128Bits(bigInt: bigint): bigint {
+  // Create a mask with 128 1's
+  const mask = (1n << 128n) - 1n;
+
+  // Use bitwise AND to keep only the lower 128 bits
+  return bigInt & mask;
+}
+
+function split_poseidon(poseidon: bigint) {
+  let u128_low = getLower128Bits(poseidon);
+
+  let rnd1_u64 = u128_low / TWO_POW_64_NZ;
+  let rnd2_u64 = u128_low % TWO_POW_64_NZ;
+
+  let rnd1_u32 = rnd1_u64 / TWO_POW_32_NZ;
+  let rnd2_u32 = rnd1_u64 % TWO_POW_32_NZ;
+  let rnd3_u32 = rnd2_u64 / TWO_POW_32_NZ;
+  let rnd4_u32 = rnd2_u64 % TWO_POW_32_NZ;
+
+  let rnd1_u16 = rnd3_u32 / TWO_POW_16_NZ;
+  let rnd2_u16 = rnd3_u32 % TWO_POW_16_NZ;
+  let rnd3_u16 = rnd4_u32 / TWO_POW_16_NZ;
+  let rnd4_u16 = rnd4_u32 % TWO_POW_16_NZ;
+
+  let rnd1_u8 = rnd3_u16 / TWO_POW_8_NZ;
+  let rnd2_u8 = rnd3_u16 % TWO_POW_8_NZ;
+  let rnd3_u8 = rnd4_u16 / TWO_POW_8_NZ;
+  let rnd4_u8 = rnd4_u16 % TWO_POW_8_NZ;
+
+  return {
+    rnd1_u32,
+    rnd2_u32,
+    rnd1_u16,
+    rnd2_u16,
+    rnd1_u8,
+    rnd2_u8,
+    rnd3_u8,
+    rnd4_u8,
+  };
+}
+
+export function getRandomness(xp: number, adventurerEntropy: bigint) {
   let params = [BigInt(xp), adventurerEntropy];
 
   let poseidon = starknet.poseidonHashMany(params);
-  let d = poseidon / U128_MAX;
-  let r = poseidon % U128_MAX;
+  let {
+    rnd1_u32,
+    rnd2_u32,
+    rnd1_u16,
+    rnd2_u16,
+    rnd1_u8,
+    rnd2_u8,
+    rnd3_u8,
+    rnd4_u8,
+  } = split_poseidon(poseidon);
 
-  return { rnd1: r, rnd2: d };
+  return {
+    rnd1: rnd1_u32,
+    rnd2: rnd2_u32,
+    rnd3: rnd1_u16,
+    rnd4: rnd2_u16,
+    rnd5: rnd1_u8,
+    rnd6: rnd2_u8,
+    rnd7: rnd3_u8,
+    rnd8: rnd4_u8,
+  };
 }
 
-function getBeastSeed(xp: number, adventurerEntropy: bigint) {
-  let params = [BigInt(xp), adventurerEntropy];
-
-  let poseidon = starknet.poseidonHashMany(params);
-  let d = poseidon / U128_MAX;
-
-  return d;
-}
-
-function getRandomnessWithHealth(
+export function getRandomnessWithActions(
   xp: number,
-  health: number,
+  actions: number,
   adventurerEntropy: bigint
 ) {
-  let params = [BigInt(xp), BigInt(health), adventurerEntropy];
+  let params = [BigInt(xp), adventurerEntropy, BigInt(actions)];
 
   let poseidon = starknet.poseidonHashMany(params);
+  let rnd1_u32 = poseidon % TWO_POW_32_NZ;
 
-  let d = poseidon / U128_MAX;
-  let r = poseidon % U128_MAX;
+  let rnd1_u16 = rnd1_u32 / TWO_POW_16_NZ;
+  let rnd2_u16 = rnd1_u32 % TWO_POW_16_NZ;
 
-  return { rnd1: r, rnd2: d };
+  let rnd1_u8 = rnd1_u16 / TWO_POW_8_NZ;
+  let rnd2_u8 = rnd1_u16 % TWO_POW_8_NZ;
+  let rnd3_u8 = rnd2_u16 / TWO_POW_8_NZ;
+  let rnd4_u8 = rnd2_u16 % TWO_POW_8_NZ;
+
+  return {
+    rnd1_u8,
+    rnd2_u8,
+    rnd3_u8,
+    rnd4_u8,
+  };
 }
 
-function getDiscoveryItem(entropy: bigint): string {
-  let roll = entropy % BigInt(100);
+function getDiscoveryItem(tier_rnd: bigint, item_rnd: bigint): string {
+  let roll = (tier_rnd * BigInt(100) + BigInt(127)) / BigInt(255);
 
   let itemIndex = 0;
 
@@ -232,23 +325,23 @@ function getDiscoveryItem(entropy: bigint): string {
 
   // 50% chance of T5
   if (roll < 50) {
-    itemIndex = Number(entropy % BigInt(gameData.T5_ITEMS.length));
+    itemIndex = Number(item_rnd % BigInt(gameData.T5_ITEMS.length));
     return gameData.T5_ITEMS[itemIndex];
     // 30% chance of T4
   } else if (roll < 80) {
-    itemIndex = Number(entropy % BigInt(gameData.T4_ITEMS.length));
+    itemIndex = Number(item_rnd % BigInt(gameData.T4_ITEMS.length));
     return gameData.T4_ITEMS[itemIndex];
     // 12% chance of T3
   } else if (roll < 92) {
-    itemIndex = Number(entropy % BigInt(gameData.T3_ITEMS.length));
+    itemIndex = Number(item_rnd % BigInt(gameData.T3_ITEMS.length));
     return gameData.T3_ITEMS[itemIndex];
     // 6% chance of T2
   } else if (roll < 98) {
-    itemIndex = Number(entropy % BigInt(gameData.T2_ITEMS.length));
+    itemIndex = Number(item_rnd % BigInt(gameData.T2_ITEMS.length));
     return gameData.T2_ITEMS[itemIndex];
     // 2% chance of T1
   } else {
-    itemIndex = Number(entropy % BigInt(gameData.T1_ITEMS.length));
+    itemIndex = Number(item_rnd % BigInt(gameData.T1_ITEMS.length));
     return gameData.T1_ITEMS[itemIndex];
   }
 }
@@ -290,8 +383,7 @@ function getXpReward(
 }
 
 function abilityBasedAvoidThreat(level: bigint, entropy: bigint): bigint {
-  let dice_roll = entropy % level;
-  return dice_roll;
+  return (level * entropy) / BigInt(255);
 }
 
 function getObstacleLevel(level: bigint, entropy: bigint): bigint {
@@ -374,25 +466,29 @@ function beastEncounter(
   adventurerEntropy: bigint,
   level: bigint,
   xp: number,
-  rnd2: bigint,
+  seed: bigint,
+  health_rnd: bigint,
+  level_rnd: bigint,
+  dmg_location_rnd: bigint,
+  crit_hit_rnd: bigint,
+  ambush_rnd: bigint,
+  specials1_rnd: bigint, // use same entropy for crit hit, initial attack location, and beast specials
+  specials2_rnd: bigint,
   items?: Item[]
 ): Beast {
-  let seed = getBeastSeed(xp, adventurerEntropy);
-
   let beast_id = (seed % MAX_ID) + BigInt(1);
 
-  let beast_health = getBeastHealth(level, seed);
+  let beast_health = getBeastHealth(level, health_rnd);
 
   let beast_tier = getTier(beast_id);
   let beast_type = getType(beast_id);
-  let beast_level = getObstacleLevel(level, seed);
+  let beast_level = getObstacleLevel(level, level_rnd);
 
-  let ambush_location = getAttackLocation(rnd2);
-  let roll = abilityBasedAvoidThreat(level, seed);
+  let ambush_location = getAttackLocation(dmg_location_rnd);
+  let roll = abilityBasedAvoidThreat(level, ambush_rnd);
   let xp_reward = getXpReward(beast_level, beast_tier, Number(level));
-  let specialName = getSpecialName(seed);
-  let criticalMultiplier = critical_multiplier(Number(level * BigInt(3)), rnd2);
-
+  let specialName = getSpecialName(specials1_rnd, specials2_rnd);
+  let isCritical = getCritical(Number(level * BigInt(3)), crit_hit_rnd);
   let adventurerArmor = items?.find((item) => item.slot === ambush_location);
 
   let damage = calculateEncounterDamage(
@@ -400,7 +496,7 @@ function beastEncounter(
     Number(beast_tier),
     Number(beast_level),
     adventurerArmor,
-    rnd2,
+    crit_hit_rnd,
     2,
     Number(level)
   );
@@ -427,26 +523,30 @@ function beastEncounter(
     dodgeRoll: Number(roll) + 1,
     nextXp: xp + Number(xp_reward),
     specialName,
-    criticalMultiplier,
+    isCritical,
     damage,
   };
 }
 
 function obstacleEncounter(
   level: bigint,
-  rnd2: bigint,
+  seed: bigint,
+  level_rnd: bigint,
+  dmg_location_rnd: bigint,
+  crit_hit_rnd: bigint,
+  dodge_rnd: bigint,
   xp: number,
   items?: Item[]
 ): Encounter {
-  let obstacle_id = (rnd2 % MAX_ID) + BigInt(1);
-  let obstacle_level = getObstacleLevel(level, rnd2);
+  let obstacle_id = (seed % MAX_ID) + BigInt(1);
+  let obstacle_level = getObstacleLevel(level, level_rnd);
   let obstacle_tier = getTier(obstacle_id);
   let obstacle_type = getType(obstacle_id);
 
-  let location = getAttackLocation(rnd2);
-  let roll = abilityBasedAvoidThreat(level, rnd2);
+  let location = getAttackLocation(dmg_location_rnd);
+  let roll = abilityBasedAvoidThreat(level, dodge_rnd);
   let xp_reward = getXpReward(obstacle_level, obstacle_tier, Number(level));
-  let criticalMultiplier = critical_multiplier(Number(level * BigInt(3)), rnd2);
+  let isCritical = getCritical(Number(level * BigInt(3)), crit_hit_rnd);
 
   let adventurerArmor = items?.find((item) => item.slot === location);
 
@@ -455,7 +555,7 @@ function obstacleEncounter(
     Number(obstacle_tier),
     Number(obstacle_level),
     adventurerArmor,
-    rnd2,
+    crit_hit_rnd,
     2,
     Number(level)
   );
@@ -480,33 +580,34 @@ function obstacleEncounter(
     location: location,
     dodgeRoll: Number(roll) + 1,
     nextXp: xp + Number(xp_reward),
-    criticalMultiplier,
+    isCritical,
     damage,
   };
 }
 
 function discoveryEncounter(
   level: bigint,
-  rnd2: bigint,
+  discovery_type_rnd: bigint,
+  amount_rnd1: bigint,
+  amount_rnd2: bigint,
   xp: number
 ): Encounter {
-  let r = rnd2 / BigInt(100);
-  let type = rnd2 % BigInt(100);
+  let type = (discovery_type_rnd * BigInt(100) + BigInt(127)) / BigInt(255);
 
   let discovery_amount = BigInt(0);
   let discovery_type = "";
 
   if (type < BigInt(45)) {
     discovery_type = "Gold";
-    discovery_amount = (r % level) + BigInt(1);
+    discovery_amount = (amount_rnd1 % level) + BigInt(1);
   } else if (type < BigInt(90)) {
     discovery_type = "Health";
-    discovery_amount = ((r % level) + BigInt(1)) * BigInt(2);
+    discovery_amount = ((amount_rnd1 % level) + BigInt(1)) * BigInt(2);
   } else {
     discovery_type = "Loot";
   }
 
-  let discovery_item = getDiscoveryItem(r);
+  let discovery_item = getDiscoveryItem(amount_rnd1, amount_rnd2);
 
   let gameData = new GameData();
 
@@ -580,12 +681,8 @@ function strength_dmg(damage: number, strength: number): number {
   return (damage * strength * 10) / 100;
 }
 
-function critical_multiplier(luck: number, entropy: bigint): number {
-  if (luck > Number(entropy % BigInt(100))) {
-    return Number(entropy % BigInt(5)) + 1;
-  }
-
-  return 0;
+function getCritical(luck: number, entropy: bigint): boolean {
+  return (luck * 255) / 100 > Number(entropy);
 }
 
 function critical_hit_bonus(
@@ -596,10 +693,8 @@ function critical_hit_bonus(
 ): number {
   let total = 0;
 
-  if (luck > Number(entropy % BigInt(100))) {
-    let damage_boost_base = Math.floor(base_damage / 5);
-    let damage_multiplier = Number(entropy % BigInt(5)) + 1;
-    total = damage_boost_base * damage_multiplier;
+  if (getCritical(luck, entropy)) {
+    total = base_damage;
 
     if (ring?.item === "Titanium Ring" && total > 0) {
       total += Math.floor((total * 3 * Math.floor(Math.sqrt(ring.xp!))) / 100);
@@ -754,11 +849,11 @@ function neck_reduction(
 function beastCounterAttack(
   items: Item[],
   beast: any,
-  rnd1: bigint,
-  rnd2: bigint,
+  beastCriticalRnd: bigint,
+  attackLocationRnd: bigint,
   adventurerLevel: number
 ) {
-  let attack_location = getAttackLocation(rnd2);
+  let attack_location = getAttackLocation(attackLocationRnd);
   let item = items.find((item) => item.slot === attack_location);
   let combatResult = calculateDamage(
     beast,
@@ -766,7 +861,7 @@ function beastCounterAttack(
     undefined,
     0,
     adventurerLevel,
-    rnd1,
+    beastCriticalRnd,
     2
   );
 
@@ -807,9 +902,9 @@ export function nextAttackResult(
   beastDamageType?: string;
   location?: string;
 } {
-  let { rnd1, rnd2 } = getRandomnessWithHealth(
+  let { rnd2_u8, rnd3_u8, rnd4_u8 } = getRandomnessWithActions(
     adventurer.xp,
-    adventurer.health,
+    adventurer.battleActionCount,
     adventurerEntropy
   );
   let weapon = items.find((item) => item.slot === "Weapon");
@@ -820,7 +915,7 @@ export function nextAttackResult(
     ring,
     adventurer.strength,
     adventurer.luck,
-    rnd1,
+    rnd2_u8,
     4
   );
   let elementalType = getElementalType(weapon?.type, beast?.type);
@@ -839,8 +934,8 @@ export function nextAttackResult(
   let beastCounter = beastCounterAttack(
     items,
     beast,
-    rnd1,
-    rnd2,
+    rnd3_u8,
+    rnd4_u8,
     adventurer?.level
   );
 
@@ -867,8 +962,6 @@ export function getGoldReward(
     return 4;
   }
 
-  let seed = getRandomness(xp, adventurerEntropy).rnd1;
-
   let ring = items.find(
     (item) => item.slot === "Ring" && item.item === "Gold Ring"
   );
@@ -877,11 +970,6 @@ export function getGoldReward(
     4,
     Math.floor(((6 - beast.tier) * beast.level) / 2 / 2)
   );
-
-  let bonus_base = Math.floor(base_reward / 4);
-  let bonus_multiplier = Number(seed % BigInt(5));
-
-  base_reward += Math.floor(bonus_base * bonus_multiplier);
 
   if (ring) {
     base_reward += Math.floor(
@@ -892,9 +980,12 @@ export function getGoldReward(
   return Math.max(4, base_reward);
 }
 
-function getSpecialName(seed: bigint): string {
-  let special2 = 1 + Number(seed % BigInt(69));
-  let special3 = 1 + Number(seed % BigInt(18));
+function getSpecialName(
+  special_2_seed: bigint,
+  special_3_seed: bigint
+): string {
+  let special2 = 1 + Number(special_2_seed % BigInt(69));
+  let special3 = 1 + Number(special_3_seed % BigInt(18));
   return `${ITEM_NAME_PREFIXES[special2]} ${ITEM_NAME_SUFFIXES[special3]}`;
 }
 
@@ -906,13 +997,14 @@ export function simulateBattle(
 ): { success: boolean; healthLeft: number; events: BattleEvent[] } {
   let health = adventurer.health;
   let beastHealth = adventurer.beastHealth;
+  let battleActions = adventurer.battleActionCount;
 
   let events: BattleEvent[] = [];
 
   while (health > 0) {
-    let { rnd1, rnd2 } = getRandomnessWithHealth(
+    let { rnd2_u8, rnd3_u8, rnd4_u8 } = getRandomnessWithActions(
       adventurer.xp,
-      health,
+      battleActions,
       adventurerEntropy
     );
     let weapon = items.find((item) => item.slot === "Weapon");
@@ -923,7 +1015,7 @@ export function simulateBattle(
       ring,
       adventurer.strength,
       adventurer.luck,
-      rnd1,
+      rnd2_u8,
       4
     );
 
@@ -946,8 +1038,8 @@ export function simulateBattle(
     let beastCounter = beastCounterAttack(
       items,
       beast,
-      rnd1,
-      rnd2,
+      rnd3_u8,
+      rnd4_u8,
       adventurer?.level
     );
 
@@ -969,6 +1061,7 @@ export function simulateBattle(
 
     beastHealth -= combatResult.totalDamage;
     health -= beastCounter.damage;
+    battleActions += 1;
   }
 
   return {
@@ -994,16 +1087,17 @@ export function simulateFlee(
 
   const level = BigInt(Math.floor(Math.sqrt(adventurer.xp)));
   let health = adventurer.health;
+  let battleActions = adventurer.battleActionCount;
 
   let events: BattleEvent[] = [];
 
   while (health > 0) {
-    let { rnd1, rnd2 } = getRandomnessWithHealth(
+    let { rnd1_u8, rnd3_u8, rnd4_u8 } = getRandomnessWithActions(
       adventurer.xp,
-      health,
+      battleActions,
       adventurerEntropy
     );
-    let roll = abilityBasedAvoidThreat(level, rnd1);
+    let roll = abilityBasedAvoidThreat(level, rnd1_u8);
 
     if (adventurer.dexterity > roll) {
       return {
@@ -1016,11 +1110,12 @@ export function simulateFlee(
     let beastCounter = beastCounterAttack(
       items,
       beast,
-      rnd2,
-      rnd2,
+      rnd3_u8,
+      rnd4_u8,
       Number(level)
     );
     health -= beastCounter.damage;
+    battleActions += 1;
 
     events.push({
       type: "beast_attack",

@@ -116,8 +116,11 @@ function processAdventurerState(
     beastHealth: data.adventurerState["adventurer"]["beastHealth"],
     statUpgrades: data.adventurerState["adventurer"]["statUpgradesAvailable"],
     name: currentAdventurer!["name"],
-    startEntropy: currentAdventurer!["startEntropy"],
-    revealBlock: currentAdventurer!["revealBlock"],
+    birthDate: currentAdventurer!["birthDate"],
+    deathDate: currentAdventurer!["deathDate"],
+    goldenTokenId: currentAdventurer!["goldenTokenId"],
+    customRenderer: currentAdventurer!["customRenderer"],
+    battleActionCount: data.adventurerState["adventurer"]["battleActionCount"],
     createdTime: currentAdventurer?.createdTime,
     lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
     timestamp: new Date(), // Equivalent to datetime.now() in Python.
@@ -276,13 +279,15 @@ export function processData(
             "id"
           ]
         ],
+        battleActionCount:
+          startGameEvent.adventurerState["adventurer"]["battleActionCount"],
         beastHealth:
           startGameEvent.adventurerState["adventurer"]["beastHealth"],
         statUpgrades:
           startGameEvent.adventurerState["adventurer"]["statUpgradesAvailable"],
-        name: feltToString(startGameEvent.adventurerMeta["name"]),
-        startEntropy: startGameEvent.adventurerMeta["startEntropy"],
-        revealBlock: startGameEvent.revealBlock,
+        name: feltToString(startGameEvent["name"]),
+        birthDate: startGameEvent.adventurerMeta["birthDate"],
+        deathDate: startGameEvent.adventurerMeta["deathDate"],
         createdTime: new Date(),
         lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
         timestamp: new Date(),

@@ -189,3 +189,4 @@ networks:
 volumes:
   etcd_data:
   mongo_data:
+  redis_data:

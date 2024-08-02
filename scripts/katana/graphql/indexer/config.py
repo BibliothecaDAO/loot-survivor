@@ -611,4 +611,212 @@ class Config:
             8: "Ring",
         }
 
+        self.ITEM_TYPES = {
+            1: "Necklace",
+            2: "Ring",
+            3: "Magic",
+            4: "Cloth",
+            5: "Blade",
+            6: "Hide",
+            7: "Bludgeon",
+            8: "Metal",
+        }
+
+        self.ITEM_TIERS = {
+            1: 1,  # Pendant
+            2: 1,  # Necklace
+            3: 1,  # Amulet
+            4: 2,  # SilverRing
+            5: 3,  # BronzeRing
+            6: 1,  # PlatinumRing
+            7: 1,  # TitaniumRing
+            8: 1,  # GoldRing
+            9: 1,  # GhostWand
+            10: 2,  # GraveWand
+            11: 3,  # BoneWand
+            12: 5,  # Wand
+            13: 1,  # Grimoire
+            14: 2,  # Chronicle
+            15: 3,  # Tome
+            16: 5,  # Book
+            17: 1,  # DivineRobe
+            18: 2,  # SilkRobe
+            19: 3,  # LinenRobe
+            20: 4,  # Robe
+            21: 5,  # Shirt
+            22: 1,  # Crown
+            23: 2,  # DivineHood
+            24: 3,  # SilkHood
+            25: 4,  # LinenHood
+            26: 5,  # Hood
+            27: 1,  # BrightsilkSash
+            28: 2,  # SilkSash
+            29: 3,  # WoolSash
+            30: 4,  # LinenSash
+            31: 5,  # Sash
+            32: 1,  # DivineSlippers
+            33: 2,  # SilkSlippers
+            34: 3,  # WoolShoes
+            35: 4,  # LinenShoes
+            36: 5,  # Shoes
+            37: 1,  # DivineGloves
+            38: 2,  # SilkGloves
+            39: 3,  # WoolGloves
+            40: 4,  # LinenGloves
+            41: 5,  # Gloves
+            42: 1,  # Katana
+            43: 2,  # Falchion
+            44: 3,  # Scimitar
+            45: 4,  # LongSword
+            46: 5,  # ShortSword
+            47: 1,  # DemonHusk
+            48: 2,  # DragonskinArmor
+            49: 3,  # StuddedLeatherArmor
+            50: 4,  # HardLeatherArmor
+            51: 5,  # LeatherArmor
+            52: 1,  # DemonCrown
+            53: 2,  # DragonsCrown
+            54: 3,  # WarCap
+            55: 4,  # LeatherCap
+            56: 5,  # Cap
+            57: 1,  # DemonhideBelt
+            58: 2,  # DragonskinBelt
+            59: 3,  # StuddedLeatherBelt
+            60: 4,  # HardLeatherBelt
+            61: 5,  # LeatherBelt
+            62: 1,  # DemonhideBoots
+            63: 2,  # DragonskinBoots
+            64: 3,  # StuddedLeatherBoots
+            65: 4,  # HardLeatherBoots
+            66: 5,  # LeatherBoots
+            67: 1,  # DemonsHands
+            68: 2,  # DragonskinGloves
+            69: 3,  # StuddedLeatherGloves
+            70: 4,  # HardLeatherGloves
+            71: 5,  # LeatherGloves
+            72: 1,  # Warhammer
+            73: 2,  # Quarterstaff
+            74: 3,  # Maul
+            75: 4,  # Mace
+            76: 5,  # Club
+            77: 1,  # HolyChestplate
+            78: 2,  # OrnateChestplate
+            79: 3,  # PlateMail
+            80: 4,  # ChainMail
+            81: 5,  # RingMail
+            82: 1,  # AncientHelm
+            83: 2,  # OrnateHelm
+            84: 3,  # GreatHelm
+            85: 4,  # FullHelm
+            86: 5,  # Helm
+            87: 1,  # OrnateBelt
+            88: 2,  # WarBelt
+            89: 3,  # PlatedBelt
+            90: 4,  # MeshBelt
+            91: 5,  # HeavyBelt
+            92: 1,  # HolyGreaves
+            93: 2,  # OrnateGreaves
+            94: 3,  # Greaves
+            95: 4,  # ChainBoots
+            96: 5,  # HeavyBoots
+            97: 1,  # HolyGauntlets
+            98: 2,  # OrnateGauntlets
+            99: 3,  # Gauntlets
+            100: 4,  # ChainGloves
+            101: 5,  # HeavyGloves
+        }
+
+        self.BEAST_TIERS = {
+            # Magical T1s
+            1: 1,
+            2: 1,
+            3: 1,
+            4: 1,
+            5: 1,
+            # Magical T2s
+            6: 2,
+            7: 2,
+            8: 2,
+            9: 2,
+            10: 2,
+            # Magical T3s
+            11: 3,
+            12: 3,
+            13: 3,
+            14: 3,
+            15: 3,
+            # Magical T4s
+            16: 4,
+            17: 4,
+            18: 4,
+            19: 4,
+            20: 4,
+            # Magical T5s
+            21: 5,
+            22: 5,
+            23: 5,
+            24: 5,
+            25: 5,
+            # Hunter T1s
+            26: 1,
+            27: 1,
+            28: 1,
+            29: 1,
+            30: 1,
+            # Hunter T2s
+            31: 2,
+            32: 2,
+            33: 2,
+            34: 2,
+            35: 2,
+            # Hunter T3s
+            36: 3,
+            37: 3,
+            38: 3,
+            39: 3,
+            40: 3,
+            # Hunter T4s
+            41: 4,
+            42: 4,
+            43: 4,
+            44: 4,
+            45: 4,
+            # Hunter T5s
+            46: 5,
+            47: 5,
+            48: 5,
+            49: 5,
+            50: 5,
+            # Brute T1s
+            51: 1,
+            52: 1,
+            53: 1,
+            54: 1,
+            55: 1,
+            # Brute T2s
+            56: 2,
+            57: 2,
+            58: 2,
+            59: 2,
+            60: 2,
+            # Brute T3s
+            61: 3,
+            62: 3,
+            63: 3,
+            64: 3,
+            65: 3,
+            # Brute T4s
+            66: 4,
+            67: 4,
+            68: 4,
+            69: 4,
+            70: 4,
+            # Brute T5s
+            71: 5,
+            72: 5,
+            73: 5,
+            74: 5,
+            75: 5,
+        }
+
         self.ATTACKERS = {1: "Adventurer", 2: "Beast"}

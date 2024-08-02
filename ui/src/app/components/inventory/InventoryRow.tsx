@@ -50,6 +50,7 @@ export const InventoryRow = ({
         entrypoint: "equip",
         calldata: [
           adventurer?.id?.toString() ?? "",
+          "0",
           equipItems.length,
           ...equipItems,
         ],

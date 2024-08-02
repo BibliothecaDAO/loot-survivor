@@ -41,7 +41,6 @@ import {
   calculateChaBoostRemoved,
 } from "@/app/lib/utils";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import InterludeScreen from "@/app/containers/InterludeScreen";
 import { useController } from "@/app/context/ControllerContext";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
 import { vitalityIncrease } from "@/app/lib/constants";
@@ -108,7 +107,7 @@ export default function UpgradeScreen({
   useEffect(() => {
     const fetchMarketItems = async () => {
       if (entropyReady || onKatana) {
-        const marketItems = (await gameContract!.call("get_items_on_market", [
+        const marketItems = (await gameContract!.call("get_market", [
           adventurer?.id!,
         ])) as string[];
         const itemData = [];
@@ -373,6 +372,7 @@ export default function UpgradeScreen({
       entrypoint: "upgrade",
       calldata: [
         adventurer?.id?.toString() ?? "",
+        // "0",
         potions !== undefined ? potions.toString() : potionAmount.toString(),
         currentUpgrades
           ? currentUpgrades["Strength"].toString()
@@ -518,7 +518,6 @@ export default function UpgradeScreen({
 
   return (
     <>
-      {!entropyReady && !onKatana && <InterludeScreen />}
       {hasStatUpgrades ? (
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 h-full">
           <div className="w-1/3 hidden sm:flex h-full">

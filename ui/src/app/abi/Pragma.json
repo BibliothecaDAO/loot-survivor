@@ -1,0 +1,1174 @@
+[
+  {
+    "name": "IOracleImpl",
+    "type": "impl",
+    "interface_name": "pragma::oracle::oracle::IOracleABI"
+  },
+  {
+    "name": "pragma::entry::structs::DataType",
+    "type": "enum",
+    "variants": [
+      {
+        "name": "SpotEntry",
+        "type": "core::felt252"
+      },
+      {
+        "name": "FutureEntry",
+        "type": "(core::felt252, core::integer::u64)"
+      },
+      {
+        "name": "GenericEntry",
+        "type": "core::felt252"
+      }
+    ]
+  },
+  {
+    "name": "core::option::Option::<core::integer::u64>",
+    "type": "enum",
+    "variants": [
+      {
+        "name": "Some",
+        "type": "core::integer::u64"
+      },
+      {
+        "name": "None",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "name": "pragma::entry::structs::PragmaPricesResponse",
+    "type": "struct",
+    "members": [
+      {
+        "name": "price",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "decimals",
+        "type": "core::integer::u32"
+      },
+      {
+        "name": "last_updated_timestamp",
+        "type": "core::integer::u64"
+      },
+      {
+        "name": "num_sources_aggregated",
+        "type": "core::integer::u32"
+      },
+      {
+        "name": "expiration_timestamp",
+        "type": "core::option::Option::<core::integer::u64>"
+      }
+    ]
+  },
+  {
+    "name": "core::array::Span::<core::felt252>",
+    "type": "struct",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<core::felt252>"
+      }
+    ]
+  },
+  {
+    "name": "pragma::entry::structs::AggregationMode",
+    "type": "enum",
+    "variants": [
+      {
+        "name": "Median",
+        "type": "()"
+      },
+      {
+        "name": "Mean",
+        "type": "()"
+      },
+      {
+        "name": "Error",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "name": "core::array::Span::<pragma::entry::structs::DataType>",
+    "type": "struct",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<pragma::entry::structs::DataType>"
+      }
+    ]
+  },
+  {
+    "name": "core::array::Span::<pragma::entry::structs::PragmaPricesResponse>",
+    "type": "struct",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<pragma::entry::structs::PragmaPricesResponse>"
+      }
+    ]
+  },
+  {
+    "name": "pragma::entry::structs::BaseEntry",
+    "type": "struct",
+    "members": [
+      {
+        "name": "timestamp",
+        "type": "core::integer::u64"
+      },
+      {
+        "name": "source",
+        "type": "core::felt252"
+      },
+      {
+        "name": "publisher",
+        "type": "core::felt252"
+      }
+    ]
+  },
+  {
+    "name": "pragma::entry::structs::SpotEntry",
+    "type": "struct",
+    "members": [
+      {
+        "name": "base",
+        "type": "pragma::entry::structs::BaseEntry"
+      },
+      {
+        "name": "price",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "pair_id",
+        "type": "core::felt252"
+      },
+      {
+        "name": "volume",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "name": "pragma::entry::structs::FutureEntry",
+    "type": "struct",
+    "members": [
+      {
+        "name": "base",
+        "type": "pragma::entry::structs::BaseEntry"
+      },
+      {
+        "name": "price",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "pair_id",
+        "type": "core::felt252"
+      },
+      {
+        "name": "volume",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "expiration_timestamp",
+        "type": "core::integer::u64"
+      }
+    ]
+  },
+  {
+    "name": "pragma::entry::structs::GenericEntry",
+    "type": "struct",
+    "members": [
+      {
+        "name": "base",
+        "type": "pragma::entry::structs::BaseEntry"
+      },
+      {
+        "name": "key",
+        "type": "core::felt252"
+      },
+      {
+        "name": "value",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "name": "pragma::entry::structs::PossibleEntries",
+    "type": "enum",
+    "variants": [
+      {
+        "name": "Spot",
+        "type": "pragma::entry::structs::SpotEntry"
+      },
+      {
+        "name": "Future",
+        "type": "pragma::entry::structs::FutureEntry"
+      },
+      {
+        "name": "Generic",
+        "type": "pragma::entry::structs::GenericEntry"
+      }
+    ]
+  },
+  {
+    "name": "core::array::Span::<pragma::entry::structs::PossibleEntries>",
+    "type": "struct",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<pragma::entry::structs::PossibleEntries>"
+      }
+    ]
+  },
+  {
+    "name": "pragma::entry::structs::Checkpoint",
+    "type": "struct",
+    "members": [
+      {
+        "name": "timestamp",
+        "type": "core::integer::u64"
+      },
+      {
+        "name": "value",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "aggregation_mode",
+        "type": "pragma::entry::structs::AggregationMode"
+      },
+      {
+        "name": "num_sources_aggregated",
+        "type": "core::integer::u32"
+      }
+    ]
+  },
+  {
+    "name": "pragma::entry::structs::SimpleDataType",
+    "type": "enum",
+    "variants": [
+      {
+        "name": "SpotEntry",
+        "type": "()"
+      },
+      {
+        "name": "FutureEntry",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "name": "core::bool",
+    "type": "enum",
+    "variants": [
+      {
+        "name": "False",
+        "type": "()"
+      },
+      {
+        "name": "True",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "name": "pragma::entry::structs::Currency",
+    "type": "struct",
+    "members": [
+      {
+        "name": "id",
+        "type": "core::felt252"
+      },
+      {
+        "name": "decimals",
+        "type": "core::integer::u32"
+      },
+      {
+        "name": "is_abstract_currency",
+        "type": "core::bool"
+      },
+      {
+        "name": "starknet_address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "ethereum_address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
+  },
+  {
+    "name": "pragma::entry::structs::Pair",
+    "type": "struct",
+    "members": [
+      {
+        "name": "id",
+        "type": "core::felt252"
+      },
+      {
+        "name": "quote_currency_id",
+        "type": "core::felt252"
+      },
+      {
+        "name": "base_currency_id",
+        "type": "core::felt252"
+      }
+    ]
+  },
+  {
+    "name": "pragma::oracle::oracle::IOracleABI",
+    "type": "interface",
+    "items": [
+      {
+        "name": "get_decimals",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_data_median",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "pragma::entry::structs::PragmaPricesResponse"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_data_median_for_sources",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          },
+          {
+            "name": "sources",
+            "type": "core::array::Span::<core::felt252>"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "pragma::entry::structs::PragmaPricesResponse"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_data",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          },
+          {
+            "name": "aggregation_mode",
+            "type": "pragma::entry::structs::AggregationMode"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "pragma::entry::structs::PragmaPricesResponse"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_data_median_multi",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_types",
+            "type": "core::array::Span::<pragma::entry::structs::DataType>"
+          },
+          {
+            "name": "sources",
+            "type": "core::array::Span::<core::felt252>"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::array::Span::<pragma::entry::structs::PragmaPricesResponse>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_data_entry",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          },
+          {
+            "name": "source",
+            "type": "core::felt252"
+          },
+          {
+            "name": "publisher",
+            "type": "core::felt252"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "pragma::entry::structs::PossibleEntries"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_data_entry_for_publishers",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          },
+          {
+            "name": "source",
+            "type": "core::felt252"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "pragma::entry::structs::PossibleEntries"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_data_for_sources",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          },
+          {
+            "name": "aggregation_mode",
+            "type": "pragma::entry::structs::AggregationMode"
+          },
+          {
+            "name": "sources",
+            "type": "core::array::Span::<core::felt252>"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "pragma::entry::structs::PragmaPricesResponse"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_data_entries",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::array::Span::<pragma::entry::structs::PossibleEntries>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_data_entries_for_sources",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          },
+          {
+            "name": "sources",
+            "type": "core::array::Span::<core::felt252>"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "(core::array::Span::<pragma::entry::structs::PossibleEntries>, core::integer::u64)"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_last_checkpoint_before",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          },
+          {
+            "name": "timestamp",
+            "type": "core::integer::u64"
+          },
+          {
+            "name": "aggregation_mode",
+            "type": "pragma::entry::structs::AggregationMode"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "(pragma::entry::structs::Checkpoint, core::integer::u64)"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_data_with_USD_hop",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "base_currency_id",
+            "type": "core::felt252"
+          },
+          {
+            "name": "quote_currency_id",
+            "type": "core::felt252"
+          },
+          {
+            "name": "aggregation_mode",
+            "type": "pragma::entry::structs::AggregationMode"
+          },
+          {
+            "name": "typeof",
+            "type": "pragma::entry::structs::SimpleDataType"
+          },
+          {
+            "name": "expiration_timestamp",
+            "type": "core::option::Option::<core::integer::u64>"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "pragma::entry::structs::PragmaPricesResponse"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_publisher_registry_address",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_latest_checkpoint_index",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          },
+          {
+            "name": "aggregation_mode",
+            "type": "pragma::entry::structs::AggregationMode"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "(core::integer::u64, core::bool)"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_latest_checkpoint",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          },
+          {
+            "name": "aggregation_mode",
+            "type": "pragma::entry::structs::AggregationMode"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "pragma::entry::structs::Checkpoint"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_checkpoint",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          },
+          {
+            "name": "checkpoint_index",
+            "type": "core::integer::u64"
+          },
+          {
+            "name": "aggregation_mode",
+            "type": "pragma::entry::structs::AggregationMode"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "pragma::entry::structs::Checkpoint"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_sources_threshold",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_admin_address",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_all_publishers",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::array::Span::<core::felt252>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_all_sources",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::array::Span::<core::felt252>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "publish_data",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "new_entry",
+            "type": "pragma::entry::structs::PossibleEntries"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "name": "publish_data_entries",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "new_entries",
+            "type": "core::array::Span::<pragma::entry::structs::PossibleEntries>"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "name": "set_admin_address",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "new_admin_address",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "name": "update_publisher_registry_address",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "new_publisher_registry_address",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "name": "add_currency",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "new_currency",
+            "type": "pragma::entry::structs::Currency"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "name": "update_currency",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "currency_id",
+            "type": "core::felt252"
+          },
+          {
+            "name": "currency",
+            "type": "pragma::entry::structs::Currency"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "name": "get_currency",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "currency_id",
+            "type": "core::felt252"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "pragma::entry::structs::Currency"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "update_pair",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "pair_id",
+            "type": "core::felt252"
+          },
+          {
+            "name": "pair",
+            "type": "pragma::entry::structs::Pair"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "name": "add_pair",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "new_pair",
+            "type": "pragma::entry::structs::Pair"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "name": "get_pair",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "pair_id",
+            "type": "core::felt252"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "pragma::entry::structs::Pair"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "set_checkpoint",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          },
+          {
+            "name": "aggregation_mode",
+            "type": "pragma::entry::structs::AggregationMode"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "name": "set_checkpoints",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "data_types",
+            "type": "core::array::Span::<pragma::entry::structs::DataType>"
+          },
+          {
+            "name": "aggregation_mode",
+            "type": "pragma::entry::structs::AggregationMode"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "name": "remove_source",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "source",
+            "type": "core::felt252"
+          },
+          {
+            "name": "data_type",
+            "type": "pragma::entry::structs::DataType"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::bool"
+          }
+        ],
+        "state_mutability": "external"
+      },
+      {
+        "name": "set_sources_threshold",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "threshold",
+            "type": "core::integer::u32"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "name": "upgrade",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "impl_hash",
+            "type": "core::starknet::class_hash::ClassHash"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      }
+    ]
+  },
+  {
+    "name": "core::array::Span::<pragma::entry::structs::Currency>",
+    "type": "struct",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<pragma::entry::structs::Currency>"
+      }
+    ]
+  },
+  {
+    "name": "core::array::Span::<pragma::entry::structs::Pair>",
+    "type": "struct",
+    "members": [
+      {
+        "name": "snapshot",
+        "type": "@core::array::Array::<pragma::entry::structs::Pair>"
+      }
+    ]
+  },
+  {
+    "name": "constructor",
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "admin_address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "publisher_registry_address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "currencies",
+        "type": "core::array::Span::<pragma::entry::structs::Currency>"
+      },
+      {
+        "name": "pairs",
+        "type": "core::array::Span::<pragma::entry::structs::Pair>"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "pragma::oracle::oracle::Oracle::UpdatedPublisherRegistryAddress",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "old_publisher_registry_address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "kind": "data",
+        "name": "new_publisher_registry_address",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "pragma::oracle::oracle::Oracle::SubmittedSpotEntry",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "spot_entry",
+        "type": "pragma::entry::structs::SpotEntry"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "pragma::oracle::oracle::Oracle::SubmittedFutureEntry",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "future_entry",
+        "type": "pragma::entry::structs::FutureEntry"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "pragma::oracle::oracle::Oracle::SubmittedGenericEntry",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "generic_entry",
+        "type": "pragma::entry::structs::GenericEntry"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "pragma::oracle::oracle::Oracle::SubmittedCurrency",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "currency",
+        "type": "pragma::entry::structs::Currency"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "pragma::oracle::oracle::Oracle::UpdatedCurrency",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "currency",
+        "type": "pragma::entry::structs::Currency"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "pragma::oracle::oracle::Oracle::UpdatedPair",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "pair",
+        "type": "pragma::entry::structs::Pair"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "pragma::oracle::oracle::Oracle::SubmittedPair",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "pair",
+        "type": "pragma::entry::structs::Pair"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "pragma::oracle::oracle::Oracle::CheckpointSpotEntry",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "pair_id",
+        "type": "core::felt252"
+      },
+      {
+        "kind": "data",
+        "name": "checkpoint",
+        "type": "pragma::entry::structs::Checkpoint"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "pragma::oracle::oracle::Oracle::CheckpointFutureEntry",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "pair_id",
+        "type": "core::felt252"
+      },
+      {
+        "kind": "data",
+        "name": "expiration_timestamp",
+        "type": "core::integer::u64"
+      },
+      {
+        "kind": "data",
+        "name": "checkpoint",
+        "type": "pragma::entry::structs::Checkpoint"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "pragma::oracle::oracle::Oracle::ChangedAdmin",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "new_admin",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
+  },
+  {
+    "kind": "enum",
+    "name": "pragma::oracle::oracle::Oracle::Event",
+    "type": "event",
+    "variants": [
+      {
+        "kind": "nested",
+        "name": "UpdatedPublisherRegistryAddress",
+        "type": "pragma::oracle::oracle::Oracle::UpdatedPublisherRegistryAddress"
+      },
+      {
+        "kind": "nested",
+        "name": "SubmittedSpotEntry",
+        "type": "pragma::oracle::oracle::Oracle::SubmittedSpotEntry"
+      },
+      {
+        "kind": "nested",
+        "name": "SubmittedFutureEntry",
+        "type": "pragma::oracle::oracle::Oracle::SubmittedFutureEntry"
+      },
+      {
+        "kind": "nested",
+        "name": "SubmittedGenericEntry",
+        "type": "pragma::oracle::oracle::Oracle::SubmittedGenericEntry"
+      },
+      {
+        "kind": "nested",
+        "name": "SubmittedCurrency",
+        "type": "pragma::oracle::oracle::Oracle::SubmittedCurrency"
+      },
+      {
+        "kind": "nested",
+        "name": "UpdatedCurrency",
+        "type": "pragma::oracle::oracle::Oracle::UpdatedCurrency"
+      },
+      {
+        "kind": "nested",
+        "name": "UpdatedPair",
+        "type": "pragma::oracle::oracle::Oracle::UpdatedPair"
+      },
+      {
+        "kind": "nested",
+        "name": "SubmittedPair",
+        "type": "pragma::oracle::oracle::Oracle::SubmittedPair"
+      },
+      {
+        "kind": "nested",
+        "name": "CheckpointSpotEntry",
+        "type": "pragma::oracle::oracle::Oracle::CheckpointSpotEntry"
+      },
+      {
+        "kind": "nested",
+        "name": "CheckpointFutureEntry",
+        "type": "pragma::oracle::oracle::Oracle::CheckpointFutureEntry"
+      },
+      {
+        "kind": "nested",
+        "name": "ChangedAdmin",
+        "type": "pragma::oracle::oracle::Oracle::ChangedAdmin"
+      }
+    ]
+  }
+]

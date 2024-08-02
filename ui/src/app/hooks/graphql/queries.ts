@@ -24,8 +24,11 @@ const ADVENTURER_FIELDS = `
   ring
   beastHealth
   statUpgrades
-  startEntropy
-  revealBlock
+  birthDate
+  deathDate
+  goldenTokenId
+  customRenderer
+  battleActionCount
   gold
   createdTime
   lastUpdatedTime
