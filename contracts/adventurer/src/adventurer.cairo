@@ -3844,7 +3844,6 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(582280)]
     fn test_get_and_apply_stats() {
         let mut adventurer = Adventurer {
             health: 100,
@@ -3860,14 +3859,14 @@ mod tests {
             },
             gold: 40,
             equipment: Equipment {
-                weapon: Item { id: 1, xp: 225 },
-                chest: Item { id: 2, xp: 65535 },
-                head: Item { id: 3, xp: 225 },
-                waist: Item { id: 4, xp: 225 },
-                foot: Item { id: 5, xp: 1000 },
-                hand: Item { id: 6, xp: 224 },
-                neck: Item { id: 7, xp: 1 },
-                ring: Item { id: 8, xp: 1 }
+                weapon: Item { id: ItemId::Wand, xp: 225 },
+                chest: Item { id: ItemId::DivineRobe, xp: 65535 },
+                head: Item { id: ItemId::DivineHood, xp: 225 },
+                waist: Item { id: ItemId::BrightsilkSash, xp: 225 },
+                foot: Item { id: ItemId::DivineSlippers, xp: 1000 },
+                hand: Item { id: ItemId::DivineGloves, xp: 224 },
+                neck: Item { id: ItemId::Amulet, xp: 1 },
+                ring: Item { id: ItemId::GoldRing, xp: 1 }
             },
             beast_health: 20,
             stat_upgrades_available: 0,
@@ -3877,12 +3876,13 @@ mod tests {
         };
 
         let stat_boosts = adventurer.equipment.get_stat_boosts(1);
-        assert(stat_boosts.strength == 6, 'wrong strength');
-        assert(stat_boosts.vitality == 1, 'wrong vitality');
-        assert(stat_boosts.dexterity == 2, 'wrong dexterity');
-        assert(stat_boosts.intelligence == 1, 'wrong intelligence');
-        assert(stat_boosts.wisdom == 4, 'wrong wisdom');
+        assert(stat_boosts.strength == 1, 'wrong strength');
+        assert(stat_boosts.vitality == 2, 'wrong vitality');
+        assert(stat_boosts.dexterity == 4, 'wrong dexterity');
+        assert(stat_boosts.intelligence == 2, 'wrong intelligence');
+        assert(stat_boosts.wisdom == 5, 'wrong wisdom');
         assert(stat_boosts.charisma == 1, 'wrong charisma');
+        assert(stat_boosts.luck == 0, 'wrong luck');
     }
 
     // test base case
