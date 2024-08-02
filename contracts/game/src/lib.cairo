@@ -580,7 +580,7 @@ mod Game {
                 );
 
                 // get randomness for combat
-                let (_, critical_hit_rnd, attack_location_rnd, _) =
+                let (_, _, beast_crit_hit_rnd, attack_location_rnd) =
                     ImplAdventurer::get_battle_randomness(
                     adventurer.xp, adventurer.battle_action_count, level_seed
                 );
@@ -595,7 +595,7 @@ mod Game {
                     adventurer_id,
                     beast,
                     beast_seed,
-                    critical_hit_rnd,
+                    beast_crit_hit_rnd,
                     attack_location_rnd,
                     false
                 );
@@ -2059,7 +2059,8 @@ mod Game {
         fight_to_the_death: bool,
     ) {
         // get randomness for combat
-        let (_, critical_hit_rnd, attack_location_rnd, _) = ImplAdventurer::get_battle_randomness(
+        let (_, adventurer_crit_hit_rnd, beast_crit_hit_rnd, attack_location_rnd) =
+            ImplAdventurer::get_battle_randomness(
             adventurer.xp, adventurer.battle_action_count, level_seed
         );
 
@@ -2067,7 +2068,7 @@ mod Game {
         adventurer.increment_battle_action_count();
 
         // attack beast and get combat result that provides damage breakdown
-        let combat_result = adventurer.attack(weapon_combat_spec, beast, critical_hit_rnd);
+        let combat_result = adventurer.attack(weapon_combat_spec, beast, adventurer_crit_hit_rnd);
 
         // provide critical hit as a boolean for events
         let is_critical_hit = combat_result.critical_hit_bonus > 0;
@@ -2095,7 +2096,7 @@ mod Game {
                 adventurer_id,
                 beast,
                 beast_seed,
-                critical_hit_rnd,
+                beast_crit_hit_rnd,
                 attack_location_rnd,
                 false
             );
@@ -2210,7 +2211,7 @@ mod Game {
         flee_to_the_death: bool
     ) {
         // get randomness for flee and ambush
-        let (flee_rnd, critical_hit_rnd, attack_location_rnd, _) =
+        let (flee_rnd, _, beast_crit_hit_rnd, attack_location_rnd) =
             ImplAdventurer::get_battle_randomness(
             adventurer.xp, adventurer.battle_action_count, level_seed
         );
@@ -2251,7 +2252,7 @@ mod Game {
                 adventurer_id,
                 beast,
                 beast_seed,
-                critical_hit_rnd,
+                beast_crit_hit_rnd,
                 attack_location_rnd,
                 false
             );
