@@ -62,42 +62,6 @@ interface BattleEvent {
   location?: string;
 }
 
-export function beastEncounters(
-  xpList: number[],
-  adventurerEntropy: bigint
-): any[] {
-  let beasts: any[] = [];
-
-  xpList.forEach((xp) => {
-    const level = BigInt(Math.floor(Math.sqrt(xp)));
-
-    let { rnd1, rnd3, rnd4, rnd5, rnd6, rnd7 } = getRandomness(
-      xp,
-      adventurerEntropy
-    );
-
-    beasts.push({
-      ...beastEncounter(
-        adventurerEntropy,
-        level,
-        xp,
-        rnd1,
-        rnd3,
-        rnd4,
-        rnd5,
-        rnd6,
-        rnd7,
-        rnd5, // use same entropy for crit hit, initial attack location, and beast specials
-        rnd6
-      ),
-      adventurerLevel: Math.floor(Math.sqrt(xp)),
-      xp: xp,
-    });
-  });
-
-  return beasts;
-}
-
 export function listAllEncounters(
   xp: number,
   adventurerEntropy: bigint,
@@ -203,7 +167,6 @@ function getNextEncounter(
 
   if (hasBeast || encounter === 0) {
     return beastEncounter(
-      adventurerEntropy,
       level,
       xp,
       rnd1,
@@ -213,7 +176,8 @@ function getNextEncounter(
       rnd6,
       rnd7,
       rnd5, // use same entropy for crit hit, initial attack location, and beast specials
-      rnd6
+      rnd6,
+      items
     ); // to create some fun organic lore for the beast special names, items);
   } else if (encounter === 1) {
     return obstacleEncounter(level, rnd1, rnd4, rnd5, rnd6, rnd7, xp, items);
@@ -463,7 +427,6 @@ function getBeastHealth(level: bigint, seed: bigint): bigint {
 }
 
 function beastEncounter(
-  adventurerEntropy: bigint,
   level: bigint,
   xp: number,
   seed: bigint,
@@ -490,7 +453,6 @@ function beastEncounter(
   let specialName = getSpecialName(specials1_rnd, specials2_rnd);
   let isCritical = getCritical(Number(level * BigInt(3)), crit_hit_rnd);
   let adventurerArmor = items?.find((item) => item.slot === ambush_location);
-
   let damage = calculateEncounterDamage(
     beast_type,
     Number(beast_tier),
@@ -682,7 +644,7 @@ function strength_dmg(damage: number, strength: number): number {
 }
 
 function getCritical(luck: number, entropy: bigint): boolean {
-  return (luck * 255) / 100 > Number(entropy);
+  return (BigInt(luck) * BigInt(255)) / BigInt(100) > entropy;
 }
 
 function critical_hit_bonus(
@@ -768,7 +730,7 @@ function calculateDamage(
       entropy
     );
   } else {
-    elemental_damage = base_attack * 1.5;
+    elemental_damage = Math.floor(base_attack * 1.5);
   }
 
   let strength_bonus = strength_dmg(elemental_damage, strength);
@@ -809,7 +771,7 @@ function calculateEncounterDamage(
       adventurerArmor?.type!
     );
   } else {
-    elemental_damage = base_attack * 1.5;
+    elemental_damage = Math.floor(base_attack * 1.5);
   }
 
   let crit_bonus = critical_hit_bonus(

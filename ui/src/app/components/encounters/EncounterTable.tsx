@@ -183,6 +183,7 @@ const EncounterTable = () => {
                                     )
                                   ]
                                 }
+                                size={"w-4"}
                                 className="pl-0.5 mt-0.5 self-center h-4 fill-current text-terminal-yellow"
                               />
                             </div>
