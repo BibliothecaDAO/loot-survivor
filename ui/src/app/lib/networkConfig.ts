@@ -9,7 +9,7 @@ export const networkConfig = {
     gameAddress:
       "0x042b35b02de4bd561e6255a42752033b80081be80ad33622d514e10323fc571b",
     lordsAddress:
-      "0x04b359a3b5972e4a05348ce46ae63d0d1ee98e6d14b93148d1d4229243aa2308",
+      "0x019c92fa87f4d5e3bE25C3DD6a284f30282a07e87cd782f5Fd387B82c8142017",
     beastsAddress:
       "0x0468e7a1761b65c891207aeb7cfc044044d9a61fc22c71d46a7bf4dbb67c607a",
     goldenTokenAddress:
