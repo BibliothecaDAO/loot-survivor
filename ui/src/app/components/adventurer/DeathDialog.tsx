@@ -122,7 +122,7 @@ export const DeathDialog = () => {
                   adventurerRank! ?? 0
                 )} place on #LootSurvivor with ${
                   adventurer?.xp
-                } XP.\n\nGravestone bears the inscription:\n\n"${twitterDeathMessage}"🪦\n\nEnter here and try to survive: ${
+                } XP.\n\n"${twitterDeathMessage}"🪦\n\nEnter here and try to survive: ${
                   networkConfig[network!].appUrl
                 }\n\n@lootrealms @provablegames #LootSurvivor #Starknet`}
                 className="animate-pulse"
