@@ -134,7 +134,7 @@ export const InventoryCard = ({
               onClick={() => handleEquipItems(item?.item ?? "")}
               disabled={
                 equipItems.includes(itemId) ||
-                item?.item === adventurer![itemSlot.toLowerCase()]
+                item?.item === adventurer![itemSlot?.toLowerCase()]
               }
               className="bg-terminal-green text-terminal-black px-1 sm:p-1 uppercase disabled:bg-terminal-black disabled:text-terminal-green"
             >
