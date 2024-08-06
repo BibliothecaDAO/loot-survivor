@@ -7,7 +7,7 @@ export const networkConfig = {
     ethAddress:
       "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
     gameAddress:
-      "0x042b35b02de4bd561e6255a42752033b80081be80ad33622d514e10323fc571b",
+      "0x0238b1072f53589e94ee8f94c37f995411ae360369c0c07ee800fe1259c70463",
     lordsAddress:
       "0x019c92fa87f4d5e3bE25C3DD6a284f30282a07e87cd782f5Fd387B82c8142017",
     beastsAddress:
