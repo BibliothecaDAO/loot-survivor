@@ -66,7 +66,7 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
           setTopUpAccount(account?.address ?? "");
           throw new Error("Not enough eth for gas.");
         } else {
-          tx = await account.execute(calls, undefined, {
+          tx = await account.execute(calls, {
             maxFee: maxFee,
           });
         }
