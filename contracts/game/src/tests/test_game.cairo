@@ -88,6 +88,18 @@ mod tests {
         contract_address_const::<1>()
     }
 
+    fn QUALIFYING_COLLECTIONS() -> Span<ContractAddress> {
+        let mut qualifying_collections = ArrayTrait::<ContractAddress>::new();
+        qualifying_collections.append(contract_address_const::<1>());
+        qualifying_collections.append(contract_address_const::<2>());
+        qualifying_collections.append(contract_address_const::<3>());
+        qualifying_collections.span()
+    }
+
+    fn LAUNCH_PROMOTION_END_TIMESTAMP() -> u64 {
+        0
+    }
+
     fn ZERO_ADDRESS() -> ContractAddress {
         contract_address_const::<0>()
     }
@@ -176,10 +188,9 @@ mod tests {
         lords: ContractAddress,
         eth: ContractAddress,
         golden_token: ContractAddress,
-        terminal_block: u64,
+        terminal_timestamp: u64,
         randomness: ContractAddress
     ) -> IGameDispatcher {
-        let vrf_level_interval = 3;
         let mut calldata = ArrayTrait::<felt252>::new();
         calldata.append(lords.into());
         calldata.append(eth.into());
@@ -187,12 +198,25 @@ mod tests {
         calldata.append(PG().into());
         calldata.append(COLLECTIBLE_BEASTS().into());
         calldata.append(golden_token.into());
-        calldata.append(terminal_block.into());
+        calldata.append(terminal_timestamp.into());
         calldata.append(randomness.into());
-        calldata.append(vrf_level_interval);
         calldata.append(ORACLE_ADDRESS().into());
         calldata.append(RENDER_CONTRACT().into());
+        calldata.append(0);
+        // TODO: add qualifying collections at deployment so we can properly
+        // test
+        // let mut qualifying_collections = QUALIFYING_COLLECTIONS();
+        // loop {
+        //     match qualifying_collections.pop_front() {
+        //         Option::Some(collection) => { 
+        //             let collection = *collection; 
+        //             calldata.append(collection.into()); 
+        //         },
+        //         Option::None(_) => { break; }
+        //     };
+        // };
 
+        calldata.append(LAUNCH_PROMOTION_END_TIMESTAMP().into());
         IGameDispatcher { contract_address: utils::deploy(Game::TEST_CLASS_HASH, calldata) }
     }
 

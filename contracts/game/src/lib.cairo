@@ -37,6 +37,8 @@ mod Game {
     component!(path: ERC721Component, storage: erc721, event: ERC721Event);
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
 
+    use poseidon::poseidon_hash_span;
+
     use pragma_lib::abi::{IRandomnessDispatcher, IRandomnessDispatcherTrait};
     use pragma_lib::abi::{IPragmaABIDispatcher, IPragmaABIDispatcherTrait};
     use pragma_lib::types::{AggregationMode, DataType, PragmaPricesResponse};
@@ -113,6 +115,7 @@ mod Game {
         _golden_token: ContractAddress,
         _cost_to_play: u128,
         _terminal_timestamp: u64,
+        _launch_promotion_end_timestamp: u64,
         _randomness_contract_address: ContractAddress,
         _oracle_address: ContractAddress,
         #[substorage(v0)]
@@ -122,6 +125,8 @@ mod Game {
         _default_renderer: ContractAddress,
         _custom_renderer: LegacyMap::<felt252, ContractAddress>,
         _player_vrf_allowance: LegacyMap::<felt252, u128>,
+        _qualifying_collections: LegacyMap::<ContractAddress, bool>,
+        _claimed_tokens: LegacyMap::<felt252, bool>,
     }
 
     #[event]
@@ -163,6 +168,7 @@ mod Game {
         ERC721Event: ERC721Component::Event,
         #[flat]
         SRC5Event: SRC5Component::Event,
+        ClaimedFreeGame: ClaimedFreeGame,
     }
 
     // @title Constructor
@@ -175,7 +181,6 @@ mod Game {
     // @param golden_token_address The address of the golden token contract
     // @param terminal_timestamp The timestamp at which the game is terminal
     // @param randomness_contract_address The address of the randomness contract
-    // @param randomness_rotation_interval The interval at which the randomness contract rotates
     // @param oracle_address The address of the price oracle contract
     // @param previous_first_place The address of the previous first place
     // @param previous_second_place The address of the previous second place
@@ -191,9 +196,10 @@ mod Game {
         golden_token_address: ContractAddress,
         terminal_timestamp: u64,
         randomness_contract_address: ContractAddress,
-        randomness_rotation_interval: u8,
         oracle_address: ContractAddress,
-        render_contract: ContractAddress
+        render_contract: ContractAddress,
+        qualifying_collections: Array<ContractAddress>,
+        launch_promotion_end_timestamp: u64
     ) {
         // init storage
         self._lords.write(lords);
@@ -206,8 +212,9 @@ mod Game {
         self._randomness_contract_address.write(randomness_contract_address);
         self._oracle_address.write(oracle_address);
         self._default_renderer.write(render_contract);
+        self._launch_promotion_end_timestamp.write(launch_promotion_end_timestamp);
 
-        // TODO: Setting offchain uri here for later use, however it is not used in the current implementation
+        // @dev base uri isn't used in the current implementation
         self.erc721.initializer("Loot Survivor", "LSVR", "https://token.lootsurvivor.io/");
 
         // On mainnet, set genesis timestamp to LSV1.0 genesis to preserve same reward distribution schedule for V1.1 
@@ -226,6 +233,10 @@ mod Game {
 
         // set the cost to play
         self._cost_to_play.write(COST_TO_PLAY);
+
+        // set qualifying nft collections
+        let mut qualifying_collections_span = qualifying_collections.span();
+        _save_qualifying_nft_collections(ref self, ref qualifying_collections_span);
 
         // give VRF provider approval for all ETH in the contract since the only
         // reason ETH will be in the contract is to cover VRF costs
@@ -304,12 +315,6 @@ mod Game {
             delay_reveal: bool,
             custom_renderer: ContractAddress
         ) -> felt252 {
-            // assert game terminal time has not been reached
-            _assert_terminal_time_not_reached(@self);
-
-            // assert provided weapon
-            _assert_valid_starter_weapon(weapon);
-
             // don't process payment distributions on Katana
             if _network_supports_vrf() {
                 // process payment for game and distribute rewards
@@ -319,8 +324,13 @@ mod Game {
                     _process_payment_and_distribute_rewards(ref self, client_reward_address);
                 }
 
-                // Pay Pragma $1 in ETH for VRF services for the game
-                _pay_for_vrf(@self);
+                // get current timestamp
+                let current_timestamp = starknet::get_block_info().unbox().block_timestamp;
+                // check if timestamp is within launch promotion period
+                if current_timestamp > self._launch_promotion_end_timestamp.read() {
+                    // pay for vrf
+                    _pay_for_vrf(@self);
+                }
             }
 
             // start the game
@@ -850,6 +860,51 @@ mod Game {
                 adventurer_index += 1;
             }
         }
+
+        /// @title Claim Free Game
+        /// @notice Allows an adventurer to claim a free game.
+        /// @param weapon A u8 representing the weapon to use in the game.
+        /// @param name A felt252 representing the name of the adventurer.
+        /// @param custom_renderer A ContractAddress representing the custom renderer to use for the adventurer.
+        /// @param delay_stat_reveal A bool representing whether to delay the stat reveal.
+        /// @param nft_address A ContractAddress representing the address of the NFT collection.
+        /// @param token_id A u256 representing the token ID of the NFT.
+        fn claim_free_game(
+            ref self: ContractState,
+            weapon: u8,
+            name: felt252,
+            custom_renderer: ContractAddress,
+            delay_stat_reveal: bool,
+            nft_address: ContractAddress,
+            token_id: u256
+        ) {
+            // assert game terminal time has not been reached
+            _assert_launch_promotion_open(@self);
+
+            // assert the nft collection is part of the set of free game nft collections
+            _assert_is_qualifying_nft(@self, nft_address);
+
+            // assert caller owns nft
+            _assert_nft_ownership(@self, nft_address, token_id);
+
+            // get hash of collection and token id
+            let token_hash = _get_token_hash(@self, nft_address, token_id);
+
+            // assert token has not already claimed free game
+            _assert_token_not_claimed(@self, token_hash);
+
+            // set token as claimed
+            self._claimed_tokens.write(token_hash, true);
+
+            // start the game
+            let adventurer_id = _start_game(
+                ref self, weapon, name, custom_renderer, delay_stat_reveal, 0
+            );
+
+            // emit claimed free game event
+            __event_ClaimedFreeGame(ref self, adventurer_id, nft_address, token_id);
+        }
+
 
         // ------------------------------------------ //
         // ------------ View Functions -------------- //
@@ -1460,6 +1515,12 @@ mod Game {
         delay_stat_reveal: bool,
         golden_token_id: u256
     ) -> felt252 {
+        // assert game terminal time has not been reached
+        _assert_terminal_time_not_reached(@self);
+
+        // assert provided weapon
+        _assert_valid_starter_weapon(weapon);
+
         // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._game_count.read() + 1;
 
@@ -3005,6 +3066,60 @@ mod Game {
         }
     }
 
+    fn _assert_launch_promotion_open(self: @ContractState) {
+        let current_timestamp = starknet::get_block_info().unbox().block_timestamp;
+        let launch_promotion_end_timestamp = self._launch_promotion_end_timestamp.read();
+        assert(
+            current_timestamp < launch_promotion_end_timestamp, messages::LAUNCH_PROMOTION_CLOSED
+        );
+    }
+
+    fn _save_qualifying_nft_collections(
+        ref self: ContractState, ref qualifying_collections: Span<ContractAddress>
+    ) {
+        loop {
+            match qualifying_collections.pop_front() {
+                Option::Some(collection_address) => {
+                    self._qualifying_collections.write(*collection_address, true);
+                },
+                Option::None(_) => { break; }
+            }
+        }
+    }
+
+    fn _assert_is_qualifying_nft(self: @ContractState, nft_collection_address: ContractAddress) {
+        assert(
+            self._qualifying_collections.read(nft_collection_address),
+            messages::NFT_COLLECTION_NOT_ELIGIBLE
+        );
+    }
+
+    fn _assert_nft_ownership(
+        self: @ContractState, nft_collection_address: ContractAddress, token_id: u256
+    ) {
+        let nft_collection_dispatcher = IERC721Dispatcher {
+            contract_address: nft_collection_address
+        };
+        let owner = nft_collection_dispatcher.owner_of(token_id);
+
+        // TODO: add support for delegate address
+        assert(owner == get_caller_address(), messages::NOT_TOKEN_OWNER);
+    }
+
+    fn _get_token_hash(
+        self: @ContractState, collection_address: ContractAddress, token_id: u256
+    ) -> felt252 {
+        let mut hash_span = ArrayTrait::<felt252>::new();
+        hash_span.append(collection_address.into());
+        hash_span.append(token_id.try_into().unwrap());
+        poseidon_hash_span(hash_span.span())
+    }
+
+    fn _assert_token_not_claimed(self: @ContractState, token_hash: felt252) {
+        let token_hashed = self._claimed_tokens.read(token_hash);
+        assert(!token_hashed, messages::TOKEN_ALREADY_CLAIMED);
+    }
+
     fn _get_market(
         self: @ContractState, adventurer_id: felt252, stat_upgrades_available: u8
     ) -> Array<u8> {
@@ -3451,6 +3566,13 @@ mod Game {
         obituary: ByteArray,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct ClaimedFreeGame {
+        adventurer_id: felt252,
+        collection_address: ContractAddress,
+        token_id: u256
+    }
+
     #[derive(Drop, Serde)]
     struct PlayerReward {
         adventurer_id: felt252,
@@ -3856,6 +3978,12 @@ mod Game {
             owner: _get_owner(@self, adventurer_id), adventurer_id, level_seed, adventurer
         };
         self.emit(PurchasedPotions { adventurer_state, quantity, cost, health, });
+    }
+
+    fn __event_ClaimedFreeGame(
+        ref self: ContractState, adventurer_id: felt252, collection_address: ContractAddress, token_id: u256
+    ) {
+        self.emit(ClaimedFreeGame { adventurer_id, collection_address, token_id });
     }
 
 

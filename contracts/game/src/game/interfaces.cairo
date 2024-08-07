@@ -52,6 +52,15 @@ trait IGame<TContractState> {
     );
     fn slay_expired_adventurers(ref self: TContractState, adventurer_ids: Array<felt252>);
 
+    fn claim_free_game(
+        ref self: TContractState,
+        weapon: u8,
+        name: felt252,
+        custom_renderer: ContractAddress,
+        delay_stat_reveal: bool,
+        nft_address: ContractAddress,
+        token_id: u256
+    );
     // ------ View Functions ------
 
     // adventurer details
