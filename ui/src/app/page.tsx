@@ -215,7 +215,7 @@ function Home() {
   const [ethBalance, setEthBalance] = useState(BigInt(0));
   const [lordsBalance, setLordsBalance] = useState(BigInt(0));
 
-  const getBalances = useCallback(async () => {
+  const getBalances = async () => {
     const balances = await fetchBalances(
       address ?? "0x0",
       ethContract,
@@ -224,7 +224,7 @@ function Home() {
     );
     setEthBalance(balances[0]);
     setLordsBalance(balances[1]);
-  }, [address, ethContract, lordsContract, gameContract]);
+  };
 
   const getEthBalance = async () => {
     const ethBalance = await fetchEthBalance(address ?? "0x0", ethContract);
