@@ -306,11 +306,7 @@ export function createSyscalls({
       const approvePragmaEthSpendingTx = {
         contractAddress: ethContract?.address ?? "",
         entrypoint: "approve",
-        calldata: [
-          gameContract?.address ?? "",
-          (dollarPrice! * BigInt(1.1)).toString(),
-          "0",
-        ],
+        calldata: [gameContract?.address ?? "", dollarPrice!.toString(), "0"],
       };
 
       const approveLordsSpendingTx = {
