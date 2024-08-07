@@ -32,7 +32,8 @@ export function StarknetProvider({
       chains={[sepolia]}
       connectors={connectors(
         networkConfig[network!].gameAddress,
-        networkConfig[network!].lordsAddress
+        networkConfig[network!].lordsAddress,
+        networkConfig[network!].ethAddress
       )}
       explorer={starkscan}
       provider={jsonRpcProvider({ rpc })}
