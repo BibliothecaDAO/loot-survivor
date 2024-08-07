@@ -64,7 +64,6 @@ import { ProfileDialog } from "@/app/components/profile/ProfileDialog";
 import TokenLoader from "@/app/components/animations/TokenLoader";
 import CartridgeConnector from "@cartridge/connector";
 import { VRF_WAIT_TIME } from "@/app/lib/constants";
-import { GameData } from "@/app/lib/data/GameData";
 import InterludeScreen from "@/app/containers/InterludeScreen";
 
 const allMenuItems: Menu[] = [
@@ -212,8 +211,6 @@ function Home() {
       setUsername("");
     }
   }, [connector]);
-
-  const gameData = new GameData();
 
   const ethBalanceRef = useRef(BigInt(0));
   const lordsBalanceRef = useRef(BigInt(0));
