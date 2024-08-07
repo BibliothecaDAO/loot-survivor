@@ -594,10 +594,14 @@ function Home() {
     return () => clearInterval(interval); // Cleanup on component unmount
   }, [adventurer?.level]);
 
-  const fetchItemSpecials = async () => {
+  const fetchItemSpecialsData = async () => {
+    const newAdventurerData = await refetch("adventurerByIdQuery", {
+      id: adventurer?.id,
+    });
     const itemsWithSpecials = await refetch("itemsByAdventurerQuery", {
       id: adventurer?.id,
     });
+    setData("adventurerByIdQuery", newAdventurerData);
     setData("itemsByAdventurerQuery", itemsWithSpecials);
   };
 
@@ -612,7 +616,7 @@ function Home() {
         if (entropy !== BigInt(0)) {
           setFetchUnlocksEntropy(false);
           setItemEntropy(BigInt(entropy.toString()));
-          fetchItemSpecials();
+          fetchItemSpecialsData();
           clearInterval(interval);
         }
       }
