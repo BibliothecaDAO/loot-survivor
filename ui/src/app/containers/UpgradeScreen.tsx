@@ -36,8 +36,14 @@ import {
 } from "@/app/types";
 import Summary from "@/app/components/upgrade/Summary";
 import { HealthCountDown } from "@/app/components/CountDown";
-import { calculateVitBoostRemoved } from "@/app/lib/utils";
+import {
+  calculateVitBoostRemoved,
+  calculateChaBoostRemoved,
+} from "@/app/lib/utils";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { useController } from "@/app/context/ControllerContext";
+import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
+import { vitalityIncrease } from "@/app/lib/constants";
 
 interface UpgradeScreenProps {
   upgrade: (
@@ -58,6 +64,9 @@ export default function UpgradeScreen({
   gameContract,
 }: UpgradeScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const updateAdventurerStats = useAdventurerStore(
+    (state) => state.updateAdventurerStats
+  );
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
@@ -78,13 +87,73 @@ export default function UpgradeScreen({
   const setUpgrades = useUIStore((state) => state.setUpgrades);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
+  const equipItems = useUIStore((state) => state.equipItems);
   const dropItems = useUIStore((state) => state.dropItems);
+  const entropyReady = useUIStore((state) => state.entropyReady);
+  const onKatana = useUIStore((state) => state.onKatana);
+  const setVitBoostRemoved = useUIStore((state) => state.setVitBoostRemoved);
+  const setChaBoostRemoved = useUIStore((state) => state.setChaBoostRemoved);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const [summary, setSummary] = useState<UpgradeSummary>({
     Stats: { ...ZeroUpgrade },
     Items: [],
     Potions: 0,
   });
+
+  const { play: clickPlay } = useUiSounds(soundSelector.click);
+
+  const setData = useQueriesStore((state) => state.setData);
+
+  useEffect(() => {
+    const fetchMarketItems = async () => {
+      if (entropyReady || onKatana) {
+        const marketItems = (await gameContract!.call("get_market", [
+          adventurer?.id!,
+        ])) as string[];
+        const itemData = [];
+        for (let item of marketItems) {
+          itemData.unshift({
+            item: gameData.ITEMS[parseInt(item)],
+            adventurerId: adventurer?.id,
+            owner: false,
+            equipped: false,
+            ownerAddress: adventurer?.owner,
+            xp: 0,
+            special1: null,
+            special2: null,
+            special3: null,
+            isAvailable: false,
+            purchasedTime: null,
+            timestamp: new Date(),
+          });
+        }
+        setData("latestMarketItemsQuery", {
+          items: itemData,
+        });
+      }
+    };
+
+    const fetchAdventurerStats = async () => {
+      if ((entropyReady || onKatana) && adventurer?.level == 2) {
+        const updatedAdventurer = (await gameContract!.call("get_adventurer", [
+          adventurer?.id!,
+        ])) as any;
+        updateAdventurerStats({
+          health: parseInt(updatedAdventurer.health),
+          strength: parseInt(updatedAdventurer.stats.strength),
+          dexterity: parseInt(updatedAdventurer.stats.dexterity),
+          vitality: parseInt(updatedAdventurer.stats.vitality),
+          intelligence: parseInt(updatedAdventurer.stats.intelligence),
+          wisdom: parseInt(updatedAdventurer.stats.wisdom),
+          charisma: parseInt(updatedAdventurer.stats.charisma),
+          luck: parseInt(updatedAdventurer.stats.luck),
+        });
+      }
+    };
+
+    fetchMarketItems();
+    fetchAdventurerStats();
+  }, [entropyReady]);
 
   const gameData = new GameData();
 
@@ -113,7 +182,7 @@ export default function UpgradeScreen({
       name: "Vitality",
       id: 3,
       icon: <HeartVitalityIcon />,
-      description: "Vitality increases max health and gives +10hp ",
+      description: `Vitality increases max health and gives +${vitalityIncrease}hp per point`,
       buttonText: "Upgrade Vitality",
       abbrev: "VIT",
       nonBoostedStat: nonBoostedStats?.vitality,
@@ -159,7 +228,9 @@ export default function UpgradeScreen({
     const upgradeMenu = [
       {
         id: 1,
-        label: `Strength - ${adventurer?.strength}`,
+        label: `Strength - ${adventurer?.strength! + upgrades["Strength"]} ${
+          upgrades["Strength"] > 0 ? ` (+${upgrades["Strength"]})` : ""
+        }`,
         icon: <ArrowTargetIcon />,
         value: "Strength",
         action: async () => setSelected("Strength"),
@@ -167,7 +238,9 @@ export default function UpgradeScreen({
       },
       {
         id: 2,
-        label: `Dexterity - ${adventurer?.dexterity}`,
+        label: `Dexterity - ${adventurer?.dexterity! + upgrades["Dexterity"]} ${
+          upgrades["Dexterity"] > 0 ? ` (+${upgrades["Dexterity"]})` : ""
+        }`,
         icon: <CatIcon />,
         value: "Dexterity",
         action: async () => setSelected("Dexterity"),
@@ -175,7 +248,9 @@ export default function UpgradeScreen({
       },
       {
         id: 3,
-        label: `Vitality - ${adventurer?.vitality}`,
+        label: `Vitality - ${adventurer?.vitality! + upgrades["Vitality"]} ${
+          upgrades["Vitality"] > 0 ? ` (+${upgrades["Vitality"]})` : ""
+        }`,
         icon: <HeartVitalityIcon />,
         value: "Vitality",
         action: async () => setSelected("Vitality"),
@@ -183,7 +258,11 @@ export default function UpgradeScreen({
       },
       {
         id: 4,
-        label: `Intelligence - ${adventurer?.intelligence}`,
+        label: `Intelligence - ${
+          adventurer?.intelligence! + upgrades["Intelligence"]
+        } ${
+          upgrades["Intelligence"] > 0 ? ` (+${upgrades["Intelligence"]})` : ""
+        }`,
         icon: <LightbulbIcon />,
         value: "Intelligence",
         action: async () => setSelected("Intelligence"),
@@ -191,7 +270,9 @@ export default function UpgradeScreen({
       },
       {
         id: 5,
-        label: `Wisdom - ${adventurer?.wisdom}`,
+        label: `Wisdom - ${adventurer?.wisdom! + upgrades["Wisdom"]} ${
+          upgrades["Wisdom"] > 0 ? ` (+${upgrades["Wisdom"]})` : ""
+        }`,
         icon: <ScrollIcon />,
         value: "Wisdom",
         action: async () => setSelected("Wisdom"),
@@ -199,7 +280,9 @@ export default function UpgradeScreen({
       },
       {
         id: 6,
-        label: `Charisma - ${adventurer?.charisma}`,
+        label: `Charisma - ${adventurer?.charisma! + upgrades["Charisma"]} ${
+          upgrades["Charisma"] > 0 ? ` (+${upgrades["Charisma"]})` : ""
+        }`,
         icon: <CoinCharismaIcon />,
         value: "Charisma",
         action: async () => setSelected("Charisma"),
@@ -222,8 +305,48 @@ export default function UpgradeScreen({
   const selectedCharisma = upgrades["Charisma"] ?? 0;
   const selectedVitality = upgrades["Vitality"] ?? 0;
 
-  const totalVitality = (adventurer?.vitality ?? 0) + selectedVitality;
-  const totalCharisma = (adventurer?.charisma ?? 0) + selectedCharisma;
+  const [totalVitality, setTotalVitality] = useState(0);
+  const [totalCharisma, setTotalCharisma] = useState(0);
+
+  const adventurerItems = useQueriesStore(
+    (state) => state.data.itemsByAdventurerQuery?.items || []
+  );
+
+  const chaBoostRemoved = calculateChaBoostRemoved(
+    purchaseItems,
+    adventurer!,
+    adventurerItems,
+    equipItems,
+    dropItems
+  );
+  setChaBoostRemoved(chaBoostRemoved);
+
+  useEffect(() => {
+    const chaBoostRemoved = calculateChaBoostRemoved(
+      purchaseItems,
+      adventurer!,
+      adventurerItems,
+      equipItems,
+      dropItems
+    );
+    setChaBoostRemoved(chaBoostRemoved);
+
+    const vitBoostRemoved = calculateVitBoostRemoved(
+      purchaseItems,
+      adventurer!,
+      adventurerItems,
+      equipItems,
+      dropItems
+    );
+    setVitBoostRemoved(vitBoostRemoved);
+  }, [purchaseItems, adventurer, adventurerItems, equipItems, dropItems]);
+
+  useEffect(() => {
+    setTotalVitality((adventurer?.vitality ?? 0) + selectedVitality);
+    setTotalCharisma(
+      (adventurer?.charisma ?? 0) + selectedCharisma - chaBoostRemoved
+    );
+  }, [adventurer, selectedVitality, selectedCharisma, chaBoostRemoved]);
 
   const purchaseGoldAmount =
     potionAmount * getPotionPrice(adventurer?.level ?? 0, totalCharisma);
@@ -279,19 +402,20 @@ export default function UpgradeScreen({
     return upgradeTx;
   };
 
-  const adventurerItems = useQueriesStore(
-    (state) => state.data.itemsByAdventurerQuery?.items || []
-  );
-
   const vitBoostRemoved = calculateVitBoostRemoved(
     purchaseItems,
     adventurer!,
-    adventurerItems
+    adventurerItems,
+    equipItems,
+    dropItems
   );
+  setVitBoostRemoved(vitBoostRemoved);
 
-  const maxHealth = Math.min(100 + totalVitality * 10, 511);
-  const newMaxHealth = 100 + (totalVitality - vitBoostRemoved) * 10;
-  const currentHealth = adventurer?.health! + selectedVitality * 10;
+  const maxHealth = Math.min(100 + totalVitality * vitalityIncrease, 1023);
+  const newMaxHealth =
+    100 + (totalVitality - vitBoostRemoved) * vitalityIncrease;
+  const currentHealth =
+    adventurer?.health! + selectedVitality * vitalityIncrease;
   const healthPlusPots = Math.min(
     currentHealth! + potionAmount * 10,
     maxHealth
@@ -326,6 +450,17 @@ export default function UpgradeScreen({
     }
   };
 
+  const { addControl } = useController();
+
+  useEffect(() => {
+    addControl("u", () => {
+      console.log("Key u pressed");
+      handleSubmitUpgradeTx();
+      setUpgradeScreen(1);
+      clickPlay();
+    });
+  }, [upgrades, purchaseItems, potionAmount]);
+
   const upgradesTotal = Object.values(upgrades)
     .filter((value) => value !== 0)
     .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
@@ -349,11 +484,11 @@ export default function UpgradeScreen({
   const totalStatUpgrades = (adventurer?.statUpgrades ?? 0) - upgradesTotal;
 
   const healthPlus = Math.min(
-    (selectedVitality + potionAmount) * 10,
+    selectedVitality * vitalityIncrease + potionAmount * 10,
     maxHealth - (adventurer?.health ?? 0)
   );
 
-  const maxHealthPlus = selectedVitality * 10;
+  const maxHealthPlus = selectedVitality * vitalityIncrease;
 
   const totalHealth = Math.min(
     (adventurer?.health ?? 0) + healthPlus,
@@ -361,22 +496,24 @@ export default function UpgradeScreen({
   );
 
   const getNoBoostedStats = async () => {
-    const stats = await gameContract?.call(
-      "get_base_stats",
+    const baseAdventurer = (await gameContract?.call(
+      "get_adventurer_no_boosts",
       CallData.compile({ token_id: adventurer?.id! })
-    ); // check whether player can use the current token
-    setNonBoostedStats(stats);
+    )) as any; // check whether player can use the current token
+    setNonBoostedStats(baseAdventurer.stats);
   };
 
   useEffect(() => {
     getNoBoostedStats();
   }, []);
 
+  const bankrupt = upgradeTotalCost > (adventurer?.gold ?? 0);
+
   useEffect(() => {
     if (healthOverflow) {
       setPotionAmount(Math.max(potionAmount - vitBoostRemoved, 0));
     }
-  }, [newMaxHealth]);
+  }, [vitBoostRemoved]);
 
   return (
     <>
@@ -391,10 +528,11 @@ export default function UpgradeScreen({
           </div>
           {!checkTransacting ? (
             <div className="w-full sm:w-2/3 h-full">
-              <div className="flex flex-col gap-2 xl:gap-0 h-full">
-                <div className="flex flex-col gap-2 sm:gap-0 justify-center text-terminal-green h-1/3 sm:h-1/4">
+              <div className="flex flex-col h-full">
+                <div className="flex flex-col sm:justify-center text-terminal-green sm:h-1/4">
                   <div className="w-full flex flex-row gap-2 mx-auto border border-terminal-green justify-between">
                     <Button
+                      className="h-10 w-16 sm:h-auto sm:w-auto"
                       variant={"outline"}
                       onClick={() => setUpgradeScreen(upgradeScreen - 1)}
                       disabled={upgradeScreen == 1}
@@ -421,17 +559,19 @@ export default function UpgradeScreen({
                           : upgradeScreen == 3
                           ? "sm:hidden"
                           : "hidden"
-                      } w-full`}
+                      } w-11/12`}
                       onClick={() => {
                         handleSubmitUpgradeTx();
                         setUpgradeScreen(1);
                       }}
-                      disabled={nextDisabled || loading || estimatingFee}
+                      disabled={
+                        nextDisabled || loading || estimatingFee || bankrupt
+                      }
                     >
                       {loading ? (
                         <span>Upgrading...</span>
                       ) : (
-                        <span>Upgrade</span>
+                        <span>{bankrupt ? "Bankrupt" : "Upgrade"}</span>
                       )}
                     </Button>
                     <Button
@@ -441,7 +581,7 @@ export default function UpgradeScreen({
                           : upgradeScreen == 3
                           ? "hidden"
                           : ""
-                      }`}
+                      } h-10 w-16 sm:h-auto sm:w-auto`}
                       onClick={() => {
                         setUpgradeScreen(upgradeScreen + 1);
                       }}
@@ -467,9 +607,7 @@ export default function UpgradeScreen({
                           <CoinIcon className="self-center w-5 h-5 fill-current text-terminal-yellow self-center ml-1" />
                           <p
                             className={
-                              upgradeTotalCost > (adventurer?.gold ?? 0)
-                                ? "text-red-600"
-                                : "text-terminal-yellow"
+                              bankrupt ? "text-red-600" : "text-terminal-yellow"
                             }
                           >
                             {upgradeTotalCost}

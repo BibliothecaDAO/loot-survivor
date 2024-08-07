@@ -1,5 +1,5 @@
 mod NameUtils {
-    use lootitems::constants::{ItemNameSuffix, ItemSuffix, ItemId};
+    use loot::constants::{ItemNameSuffix, ItemSuffix, ItemId};
 
     fn is_special3_set1(name: u8) -> bool {
         (name == ItemNameSuffix::Bane
@@ -77,7 +77,7 @@ mod NameUtils {
 }
 
 mod ItemUtils {
-    use lootitems::{loot::Loot, constants::{ItemNameSuffix, ItemSuffix, ItemId}};
+    use loot::{loot::Loot, constants::{ItemNameSuffix, ItemSuffix, ItemId}};
     use combat::constants::CombatEnums::{Type, Tier, Slot};
 
 
@@ -1058,6 +1058,149 @@ mod ItemUtils {
     fn get_blank_item() -> Loot {
         Loot { id: 0, tier: Tier::None(()), item_type: Type::None(()), slot: Slot::None(()) }
     }
+
+    #[inline(always)]
+    fn get_t5_items() -> Span<u8> {
+        array![
+            ItemId::Book,
+            ItemId::Wand,
+            ItemId::Hood,
+            ItemId::Sash,
+            ItemId::Shirt,
+            ItemId::Shoes,
+            ItemId::Gloves,
+            ItemId::Club,
+            ItemId::Helm,
+            ItemId::RingMail,
+            ItemId::HeavyBoots,
+            ItemId::HeavyBelt,
+            ItemId::HeavyGloves,
+            ItemId::ShortSword,
+            ItemId::LeatherBelt,
+            ItemId::LeatherBoots,
+            ItemId::LeatherArmor,
+            ItemId::LeatherGloves,
+            ItemId::Cap,
+        ]
+            .span()
+    }
+
+    #[inline(always)]
+    fn get_t4_items() -> Span<u8> {
+        array![
+            ItemId::LongSword,
+            ItemId::HardLeatherBelt,
+            ItemId::HardLeatherBoots,
+            ItemId::HardLeatherArmor,
+            ItemId::LeatherCap,
+            ItemId::HardLeatherGloves,
+            ItemId::Mace,
+            ItemId::ChainMail,
+            ItemId::FullHelm,
+            ItemId::ChainBoots,
+            ItemId::ChainGloves,
+            ItemId::MeshBelt,
+            ItemId::Robe,
+            ItemId::LinenHood,
+            ItemId::LinenSash,
+            ItemId::LinenShoes,
+            ItemId::LinenGloves,
+        ]
+            .span()
+    }
+
+    #[inline(always)]
+    fn get_t3_items() -> Span<u8> {
+        array![
+            ItemId::Tome,
+            ItemId::BoneWand,
+            ItemId::LinenRobe,
+            ItemId::SilkHood,
+            ItemId::WoolSash,
+            ItemId::WoolShoes,
+            ItemId::WoolGloves,
+            ItemId::Scimitar,
+            ItemId::StuddedLeatherArmor,
+            ItemId::StuddedLeatherBoots,
+            ItemId::StuddedLeatherBelt,
+            ItemId::StuddedLeatherGloves,
+            ItemId::WarCap,
+            ItemId::Maul,
+            ItemId::Greaves,
+            ItemId::Gauntlets,
+            ItemId::PlateMail,
+            ItemId::GreatHelm,
+            ItemId::PlatedBelt
+        ]
+            .span()
+    }
+
+    #[inline(always)]
+    fn get_t2_items() -> Span<u8> {
+        array![
+            ItemId::GraveWand,
+            ItemId::Chronicle,
+            ItemId::SilkRobe,
+            ItemId::DivineHood,
+            ItemId::SilkSash,
+            ItemId::SilkSlippers,
+            ItemId::SilkGloves,
+            ItemId::Falchion,
+            ItemId::DragonsCrown,
+            ItemId::DragonskinBelt,
+            ItemId::DragonskinBoots,
+            ItemId::DragonskinArmor,
+            ItemId::DragonskinGloves,
+            ItemId::Quarterstaff,
+            ItemId::OrnateChestplate,
+            ItemId::WarBelt,
+            ItemId::OrnateHelm,
+            ItemId::OrnateGreaves,
+            ItemId::OrnateGauntlets
+        ]
+            .span()
+    }
+
+    #[inline(always)]
+    fn get_t1_items() -> Span<u8> {
+        array![
+            ItemId::GhostWand,
+            ItemId::Grimoire,
+            ItemId::DivineRobe,
+            ItemId::Crown,
+            ItemId::BrightsilkSash,
+            ItemId::DivineSlippers,
+            ItemId::DivineGloves,
+            ItemId::Katana,
+            ItemId::DemonHusk,
+            ItemId::DemonCrown,
+            ItemId::DemonhideBelt,
+            ItemId::DemonsHands,
+            ItemId::DemonhideBoots,
+            ItemId::Warhammer,
+            ItemId::HolyChestplate,
+            ItemId::AncientHelm,
+            ItemId::HolyGreaves,
+            ItemId::HolyGauntlets,
+            ItemId::OrnateBelt,
+        ]
+            .span()
+    }
+
+    #[inline(always)]
+    fn get_jewelry_items() -> Span<u8> {
+        array![
+            ItemId::Necklace,
+            ItemId::Pendant,
+            ItemId::Amulet,
+            ItemId::GoldRing,
+            ItemId::SilverRing,
+            ItemId::BronzeRing,
+            ItemId::PlatinumRing,
+            ItemId::TitaniumRing
+        ]
+            .span()
+    }
 }
 
 // ---------------------------
@@ -1066,7 +1209,7 @@ mod ItemUtils {
 #[cfg(test)]
 mod tests {
     use core::array::ArrayTrait;
-    use lootitems::{utils::{NameUtils, ItemUtils}, constants::{ItemId}};
+    use loot::{utils::{NameUtils, ItemUtils}, constants::{ItemId}};
 
     #[test]
     #[available_gas(151130)]

@@ -27,7 +27,7 @@ export const AdventurerName = ({
       ...formData,
       [name]: value.slice(0, 13),
     });
-    if (value.length >= 13) {
+    if (value.length >= 18) {
       setIsMaxLength(true);
     } else {
       setIsMaxLength(false);

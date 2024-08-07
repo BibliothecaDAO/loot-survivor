@@ -1,16 +1,21 @@
 version: '3.6'
 
 services:
-  mongo:
-    image: mongo:6.0.8
-    restart: always
+  graph:
+    build:
+      context: .
+      dockerfile: Dockerfile.sepolia
     ports:
-      - "27017:27017"
+      - "8080:8080"
+    # volumes:
+    #   - /etc/letsencrypt:/etc/letsencrypt:ro
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
     volumes:
-      - mongo_data:/data/db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: mongo
-      MONGO_INITDB_ROOT_PASSWORD: mongo
+      - redis_data:/data
 
 volumes:
-  mongo_data:
+  redis_data:

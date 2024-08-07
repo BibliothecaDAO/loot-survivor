@@ -8,6 +8,8 @@ import {
   GiBattleGearIcon,
   SkullCrossedBonesIcon,
 } from "@/app/components/icons/Icons";
+import useUIStore from "@/app/hooks/useUIStore";
+import { networkConfig } from "@/app/lib/networkConfig";
 
 interface BattleDisplayProps {
   battleData: Battle;
@@ -30,7 +32,6 @@ export const BattleDisplay = ({
   const AdventurerHealthExists = (battleData.adventurerHealth ?? 0) > 0;
   const NoDamageDealt = battleData.damageDealt === 0;
   const NoDamageTaken = battleData.damageTaken === 0;
-  const IdleDamagePenalty = !battleData.beast;
   const CriticalHit = battleData.criticalHit;
 
   const renderDiscoveryMessage = () => {
@@ -130,15 +131,6 @@ export const BattleDisplay = ({
         </span>
       );
     }
-
-    if (IdleDamagePenalty) {
-      return (
-        <span className="flex flex-row items-center justify-between">
-          <p>OOPS! Killed by idle death penalty!</p>
-          <SkullCrossedBonesIcon />
-        </span>
-      );
-    }
   };
 
   return (
@@ -154,6 +146,7 @@ export const NotificationBattleDisplay = ({
   battleData,
 }: NotificationBattleDisplayProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const network = useUIStore((state) => state.network);
 
   const isArray = Array.isArray(battleData);
   const handleBeastInfo = () => {
@@ -218,8 +211,6 @@ export const NotificationBattleDisplay = ({
     battleData.some(
       (data) => data.attacker === "Beast" && (data.adventurerHealth ?? 0) === 0
     );
-  const IdleDeathPenalty =
-    isArray && battleData.length == 1 && !battleData[0].beast;
 
   const renderBattleNotification = () => {
     if (BeastFled) {
@@ -337,17 +328,14 @@ export const NotificationBattleDisplay = ({
             <GiBattleGearIcon />
           </span>
           <TwitterShareButton
-            text={`${adventurer?.name} just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${process.env.NEXT_PUBLIC_APP_URL}\n\n@lootrealms #Starknet #Play2Die #🪦`}
+            text={`${
+              adventurer?.name
+            } just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${
+              networkConfig[network!].appUrl
+            }\n\n@lootrealms @provablegames #Starknet`}
             className="animate-pulse"
           />
         </div>
-      );
-    } else if (IdleDeathPenalty) {
-      return (
-        <span className="flex flex-row items-center justify-between w-full">
-          <p>Killed from the idle death penalty!</p>
-          <SkullCrossedBonesIcon />
-        </span>
       );
     }
   };

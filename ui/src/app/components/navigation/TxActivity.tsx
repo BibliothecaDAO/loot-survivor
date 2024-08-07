@@ -5,6 +5,8 @@ import { displayAddress, padAddress } from "@/app/lib/utils";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import LootIconLoader from "@/app/components/icons/Loader";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import useUIStore from "@/app/hooks/useUIStore";
+import { networkConfig } from "@/app/lib/networkConfig";
 
 export const TxActivity = () => {
   const stopLoading = useLoadingStore((state) => state.stopLoading);
@@ -14,6 +16,7 @@ export const TxActivity = () => {
   const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
   const error = useTransactionCartStore((state) => state.error);
   const setError = useTransactionCartStore((state) => state.setError);
+  const network = useUIStore((state) => state.network);
 
   const { data } = useWaitForTransaction({
     hash: hash ? hash : "0x0",
@@ -56,7 +59,7 @@ export const TxActivity = () => {
               <span className="hidden sm:block">Hash:</span>
               <a
                 href={`${
-                  process.env.NEXT_PUBLIC_BLOCK_EXPLORER_URL
+                  networkConfig[network!].blockExplorerUrl
                 }tx/${padAddress(hash)}`}
                 target="_blank"
                 className="animate-pulse"

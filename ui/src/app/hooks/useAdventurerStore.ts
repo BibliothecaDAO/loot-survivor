@@ -10,6 +10,7 @@ export interface AdventurerProps {
 type State = {
   adventurer?: AdventurerClass | undefined;
   setAdventurer: (value: Adventurer) => void;
+  updateAdventurerStats: (stats: Partial<AdventurerClass>) => void;
   image?: string;
   setImage: (value: string) => void;
   computed: {
@@ -27,6 +28,13 @@ const useAdventurerStore = create<State>((set, get) => ({
     set((state) => ({
       ...state,
       adventurer: new AdventurerClass(value),
+    })),
+  updateAdventurerStats: (stats: Partial<AdventurerClass>) =>
+    set((state) => ({
+      adventurer: {
+        ...state.adventurer,
+        ...stats,
+      },
     })),
   image: undefined,
   setImage: (value) => set({ image: value }),

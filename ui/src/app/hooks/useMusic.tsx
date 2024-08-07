@@ -34,14 +34,16 @@ export const useMusic = (
     }
     stopRef.current = stop;
 
-    if (playState.isInBattle) {
-      setMusic(trackArray[Math.floor(Math.random() * trackArray.length)]);
-    } else if (playState.isDead) {
-      setMusic(musicSelector.death);
-    } else {
-      setMusic(musicSelector.backgroundMusic);
+    if (!playState.isMuted) {
+      if (playState.isDead) {
+        setMusic(musicSelector.death);
+      } else if (playState.isInBattle) {
+        setMusic(trackArray[Math.floor(Math.random() * trackArray.length)]);
+      } else {
+        setMusic(musicSelector.backgroundMusic);
+      }
+      start();
     }
-    start();
   }, [playState.isInBattle, playState.isDead, start, stop]);
 
   useEffect(() => {

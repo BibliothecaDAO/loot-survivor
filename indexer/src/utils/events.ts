@@ -22,7 +22,7 @@ export const START_GAME = eventKey("StartGame");
 export const ADVENTURER_UPGRADED = eventKey("AdventurerUpgraded");
 export const DISCOVERED_HEALTH = eventKey("DiscoveredHealth");
 export const DISCOVERED_GOLD = eventKey("DiscoveredGold");
-export const DISCOVERED_XP = eventKey("DiscoveredXP");
+export const DISCOVERED_LOOT = eventKey("DiscoveredLoot");
 export const HIT_BY_OBSTACLE = eventKey("HitByObstacle");
 export const DODGED_OBSTACLE = eventKey("DodgedObstacle");
 
@@ -37,16 +37,18 @@ export const ADVENTURER_DIED = eventKey("AdventurerDied");
 export const FLEE_FAILED = eventKey("FleeFailed");
 export const FLEE_SUCCEEDED = eventKey("FleeSucceeded");
 
-export const PURCHASED_POTIONS = eventKey("PurchasedPotions");
 export const PURCHASED_ITEMS = eventKey("PurchasedItems");
 export const UPGRADES_AVAILABLE = eventKey("UpgradesAvailable");
 export const EQUIPPED_ITEMS = eventKey("EquippedItems");
 export const DROPPED_ITEMS = eventKey("DroppedItems");
 export const ITEMS_LEVELED_UP = eventKey("ItemsLeveledUp");
+export const EQUIPMENT_CHANGED = eventKey("EquipmentChanged");
 
 export const NEW_HIGH_SCORE = eventKey("NewHighScore");
 export const REWARD_DISTRIBUTION = eventKey("RewardDistribution");
 export const GAME_ENTROPY_ROTATED = eventKey("GameEntropyRotatedEvent");
+
+export const TRANSFER = eventKey("Transfer");
 
 export const parseStats = combineParsers({
   strength: { index: 0, parser: parseU8 },
@@ -61,7 +63,6 @@ export const parseStats = combineParsers({
 export const parseLootStatistics = combineParsers({
   id: { index: 0, parser: parseU8 },
   xp: { index: 1, parser: parseU16 },
-  metadata: { index: 2, parser: parseU8 },
 });
 
 export const parseLoot = combineParsers({
@@ -76,30 +77,35 @@ export const parseLootWithPrice = combineParsers({
   price: { index: 1, parser: parseU16 },
 });
 
+export const parseEquipment = combineParsers({
+  weapon: { index: 0, parser: parseLootStatistics },
+  chest: { index: 1, parser: parseLootStatistics },
+  head: { index: 2, parser: parseLootStatistics },
+  waist: { index: 3, parser: parseLootStatistics },
+  foot: { index: 4, parser: parseLootStatistics },
+  hand: { index: 5, parser: parseLootStatistics },
+  neck: { index: 6, parser: parseLootStatistics },
+  ring: { index: 7, parser: parseLootStatistics },
+});
+
 export const parseAdventurer = combineParsers({
-  lastActionBlock: { index: 0, parser: parseU16 },
-  health: { index: 1, parser: parseU16 },
-  xp: { index: 2, parser: parseU16 },
-  stats: { index: 3, parser: parseStats },
-  gold: { index: 4, parser: parseU16 },
-  weapon: { index: 5, parser: parseLootStatistics },
-  chest: { index: 6, parser: parseLootStatistics },
-  head: { index: 7, parser: parseLootStatistics },
-  waist: { index: 8, parser: parseLootStatistics },
-  foot: { index: 9, parser: parseLootStatistics },
-  hand: { index: 10, parser: parseLootStatistics },
-  neck: { index: 11, parser: parseLootStatistics },
-  ring: { index: 12, parser: parseLootStatistics },
-  beastHealth: { index: 13, parser: parseU16 },
-  statsPointsAvailable: { index: 14, parser: parseU8 },
-  actionsPerBlock: { index: 15, parser: parseU8 },
-  mutated: { index: 16, parser: parseBoolean },
+  health: { index: 0, parser: parseU16 },
+  xp: { index: 1, parser: parseU16 },
+  gold: { index: 2, parser: parseU16 },
+  beastHealth: { index: 3, parser: parseU16 },
+  statsUpgradesAvailable: { index: 4, parser: parseU8 },
+  stats: { index: 5, parser: parseStats },
+  equipment: { index: 6, parser: parseEquipment },
+  battleActionCount: { index: 7, parser: parseU16 },
+  mutated: { index: 8, parser: parseBoolean },
+  awaitingItemSpecials: { index: 9, parser: parseBoolean },
 });
 
 export const parseAdventurerState = combineParsers({
   owner: { index: 0, parser: parseFelt252 },
   adventurerId: { index: 1, parser: parseFelt252 },
-  adventurer: { index: 2, parser: parseAdventurer },
+  entropy: { index: 2, parser: parseFelt252 },
+  adventurer: { index: 3, parser: parseAdventurer },
 });
 
 export const parseSpecialPowers = combineParsers({
@@ -172,16 +178,19 @@ export const parseAdventurerDied = combineParsers({
 });
 
 export const parseAdventurerMetadata = combineParsers({
-  startBlock: { index: 0, parser: parseU128 },
-  startingStats: { index: 1, parser: parseStats },
-  name: { index: 2, parser: parseU128 },
-  interfaceCamel: { index: 3, parser: parseBoolean },
+  birthDate: { index: 0, parser: parseU64 },
+  deathDate: { index: 1, parser: parseU64 },
+  adventurerEntropy: { index: 2, parser: parseU64 },
+  itemSpecialsSeed: { index: 3, parser: parseU16 },
+  rankAtDeath: { index: 4, parser: parseU8 },
+  delayStatReveal: { index: 5, parser: parseBoolean },
 });
-
 export const parseStartGame = combineParsers({
   adventurerState: { index: 0, parser: parseAdventurerState },
   adventurerMeta: { index: 1, parser: parseAdventurerMetadata },
-  revealBlock: { index: 2, parser: parseU64 },
+  name: { index: 2, parser: parseFelt252 },
+  goldenTokenId: { index: 3, parser: parseU256 },
+  customRenderer: { index: 4, parser: parseFelt252 },
 });
 
 export const parseBag = combineParsers({
@@ -196,7 +205,11 @@ export const parseBag = combineParsers({
   item9: { index: 8, parser: parseLootStatistics },
   item10: { index: 9, parser: parseLootStatistics },
   item11: { index: 10, parser: parseLootStatistics },
-  mutated: { index: 11, parser: parseBoolean },
+  item12: { index: 11, parser: parseLootStatistics },
+  item13: { index: 12, parser: parseLootStatistics },
+  item14: { index: 13, parser: parseLootStatistics },
+  item15: { index: 14, parser: parseLootStatistics },
+  mutated: { index: 15, parser: parseBoolean },
 });
 
 export const parseAdventurerStateWithBag = combineParsers({
@@ -224,9 +237,9 @@ export const parseDiscoveredGold = combineParsers({
   goldAmount: { index: 1, parser: parseU16 },
 });
 
-export const parseDiscoveredXp = combineParsers({
+export const parseDiscoveredLoot = combineParsers({
   adventurerState: { index: 0, parser: parseAdventurerState },
-  xpAmount: { index: 1, parser: parseU16 },
+  itemId: { index: 1, parser: parseU8 },
 });
 
 export const parseHitByObstacle = combineParsers({
@@ -289,6 +302,13 @@ export const parseDroppedItems = combineParsers({
   itemIds: { index: 1, parser: parseArray(parseU8) },
 });
 
+export const parseEquipmentChanged = combineParsers({
+  adventurerStateWithBag: { index: 0, parser: parseAdventurerStateWithBag },
+  equippedItems: { index: 1, parser: parseArray(parseU8) },
+  baggedItems: { index: 2, parser: parseArray(parseU8) },
+  droppedItems: { index: 3, parser: parseArray(parseU8) },
+});
+
 export const parseUpgradesAvailable = combineParsers({
   adventurerState: { index: 0, parser: parseAdventurerState },
   items: { index: 1, parser: parseArray(parseU8) },
@@ -343,4 +363,10 @@ export const parseGameEntropyRotated = combineParsers({
   newBlockTimestamp: { index: 6, parser: parseU64 },
   newNextRotationBlock: { index: 7, parser: parseU64 },
   blocksPerHour: { index: 8, parser: parseU64 },
+});
+
+export const parseTransfer = combineParsers({
+  fromAddress: { index: 0, parser: parseFelt252 },
+  toAddress: { index: 1, parser: parseFelt252 },
+  tokenId: { index: 2, parser: parseU256 },
 });

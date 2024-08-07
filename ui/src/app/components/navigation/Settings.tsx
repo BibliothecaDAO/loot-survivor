@@ -32,9 +32,9 @@ export default function Settings() {
       id: 3,
       label: isMuted ? "Unmute" : "Mute",
       icon: isMuted ? (
-        <SoundOnIcon className="fill-current" />
-      ) : (
         <SoundOffIcon className="fill-current" />
+      ) : (
+        <SoundOnIcon className="fill-current" />
       ),
       action: () => setIsMuted(!isMuted),
     },

@@ -22,7 +22,15 @@ export type ScreenPage =
   | "wallet"
   | "tutorial"
   | "onboarding"
-  | "create adventurer";
+  | "create adventurer"
+  | "future";
+
+export type Network =
+  | "mainnet"
+  | "katana"
+  | "sepolia"
+  | "localKatana"
+  | undefined;
 
 type State = {
   disconnected: boolean;
@@ -31,6 +39,7 @@ type State = {
   setIsWrongNetwork: (value: boolean) => void;
   onboarded: boolean;
   handleOnboarded: () => void;
+  handleOffboarded: () => void;
   isMuted: boolean;
   setIsMuted: (value: boolean) => void;
   screen: ScreenPage;
@@ -85,12 +94,43 @@ type State = {
   setSpecialBeast: (value: SpecialBeast | null) => void;
   isMintingLords: boolean;
   setIsMintingLords: (value: boolean) => void;
+  isWithdrawing: boolean;
+  setIsWithdrawing: (value: boolean) => void;
   averageBlockTime: number;
   setAverageBlockTime: (value: number) => void;
-  updateDeathPenalty: boolean;
-  setUpdateDeathPenalty: (value: boolean) => void;
-  startPenalty: boolean;
-  setStartPenalty: (value: boolean) => void;
+  adventurerEntropy: bigint;
+  setAdventurerEntropy: (value: bigint) => void;
+  itemEntropy: bigint;
+  setItemEntropy: (value: bigint) => void;
+  entropyReady: boolean;
+  setEntropyReady: (value: boolean) => void;
+  fetchUnlocksEntropy: boolean;
+  setFetchUnlocksEntropy: (value: boolean) => void;
+  loginScreen: boolean;
+  setLoginScreen: (value: boolean) => void;
+  network: Network;
+  setNetwork: (value: Network) => void;
+  onMainnet: boolean;
+  onSepolia: boolean;
+  onKatana: boolean;
+  encounterTable: boolean;
+  battleDialog: boolean;
+  fleeDialog: boolean;
+  showEncounterTable: (value: boolean) => void;
+  showBattleDialog: (value: boolean) => void;
+  showFleeDialog: (value: boolean) => void;
+  vitBoostRemoved: number;
+  setVitBoostRemoved: (value: number) => void;
+  chaBoostRemoved: number;
+  setChaBoostRemoved: (value: number) => void;
+  showProfile: boolean;
+  setShowProfile: (value: boolean) => void;
+  username: string;
+  setUsername: (value: string) => void;
+  isController: boolean;
+  setIsController: (value: boolean) => void;
+  controllerAdmin: string;
+  setControllerAdmin: (value: string) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -101,6 +141,9 @@ const useUIStore = create<State>((set) => ({
   onboarded: false,
   handleOnboarded: () => {
     set({ onboarded: true });
+  },
+  handleOffboarded: () => {
+    set({ onboarded: false });
   },
   isMuted: false,
   setIsMuted: (value) => set({ isMuted: value }),
@@ -156,12 +199,48 @@ const useUIStore = create<State>((set) => ({
   setSpecialBeast: (value) => set({ specialBeast: value }),
   isMintingLords: false,
   setIsMintingLords: (value) => set({ isMintingLords: value }),
+  isWithdrawing: false,
+  setIsWithdrawing: (value) => set({ isWithdrawing: value }),
   averageBlockTime: 0,
   setAverageBlockTime: (value) => set({ averageBlockTime: value }),
-  updateDeathPenalty: false,
-  setUpdateDeathPenalty: (value) => set({ updateDeathPenalty: value }),
-  startPenalty: false,
-  setStartPenalty: (value) => set({ startPenalty: value }),
+  adventurerEntropy: BigInt(0),
+  setAdventurerEntropy: (value) => set({ adventurerEntropy: value }),
+  itemEntropy: BigInt(0),
+  setItemEntropy: (value) => set({ itemEntropy: value }),
+  entropyReady: false,
+  setEntropyReady: (value) => set({ entropyReady: value }),
+  loginScreen: false,
+  setLoginScreen: (value) => set({ loginScreen: value }),
+  network: undefined,
+  setNetwork: (value) => {
+    set({ network: value });
+    set({ onMainnet: value === "mainnet" });
+    set({ onSepolia: value === "sepolia" });
+    set({ onKatana: value === "katana" || value === "localKatana" });
+  },
+  onMainnet: false,
+  onSepolia: false,
+  onKatana: false,
+  encounterTable: false,
+  battleDialog: false,
+  fleeDialog: false,
+  showEncounterTable: (value) => set({ encounterTable: value }),
+  showBattleDialog: (value) => set({ battleDialog: value }),
+  showFleeDialog: (value) => set({ fleeDialog: value }),
+  vitBoostRemoved: 0,
+  setVitBoostRemoved: (value) => set({ vitBoostRemoved: value }),
+  chaBoostRemoved: 0,
+  setChaBoostRemoved: (value) => set({ chaBoostRemoved: value }),
+  showProfile: false,
+  setShowProfile: (value) => set({ showProfile: value }),
+  username: "",
+  setUsername: (value) => set({ username: value }),
+  isController: false,
+  setIsController: (value) => set({ isController: value }),
+  controllerAdmin: "",
+  setControllerAdmin: (value) => set({ controllerAdmin: value }),
+  fetchUnlocksEntropy: false,
+  setFetchUnlocksEntropy: (value) => set({ fetchUnlocksEntropy: value }),
 }));
 
 export default useUIStore;

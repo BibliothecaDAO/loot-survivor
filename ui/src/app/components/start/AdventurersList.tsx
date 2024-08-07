@@ -1,49 +1,85 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Contract } from "starknet";
 import { Button } from "@/app/components/buttons/Button";
 import Info from "@/app/components/adventurer/Info";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import { Adventurer } from "@/app/types";
 import { SkullIcon } from "@/app/components/icons/Icons";
 import useUIStore from "@/app/hooks/useUIStore";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import LootIconLoader from "@/app/components/icons/Loader";
+import useCustomQuery from "@/app/hooks/useCustomQuery";
+import { getAdventurersByOwner } from "@/app/hooks/graphql/queries";
+import useNetworkAccount from "@/app/hooks/useNetworkAccount";
+import { indexAddress, padAddress } from "@/app/lib/utils";
+import { Adventurer } from "@/app/types";
 
 export interface AdventurerListProps {
   isActive: boolean;
   onEscape: () => void;
-  adventurers: Adventurer[];
   handleSwitchAdventurer: (adventurerId: number) => Promise<void>;
   gameContract: Contract;
+  adventurersCount: number;
+  aliveAdventurersCount: number;
 }
 
 export const AdventurersList = ({
   isActive,
   onEscape,
-  adventurers,
   handleSwitchAdventurer,
   gameContract,
+  adventurersCount,
+  aliveAdventurersCount,
 }: AdventurerListProps) => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [showZeroHealth, setShowZeroHealth] = useState(true);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
+  const network = useUIStore((state) => state.network);
+  const { account } = useNetworkAccount();
+  const owner = account?.address ? padAddress(account.address) : "";
+  const adventurersPerPage = 10;
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const skip = (currentPage - 1) * adventurersPerPage;
 
   const { isLoading } = useQueriesStore();
 
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
 
-  const sortedAdventurers = !isWrongNetwork
-    ? [...adventurers].sort((a, b) => (a.level ?? 0) - (b.level ?? 0))
-    : [];
+  const adventurersVariables = useMemo(() => {
+    return {
+      owner: indexAddress(owner),
+      health: showZeroHealth ? 0 : 1,
+      skip: skip,
+    };
+  }, [owner, skip, showZeroHealth]);
 
-  const filteredAdventurers = showZeroHealth
-    ? sortedAdventurers
-    : sortedAdventurers.filter((adventurer) => adventurer.health !== 0);
-
-  const hasDeadAdventurers = sortedAdventurers.some(
-    (adventurer) => adventurer.health === 0
+  const adventurersData = useCustomQuery(
+    network,
+    "adventurersByOwnerQuery",
+    getAdventurersByOwner,
+    adventurersVariables,
+    owner === ""
   );
+
+  const adventurers: Adventurer[] = adventurersData?.adventurers ?? [];
+
+  const totalPages = useMemo(
+    () =>
+      Math.ceil(
+        (showZeroHealth ? adventurersCount : aliveAdventurersCount) /
+          adventurersPerPage
+      ),
+    [adventurersCount, aliveAdventurersCount, showZeroHealth]
+  );
+
+  const formatAdventurersCount = showZeroHealth
+    ? adventurersCount
+    : aliveAdventurersCount;
+
+  const handleClick = (newPage: number): void => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -53,18 +89,18 @@ export const AdventurersList = ({
           break;
         case "ArrowDown":
           setSelectedIndex((prev) =>
-            Math.min(prev + 1, filteredAdventurers.length - 1)
+            Math.min(prev + 1, adventurers.length - 1)
           );
           break;
         case "Enter":
-          setAdventurer(filteredAdventurers[selectedIndex]);
+          setAdventurer(adventurers[selectedIndex]);
           break;
         case "Escape":
           onEscape();
           break;
       }
     },
-    [setAdventurer, onEscape, selectedIndex, filteredAdventurers]
+    [setAdventurer, onEscape, selectedIndex, adventurers]
   );
 
   useEffect(() => {
@@ -80,10 +116,10 @@ export const AdventurersList = ({
 
   return (
     <div className="flex flex-col items-center h-full">
-      {sortedAdventurers.length > 0 ? (
+      {formatAdventurersCount > 0 ? (
         <div className="flex flex-col gap-2 sm:flex-row w-full h-full items-center sm:items-start">
           <div className="flex flex-col w-full sm:w-1/3 overflow-y-auto default-scroll mx-2 border border-terminal-green sm:border-none h-[350px] xl:h-[500px] 2xl:h-[625px] p-1">
-            {filteredAdventurers.map((adventurer, index) => (
+            {adventurers.map((adventurer, index) => (
               <Button
                 key={index}
                 ref={(ref) => (buttonRefs.current[index] = ref)}
@@ -110,9 +146,32 @@ export const AdventurersList = ({
                 </div>
               </Button>
             ))}
+            {formatAdventurersCount > 10 && (
+              <div className="flex justify-center mt-8">
+                <Button
+                  variant={"outline"}
+                  onClick={() =>
+                    currentPage > 1 && handleClick(currentPage - 1)
+                  }
+                  disabled={currentPage === 1}
+                >
+                  back
+                </Button>
+
+                <Button
+                  variant={"outline"}
+                  onClick={() =>
+                    currentPage < totalPages && handleClick(currentPage + 1)
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  next
+                </Button>
+              </div>
+            )}
           </div>
           <div>
-            {hasDeadAdventurers && (
+            {formatAdventurersCount > 0 && (
               <Button
                 className="w-full h-full"
                 size={"xs"}
@@ -122,7 +181,7 @@ export const AdventurersList = ({
               </Button>
             )}
           </div>
-          {filteredAdventurers.length > 0 && (
+          {adventurers.length > 0 && (
             <div className="hidden sm:block sm:w-6/12 md:w-6/12 lg:w-2/3 w-full h-full">
               {isLoading.global ? (
                 <div className="flex justify-center items-center h-full">
@@ -130,7 +189,7 @@ export const AdventurersList = ({
                 </div>
               ) : (
                 <Info
-                  adventurer={filteredAdventurers[selectedIndex]}
+                  adventurer={adventurers[selectedIndex]}
                   gameContract={gameContract}
                 />
               )}

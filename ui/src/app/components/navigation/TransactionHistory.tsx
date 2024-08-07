@@ -11,6 +11,7 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { useUiSounds } from "@/app/hooks/useUiSound";
 import { soundSelector } from "@/app/hooks/useUiSound";
 import useTransactionManager from "@/app/hooks/useTransactionManager";
+import { networkConfig } from "@/app/lib/networkConfig";
 
 export interface TransactionHistoryProps {
   buttonRef: RefObject<HTMLElement>;
@@ -26,6 +27,7 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
   const { transactions } = useTransactionManager();
   const { data: queryData } = useQueriesStore();
   const displayHistory = useUIStore((state) => state.displayHistory);
+  const network = useUIStore((state) => state.network);
   const { play } = useUiSounds(soundSelector.click);
 
   const history = useLoadingStore((state) => state.history);
@@ -89,7 +91,7 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                               <span className="hidden sm:block">Hash:</span>
                               <a
                                 href={`${
-                                  process.env.NEXT_PUBLIC_BLOCK_EXPLORER_URL
+                                  networkConfig[network!].blockExplorerUrl
                                 }tx/${padAddress(tx.hash)}`}
                                 target="_blank"
                               >

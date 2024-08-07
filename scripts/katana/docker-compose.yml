@@ -1,0 +1,192 @@
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "5443:5443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./certs:/etc/nginx/certs
+    depends_on:
+      - katana
+
+  katana:
+    build: .
+    container_name: katana_container
+    ports:
+      - "5050:5050"
+    volumes:
+      - ./katana:/katana
+
+  dna:
+    image: quay.io/apibara/starknet:1.5.0
+    restart: always
+    ports:
+      - "7171:7171"
+    command:
+      - start
+      - --rpc
+      - http://katana:5050
+    depends_on:
+      - katana
+
+  mongo:
+    image: mongo:6.0.8
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./scripts/mongo-init:/docker-entrypoint-initdb.d
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+
+  etcd:
+    image: docker.io/bitnami/etcd:3.5
+    environment:
+      ALLOW_NONE_AUTHENTICATION: "yes"
+    volumes:
+      - etcd_data:/bitnami/etcd
+
+  adventurers_indexer:
+    image: quay.io/apibara/sink-mongo:0.8.0
+    depends_on:
+      - etcd
+      - mongo
+      - dna
+      - katana
+    restart: always
+    command:
+      - run
+      - --allow-env=/katana/.env
+      - /data/indexer/adventurers.ts
+    volumes:
+      - ./:/data/
+      - ./katana:/katana
+    environment:
+      PERSIST_TO_ETCD: http://etcd:2379
+      SINK_ID: adventurers
+
+  battles_indexer:
+    image: quay.io/apibara/sink-mongo:0.8.0
+    depends_on:
+      - etcd
+      - mongo
+      - dna
+      - katana
+    restart: always
+    command:
+      - run
+      - --allow-env=/katana/.env
+      - /data/indexer/battles.ts
+    volumes:
+      - ./:/data/
+      - ./katana:/katana
+    environment:
+      PERSIST_TO_ETCD: http://etcd:2379
+      SINK_ID: battles
+
+  beasts_indexer:
+    image: quay.io/apibara/sink-mongo:0.8.0
+    depends_on:
+      - etcd
+      - mongo
+      - dna
+      - katana
+    restart: always
+    command:
+      - run
+      - --allow-env=/katana/.env
+      - /data/indexer/beasts.ts
+    volumes:
+      - ./:/data/
+      - ./katana:/katana
+    environment:
+      PERSIST_TO_ETCD: http://etcd:2379
+      SINK_ID: beasts
+
+  discoveries_indexer:
+    image: quay.io/apibara/sink-mongo:0.8.0
+    depends_on:
+      - etcd
+      - mongo
+      - dna
+      - katana
+    restart: always
+    command:
+      - run
+      - --allow-env=/katana/.env
+      - /data/indexer/discoveries.ts
+    volumes:
+      - ./:/data/
+      - ./katana:/katana
+    environment:
+      PERSIST_TO_ETCD: http://etcd:2379
+      SINK_ID: discoveries
+
+  items_indexer:
+    image: quay.io/apibara/sink-mongo:0.8.0
+    depends_on:
+      - etcd
+      - mongo
+      - dna
+      - katana
+    restart: always
+    command:
+      - run
+      - --allow-env=/katana/.env
+      - /data/indexer/items.ts
+    volumes:
+      - ./:/data/
+      - ./katana:/katana
+    environment:
+      PERSIST_TO_ETCD: http://etcd:2379
+      SINK_ID: items
+
+  scores_indexer:
+    image: quay.io/apibara/sink-mongo:0.8.0
+    depends_on:
+      - etcd
+      - mongo
+      - dna
+      - katana
+    restart: always
+    command:
+      - run
+      - --allow-env=/katana/.env
+      - /data/indexer/scores.ts
+    volumes:
+      - ./:/data/
+      - ./katana:/katana
+    environment:
+      PERSIST_TO_ETCD: http://etcd:2379
+      SINK_ID: scores
+
+  graph:
+    build:
+      context: .
+      dockerfile: Dockerfile.graph
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+
+networks:
+  default:
+    name: lootsurvivor_network
+    driver: bridge
+
+volumes:
+  etcd_data:
+  mongo_data:
+  redis_data:

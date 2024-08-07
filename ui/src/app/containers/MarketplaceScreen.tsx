@@ -38,34 +38,24 @@ export default function MarketplaceScreen({
     ? adventurer?.gold - upgradeTotalCost
     : 0;
 
-  const underMaxItems = adventurerItems.length < 19;
-
   return (
     <>
-      {underMaxItems ? (
-        <div className="w-full sm:mx-auto overflow-y-auto h-full border border-terminal-green table-scroll">
-          {isLoading.latestMarketItemsQuery && (
-            <div className="flex justify-center p-10 text-center">
-              <LootIconLoader />
-            </div>
-          )}
-          <MarketplaceTable
-            purchaseItems={purchaseItems}
-            setPurchaseItems={setPurchaseItems}
-            upgradeHandler={upgradeHandler}
-            totalCharisma={totalCharisma}
-            calculatedNewGold={calculatedNewGold}
-            adventurerItems={adventurerItems}
-            dropItems={dropItems}
-          />
-        </div>
-      ) : (
-        <div className="flex w-full h-64">
-          <p className="m-auto items-center text-2xl sm:text-4xl animate-pulse">
-            You have a full inventory!
-          </p>
-        </div>
-      )}
+      <div className="w-full sm:mx-auto overflow-y-auto h-full border border-terminal-green table-scroll">
+        {isLoading.latestMarketItemsQuery && (
+          <div className="flex justify-center p-10 text-center">
+            <LootIconLoader />
+          </div>
+        )}
+        <MarketplaceTable
+          purchaseItems={purchaseItems}
+          setPurchaseItems={setPurchaseItems}
+          upgradeHandler={upgradeHandler}
+          totalCharisma={totalCharisma}
+          calculatedNewGold={calculatedNewGold}
+          adventurerItems={adventurerItems}
+          dropItems={dropItems}
+        />
+      </div>
     </>
   );
 }

@@ -4,16 +4,16 @@ version = "0.1.0"
 
 [dependencies]
 starknet.workspace = true
-lootitems = { path = "../loot" }
-survivor = { path = "../adventurer" }
+loot = { path = "../loot" }
+adventurer = { path = "../adventurer" }
 market = { path = "../market" }
 obstacles = { path = "../obstacles" }
-game_entropy = { path = "../game_entropy" }
-game_snapshot = { path = "../game_snapshot" }
-openzeppelin.workspace = true
-golden_token.workspace = true
-arcade_account.workspace = true
+pragma_lib = { git = "https://github.com/astraly-labs/pragma-lib" }
+openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v0.14.0" }
+alexandria_encoding = { git = "https://github.com/keep-starknet-strange/alexandria.git" }
+graffiti = { git = "https://github.com/ponderingdemocritus/graffiti", rev = "bc569531791dbc71c6cd8d9bc154c34eedad31fe" }
 
 [[target.starknet-contract]]
 allowed-libfuncs-list.name = "experimental"
 allowed-libfuncs = true
+casm = true
