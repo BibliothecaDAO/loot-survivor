@@ -90,7 +90,7 @@ const cartridgeConnector = (gameAddress: string, lordsAddress: string) =>
       },
       {
         target: lordsAddress,
-        method: "mint",
+        method: "mint_lords",
       },
     ],
     {
