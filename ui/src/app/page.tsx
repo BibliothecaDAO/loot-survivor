@@ -598,31 +598,10 @@ function Home() {
   }, [adventurer?.level]);
 
   const fetchItemSpecials = async () => {
-    if (entropyReady || onKatana) {
-      const marketItems = (await gameContract!.call("get_market", [
-        adventurer?.id!,
-      ])) as string[];
-      const itemData = [];
-      for (let item of marketItems) {
-        itemData.unshift({
-          item: gameData.ITEMS[parseInt(item)],
-          adventurerId: adventurer?.id,
-          owner: false,
-          equipped: false,
-          ownerAddress: adventurer?.owner,
-          xp: 0,
-          special1: null,
-          special2: null,
-          special3: null,
-          isAvailable: false,
-          purchasedTime: null,
-          timestamp: new Date(),
-        });
-      }
-      setData("latestMarketItemsQuery", {
-        items: itemData,
-      });
-    }
+    const itemsWithSpecials = await refetch("itemsByAdventurerQuery", {
+      id: adventurer?.id,
+    });
+    setData("itemsByAdventurerQuery", itemsWithSpecials);
   };
 
   useEffect(() => {
