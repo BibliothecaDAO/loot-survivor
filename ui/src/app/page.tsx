@@ -628,9 +628,12 @@ function Home() {
   useEffect(() => {
     const fetchEntropy = async () => {
       if (adventurer?.id && fetchUnlocksEntropy) {
-        const entropy = await gameContract!.call("get_item_entropy", [
-          adventurer?.id!,
-        ]);
+        console.log("fetching entropy");
+        const adventurerMeta: any = await gameContract!.call(
+          "get_adventurer_meta",
+          [adventurer?.id!]
+        );
+        const entropy = adventurerMeta.items_special_seed;
         if (entropy !== BigInt(0)) {
           setFetchUnlocksEntropy(false);
           setItemEntropy(BigInt(entropy.toString()));
