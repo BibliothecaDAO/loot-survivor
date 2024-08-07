@@ -65,8 +65,6 @@ export const ProfileDialog = ({
     setTimeout(() => setCopiedEth(false), 2000);
   };
 
-  console.log(controllerAdmin);
-
   return (
     <div className="fixed w-full h-full sm:w-3/4 sm:h-3/4 top-0 sm:top-1/8 bg-terminal-black border border-terminal-green flex flex-col items-center p-10 z-30">
       <button
@@ -188,6 +186,7 @@ export const ProfileDialog = ({
                 setAdventurer(NullAdventurer);
                 setNetwork(undefined);
                 handleOffboarded();
+                setShowProfile(false);
               }}
             >
               Logout
