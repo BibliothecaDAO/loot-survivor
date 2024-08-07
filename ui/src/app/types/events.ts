@@ -9,10 +9,12 @@ type u16 = number;
 type u8 = number;
 
 type AdventurerMetadata = {
-  startBlock: u64;
-  startingStats: Stats;
-  name: u128;
-  interfaceCamel: boolean;
+  birthDate: u64;
+  deathDate: u64;
+  adventurerEntropy: u64;
+  itemSpecialsSeed: u16;
+  rankAtDeath: u8;
+  delayStatReveal: boolean;
 };
 
 type Stats = {
@@ -25,18 +27,7 @@ type Stats = {
   luck: u8;
 };
 
-type LootStatistics = {
-  id: u8;
-  xp: u16;
-  metadata: u8;
-};
-
-type Adventurer = {
-  lastAction: u16;
-  health: u16;
-  xp: u16;
-  stats: Stats;
-  gold: u16;
+type Equipment = {
   weapon: LootStatistics;
   chest: LootStatistics;
   head: LootStatistics;
@@ -45,10 +36,24 @@ type Adventurer = {
   hand: LootStatistics;
   neck: LootStatistics;
   ring: LootStatistics;
+};
+
+type LootStatistics = {
+  id: u8;
+  xp: u16;
+};
+
+type Adventurer = {
+  health: u16;
+  xp: u16;
+  gold: u16;
   beastHealth: u16;
-  statPointsAvailable: u8;
-  actionsPerBlock: u8;
+  statUpgradesAvailable: u8;
+  stats: Stats;
+  equipment: Equipment;
+  battleActionCount: u8;
   mutated: boolean;
+  awaitingItemSpecials: boolean;
 };
 
 type Bag = {
@@ -63,6 +68,10 @@ type Bag = {
   item9: LootStatistics;
   item10: LootStatistics;
   item11: LootStatistics;
+  item12: LootStatistics;
+  item13: LootStatistics;
+  item14: LootStatistics;
+  item15: LootStatistics;
   mutated: boolean;
 };
 
@@ -113,6 +122,7 @@ type ContractAddress = string;
 export type AdventurerState = {
   owner: ContractAddress;
   adventurerId: u128;
+  adventurerEntropy: string;
   adventurer: Adventurer;
 };
 
@@ -138,7 +148,9 @@ type AdventurerStateWithBag = {
 export type StartGameEvent = {
   adventurerState: AdventurerState;
   adventurerMeta: AdventurerMetadata;
-  revealBlock: u64;
+  name: number;
+  goldenTokenId: number;
+  customRenderer: ContractAddress;
 };
 
 export type DiscoveredHealthEvent = {
@@ -154,6 +166,18 @@ export type DiscoveredGoldEvent = {
 export type DiscoveredXPEvent = {
   adventurerState: AdventurerState;
   xpAmount: u16;
+};
+
+export type DiscoveredLootEvent = {
+  adventurerState: AdventurerState;
+  itemId: u16;
+};
+
+export type EquipmentChangedEvent = {
+  adventurerStateWithBag: AdventurerStateWithBag;
+  equippedItems: u8[];
+  baggedItems: u8[];
+  droppedItems: u8[];
 };
 
 export type DodgedObstacleEvent = {
@@ -304,13 +328,6 @@ export type AdventurerLeveledUpEvent = {
 export type UpgradesAvailableEvent = {
   adventurerState: AdventurerState;
   items: number[];
-};
-
-export type IdleDeathPenaltyEvent = {
-  adventurerState: AdventurerState;
-  idleBlocks: u16;
-  penaltyThreshold: u16;
-  caller: ContractAddress;
 };
 
 export type AdventurerUpgradedEvent = {

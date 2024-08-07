@@ -1,10 +1,10 @@
-import { ReactElement, JSXElementConstructor } from "react";
+import { ReactElement, JSXElementConstructor, useMemo } from "react";
 import {
   InvokeTransactionReceiptResponse,
   Contract,
   AccountInterface,
-  GetTransactionReceiptResponse,
-  Provider,
+  RevertedTransactionReceiptResponse,
+  ProviderInterface,
 } from "starknet";
 import { GameData } from "@/app/lib/data/GameData";
 import {
@@ -20,31 +20,31 @@ import {
   Beast,
   SpecialBeast,
   Discovery,
+  PragmaPrice,
 } from "@/app/types";
-import { getKeyFromValue, stringToFelt, indexAddress } from "@/app/lib/utils";
+import {
+  getKeyFromValue,
+  stringToFelt,
+  indexAddress,
+  DataType,
+} from "@/app/lib/utils";
 import { parseEvents } from "@/app/lib/utils/parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
-import Storage from "@/app/lib/storage";
-import { BurnerStorage } from "@/app/types";
 import { Connector } from "@starknet-react/core";
-import {
-  checkArcadeConnector,
-  providerInterfaceCamel,
-} from "@/app/lib/connectors";
+import { checkArcadeConnector } from "@/app/lib/connectors";
 import { QueryData, QueryKey } from "@/app/hooks/useQueryStore";
 import { AdventurerClass } from "@/app/lib/classes";
 import { ScreenPage } from "@/app/hooks/useUIStore";
-import { TRANSACTION_WAIT_RETRY_INTERVAL } from "@/app/lib/constants";
-
-const rpc_addr = process.env.NEXT_PUBLIC_RPC_URL;
-const provider = new Provider({
-  nodeUrl: rpc_addr!,
-});
+import { getWaitRetryInterval } from "@/app/lib/constants";
+import { Network } from "@/app/hooks/useUIStore";
 
 export interface SyscallsProps {
   gameContract: Contract;
+  ethContract: Contract;
   lordsContract: Contract;
   beastsContract: Contract;
+  pragmaContract: Contract;
+  rendererContractAddress: string;
   addTransaction: ({ hash, metadata }: TransactionParams) => void;
   queryData: QueryData;
   resetData: (queryKey?: QueryKey) => void;
@@ -63,7 +63,8 @@ export interface SyscallsProps {
     isArcade: boolean,
     ethBalance: number,
     showTopUpDialog: (show: boolean) => void,
-    setTopUpAccount: (account: string) => void
+    setTopUpAccount: (account: string) => void,
+    network: Network
   ) => Promise<any>;
   startLoading: (
     type: string,
@@ -89,16 +90,18 @@ export interface SyscallsProps {
   ethBalance: bigint;
   showTopUpDialog: (value: boolean) => void;
   setTopUpAccount: (value: string) => void;
-  setEstimatingFee: (value: boolean) => void;
   account: AccountInterface;
-  resetCalls: () => void;
   setSpecialBeastDefeated: (value: boolean) => void;
   setSpecialBeast: (value: SpecialBeast) => void;
   connector?: Connector;
   getEthBalance: () => Promise<void>;
   getBalances: () => Promise<void>;
   setIsMintingLords: (value: boolean) => void;
-  setUpdateDeathPenalty: (value: boolean) => void;
+  setIsWithdrawing: (value: boolean) => void;
+  setEntropyReady: (value: boolean) => void;
+  setFetchUnlocksEntropy: (value: boolean) => void;
+  provider: ProviderInterface;
+  network: Network;
 }
 
 function handleEquip(
@@ -173,10 +176,13 @@ function handleDrop(
   return droppedItems;
 }
 
-export function syscalls({
+export function createSyscalls({
   gameContract,
+  ethContract,
   lordsContract,
   beastsContract,
+  pragmaContract,
+  rendererContractAddress,
   addTransaction,
   account,
   queryData,
@@ -199,58 +205,50 @@ export function syscalls({
   ethBalance,
   showTopUpDialog,
   setTopUpAccount,
-  setEstimatingFee,
-  resetCalls,
   setSpecialBeastDefeated,
   setSpecialBeast,
   connector,
   getEthBalance,
   getBalances,
   setIsMintingLords,
-  setUpdateDeathPenalty,
+  setIsWithdrawing,
+  setEntropyReady,
+  setFetchUnlocksEntropy,
+  provider,
+  network,
 }: SyscallsProps) {
   const gameData = new GameData();
 
-  const updateItemsXP = (adventurerState: Adventurer, itemsXP: number[]) => {
+  const onKatana = network === "localKatana" || network === "katana";
+
+  const updateItemsXP = (
+    adventurerState: Adventurer,
+    itemsXP: number[],
+    items: Item[]
+  ) => {
     const weapon = adventurerState.weapon;
-    const weaponIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
-      (item: Item) => item.item == weapon
-    );
-    const chest = adventurerState.chest;
+    const weaponIndex = items.findIndex((item: Item) => item.item == weapon);
     setData("itemsByAdventurerQuery", itemsXP[0], "xp", weaponIndex);
-    const chestIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
-      (item: Item) => item.item == chest
-    );
+    const chest = adventurerState.chest;
+    const chestIndex = items.findIndex((item: Item) => item.item == chest);
     setData("itemsByAdventurerQuery", itemsXP[1], "xp", chestIndex);
     const head = adventurerState.head;
-    const headIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
-      (item: Item) => item.item == head
-    );
+    const headIndex = items.findIndex((item: Item) => item.item == head);
     setData("itemsByAdventurerQuery", itemsXP[2], "xp", headIndex);
     const waist = adventurerState.waist;
-    const waistIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
-      (item: Item) => item.item == waist
-    );
+    const waistIndex = items.findIndex((item: Item) => item.item == waist);
     setData("itemsByAdventurerQuery", itemsXP[3], "xp", waistIndex);
     const foot = adventurerState.foot;
-    const footIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
-      (item: Item) => item.item == foot
-    );
+    const footIndex = items.findIndex((item: Item) => item.item == foot);
     setData("itemsByAdventurerQuery", itemsXP[4], "xp", footIndex);
     const hand = adventurerState.hand;
-    const handIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
-      (item: Item) => item.item == hand
-    );
+    const handIndex = items.findIndex((item: Item) => item.item == hand);
     setData("itemsByAdventurerQuery", itemsXP[5], "xp", handIndex);
     const neck = adventurerState.neck;
-    const neckIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
-      (item: Item) => item.item == neck
-    );
+    const neckIndex = items.findIndex((item: Item) => item.item == neck);
     setData("itemsByAdventurerQuery", itemsXP[6], "xp", neckIndex);
     const ring = adventurerState.ring;
-    const ringIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
-      (item: Item) => item.item == ring
-    );
+    const ringIndex = items.findIndex((item: Item) => item.item == ring);
     setData("itemsByAdventurerQuery", itemsXP[7], "xp", ringIndex);
   };
 
@@ -276,49 +274,54 @@ export function syscalls({
   const spawn = async (
     formData: FormData,
     goldenTokenId: string,
+    revenueAddress: string,
     costToPlay?: number
   ) => {
-    const storage: BurnerStorage = Storage.get("burners");
-    let interfaceCamel = "";
-    const isArcade = checkArcadeConnector(connector!);
-    if (isArcade) {
-      const walletProvider = storage[account?.address!].masterAccountProvider;
-      interfaceCamel = providerInterfaceCamel(walletProvider);
-    } else {
-      interfaceCamel = providerInterfaceCamel(connector!.id);
-    }
-
-    const approveLordsSpendingTx = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", costToPlay!.toString(), "0"],
-    }; // Approve dynamic LORDS to be spent each time spawn is called based on the get_cost_to_play
-
     const mintAdventurerTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "new_game",
       calldata: [
-        process.env.NEXT_PUBLIC_DAO_ADDRESS ?? "",
+        revenueAddress,
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         stringToFelt(formData.name).toString(),
         goldenTokenId,
         "0",
-        interfaceCamel,
+        "0", // delay_stat_reveal
+        rendererContractAddress,
       ],
     };
 
     addToCalls(mintAdventurerTx);
 
-    const payWithLordsCalls = [
-      ...calls,
-      approveLordsSpendingTx,
-      mintAdventurerTx,
-    ];
+    let spawnCalls = [...calls, mintAdventurerTx];
 
-    const payWithGoldenTokenCalls = [...calls, mintAdventurerTx];
+    if (!onKatana && goldenTokenId === "0") {
+      const result = await pragmaContract.call("get_data_median", [
+        DataType.SpotEntry("19514442401534788"),
+      ]);
+      const dollarToWei = BigInt(1) * BigInt(10) ** BigInt(18);
+      const ethToWei = (result as PragmaPrice).price / BigInt(10) ** BigInt(8);
+      const dollarPrice = dollarToWei / ethToWei;
 
-    const spawnCalls =
-      goldenTokenId === "0" ? payWithLordsCalls : payWithGoldenTokenCalls;
+      const approvePragmaEthSpendingTx = {
+        contractAddress: ethContract?.address ?? "",
+        entrypoint: "approve",
+        calldata: [gameContract?.address ?? "", dollarPrice!.toString(), "0"],
+      };
+
+      const approveLordsSpendingTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "approve",
+        calldata: [gameContract?.address ?? "", costToPlay!.toString(), "0"],
+      };
+
+      spawnCalls = [
+        ...calls,
+        approvePragmaEthSpendingTx,
+        approveLordsSpendingTx,
+        mintAdventurerTx,
+      ];
+    }
 
     startLoading(
       "Create",
@@ -326,6 +329,8 @@ export function syscalls({
       "adventurersByOwnerQuery",
       undefined
     );
+
+    const isArcade = checkArcadeConnector(connector!);
     try {
       const tx = await handleSubmitCalls(
         account,
@@ -333,7 +338,8 @@ export function syscalls({
         isArcade,
         Number(ethBalance),
         showTopUpDialog,
-        setTopUpAccount
+        setTopUpAccount,
+        network
       );
       addTransaction({
         hash: tx?.transaction_hash,
@@ -341,17 +347,16 @@ export function syscalls({
           method: `Spawn ${formData.name}`,
         },
       });
-
       const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
-        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
+        retryInterval: getWaitRetryInterval(network!),
       });
       // Handle if the tx was reverted
       if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
+        (receipt as RevertedTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
+          (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
       // Here we need to process the StartGame event first and use the output for AmbushedByBeast event
@@ -419,7 +424,7 @@ export function syscalls({
       stopLoading(`You have spawned ${formData.name}!`, false, "Create");
       setAdventurer(adventurerState);
       setScreen("play");
-      getEthBalance();
+      !onKatana && getEthBalance();
     } catch (e) {
       console.log(e);
       stopLoading(e, true);
@@ -448,7 +453,8 @@ export function syscalls({
         isArcade,
         Number(ethBalance),
         showTopUpDialog,
-        setTopUpAccount
+        setTopUpAccount,
+        network
       );
       setTxHash(tx?.transaction_hash);
       addTransaction({
@@ -458,15 +464,15 @@ export function syscalls({
         },
       });
       const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
-        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
+        retryInterval: getWaitRetryInterval(network!),
       });
       // Handle if the tx was reverted
       if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
+        (receipt as RevertedTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
+          (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
       const events = await parseEvents(
@@ -491,22 +497,18 @@ export function syscalls({
         (item: Item) =>
           !unequippedItems.some((droppedItem) => droppedItem.item == item.item)
       );
-      const filteredDrops = [
-        ...(filteredUnequips ?? []),
-        ...equippedItems,
-        ...unequippedItems,
-      ]?.filter((item: Item) => !droppedItems.includes(item.item ?? ""));
-      setData("itemsByAdventurerQuery", {
-        items: [...filteredDrops],
-      });
 
       const discoveries: Discovery[] = [];
+
+      let discoveredLootEquipped = [];
+      let discoveredLootBagged = [];
 
       const filteredDiscoveries = events.filter(
         (event) =>
           event.name === "DiscoveredHealth" ||
           event.name === "DiscoveredGold" ||
           event.name === "DiscoveredXP" ||
+          event.name === "DiscoveredLoot" ||
           event.name === "DodgedObstacle" ||
           event.name === "HitByObstacle"
       );
@@ -517,42 +519,77 @@ export function syscalls({
           });
           setAdventurer(discovery.data[0]);
           discoveries.unshift(discovery.data[1]);
-          if (
-            discovery.name === "DodgedObstacle" ||
-            discovery.name === "HitByObstacle"
-          ) {
-            updateItemsXP(discovery.data[0], discovery.data[2]);
-            const itemsLeveledUpEvents = events.filter(
-              (event) => event.name === "ItemsLeveledUp"
+          if (discovery.name === "DiscoveredLoot") {
+            const filteredEquipmentChangedEvents = events.filter(
+              (event) => event.name === "EquipmentChanged"
             );
-            for (let itemsLeveledUpEvent of itemsLeveledUpEvents) {
-              for (let itemLeveled of itemsLeveledUpEvent.data[1]) {
-                const ownedItemIndex =
-                  queryData.itemsByAdventurerQuery?.items.findIndex(
-                    (item: Item) => item.item == itemLeveled.item
-                  );
-                if (itemLeveled.suffixUnlocked) {
-                  setData(
-                    "itemsByAdventurerQuery",
-                    itemLeveled.special1,
-                    "special1",
-                    ownedItemIndex
-                  );
-                }
-                if (itemLeveled.prefixesUnlocked) {
-                  setData(
-                    "itemsByAdventurerQuery",
-                    itemLeveled.special2,
-                    "special2",
-                    ownedItemIndex
-                  );
-                  setData(
-                    "itemsByAdventurerQuery",
-                    itemLeveled.special3,
-                    "special3",
-                    ownedItemIndex
-                  );
-                }
+            for (let filteredEquipmentChangedEvent of filteredEquipmentChangedEvents) {
+              discoveredLootEquipped.push(
+                ...filteredEquipmentChangedEvent.data[1]
+              );
+              discoveredLootBagged.push(
+                ...filteredEquipmentChangedEvent.data[2]
+              );
+            }
+          }
+        }
+      }
+
+      const filteredDrops = [
+        ...(filteredUnequips ?? []),
+        ...equippedItems,
+        ...unequippedItems,
+      ]?.filter((item: Item) => !droppedItems.includes(item.item ?? ""));
+      setData("itemsByAdventurerQuery", {
+        items: [
+          ...filteredDrops,
+          ...discoveredLootEquipped,
+          ...discoveredLootBagged,
+        ],
+      });
+
+      const filteredObstacles = events.filter(
+        (event) =>
+          event.name === "DodgedObstacle" || event.name === "HitByObstacle"
+      );
+      if (filteredObstacles.length > 0) {
+        for (let discovery of filteredObstacles) {
+          updateItemsXP(discovery.data[0], discovery.data[2], [
+            ...filteredDrops,
+            ...discoveredLootEquipped,
+            ...discoveredLootBagged,
+          ]);
+          const itemsLeveledUpEvents = events.filter(
+            (event) => event.name === "ItemsLeveledUp"
+          );
+          for (let itemsLeveledUpEvent of itemsLeveledUpEvents) {
+            for (let itemLeveled of itemsLeveledUpEvent.data[1]) {
+              const ownedItemIndex =
+                queryData.itemsByAdventurerQuery?.items.findIndex(
+                  (item: Item) => item.item == itemLeveled.item
+                );
+              if (itemLeveled.suffixUnlocked) {
+                setData(
+                  "itemsByAdventurerQuery",
+                  itemLeveled.special1,
+                  "special1",
+                  ownedItemIndex
+                );
+                setFetchUnlocksEntropy(true);
+              }
+              if (itemLeveled.prefixesUnlocked) {
+                setData(
+                  "itemsByAdventurerQuery",
+                  itemLeveled.special2,
+                  "special2",
+                  ownedItemIndex
+                );
+                setData(
+                  "itemsByAdventurerQuery",
+                  itemLeveled.special3,
+                  "special3",
+                  ownedItemIndex
+                );
               }
             }
           }
@@ -596,19 +633,6 @@ export function syscalls({
         }
       }
 
-      const idleDeathPenaltyEvents = events.filter(
-        (event) => event.name === "IdleDeathPenalty"
-      );
-      if (idleDeathPenaltyEvents.length > 0) {
-        for (let idleDeathPenaltyEvent of idleDeathPenaltyEvents) {
-          setData("adventurerByIdQuery", {
-            adventurers: [idleDeathPenaltyEvent.data[0]],
-          });
-          setAdventurer(idleDeathPenaltyEvent.data[0]);
-          discoveries.unshift(idleDeathPenaltyEvent.data[2]);
-        }
-      }
-
       const reversedDiscoveries = discoveries.slice().reverse();
 
       const adventurerDiedEvents = events.filter(
@@ -618,23 +642,14 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });
-        const deadAdventurerIndex =
-          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
-            (adventurer: Adventurer) =>
-              adventurer.id == adventurerDiedEvent.data[0].id
-          );
-        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
         setAdventurer(adventurerDiedEvent.data[0]);
         const killedByObstacle =
           reversedDiscoveries[0]?.discoveryType == "Obstacle" &&
           reversedDiscoveries[0]?.adventurerHealth == 0;
-        const killedByPenalty =
-          !reversedDiscoveries[0]?.discoveryType &&
-          reversedDiscoveries[0]?.adventurerHealth == 0;
         const killedByAmbush =
           reversedDiscoveries[0]?.ambushed &&
           reversedDiscoveries[0]?.adventurerHealth == 0;
-        if (killedByObstacle || killedByPenalty || killedByAmbush) {
+        if (killedByObstacle || killedByAmbush) {
           setDeathNotification(
             "Explore",
             discoveries.reverse(),
@@ -645,37 +660,10 @@ export function syscalls({
         setStartOption("create adventurer");
       }
 
-      const upgradesAvailableEvents = events.filter(
-        (event) => event.name === "UpgradesAvailable"
+      const leveledUpEvents = events.filter(
+        (event) => event.name === "AdventurerLeveledUp"
       );
-      if (upgradesAvailableEvents.length > 0) {
-        for (let upgradesAvailableEvent of upgradesAvailableEvents) {
-          setData("adventurerByIdQuery", {
-            adventurers: [upgradesAvailableEvent.data[0]],
-          });
-          setAdventurer(upgradesAvailableEvent.data[0]);
-          const newItems = upgradesAvailableEvent.data[1];
-          const itemData = [];
-          for (let newItem of newItems) {
-            itemData.unshift({
-              item: newItem,
-              adventurerId: upgradesAvailableEvent.data[0]["id"],
-              owner: false,
-              equipped: false,
-              ownerAddress: upgradesAvailableEvent.data[0]["owner"],
-              xp: 0,
-              special1: null,
-              special2: null,
-              special3: null,
-              isAvailable: false,
-              purchasedTime: null,
-              timestamp: new Date(),
-            });
-          }
-          setData("latestMarketItemsQuery", {
-            items: itemData,
-          });
-        }
+      if (leveledUpEvents.length > 0) {
         setScreen("upgrade");
       }
 
@@ -692,8 +680,7 @@ export function syscalls({
       setEquipItems([]);
       setDropItems([]);
       stopLoading(reversedDiscoveries, false, "Explore");
-      getEthBalance();
-      setUpdateDeathPenalty(true);
+      !onKatana && getEthBalance();
     } catch (e) {
       console.log(e);
       stopLoading(e, true);
@@ -702,11 +689,12 @@ export function syscalls({
 
   const attack = async (tillDeath: boolean, beastData: Beast) => {
     resetData("latestMarketItemsQuery");
-    const attackTx = {
+    const attackTx: Call = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "attack",
       calldata: [adventurer?.id?.toString() ?? "", tillDeath ? "1" : "0"],
     };
+
     addToCalls(attackTx);
 
     const isArcade = checkArcadeConnector(connector!);
@@ -718,7 +706,8 @@ export function syscalls({
         isArcade,
         Number(ethBalance),
         showTopUpDialog,
-        setTopUpAccount
+        setTopUpAccount,
+        network
       );
       setTxHash(tx?.transaction_hash);
       addTransaction({
@@ -728,15 +717,15 @@ export function syscalls({
         },
       });
       const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
-        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
+        retryInterval: getWaitRetryInterval(network!),
       });
       // Handle if the tx was reverted
       if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
+        (receipt as RevertedTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
+          (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
       // reset battles by tx hash
@@ -804,7 +793,9 @@ export function syscalls({
         });
         setAdventurer(slayedBeastEvent.data[0]);
         battles.unshift(slayedBeastEvent.data[1]);
-        updateItemsXP(slayedBeastEvent.data[0], slayedBeastEvent.data[2]);
+        updateItemsXP(slayedBeastEvent.data[0], slayedBeastEvent.data[2], [
+          ...filteredDrops,
+        ]);
         setData(
           "beastQuery",
           slayedBeastEvent.data[0].beastHealth,
@@ -827,6 +818,7 @@ export function syscalls({
                 "special1",
                 ownedItemIndex
               );
+              setFetchUnlocksEntropy(true);
             }
             if (itemLeveled.prefixesUnlocked) {
               setData(
@@ -862,19 +854,6 @@ export function syscalls({
         }
       }
 
-      const idleDeathPenaltyEvents = events.filter(
-        (event) => event.name === "IdleDeathPenalty"
-      );
-      if (idleDeathPenaltyEvents.length > 0) {
-        for (let idleDeathPenaltyEvent of idleDeathPenaltyEvents) {
-          setData("adventurerByIdQuery", {
-            adventurers: [idleDeathPenaltyEvent.data[0]],
-          });
-          setAdventurer(idleDeathPenaltyEvent.data[0]);
-          battles.unshift(idleDeathPenaltyEvent.data[1]);
-        }
-      }
-
       const reversedBattles = battles.slice().reverse();
 
       const adventurerDiedEvents = events.filter(
@@ -884,20 +863,11 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });
-        const deadAdventurerIndex =
-          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
-            (adventurer: Adventurer) =>
-              adventurer.id == adventurerDiedEvent.data[0].id
-          );
-        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
         setAdventurer(adventurerDiedEvent.data[0]);
         const killedByBeast = battles.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );
-        const killedByPenalty = battles.some(
-          (battle) => !battle.attacker && battle.adventurerHealth == 0
-        );
-        if (killedByBeast || killedByPenalty) {
+        if (killedByBeast) {
           setDeathNotification(
             "Attack",
             reversedBattles,
@@ -908,37 +878,10 @@ export function syscalls({
         setStartOption("create adventurer");
       }
 
-      const upgradesAvailableEvents = events.filter(
-        (event) => event.name === "UpgradesAvailable"
+      const leveledUpEvents = events.filter(
+        (event) => event.name === "AdventurerLeveledUp"
       );
-      if (upgradesAvailableEvents.length > 0) {
-        for (let upgradesAvailableEvent of upgradesAvailableEvents) {
-          setData("adventurerByIdQuery", {
-            adventurers: [upgradesAvailableEvent.data[0]],
-          });
-          setAdventurer(upgradesAvailableEvent.data[0]);
-          const newItems = upgradesAvailableEvent.data[1];
-          const itemData = [];
-          for (let newItem of newItems) {
-            itemData.unshift({
-              item: newItem,
-              adventurerId: upgradesAvailableEvent.data[0]["id"],
-              owner: false,
-              equipped: false,
-              ownerAddress: upgradesAvailableEvent.data[0]["owner"],
-              xp: 0,
-              special1: null,
-              special2: null,
-              special3: null,
-              isAvailable: false,
-              purchasedTime: null,
-              timestamp: new Date(),
-            });
-          }
-          setData("latestMarketItemsQuery", {
-            items: itemData,
-          });
-        }
+      if (leveledUpEvents.length > 0) {
         setScreen("upgrade");
       }
 
@@ -961,8 +904,8 @@ export function syscalls({
       stopLoading(reversedBattles, false, "Attack");
       setEquipItems([]);
       setDropItems([]);
-      getEthBalance();
-      setUpdateDeathPenalty(true);
+      !onKatana && getEthBalance();
+      setEntropyReady(false);
     } catch (e) {
       console.log(e);
       stopLoading(e, true);
@@ -986,7 +929,8 @@ export function syscalls({
         isArcade,
         Number(ethBalance),
         showTopUpDialog,
-        setTopUpAccount
+        setTopUpAccount,
+        network
       );
       setTxHash(tx?.transaction_hash);
       addTransaction({
@@ -996,15 +940,15 @@ export function syscalls({
         },
       });
       const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
-        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
+        retryInterval: getWaitRetryInterval(network!),
       });
       // Handle if the tx was reverted
       if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
+        (receipt as RevertedTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
+          (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
       // Add optimistic data
@@ -1064,19 +1008,6 @@ export function syscalls({
         battles.unshift(fleeSucceededEvent.data[1]);
       }
 
-      const idleDeathPenaltyEvents = events.filter(
-        (event) => event.name === "IdleDeathPenalty"
-      );
-      if (idleDeathPenaltyEvents.length > 0) {
-        for (let idleDeathPenaltyEvent of idleDeathPenaltyEvents) {
-          setData("adventurerByIdQuery", {
-            adventurers: [idleDeathPenaltyEvent.data[0]],
-          });
-          setAdventurer(idleDeathPenaltyEvent.data[0]);
-          battles.unshift(idleDeathPenaltyEvent.data[1]);
-        }
-      }
-
       const reversedBattles = battles.slice().reverse();
 
       const adventurerDiedEvents = events.filter(
@@ -1086,20 +1017,11 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });
-        const deadAdventurerIndex =
-          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
-            (adventurer: Adventurer) =>
-              adventurer.id == adventurerDiedEvent.data[0].id
-          );
-        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
         setAdventurer(adventurerDiedEvent.data[0]);
         const killedByBeast = battles.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );
-        const killedByPenalty = battles.some(
-          (battle) => !battle.attacker && battle.adventurerHealth == 0
-        );
-        if (killedByBeast || killedByPenalty) {
+        if (killedByBeast) {
           setDeathNotification(
             "Flee",
             reversedBattles,
@@ -1110,33 +1032,10 @@ export function syscalls({
         setStartOption("create adventurer");
       }
 
-      const upgradesAvailableEvents = events.filter(
-        (event) => event.name === "UpgradesAvailable"
+      const leveledUpEvents = events.filter(
+        (event) => event.name === "AdventurerLeveledUp"
       );
-      if (upgradesAvailableEvents.length > 0) {
-        for (let upgradesAvailableEvent of upgradesAvailableEvents) {
-          const newItems = upgradesAvailableEvent.data[1];
-          const itemData = [];
-          for (let newItem of newItems) {
-            itemData.unshift({
-              item: newItem,
-              adventurerId: upgradesAvailableEvent.data[0]["id"],
-              owner: false,
-              equipped: false,
-              ownerAddress: upgradesAvailableEvent.data[0]["owner"],
-              xp: 0,
-              special1: null,
-              special2: null,
-              special3: null,
-              isAvailable: false,
-              purchasedTime: null,
-              timestamp: new Date(),
-            });
-          }
-          setData("latestMarketItemsQuery", {
-            items: itemData,
-          });
-        }
+      if (leveledUpEvents.length > 0) {
         setScreen("upgrade");
       }
 
@@ -1158,8 +1057,7 @@ export function syscalls({
       stopLoading(reversedBattles, false, "Flee");
       setEquipItems([]);
       setDropItems([]);
-      getEthBalance();
-      setUpdateDeathPenalty(true);
+      !onKatana && getEthBalance();
     } catch (e) {
       console.log(e);
       stopLoading(e, true);
@@ -1192,7 +1090,8 @@ export function syscalls({
         isArcade,
         Number(ethBalance),
         showTopUpDialog,
-        setTopUpAccount
+        setTopUpAccount,
+        network
       );
       setTxHash(tx?.transaction_hash);
       addTransaction({
@@ -1202,15 +1101,15 @@ export function syscalls({
         },
       });
       const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
-        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
+        retryInterval: getWaitRetryInterval(network!),
       });
       // Handle if the tx was reverted
       if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
+        (receipt as RevertedTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
+          (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
       // Add optimistic data
@@ -1260,6 +1159,14 @@ export function syscalls({
             item.equipped = true;
           }
         }
+        for (let unequippedItem of equippedItemsEvent.data[2]) {
+          let item = purchasedItems.find(
+            (item) => gameData.ITEMS[parseInt(item.item)] === unequippedItem
+          );
+          if (item) {
+            item.equipped = false;
+          }
+        }
       }
 
       const filteredEquips = queryData.itemsByAdventurerQuery?.items?.filter(
@@ -1268,7 +1175,9 @@ export function syscalls({
       );
       const filteredUnequips = filteredEquips?.filter(
         (item: Item) =>
-          !unequippedItems.some((droppedItem) => droppedItem.item == item.item)
+          !unequippedItems.some(
+            (unequippedItem) => unequippedItem.item == item.item
+          )
       );
       const filteredDrops = [
         ...(filteredUnequips ?? []),
@@ -1279,128 +1188,24 @@ export function syscalls({
         items: [...filteredDrops, ...purchasedItems],
       });
 
-      const adventurerDiedEvents = events.filter(
-        (event) => event.name === "AdventurerDied"
-      );
-      if (adventurerDiedEvents.length > 0) {
-        for (let adventurerDiedEvent of adventurerDiedEvents) {
-          setData("adventurerByIdQuery", {
-            adventurers: [adventurerDiedEvent.data[0]],
-          });
-          const deadAdventurerIndex =
-            queryData.adventurersByOwnerQuery?.adventurers.findIndex(
-              (adventurer: Adventurer) =>
-                adventurer.id == adventurerDiedEvent.data[0].id
-            );
-          setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
-          setAdventurer(adventurerDiedEvent.data[0]);
-          setDeathNotification("Upgrade", "Death Penalty");
-          setScreen("start");
-          setStartOption("create adventurer");
-        }
-      }
-
       // Reset items to no availability
       setData("latestMarketItemsQuery", null);
-      if (events.some((event) => event.name === "AdventurerDied")) {
-        setScreen("start");
-        setStartOption("create adventurer");
-        stopLoading("Death Penalty");
-      } else {
-        stopLoading(
-          {
-            Stats: upgrades,
-            Items: purchaseItems,
-            Potions: potionAmount,
-          },
-          false,
-          "Upgrade"
-        );
-        setScreen("play");
-      }
-      getEthBalance();
-      setUpdateDeathPenalty(true);
+      stopLoading(
+        {
+          Stats: upgrades,
+          Items: purchaseItems,
+          Potions: potionAmount,
+        },
+        false,
+        "Upgrade"
+      );
+      setScreen("play");
+
+      !onKatana && getEthBalance();
+      setEntropyReady(false);
     } catch (e) {
       console.log(e);
       stopLoading(e, true);
-    }
-  };
-
-  const slayIdles = async (slayAdventurers: string[]) => {
-    const slayIdleAdventurersTx = {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "slay_idle_adventurers",
-      calldata: [slayAdventurers.length, ...slayAdventurers],
-      metadata: `Slaying all Adventurers`,
-    };
-    addToCalls(slayIdleAdventurersTx);
-
-    const isArcade = checkArcadeConnector(connector!);
-    startLoading("Slay All Idles", "Slaying All Idles", undefined, undefined);
-    try {
-      const tx = await handleSubmitCalls(
-        account,
-        [...calls, slayIdleAdventurersTx],
-        isArcade,
-        Number(ethBalance),
-        showTopUpDialog,
-        setTopUpAccount
-      );
-      setTxHash(tx?.transaction_hash);
-      addTransaction({
-        hash: tx?.transaction_hash,
-        metadata: {
-          method: `Upgrade`,
-        },
-      });
-      const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
-        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
-      });
-      // Handle if the tx was reverted
-      if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
-        "REVERTED"
-      ) {
-        throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
-        );
-      }
-      const events = await parseEvents(
-        receipt as InvokeTransactionReceiptResponse,
-        queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
-      );
-
-      // If there are any equip or drops, do them first
-      const { equippedItems, unequippedItems } = handleEquip(
-        events,
-        setData,
-        setAdventurer,
-        queryData
-      );
-      const droppedItems = handleDrop(events, setData, setAdventurer);
-
-      const filteredEquips = queryData.itemsByAdventurerQuery?.items?.filter(
-        (item: Item) =>
-          !equippedItems.some((equippedItem) => equippedItem.item == item.item)
-      );
-      const filteredUnequips = filteredEquips?.filter(
-        (item: Item) =>
-          !unequippedItems.some((droppedItem) => droppedItem.item == item.item)
-      );
-      const filteredDrops = [
-        ...(filteredUnequips ?? []),
-        ...equippedItems,
-        ...unequippedItems,
-      ]?.filter((item: Item) => !droppedItems.includes(item.item ?? ""));
-      setData("itemsByAdventurerQuery", {
-        items: [...filteredDrops],
-      });
-
-      stopLoading(`You have slain all idle adventurers!`);
-      getEthBalance();
-    } catch (e) {
-      console.log(e);
-      stopLoading(`You have slain all idle adventurers!`);
     }
   };
 
@@ -1429,7 +1234,8 @@ export function syscalls({
         isArcade,
         Number(ethBalance),
         showTopUpDialog,
-        setTopUpAccount
+        setTopUpAccount,
+        network
       );
       setTxHash(tx?.transaction_hash);
       addTransaction({
@@ -1439,114 +1245,21 @@ export function syscalls({
         },
       });
       const receipt = await provider?.waitForTransaction(tx?.transaction_hash, {
-        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
+        retryInterval: getWaitRetryInterval(network!),
       });
       // Handle if the tx was reverted
       if (
-        (receipt as GetTransactionReceiptResponse).execution_status ===
+        (receipt as RevertedTransactionReceiptResponse).execution_status ===
         "REVERTED"
       ) {
         throw new Error(
-          (receipt as GetTransactionReceiptResponse).revert_reason
+          (receipt as RevertedTransactionReceiptResponse).revert_reason
         );
       }
       const events = await parseEvents(
         receipt as InvokeTransactionReceiptResponse,
         queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
       );
-
-      const equippedItemsEvents = events.filter(
-        (event) => event.name === "EquippedItems"
-      );
-      // Equip items that are not purchases
-      for (let equippedItemsEvent of equippedItemsEvents) {
-        setData("adventurerByIdQuery", {
-          adventurers: [equippedItemsEvent.data[0]],
-        });
-        setAdventurer(equippedItemsEvent.data[0]);
-      }
-
-      const battles = [];
-      // Handle the beast counterattack from swapping
-      const attackedBeastEvents = events.filter(
-        (event) => event.name === "AttackedByBeast"
-      );
-      for (let attackedBeastEvent of attackedBeastEvents) {
-        setData("adventurerByIdQuery", {
-          adventurers: [attackedBeastEvent.data[0]],
-        });
-        setAdventurer(attackedBeastEvent.data[0]);
-        battles.unshift(attackedBeastEvent.data[1]);
-        setData(
-          "beastQuery",
-          attackedBeastEvent.data[0].beastHealth,
-          "health",
-          0
-        );
-      }
-
-      const droppedItemsEvents = events.filter(
-        (event) => event.name === "DroppedItems"
-      );
-      for (let droppedItemsEvent of droppedItemsEvents) {
-        setData("adventurerByIdQuery", {
-          adventurers: [droppedItemsEvent.data[0]],
-        });
-        setAdventurer(droppedItemsEvent.data[0]);
-      }
-
-      const adventurerDiedEvents = events.filter(
-        (event) => event.name === "AdventurerDied"
-      );
-      for (let adventurerDiedEvent of adventurerDiedEvents) {
-        if (
-          adventurerDiedEvent.data[1].callerAddress ===
-          adventurerDiedEvent.data[0].owner
-        ) {
-          setData("adventurerByIdQuery", {
-            adventurers: [adventurerDiedEvent.data[0]],
-          });
-          const deadAdventurerIndex =
-            queryData.adventurersByOwnerQuery?.adventurers.findIndex(
-              (adventurer: Adventurer) =>
-                adventurer.id == adventurerDiedEvent.data[0].id
-            );
-          setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
-          setAdventurer(adventurerDiedEvent.data[0]);
-          const killedByBeast = battles.some(
-            (battle) =>
-              battle.attacker == "Beast" && battle.adventurerHealth == 0
-          );
-          // In a multicall someone can either die from swapping inventory or the death penalty. Here we handle those cases
-          if (killedByBeast) {
-            setDeathNotification(
-              "Multicall",
-              ["You equipped"],
-              adventurerDiedEvent.data[0]
-            );
-          } else {
-            setDeathNotification("Upgrade", "Death Penalty");
-          }
-          setScreen("start");
-          setStartOption("create adventurer");
-        }
-      }
-
-      setData("battlesByBeastQuery", {
-        battles: [
-          ...battles,
-          ...(queryData.battlesByBeastQuery?.battles ?? []),
-        ],
-      });
-      setData("battlesByAdventurerQuery", {
-        battles: [
-          ...battles,
-          ...(queryData.battlesByAdventurerQuery?.battles ?? []),
-        ],
-      });
-      setData("battlesByTxHashQuery", {
-        battles: [...battles.reverse()],
-      });
 
       // Handle upgrade
       const upgradeEvents = events.filter(
@@ -1561,7 +1274,6 @@ export function syscalls({
         // Reset items to no availability
         setData("latestMarketItemsQuery", null);
         setScreen("play");
-        setUpdateDeathPenalty(true);
       }
 
       const droppedItems = handleDrop(events, setData, setAdventurer);
@@ -1582,6 +1294,9 @@ export function syscalls({
         setData,
         setAdventurer,
         queryData
+      );
+      const equippedItemsEvents = events.filter(
+        (event) => event.name === "EquippedItems"
       );
       for (let equippedItemsEvent of equippedItemsEvents) {
         for (let equippedItem of equippedItemsEvent.data[1]) {
@@ -1608,19 +1323,82 @@ export function syscalls({
         items: [...filteredDrops, ...purchasedItems],
       });
 
+      const battles = [];
+      // Handle the beast counterattack from swapping
+      const attackedBeastEvents = events.filter(
+        (event) => event.name === "AttackedByBeast"
+      );
+      for (let attackedBeastEvent of attackedBeastEvents) {
+        setData("adventurerByIdQuery", {
+          adventurers: [attackedBeastEvent.data[0]],
+        });
+        setAdventurer(attackedBeastEvent.data[0]);
+        battles.unshift(attackedBeastEvent.data[1]);
+        setData(
+          "beastQuery",
+          attackedBeastEvent.data[0].beastHealth,
+          "health",
+          0
+        );
+      }
+
+      const adventurerDiedEvents = events.filter(
+        (event) => event.name === "AdventurerDied"
+      );
+      for (let adventurerDiedEvent of adventurerDiedEvents) {
+        if (
+          adventurerDiedEvent.data[1].callerAddress ===
+          adventurerDiedEvent.data[0].owner
+        ) {
+          setData("adventurerByIdQuery", {
+            adventurers: [adventurerDiedEvent.data[0]],
+          });
+          setAdventurer(adventurerDiedEvent.data[0]);
+          const killedByBeast = battles.some(
+            (battle) =>
+              battle.attacker == "Beast" && battle.adventurerHealth == 0
+          );
+          if (killedByBeast) {
+            setDeathNotification(
+              "Multicall",
+              ["You equipped"],
+              adventurerDiedEvent.data[0]
+            );
+          }
+          setScreen("start");
+          setStartOption("create adventurer");
+        }
+      }
+
+      setData("battlesByBeastQuery", {
+        battles: [
+          ...battles,
+          ...(queryData.battlesByBeastQuery?.battles ?? []),
+        ],
+      });
+      setData("battlesByAdventurerQuery", {
+        battles: [
+          ...battles,
+          ...(queryData.battlesByAdventurerQuery?.battles ?? []),
+        ],
+      });
+      setData("battlesByTxHashQuery", {
+        battles: [...battles.reverse()],
+      });
+
       stopLoading(notification, false, "Multicall");
-      getEthBalance();
+      !onKatana && getEthBalance();
     } catch (e) {
       console.log(e);
       stopLoading(e, true);
     }
   };
 
-  const mintLords = async (lordsAmount: number) => {
+  const mintLords = async () => {
     const mintLords: Call = {
       contractAddress: lordsContract?.address ?? "",
-      entrypoint: "mint",
-      calldata: [account?.address ?? "0x0", lordsAmount.toString(), "0"],
+      entrypoint: "mint_lords",
+      calldata: [],
     };
     const isArcade = checkArcadeConnector(connector!);
     try {
@@ -1631,10 +1409,11 @@ export function syscalls({
         isArcade,
         Number(ethBalance),
         showTopUpDialog,
-        setTopUpAccount
+        setTopUpAccount,
+        network
       );
       const result = await provider?.waitForTransaction(tx?.transaction_hash, {
-        retryInterval: TRANSACTION_WAIT_RETRY_INTERVAL,
+        retryInterval: getWaitRetryInterval(network!),
       });
 
       if (!result) {
@@ -1649,14 +1428,75 @@ export function syscalls({
     }
   };
 
+  const withdraw = async (
+    adminAccountAddress: string,
+    account: AccountInterface,
+    ethBalance: bigint,
+    lordsBalance: bigint
+  ) => {
+    try {
+      setIsWithdrawing(true);
+
+      const transferEthTx = {
+        contractAddress: ethContract?.address ?? "",
+        entrypoint: "transfer",
+        calldata: [adminAccountAddress, ethBalance ?? "0x0", "0x0"],
+      };
+
+      const transferLordsTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "transfer",
+        calldata: [adminAccountAddress, lordsBalance ?? "0x0", "0x0"],
+      };
+
+      // const maxFee = getMaxFee(network!);
+
+      // const transferEthTx = {
+      //   contractAddress: ethContract?.address ?? "",
+      //   entrypoint: "transfer",
+      //   calldata: CallData.compile([
+      //     masterAccountAddress,
+      //     newEthBalance ?? "0x0",
+      //     "0x0",
+      //   ]),
+      // };
+
+      // If they have Lords also withdraw
+      const calls =
+        lordsBalance > BigInt(0)
+          ? [transferEthTx, transferLordsTx]
+          : [transferEthTx];
+
+      const { transaction_hash } = await account.execute(calls);
+
+      const result = await provider.waitForTransaction(transaction_hash, {
+        retryInterval: getWaitRetryInterval(network!),
+      });
+
+      if (!result) {
+        throw new Error("Transaction did not complete successfully.");
+      }
+
+      setIsWithdrawing(false);
+      getBalances();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
   return {
     spawn,
     explore,
     attack,
     flee,
     upgrade,
-    slayIdles,
     multicall,
     mintLords,
+    withdraw,
   };
+}
+
+// Then, create a custom Hook that uses the syscalls function
+export function useSyscalls(props: SyscallsProps) {
+  return useMemo(() => createSyscalls(props), [props]);
 }

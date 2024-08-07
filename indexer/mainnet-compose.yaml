@@ -31,7 +31,7 @@ services:
     restart: always
     command:
       - run
-      - --allow-env=/data/env-mainnet
+      - --allow-env=/data/env-sepolia
       - /data/src/adventurers.ts
     volumes:
       - ./:/data/
@@ -49,7 +49,7 @@ services:
     restart: always
     command:
       - run
-      - --allow-env=/data/env-mainnet
+      - --allow-env=/data/env-sepolia
       - /data/src/battles.ts
     volumes:
       - ./:/data/
@@ -67,7 +67,7 @@ services:
     restart: always
     command:
       - run
-      - --allow-env=/data/env-mainnet
+      - --allow-env=/data/env-sepolia
       - /data/src/beasts.ts
     volumes:
       - ./:/data/
@@ -85,7 +85,7 @@ services:
     restart: always
     command:
       - run
-      - --allow-env=/data/env-mainnet
+      - --allow-env=/data/env-sepolia
       - /data/src/discoveries.ts
     volumes:
       - ./:/data/
@@ -103,7 +103,7 @@ services:
     restart: always
     command:
       - run
-      - --allow-env=/data/env-mainnet
+      - --allow-env=/data/env-sepolia
       - /data/src/items.ts
     volumes:
       - ./:/data/
@@ -121,7 +121,7 @@ services:
     restart: always
     command:
       - run
-      - --allow-env=/data/env-mainnet
+      - --allow-env=/data/env-sepolia
       - /data/src/scores.ts
     volumes:
       - ./:/data/

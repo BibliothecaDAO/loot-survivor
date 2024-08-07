@@ -6,14 +6,11 @@ import {
   ADVENTURER_UPGRADED,
   DISCOVERED_GOLD,
   DISCOVERED_HEALTH,
-  DISCOVERED_XP,
   parseAdventurerUpgraded,
   parseDiscoveredGold,
   parseDiscoveredHealth,
-  parseDiscoveredXp,
   parseStartGame,
   START_GAME,
-  PURCHASED_POTIONS,
   PURCHASED_ITEMS,
   ATTACKED_BY_BEAST,
   ADVENTURER_DIED,
@@ -43,9 +40,18 @@ import {
   parseUpgradesAvailable,
   DISCOVERED_BEAST,
   parseDiscoveredBeast,
+  DISCOVERED_LOOT,
+  parseDiscoveredLoot,
+  TRANSFER,
+  parseTransfer,
 } from "./utils/events.ts";
-import { insertAdventurer, updateAdventurer } from "./utils/helpers.ts";
+import {
+  insertAdventurer,
+  updateAdventurer,
+  updateAdventurerOwner,
+} from "./utils/helpers.ts";
 import { MONGO_CONNECTION_STRING } from "./utils/constants.ts";
+import { getLevelFromXp } from "./utils/encode.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
@@ -59,11 +65,10 @@ const filter = {
     { fromAddress: GAME, keys: [ADVENTURER_UPGRADED] },
     { fromAddress: GAME, keys: [DISCOVERED_HEALTH] },
     { fromAddress: GAME, keys: [DISCOVERED_GOLD] },
-    { fromAddress: GAME, keys: [DISCOVERED_XP] },
+    { fromAddress: GAME, keys: [DISCOVERED_LOOT] },
     { fromAddress: GAME, keys: [DODGED_OBSTACLE] },
     { fromAddress: GAME, keys: [HIT_BY_OBSTACLE] },
     { fromAddress: GAME, keys: [DISCOVERED_BEAST] },
-    { fromAddress: GAME, keys: [PURCHASED_POTIONS] },
     { fromAddress: GAME, keys: [PURCHASED_ITEMS] },
     { fromAddress: GAME, keys: [EQUIPPED_ITEMS] },
     { fromAddress: GAME, keys: [DROPPED_ITEMS] },
@@ -76,6 +81,7 @@ const filter = {
     { fromAddress: GAME, keys: [FLEE_SUCCEEDED] },
     { fromAddress: GAME, keys: [ITEMS_LEVELED_UP] },
     { fromAddress: GAME, keys: [UPGRADES_AVAILABLE] },
+    { fromAddress: GAME, keys: [ADVENTURER_UPGRADED] },
   ],
 };
 
@@ -107,9 +113,10 @@ export default function transform({ header, events }: Block) {
           insertAdventurer({
             id: as.adventurerId,
             owner: as.owner,
-            lastAction: as.adventurer.lastActionBlock,
+            entropy: am.adventurerEntropy,
             health: as.adventurer.health,
             xp: as.adventurer.xp,
+            level: getLevelFromXp(as.adventurer.xp),
             strength: as.adventurer.stats.strength,
             dexterity: as.adventurer.stats.dexterity,
             vitality: as.adventurer.stats.vitality,
@@ -118,20 +125,22 @@ export default function transform({ header, events }: Block) {
             charisma: as.adventurer.stats.charisma,
             luck: as.adventurer.stats.luck,
             gold: as.adventurer.gold,
-            weapon: as.adventurer.weapon.id,
-            chest: as.adventurer.chest.id,
-            head: as.adventurer.head.id,
-            waist: as.adventurer.waist.id,
-            foot: as.adventurer.foot.id,
-            hand: as.adventurer.hand.id,
-            neck: as.adventurer.neck.id,
-            ring: as.adventurer.ring.id,
+            battleActionCount: as.adventurer.battleActionCount,
+            weapon: as.adventurer.equipment.weapon.id,
+            chest: as.adventurer.equipment.chest.id,
+            head: as.adventurer.equipment.head.id,
+            waist: as.adventurer.equipment.waist.id,
+            foot: as.adventurer.equipment.foot.id,
+            hand: as.adventurer.equipment.hand.id,
+            neck: as.adventurer.equipment.neck.id,
+            ring: as.adventurer.equipment.ring.id,
             beastHealth: as.adventurer.beastHealth,
-            statUpgrades: as.adventurer.statsPointsAvailable,
-            actionsPerBlock: as.adventurer.actionsPerBlock,
-            name: am.name,
-            startBlock: am.startBlock,
-            revealBlock: value.revealBlock,
+            statUpgrades: as.adventurer.statsUpgradesAvailable,
+            name: value.name,
+            birthDate: am.birthDate,
+            deathDate: am.deathDate,
+            goldenTokenId: value.goldenTokenId,
+            customRenderer: value.customRenderer,
             createdTime: new Date().toISOString(),
             lastUpdatedTime: new Date().toISOString(),
             timestamp: new Date().toISOString(),
@@ -168,9 +177,9 @@ export default function transform({ header, events }: Block) {
           }),
         ];
       }
-      case DISCOVERED_XP: {
-        console.log("DISCOVERED_XP", "->", "ADVENTURER UPDATES");
-        const { value } = parseDiscoveredXp(event.data, 0);
+      case DISCOVERED_LOOT: {
+        console.log("DISCOVERED_LOOT", "->", "ADVENTURER UPDATES");
+        const { value } = parseDiscoveredLoot(event.data, 0);
         return [
           updateAdventurer({
             timestamp: new Date().toISOString(),
@@ -201,16 +210,6 @@ export default function transform({ header, events }: Block) {
       case DISCOVERED_BEAST: {
         console.log("DISCOVERED_BEAST", "->", "ADVENTURER UPDATES");
         const { value } = parseDiscoveredBeast(event.data, 0);
-        return [
-          updateAdventurer({
-            timestamp: new Date().toISOString(),
-            adventurerState: value.adventurerState,
-          }),
-        ];
-      }
-      case PURCHASED_POTIONS: {
-        console.log("PURCHASED_POTIONS", "->", "ADVENTURER UPDATES");
-        const { value } = parseDiscoveredXp(event.data, 0);
         return [
           updateAdventurer({
             timestamp: new Date().toISOString(),
@@ -335,6 +334,17 @@ export default function transform({ header, events }: Block) {
           updateAdventurer({
             timestamp: new Date().toISOString(),
             adventurerState: value.adventurerState,
+          }),
+        ];
+      }
+      case TRANSFER: {
+        console.log("TRANSFER", "->", "ADVENTURER UPDATES");
+        const { value } = parseTransfer(event.data, 0);
+        return [
+          updateAdventurerOwner({
+            adventurerId: value.tokenId,
+            newOwner: value.toAddress,
+            timestamp: new Date().toISOString(),
           }),
         ];
       }

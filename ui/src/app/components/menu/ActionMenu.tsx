@@ -26,7 +26,9 @@ const ActionMenu: React.FC<ActionMenuProps> = ({
           buttonsData[0].disabled
             ? "text-slate-400"
             : "border border-terminal-green"
-        } p-1 sm:p-2 bg-terminal-black`}
+        } p-1 sm:p-2 bg-terminal-black ${
+          title === "Explore" ? "w-12" : "w-10"
+        } sm:w-20 flex justify-center`}
       >
         <p className="uppercase text-sm sm:text-base">{title}</p>
       </div>

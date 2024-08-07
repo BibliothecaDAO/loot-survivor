@@ -3,18 +3,10 @@ import { Button } from "@/app/components/buttons/Button";
 import { getItemData, getItemPrice, getKeyFromValue } from "@/app/lib/utils";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import LootIcon from "@/app/components/icons/LootIcon";
-import { useWaitForTransaction } from "@starknet-react/core";
-import {
-  Metadata,
-  Item,
-  ItemPurchase,
-  UpgradeStats,
-  NullAdventurer,
-} from "@/app/types";
+import { Item, ItemPurchase, UpgradeStats, NullAdventurer } from "@/app/types";
 import { CoinIcon } from "@/app/components/icons/Icons";
 import EfficacyDisplay from "@/app/components/icons/EfficacyIcon";
 import { GameData } from "@/app/lib/data/GameData";
-import useTransactionManager from "@/app/hooks/useTransactionManager";
 
 interface MarketplaceRowProps {
   item: Item;
@@ -49,13 +41,6 @@ const MarketplaceRow = ({
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const { hashes, transactions } = useTransactionManager();
-  const { data: txData } = useWaitForTransaction({
-    hash: hashes ? hashes[0] : "0x0",
-  });
-
-  const transactingMarketIds = (transactions[0]?.metadata as Metadata)?.items;
-
   const gameData = new GameData();
 
   const singlePurchaseExists = (item: string) => {
@@ -67,14 +52,6 @@ const MarketplaceRow = ({
   const { tier, type, slot } = getItemData(item.item ?? "");
   const itemPrice = getItemPrice(tier, totalCharisma);
   const enoughGold = calculatedNewGold >= itemPrice;
-
-  const checkTransacting = (item: string) => {
-    if (txData?.finality_status !== undefined) {
-      return transactingMarketIds?.includes(item);
-    } else {
-      return false;
-    }
-  };
 
   const checkOwned = (item: string) => {
     return ownedItems.some((ownedItem) => ownedItem.item == item);
@@ -131,7 +108,7 @@ const MarketplaceRow = ({
   ).length;
 
   const equipFull = equippedItems + purchaseEquipItems === 8;
-  const bagFull = baggedItems + purchaseNoEquipItems === 11;
+  const bagFull = baggedItems + purchaseNoEquipItems === 15;
 
   useEffect(() => {
     if (isActive) {
@@ -176,53 +153,48 @@ const MarketplaceRow = ({
       <td className="w-20 sm:w-32 text-center">
         {activeMenu === index ? (
           <div className="hidden sm:flex flex-row items-center justify-center gap-2">
-            <p>Equip?</p>
-            <div className="flex flex-col">
-              <Button
-                size={"xxxs"}
-                variant={"ghost"}
-                onClick={() => {
-                  const newPurchases = [
-                    ...purchaseItems,
-                    {
-                      item:
-                        getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
-                        "0",
-                      equip: "1",
-                    },
-                  ];
-                  setPurchaseItems(newPurchases);
-                  upgradeHandler(undefined, undefined, newPurchases);
-                  setActiveMenu(null);
-                }}
-              >
-                Yes
-              </Button>
-              <Button
-                size={"xxxs"}
-                variant={"ghost"}
-                onClick={() => {
-                  const newPurchases = [
-                    ...purchaseItems,
-                    {
-                      item:
-                        getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
-                        "0",
-                      equip: "0",
-                    },
-                  ];
-                  setPurchaseItems(newPurchases);
-                  upgradeHandler(undefined, undefined, newPurchases);
-                  setActiveMenu(null);
-                }}
-                disabled={bagFull}
-              >
-                No
-              </Button>
-            </div>
+            <Button
+              className="w-10"
+              variant={"contrast"}
+              onClick={() => {
+                const newPurchases = [
+                  ...purchaseItems,
+                  {
+                    item:
+                      getKeyFromValue(gameData.ITEMS, item?.item ?? "") ?? "0",
+                    equip: "1",
+                  },
+                ];
+                setPurchaseItems(newPurchases);
+                upgradeHandler(undefined, undefined, newPurchases);
+                setActiveMenu(null);
+              }}
+            >
+              Equip
+            </Button>
+            <Button
+              className="w-10"
+              variant={"contrast"}
+              onClick={() => {
+                const newPurchases = [
+                  ...purchaseItems,
+                  {
+                    item:
+                      getKeyFromValue(gameData.ITEMS, item?.item ?? "") ?? "0",
+                    equip: "0",
+                  },
+                ];
+                setPurchaseItems(newPurchases);
+                upgradeHandler(undefined, undefined, newPurchases);
+                setActiveMenu(null);
+              }}
+              disabled={bagFull}
+            >
+              Bag
+            </Button>
 
             <Button
-              size={"xxxs"}
+              className="text-8xl"
               variant={"ghost"}
               onClick={() => setActiveMenu(null)}
             >
@@ -234,10 +206,10 @@ const MarketplaceRow = ({
             onClick={() => {
               setActiveMenu(index);
             }}
+            className="h-10 w-16 sm:h-auto sm:w-auto"
             disabled={
               itemPrice > (adventurer?.gold ?? 0) ||
               !enoughGold ||
-              checkTransacting(item.item ?? "") ||
               singlePurchaseExists(item.item ?? "") ||
               item.owner ||
               checkOwned(item.item ?? "") ||
@@ -245,12 +217,10 @@ const MarketplaceRow = ({
               (equipFull && bagFull) ||
               (bagFull && !emptySlot)
             }
-            className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
           >
             {!enoughGold || itemPrice > (adventurer?.gold ?? 0)
               ? "Not Enough Gold"
-              : checkTransacting(item.item ?? "") ||
-                singlePurchaseExists(item.item ?? "") ||
+              : singlePurchaseExists(item.item ?? "") ||
                 checkPurchased(item.item ?? "")
               ? "In Cart"
               : checkOwned(item.item ?? "")

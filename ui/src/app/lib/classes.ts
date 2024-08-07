@@ -4,8 +4,8 @@ import { calculateLevel, getItemData } from "@/app/lib/utils";
 export class AdventurerClass implements Adventurer {
   [key: string]: number | string | Date | undefined;
   id?: number; // Adventurer ID
-  lastAction?: number; // Block number from last action
   owner?: string; // Hex address of the owner
+  entropy?: string; // Entropy of the adventurer
   name?: string; // Name of the adventurer
   order?: string; // Order of the adventurer
   health?: number; // Health of the adventurer
@@ -28,8 +28,11 @@ export class AdventurerClass implements Adventurer {
   ring?: string; // Ring of the adventure
   beastHealth?: number; // Beast health adventurer is engaging
   statUpgrades?: number; // Stat upgrades adventurer has
-  startBlock?: number; // The block number the adventurer was minted
-  revealBlock?: number; // The next block number that the game entropy rotates from spawn
+  birthDate?: number; // Birth date of the adventurer
+  deathDate?: number; // Death date of the adventurer
+  goldenTokenId?: number; // Golden token ID of the adventurer
+  customRenderer?: string; // Custom renderer of the adventurer
+  battleActionCount?: number; // Battle action count of the adventurer
   gold?: number; // Gold adventurer has
   createdTime?: Date; // Block time the adventurer was created
   lastUpdatedTime?: Date; // Block time the adventurer was last updated
@@ -37,8 +40,8 @@ export class AdventurerClass implements Adventurer {
   constructor(adventurer: Adventurer) {
     const {
       id,
-      lastAction,
       owner,
+      entropy,
       name,
       order,
       health,
@@ -60,8 +63,11 @@ export class AdventurerClass implements Adventurer {
       ring,
       beastHealth,
       statUpgrades,
-      startBlock,
-      revealBlock,
+      birthDate,
+      deathDate,
+      goldenTokenId,
+      customRenderer,
+      battleActionCount,
       gold,
       createdTime,
       lastUpdatedTime,
@@ -69,8 +75,8 @@ export class AdventurerClass implements Adventurer {
     } = adventurer;
 
     this.id = id;
-    this.lastAction = lastAction;
     this.owner = owner;
+    this.entropy = entropy;
     this.name = name;
     this.order = order;
     this.health = health;
@@ -95,8 +101,11 @@ export class AdventurerClass implements Adventurer {
     this.ring = ring;
     this.beastHealth = beastHealth;
     this.statUpgrades = statUpgrades;
-    this.startBlock = startBlock;
-    this.revealBlock = revealBlock;
+    this.birthDate = birthDate;
+    this.deathDate = deathDate;
+    this.goldenTokenId = goldenTokenId;
+    this.customRenderer = customRenderer;
+    this.battleActionCount = battleActionCount;
     this.gold = gold;
     this.createdTime = createdTime;
     this.lastUpdatedTime = lastUpdatedTime;

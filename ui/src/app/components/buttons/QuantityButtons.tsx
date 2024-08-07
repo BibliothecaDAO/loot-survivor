@@ -29,8 +29,9 @@ const QuantityButtons: React.FC<ButtonProps> = ({
   };
 
   return (
-    <div className="text-xl">
+    <div className="text-xl flex items-center">
       <Button
+        className="h-10 w-16 text-4xl sm:h-auto sm:w-auto sm:text-base"
         size={size}
         variant={"default"}
         onClick={handleDecrement}
@@ -40,6 +41,7 @@ const QuantityButtons: React.FC<ButtonProps> = ({
       </Button>
       <span className=" p-2">{amount}</span>
       <Button
+        className="h-10 w-16 text-4xl sm:h-auto sm:w-auto sm:text-base"
         size={size}
         variant={"default"}
         onClick={handleIncrement}

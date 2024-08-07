@@ -1,60 +1,37 @@
-import React, {
-  useCallback,
-  useEffect,
-  useState,
-  useRef,
-  RefObject,
-} from "react";
+import React, { useRef, RefObject } from "react";
 import { MdClose } from "react-icons/md";
-import { Contract } from "starknet";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Button } from "@/app/components/buttons/Button";
-import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import {
-  processItemName,
-  getItemPrice,
-  getItemData,
-  getValueFromKey,
-  calculateVitBoostRemoved,
-} from "@/app/lib/utils";
+import { getValueFromKey } from "@/app/lib/utils";
 import useUIStore from "@/app/hooks/useUIStore";
 import { useUiSounds } from "@/app/hooks/useUiSound";
 import { soundSelector } from "@/app/hooks/useUiSound";
-import { Item, NullItem, Call, ItemPurchase, ZeroUpgrade } from "@/app/types";
+import { Call, ItemPurchase, ZeroUpgrade } from "@/app/types";
 import { GameData } from "@/app/lib/data/GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
-import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { UpgradeStats } from "@/app/types";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
-  multicall: (
-    loadingMessage: string[],
-    notification: string[],
-    upgradeTx?: any
-  ) => Promise<void>;
-  gameContract: Contract;
+  handleSubmitMulticall: () => void;
+  handleAddUpgradeTx: (
+    upgrade?: UpgradeStats,
+    potionAmount?: number,
+    purchaseItems?: ItemPurchase[]
+  ) => void;
+  handleResetCalls: () => void;
 }
 
 const TransactionCart = ({
   buttonRef,
-  multicall,
-  gameContract,
+  handleSubmitMulticall,
+  handleAddUpgradeTx,
+  handleResetCalls,
 }: TransactionCartProps) => {
-  const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeFromCalls = useTransactionCartStore(
     (state) => state.removeFromCalls
   );
-  const removeEntrypointFromCalls = useTransactionCartStore(
-    (state) => state.removeEntrypointFromCalls
-  );
-  const resetCalls = useTransactionCartStore((state) => state.resetCalls);
-  const [notification, setNotification] = useState<any[]>([]);
-  const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
-  const { data } = useQueriesStore();
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
@@ -72,161 +49,10 @@ const TransactionCart = ({
   const setSlayAdventurers = useUIStore((state) => state.setSlayAdventurers);
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(wrapperRef, () => setDisplayCart(false), buttonRef);
-  const resetNotification = useLoadingStore((state) => state.resetNotification);
 
   const callExists = calls.length > 0;
 
-  const items = data.latestMarketItemsQuery
-    ? data.latestMarketItemsQuery.items
-    : [];
-
   const gameData = new GameData();
-
-  const handleBuyItem = useCallback(
-    (call: any) => {
-      const item = items.find(
-        (item: Item) =>
-          item.item === (Array.isArray(call.calldata) && call.calldata[0])
-      );
-      const itemName = processItemName(item ?? NullItem);
-      const { tier } = getItemData(item?.item ?? "");
-      setNotification((notifications) => [
-        ...notifications,
-        `You purchased ${item?.item && itemName} for ${getItemPrice(
-          tier,
-          adventurer?.charisma ?? 0
-        )} gold`,
-      ]);
-      setLoadingMessage((messages) => [...messages, "Purchasing"]);
-    },
-    [items]
-  );
-
-  const handleEquipItem = () => {
-    setNotification((notifications) => [
-      ...notifications,
-      `You equipped ${equipItems.length} items!`,
-    ]);
-    setLoadingMessage((messages) => [...messages, "Equipping"]);
-  };
-
-  const handleDropItems = () => {
-    setNotification((notifications) => [
-      ...notifications,
-      `You dropped ${dropItems.length} items!`,
-    ]);
-    setLoadingMessage((messages) => [...messages, "Dropping"]);
-  };
-
-  const handleUpgradeAdventurer = () => {
-    setNotification((notifications) => [
-      ...notifications,
-      {
-        Stats: upgrades,
-        Items: purchaseItems,
-        Potions: potionAmount,
-      },
-    ]);
-    setLoadingMessage((messages) => [...messages, "Upgrading"]);
-  };
-
-  const handleSlayIdleAdventurers = useCallback((call: any) => {
-    setNotification((notifications) => [
-      ...notifications,
-      `You slayed ${
-        Array.isArray(call.calldata) && call.calldata[0]
-      } Adventurers`,
-    ]);
-    setLoadingMessage((messages) => [...messages, "Slaying Adventurer"]);
-  }, []);
-
-  const handleLoadData = useCallback(() => {
-    for (let call of calls) {
-      switch (call.entrypoint) {
-        case "buy_item":
-          handleBuyItem(call);
-          break;
-        case "equip":
-          handleEquipItem();
-          break;
-        case "drop":
-          handleDropItems();
-          break;
-        case "upgrade":
-          handleUpgradeAdventurer();
-          break;
-        case "slay_idle_adventurers":
-          handleSlayIdleAdventurers(call);
-          break;
-        default:
-          break;
-      }
-    }
-  }, [
-    calls,
-    handleBuyItem,
-    handleEquipItem,
-    handleDropItems,
-    handleUpgradeAdventurer,
-    handleSlayIdleAdventurers,
-  ]);
-
-  useEffect(() => {
-    handleLoadData();
-  }, [calls]);
-
-  const handleResetCalls = () => {
-    resetCalls();
-    setEquipItems([]);
-    setDropItems([]);
-    setPotionAmount(0);
-    setPurchaseItems([]);
-    setUpgrades({ ...ZeroUpgrade });
-    setSlayAdventurers([]);
-  };
-
-  const handleAddUpgradeTx = (
-    currentUpgrades?: UpgradeStats,
-    potions?: number,
-    items?: any[]
-  ) => {
-    removeEntrypointFromCalls("upgrade");
-    const upgradeTx = {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "upgrade",
-      calldata: [
-        adventurer?.id?.toString() ?? "",
-        potions! >= 0 ? potions?.toString() : potionAmount.toString(),
-        currentUpgrades
-          ? currentUpgrades["Strength"].toString()
-          : upgrades["Strength"].toString(),
-        currentUpgrades
-          ? currentUpgrades["Dexterity"].toString()
-          : upgrades["Dexterity"].toString(),
-        currentUpgrades
-          ? currentUpgrades["Vitality"].toString()
-          : upgrades["Vitality"].toString(),
-        currentUpgrades
-          ? currentUpgrades["Intelligence"].toString()
-          : upgrades["Intelligence"].toString(),
-        currentUpgrades
-          ? currentUpgrades["Wisdom"].toString()
-          : upgrades["Wisdom"].toString(),
-        currentUpgrades
-          ? currentUpgrades["Charisma"].toString()
-          : upgrades["Charisma"].toString(),
-        "0",
-        items ? items.length.toString() : purchaseItems.length.toString(),
-        ...(items
-          ? items.flatMap(Object.values)
-          : purchaseItems.flatMap(Object.values)),
-      ],
-    };
-    addToCalls(upgradeTx);
-  };
-
-  const selectedVitality = upgrades["Vitality"] ?? 0;
-  const totalVitality = (adventurer?.vitality ?? 0) + selectedVitality;
 
   const filteredStats = Object.entries(upgrades).filter(
     (stat: any) => stat[1] !== 0
@@ -451,38 +277,7 @@ const TransactionCart = ({
             <Button
               disabled={!callExists}
               onClick={async () => {
-                resetNotification();
-                // Handle for vitBoostRemoval
-                const vitBoostRemoved = calculateVitBoostRemoved(
-                  purchaseItems,
-                  adventurer!,
-                  data.itemsByAdventurerQuery?.items ?? []
-                );
-                let upgradeTx: any;
-                if (potionAmount > 0) {
-                  // Check whether health + pots is within vitBoostRemoved of the maxHealth
-                  const maxHealth = 100 + totalVitality * 10;
-                  const newMaxHealth =
-                    100 + (totalVitality - vitBoostRemoved) * 10;
-                  const currentHealth =
-                    adventurer?.health! + selectedVitality * 10;
-                  const healthPlusPots = Math.min(
-                    currentHealth! + potionAmount * 10,
-                    maxHealth
-                  );
-                  const healthOverflow = healthPlusPots > newMaxHealth;
-                  if (healthOverflow) {
-                    const newUpgradeTx = handleAddUpgradeTx(
-                      undefined,
-                      Math.max(potionAmount - vitBoostRemoved, 0),
-                      undefined
-                    );
-                    upgradeTx = newUpgradeTx;
-                  }
-                }
-                setDisplayCart(false);
-                await multicall(loadingMessage, notification, upgradeTx);
-                handleResetCalls();
+                handleSubmitMulticall();
               }}
             >
               Submit all Transactions

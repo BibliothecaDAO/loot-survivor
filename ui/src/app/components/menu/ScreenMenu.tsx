@@ -15,17 +15,21 @@ interface HorizontalKeyboardControlProps {
   buttonsData: Menu[];
   disabled?: boolean[];
   onButtonClick: (value: any) => void;
+  hideEncounters?: boolean;
 }
 
 const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
   buttonsData,
   onButtonClick,
   disabled,
+  hideEncounters,
 }) => {
   const { play } = useUiSounds(soundSelector.click);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const screen = useUIStore((state) => state.screen);
+  const encounterTable = useUIStore((state) => state.encounterTable);
+  const showEncounterTable = useUIStore((state) => state.showEncounterTable);
 
   useEffect(() => {
     onButtonClick(buttonsData[selectedIndex]?.screen);
@@ -86,7 +90,7 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
     <div className="flex justify-between sm:justify-start w-full">
       {buttonsData.map((buttonData, index) => (
         <Button
-          className="px-2.5 sm:px-3"
+          className="px-2.5 sm:px-3 h-10 w-16 sm:w-24"
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
           variant={buttonData.screen === screen ? "default" : "outline"}
@@ -99,6 +103,14 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
           {buttonData.label}
         </Button>
       ))}
+      <Button
+        className="hidden sm:block px-2.5 sm:px-3 shadow-lg"
+        variant={encounterTable ? "default" : "token"}
+        onClick={() => showEncounterTable(!encounterTable)}
+        disabled={hideEncounters}
+      >
+        Prescience
+      </Button>
     </div>
   );
 };

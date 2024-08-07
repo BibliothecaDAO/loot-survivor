@@ -5,7 +5,7 @@ import { ScreenPage } from "@/app/hooks/useUIStore";
 export interface Adventurer {
   [key: string]: number | string | Date | undefined;
   id?: number; // Adventurer ID
-  lastAction?: number; // Block number from last action
+  entropy?: string; // Entropy of the adventurer
   owner?: string; // Hex address of the owner
   classType?: string; // Class of the adventurer
   homeRealm?: number; // Home Realm of the adventurer
@@ -31,8 +31,11 @@ export interface Adventurer {
   ring?: string; // Ring of the adventure
   beastHealth?: number; // Beast health adventurer is engaging
   statUpgrades?: number; // Stat upgrades adventurer has
-  startBlock?: number; // The block number the adventurer was minted
-  revealBlock?: number; // The next block number that the game entropy rotates from spawn
+  birthDate?: number; // Birth date of the adventurer
+  deathDate?: number; // Death date of the adventurer
+  goldenTokenId?: number; // Golden token ID of the adventurer
+  customRenderer?: string; // Custom renderer of the adventurer
+  battleActionCount?: number; // Battle action count of the adventurer
   gold?: number; // Gold adventurer has
   createdTime?: Date; // Block time the adventurer was created
   lastUpdatedTime?: Date; // Block time the adventurer was last updated
@@ -506,4 +509,12 @@ export type BlockData = {
 export type IsIdleResult = {
   0: boolean;
   1: bigint;
+};
+
+export type PragmaPrice = {
+  decimals: bigint;
+  expiration_timestamp: any;
+  last_updated_timestamp: bigint;
+  num_sources_aggregated: bigint;
+  price: bigint;
 };

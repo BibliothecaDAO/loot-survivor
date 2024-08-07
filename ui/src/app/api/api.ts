@@ -2,8 +2,7 @@ interface MintEthProps {
   address: string;
 }
 
-export const getBlock = async (blockNumber: number) => {
-  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL!;
+export const getBlock = async (rpcUrl: string, blockNumber: number) => {
   try {
     const requestBody = {
       jsonrpc: "2.0",
@@ -69,10 +68,10 @@ export const getApibaraStatus = async () => {
 };
 
 export const getInterface = async (
+  rpcUrl: string,
   masterAddress: string,
   arcade_interface_id: string
 ) => {
-  const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL!;
   const response = await fetch(rpcUrl, {
     method: "POST",
     headers: {

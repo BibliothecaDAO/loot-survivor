@@ -10,6 +10,7 @@ export type QueryKey =
   | "battlesByBeastQuery"
   | "lastBeastQuery"
   | "beastQuery"
+  | "killedBeastsQuery"
   | "discoveriesQuery"
   | "latestDiscoveriesQuery"
   | "discoveryByTxHashQuery"
@@ -24,7 +25,13 @@ export type QueryKey =
   | "itemsByProfileQuery"
   | "topScoresQuery"
   | "latestMarketItemsQuery"
-  | "adventurerToSlayQuery";
+  | "adventurerToSlayQuery"
+  | "adventurerCountsQuery"
+  | "discoveriesAndBattlesByAdventurerQuery"
+  | "discoveryBattleCountsQuery"
+  | "adventurersByOwnerCountQuery"
+  | "aliveAdventurersByOwnerCountQuery"
+  | "adventurerRankQuery";
 
 export interface BattlesResult {
   [key: string]: Battle[];
@@ -56,6 +63,12 @@ export interface ScoresResult {
   scores: Score[];
 }
 
+export interface AdventurerRankResult {
+  adventurerRank: {
+    rank: number;
+  };
+}
+
 export interface QueryData {
   lastBattleQuery: BattlesResult | null;
   lastBeastBattleQuery: BattlesResult | null;
@@ -64,6 +77,7 @@ export interface QueryData {
   battlesByBeastQuery: BattlesResult | null;
   lastBeastQuery: DiscoveriesResult | null;
   beastQuery: BeastsResult | null;
+  killedBeastsQuery: BeastsResult | null;
   discoveriesQuery: DiscoveriesResult | null;
   latestDiscoveriesQuery: DiscoveriesResult | null;
   discoveryByTxHashQuery: DiscoveriesResult | null;
@@ -79,6 +93,12 @@ export interface QueryData {
   topScoresQuery: ScoresResult | null;
   latestMarketItemsQuery: ItemsResult | null;
   adventurerToSlayQuery: AdventurersResult | null;
+  adventurerCountsQuery: AdventurersResult | null;
+  discoveriesAndBattlesByAdventurerQuery: DiscoveriesResult | null;
+  discoveryBattleCountsQuery: DiscoveriesResult | null;
+  adventurersByOwnerCountQuery: AdventurersResult | null;
+  aliveAdventurersByOwnerCountQuery: AdventurersResult | null;
+  adventurerRankQuery: AdventurersResult | null;
 }
 
 type QueriesState = {
@@ -106,6 +126,7 @@ const initialData: QueryData = {
   battlesByBeastQuery: null,
   lastBeastQuery: null,
   beastQuery: null,
+  killedBeastsQuery: null,
   discoveriesQuery: null,
   latestDiscoveriesQuery: null,
   discoveryByTxHashQuery: null,
@@ -121,6 +142,12 @@ const initialData: QueryData = {
   topScoresQuery: null,
   latestMarketItemsQuery: null,
   adventurerToSlayQuery: null,
+  adventurerCountsQuery: null,
+  discoveriesAndBattlesByAdventurerQuery: null,
+  discoveryBattleCountsQuery: null,
+  adventurersByOwnerCountQuery: null,
+  aliveAdventurersByOwnerCountQuery: null,
+  adventurerRankQuery: null,
 };
 
 const initialLoading: Record<QueryKey, boolean> & { global: boolean } = {
@@ -131,6 +158,7 @@ const initialLoading: Record<QueryKey, boolean> & { global: boolean } = {
   battlesByBeastQuery: false,
   lastBeastQuery: false,
   beastQuery: false,
+  killedBeastsQuery: false,
   discoveriesQuery: false,
   latestDiscoveriesQuery: false,
   discoveryByTxHashQuery: false,
@@ -146,6 +174,12 @@ const initialLoading: Record<QueryKey, boolean> & { global: boolean } = {
   topScoresQuery: false,
   latestMarketItemsQuery: false,
   adventurerToSlayQuery: false,
+  adventurerCountsQuery: false,
+  discoveriesAndBattlesByAdventurerQuery: false,
+  discoveryBattleCountsQuery: false,
+  adventurersByOwnerCountQuery: false,
+  aliveAdventurersByOwnerCountQuery: false,
+  adventurerRankQuery: false,
   global: false,
 };
 
@@ -157,6 +191,7 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   battlesByBeastQuery: async () => {},
   lastBeastQuery: async () => {},
   beastQuery: async () => {},
+  killedBeastsQuery: async () => {},
   discoveriesQuery: async () => {},
   latestDiscoveriesQuery: async () => {},
   discoveryByTxHashQuery: async () => {},
@@ -172,6 +207,12 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   topScoresQuery: async () => {},
   latestMarketItemsQuery: async () => {},
   adventurerToSlayQuery: async () => {},
+  adventurerCountsQuery: async () => {},
+  discoveriesAndBattlesByAdventurerQuery: async () => {},
+  discoveryBattleCountsQuery: async () => {},
+  adventurersByOwnerCountQuery: async () => {},
+  aliveAdventurersByOwnerCountQuery: async () => {},
+  adventurerRankQuery: async () => {},
 };
 
 export const useQueriesStore = create<QueriesState>((set, get) => ({
@@ -283,6 +324,7 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
         battlesByBeastQuery: null,
         lastBeastQuery: null,
         beastQuery: null,
+        killedBeastsQuery: null,
         discoveriesQuery: null,
         latestDiscoveriesQuery: null,
         discoveryByTxHashQuery: null,
@@ -298,6 +340,12 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
         topScoresQuery: null,
         latestMarketItemsQuery: null,
         adventurerToSlayQuery: null,
+        adventurerCountsQuery: null,
+        discoveriesAndBattlesByAdventurerQuery: null,
+        discoveryBattleCountsQuery: null,
+        adventurersByOwnerCountQuery: null,
+        aliveAdventurersByOwnerCountQuery: null,
+        adventurerRankQuery: null,
       };
       for (let key of allKeys) {
         const refetch = refetchFunctions[key as QueryKey];

@@ -11,7 +11,6 @@ import {
   potionBasePrice,
 } from "@/app/lib/constants";
 import { deathMessages } from "@/app/lib/constants";
-import { getBlock } from "@/app/api/api";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -23,7 +22,7 @@ export function formatNumber(num: number): string {
   } else if (Math.abs(num) >= 1000) {
     return parseFloat((num / 1000).toFixed(2)) + "k";
   } else {
-    return num.toFixed(0);
+    return num.toFixed(2);
   }
 }
 
@@ -372,46 +371,31 @@ export function getDeathMessageByRank(rank: number): string {
   return message || "Better luck next time - You can improve!";
 }
 
-export const fetchAverageBlockTime = async (
-  currentBlock: number,
-  numberOfBlocks: number
-) => {
-  try {
-    let totalTimeInterval = 0;
-
-    for (let i = currentBlock - numberOfBlocks; i < currentBlock; i++) {
-      const currentBlockData = await getBlock(i);
-      const nextBlockData = await getBlock(i + 1);
-
-      const timeInterval = nextBlockData.timestamp - currentBlockData.timestamp;
-      totalTimeInterval += timeInterval;
-    }
-    const averageTime = totalTimeInterval / numberOfBlocks;
-    return averageTime;
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
-
-export const fetchBlockTime = async (currentBlock: number) => {
-  try {
-    const currentBlockData = await getBlock(currentBlock);
-    return currentBlockData.timestamp;
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
-
-export const calculateVitBoostRemoved = (
+export const getUnequippedSuffixBoosts = (
   purchases: ItemPurchase[],
   adventurer: Adventurer,
-  items: Item[]
+  items: Item[],
+  equipItems: string[],
+  dropItems: string[]
 ) => {
   const gameData = new GameData();
-  const equippedItems = purchases.filter((purchase) => purchase.equip === "1");
-  const itemStrings = equippedItems.map(
+  const equippedPurchasedItems = purchases.filter(
+    (purchase) => purchase.equip === "1"
+  );
+  const purchasedItemStrings = equippedPurchasedItems.map(
     (purchase) => gameData.ITEMS[parseInt(purchase?.item) ?? 0]
   );
+  const equippedItemStrings = equipItems.map(
+    (equip) => gameData.ITEMS[parseInt(equip) ?? 0]
+  );
+  const droppedItemStrings = dropItems.map(
+    (drop) => gameData.ITEMS[parseInt(drop) ?? 0]
+  );
+  const itemStrings = [
+    ...purchasedItemStrings,
+    ...equippedItemStrings,
+    ...droppedItemStrings,
+  ];
   const slotStrings = itemStrings.map(
     (itemString) => gameData.ITEM_SLOTS[itemString.split(" ").join("")]
   );
@@ -524,11 +508,43 @@ export const calculateVitBoostRemoved = (
       );
     }
   }
-  const filteredSuffixBoosts = unequippedSuffixBoosts.filter(
-    (suffix) => suffix !== undefined
+  return unequippedSuffixBoosts.filter((suffix) => suffix !== undefined);
+};
+
+export const calculateVitBoostRemoved = (
+  purchases: ItemPurchase[],
+  adventurer: Adventurer,
+  items: Item[],
+  equipItems: string[],
+  dropItems: string[]
+) => {
+  const filteredSuffixBoosts = getUnequippedSuffixBoosts(
+    purchases,
+    adventurer,
+    items,
+    equipItems,
+    dropItems
   );
   const vitTotal = findAndSumVitValues(filteredSuffixBoosts);
   return vitTotal;
+};
+
+export const calculateChaBoostRemoved = (
+  purchases: ItemPurchase[],
+  adventurer: Adventurer,
+  items: Item[],
+  equipItems: string[],
+  dropItems: string[]
+) => {
+  const filteredSuffixBoosts = getUnequippedSuffixBoosts(
+    purchases,
+    adventurer,
+    items,
+    equipItems,
+    dropItems
+  );
+  const chaTotal = findAndSumChaValues(filteredSuffixBoosts);
+  return chaTotal;
 };
 
 function findAndSumVitValues(arr: string[]): number {
@@ -548,6 +564,57 @@ function findAndSumVitValues(arr: string[]): number {
   return total;
 }
 
+function findAndSumChaValues(arr: string[]): number {
+  let total = 0;
+
+  arr.forEach((str) => {
+    const matches = str.match(/CHA \+\d+/g);
+
+    if (matches) {
+      matches.forEach((match) => {
+        const value = parseInt(match.split("+")[1]);
+        total += value;
+      });
+    }
+  });
+
+  return total;
+}
+
 export function formatCurrency(value: number): string {
   return (value / 10 ** 18).toFixed(4);
 }
+
+export function formatLords(value: number): string {
+  return (value / 10 ** 18).toFixed(0);
+}
+
+export const formatItemName = (name: string): string => {
+  return name.replace(/([a-z])([A-Z])/g, "$1 $2");
+};
+
+export const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (err) {
+    console.error("Failed to copy text: ", err);
+  }
+};
+
+export const DataType = {
+  SpotEntry: (pairId: string) => ({
+    variant: "SpotEntry",
+    activeVariant: () => "SpotEntry",
+    unwrap: () => pairId,
+  }),
+  FutureEntry: (pairId: string, expirationTimestamp: string) => ({
+    variant: "FutureEntry",
+    activeVariant: () => "FutureEntry",
+    unwrap: () => [pairId, expirationTimestamp],
+  }),
+  GenericEntry: (key: string) => ({
+    variant: "GenericEntry",
+    activeVariant: () => "GenericEntry",
+    unwrap: () => key,
+  }),
+};

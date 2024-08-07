@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Contract } from "starknet";
 import { Adventurer, NullAdventurer, NullItem } from "@/app/types";
 import {
@@ -7,7 +8,7 @@ import {
 } from "@/app/components/icons/Icons";
 import { ItemDisplay } from "@/app/components/adventurer/ItemDisplay";
 import LevelBar from "@/app/components/adventurer/LevelBar";
-import { getKeyFromValue } from "@/app/lib/utils";
+import { getItemData, getKeyFromValue } from "@/app/lib/utils";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import { Item } from "@/app/types";
@@ -15,6 +16,7 @@ import { HealthCountDown } from "@/app/components/CountDown";
 import { GameData } from "@/app/lib/data/GameData";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { calculateLevel } from "@/app/lib/utils";
+import { vitalityIncrease } from "@/app/lib/constants";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
@@ -35,10 +37,13 @@ export default function Info({
   const setDropItems = useUIStore((state) => state.setDropItems);
   const potionAmount = useUIStore((state) => state.potionAmount);
   const upgrades = useUIStore((state) => state.upgrades);
+  const vitBoostRemoved = useUIStore((state) => state.vitBoostRemoved);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
+  const equipItems = useUIStore((state) => state.equipItems);
+  const purchaseItems = useUIStore((state) => state.purchaseItems);
 
   const gameData = new GameData();
 
@@ -49,6 +54,89 @@ export default function Info({
     : data.itemsByAdventurerQuery
     ? data.itemsByAdventurerQuery.items
     : [];
+
+  const filteredItems = useMemo(() => {
+    const filteredDrops = items.filter(
+      (item) =>
+        !dropItems.includes(getKeyFromValue(gameData.ITEMS, item.item!) ?? "")
+    );
+
+    const updatePurchaseEquips = filteredDrops.flatMap((item) => {
+      if (purchaseItems.length > 0) {
+        const replaceItems = purchaseItems.filter((pItem) => {
+          const { slot: equipSlot } = getItemData(
+            gameData.ITEMS[parseInt(pItem.item)]
+          );
+          const { slot: heldSlot } = getItemData(item.item!);
+          return equipSlot === heldSlot && pItem.equip === "1";
+        });
+        if (replaceItems.length > 0) {
+          return [
+            { ...item, equipped: false },
+            {
+              item: gameData.ITEMS[
+                parseInt(replaceItems[replaceItems.length - 1].item)
+              ],
+              adventurerId: formatAdventurer.id,
+              owner: true,
+              equipped: true,
+              ownerAddress: formatAdventurer.owner,
+              xp: 0,
+              special1: undefined,
+              special2: undefined,
+              special3: undefined,
+              isAvailable: false,
+              purchasedTime: new Date(),
+              timestamp: new Date(),
+            },
+          ];
+        }
+      }
+
+      return [item];
+    });
+
+    const updateEquips = updatePurchaseEquips.map((item) => {
+      const replaceItem = equipItems.find((eItem) => {
+        const { slot: equipSlot } = getItemData(
+          gameData.ITEMS[parseInt(eItem)]
+        );
+        const { slot: heldSlot } = getItemData(item.item!);
+        return equipSlot === heldSlot;
+      });
+      if (replaceItem) {
+        if (item.equipped) {
+          return { ...item, equipped: false };
+        } else {
+          if (item.item === gameData.ITEMS[parseInt(replaceItem)]) {
+            return { ...item, equipped: true };
+          }
+        }
+      }
+
+      return item;
+    });
+
+    return [
+      ...updateEquips,
+      ...purchaseItems
+        .filter((pItem) => pItem.equip === "1")
+        .map((pItem) => ({
+          item: gameData.ITEMS[parseInt(pItem.item)],
+          adventurerId: formatAdventurer.id,
+          owner: true,
+          equipped: true,
+          ownerAddress: formatAdventurer.owner,
+          xp: 0,
+          special1: undefined,
+          special2: undefined,
+          special3: undefined,
+          isAvailable: false,
+          purchasedTime: new Date(),
+          timestamp: new Date(),
+        })),
+    ];
+  }, [items, dropItems, equipItems, purchaseItems]);
 
   const handleDropItems = (item: string) => {
     const newDropItems = [
@@ -73,13 +161,41 @@ export default function Info({
   };
 
   const attributes = [
-    { key: "STR", value: formatAdventurer.strength ?? 0 },
-    { key: "DEX", value: formatAdventurer.dexterity },
-    { key: "INT", value: formatAdventurer.intelligence ?? 0 },
-    { key: "VIT", value: formatAdventurer.vitality ?? 0 },
-    { key: "WIS", value: formatAdventurer.wisdom ?? 0 },
-    { key: "CHA", value: formatAdventurer.charisma ?? 0 },
-    { key: "LUCK", value: formatAdventurer.luck ?? 0 },
+    {
+      key: "STR",
+      value: (formatAdventurer.strength ?? 0) + upgrades["Strength"],
+      upgrade: upgrades["Strength"],
+    },
+    {
+      key: "DEX",
+      value: (formatAdventurer.dexterity ?? 0) + upgrades["Dexterity"],
+      upgrade: upgrades["Dexterity"],
+    },
+    {
+      key: "INT",
+      value: (formatAdventurer.intelligence ?? 0) + upgrades["Intelligence"],
+      upgrade: upgrades["Intelligence"],
+    },
+    {
+      key: "VIT",
+      value: (formatAdventurer.vitality ?? 0) + upgrades["Vitality"],
+      upgrade: upgrades["Vitality"],
+    },
+    {
+      key: "WIS",
+      value: (formatAdventurer.wisdom ?? 0) + upgrades["Wisdom"],
+      upgrade: upgrades["Wisdom"],
+    },
+    {
+      key: "CHA",
+      value: (formatAdventurer.charisma ?? 0) + upgrades["Charisma"],
+      upgrade: upgrades["Charisma"],
+    },
+    {
+      key: "LUCK",
+      value: formatAdventurer.luck ?? 0,
+      upgrade: upgrades["Luck"],
+    },
   ];
 
   const bodyParts = [
@@ -97,14 +213,17 @@ export default function Info({
 
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
 
-  const maxHealth = Math.min(100 + totalVitality * 10, 720);
+  const maxHealth = Math.min(
+    100 + (totalVitality - vitBoostRemoved) * vitalityIncrease,
+    1023
+  );
 
   const healthPlus = Math.min(
-    (vitalitySelected + potionAmount) * 10,
+    vitalitySelected * vitalityIncrease + potionAmount * 10,
     maxHealth - (formatAdventurer.health ?? 0)
   );
 
-  const maxHealthPlus = vitalitySelected * 10;
+  const maxHealthPlus = vitalitySelected * vitalityIncrease;
 
   const totalHealth = Math.min(
     (formatAdventurer.health ?? 0) + healthPlus,
@@ -154,10 +273,15 @@ export default function Info({
               {attributes.map((attribute) => (
                 <div
                   key={attribute.key}
-                  className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black"
+                  className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black relative"
                 >
                   {attribute.key}
-                  <span className="pl-1">{attribute.value}</span>
+                  <span className="flex flex-row items-center">
+                    {attribute.upgrade > 0 && (
+                      <span className="text-xs">{`(+${attribute.upgrade})`}</span>
+                    )}
+                    <span className="pl-1">{attribute.value}</span>
+                  </span>
                 </div>
               ))}
             </div>
@@ -171,11 +295,10 @@ export default function Info({
             {bodyParts.map((part) => (
               <ItemDisplay
                 item={
-                  items.find(
-                    (item: Item) =>
-                      item.item === formatAdventurer[part.toLowerCase()] &&
-                      item.equipped
-                  ) || NullItem
+                  filteredItems.find((item: Item) => {
+                    const { slot } = getItemData(item.item!);
+                    return slot === part && item.equipped;
+                  }) || NullItem
                 }
                 itemSlot={part}
                 handleDrop={handleDropItems}

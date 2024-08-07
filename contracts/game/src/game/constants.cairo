@@ -1,3 +1,22 @@
+const COST_TO_PLAY: u128 = 50000000000000000000;
+const MINIMUM_DAMAGE_FROM_BEASTS: u8 = 2;
+const MAINNET_CHAIN_ID: felt252 = 0x534e5f4d41494e;
+const SEPOLIA_CHAIN_ID: felt252 = 0x534e5f5345504f4c4941;
+const KATANA_CHAIN_ID: felt252 = 0x4b4154414e41;
+const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 50;
+const SECONDS_IN_DAY: u32 = 86400;
+const TARGET_PRICE_USD_CENTS: u16 = 300;
+const VRF_COST_PER_GAME: u32 = 100000000; // 1$ with 8 decimals
+const VRF_MAX_CALLBACK_MAINNET: u32 = 5000000; // $0.05
+const VRF_MAX_CALLBACK_TESTNET: u32 = 100000000; // 1$ with 8 decimals
+const PRAGMA_LORDS_KEY: felt252 = 'LORDS/USD'; // felt252 conversion of "LORDS/USD"
+const PRAGMA_PUBLISH_DELAY: u8 = 0;
+const PRAGMA_NUM_WORDS: u8 = 1;
+const GAME_EXPIRY_DAYS: u8 = 10;
+const OBITUARY_EXPIRY_DAYS: u8 = 10;
+const MAX_U64: u64 = 0xffffffffffffffff;
+const STARTER_BEAST_ATTACK_DAMAGE: u16 = 10;
+
 mod messages {
     const NOT_ENOUGH_GOLD: felt252 = 'Not enough gold';
     const ITEM_DOES_NOT_EXIST: felt252 = 'Market item does not exist';
@@ -9,11 +28,14 @@ mod messages {
     const NOT_IN_BATTLE: felt252 = 'Not in battle';
     const ACTION_NOT_ALLOWED_DURING_BATTLE: felt252 = 'Action not allowed in battle';
     const CANT_FLEE_STARTER_BEAST: felt252 = 'Cant flee starter beast';
+    const CANT_DROP_DURING_STARTER_BEAST: felt252 = 'Cant drop during starter beast';
     const STAT_UPGRADES_AVAILABLE: felt252 = 'Stat upgrade available';
     const BLOCK_NUMBER_ERROR: felt252 = 'Too soon update';
     const DEAD_ADVENTURER: felt252 = 'Adventurer is dead';
+    const ADVENTURER_IS_ALIVE: felt252 = 'Adventurer is still alive';
     const HEALTH_FULL: felt252 = 'Health already full';
-    const ADVENTURER_NOT_IDLE: felt252 = 'Adventurer is not idle';
+    const ADVENTURER_NOT_EXPIRED: felt252 = 'Adventurer not expired';
+    const GAME_EXPIRED: felt252 = 'Game has expired';
     const ONE_EXPLORE_PER_BLOCK: felt252 = 'One explore per block';
     const INSUFFICIENT_STAT_UPGRADES: felt252 = 'insufficient stat upgrades';
     const TOO_MANY_ITEMS: felt252 = 'Too many items';
@@ -36,50 +58,34 @@ mod messages {
     const GAME_ALREADY_STARTED: felt252 = 'game already started';
     const STARTING_ENTROPY_IS_VALID: felt252 = 'starting entropy is valid';
     const VALID_BLOCK_HASH_UNAVAILABLE: felt252 = 'valid hash not yet available';
+    const LEVEL_SEED_NOT_SET: felt252 = 'level seed not set';
+    const WAITING_FOR_ITEM_SPECIALS: felt252 = 'waiting for item specials';
+    const FETCHING_ETH_PRICE_ERROR: felt252 = 'error fetching eth price';
+    const OBITUARY_ALREADY_SET: felt252 = 'obituary already set';
+    const OBITUARY_WINDOW_CLOSED: felt252 = 'obituary window closed';
+    const INVALID_ITEM_ID: felt252 = 'invalid item id';
+    const LAUNCH_PROMOTION_CLOSED: felt252 = 'launch promotion closed';
+    const NFT_COLLECTION_NOT_ELIGIBLE: felt252 = 'nft collection not eligible';
+    const NOT_TOKEN_OWNER: felt252 = 'not token owner';
+    const TOKEN_ALREADY_CLAIMED: felt252 = 'token already claimed';
+
 }
-
-// TODO: Update for mainnet
-const BLOCKS_IN_A_WEEK: u64 = 1000;
-const COST_TO_PLAY: u128 = 25000000000000000000;
-const NUM_STARTING_STATS: u8 = 9;
-const STARTING_GAME_ENTROPY_ROTATION_INTERVAL: u8 = 6;
-const MINIMUM_DAMAGE_FROM_BEASTS: u8 = 2;
-const MAINNET_REVEAL_DELAY_BLOCKS: u8 = 11;
-
-const U64_MAX: u64 = 18446744073709551615;
-const U128_MAX: u128 = 340282366920938463463374607431768211455;
 
 #[derive(Drop, Copy)]
 struct Rewards {
-    DAO: u256,
-    INTERFACE: u256,
+    BIBLIO: u256,
+    PG: u256,
+    CLIENT_PROVIDER: u256,
     FIRST_PLACE: u256,
     SECOND_PLACE: u256,
     THIRD_PLACE: u256,
 }
 
-mod REWARD_DISTRIBUTIONS_PHASE1_BP {
-    const DAO: u256 = 0;
-    const INTERFACE: u256 = 0;
-    const FIRST_PLACE: u256 = 480;
-    const SECOND_PLACE: u256 = 320;
-    const THIRD_PLACE: u256 = 200;
-}
-
-mod REWARD_DISTRIBUTIONS_PHASE2_BP {
-    const DAO: u256 = 0;
-    const INTERFACE: u256 = 280;
-    const FIRST_PLACE: u256 = 320;
-    const SECOND_PLACE: u256 = 240;
-    const THIRD_PLACE: u256 = 160;
-}
-
-mod REWARD_DISTRIBUTIONS_PHASE3_BP {
-    const DAO: u256 = 200;
-    const INTERFACE: u256 = 240;
-    const FIRST_PLACE: u256 = 280;
+mod REWARD_DISTRIBUTIONS_BP {
+    const CLIENT_PROVIDER: u256 = 270;
+    const FIRST_PLACE: u256 = 270;
     const SECOND_PLACE: u256 = 160;
-    const THIRD_PLACE: u256 = 120;
+    const THIRD_PLACE: u256 = 100;
+    const CREATOR: u256 = 200;
 }
 
-const STARTER_BEAST_ATTACK_DAMAGE: u16 = 10;

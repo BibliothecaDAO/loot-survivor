@@ -4,17 +4,21 @@ import {
   GiBruteIcon,
   SkullCrossedBonesIcon,
   SpikedWallIcon,
-  GiSandsOfTimeIcon,
   TwoCoinIcon,
   HealthPotionIcon,
 } from "@/app/components/icons/Icons";
+import LootIcon from "@/app/components/icons/LootIcon";
 import { Discovery } from "@/app/types";
+import { GameData } from "@/app/lib/data/GameData";
+import { getItemData } from "@/app/lib/utils";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
 interface DiscoveryProps {
   discoveryData: Discovery;
 }
 
 export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
+  const adventurer = useAdventurerStore((state) => state.adventurer);
   const beastName = processBeastName(
     discoveryData?.entity ?? "",
     discoveryData?.special2 ?? "",
@@ -22,6 +26,8 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   );
 
   const AdventurerHealthExists = (discoveryData?.adventurerHealth ?? 0) > 0;
+
+  const gameData = new GameData();
 
   const renderDiscoveryMessage = () => {
     if (discoveryData?.discoveryType === "Beast") {
@@ -103,15 +109,6 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       }
     }
 
-    if (!discoveryData?.discoveryType) {
-      return (
-        <span className="flex flex-row items-center justify-between">
-          <p>OOPS! Killed by idle death penalty!</p>
-          <GiSandsOfTimeIcon />
-        </span>
-      );
-    }
-
     if (discoveryData?.discoveryType === "Item") {
       if (discoveryData?.subDiscoveryType === "Gold") {
         return (
@@ -137,6 +134,29 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
               <p>GREAT! Discovered {discoveryData?.outputAmount} health! </p>
             </div>
             <HealthPotionIcon />
+          </span>
+        );
+      }
+
+      if (discoveryData?.subDiscoveryType === "Loot") {
+        const itemName = gameData.ITEMS[discoveryData?.outputAmount!];
+        const { slot } = getItemData(itemName ?? "");
+        const hasEquipped = adventurer![slot.toLowerCase()] == itemName;
+        return (
+          <span className="flex flex-row items-center justify-between">
+            <div className="flex self-center">
+              {!hasEquipped ? (
+                <p>
+                  WOW! Discovered {itemName}. Check your bag!
+                  <LootIcon size={"w-5"} type={slot} />
+                </p>
+              ) : (
+                <p>
+                  WOW! Discovered and equipped {itemName}!
+                  <LootIcon size={"w-5"} type={slot} />
+                </p>
+              )}
+            </div>
           </span>
         );
       }

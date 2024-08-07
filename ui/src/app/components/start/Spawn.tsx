@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Block, CallData, Contract } from "starknet";
-import { useAccount, useConnect, useBlock } from "@starknet-react/core";
+import { CallData, Contract } from "starknet";
+import { useConnect } from "@starknet-react/core";
 import Image from "next/image";
 import { TypeAnimation } from "react-type-animation";
 import { MdClose } from "react-icons/md";
@@ -13,18 +13,16 @@ import { FormData, GameToken } from "@/app/types";
 import { Button } from "@/app/components/buttons/Button";
 import { getArcadeConnectors, getWalletConnectors } from "@/app/lib/connectors";
 import Lords from "public/icons/lords.svg";
-import {
-  indexAddress,
-  formatTimeSeconds,
-  fetchAverageBlockTime,
-  formatCurrency,
-} from "@/app/lib/utils";
+import { indexAddress, formatTimeSeconds, formatLords } from "@/app/lib/utils";
+import { networkConfig } from "@/app/lib/networkConfig";
+import useNetworkAccount from "@/app/hooks/useNetworkAccount";
 
 export interface SpawnProps {
   formData: FormData;
   spawn: (
     formData: FormData,
     goldenTokenId: string,
+    revenueAddress: string,
     costToPlay?: number
   ) => Promise<void>;
   handleBack: () => void;
@@ -53,8 +51,9 @@ export const Spawn = ({
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
-  const averageBlockTime = useUIStore((state) => state.averageBlockTime);
-  const setAverageBlockTime = useUIStore((state) => state.setAverageBlockTime);
+  const onMainnet = useUIStore((state) => state.onMainnet);
+  const network = useUIStore((state) => state.network);
+  const onKatana = useUIStore((state) => state.onKatana);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
 
   useEffect(() => {
@@ -65,7 +64,7 @@ export const Spawn = ({
     }
   }, [formData]);
 
-  const { account } = useAccount();
+  const { account } = useNetworkAccount();
   const { connectors, connect } = useConnect();
 
   const walletConnectors = getWalletConnectors(connectors);
@@ -79,13 +78,25 @@ export const Spawn = ({
 
   const handleSubmitLords = async () => {
     resetNotification();
-    await spawn(formData, "0", lordsGameCost);
-    await getBalances();
+    await spawn(
+      formData,
+      "0",
+      networkConfig[network!].revenueAddress,
+      lordsGameCost
+    );
+    if (!onKatana) {
+      await getBalances();
+    }
   };
 
   const handleSubmitGoldenToken = async () => {
     resetNotification();
-    await spawn(formData, usableToken, lordsGameCost);
+    await spawn(
+      formData,
+      usableToken,
+      networkConfig[network!].revenueAddress,
+      lordsGameCost
+    );
     await getBalances();
   };
 
@@ -111,30 +122,6 @@ export const Spawn = ({
       }
     }
   };
-
-  const onMainnet = process.env.NEXT_PUBLIC_NETWORK === "mainnet";
-
-  const waitEstimate = 12 * averageBlockTime; // add one for closer estimate
-
-  const { data: blockData } = useBlock({
-    refetchInterval: false,
-  });
-
-  const currentBlockNumber = (blockData as Block)?.block_number ?? 0;
-
-  const [fetchedAverageBlockTime, setFetchedAverageBlockTime] = useState(false);
-
-  const fetchData = async () => {
-    const result = await fetchAverageBlockTime(currentBlockNumber, 20);
-    setAverageBlockTime(result!);
-    setFetchedAverageBlockTime(true);
-  };
-
-  useEffect(() => {
-    if (onMainnet && !fetchedAverageBlockTime && currentBlockNumber > 0) {
-      fetchData();
-    }
-  }, [currentBlockNumber]);
 
   useEffect(() => {
     getUsableGoldenToken(goldenTokens ?? []);
@@ -168,15 +155,9 @@ export const Spawn = ({
         {onMainnet && (
           <div className="absolute top-1/6 left-0 right-0 flex flex-col items-center text-center">
             <p className="text-2xl">Estimated wait time:</p>
-            {averageBlockTime > 0 ? (
-              <p className="text-4xl text-terminal-yellow">
-                {formatTimeSeconds(Math.floor(waitEstimate))}
-              </p>
-            ) : (
-              <p className="text-2xl loading-ellipsis text-terminal-yellow">
-                Loading
-              </p>
-            )}
+            <p className="text-4xl text-terminal-yellow">
+              {formatTimeSeconds(Math.floor(30))}
+            </p>
           </div>
         )}
 
@@ -206,7 +187,7 @@ export const Spawn = ({
                         ? `Connect ${connector.id}`
                         : connector.id === "argentWebWallet"
                         ? "Login With Email"
-                        : "Login with Argent Mobile"}
+                        : "Login with Cartridge Controller"}
                     </Button>
                   ))}
                   <Button onClick={handleButtonClick}>
@@ -228,7 +209,7 @@ export const Spawn = ({
                 </div>
               </div>
             </>
-          ) : (
+          ) : !onKatana ? (
             <>
               <div className="flex flex-col gap-2">
                 <Button
@@ -239,13 +220,12 @@ export const Spawn = ({
                     isWrongNetwork ||
                     loading ||
                     estimatingFee ||
-                    !checkEnoughLords ||
-                    (!fetchedAverageBlockTime && onMainnet)
+                    !checkEnoughLords
                   }
                   onClick={() => handleSubmitLords()}
                   className="relative"
                 >
-                  <div className="flex flex-row items-center gap-1 w-full h-full">
+                  <div className="flex flex-row items-center gap-5 w-full h-full">
                     <p className="whitespace-nowrap w-3/4 mr-5">
                       {checkEnoughLords
                         ? formFilled
@@ -253,8 +233,10 @@ export const Spawn = ({
                           : "Fill details"
                         : "Not enough Lords"}
                     </p>
-                    {formatCurrency(lordsGameCost)}
-                    <Lords className="absolute self-center sm:w-5 sm:h-5  h-3 w-3 fill-current right-5" />
+                    <span className="absolute flex flex-row right-5">
+                      {formatLords(lordsGameCost)}
+                      <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current" />
+                    </span>
                   </div>
                 </Button>
 
@@ -269,8 +251,7 @@ export const Spawn = ({
                       loading ||
                       estimatingFee ||
                       !goldenTokenExists ||
-                      usableToken === "0" ||
-                      (!fetchedAverageBlockTime && onMainnet)
+                      usableToken === "0"
                     }
                     className="relative w-full"
                   >
@@ -293,14 +274,16 @@ export const Spawn = ({
                       </div>
                     </div>
                   </Button>
-                  <a
-                    href={process.env.NEXT_PUBLIC_GOLDEN_TOKEN_MINT_URL}
-                    target="_blank"
-                  >
-                    <Button type="button" className="text-black">
-                      Buy
-                    </Button>
-                  </a>
+                  {onMainnet && (
+                    <a
+                      href={networkConfig[network!].goldenTokenMintUrl}
+                      target="_blank"
+                    >
+                      <Button type="button" className="text-black">
+                        Buy
+                      </Button>
+                    </a>
+                  )}
                 </div>
               </div>
               {!checkEnoughLords && (
@@ -308,9 +291,9 @@ export const Spawn = ({
                   onClick={async () => {
                     if (onMainnet) {
                       const avnuLords = `https://app.avnu.fi/en?tokenFrom=${indexAddress(
-                        process.env.NEXT_PUBLIC_ETH_ADDRESS ?? ""
+                        networkConfig[network!].ethAddress ?? ""
                       )}&tokenTo=${indexAddress(
-                        process.env.NEXT_PUBLIC_LORDS_ADDRESS ?? ""
+                        networkConfig[network!].lordsAddress ?? ""
                       )}&amount=0.001`;
                       window.open(avnuLords, "_blank");
                     } else {
@@ -322,6 +305,23 @@ export const Spawn = ({
                 </Button>
               )}
             </>
+          ) : (
+            <Button
+              size={"xl"}
+              disabled={
+                !formFilled ||
+                !account ||
+                isWrongNetwork ||
+                loading ||
+                estimatingFee
+              }
+              onClick={() => handleSubmitLords()}
+              className="relative"
+            >
+              <div className="flex flex-row items-center gap-1 w-full h-full">
+                {formFilled ? "Play as Guest" : "Fill details"}
+              </div>
+            </Button>
           )}
         </div>
         <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center gap-4 z-10 pb-8">
