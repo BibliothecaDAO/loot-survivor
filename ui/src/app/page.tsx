@@ -212,8 +212,8 @@ function Home() {
     }
   }, [connector]);
 
-  const ethBalanceRef = useRef(BigInt(0));
-  const lordsBalanceRef = useRef(BigInt(0));
+  const [ethBalance, setEthBalance] = useState(BigInt(0));
+  const [lordsBalance, setLordsBalance] = useState(BigInt(0));
 
   const getBalances = useCallback(async () => {
     const balances = await fetchBalances(
@@ -222,13 +222,13 @@ function Home() {
       lordsContract,
       gameContract
     );
-    ethBalanceRef.current = balances[0];
-    lordsBalanceRef.current = balances[1];
+    setEthBalance(balances[0]);
+    setLordsBalance(balances[1]);
   }, [address, ethContract, lordsContract, gameContract]);
 
   const getEthBalance = async () => {
     const ethBalance = await fetchEthBalance(address ?? "0x0", ethContract);
-    ethBalanceRef.current = ethBalance;
+    setEthBalance(ethBalance);
   };
 
   useEffect(() => {
@@ -274,7 +274,7 @@ function Home() {
     setScreen,
     setAdventurer,
     setStartOption,
-    ethBalance: ethBalanceRef.current,
+    ethBalance,
     showTopUpDialog,
     setTopUpAccount,
     account: account!,
@@ -647,8 +647,8 @@ function Home() {
       {isWithdrawing && <TokenLoader isWithdrawing={isWithdrawing} />}
       {screen === "onboarding" ? (
         <Onboarding
-          ethBalance={ethBalanceRef.current}
-          lordsBalance={lordsBalanceRef.current}
+          ethBalance={ethBalance}
+          lordsBalance={lordsBalance}
           costToPlay={costToPlay}
           mintLords={mintLords}
           getBalances={getBalances}
@@ -667,8 +667,8 @@ function Home() {
             <Header
               multicall={multicall}
               mintLords={mintLords}
-              ethBalance={ethBalanceRef.current}
-              lordsBalance={lordsBalanceRef.current}
+              ethBalance={ethBalance}
+              lordsBalance={lordsBalance}
               gameContract={gameContract!}
               costToPlay={costToPlay}
             />
@@ -715,7 +715,7 @@ function Home() {
                   <AdventurerScreen
                     spawn={spawn}
                     handleSwitchAdventurer={handleSwitchAdventurer}
-                    lordsBalance={lordsBalanceRef.current}
+                    lordsBalance={lordsBalance}
                     gameContract={gameContract!}
                     goldenTokenData={goldenTokenData}
                     getBalances={getBalances}
@@ -762,8 +762,8 @@ function Home() {
                     <span className="w-full h-full bg-black/50" />
                     <ProfileDialog
                       withdraw={withdraw}
-                      ethBalance={ethBalanceRef.current}
-                      lordsBalance={lordsBalanceRef.current}
+                      ethBalance={ethBalance}
+                      lordsBalance={lordsBalance}
                       ethContractAddress={ethContract!.address}
                       lordsContractAddress={lordsContract!.address}
                     />
