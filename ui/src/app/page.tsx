@@ -2,7 +2,7 @@
 import { useConnect, useContract, useProvider } from "@starknet-react/core";
 import { sepolia } from "@starknet-react/chains";
 import { constants } from "starknet";
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import ActionsScreen from "@/app/containers/ActionsScreen";
 import AdventurerScreen from "@/app/containers/AdventurerScreen";
 import InventoryScreen from "@/app/containers/InventoryScreen";
