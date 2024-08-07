@@ -614,10 +614,13 @@ function Home() {
         );
         const entropy = adventurerMeta.item_specials_seed;
         if (entropy !== BigInt(0)) {
-          setFetchUnlocksEntropy(false);
-          setItemEntropy(BigInt(entropy.toString()));
-          fetchItemSpecialsData();
-          clearInterval(interval);
+          // Add a 5-second delay before executing the rest of the logic
+          setTimeout(() => {
+            setFetchUnlocksEntropy(false);
+            setItemEntropy(BigInt(entropy.toString()));
+            fetchItemSpecialsData();
+            clearInterval(interval);
+          }, 5000); // 5000 milliseconds = 5 seconds
         }
       }
     };
