@@ -1875,20 +1875,20 @@
     "@babel/helper-validator-identifier" "^7.24.7"
     to-fast-properties "^2.0.0"
 
-"@cartridge/connector@^0.3.35":
-  version "0.3.35"
-  resolved "https://registry.yarnpkg.com/@cartridge/connector/-/connector-0.3.35.tgz#6a35df1ddd1f6b2a68468842b4c9bf32101c1188"
-  integrity sha512-gxv07zOHSSsAd4hWgWG949PjUvr/jbfN+Ur1aZPSTL8Cytyl9LLsrctQ0gTVINrHl6lbnbZpnsFkEDs4wGmSWw==
+"@cartridge/connector@^0.3.38":
+  version "0.3.38"
+  resolved "https://registry.yarnpkg.com/@cartridge/connector/-/connector-0.3.38.tgz#788d31429cd9b86a95887ed07b57922769f911f1"
+  integrity sha512-XvT1BJbIRaqM/3A71RWLQ8sSJUVdgHdeA6RK+XD4kwi8Rwzci412e3ixH+lE4b359rCdT2jWQC2E7xsXf8GvVA==
   dependencies:
-    "@cartridge/controller" "^0.3.35"
+    "@cartridge/controller" "^0.3.38"
     "@starknet-react/core" "^2.1.5"
     starknet "^6.11.0"
     typescript "^5.4.5"
 
-"@cartridge/controller@^0.3.35":
-  version "0.3.35"
-  resolved "https://registry.yarnpkg.com/@cartridge/controller/-/controller-0.3.35.tgz#6757c85e56eeff00989d6b3e01f873c8aada6be1"
-  integrity sha512-+ZJ1TSeK50xuhHPM+R6/U/d5mvEQHIi3cA0UCAfYOoDzUY8arAHfGnU1we1320ECW0r4PPz2Dqsqpn1kHy8pHw==
+"@cartridge/controller@^0.3.38":
+  version "0.3.38"
+  resolved "https://registry.yarnpkg.com/@cartridge/controller/-/controller-0.3.38.tgz#d9ee492c9d181d32fd904da8899c219020dfa747"
+  integrity sha512-jQdRFKxRsBNrky/JwAy49jTlTww0kt4Lslkml66TcSVB+qA0P74BZu5Bk7survvju/9Vhp0KE5AyRPUU42z/JQ==
   dependencies:
     "@cartridge/penpal" "^6.2.3"
     base64url "^3.0.1"
@@ -2937,6 +2937,11 @@
     "@stablelib/random" "^1.0.2"
     "@stablelib/wipe" "^1.0.1"
 
+"@starknet-io/types-js@^0.7.7":
+  version "0.7.7"
+  resolved "https://registry.yarnpkg.com/@starknet-io/types-js/-/types-js-0.7.7.tgz#444be5e4e585ec6f599d42d3407280d98b2dfdf8"
+  integrity sha512-WLrpK7LIaIb8Ymxu6KF/6JkGW1sso988DweWu7p5QY/3y7waBIiPvzh27D9bX5KIJNRDyOoOVoHVEKYUYWZ/RQ==
+
 "@starknet-react/chains@^0.1.7":
   version "0.1.7"
   resolved "https://registry.yarnpkg.com/@starknet-react/chains/-/chains-0.1.7.tgz#58503379e2ffabe33b4f6e0f2aef775e84745a4d"
@@ -2954,9 +2959,9 @@
     zod "^3.22.2"
 
 "@starknet-react/core@^2.1.5":
-  version "2.8.2"
-  resolved "https://registry.yarnpkg.com/@starknet-react/core/-/core-2.8.2.tgz#de30d82a7263d8b719982e61828b9850195cbeb5"
-  integrity sha512-OUF3ESBAqck2qU6wNyl3Y/o+axeNQae++AKfgK+2AS3Wb0jNA1Pjk6uH75STq+AQR6jwH0q2mx+krKZdqzKUZg==
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/@starknet-react/core/-/core-2.9.0.tgz#216ee363540bff10961e22a633a9420f0a42e105"
+  integrity sha512-UdRo454/g2lb0YsNAUJohJ2w21LlahcEXQlkWrddoKFubRY6Q0b39hec0eZOCqfU0Z1Sh7kF1XYvI5t9xL4yTQ==
   dependencies:
     "@starknet-react/chains" "^0.1.7"
     "@tanstack/react-query" "^5.0.1"
@@ -4023,9 +4028,9 @@ cbor-extract@^2.2.0:
     "@cbor-extract/cbor-extract-win32-x64" "2.2.0"
 
 cbor-x@^1.5.0:
-  version "1.5.9"
-  resolved "https://registry.yarnpkg.com/cbor-x/-/cbor-x-1.5.9.tgz#ed6b2afcd7884bdd697674bfb7332c1473a13ecf"
-  integrity sha512-OEI5rEu3MeR0WWNUXuIGkxmbXVhABP+VtgAXzm48c9ulkrsvxshjjk94XSOGphyAKeNGLPfAxxzEtgQ6rEVpYQ==
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/cbor-x/-/cbor-x-1.6.0.tgz#89c35d2d805efc30e09a28349425cc05d57aacd7"
+  integrity sha512-0kareyRwHSkL6ws5VXHEf8uY1liitysCVJjlmhaLG+IXLqhSaOO+t63coaso7yjwEzWZzLy8fJo06gZDVQM9Qg==
   optionalDependencies:
     cbor-extract "^2.2.0"
 
@@ -5362,11 +5367,11 @@ get-starknet-core@^3.2.0:
     "@module-federation/runtime" "^0.1.2"
 
 get-starknet-core@^4.0.0-next.3:
-  version "4.0.0-next.5"
-  resolved "https://registry.yarnpkg.com/get-starknet-core/-/get-starknet-core-4.0.0-next.5.tgz#a42218a78046f61b6719760bc668e01131e0c1dc"
-  integrity sha512-zZ3i4E5UYF1f04fgkwfaVC0uj1pvdBlzsDqXEAfb4jc1WO4zM7rIm4XAUqdMwVSr4CBend5RM7U+zv166fBNYg==
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/get-starknet-core/-/get-starknet-core-4.0.0.tgz#9a81101b3a4e54e090f76492b566abaa3b5865c7"
+  integrity sha512-6pLmidQZkC3wZsrHY99grQHoGpuuXqkbSP65F8ov1/JsEI8DDLkhsAuLCKFzNOK56cJp+f1bWWfTJ57e9r5eqQ==
   dependencies:
-    starknet-types "^0.7.1"
+    "@starknet-io/types-js" "^0.7.7"
 
 get-stream@^6.0.0, get-stream@^6.0.1:
   version "6.0.1"
@@ -7651,11 +7656,6 @@ starknet-types@^0.0.4:
   resolved "https://registry.yarnpkg.com/starknet-types/-/starknet-types-0.0.4.tgz#1f92cdde4b2989e1da743c24827960b50057914b"
   integrity sha512-PklqFeSp9gMqbzW5IbO8l1s3xsNZYkNG/x/gsytgYCIl6H/cqiwCZolVTneyTibvrdHOQ8kP3PXwfdsypudYqw==
 
-starknet-types@^0.7.1:
-  version "0.7.2"
-  resolved "https://registry.yarnpkg.com/starknet-types/-/starknet-types-0.7.2.tgz#2a1be2392e6e568484afabdc1e83411b5105713b"
-  integrity sha512-r3JJ0rrK0g3FnVRGcFiLY+9YT5WZgxB4TKBfR44wYGevHtKEM6BM5B+Gn1eou1zV7xEAwz3GpmvLSQTUAzDhsw==
-
 starknet@6.7.0:
   version "6.7.0"
   resolved "https://registry.yarnpkg.com/starknet/-/starknet-6.7.0.tgz#004111004d93efd4a5a9da79bd8a97f8d7d50409"
@@ -8228,9 +8228,9 @@ typescript@5.0.2:
   integrity sha512-wVORMBGO/FAs/++blGNeAVdbNKtIh1rbBL2EyQ1+J9lClJ93KiiKe8PmFIVdXhHcyv44SL9oglmfeSsndo0jRw==
 
 typescript@^5.4.5:
-  version "5.4.5"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.4.5.tgz#42ccef2c571fdbd0f6718b1d1f5e6e5ef006f611"
-  integrity sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==
+  version "5.5.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.5.4.tgz#d9852d6c82bad2d2eda4fd74a5762a8f5909e9ba"
+  integrity sha512-Mtq29sKDAEYP7aljRgtPOpTvOfbwRWlS6dPRzwjdE+C0R4brX/GUyhHSecbHMFLNBLcJIPt9nl9yG5TZ1weH+Q==
 
 ufo@^1.3.2, ufo@^1.4.0, ufo@^1.5.3:
   version "1.5.3"

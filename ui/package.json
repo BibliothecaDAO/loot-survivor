@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.7.11",
-    "@cartridge/connector": "^0.3.35",
+    "@cartridge/connector": "^0.3.38",
     "@dojoengine/create-burner": "^0.7.0-alpha.1",
     "@fontsource/vt323": "^4.5.10",
     "@starknet-react/core": "^2.5.0",
