@@ -60,7 +60,6 @@ export default function InventoryScreen({
         entrypoint: "equip",
         calldata: [
           adventurer?.id?.toString() ?? "",
-          "0",
           newEquipItems.length.toString(),
           ...newEquipItems,
         ],
@@ -83,7 +82,6 @@ export default function InventoryScreen({
         entrypoint: "drop",
         calldata: [
           adventurer?.id?.toString() ?? "",
-          "0",
           newDropItems.length.toString(),
           ...newDropItems,
         ],
