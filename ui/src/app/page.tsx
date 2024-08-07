@@ -104,6 +104,9 @@ function Home() {
   const isMuted = useUIStore((state) => state.isMuted);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
+  const updateAdventurerStats = useAdventurerStore(
+    (state) => state.updateAdventurerStats
+  );
   const calls = useTransactionCartStore((state) => state.calls);
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
@@ -595,13 +598,22 @@ function Home() {
   }, [adventurer?.level]);
 
   const fetchItemSpecialsData = async () => {
-    const newAdventurerData = await refetch("adventurerByIdQuery", {
-      id: adventurer?.id,
-    });
+    const updatedAdventurer = (await gameContract!.call("get_adventurer", [
+      adventurer?.id!,
+    ])) as any;
     const itemsWithSpecials = await refetch("itemsByAdventurerQuery", {
       id: adventurer?.id,
     });
-    setData("adventurerByIdQuery", newAdventurerData);
+    updateAdventurerStats({
+      health: parseInt(updatedAdventurer.health),
+      strength: parseInt(updatedAdventurer.stats.strength),
+      dexterity: parseInt(updatedAdventurer.stats.dexterity),
+      vitality: parseInt(updatedAdventurer.stats.vitality),
+      intelligence: parseInt(updatedAdventurer.stats.intelligence),
+      wisdom: parseInt(updatedAdventurer.stats.wisdom),
+      charisma: parseInt(updatedAdventurer.stats.charisma),
+      luck: parseInt(updatedAdventurer.stats.luck),
+    });
     setData("itemsByAdventurerQuery", itemsWithSpecials);
   };
 
