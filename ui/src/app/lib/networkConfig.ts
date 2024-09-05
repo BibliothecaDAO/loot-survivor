@@ -53,7 +53,7 @@ export const networkConfig = {
     appUrl: "https://lootsurvivor.io/",
     beastsViewer: "https://realms.world/collection/beasts",
     goldenTokenMintUrl: "https://realms.world/collection/goldenToken",
-    blockExplorerUrl: "https:/voyager.online/",
+    blockExplorerUrl: "https://voyager.online/",
     faucetUrl: "https://blastapi.io/faucets/starknet-sepolia-eth",
     masterAccount: "0x0",
     masterPrivateKey: "0x0",
